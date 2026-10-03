@@ -5,7 +5,7 @@ import { afterAll, describe, expect, test } from 'vitest';
 
 import { frameworkTreesOf, getCallerDir, isFrameworkFrame, stackFrames } from './caller.js';
 
-// Real directories: the check resolves real paths, and a made-up one only exercises the fallback.
+// invariant: real directories: the check resolves real paths, and a made-up one only exercises the fallback.
 const base = mkdtempSync(resolve(tmpdir(), 'caller-frames-'));
 
 const framework = join(base, 'framework', 'dist');

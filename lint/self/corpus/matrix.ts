@@ -142,7 +142,7 @@ function sourcesOf(root: string): Record<Column, Source[]> {
             ...(tree.files ?? []).map((relative) => resolve(root, relative)),
         ].map((path) => {
             const source = readFileSync(path, 'utf8');
-            // A document's only comments are `#` lines, and an apostrophe in its prose is no quote.
+            // invariant: a document's only comments are `#` lines, and an apostrophe in its prose is no quote.
             if (path.endsWith('.spec.yaml')) {
                 return {
                     calls: [],
@@ -154,7 +154,7 @@ function sourcesOf(root: string): Record<Column, Source[]> {
             return { calls: callsOf(path, source), strings: stringsOf(text), text };
         });
     };
-    // Written out rather than folded: the compiler then holds that every column has a tree.
+    // invariant: written out rather than folded: the compiler then holds that every column has a tree.
     return {
         api: read('api'),
         cli: read('cli'),
@@ -224,7 +224,7 @@ export function matrixCapabilities(): Capability[] {
         name: `{{${kind}}}`,
         probe: `{{${kind}`,
         probeByColumn: { module: `match.${kind}` },
-        // A token family is declared by the matcher, not a facet: a family no golden here needs is no hole in that facet, and the module column is the matcher's proof.
+        // invariant: a token family is declared by the matcher, not a facet: a family no golden here needs is no hole in that facet, and the module column is the matcher's proof.
         exempt: {
             api: TOKENS_ARE_THE_MATCHERS,
             cli: TOKENS_ARE_THE_MATCHERS,
@@ -371,7 +371,7 @@ export function layers(root: string): Layer[] {
         (total, tree) => total + filesDirectlyIn(resolve(root, tree), ['.test.ts']),
         0,
     );
-    // A `*.specification.ts` builds a runner and asserts nothing.
+    // invariant: a `*.specification.ts` builds a runner and asserts nothing.
     const facetSpecs = FACET_MATRIX_COLUMNS.filter(
         (column) => column !== 'module' && column !== 'lint',
     ).reduce(

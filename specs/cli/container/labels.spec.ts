@@ -32,7 +32,7 @@ function dockerAvailable(): boolean {
 
 const HAS_DOCKER = dockerAvailable();
 
-/* A live container's log stream is cut at an arbitrary instant: targeted probes, `output-asserted-as-a-golden` scalpel. */
+/* invariant: a live container's log stream is cut at an arbitrary instant: targeted probes, `output-asserted-as-a-golden` scalpel. */
 
 describe('labels', () => {
     test.skipIf(!HAS_DOCKER)(
@@ -72,7 +72,7 @@ describe('labels', () => {
                 trackedId = result.containerIds[0];
                 expect(trackedId).toMatch(/^[\da-f]{12}$/u);
 
-                // While the scope is live the id really carries the run label, which makes the after-dispose assertion falsifiable.
+                // invariant: while the scope is live the id really carries the run label, which makes the after-dispose assertion falsifiable.
                 expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);
             }
 

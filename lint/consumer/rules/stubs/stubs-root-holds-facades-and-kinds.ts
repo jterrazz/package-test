@@ -58,7 +58,7 @@ function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<
         declaration.type === 'ArrowFunctionExpression' ||
         declaration.type === 'FunctionDeclaration' ||
         declaration.type === 'FunctionExpression' ||
-        // The value is built above; the `Stub` type covers what the AST cannot follow.
+        // invariant: the value is built above; the `Stub` type covers what the AST cannot follow.
         declaration.type === 'Identifier'
     );
 }
@@ -203,7 +203,7 @@ function checkComposite(context: Context, program: AstNode, base: string): void 
             named = exportsByName(node) || named;
             if (exportsDefault(node)) {
                 hasDefault = true;
-                // A composition re-export is a legitimate way to build the world.
+                // invariant: a composition re-export is a legitimate way to build the world.
                 composed =
                     stringValue(node.source as AstNode | undefined) !== undefined || composed;
             }
@@ -255,7 +255,7 @@ type Check = (node: AstNode) => void;
 
 function checkOf(context: Context): Check | undefined {
     const parts = segmentsOf(context);
-    // `src/**/stubs/` is the framework's own stub module: only specs carry the convention.
+    // invariant: `src/**/stubs/` is the framework's own stub module: only specs carry the convention.
     if (!identityOf(context).inSpecs) {
         return undefined;
     }

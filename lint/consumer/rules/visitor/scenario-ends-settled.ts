@@ -67,7 +67,7 @@ function settles(node: AstNode, visitor: string): boolean {
     if (verb !== undefined) {
         return TERMINALS.has(verb);
     }
-    // The wait is in the tail.
+    // invariant: the wait is in the tail.
     const callee = child(node, 'callee');
     if (node.type !== 'CallExpression' || callee === undefined) {
         return false;
@@ -104,7 +104,7 @@ export const scenarioEndsSettled = defineRule(
             return {
                 before() {
                     const identity = identityOf(context);
-                    // A `.test.ts` under `specs/` not yet renamed counts; a `.test.tsx` is the component's.
+                    // invariant: a `.test.ts` under `specs/` not yet renamed counts; a `.test.tsx` is the component's.
                     return (
                         identity.role === 'spec' || (identity.role === 'module' && identity.inSpecs)
                     );

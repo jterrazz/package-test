@@ -21,10 +21,10 @@ const SPECS_DEPTH = 6;
 /** Stated rather than guessed, so a path-less run reports exactly what a per-root run would; a member directory named `specs` is a root of its own. */
 export function discoverSpecRoots(rootDir: string): string[] {
     const roots = new Set<string>();
-    // A tree named by hand is judged on what it holds.
+    // invariant: a tree named by hand is judged on what it holds.
     const members = discoverMembers(rootDir);
     for (const member of members.length === 0 ? [rootDir] : members) {
-        // A workspace declaring `packages: ['specs']`: without this the ratchet run walked no tree for that member.
+        // invariant: a workspace declaring `packages: ['specs']`: without this the ratchet run walked no tree for that member.
         if (basename(member) === 'specs') {
             roots.add(member);
         }

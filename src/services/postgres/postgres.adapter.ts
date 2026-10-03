@@ -83,7 +83,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             throw invariant('postgres() was healthchecked before it had a connection string');
         }
 
-        // Healthcheck uses a throwaway client (connection might not be established yet)
+        // hazard: healthcheck uses a throwaway client (connection might not be established yet)
         try {
             const PgClient = await clientConstructor();
             const client = new PgClient({ connectionString: this.connectionString });
@@ -108,7 +108,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             return;
         }
 
-        // Its own name first, then the type's.
+        // invariant: its own name first, then the type's.
         const initPaths = [
             resolve(dockerDir, `${this.serviceName}/init.sql`),
             resolve(dockerDir, 'postgres/init.sql'),
@@ -133,7 +133,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         const PgClient = await clientConstructor();
         const client = new PgClient({ connectionString: this.connectionString });
         client.on('error', () => {
-            // Connection dropped (container stopped) — reset so next call reconnects
+            // invariant: connection dropped (container stopped) — reset so next call reconnects
             this.client = null;
         });
         await client.connect();

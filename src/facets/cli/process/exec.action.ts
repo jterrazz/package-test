@@ -37,7 +37,6 @@ export const exec = defineAction<
         } else if (Array.isArray(args)) {
             output = { exitCode: 0, stderr: '', stdout: '' };
             for (const one of args) {
-                // oxlint-disable-next-line eslint/no-await-in-loop -- a sequence runs in order and stops at the first command that fails
                 output = await command.exec(one, cwd, env);
                 if (output.exitCode !== 0) {
                     break;

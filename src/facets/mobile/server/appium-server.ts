@@ -28,7 +28,7 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
     }
 
     const serve = new ServedProcess(
-        // The served process injects `PORT`; appium reads only a flag.
+        // outside: the served process injects `PORT`; appium reads only a flag.
         { command: `"${bin}" --port "$PORT"`, ready: '/status', timeout: APPIUM_READY_TIMEOUT_MS },
         root,
         'mobile',
@@ -138,7 +138,6 @@ export async function reachAppium(
 }
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         /** The simulator a `mobile({ device, root })` project serves one Appium server for, and where its binary is resolved from. */
         mobileAppium?: { device: MobileDevice; root: string };

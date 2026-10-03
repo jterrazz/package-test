@@ -15,9 +15,9 @@ const SEMVER_SOURCE = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-
 const SHA_SOURCE = '[0-9a-f]{7,64}';
 const HEX_SOURCE = '[0-9a-fA-F]+';
 const BASE64_SOURCE = '[A-Za-z0-9+/]+={0,2}';
-// The range lives in the pattern, so an embedded `{{port}}` rejects "99999".
+// value: the range lives in the pattern, so an embedded `{{port}}` rejects "99999".
 const PORT_SOURCE = String.raw`(?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|\d{1,4})`;
-// Each octet 0-255 in the pattern itself, so embedded `{{ip}}` rejects "999.1.1.1".
+// value: each octet 0-255 in the pattern itself, so embedded `{{ip}}` rejects "999.1.1.1".
 const IP_OCTET = String.raw`(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)`;
 const IP_SOURCE = String.raw`(?:${IP_OCTET}\.){3}${IP_OCTET}`;
 const URL_SOURCE = String.raw`https?:\/\/[^\s"'<>]+`;
@@ -78,7 +78,7 @@ function capturedEquals(a: unknown, b: unknown): boolean {
     if (Object.is(a, b)) {
         return true;
     }
-    // Cross-context captures: a number from JSON equals its string form from text.
+    // invariant: cross-context captures: a number from JSON equals its string form from text.
     if (
         (typeof a === 'number' && typeof b === 'string') ||
         (typeof a === 'string' && typeof b === 'number')
@@ -86,7 +86,7 @@ function capturedEquals(a: unknown, b: unknown): boolean {
         return String(a) === String(b);
     }
     if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
-        // Sorted-key form: two captures of one object are equal whatever the key order.
+        // invariant: sorted-key form: two captures of one object are equal whatever the key order.
         return stableStringify(a) === stableStringify(b);
     }
     return false;
@@ -187,7 +187,7 @@ function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
     if (source) {
         return source;
     }
-    // String: stays on one line; any: crosses lines.
+    // invariant: string: stays on one line; any: crosses lines.
     return kind === 'any' ? String.raw`[\s\S]*?` : String.raw`[^\n]*?`;
 }
 

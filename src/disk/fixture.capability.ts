@@ -11,7 +11,6 @@ export type FixtureChain<Self> = {
     fixture: FixtureMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface FixtureSignature extends ChainSignature {
     readonly chain: FixtureChain<this['self']>;
 }

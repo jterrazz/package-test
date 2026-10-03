@@ -3,7 +3,7 @@ import { afterAll } from 'vitest';
 
 import { databaseJobs } from './_fixtures/specimen-job/database-jobs.js';
 
-// The record key, kebab-cased, is the service name (`server-sees-declared-services`).
+// invariant: the record key, kebab-cased, is the service name (`server-sees-declared-services`).
 export const analyticsHandle = postgres();
 
 export const { cleanup, job } = await specification.job({

@@ -57,7 +57,7 @@ export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Spotted[] {
 
     for (const testFile of listFiles(rootDir, isNodeTestFileName)) {
         const text = readSource(testFile);
-        // Enforced only when exactly one imported spec applies: mixed database configurations are ambiguous.
+        // invariant: enforced only when exactly one imported spec applies: mixed database configurations are ambiguous.
         const applicable = new Set<SpecModel>();
         for (const binding of namedImports(text)) {
             const target = resolveRelativeImport(testFile, binding.source);

@@ -7,7 +7,7 @@ export function DraftEditor() {
                 try {
                     await fetch('/api/draft', { body: '{"text":"hi"}', method: 'POST' });
                 } catch {
-                    // A save that did not land is the editor's to forget as it leaves.
+                    // invariant: a save that did not land is the editor's to forget as it leaves.
                 }
             })();
         },

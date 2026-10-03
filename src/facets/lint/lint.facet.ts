@@ -1,4 +1,4 @@
-/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
+/* oxlint-disable typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import type { MatrixRow } from '../../chain/capability.js';
 import type { ChainOf } from '../../chain/chain.js';
 import type { Started } from '../../chain/config.js';

@@ -166,7 +166,7 @@ export function checkNoUnusedGround(rootDir: string): Spotted[] {
         const testFiles = listFiles(dir, (path) => isReferrer(basename(path)));
         const rel = relative(rootDir, dir);
 
-        // A domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.
+        // invariant: a domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.
         if (testFiles.length === 0) {
             violations.push({
                 path: rel,
@@ -211,7 +211,7 @@ function checkPoolFixtures(rootDir: string): Spotted[] {
     const violations: Spotted[] = [];
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
-        // A reference made from inside the pool is left out: a dead entry cannot vouch for another.
+        // invariant: a reference made from inside the pool is left out: a dead entry cannot vouch for another.
         const references: References = { paths: new Set(), patterns: [] };
         for (const file of listReferrers(specsRoot, pool)) {
             referencesOf(file, references);

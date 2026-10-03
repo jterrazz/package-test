@@ -14,7 +14,6 @@ export type InterceptChain<Self> = {
     intercept: InterceptMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface InterceptSignature extends ChainSignature {
     readonly chain: InterceptChain<this['self']>;
 }

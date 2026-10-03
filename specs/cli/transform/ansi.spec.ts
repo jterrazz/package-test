@@ -33,7 +33,7 @@ function inUpdateMode(block: () => void): void {
     }
 }
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 /* oxlint-disable jterrazz/no-raw-bypass -- The raw `.raw` accessor IS the subject
    under test here (see the note above): every `.raw` assertion proves what the
    comparison strips. Whole-output goldens are the toMatch(file(…)) cases in this file. */
@@ -104,7 +104,7 @@ describe('ansi', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             mkdirSync(EXPECTED_DIR, { recursive: true });
-            // The golden lacks " plain": the transform runs on the actual output only.
+            // invariant: the golden lacks " plain": the transform runs on the actual output only.
             writeFileSync(fixturePath, 'red bold\n');
 
             const result = await asymmetricCli.exec('ansi');

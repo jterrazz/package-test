@@ -142,7 +142,7 @@ export async function judgeLedgers(
     if (drift.length > 0) {
         return { failure: methodlessDrifted(drift) };
     }
-    // Every specification of the run declares the same table: a route counts once.
+    // invariant: every specification of the run declares the same table: a route counts once.
     const declared = [...new Map(table.map((route) => [spelled(route), route])).values()];
     const missing = unreachedRoutes(declared, run.reached);
     const named = missing.map((route) => `  ${spelled(route)}`).join('\n');

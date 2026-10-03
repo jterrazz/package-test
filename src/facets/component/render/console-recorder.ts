@@ -22,7 +22,7 @@ export function recordConsole(): { entries: ConsoleEntry[]; stop: () => void } {
             original(...args);
         };
     }
-    // Vitest's own listener relays the event as `console.error(new Error(message))` in the same dispatch: one exception is one line.
+    // outside: Vitest's own listener relays the event as `console.error(new Error(message))` in the same dispatch: one exception is one line.
     const onError = (event: ErrorEvent): void => {
         const last = entries.at(-1);
         if (last?.type === 'error' && last.raised === event.message) {

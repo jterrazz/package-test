@@ -4,7 +4,7 @@ import { refusal } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import process from 'node:process';
 
-// This repository's presets are its own build, and the build reads this file before there is one to import.
+// invariant: this repository's presets are its own build, and the build reads this file before there is one to import.
 const PRESETS = ['./dist/config.js', './.artifacts/dev/self-config.js'];
 
 const built = PRESETS.every((path) => existsSync(new URL(path, import.meta.url)));

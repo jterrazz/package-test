@@ -11,7 +11,7 @@ export default async function setup(
     }
     const double = await startAppiumDouble(specimen);
     project.provide('appiumDouble', double.url);
-    // A spawned Appium server of the run is a stub forwarding here.
+    // invariant: a spawned Appium server of the run is a stub forwarding here.
     process.env.APPIUM_DOUBLE_URL = double.url;
     return async () => {
         await double.stop();

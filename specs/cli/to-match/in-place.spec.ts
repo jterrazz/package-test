@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli as vitestCli } from '../vitest-cli.specification.js';
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('in-place', () => {
     test('a scratch test holding empty values is filled with what it compared, and the next run reads them back', async () => {

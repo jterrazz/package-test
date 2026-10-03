@@ -111,7 +111,7 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
         }
         if (character === '(' || character === '[' || character === '{') {
             const close = closingOf(blank, index);
-            // An object type in a return annotation is followed by more of the head.
+            // invariant: an object type in a return annotation is followed by more of the head.
             if (
                 isFunction &&
                 character === '{' &&
@@ -164,7 +164,7 @@ function withoutAnUnreadDeclaration(text: string): string {
 
 function withImportsPruned(text: string): string {
     const clauses = importsOf(text);
-    // A name another import clause spells (`{ cli as vitestCli }`) is no read of it.
+    // invariant: a name another import clause spells (`{ cli as vitestCli }`) is no read of it.
     const code = clauses
         .toReversed()
         .reduce((rest, clause) => rest.slice(0, clause.start) + rest.slice(clause.end), text);
@@ -321,7 +321,7 @@ function liftGround(specsRoot: string, leaf: string): string[] {
             const lowest =
                 lowestCommonFolder(readers.map(({ file }) => dirname(file))) ?? specsRoot;
             const destination = join(reservedFolderOf(specsRoot, lowest, role), entry.name);
-            // The pool holds that name: `no-reach-into-sibling-ground` keeps reporting the reach.
+            // invariant: the pool holds that name: `no-reach-into-sibling-ground` keeps reporting the reach.
             if (existsSync(destination)) {
                 continue;
             }

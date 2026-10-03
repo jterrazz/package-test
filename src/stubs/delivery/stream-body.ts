@@ -13,7 +13,7 @@ export function toReadableStream(body: StreamBody): ReadableStream<Uint8Array> {
                 controller.close();
                 return;
             }
-            // The spacing is between chunks: the first is not held back.
+            // invariant: the spacing is between chunks: the first is not held back.
             if (body.delayBetweenChunks > 0 && index > 0) {
                 await pause(body.delayBetweenChunks);
             }

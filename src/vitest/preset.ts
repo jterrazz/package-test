@@ -8,7 +8,7 @@ import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './proje
 /** `json-summary` is what the coverage ratchet reads; the v8 provider is an optional peer. */
 const COVERAGE = {
     exclude: [
-        // Browser Mode instruments the page's bundle: without this, react-dom alone buries the project's own number.
+        // outside: browser Mode instruments the page's bundle: without this, react-dom alone buries the project's own number.
         '**/node_modules/**',
         'specs/**',
         GROUND_GLOB,

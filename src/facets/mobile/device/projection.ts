@@ -85,7 +85,7 @@ function substance(node: RawNode): Omit<ScreenNode, 'children'> {
     return {
         type: node.tag.replace(/^XCUIElementType/u, ''),
         ...(label === undefined ? {} : { label }),
-        // A value or identifier echoing the label is XCUITest noise.
+        // outside: a value or identifier echoing the label is XCUITest noise.
         ...(value === undefined || value === label ? {} : { value }),
         ...(identifier === undefined || identifier === label ? {} : { identifier }),
     };
@@ -131,13 +131,13 @@ function collectTexts(node: RawNode, texts: string[]): void {
 
 export function projectScreen(xml: string): DeviceScreen {
     let root = parsePageSource(xml);
-    // The page source wraps the application in an `AppiumAUT` envelope.
+    // outside: the page source wraps the application in an `AppiumAUT` envelope.
     const [onlyChild] = root.children;
     if (root.tag === 'AppiumAUT' && root.children.length === 1 && onlyChild !== undefined) {
         root = onlyChild;
     }
 
-    // The app's own label is chrome, not screen content.
+    // invariant: the app's own label is chrome, not screen content.
     const texts: string[] = [];
     for (const child of root.children) {
         collectTexts(child, texts);

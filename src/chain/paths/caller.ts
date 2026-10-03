@@ -61,7 +61,7 @@ export function isFrameworkFrame(
     if (TEST_FILE.test(filePath)) {
         return false;
     }
-    // Both sides through realpath: an install reached by symlink must compare equal to itself.
+    // hazard: both sides through realpath: an install reached by symlink must compare equal to itself.
     const real = safeRealpath(filePath);
     return frameworkTrees.some((tree) => isStrictlyInside(safeRealpath(tree), real));
 }
@@ -71,6 +71,6 @@ export function getCallerDir(): string {
     const caller = callerFrames().find(
         ({ file }) => !file.includes('node_modules') && !isFrameworkFrame(file),
     );
-    /* Every frame internal: the chain was started from node_modules (a rule pack declaring tests), so the working directory stands in. */
+    /* invariant: every frame internal: the chain was started from node_modules (a rule pack declaring tests), so the working directory stands in. */
     return caller === undefined ? process.cwd() : dirname(caller.file);
 }

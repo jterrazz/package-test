@@ -114,7 +114,7 @@ function renderLines(
         const act = actualLines[i];
 
         if (exp !== undefined && act !== undefined && equals(exp, act)) {
-            // The line matched: render the expected form, the one carrying the token.
+            // invariant: the line matched: render the expected form, the one carrying the token.
             rendered.push(`  ${exp}`);
             continue;
         }

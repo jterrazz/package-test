@@ -127,11 +127,11 @@ function scopeOf(context: Context): Scope | undefined {
     const banned = segmentsOf(context)
         .slice(0, -1)
         .find((part) => part === '__mocks__' || part === '__fixtures__');
-    // Plus any file inside one of the two banned directories: that clause names the directory itself.
+    // invariant: plus any file inside one of the two banned directories: that clause names the directory itself.
     if (!isTestRole(role) && banned === undefined) {
         return undefined;
     }
-    // The module role's alone: a stub unit imports the `.response.json` it stands for.
+    // invariant: the module role's alone: a stub unit imports the `.response.json` it stands for.
     return {
         allowed,
         banned,

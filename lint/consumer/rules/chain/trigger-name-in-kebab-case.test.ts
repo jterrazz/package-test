@@ -25,7 +25,6 @@ ruleTester().run('trigger-name-in-kebab-case', triggerNameInKebabCase, {
         { code: 'await job.trigger("nightly-report");' },
         { code: 'await job.trigger("send-welcome-emails");' },
         { code: 'await job.trigger("cleanup2");' },
-        // Dynamic names are out of static reach.
-        { code: 'await job.trigger(name);' },
+        { name: 'Dynamic names are out of static reach.', code: 'await job.trigger(name);' },
     ],
 });

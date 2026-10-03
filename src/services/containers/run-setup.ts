@@ -44,7 +44,7 @@ export async function prepareDocker(): Promise<void> {
             try {
                 await client.image.pull(name);
             } catch {
-                /* The start that needs the image pulls it again, and reports what failed */
+                /* invariant: the start that needs the image pulls it again, and reports what failed */
             }
         }),
     ]);
@@ -77,7 +77,7 @@ function packageVersion(): string {
 const RUN_SERVICES = Symbol.for(`@jterrazz/test.run-services@${packageVersion()}`);
 
 function settled(prepare: () => Promise<void>): () => Promise<void> {
-    // Settled here and rethrown on request: unasked, a refusal is nobody's.
+    // invariant: settled here and rethrown on request: unasked, a refusal is nobody's.
     const prepared = (async (): Promise<Error | null> => {
         try {
             await prepare();

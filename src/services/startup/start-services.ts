@@ -67,7 +67,7 @@ export async function startProcessServices(
             await handle.spawnWith(root, services, runId);
             started.push(handle);
         } catch (error) {
-            // One process that never came up must not orphan the ones before it.
+            // hazard: one process that never came up must not orphan the ones before it.
             await stop();
             throw error;
         }

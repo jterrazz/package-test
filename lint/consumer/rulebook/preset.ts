@@ -211,6 +211,15 @@ const NAMES: NamesRule[] = [
     },
 ];
 
+export const TEST_COMMENT_OPENINGS: readonly string[] = Object.freeze([
+    'Given - ',
+    'When - ',
+    'Then - ',
+    'And - ',
+    'checker-disable',
+    'testId:',
+]);
+
 export function testPreset(): Preset {
     return {
         baseline: [TEST_SECTION],
@@ -220,7 +229,13 @@ export function testPreset(): Preset {
         oxlint: {
             jsPlugins: ['@jterrazz/test/oxlint'],
             overrides: [importRulesForSpecifications, vitestOnTests],
-            rules: recommendedRules,
+            rules: {
+                ...recommendedRules,
+                'jterrazz-typescript/comment-states-its-kind': [
+                    'error',
+                    { openings: [...TEST_COMMENT_OPENINGS] },
+                ],
+            },
         },
         checker: {
             label: 'Test Conventions (@jterrazz/test)',

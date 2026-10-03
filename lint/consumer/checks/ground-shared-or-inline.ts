@@ -97,7 +97,7 @@ function roleOf(path: string): string | undefined {
 
 function referencesIn(file: string): Reference[] {
     const text = blankComments(readFileSync(file, 'utf8'));
-    // A module that is no test is read by every test importing it: what it names is shared.
+    // invariant: a module that is no test is read by every test importing it: what it names is shared.
     const spans = TEST_FILE.test(file) ? testSpans(text) : [];
     const references: Reference[] = [];
     for (const match of text.matchAll(DISK_LITERAL)) {
@@ -453,7 +453,7 @@ function block(text: string, indent: string): string {
     const last = lines.pop() ?? '';
     const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
     const closing = last === '' ? indent : `${inner}${last}`;
-    // The literal is read back through the runtime's own dedent: a candidate that does not come back unchanged is written as one quoted line.
+    // invariant: the literal is read back through the runtime's own dedent: a candidate that does not come back unchanged is written as one quoted line.
     return dedent(`\n${body}\n${closing}`) === text
         ? `\`\n${escapeTemplate(body)}\n${escapeTemplate(closing)}\``
         : JSON.stringify(text);
@@ -512,7 +512,7 @@ function removeEmptied(folders: Set<string>): void {
                 rmSync(folder, { recursive: true });
             }
         } catch {
-            // Already gone with a deeper one.
+            // invariant: already gone with a deeper one.
         }
     }
 }
@@ -523,7 +523,7 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
     );
     const emptied = new Set<string>();
     const byFile = new Map<string, SingleUse[]>();
-    // A file its one test names twice is the author's to write in place, once.
+    // invariant: a file its one test names twice is the author's to write in place, once.
     for (const use of singleUseFiles(rootDir).filter(({ references }) => references === 1)) {
         byFile.set(use.reference.file, [...(byFile.get(use.reference.file) ?? []), use]);
     }

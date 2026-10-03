@@ -52,7 +52,7 @@ export class ProcessHandle implements ServiceHandle {
     }
 
     async healthcheck(): Promise<void> {
-        // Readiness IS the healthcheck here: `start()` does not resolve until
+        // invariant: readiness IS the healthcheck here: `start()` does not resolve until
         // the process answers on `ready`, so there is nothing left to probe.
         await Promise.resolve();
     }
@@ -78,7 +78,7 @@ export class ProcessHandle implements ServiceHandle {
     }
 
     async reset(): Promise<void> {
-        // Resetting a process between chains would mean restarting it.
+        // invariant: resetting a process between chains would mean restarting it.
         await Promise.resolve();
     }
 
@@ -92,7 +92,7 @@ export class ProcessHandle implements ServiceHandle {
             typeof this.options.env === 'function' ? this.options.env(services) : this.options.env;
         this.served = new ServedProcess(this.options, root, 'process', {
             ...stated,
-            // One id per run, minted by the facet: a spec reads it instead of sampling `Date.now()` (`no-sampled-value-in-expectation`).
+            // invariant: one id per run, minted by the facet: a spec reads it instead of sampling `Date.now()` (`no-sampled-value-in-expectation`).
             TEST_RUN_ID: runId,
         });
         this.connectionString = await this.served.start();

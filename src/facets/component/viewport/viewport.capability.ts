@@ -11,7 +11,6 @@ export type ViewportChain<Self> = {
     viewport: ViewportMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface ViewportSignature extends ChainSignature {
     readonly chain: ViewportChain<this['self']>;
 }

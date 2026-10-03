@@ -72,7 +72,7 @@ export async function startMobile<Services extends ServiceRecord>(
     const root = resolveRoot(options.root, callerDir);
     const { appium, device: driven, outlivesFile } = await reachAppium(options, root);
 
-    // Services come up before the app launches: a dev build reaches its bundler on its first frame.
+    // invariant: services come up before the app launches: a dev build reaches its bundler on its first frame.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the empty record stands for an absent one, and every facet states the default the same way
     const services = (options.services ?? {}) as Services;
     let started: null | StartedServices = null;
@@ -85,7 +85,7 @@ export async function startMobile<Services extends ServiceRecord>(
         }
     }
 
-    // The stub starts last, so a constructor refusal never orphans a server.
+    // invariant: the stub starts last, so a constructor refusal never orphans a server.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
@@ -93,7 +93,7 @@ export async function startMobile<Services extends ServiceRecord>(
         backendUrl = await backend.start();
     }
 
-    // One session per runner; per run under a server that outlives the file. A server this runner spawned stops with it.
+    // invariant: one session per runner; per run under a server that outlives the file. A server this runner spawned stops with it.
     let device: DevicePort | null = null;
     const getDevice = async (): Promise<DevicePort> => {
         if (!device) {

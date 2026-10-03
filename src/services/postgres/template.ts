@@ -16,7 +16,7 @@ export async function endQuietly(client: Client | null): Promise<void> {
     try {
         await client?.end();
     } catch {
-        /* Already closed */
+        /* invariant: already closed */
     }
 }
 
@@ -38,7 +38,7 @@ export async function withClient<T>(
     const PgClient = await clientConstructor();
     const client = new PgClient({ connectionString });
     client.on('error', () => {
-        // A dropped connection fails the query in flight, which is what reports it.
+        // invariant: a dropped connection fails the query in flight, which is what reports it.
     });
     await client.connect();
     try {

@@ -9,7 +9,7 @@ import type { AstNode } from '../../../kit/project/ast.js';
 import { checkoutUnder } from '../../../kit/testing/package-tree.fixtures.js';
 import { seedsAreSql } from './seeds-are-sql.js';
 
-// The fs-anchored cases run against the shared E2E fixture trees.
+// invariant: the fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
 
 const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/_seeds']);
@@ -32,8 +32,8 @@ execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_STRAY });
 
 ruleTester().run('seeds-are-sql', seedsAreSql, {
     invalid: [
-        // Every stray is named, whatever its extension: two strays, two reports.
         {
+            name: 'Every stray is named, whatever its extension: two strays, two reports.',
             code: 'test("x", () => {});',
             errors: [
                 { column: 0, line: 1, messageId: 'notSql' },
@@ -41,37 +41,37 @@ ruleTester().run('seeds-are-sql', seedsAreSql, {
             ],
             filename: `${TWO_STRAYS}/specs/app/widget/widget.test.ts`,
         },
-        // A file nobody added is still in the tree: it violates like a tracked one.
         {
+            name: 'A file nobody added is still in the tree: it violates like a tracked one.',
             code: 'test("x", () => {});',
             errors: [{ column: 0, line: 1, messageId: 'notSql' }],
             filename: `${UNTRACKED_STRAY}/specs/app/widget/widget.test.ts`,
         },
-        // The violation fixture keeps a .json next to the .sql.
         {
+            name: 'The violation fixture keeps a .json next to the .sql.',
             code: 'test("x", () => {});',
             errors: [{ column: 0, line: 1, messageId: 'notSql' }],
             filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
-        // Only .sql fragments in the compliant twin.
         {
+            name: 'Only .sql fragments in the compliant twin.',
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
-        // No _seeds/ directory at this level (the feature has no _seeds/ sibling).
         {
+            name: 'No _seeds/ directory at this level (the feature has no _seeds/ sibling).',
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/compliant/specs/app/app.test.ts`,
         },
-        // A file `.gitignore` names is on no checkout: it violates nothing.
         {
+            name: 'A file `.gitignore` names is on no checkout: it violates nothing.',
             code: 'test("x", () => {});',
             filename: `${IGNORED_STRAY}/specs/app/widget/widget.test.ts`,
         },
-        // Outside specs/ the rule is inert.
         {
+            name: 'Outside specs/ the rule is inert.',
             code: 'test("x", () => {});',
             filename: '/repo/src/specification/matching/match.test.ts',
         },
@@ -86,7 +86,7 @@ function lintPass(file: string): string[] {
         report: (diagnostic) => {
             reported.push(String(diagnostic.data?.entry));
         },
-        // A lint of its own: oxlint forgets what a file's lint answered when it ends.
+        // invariant: a lint of its own: oxlint forgets what a file's lint answered when it ends.
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the rule keys its answers on this object and reads nothing of it
         sourceCode: {} as Context['sourceCode'],
     };

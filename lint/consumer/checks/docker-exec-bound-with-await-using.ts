@@ -43,7 +43,7 @@ export function checkDockerExecBoundWithAwaitUsing(rootDir: string): Spotted[] {
             readText(testFile),
             'docker-exec-bound-with-await-using',
         );
-        // The `await using` form matches group 1 and is exempt.
+        // invariant: the `await using` form matches group 1 and is exempt.
         const binding =
             /\b(?<kind>await\s+using|const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*await\s+(?<runner>[A-Za-z_$][\w$]*)\b[^;]*?\.exec\s*\(/gu;
         for (const match of text.matchAll(binding)) {

@@ -6,24 +6,24 @@ const SPEC = '/repo/specs/website/home/subscribe.spec.ts';
 
 ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
     invalid: [
-        // The escape hatch with nothing stated about it.
         {
+            name: 'The escape hatch with nothing stated about it.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(testId('subscribe-cta'));
             });`,
             errors: [{ column: 36, line: 2, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
-        // The mobile twin — `.open()` carries the same element vocabulary.
         {
+            name: 'The mobile twin — `.open()` carries the same element vocabulary.',
             code: `const result = await mobile.open('home', async (visitor) => {
                 await visitor.tap(testId('cta'));
             });`,
             errors: [{ column: 34, line: 2, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
-        // One report per unexplained escape, scoping included.
         {
+            name: 'One report per unexplained escape, scoping included.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.fill(within(testId('form'), field('Email')), 'a@b.test');
                 await visitor.click(testId('subscribe-cta'));
@@ -34,8 +34,8 @@ ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
             ],
             filename: SPEC,
         },
-        // A comment that names no invariant is not a statement.
         {
+            name: 'A comment that names no invariant is not a statement.',
             code: `const result = await website.visit('/', async (visitor) => {
                 // testId:
                 await visitor.click(testId('subscribe-cta'));
@@ -43,9 +43,8 @@ ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
             errors: [{ column: 36, line: 3, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
-        // A comment two lines up is out of the window: it reads as being
-        // about something else.
         {
+            name: 'A comment two lines up is out of the window: it reads as being about something else.',
             code: `const result = await website.visit('/', async (visitor) => {
                 // testId: the widget renders no accessible name
                 await visitor.fill(field('Email'), 'a@b.test');
@@ -56,34 +55,36 @@ ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
         },
     ],
     valid: [
-        // User-facing elements only.
         {
+            name: 'User-facing elements only.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.fill(field('Email'), 'visitor@site.test');
                 await visitor.click(button('Subscribe'));
             });`,
             filename: SPEC,
         },
-        // The hatch, with the invariant stated on its own line.
         {
+            name: 'The hatch, with the invariant stated on its own line.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(testId('subscribe-cta')); // testId: the third-party widget renders no accessible name
             });`,
             filename: SPEC,
         },
-        // The same invariant on the line ABOVE — the form a consumer with
-        // `eslint/no-inline-comments` armed has to write.
         {
+            name: 'The same invariant on the line ABOVE — the form a consumer with `eslint/no-inline-comments` armed has to write.',
             code: `const result = await website.visit('/', async (visitor) => {
                 // testId: the third-party widget renders no accessible name
                 await visitor.click(testId('subscribe-cta'));
             });`,
             filename: SPEC,
         },
-        // Outside a scenario the helper is not the rule's subject.
-        { code: `const element = testId('subscribe-cta');`, filename: SPEC },
-        // A non-scenario terminal action is out of scope.
         {
+            name: "Outside a scenario the helper is not the rule's subject.",
+            code: `const element = testId('subscribe-cta');`,
+            filename: SPEC,
+        },
+        {
+            name: 'A non-scenario terminal action is out of scope.',
             code: `const result = await website.fetch('/', async (visitor) => {
                 await visitor.click(testId('cta'));
             });`,

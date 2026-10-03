@@ -118,7 +118,7 @@ export async function ensureBooted(udid: string): Promise<void> {
         await run('xcrun', ['simctl', 'boot', udid]);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        // "Unable to boot device in current state: Booted" — already up.
+        // outside: "Unable to boot device in current state: Booted" — already up.
         if (!message.includes('current state: Booted')) {
             throw new Error(
                 refusal({

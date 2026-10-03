@@ -21,7 +21,6 @@ export type SeedChain<Self, DatabaseKey extends string> = {
     seed: SeedMethod<Self, DatabaseKey>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface SeedSignature extends ChainSignature {
     readonly chain: SeedChain<this['self'], this['params']['databaseKey']>;
 }
@@ -39,7 +38,6 @@ export const seed = defineCapability<
     arm: async (queued, { databases }, { testDir }) => {
         await databases.reset();
         for (const entry of queued) {
-            // oxlint-disable-next-line eslint/no-await-in-loop -- seeds run in the order the chain stated them: a later one may read what an earlier one wrote
             await databases.target(entry.database).seed(databases.read(entry.path, testDir));
         }
         return {};

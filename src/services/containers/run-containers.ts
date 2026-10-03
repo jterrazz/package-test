@@ -34,7 +34,7 @@ export class RunContainers {
     constructor(
         create: (request: ContainerRequest) => ContainerPort,
         ready: () => Promise<void> = async () => {
-            // A runtime nothing checks is taken as reachable.
+            // invariant: a runtime nothing checks is taken as reachable.
         },
     ) {
         this.create = create;
@@ -79,7 +79,7 @@ export class RunContainers {
             await container.start();
             return container;
         } catch (error) {
-            // A start that failed is not the run's container: the next request tries again.
+            // invariant: a start that failed is not the run's container: the next request tries again.
             this.started.delete(key);
             throw error;
         }

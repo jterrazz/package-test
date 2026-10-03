@@ -61,7 +61,7 @@ function isValueReference(node: AstNode): boolean {
         return false;
     }
     if (parent.type === 'UnaryExpression' && parent.operator === 'typeof') {
-        // `typeof window === 'undefined'` reaches no document: it is how a module states it runs in both runtimes.
+        // invariant: `typeof window === 'undefined'` reaches no document: it is how a module states it runs in both runtimes.
         return false;
     }
     if (parent.type === 'MemberExpression') {

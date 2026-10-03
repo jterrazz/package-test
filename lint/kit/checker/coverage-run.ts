@@ -19,7 +19,7 @@ const say = (line: string): void => {
     process.stdout.write(`${line}\n`);
 };
 
-// Neither gesture runs the suite: each reads the last `--coverage` report, so a second run cannot disagree with the first.
+// invariant: neither gesture runs the suite: each reads the last `--coverage` report, so a second run cannot disagree with the first.
 export function coverageFloor(judge: CoverageJudge): KitCommand {
     return (args) => {
         const commandLine = readCommandLine(args, ['--scope']);

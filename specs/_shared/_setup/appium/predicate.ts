@@ -1,5 +1,5 @@
 /**
- * The NSPredicate subset an `-ios predicate string:` selector is written in,
+ * outside: the NSPredicate subset an `-ios predicate string:` selector is written in,
  * read the way XCUITest reads it: comparisons (`==`, `CONTAINS`, `IN`) of an
  * element attribute against a quoted string, a number or a `{…}` set, joined
  * by `AND`/`OR` and grouped by parentheses. Anything else refuses as an

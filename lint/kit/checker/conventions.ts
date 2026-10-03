@@ -95,7 +95,7 @@ type Judged = {
     what: string;
 };
 
-// A run over part of a project keeping the section reports, and the run over its root judges.
+// invariant: a run over part of a project keeping the section reports, and the run over its root judges.
 function judgedWhere({ context }: Run, judged: Judged, deferring: boolean): PassResult {
     const { findings, fixes = [], passes, refusals = [], what } = judged;
     const judge = process.cwd();

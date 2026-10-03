@@ -34,7 +34,6 @@ export type TestProject = {
 };
 
 declare module '@jterrazz/typescript/config' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- declaration merging is the one thing only an interface can do, and it is the point
     interface JterrazzConfig {
         /** What `@jterrazz/test` reads. */
         test?: TestSettings;

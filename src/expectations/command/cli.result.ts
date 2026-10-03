@@ -130,7 +130,7 @@ export class CliResult extends BaseResult {
         if (!this.dockerConfig || !this.testRunId) {
             return;
         }
-        // Re-query when the test never asked: containers it never asserted on are still removed.
+        // invariant: re-query when the test never asked: containers it never asserted on are still removed.
         const ids =
             this.containersCache === null
                 ? findContainersByLabel(this.dockerConfig.testRunLabel, this.testRunId)

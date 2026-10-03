@@ -42,7 +42,6 @@ export function projectWrapper<Ui>(): ((ui: Ui) => Ui) | undefined {
 }
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         /** The instant `component({ clock })` pins for every render. */
         componentClock?: string;

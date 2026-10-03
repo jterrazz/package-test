@@ -105,15 +105,15 @@ export class Orchestrator {
             } catch (error: any) {
                 let logs = '';
                 try {
-                    // A container of the project logs every file's work: the report reads from this start's.
+                    // invariant: a container of the project logs every file's work: the report reads from this start's.
                     logs = await container.getLogs(new Date(startedAt - LOG_CLOCK_MARGIN_MS));
                 } catch {
-                    /* Ignore log fetch errors */
+                    /* invariant: ignore log fetch errors */
                 }
                 try {
                     await container.stop();
                 } catch {
-                    /* Ignore stop errors */
+                    /* invariant: ignore stop errors */
                 }
 
                 reports.push({

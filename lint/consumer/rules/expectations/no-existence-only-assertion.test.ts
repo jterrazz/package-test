@@ -6,16 +6,16 @@ const TEST_FILE = '/repo/src/domain/order.test.ts';
 
 ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
     invalid: [
-        // The whole proof is that something came back.
         {
+            name: 'The whole proof is that something came back.',
             code: `test('builds', () => {
                 expect(build()).toBeDefined();
             });`,
             errors: [{ column: 0, line: 1, messageId: 'existenceOnly' }],
             filename: TEST_FILE,
         },
-        // The negated form says no more.
         {
+            name: 'The negated form says no more.',
             code: `test('builds', () => {
                 expect(build()).not.toBeNull();
             });`,
@@ -32,8 +32,8 @@ ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
         },
     ],
     valid: [
-        // A precondition beside the real oracle.
         {
+            name: 'A precondition beside the real oracle.',
             code: `test('builds', () => {
                 const result = build();
                 expect(result).toBeDefined();
@@ -59,23 +59,23 @@ ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
             });`,
             filename: TEST_FILE,
         },
-        // A real oracle.
         {
+            name: 'A real oracle.',
             code: `test('builds', () => {
                 expect(build().name).toBe('widget');
             });`,
             filename: TEST_FILE,
         },
-        // A precise negative: nothing happened, which nothing else states.
         {
+            name: 'A precise negative: nothing happened, which nothing else states.',
             code: `test('stays open', () => {
                 open({ onClose });
                 expect(onClose).not.toHaveBeenCalled();
             });`,
             filename: TEST_FILE,
         },
-        // A soft assertion is an assertion — two oracles, not one.
         {
+            name: 'A soft assertion is an assertion — two oracles, not one.',
             code: `test('builds', () => {
                 const result = build();
                 expect.soft(result.name).toBe('widget');

@@ -169,7 +169,7 @@ export function isConventionalSubdir(path: string): boolean {
     if (!isDir(path)) {
         return false;
     }
-    // A real ground folder holds leaf fixtures, never a test nor a nested ground folder.
+    // invariant: a real ground folder holds leaf fixtures, never a test nor a nested ground folder.
     const files = listFiles(path, isTestFileName);
     if (files.length > 0) {
         return false;
@@ -316,6 +316,6 @@ export function decodeText(path: string): null | string {
     } catch {
         return null;
     }
-    // A NUL or a U+FFFD replacement char: a binary snapshot carries no token grammar.
+    // invariant: a NUL or a U+FFFD replacement char: a binary snapshot carries no token grammar.
     return text.includes('\u0000') || text.includes('\uFFFD') ? null : text;
 }

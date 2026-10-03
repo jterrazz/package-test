@@ -40,26 +40,26 @@ export async function startJob(options) {
 
 ruleTester().run('facet-is-a-composition', facetIsAComposition, {
     invalid: [
-        // A helper written in the facet file is logic no other facet shares.
         {
+            name: 'A helper written in the facet file is logic no other facet shares.',
             code: `${COMPOSED}\nfunction pinned(iso) {\n    return iso;\n}\n`,
             errors: [{ column: 0, line: 25, messageId: 'stray' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // A value computed beside the composition is a second definition of something.
         {
+            name: 'A value computed beside the composition is a second definition of something.',
             code: `${COMPOSED}\nconst DEFAULT_JOBS = [];\n`,
             errors: [{ column: 0, line: 25, messageId: 'stray' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // A class, exported or not.
         {
+            name: 'A class, exported or not.',
             code: `${COMPOSED}\nexport class JobChain {}\n`,
             errors: [{ column: 0, line: 25, messageId: 'stray' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // Adapters built in a block of statements, rather than handed back as the adapters.
         {
+            name: 'Adapters built in a block of statements, rather than handed back as the adapters.',
             code: COMPOSED.replace(
                 'adapters: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
                 'adapters: (config) => {\n        const jobs = config.jobs ?? [];\n        return { clock: processClock, jobs };\n    },',
@@ -67,8 +67,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             errors: [{ column: 56, line: 19, messageId: 'adapters' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // A setup defined inside the composition, its reduce and all, rather than imported from its folder.
         {
+            name: 'A setup defined inside the composition, its reduce and all, rather than imported from its folder.',
             code: COMPOSED.replace(
                 'capabilities: [clock],',
                 "capabilities: [defineSetup({ name: 'clock', row: {}, reduce: (args, state) => ({ ...state, clock: new Date(String(args[0])).toISOString() }) })],",
@@ -76,8 +76,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             errors: [{ column: 19, line: 12, messageId: 'listed' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // An adapter written inline, however it is nested, and a builder no seam exports.
         {
+            name: 'An adapter written inline, however it is nested, and a builder no seam exports.',
             code: COMPOSED.replace(
                 'clock: processClock,',
                 'clock: { pin: (iso) => { const at = new Date(iso); vi.setSystemTime(at); return at; } }, network: clock.build(config),',
@@ -88,8 +88,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             ],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // Where the facet's paths start, computed in the facet.
         {
+            name: "Where the facet's paths start, computed in the facet.",
             code: COMPOSED.replace(
                 'locate: getCallerDir,',
                 "locate: () => {\n        const stack = new Error().stack ?? '';\n        return stack.split('\\n')[3] ?? '';\n    },",
@@ -97,8 +97,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             errors: [{ column: 4, line: 22, messageId: 'inline' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // An option whose row is computed, and a member no composition holds.
         {
+            name: 'An option whose row is computed, and a member no composition holds.',
             code: COMPOSED.replace(
                 "options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } }",
                 "options: { root: { group: 'Constructor option', name: 'root', probe: String('root:') } }",
@@ -109,8 +109,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             ],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // A default parameter of `adapters` runs whatever it is written with, before any adapter.
         {
+            name: 'A default parameter of `adapters` runs whatever it is written with, before any adapter.',
             code: COMPOSED.replace(
                 'adapters: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
                 'adapters: ({ jobs = [3, 1].sort().map((x) => x * 2) } = {}) => ({ clock: processClock, jobs }),',
@@ -118,8 +118,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             errors: [{ column: 56, line: 19, messageId: 'adapters' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // What `defineFacet` is handed before the facet runs when the module loads.
         {
+            name: 'What `defineFacet` is handed before the facet runs when the module loads.',
             code: COMPOSED.replace(
                 'defineFacet<JobSpecification>()(',
                 'defineFacet<JobSpecification>([1, 2].reduce((a, b) => a + b, 0))(',
@@ -127,8 +127,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             errors: [{ column: 54, line: 19, messageId: 'defined' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // A computed key runs its expression: an option's, a row field's, a facet member's and an adapter's.
         {
+            name: "A computed key runs its expression: an option's, a row field's, a facet member's and an adapter's.",
             code: COMPOSED.replace(
                 "options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } }",
                 "options: { [String([1].map((x) => x + 1))]: { group: 'a', name: 'b', probe: 'c' }, root: { group: 'a', [String(1)]: 'b', probe: 'c' } }",
@@ -146,8 +146,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             ],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // The constructor running a definition's step, and building a result.
         {
+            name: "The constructor running a definition's step, and building a result.",
             code: `${OPENS}\nexport function seeded(state, config) {\n    return seed.reduce([], state, { config, adapters: {} });\n}\nexport const empty = new BaseResult({ config: {}, testDir: '' });\n`,
             errors: [
                 { column: 11, line: 12, messageId: 'runsStep' },
@@ -155,8 +155,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             ],
             filename: '/repo/src/facets/job/job.handle.ts',
         },
-        // A step reached through a namespace import, a destructured step, and one reached through the facet.
         {
+            name: 'A step reached through a namespace import, a destructured step, and one reached through the facet.',
             code: `${OPENS}\nimport * as defs from '../../services/seed/seed.capability.js';\nexport function steps(state, context) {\n    const { reduce: seeding } = seed;\n    defs.seed.reduce([], state, context);\n    seeding([], state, context);\n    return jobFacet.composition.capabilities[0].reduce([], state, context);\n}\n`,
             errors: [
                 { column: 4, line: 14, messageId: 'runsStep' },
@@ -165,8 +165,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             ],
             filename: '/repo/src/facets/job/job.handle.ts',
         },
-        // A step reached through an alias of the step or of its definition, a destructured default, and a binding written after the call.
         {
+            name: 'A step reached through an alias of the step or of its definition, a destructured default, and a binding written after the call.',
             code: `${OPENS}\nexport function early(state, context) {\n    return late([], state, context);\n}\nconst { reduce: late } = seed;\nexport function aliased(state, context) {\n    const run = seed.reduce;\n    const definition = seed;\n    const { reduce = undefined } = seed;\n    run([], state, context);\n    definition.reduce([], state, context);\n    return reduce([], state, context);\n}\n`,
             errors: [
                 { column: 11, line: 12, messageId: 'runsStep' },
@@ -176,8 +176,8 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             ],
             filename: '/repo/src/facets/job/job.handle.ts',
         },
-        // A step called through `call`, read by a string key or off a cast, and a result built through a namespace import.
         {
+            name: 'A step called through `call`, read by a string key or off a cast, and a result built through a namespace import.',
             code: `${OPENS}\nimport * as results from '../../expectations/result.js';\nexport function reached(state, context) {\n    seed.reduce.call(undefined, [], state, context);\n    seed['reduce']([], state, context);\n    (seed as any).reduce([], state, context);\n    return new results.BaseResult({ config: {}, testDir: '' });\n}\n`,
             errors: [
                 { column: 4, line: 13, messageId: 'runsStep' },
@@ -190,15 +190,18 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
     ],
     valid: [
         { code: COMPOSED, filename: '/repo/src/facets/job/job.facet.ts' },
-        // An array's own `reduce` is no definition's step.
-        { code: OPENS, filename: '/repo/src/facets/job/job.handle.ts' },
-        // Only a facet's own folder file is a composition: a sibling module is free.
         {
+            name: "An array's own `reduce` is no definition's step.",
+            code: OPENS,
+            filename: '/repo/src/facets/job/job.handle.ts',
+        },
+        {
+            name: "Only a facet's own folder file is a composition: a sibling module is free.",
             code: `${COMPOSED}\nfunction pinned(iso) {\n    return iso;\n}\n`,
             filename: '/repo/src/facets/mobile/projection.ts',
         },
-        // And only under this package's `src/facets/`.
         {
+            name: "And only under this package's `src/facets/`.",
             code: `${COMPOSED}\nfunction pinned(iso) {\n    return iso;\n}\n`,
             filename: '/repo/specs/job/job.facet.ts',
         },

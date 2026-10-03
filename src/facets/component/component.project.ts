@@ -89,7 +89,7 @@ function callerDirectory(): string {
     }
     const bundled = BUNDLED_CONFIG.exec(basename(file))?.groups?.name;
     if (bundled === undefined || basename(dirname(file)) !== '.vite-temp') {
-        // Bundled beside the config or not bundled: either way the frame sits in the config's own directory.
+        // invariant: bundled beside the config or not bundled: either way the frame sits in the config's own directory.
         return dirname(file);
     }
     return nearestHolding(bundled) ?? process.cwd();
@@ -131,7 +131,7 @@ async function reroot(
     let fix: string;
     if (typeof source === 'string') {
         const { loadConfigFromFile } = await import('vite');
-        // `loadConfigFromFile` resolves a relative path against the tool's cwd, not the config's.
+        // outside: `loadConfigFromFile` resolves a relative path against the tool's cwd, not the config's.
         const from = isAbsolute(source) ? source : resolve(root, source);
         const file = await loadConfigFromFile(environment, from);
         loaded = file?.config;
@@ -290,7 +290,7 @@ function viewportOf(options: ComponentProjectOptions): { height: number; width: 
 export async function component(
     options: ComponentProjectOptions = {},
 ): Promise<TestProjectInlineConfiguration> {
-    // Read before the first `await`: the caller's frame is on the stack only during the synchronous body.
+    // hazard: read before the first `await`: the caller's frame is on the stack only during the synchronous body.
     const root = options.root ?? callerDirectory();
     assertProviderPin(versionOf('vitest'), installedVersion('@vitest/browser-playwright'));
     const { playwright } = await import('@vitest/browser-playwright');
@@ -306,7 +306,7 @@ export async function component(
             browser: {
                 commands: COMPONENT_COMMANDS,
                 enabled: true,
-                // A reference screenshot is a golden with its own Vitest 5 option, apart from the failure screenshot.
+                // outside: a reference screenshot is a golden with its own Vitest 5 option, apart from the failure screenshot.
                 expect: { toMatchScreenshot: { screenshotDirectory: SCREENSHOTS_DIR } },
                 headless: true,
                 instances: [{ browser: 'chromium' as const }],

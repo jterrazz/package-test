@@ -7,7 +7,7 @@ async function release(
     try {
         await reader.cancel(reason);
     } catch {
-        // How msw's branch ends is not the subject's to hear.
+        // invariant: how msw's branch ends is not the subject's to hear.
     }
 }
 

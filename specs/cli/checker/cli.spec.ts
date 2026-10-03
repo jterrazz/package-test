@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { cli } from '../checker-cli.specification.js';
 
 describe('cli', () => {
-    // The checker's diagnostics are this package's product, so the whole stream is goldened.
+    // invariant: the checker's diagnostics are this package's product, so the whole stream is goldened.
     test('lint — checker CLI contract — a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down
         const result = await cli
@@ -34,7 +34,7 @@ describe('cli', () => {
         `);
     });
 
-    // Scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
+    // invariant: scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a root holding no specs tree at all is refused, not reported clean', async () => {
         // Given - a package with module tests and no `specs/` anywhere below it
         const result = await cli.fixture(directory('./_fixtures/checker-no-specs/')).exec('.');
@@ -44,7 +44,7 @@ describe('cli', () => {
         expect(result.stdout.text).toContain('no `specs/` tree under');
     });
 
-    // Scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
+    // invariant: scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a nonexistent root fails loudly instead of reporting a clean tree', async () => {
         // Given - a target directory that does not exist
         const result = await cli.exec('does-not-exist-xyz');

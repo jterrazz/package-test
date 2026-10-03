@@ -620,7 +620,7 @@ function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly s
     });
     map.set(key, value);
     if (at !== -1) {
-        // `set` appended: move the new pair to its canonical place.
+        // invariant: `set` appended: move the new pair to its canonical place.
         const added = (map.items as Pair<Node, Node>[]).pop()!;
         map.items.splice(at, 0, added);
     }
@@ -782,7 +782,7 @@ export const SPEC_SCHEMA: SpecSchema = {
             ...oneOrMany(fixturePath()),
         },
         runs: {
-            // Only the last run may wait; no keyword addresses the last item, so the schema holds that one run at most does.
+            // invariant: only the last run may wait; no keyword addresses the last item, so the schema holds that one run at most does.
             contains: { required: ['waitFor'] },
             description:
                 'The session: one or more runs, sequential, sharing one working directory.',

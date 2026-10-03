@@ -7,8 +7,8 @@ const IMPORT = "import { api } from '../../api.specification.js';";
 
 ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
     invalid: [
-        // Every chain pins the same instant: the view is declared once, the setting leaves each chain.
         {
+            name: 'Every chain pins the same instant: the view is declared once, the setting leaves each chain.',
             code: [
                 IMPORT,
                 "test('a', async () => { await api.clock('2026-01-01T00:00:00Z').get('/events'); });",
@@ -24,8 +24,8 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
                 "test('b', async () => { await events.seed(file('./_seeds/x.sql')).get('/events?page=2'); });",
             ].join('\n'),
         },
-        // The message spells the view it would write.
         {
+            name: 'The message spells the view it would write.',
             code: [
                 IMPORT,
                 "test('a', async () => { await api.headers({ 'accept-language': 'fr' }).get('/events'); });",
@@ -48,8 +48,8 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
                 "test('b', async () => { await events.get('/events'); });",
             ].join('\n'),
         },
-        // The view is named for the subject, whatever the file's aspect: the job it triggers.
         {
+            name: "The view is named for the subject, whatever the file's aspect: the job it triggers.",
             code: [
                 "import { job } from '../job.specification.js';",
                 "test('a', async () => { await job.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
@@ -65,8 +65,8 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
                 "test('b', async () => { await reportRefresh.trigger('report-refresh'); });",
             ].join('\n'),
         },
-        // A route under an item is named for the resource its folder ends on; a name the file already holds takes `View`.
         {
+            name: 'A route under an item is named for the resource its folder ends on; a name the file already holds takes `View`.',
             code: [
                 IMPORT,
                 'const chart = { symbol: "btc" };',
@@ -86,28 +86,28 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
         },
     ],
     valid: [
-        // One chain states nothing about a file.
         {
+            name: 'One chain states nothing about a file.',
             code: `${IMPORT}\ntest('a', async () => { await api.clock('x').get('/events'); });`,
             filename: SPEC,
         },
-        // Two instants are two conditions.
         {
+            name: 'Two instants are two conditions.',
             code: `${IMPORT}\ntest('a', async () => { await api.clock('x').get('/e'); });\ntest('b', async () => { await api.clock('y').get('/e'); });`,
             filename: SPEC,
         },
-        // A chain without the setting breaks the pattern.
         {
+            name: 'A chain without the setting breaks the pattern.',
             code: `${IMPORT}\ntest('a', async () => { await api.clock('x').get('/e'); });\ntest('b', async () => { await api.get('/e'); });`,
             filename: SPEC,
         },
-        // A seed repeated is a Given, never a setting.
         {
+            name: 'A seed repeated is a Given, never a setting.',
             code: `${IMPORT}\ntest('a', async () => { await api.seed(S).get('/e'); });\ntest('b', async () => { await api.seed(S).get('/e'); });`,
             filename: SPEC,
         },
-        // A module test is not a spec.
         {
+            name: 'A module test is not a spec.',
             code: `${IMPORT}\ntest('a', async () => { await api.clock('x').get('/e'); });\ntest('b', async () => { await api.clock('x').get('/e'); });`,
             filename: '/repo/src/events.test.ts',
         },

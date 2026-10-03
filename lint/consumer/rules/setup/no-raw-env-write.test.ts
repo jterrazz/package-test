@@ -6,8 +6,8 @@ const TEST_FILE = '/repo/src/domain/order.test.ts';
 
 ruleTester().run('no-raw-env-write', noRawEnvWrite, {
     invalid: [
-        // The assignment outlasts the test.
         {
+            name: 'The assignment outlasts the test.',
             code: `test('reads the token', () => {
                 process.env.API_TOKEN = 'secret';
                 expect(read()).toBe('secret');
@@ -15,8 +15,8 @@ ruleTester().run('no-raw-env-write', noRawEnvWrite, {
             errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
             filename: TEST_FILE,
         },
-        // The computed form says the same thing.
         {
+            name: 'The computed form says the same thing.',
             code: `test('reads the token', () => {
                 process.env['API_TOKEN'] = 'secret';
                 expect(read()).toBe('secret');
@@ -26,23 +26,23 @@ ruleTester().run('no-raw-env-write', noRawEnvWrite, {
         },
     ],
     valid: [
-        // The self-restoring form.
         {
+            name: 'The self-restoring form.',
             code: `test('reads the token', () => {
                 vi.stubEnv('API_TOKEN', 'secret');
                 expect(read()).toBe('secret');
             });`,
             filename: TEST_FILE,
         },
-        // Reading is not writing.
         {
+            name: 'Reading is not writing.',
             code: `test('reads the token', () => {
                 expect(read()).toBe(process.env.API_TOKEN);
             });`,
             filename: TEST_FILE,
         },
-        // Out of reach outside a test.
         {
+            name: 'Out of reach outside a test.',
             code: `process.env.API_TOKEN = 'secret';`,
             filename: '/repo/src/domain/order.ts',
         },
@@ -51,8 +51,8 @@ ruleTester().run('no-raw-env-write', noRawEnvWrite, {
 
 ruleTester().run('no-raw-env-write — the other two spellings', noRawEnvWrite, {
     invalid: [
-        // Replacing the whole environment outlasts the test just the same.
         {
+            name: 'Replacing the whole environment outlasts the test just the same.',
             code: `test('reads the token', () => {
                 process.env = { ...process.env, API_TOKEN: 'secret' };
                 expect(read()).toBe('secret');
@@ -60,8 +60,8 @@ ruleTester().run('no-raw-env-write — the other two spellings', noRawEnvWrite, 
             errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
             filename: TEST_FILE,
         },
-        // And so does taking a variable away.
         {
+            name: 'And so does taking a variable away.',
             code: `test('reads no token', () => {
                 delete process.env.API_TOKEN;
                 expect(read()).toBe(undefined);
@@ -71,8 +71,8 @@ ruleTester().run('no-raw-env-write — the other two spellings', noRawEnvWrite, 
         },
     ],
     valid: [
-        // Deleting something else is nobody's business here.
         {
+            name: "Deleting something else is nobody's business here.",
             code: `test('drops the key', () => {
                 delete config.token;
                 expect(read()).toBe(undefined);

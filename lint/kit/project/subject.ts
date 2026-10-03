@@ -430,7 +430,7 @@ export function doorsOf(
 function requestLineOf(text: string): Subject[] {
     const { method = '', path = '/' } = REQUEST_LINE.exec(text)?.groups ?? {};
     const verb = HTTP_VERBS[method.toLowerCase()];
-    // A request file's line is the route: there is no template to write beside it.
+    // invariant: a request file's line is the route: there is no template to write beside it.
     return verb === undefined ? [] : [{ facet: 'api', method: verb, path, template: true }];
 }
 
@@ -451,7 +451,7 @@ const pageOf: TerminalReader = (first) => {
 
 const TERMINALS: Record<string, TerminalReader> = {
     exec: (first, _readRequest, commands) => {
-        // A sequence is one session of the binary, opened by its first command.
+        // invariant: a sequence is one session of the binary, opened by its first command.
         const line =
             first?.trim().startsWith('[') === true
                 ? literalOf(argumentsOf(first.trim().slice(1, -1))[0])

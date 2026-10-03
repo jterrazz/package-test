@@ -1,5 +1,4 @@
 export { specification, type SpecificationConfig } from './facets/specification.js';
-// oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: `no-unpublished-subpath` publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
 export type * from './facets/api/api.face.js';
 export type * from './facets/cli/cli.face.js';
 export * from './facets/component/component.face.js';
@@ -104,5 +103,5 @@ export type { TextAccessor } from './expectations/text/text.js';
 export { text } from './expectations/text/text-subject.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil, type WaitUntilOptions } from './expectations/conditions/wait-until.js';
-// Also carries the vitest `Assertion` augmentation: the one `types` entry publishes the matchers through it.
+// outside: also carries the vitest `Assertion` augmentation: the one `types` entry publishes the matchers through it.
 export type { MatchFixtureOptions } from './expectations/goldens/match-options.js';

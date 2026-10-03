@@ -42,7 +42,7 @@ export const noRawEnvWrite = defineRule(
                         context.report({ messageId: 'rawAssignment', node });
                     }
                 },
-                // A deletion is a write too: it is gone for every later file of the worker.
+                // invariant: a deletion is a write too: it is gone for every later file of the worker.
                 UnaryExpression(node: AstNode) {
                     if (node.operator === 'delete' && isEnvTarget(child(node, 'argument'))) {
                         context.report({ messageId: 'rawAssignment', node });

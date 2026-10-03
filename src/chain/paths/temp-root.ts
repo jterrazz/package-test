@@ -55,7 +55,7 @@ function joinedRoot(): boolean {
 export default function setup(): () => void {
     if (joinedRoot()) {
         return () => {
-            // The root is removed by the teardown of the setup that made it.
+            // invariant: the root is removed by the teardown of the setup that made it.
         };
     }
     const parent = join(tmpdir(), TEMP_ROOTS_PARENT);

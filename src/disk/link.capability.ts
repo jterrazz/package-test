@@ -12,7 +12,6 @@ export type LinkChain<Self> = {
     link: LinkMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface LinkSignature extends ChainSignature {
     readonly chain: LinkChain<this['self']>;
 }

@@ -3,7 +3,7 @@ import { describe, expect, inject, test } from 'vitest';
 
 import { integration } from '../redis.specification.js';
 
-/* A probe flushing keys binds a fresh handle: the runner's handle holds a worker index (`state-isolated-per-worker`), and index 0 is the container's own, which no reset flushes. */
+/* invariant: a probe flushing keys binds a fresh handle: the runner's handle holds a worker index (`state-isolated-per-worker`), and index 0 is the container's own, which no reset flushes. */
 
 describe('redis', () => {
     test('builds a connection string on the redis scheme', async () => {

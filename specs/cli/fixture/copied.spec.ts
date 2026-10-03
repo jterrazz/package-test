@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('copied', () => {
     test('copies fixture file into working dir before exec', async () => {

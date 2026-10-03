@@ -120,7 +120,7 @@ const GROUND: GroundPasses = {
         ...noDocumentInGroundFindings(rel, name),
         ...(text === null ? [] : checkDocumentFollowsItsGrammar(text, rel)),
     ],
-    // `no-volatile-literal` reaches ground as well as documents: the same volatile literal in the other half of the tree.
+    // invariant: `no-volatile-literal` reaches ground as well as documents: the same volatile literal in the other half of the tree.
     expected: ({ atTop, name, rel, text }) => [
         ...(atTop && name.endsWith('.http')
             ? checkHttpFirstLineFollowsItsGrammar(rel, name, text, 'response')
@@ -138,7 +138,7 @@ const GROUND: GroundPasses = {
         ...checkNoSilentRefusal(file.document),
         ...checkDocumentEnvAndServeRegistered(file.document, dir),
     ],
-    // `request-file-extension-known` (oxlint) owns the extension rule.
+    // invariant: `request-file-extension-known` (oxlint) owns the extension rule.
     request: ({ atTop, name, rel, text }) =>
         name.endsWith('.http')
             ? [
@@ -161,10 +161,10 @@ function memberFindings({
     return [
         ...(config === null ? [] : checkNoSimulatedDomInConfig(config, rootDir)),
         ...checkNoRedundantTestDependency({ label, manifest, memberDir, subject }),
-        // Only a walk of the member sees a `.spec.ts` that never reached a `specs/` tree.
+        // invariant: only a walk of the member sees a `.spec.ts` that never reached a `specs/` tree.
         ...anchored(checkFileSuffixMatchesPlaceInMember(memberDir)),
         ...checkNoSnapshotFolder(memberDir, label),
-        // The tree pass reads the tests under `specs/`.
+        // invariant: the tree pass reads the tests under `specs/`.
         ...moduleTestsOf(memberDir).flatMap((test) => checkNamedPathExistsIn(test, rootDir)),
     ];
 }

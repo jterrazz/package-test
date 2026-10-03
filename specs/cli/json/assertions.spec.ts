@@ -32,7 +32,7 @@ function inUpdateMode(block: () => void): void {
     }
 }
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('assertions', () => {
     test('toMatch writes with TEST_UPDATE then passes on identical content', async () => {

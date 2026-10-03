@@ -20,8 +20,8 @@ writeFileSync(join(SENT, 'specs/app/widget/_requests/orders/big.json'), '{}\n');
 
 ruleTester().run('request-file-extension-known', requestFileExtensionKnown, {
     invalid: [
-        // Every bare file is named: two of them, two reports.
         {
+            name: 'Every bare file is named: two of them, two reports.',
             code: 'test("x", () => {});',
             errors: [
                 { column: 0, line: 1, messageId: 'noExtension' },
@@ -29,31 +29,31 @@ ruleTester().run('request-file-extension-known', requestFileExtensionKnown, {
             ],
             filename: `${TWO_BARE}/specs/app/widget/widget.test.ts`,
         },
-        // The violation fixture keeps a body with no extension next to the .http.
         {
+            name: 'The violation fixture keeps a body with no extension next to the .http.',
             code: 'test("x", () => {});',
             errors: [{ column: 0, line: 1, messageId: 'noExtension' }],
             filename: `${SPECS_LINT}/request-file-extension-known/_fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
-        // A whole request and a body, side by side, in the compliant twin.
         {
+            name: 'A whole request and a body, side by side, in the compliant twin.',
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/request-file-extension-known/_fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
-        // A `.http`, a `.json` and a `.txt` body, and a folder: everything a spec sends.
         {
+            name: 'A `.http`, a `.json` and a `.txt` body, and a folder: everything a spec sends.',
             code: 'test("x", () => {});',
             filename: `${SENT}/specs/app/widget/widget.test.ts`,
         },
-        // No _requests/ directory at this level (the feature has no _requests/ sibling).
         {
+            name: 'No _requests/ directory at this level (the feature has no _requests/ sibling).',
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/request-file-extension-known/_fixtures/compliant/specs/app/app.test.ts`,
         },
-        // Outside specs/ the rule is inert.
         {
+            name: 'Outside specs/ the rule is inert.',
             code: 'test("x", () => {});',
             filename: '/repo/src/specification/matching/match.test.ts',
         },

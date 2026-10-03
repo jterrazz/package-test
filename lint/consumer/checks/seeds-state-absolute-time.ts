@@ -16,7 +16,7 @@ function withoutComments(text: string): string {
 
 /** The chain's `.clock()` pins what the code reads, so a seed never asks the machine; under SQLite `datetime('now')` also writes a space where an ORM writes `T`, and the two mis-sort. */
 export function checkSeedsStateAbsoluteTime(path: string, rel: string, name: string): Spotted[] {
-    // `seeds-are-sql` (oxlint) owns the extension rule; this pass reads the SQL alone.
+    // invariant: `seeds-are-sql` (oxlint) owns the extension rule; this pass reads the SQL alone.
     if (!name.endsWith('.sql')) {
         return [];
     }

@@ -10,7 +10,6 @@ export type ClockChain<Self> = {
     clock: ClockMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface ClockSignature extends ChainSignature {
     readonly chain: ClockChain<this['self']>;
 }

@@ -174,14 +174,14 @@ function assertRun(
     scope: CaptureScope,
 ): void {
     const { actual, run } = outcome;
-    // An exit-code mismatch is reported alone: the stream diffs are its consequences.
+    // invariant: an exit-code mismatch is reported alone: the stream diffs are its consequences.
     if (actual.exitCode !== run.exitCode) {
         throw failure(document, run, context, [
             [
                 'exit code mismatch',
                 `  expected: ${run.exitCode}`,
                 `  received: ${actual.exitCode}`,
-                // The stream carries its own final newline; the joiner adds the separator.
+                // invariant: the stream carries its own final newline; the joiner adds the separator.
                 ...(outcome.stderr.length > 0
                     ? ['', 'stderr was:', outcome.stderr.replace(/\n$/u, '')]
                     : []),
@@ -320,12 +320,12 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
     const { document } = file;
     const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');
 
-    // Layered over what the chain copied, in declaration order, as chained `.fixture()` calls are.
+    // invariant: layered over what the chain copied, in declaration order, as chained `.fixture()` calls are.
     for (const fixture of document.fixtures) {
         fsFixtures.layer(fixture.path, fileDir, workDir);
     }
 
-    // One resolved spelling of the working directory for `{{workdir}}`, `$WORKDIR` and `TEST_WORKDIR`.
+    // invariant: one resolved spelling of the working directory for `{{workdir}}`, `$WORKDIR` and `TEST_WORKDIR`.
     const workdir = safeRealpath(workDir);
     const servers = await startServers(document, config, displayPath, workdir);
     const scope = new CaptureScope(workdir);
@@ -338,7 +338,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         workdir,
     );
 
-    // A rewrite needs every run executed; a normal session judges each run where it stands.
+    // invariant: a rewrite needs every run executed; a normal session judges each run where it stands.
     const rewriting = shouldUpdateSnapshots() && options.frozen !== true;
     const outcomes: RunOutcome[] = [];
     try {
@@ -362,7 +362,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
                 stdout: comparable(actual.stdout, config.transform),
             };
             outcomes.push(outcome);
-            // Judged here, before the next command: a run's `files:` describes the directory as this run left it.
+            // invariant: judged here, before the next command: a run's `files:` describes the directory as this run left it.
             if (!rewriting) {
                 assertRun(document, outcome, { displayPath, filePath }, workDir, scope);
             }

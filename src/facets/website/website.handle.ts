@@ -126,7 +126,7 @@ async function startSite<Services extends ServiceRecord>(
         context.root,
         'website',
         {
-            // One id per run, minted by the facet, never sampled by a spec (`no-sampled-value-in-expectation`).
+            // invariant: one id per run, minted by the facet, never sampled by a spec (`no-sampled-value-in-expectation`).
             TEST_RUN_ID: context.started?.runId ?? randomUUID(),
             ...serverBackendEnv(options.backend, context.backendUrl),
         },
@@ -170,7 +170,7 @@ export async function startWebsite<Services extends ServiceRecord>(
     const callerDir = getCallerDir();
     await registerMatchers();
 
-    // The type already forbids it; this covers untyped callers.
+    // invariant: the type already forbids it; this covers untyped callers.
     if (options.backend && !options.server) {
         throw new Error(
             refusal({
@@ -193,7 +193,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         );
     }
 
-    // Started before the server, so the child finds its URL from the first request.
+    // invariant: started before the server, so the child finds its URL from the first request.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
@@ -215,7 +215,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         started,
     });
 
-    // Launched lazily on the first `.visit()`; playwright is an optional peer (the layer map).
+    // invariant: launched lazily on the first `.visit()`; playwright is an optional peer (the layer map).
     let browser: BrowserPort | null = null;
     const getBrowser = async (): Promise<BrowserPort> => {
         if (!browser) {

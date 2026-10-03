@@ -513,11 +513,6 @@
             "count": 1
         }
     },
-    "specs/component/intercept/token-feed.tsx": {
-        "no-await-in-loop": {
-            "count": 1
-        }
-    },
     "specs/website/visit/subscribe.spec.ts": {
         "jterrazz/scenario-ends-settled": {
             "count": 1
@@ -600,16 +595,8 @@
             "count": 10
         }
     },
-    "src/expectations/conditions/wait-until.ts": {
-        "no-await-in-loop": {
-            "count": 2
-        }
-    },
     "src/expectations/disk/directory.ts": {
         "jsdoc/empty-tags": {
-            "count": 1
-        },
-        "no-await-in-loop": {
             "count": 1
         }
     },
@@ -783,9 +770,6 @@
         "max-params": {
             "count": 1
         },
-        "no-await-in-loop": {
-            "count": 6
-        },
         "typescript/no-non-null-assertion": {
             "count": 2
         }
@@ -851,9 +835,6 @@
         "max-lines": {
             "count": 1
         },
-        "no-await-in-loop": {
-            "count": 9
-        },
         "no-promise-executor-return": {
             "count": 1
         },
@@ -900,9 +881,6 @@
         },
         "max-lines-per-function": {
             "count": 2
-        },
-        "no-await-in-loop": {
-            "count": 1
         }
     },
     "src/facets/website/fetch/fetch.action.ts": {
@@ -949,9 +927,6 @@
         }
     },
     "src/services/postgres/postgres.adapter.ts": {
-        "no-await-in-loop": {
-            "count": 1
-        },
         "typescript/no-explicit-any": {
             "count": 1
         },
@@ -979,9 +954,6 @@
         },
         "max-lines-per-function": {
             "count": 1
-        },
-        "no-await-in-loop": {
-            "count": 6
         },
         "typescript/no-unsafe-call": {
             "count": 2
@@ -1016,9 +988,6 @@
         "max-lines": {
             "count": 1
         },
-        "no-await-in-loop": {
-            "count": 2
-        },
         "typescript/no-unsafe-type-assertion": {
             "count": 3
         },
@@ -1036,9 +1005,6 @@
         "max-lines-per-function": {
             "count": 1
         },
-        "no-await-in-loop": {
-            "count": 5
-        },
         "no-console": {
             "count": 2
         },
@@ -1050,11 +1016,6 @@
         },
         "typescript/no-unsafe-member-access": {
             "count": 1
-        }
-    },
-    "src/services/startup/start-services.ts": {
-        "no-await-in-loop": {
-            "count": 5
         }
     },
     "src/services/startup/startup-report.ts": {

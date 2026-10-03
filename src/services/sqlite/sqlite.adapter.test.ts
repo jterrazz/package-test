@@ -260,7 +260,7 @@ describe('sqlite', () => {
         // Then - its holder is presumed alive, so a waiter waits
         expect(isStaleTemplateLock(lockPath)).toBe(false);
 
-        // Long past the build budget the holder is presumed dead: a crashed worker must not wedge the suite.
+        // invariant: long past the build budget the holder is presumed dead: a crashed worker must not wedge the suite.
         expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBe(true);
         releaseTemplateLock(lockPath);
     });

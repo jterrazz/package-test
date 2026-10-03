@@ -18,12 +18,12 @@ export const FRAMEWORK_LAYERS = {
     chain: {
         folders: {
             context: [],
-            // A scratch folder ends with the test that asked for it (vitest's `onTestFinished`).
+            // invariant: a scratch folder ends with the test that asked for it (vitest's `onTestFinished`).
             paths: ['vitest'],
             refusals: [],
         },
         imports: CHAIN_AND_KIT,
-        // The four-part lesson a refusal prints is the toolchain's rules kit.
+        // invariant: the four-part lesson a refusal prints is the toolchain's rules kit.
         packages: ['@jterrazz/typescript/rules'],
     },
     visitor: { imports: [...CHAIN_AND_KIT, 'visitor/'] },
@@ -31,9 +31,9 @@ export const FRAMEWORK_LAYERS = {
         imports: [...CHAIN_AND_KIT, 'expectations/'],
         packages: ['vitest'],
         seams: {
-            // A table read names its database by the rule a seed names it by: one validation.
+            // invariant: a table read names its database by the rule a seed names it by: one validation.
             'expectations/result.ts': ['services/database-option'],
-            // A golden is a file the spec names on disk, with the `file()`/`directory()` every verb takes.
+            // invariant: a golden is a file the spec names on disk, with the `file()`/`directory()` every verb takes.
             'expectations/goldens/match-options.ts': ['disk/spec-path'],
             'expectations/goldens/matchers.ts': ['disk/spec-path', 'disk/resolved-spec-path'],
             'expectations/goldens/text-assertions.ts': ['disk/spec-path'],
@@ -43,7 +43,7 @@ export const FRAMEWORK_LAYERS = {
         imports: [...CHAIN_AND_KIT, 'stubs/'],
         packages: librariesOwnedIn('src/stubs/'),
         seams: {
-            // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
+            // invariant: a stub's request filter is an expectation on the outgoing request: one grammar, never a second.
             'stubs/kinds/http.ts': ['expectations/tokens/'],
             'stubs/kinds/text-filter.ts': ['expectations/tokens/'],
             'stubs/matching/route.ts': ['expectations/tokens/'],
@@ -51,10 +51,10 @@ export const FRAMEWORK_LAYERS = {
     },
     services: {
         imports: [...CHAIN_AND_KIT, 'services/'],
-        // The container server's reader is a provided value (`vitest`).
+        // invariant: the container server's reader is a provided value (`vitest`).
         packages: [...librariesOwnedIn('src/services/'), 'vitest'],
         seams: {
-            // A seed is a `.sql` file the spec names on disk, with `file()`.
+            // invariant: a seed is a `.sql` file the spec names on disk, with `file()`.
             'services/seed/database-set.adapter.ts': ['disk/resolved-spec-path'],
             'services/seed/seed.capability.ts': ['disk/spec-path'],
         },
@@ -65,7 +65,7 @@ export const FRAMEWORK_LAYERS = {
         imports: [...CHAIN_AND_KIT, 'mocks/'],
         packages: ['vitest', ...librariesOwnedIn('src/mocks/')],
     },
-    // A folder owns its files, and no facet lists another.
+    // invariant: a folder owns its files, and no facet lists another.
     facets: {
         folders: {
             api: librariesOwnedIn('src/facets/api/'),
@@ -98,7 +98,7 @@ export const FRAMEWORK_LAYERS = {
                 'facets/mobile/mobile.handle',
                 'facets/website/website.handle',
             ],
-            // A facet reaches the runner config from its project alone: it runs in the Vitest main process, never in test code.
+            // invariant: a facet reaches the runner config from its project alone: it runs in the Vitest main process, never in test code.
             'facets/api/api.project.ts': ['vitest/project'],
             'facets/cli/cli.project.ts': ['vitest/project'],
             'facets/component/component.project.ts': ['vitest/project'],
@@ -113,16 +113,16 @@ export const FRAMEWORK_LAYERS = {
         imports: [
             'vitest/',
             'chain/',
-            // Update mode's global setup, which every project carries.
+            // invariant: update mode's global setup, which every project carries.
             'expectations/in-place/in-place-setup',
             'lint/kit/',
         ],
-        // The ground folders every project skips are the toolchain's rules kit.
+        // invariant: the ground folders every project skips are the toolchain's rules kit.
         packages: ['vitest', '@jterrazz/typescript/rules'],
     },
     lint: {
         imports: ['lint/'],
-        // oxlint's plugin types and the toolchain's config type (erased), and the module parser.
+        // invariant: oxlint's plugin types and the toolchain's config type (erased), and the module parser.
         packages: [
             '@oxlint/plugins',
             '@jterrazz/typescript/config',

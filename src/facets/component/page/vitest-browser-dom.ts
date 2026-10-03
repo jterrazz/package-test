@@ -57,7 +57,7 @@ function locateSearch(scope: LocatorSelectors, target: Target, exact: boolean): 
 /** No `.first()`: taking the first match is the silent wrong-element bug `target-matches-one-element` prevents. */
 export function locate(root: LocatorSelectors, target: Target): Locator {
     const scope: LocatorSelectors = target.scope ? locate(root, target.scope) : root;
-    // An absent `exact` is the default, not a choice.
+    // invariant: an absent `exact` is the default, not a choice.
     const exact = target.exact ?? true;
     const name = target.name ?? '';
     if (target.kind === 'field') {
@@ -76,7 +76,7 @@ export function locate(root: LocatorSelectors, target: Target): Locator {
     if (target.kind === 'search') {
         return locateSearch(scope, target, exact);
     }
-    // Every other kind is an ARIA role named after itself: one branch answers for all.
+    // invariant: every other kind is an ARIA role named after itself: one branch answers for all.
     return scope.getByRole(
         target.kind,
         target.name === undefined ? { exact } : { exact, name: target.name },
@@ -179,7 +179,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
         },
         gone: async (target) => {
             await act(target, async (locator) => {
-                // Polled: `expect.element` refuses a locator matching nothing, the commonest way to be gone.
+                // invariant: polled: `expect.element` refuses a locator matching nothing, the commonest way to be gone.
                 await polling(
                     () => isGone(locator, target),
                     `${asWritten(target)} is still on the screen`,
@@ -210,7 +210,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
                     return;
                 }
                 if (target.selected !== undefined) {
-                    // No matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
+                    // invariant: no matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
                     await polling(
                         () => locator.query()?.matches(':checked') === true,
                         `${asWritten(target)} is not the selected one`,

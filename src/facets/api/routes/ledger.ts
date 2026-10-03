@@ -82,7 +82,6 @@ export async function routesLedger(): Promise<string | undefined> {
 }
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         routesLedger?: string;
     }

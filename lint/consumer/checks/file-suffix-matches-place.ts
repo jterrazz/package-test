@@ -105,11 +105,11 @@ function movesUnderFacet(specsRoot: string): PlacementMove[] {
         }
         const parts = relative(specsRoot, path).split(/[/\\]/u);
         const facet = parts[0];
-        // A file loose at the specs root is `specs-at-declared-depth`'s, and a non-facet first level is a repository suite, unless the tree itself is one facet's.
+        // invariant: a file loose at the specs root is `specs-at-declared-depth`'s, and a non-facet first level is a repository suite, unless the tree itself is one facet's.
         if (!rooted && (parts.length < 2 || facet === undefined || !FACETS.has(facet))) {
             continue;
         }
-        // A `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
+        // invariant: a `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
         if (parts.some((part) => isGroundFolder(part))) {
             continue;
         }

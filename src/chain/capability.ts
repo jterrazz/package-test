@@ -32,7 +32,6 @@ export type FacetParams = {
 };
 
 /** Each definition extends this, naming its methods over `this['self']` and `this['params']`; `ChainOf` fills both in. */
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name: a facet fills `self` and `params` in by intersecting it
 export interface ChainSignature {
     readonly chain: object;
     readonly params: FacetParams;

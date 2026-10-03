@@ -26,7 +26,7 @@ import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';
 import type { ServiceHandle } from '../service.port.js';
 
-// The SQLite file-format header: a crash can leave a 0-byte or partial template behind.
+// outside: the SQLite file-format header: a crash can leave a 0-byte or partial template behind.
 const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 
 /** An optional peer, a native module to compile. */
@@ -38,7 +38,7 @@ async function loadDatabase(): Promise<typeof Database> {
             const betterSqlite3 = await import('better-sqlite3');
             return betterSqlite3.default;
         });
-        // Installed is not built: npm, pnpm and bun withhold install scripts. Opening one database here lets the refusal name the peer and the command.
+        // outside: installed is not built: npm, pnpm and bun withhold install scripts. Opening one database here lets the refusal name the peer and the command.
         requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
             const Probe = constructor;
             new Probe(':memory:').close();
@@ -165,7 +165,7 @@ export function releaseTemplateLock(lockPath: string): void {
     try {
         unlinkSync(lockPath);
     } catch {
-        /* Ignore — already released */
+        /* invariant: ignore — already released */
     }
 }
 
@@ -184,7 +184,7 @@ function removeDatabaseFiles(path: string): void {
         try {
             unlinkSync(`${path}${suffix}`);
         } catch {
-            /* Ignore — nothing to remove */
+            /* invariant: ignore — nothing to remove */
         }
     }
 }
@@ -221,7 +221,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 
     async healthcheck(): Promise<void> {
-        // SQLite is always ready — it's a file
+        // invariant: SQLite is always ready — it's a file
     }
 
     /** One worker builds under an exclusive lock, the others wait: two concurrent `prisma db push` on one file is `database is locked`. */
@@ -235,7 +235,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         const lockPath = `${this.templatePath}.lock`;
 
         for (;;) {
-            // An invalid template (a crash's 0-byte leftover) reads as absent and is rebuilt.
+            // invariant: an invalid template (a crash's 0-byte leftover) reads as absent and is rebuilt.
             if (isValidSqliteTemplate(this.templatePath)) {
                 break;
             }
@@ -275,7 +275,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
                     PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
                 });
 
-                // Checkpoint WAL so the template is a single file, safe to copy.
+                // invariant: checkpoint WAL so the template is a single file, safe to copy.
                 const tmpDb = new (database())(buildPath);
                 tmpDb.pragma('wal_checkpoint(TRUNCATE)');
                 tmpDb.close();
@@ -355,7 +355,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         return {
             acquire: async (workerId: string) => {
                 this.closeDb();
-                // Per-run scratch in the OS temp dir; the pid joins the name because a worker id is unique only inside one vitest run.
+                // invariant: per-run scratch in the OS temp dir; the pid joins the name because a worker id is unique only inside one vitest run.
                 this.workerDbPath = resolve(
                     tmpdir(),
                     `test-worker-${workerId}-${process.pid}-${Date.now()}.sqlite`,

@@ -61,7 +61,6 @@ export async function serviceContainers(): Promise<string | undefined> {
 }
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         /** The loopback address the run's containers are asked for at. */
         serviceContainers?: string;

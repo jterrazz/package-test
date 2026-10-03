@@ -24,7 +24,7 @@ function inUpdateMode(block: () => void): void {
     }
 }
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('failure', () => {
     test('text exposes stderr content', async () => {

@@ -33,7 +33,7 @@ function catchMessage(assertion: () => unknown): string {
     throw new Error('expected the assertion to throw, but it passed');
 }
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('comparison', () => {
     test('text exposes the comparable string', async () => {

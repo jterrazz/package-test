@@ -45,7 +45,7 @@ export const givenAndThenMarkersPresent = defineRule(
                     if (callback === undefined) {
                         return;
                     }
-                    // A table's narration sits in the argument list, before the title.
+                    // invariant: a table's narration sits in the argument list, before the title.
                     const scope = testCalleeHasModifier(child(node, 'callee'), 'each')
                         ? node
                         : callback;

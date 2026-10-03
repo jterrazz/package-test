@@ -58,7 +58,7 @@ function resetWorkerStubs(): void {
 export function mswWorker(atTestEnd: (teardown: () => void) => void): InterceptPort {
     return {
         accepts: () => {
-            // Every chain of a page may declare stubs: the worker serves them all.
+            // invariant: every chain of a page may declare stubs: the worker serves them all.
         },
         arm: async (stubs) => {
             const registration = await registerWorkerStubs(stubs);

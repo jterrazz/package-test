@@ -37,7 +37,7 @@ export function checkGroundBesideItsOnlyReader(specsRoot: string): Spotted[] {
         (candidate) => !derived(candidate),
     )) {
         const entries = entriesOf(directory);
-        // A `.test.tsx` is out of reach, as for `specs-at-declared-depth`: a tree of rendered units has no domain folders for the ground to move into.
+        // invariant: a `.test.tsx` is out of reach, as for `specs-at-declared-depth`: a tree of rendered units has no domain folders for the ground to move into.
         const tests = entries
             .filter((entry) => entry.isFile() && isNodeTestFileName(entry.name))
             .map((entry) => join(directory, entry.name));

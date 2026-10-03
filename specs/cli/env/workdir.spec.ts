@@ -5,9 +5,9 @@ import { resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
 import { cli } from '../cli.specification.js';
-// A single SQL database: DB_URL and the unambiguous DATABASE_URL are both injected (`service-urls-injected`).
+// invariant: a single SQL database: DB_URL and the unambiguous DATABASE_URL are both injected (`service-urls-injected`).
 
-/* The `env` fixture dumps the whole child environment, ephemeral ports included: each test probes its one variable (`output-asserted-as-a-golden` scalpel). */
+/* invariant: the `env` fixture dumps the whole child environment, ephemeral ports included: each test probes its one variable (`output-asserted-as-a-golden` scalpel). */
 
 /** macOS's own `$TMPDIR` shape (`/var` → `/private/var`), made explicit so the guard holds on Linux: only the resolved spelling is what a child reports. */
 async function underSymlinkedTmp<T>(action: () => Promise<T>): Promise<T> {

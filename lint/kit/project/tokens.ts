@@ -45,7 +45,7 @@ function misfitTokens(text: string): (TokenSite & { malformed: boolean })[] {
                 }
                 continue;
             }
-            // Flagged only when a known kind is followed by junk, never arbitrary noise.
+            // invariant: flagged only when a known kind is followed by junk, never arbitrary noise.
             const kind = LEADING_WORD.exec(inner)?.groups?.kind;
             if (kind !== undefined && KNOWN.has(kind) && inner !== kind) {
                 misfits.push({ line: index + 1, malformed: true, token: match[0] });

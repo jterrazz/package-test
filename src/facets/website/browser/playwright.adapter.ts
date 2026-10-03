@@ -32,7 +32,7 @@ type PageExtraction = {
     title: string;
 };
 
-/* Playwright's actionability default, so `see(valued(…))` waits as long as `see()`. */
+/* invariant: Playwright's actionability default, so `see(valued(…))` waits as long as `see()`. */
 const VALUE_TIMEOUT_MS = 30_000;
 const VALUE_POLL_MS = 100;
 
@@ -51,7 +51,7 @@ const FIELD_ROLES = [
 /** No `.first()`: playwright's strict mode is the mechanism behind `target-matches-one-element`. */
 function locate(root: MatchScope, target: Target): Locator {
     const scope: MatchScope = target.scope ? locate(root, target.scope) : root;
-    // `exact` is the framework's default, not playwright's.
+    // invariant: `exact` is the framework's default, not playwright's.
     const exact = target.exact ?? true;
     const name = target.name ?? '';
     if (target.kind === 'field') {
@@ -67,7 +67,7 @@ function locate(root: MatchScope, target: Target): Locator {
     if (target.kind === 'text') {
         return scope.getByText(name, { exact });
     }
-    // Every other kind is an ARIA role named after itself: one branch answers for all.
+    // invariant: every other kind is an ARIA role named after itself: one branch answers for all.
     return scope.getByRole(
         target.kind,
         target.name === undefined ? { exact } : { exact, name: target.name },
@@ -129,7 +129,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
     try {
         return await locator.inputValue({ timeout: VALUE_POLL_MS });
     } catch (error) {
-        // A strict-mode violation is `act()`'s `target-matches-one-element` refusal; anything else means the field is not there yet.
+        // invariant: a strict-mode violation is `act()`'s `target-matches-one-element` refusal; anything else means the field is not there yet.
         if (isStrictViolation(error)) {
             throw error;
         }
@@ -142,7 +142,6 @@ async function waitForValue(locator: Locator, target: Target, wanted: boolean): 
     const value = target.value ?? '';
     const deadline = Date.now() + VALUE_TIMEOUT_MS;
     for (;;) {
-        // oxlint-disable-next-line eslint/no-await-in-loop -- a poll asks, waits, asks again: the rounds are sequential by definition and there is nothing to run in parallel
         const actual = await currentValue(locator);
         if (actual === null ? !wanted : (actual === value) === wanted) {
             return;
@@ -157,7 +156,6 @@ async function waitForValue(locator: Locator, target: Target, wanted: boolean): 
                 }),
             );
         }
-        // oxlint-disable-next-line eslint/no-await-in-loop -- same round: the wait between two looks is what a poll IS
         await sleep(VALUE_POLL_MS);
     }
 }
@@ -305,7 +303,7 @@ export class PlaywrightAdapter implements BrowserPort {
         });
         this.contexts.add(context);
 
-        // With `'block'`, requests leaving the site are aborted; the stub backend stays reachable through `allowedOrigins`.
+        // invariant: with `'block'`, requests leaving the site are aborted; the stub backend stays reachable through `allowedOrigins`.
         if (options.external === 'block') {
             const allowed = new Set([
                 new URL(options.baseUrl).origin,
@@ -322,7 +320,7 @@ export class PlaywrightAdapter implements BrowserPort {
 
         try {
             const page = await context.newPage();
-            // Pinned before the first byte: a script reading `Date.now()` on load must see the stated instant.
+            // invariant: pinned before the first byte: a script reading `Date.now()` on load must see the stated instant.
             if (options.clock !== undefined) {
                 await page.clock.setFixedTime(new Date(options.clock));
             }
@@ -330,7 +328,7 @@ export class PlaywrightAdapter implements BrowserPort {
             page.on('console', (message) => {
                 consoleMessages.push({ text: message.text(), type: message.type() });
             });
-            // An uncaught exception is an error of the visit, spelled as the browser's `ErrorEvent` spells it.
+            // invariant: an uncaught exception is an error of the visit, spelled as the browser's `ErrorEvent` spells it.
             page.on('pageerror', (error) => {
                 consoleMessages.push({
                     text: `Uncaught ${error.name}: ${error.message}`,
@@ -375,7 +373,7 @@ export class PlaywrightAdapter implements BrowserPort {
                 };
             });
 
-            // The same Playwright method the component facet's command calls: one dialect for both trees.
+            // invariant: the same Playwright method the component facet's command calls: one dialect for both trees.
             const tree = await page.locator('body').ariaSnapshot();
 
             return {

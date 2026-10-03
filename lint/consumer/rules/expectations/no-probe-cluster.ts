@@ -101,7 +101,7 @@ export const noProbeCluster = defineRule(
                             goldened.add(subject);
                             return;
                         }
-                        // A negated probe states an absence, which no golden of what the output carries can say.
+                        // invariant: a negated probe states an absence, which no golden of what the output carries can say.
                         if (PROBES.has(assertion.matcher) && !assertion.modifiers.includes('not')) {
                             probes.set(subject, (probes.get(subject) ?? 0) + 1);
                         }

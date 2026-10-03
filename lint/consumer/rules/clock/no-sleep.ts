@@ -56,7 +56,7 @@ export const noSleep = defineRule(
     },
     {
         createOnce(context: Context): Visitor {
-            // The walk is top-down, so a double's span is recorded before anything inside it: the plugin API gives no parent pointer.
+            // outside: the walk is top-down, so a double's span is recorded before anything inside it: the plugin API gives no parent pointer.
             let doubles: { end: number; start: number }[] = [];
             const insideADouble = (node: AstNode): boolean =>
                 doubles.some((span) => nodeStart(node) >= span.start && nodeEnd(node) <= span.end);
@@ -65,7 +65,7 @@ export const noSleep = defineRule(
                     doubles = [];
                     return isTestRole(identityOf(context).role);
                 },
-                // Opened on the function, not the object, so a `setTimeout(…)` in a non-function property is still the test's own.
+                // invariant: opened on the function, not the object, so a `setTimeout(…)` in a non-function property is still the test's own.
                 Property(node: AstNode) {
                     const implementation = implementationOf(node);
                     if (implementation !== undefined) {
@@ -95,7 +95,7 @@ export const noSleep = defineRule(
                         context.report({ messageId: 'sleep', node });
                         return;
                     }
-                    // `Atomics.wait(…)` blocks the thread: a sleep in disguise.
+                    // invariant: `Atomics.wait(…)` blocks the thread: a sleep in disguise.
                     if (
                         name === 'wait' &&
                         callee.type === 'MemberExpression' &&

@@ -17,7 +17,7 @@ function dockerAvailable(): boolean {
 
 const HAS_DOCKER = dockerAvailable();
 
-/* A live container's log stream is cut at an arbitrary instant: targeted probes, `output-asserted-as-a-golden` scalpel. */
+/* invariant: a live container's log stream is cut at an arbitrary instant: targeted probes, `output-asserted-as-a-golden` scalpel. */
 
 describe('spawn', () => {
     test.skipIf(!HAS_DOCKER)(

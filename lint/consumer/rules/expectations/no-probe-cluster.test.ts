@@ -6,8 +6,8 @@ const SPEC_FILE = '/repo/specs/cli/build/build.spec.ts';
 
 ruleTester().run('no-probe-cluster', noProbeCluster, {
     invalid: [
-        // Three greps where a golden would say the whole thing.
         {
+            name: 'Three greps where a golden would say the whole thing.',
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
                 expect(result.stdout).toContain('compiled');
@@ -17,8 +17,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
             errors: [{ column: 0, line: 1, messageId: 'cluster' }],
             filename: SPEC_FILE,
         },
-        // Two subjects, each with its own cluster.
         {
+            name: 'Two subjects, each with its own cluster.',
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
                 expect(result.stdout).toContain('compiled');
@@ -36,8 +36,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
         },
     ],
     valid: [
-        // Two probes are a scalpel, not a cluster.
         {
+            name: 'Two probes are a scalpel, not a cluster.',
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
                 expect(result.stdout).toContain('compiled');
@@ -45,8 +45,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
             });`,
             filename: SPEC_FILE,
         },
-        // The golden on the same subject answers for all of it.
         {
+            name: 'The golden on the same subject answers for all of it.',
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
                 expect(result.stdout).toMatch(file('./_expected/build.txt'));
@@ -56,8 +56,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
             });`,
             filename: SPEC_FILE,
         },
-        // A status is one value: `no-status-only-test` owns that test, not this one.
         {
+            name: 'A status is one value: `no-status-only-test` owns that test, not this one.',
             code: `test('answers', async () => {
                 const result = await api.get('/health');
                 expect(result.status).toBe(200);
@@ -66,8 +66,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
             });`,
             filename: SPEC_FILE,
         },
-        // Three absences: nothing a golden of what the output DOES carry states.
         {
+            name: 'Three absences: nothing a golden of what the output DOES carry states.',
             code: `test('escapes', async () => {
                 const result = await render();
                 expect(result.html).not.toContain('<img src=x');
@@ -76,8 +76,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
             });`,
             filename: SPEC_FILE,
         },
-        // A value is one reading, however many times it is read.
         {
+            name: 'A value is one reading, however many times it is read.',
             code: `test('fills', async () => {
                 const input = field('Name');
                 expect(input.value).toBe('');
@@ -86,8 +86,8 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
             });`,
             filename: SPEC_FILE,
         },
-        // The threshold is an option.
         {
+            name: 'The threshold is an option.',
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
                 expect(result.stdout).toContain('compiled');

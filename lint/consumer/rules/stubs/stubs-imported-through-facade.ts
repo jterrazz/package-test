@@ -34,7 +34,7 @@ export const stubsImportedThroughFacade = defineRule(
                 }),
                 before() {
                     const { inSpecs, role } = identityOf(context);
-                    // Inside `_setup/stubs/` the internal half is the file's own business.
+                    // invariant: inside `_setup/stubs/` the internal half is the file's own business.
                     return inSpecs && role !== 'stub';
                 },
             };

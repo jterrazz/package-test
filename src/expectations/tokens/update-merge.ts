@@ -32,7 +32,7 @@ export function mergePreservingPlaceholders(
         workdir === undefined ? value : substituteWorkdirDeep(value, workdir);
 
     function merge(prev: unknown, act: unknown): unknown {
-        // Placeholders match the raw actual, so `{{workdir}}` sees the real cwd.
+        // invariant: placeholders match the raw actual, so `{{workdir}}` sees the real cwd.
         if (typeof prev === 'string' && hasPlaceholders(prev)) {
             return placeholderStringMatches(prev, act, scope) ? prev : subst(act);
         }

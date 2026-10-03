@@ -8,7 +8,7 @@ import { integration } from '../integration.specification.js';
 
 const SPECIMEN_DOCKER = resolve(import.meta.dirname, '../../_shared/_fixtures/specimen-api/docker');
 
-/* Refusals needing no container are a module test beside `postgres.ts`. */
+/* invariant: refusals needing no container are a module test beside `postgres.ts`. */
 
 describe('postgres', () => {
     test('builds a connection string carrying the credentials and the worker own database', async () => {
@@ -223,7 +223,7 @@ describe('postgres', () => {
         expect(result.value).toMatch([['ok']]);
     });
 
-    /* `output-asserted-as-a-golden` scalpel: the reason is postgres's own wording, unstable across image versions; the framework's half is probed. */
+    /* invariant: `output-asserted-as-a-golden` scalpel: the reason is postgres's own wording, unstable across image versions; the framework's half is probed. */
 
     test('what the database refuses — a failing statement surfaces the database own complaint', async () => {
         // Given - a statement naming a table that does not exist

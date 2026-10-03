@@ -4,23 +4,23 @@ import { noExpectInScenario } from './no-expect-in-scenario.js';
 
 ruleTester().run('no-expect-in-scenario', noExpectInScenario, {
     invalid: [
-        // An assertion inside a website visit scenario.
         {
+            name: 'An assertion inside a website visit scenario.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(button('Subscribe'));
                 expect(visitor).toBeDefined();
             });`,
             errors: [{ column: 16, line: 3, messageId: 'expectInScenario' }],
         },
-        // The mobile twin — `.open()` carries the same scenario grammar.
         {
+            name: 'The mobile twin — `.open()` carries the same scenario grammar.',
             code: `const result = await mobile.open('home', async (visitor) => {
                 expect(await visitor.see(content('Welcome'))).toBe(true);
             });`,
             errors: [{ column: 16, line: 2, messageId: 'expectInScenario' }],
         },
-        // Two assertions in one scenario are two reports.
         {
+            name: 'Two assertions in one scenario are two reports.',
             code: `const result = await website.visit('/', (visitor) => {
                 expect(visitor).toBeDefined();
                 expect(visitor).not.toBeNull();
@@ -32,23 +32,27 @@ ruleTester().run('no-expect-in-scenario', noExpectInScenario, {
         },
     ],
     valid: [
-        // The scenario acts; the assertions sit in the Then, on the result.
         {
+            name: 'The scenario acts; the assertions sit in the Then, on the result.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.fill(field('Email'), 'visitor@site.test');
                 await visitor.click(button('Subscribe'));
             });
             expect(result.content).toContain('Thanks');`,
         },
-        // No scenario callback at all — nothing to keep pure.
-        { code: `const result = await website.visit('/');` },
-        // A non-scenario terminal action is out of scope.
         {
+            name: 'No scenario callback at all — nothing to keep pure.',
+            code: `const result = await website.visit('/');`,
+        },
+        {
+            name: 'A non-scenario terminal action is out of scope.',
             code: `const result = await website.fetch('/', async (visitor) => {
                 expect(visitor).toBeDefined();
             });`,
         },
-        // A second argument that is not a function is not a scenario.
-        { code: `const result = await website.visit('/', options);` },
+        {
+            name: 'A second argument that is not a function is not a scenario.',
+            code: `const result = await website.visit('/', options);`,
+        },
     ],
 });

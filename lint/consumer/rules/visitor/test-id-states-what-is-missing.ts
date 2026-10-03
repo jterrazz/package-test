@@ -44,7 +44,7 @@ export const testIdStatesWhatIsMissing = defineRule(
                 if (REASON.test(own) || REASON.test(above)) {
                     return true;
                 }
-                // A block comment, or one the formatter moved, is invisible to the text scan.
+                // invariant: a block comment, or one the formatter moved, is invisible to the text scan.
                 return comments.some((comment) => {
                     const at = commentLine(context, comment);
                     return (at === line || at === line - 1) && REASON.test(`//${comment.value}`);

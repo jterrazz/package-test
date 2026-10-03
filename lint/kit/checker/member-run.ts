@@ -29,7 +29,7 @@ export function runMember(
         return [];
     }
     const label = relative(rootDir, memberDir) || '.';
-    // `--member .` is the ordinary run, and `.: no vitest.config.ts` names nothing a reader can act on.
+    // invariant: `--member .` is the ordinary run, and `.: no vitest.config.ts` names nothing a reader can act on.
     const subject = label === '.' ? (manifest.name ?? basename(memberDir)) : label;
     return registry.member({
         anchored: anchoredTo(label),

@@ -75,7 +75,7 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
     const actual = accessor.text;
 
     if (shouldUpdateSnapshots() && !frozen) {
-        // Update mode writes tokens, not values (`no-volatile-literal`).
+        // invariant: update mode writes tokens, not values (`no-volatile-literal`).
         const merged = mergeTextPreservingPlaceholders(
             recordedGolden(filePath),
             actual,
@@ -182,7 +182,7 @@ export function compareResponse(
         );
     }
 
-    // Subset semantics: only the headers the fixture lists are asserted.
+    // invariant: subset semantics: only the headers the fixture lists are asserted.
     for (const [key, value] of Object.entries(expected.headers)) {
         const actualValue = actual.headers[key.toLowerCase()];
         if (actualValue === undefined || !structuralEquals(value, actualValue, scope)) {

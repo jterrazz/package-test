@@ -12,7 +12,6 @@ export type CallChain<P extends FacetParams> = {
     call: <T>(subject: (services: P['services']) => Promise<T> | T) => Promise<CallResult<T>>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface CallSignature extends ChainSignature {
     readonly chain: CallChain<this['params']>;
 }

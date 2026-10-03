@@ -12,7 +12,6 @@ export type EnvChain<Self> = {
     env: EnvMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface EnvSignature extends ChainSignature {
     readonly chain: EnvChain<this['self']>;
 }

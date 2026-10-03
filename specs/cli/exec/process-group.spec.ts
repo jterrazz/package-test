@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
+/* invariant: capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
 
 describe('process-group', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — terminates the whole process group, not just the direct child', async () => {

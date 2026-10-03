@@ -18,7 +18,7 @@ export const { backendUrl, cleanup, mobile } = await specification.mobile({
     device: simulator,
     root: '../_shared/_fixtures/specimen-mobile',
     services: { notes },
-    // The first session on a cold simulator builds WebDriverAgent, which takes minutes.
+    // outside: the first session on a cold simulator builds WebDriverAgent, which takes minutes.
     timeouts: { action: 5000, launch: 600_000 },
 });
 
@@ -27,7 +27,6 @@ export const notesUrl = notes.connectionString;
 afterAll(cleanup);
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         appiumDouble?: string;
     }

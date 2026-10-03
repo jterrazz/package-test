@@ -97,7 +97,7 @@ describe('peer', () => {
         // Then - the guard is a pass-through
         expect(() => {
             requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
-                /* a binding that loads does nothing here */
+                /* invariant: a binding that loads does nothing here */
             });
         }).not.toThrow();
     });

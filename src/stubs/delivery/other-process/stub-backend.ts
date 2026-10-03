@@ -131,7 +131,7 @@ export class StubBackend {
         const method = (request.method ?? 'GET').toUpperCase();
         const cors = this.corsHeaders(request);
 
-        // CORS preflight: always answered, whatever is declared.
+        // invariant: CORS preflight: always answered, whatever is declared.
         if (method === 'OPTIONS') {
             response.writeHead(204, cors);
             response.end();
@@ -179,7 +179,7 @@ export class StubBackend {
         const status = reply.status ?? 200;
         const { body } = reply;
         if (isStreamBody(body)) {
-            // A declared stream is written piece by piece with the connection held open: the order is what the client is specified against.
+            // invariant: a declared stream is written piece by piece with the connection held open: the order is what the client is specified against.
             response.writeHead(status, {
                 ...cors,
                 'content-type': body.contentType,

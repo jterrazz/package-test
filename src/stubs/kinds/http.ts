@@ -62,7 +62,7 @@ function frameEvent(event: SseEvent): string {
         lines.push(`retry: ${event.retry}`);
     }
     const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
-    // A multi-line payload is several `data:` lines: a raw newline would end the frame.
+    // outside: a multi-line payload is several `data:` lines: a raw newline would end the frame.
     for (const line of payload.split('\n')) {
         lines.push(`data: ${line}`);
     }

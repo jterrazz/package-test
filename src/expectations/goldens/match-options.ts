@@ -64,8 +64,7 @@ type ResultSubject =
 type SubjectIsNoValue = { readonly 'a result accessor is compared whole': never };
 
 declare module 'vitest' {
-    // One interface carries every matcher: split across two, a doubly-resolved `vitest` picks up one and not the other. The type parameters repeat vitest's character for character (TS2428).
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface: a type alias redeclares the name and every matcher is lost
+    // outside: one interface carries every matcher: split across two, a doubly-resolved `vitest` picks up one and not the other. The type parameters repeat vitest's character for character (TS2428).
     interface Assertion<R extends Promise<void> | void = void, T = unknown> {
         /** Assert the table holds zero rows (async: queries the database). */
         toBeEmpty: T extends TableAccessorType ? () => Promise<void> : never;

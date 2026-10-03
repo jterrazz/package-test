@@ -112,7 +112,7 @@ export class TestcontainersAdapter implements ContainerPort {
             return '';
         }
 
-        // The runtime reads `since` as UNIX seconds, a fraction taken as a fraction of one.
+        // outside: the runtime reads `since` as UNIX seconds, a fraction taken as a fraction of one.
         const stream = await this.container.logs(
             since === undefined ? undefined : { since: since.getTime() / 1000 },
         );
@@ -124,7 +124,7 @@ export class TestcontainersAdapter implements ContainerPort {
             stream.on('end', () => {
                 resolve(output);
             });
-            // Timeout after 1s if stream doesn't end
+            // value: timeout after 1s if stream doesn't end
             setTimeout(() => {
                 resolve(output);
             }, 1000);

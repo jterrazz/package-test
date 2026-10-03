@@ -15,6 +15,6 @@ export function matchesText(filter: TextFilter | undefined, actual: string): boo
     if (filter instanceof RegExp) {
         return filter.test(actual);
     }
-    // A code matcher: the one structural comparison every assertion makes.
+    // invariant: a code matcher: the one structural comparison every assertion makes.
     return structuralEquals(filter, actual, new CaptureScope());
 }

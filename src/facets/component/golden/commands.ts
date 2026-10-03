@@ -75,8 +75,8 @@ type PageCommands = {
     [Name in keyof typeof COMPONENT_COMMANDS]: PageSide<(typeof COMPONENT_COMMANDS)[Name]>;
 };
 
-/* A `declare module` merges only from a file that is itself a module: a lone `.d.ts` would lose its `export {}` to a formatter and shadow the module. */
+/* outside: a `declare module` merges only from a file that is itself a module: a lone `.d.ts` would lose its `export {}` to a formatter and shadow the module. */
 declare module 'vitest/browser' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-empty-object-type -- `BrowserCommands` is vitest's own interface: only an interface merges into it, and it extends the computed list rather than restating it
+    // oxlint-disable-next-line typescript/no-empty-object-type -- `BrowserCommands` is vitest's own interface: only an interface merges into it, and it extends the computed list rather than restating it
     interface BrowserCommands extends PageCommands {}
 }

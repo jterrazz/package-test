@@ -1,7 +1,7 @@
 import { ruleTester } from '@jterrazz/test';
 
 import { noSimulatedDom } from './no-simulated-dom.js';
-/* Joined at runtime: vitest scans a test file's SOURCE for the pragma, and a literal here would switch this file's own environment. */
+/* invariant: joined at runtime: vitest scans a test file's SOURCE for the pragma, and a literal here would switch this file's own environment. */
 const PRAGMA = ['@vitest', 'environment'].join('-');
 
 const tester = ruleTester();
@@ -22,14 +22,17 @@ tester.run('no-simulated-dom', noSimulatedDom, {
         },
     ],
     valid: [
-        // A real runtime is not a drawing of one.
-        { code: `// ${PRAGMA} node\ntest("x", () => {});`, filename: MODULE_TEST },
+        {
+            name: 'A real runtime is not a drawing of one.',
+            code: `// ${PRAGMA} node\ntest("x", () => {});`,
+            filename: MODULE_TEST,
+        },
         {
             code: `// ${PRAGMA} edge-runtime\ntest("x", () => {});`,
             filename: MODULE_TEST,
         },
-        // Production code carries no environment pragma to judge.
         {
+            name: 'Production code carries no environment pragma to judge.',
             code: `// ${PRAGMA} happy-dom\nexport const x = 1;`,
             filename: '/repo/src/ui/post-client.ts',
         },

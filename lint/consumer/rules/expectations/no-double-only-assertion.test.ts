@@ -6,8 +6,8 @@ const MODULE_FILE = '/repo/src/domain/order.test.ts';
 
 ruleTester().run('no-double-only-assertion', noDoubleOnlyAssertion, {
     invalid: [
-        // The whole proof is the call log of a port the test built.
         {
+            name: 'The whole proof is the call log of a port the test built.',
             code: `test('notifies', () => {
                 const mailer = mockOf<Mailer>();
                 notify(mailer);
@@ -16,8 +16,8 @@ ruleTester().run('no-double-only-assertion', noDoubleOnlyAssertion, {
             errors: [{ column: 0, line: 1, messageId: 'doubleOnly' }],
             filename: MODULE_FILE,
         },
-        // Two assertions, both on doubles.
         {
+            name: 'Two assertions, both on doubles.',
             code: `test('notifies', () => {
                 const send = vi.fn();
                 notify({ send });
@@ -29,8 +29,8 @@ ruleTester().run('no-double-only-assertion', noDoubleOnlyAssertion, {
         },
     ],
     valid: [
-        // A double beside something the subject produced.
         {
+            name: 'A double beside something the subject produced.',
             code: `test('notifies', () => {
                 const mailer = mockOf<Mailer>();
                 const result = notify(mailer);
@@ -39,15 +39,15 @@ ruleTester().run('no-double-only-assertion', noDoubleOnlyAssertion, {
             });`,
             filename: MODULE_FILE,
         },
-        // No double at all.
         {
+            name: 'No double at all.',
             code: `test('notifies', () => {
                 expect(notify()).toBe('sent');
             });`,
             filename: MODULE_FILE,
         },
-        // A component reads its callback prop this way by design.
         {
+            name: 'A component reads its callback prop this way by design.',
             code: `test('closes', () => {
                 const onClose = vi.fn();
                 render(<Host onClose={onClose} />);

@@ -62,7 +62,7 @@ function catalogueSections(published: Row[], families: Record<string, string>): 
 
 export function catalogueBody(published: Row[], families: Record<string, string>): string {
     const c = counts(published);
-    // A channel with no rows yet is not announced with a zero: a reader would go looking for it.
+    // invariant: a channel with no rows yet is not announced with a zero: a reader would go looking for it.
     const named = [
         [c.static, '**static** (oxlint rules)'],
         [c.upstream, '**upstream** (options set on an upstream rule)'],

@@ -75,7 +75,7 @@ export class ServedProcess {
     async start(): Promise<string> {
         this.runBefore();
         const banner = this.options.ready instanceof RegExp ? this.options.ready : null;
-        // Banner mode: the server picks and announces the port, nothing is injected as `PORT`.
+        // invariant: banner mode: the server picks and announces the port, nothing is injected as `PORT`.
         const port = banner ? null : (this.options.port ?? (await findFreePort()));
         const timeout = this.options.timeout ?? DEFAULT_READY_TIMEOUT;
 
@@ -121,7 +121,7 @@ export class ServedProcess {
 
         if (banner) {
             for (;;) {
-                // A `g`-flagged pattern would carry lastIndex across polls.
+                // hazard: a `g`-flagged pattern would carry lastIndex across polls.
                 banner.lastIndex = 0;
                 const found = banner.exec(this.output);
                 if (found) {

@@ -127,7 +127,7 @@ export const specsAtDeclaredDepth = defineRule(
                         });
                         return;
                     }
-                    // `[facet, domain, …]`.
+                    // invariant: `[facet, domain, …]`.
                     const nesting = anchor.relative.length - 1;
 
                     if (isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX)) {
@@ -142,7 +142,7 @@ export const specsAtDeclaredDepth = defineRule(
                                     node,
                                 });
                             }
-                            // A ground module's test answers to `test-beside-its-module`, not to depth.
+                            // invariant: a ground module's test answers to `test-beside-its-module`, not to depth.
                             return;
                         }
                     }

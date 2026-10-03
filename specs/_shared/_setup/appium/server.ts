@@ -12,7 +12,7 @@ import type { Json } from './session.js';
 import { StaleElementError } from './stale-element-error.js';
 
 /**
- * The Appium protocol double — a WebDriver server that answers like Appium's
+ * outside: the Appium protocol double — a WebDriver server that answers like Appium's
  * XCUITest driver, from a {@link ScriptedApp} instead of a simulator.
  *
  * It speaks the W3C endpoints the mobile facet's adapter calls: a session

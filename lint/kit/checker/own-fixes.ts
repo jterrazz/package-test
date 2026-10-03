@@ -196,7 +196,7 @@ export function applyOwnFixes(root: string): void {
     if (oxlint === undefined || config === undefined) {
         return;
     }
-    // oxlint rewrites its suppressions file on every `--fix`, dropping each rule the run did not arm, so it is put back as it was.
+    // invariant: oxlint rewrites its suppressions file on every `--fix`, dropping each rule the run did not arm, so it is put back as it was.
     const suppressions = join(root, OXLINT_SUPPRESSIONS);
     const held = existsSync(suppressions) ? readFileSync(suppressions, 'utf8') : undefined;
     try {

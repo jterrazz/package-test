@@ -162,7 +162,7 @@ function pairAsMultiset(expected: Rows, actual: unknown[][], scope: CaptureScope
         return {
             actual: column === undefined ? undefined : actual[column],
             expected: row,
-            // A pairing each row holds alone but not with the captures shared across rows matches none.
+            // invariant: a pairing each row holds alone but not with the captures shared across rows matches none.
             matched: holds.has(index) && !complete,
         };
     });

@@ -54,7 +54,7 @@ export function withLeadingComments(text: string, start: number): number {
         if (line.startsWith('//')) {
             begin = previous;
         } else if (line.endsWith('*/')) {
-            // The doc comment a declaration opens on goes with it.
+            // invariant: the doc comment a declaration opens on goes with it.
             const opening = text.lastIndexOf(
                 '/*',
                 previous + text.slice(previous, begin).lastIndexOf('*/'),

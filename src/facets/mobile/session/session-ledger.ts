@@ -93,7 +93,7 @@ export async function endSessions(directory: string): Promise<void> {
                 });
                 await response.body?.cancel();
             } catch {
-                // The server is gone, and its sessions with it.
+                // invariant: the server is gone, and its sessions with it.
             }
         }),
     );
@@ -110,7 +110,6 @@ export async function mobileSessions(): Promise<string | undefined> {
 }
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         /** Where each mobile runner records the driver session it opened. */
         mobileSessions?: string;

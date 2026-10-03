@@ -71,7 +71,7 @@ export const markerOnOneLine = defineRule(
                             continue;
                         }
                         const indent = text.slice(lineStartAt(text, start), start);
-                        // A marker trailing code is out of this rule's reach.
+                        // invariant: a marker trailing code is out of this rule's reach.
                         if (indent.trim() !== '') {
                             continue;
                         }

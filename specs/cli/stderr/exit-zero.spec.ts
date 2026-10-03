@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
+/* invariant: capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
 
 describe('exit-zero', () => {
     test('captures stderr on exit zero (Unix-style status banners)', async () => {

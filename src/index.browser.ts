@@ -11,7 +11,6 @@ import type {
 import type { redis as redisFn } from './services/redis/redis.adapter.js';
 import type { sqlite as sqliteFn } from './services/sqlite/sqlite.adapter.js';
 
-// oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: its types are the node entry's by design, so the two runtimes cannot publish two type surfaces
 export type * from './index.js';
 
 export { component } from './facets/component/component.face.browser.js';

@@ -1,4 +1,4 @@
-// Through the package entry: it wires the integration registry the constructors consume (`no-framework-internals`).
+// invariant: through the package entry: it wires the integration registry the constructors consume (`no-framework-internals`).
 import { postgres, redis, specification } from '@jterrazz/test';
 /* oxlint-disable jterrazz/runner-in-specification-file -- negative constructor specs:
    every specification.api() call here MUST fail to start, so no runner can
@@ -15,7 +15,7 @@ const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, './_fixtures/broken-po
 const BROKEN_MULTI_INIT = resolve(import.meta.dirname, './_fixtures/broken-multi-init');
 const BROKEN_SECOND_POSTGRES = resolve(import.meta.dirname, './_fixtures/broken-second-postgres');
 
-/* The startup report interleaves live postgres logs and absolute paths, so each test probes the status markers and the thrown error (`output-asserted-as-a-golden` scalpel). */
+/* invariant: the startup report interleaves live postgres logs and absolute paths, so each test probes the status markers and the thrown error (`output-asserted-as-a-golden` scalpel). */
 
 async function startAndCapture(
     root: string,
@@ -41,7 +41,7 @@ async function startAndCapture(
 type Capture = { failure: Error | undefined; output: string };
 
 describe('initiation-errors', () => {
-    // Three refusals, each a container start, captured once and read by eight tests: the hook pays for the containers, not for a Given.
+    // invariant: three refusals, each a container start, captured once and read by eight tests: the hook pays for the containers, not for a Given.
     let brokenInit: Capture;
     let multiService: Capture;
     let multiPostgres: Capture;
@@ -53,7 +53,7 @@ describe('initiation-errors', () => {
             cache: redis(),
             db: postgres(),
         });
-        // `db` must be wired and succeed before `brokenDb` fails.
+        // invariant: `db` must be wired and succeed before `brokenDb` fails.
         multiPostgres = await startAndCapture(BROKEN_SECOND_POSTGRES, {
             db: postgres(),
             brokenDb: postgres(),

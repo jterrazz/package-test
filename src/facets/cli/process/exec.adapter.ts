@@ -54,7 +54,7 @@ export async function observeProcess(
                 return;
             }
             child.kill('SIGTERM');
-            // Escalate if the child ignores SIGTERM. Cleared on exit.
+            // hazard: escalate if the child ignores SIGTERM. Cleared on exit.
             killTimer = setTimeout(() => {
                 if (!exited) {
                     child.kill('SIGKILL');
@@ -93,7 +93,7 @@ export async function observeProcess(
             checkPattern();
         });
 
-        // Exited before the pattern matched: without a pattern a clean exit is a success.
+        // invariant: exited before the pattern matched: without a pattern a clean exit is a success.
         child.on('exit', (code) => {
             exited = true;
             if (killTimer) {
@@ -106,7 +106,7 @@ export async function observeProcess(
                 finish(code ?? 1);
                 return;
             }
-            // A pattern was expected: even a clean exit is a failure.
+            // invariant: a pattern was expected: even a clean exit is a failure.
             finish(code === 0 ? 1 : (code ?? 1));
         });
     });
@@ -126,13 +126,13 @@ export class ExecAdapter implements CliPort {
             cwd,
             encoding: 'utf8',
             env,
-            // Absent `input` still closes stdin: the child reads EOF, never a TTY.
+            // outside: absent `input` still closes stdin: the child reads EOF, never a TTY.
             input: input?.stdin,
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
             timeout: input?.timeout,
         });
-        // A killed run reports 124, as the long-running path does for a timeout.
+        // invariant: a killed run reports 124, as the long-running path does for a timeout.
         // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- `spawnSync` types `error` as `Error`, which carries no `code`; the assertion is what reaches it
         const timedOut = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT';
         return {
@@ -149,7 +149,7 @@ export class ExecAdapter implements CliPort {
         extraEnv?: CliEnv,
     ): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
-        // `detached` gives the child its own process group, so a `tsdown --watch` grandchild dies with it.
+        // hazard: `detached` gives the child its own process group, so a `tsdown --watch` grandchild dies with it.
         const child = spawn(`${this.command} ${args}`, [], {
             cwd,
             detached: process.platform !== 'win32',
@@ -157,14 +157,14 @@ export class ExecAdapter implements CliPort {
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
         });
-        // Signal the process group (negative pid); fall back to the child where groups are unsupported.
+        // outside: signal the process group (negative pid); fall back to the child where groups are unsupported.
         const kill = (signal?: NodeJS.Signals | number): boolean => {
             if (child.pid !== undefined && process.platform !== 'win32') {
                 try {
                     process.kill(-child.pid, signal ?? 'SIGTERM');
                     return true;
                 } catch {
-                    // Group already reaped (ESRCH) or not killable — fall through.
+                    // outside: group already reaped (ESRCH) or not killable — fall through.
                 }
             }
             return child.kill(signal);

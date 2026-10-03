@@ -8,7 +8,6 @@ export type HeadersChain<Self> = {
     headers: HeadersMethod<Self>;
 };
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface HeadersSignature extends ChainSignature {
     readonly chain: HeadersChain<this['self']>;
 }

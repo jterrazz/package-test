@@ -162,7 +162,7 @@ const citingFiles = (): string[] => {
     for (const root of ['docs', 'skills']) {
         for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-            // A decision record is never edited: the ids it removed resolve to nothing by design.
+            // invariant: a decision record is never edited: the ids it removed resolve to nothing by design.
             if (path.endsWith('.md') && !path.startsWith('docs/decisions/')) {
                 found.push(path);
             }
@@ -226,7 +226,7 @@ const idsCitedIn = (line: string): string[] =>
         ),
     );
 
-// A rule's specs in `specs/lint/<id>/`, on the lint facet; `meta/` holds the specs named for the meta row they prove.
+// invariant: a rule's specs in `specs/lint/<id>/`, on the lint facet; `meta/` holds the specs named for the meta row they prove.
 const entries = readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true }).map((entry) =>
     String(entry).replaceAll('\\', '/'),
 );

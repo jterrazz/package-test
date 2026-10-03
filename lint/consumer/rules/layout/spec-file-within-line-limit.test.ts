@@ -28,8 +28,11 @@ ruleTester().run('spec-file-within-line-limit', specFileWithinLineLimit, {
     ],
     valid: [
         { code: specOf(MAX_SPEC_LINES, ['rejects a']), filename: SPEC },
-        // A module test is not a spec.
-        { code: specOf(MAX_SPEC_LINES + 50, ['a']), filename: '/repo/src/events/list.test.ts' },
+        {
+            name: 'A module test is not a spec.',
+            code: specOf(MAX_SPEC_LINES + 50, ['a']),
+            filename: '/repo/src/events/list.test.ts',
+        },
     ],
 });
 

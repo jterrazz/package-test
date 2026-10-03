@@ -6,8 +6,8 @@ const TEST_FILE = '/repo/src/domain/order.test.ts';
 
 ruleTester().run('marker-on-one-line', markerOnOneLine, {
     invalid: [
-        // The sentence wrapped onto a second comment line.
         {
+            name: 'The sentence wrapped onto a second comment line.',
             code: `test('ships', () => {
     // Given - a paid order, placed by a customer whose address
     // the warehouse can reach in one day
@@ -18,8 +18,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
             errors: [{ column: 4, line: 2, messageId: 'wrapped' }],
             filename: TEST_FILE,
         },
-        // Both markers wrapped: one report each.
         {
+            name: 'Both markers wrapped: one report each.',
             code: `test('ships', () => {
     // Given - a paid order
     // placed yesterday
@@ -36,8 +36,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
         },
     ],
     valid: [
-        // One line each.
         {
+            name: 'One line each.',
             code: `test('ships', () => {
     // Given - a paid order
     const order = paid();
@@ -46,8 +46,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
 });`,
             filename: TEST_FILE,
         },
-        // A blank line makes the second comment a comment of its own.
         {
+            name: 'A blank line makes the second comment a comment of its own.',
             code: `test('ships', () => {
     // Given - a paid order
 
@@ -58,8 +58,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
 });`,
             filename: TEST_FILE,
         },
-        // A deeper indentation belongs to the block below, not to the marker.
         {
+            name: 'A deeper indentation belongs to the block below, not to the marker.',
             code: `test('ships', () => {
     // Given - a paid order
         // the nested note
@@ -69,9 +69,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
 });`,
             filename: TEST_FILE,
         },
-        // A suppression under a marker is an instruction to a tool, not a
-        // wrapped sentence: folding it into the marker would disable it.
         {
+            name: 'A suppression under a marker is an instruction to a tool, not a wrapped sentence: folding it into the marker would disable it.',
             code: `test('ships', () => {
     // Given - a paid order
     // oxlint-disable-next-line jterrazz/no-sleep -- the clock primitive under test
@@ -81,8 +80,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
 });`,
             filename: TEST_FILE,
         },
-        // Two markers in a row are two sentences, not a wrap.
         {
+            name: 'Two markers in a row are two sentences, not a wrap.',
             code: `test('ships', () => {
     // Given - a paid order
     // When - the warehouse picks it up
@@ -92,9 +91,8 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
 });`,
             filename: TEST_FILE,
         },
-        // A formatter's directive is an instruction, and folding it in would
-        // turn it off — `-ignore` is the word every formatter uses.
         {
+            name: "A formatter's directive is an instruction, and folding it in would turn it off — `-ignore` is the word every formatter uses.",
             code: `test('ships', () => {
     // Given - a table of orders
     // oxfmt-ignore

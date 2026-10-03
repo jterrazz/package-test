@@ -240,7 +240,6 @@ export function writeInPlace(
 }
 
 declare module 'vitest' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
         /** Where update mode leaves each rewritten test source until the run ends. */
         inPlaceRewrites?: string;

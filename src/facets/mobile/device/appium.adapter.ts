@@ -30,7 +30,7 @@ type DriverElement = ElementList[number];
 
 type MatchScope = Driver | DriverElement;
 
-/* 30s absorbs a cold app boot, as playwright's actionability default; a slower app raises `timeouts`. */
+/* outside: 30s absorbs a cold app boot, as playwright's actionability default; a slower app raises `timeouts`. */
 const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
 /** WebDriverAgent builds once per simulator: the first session is the slow one. */
@@ -153,11 +153,11 @@ export class AppiumAdapter implements DevicePort {
     async open(options: DeviceOpenOptions): Promise<DeviceScreen> {
         const driver = await this.session(options.bundleId);
 
-        // Every open terminates the app first, then relaunches it.
+        // invariant: every open terminates the app first, then relaunches it.
         try {
             await driver.executeScript('mobile: terminateApp', [{ bundleId: options.bundleId }]);
         } catch {
-            // The app was not running — a fresh state already.
+            // invariant: the app was not running — a fresh state already.
         }
         await (options.deepLink === undefined
             ? driver.executeScript('mobile: activateApp', [{ bundleId: options.bundleId }])
@@ -204,7 +204,7 @@ export class AppiumAdapter implements DevicePort {
         const chain = scopeChain(target);
         const deadline = Date.now() + this.actionTimeoutMs;
 
-        /* The scroll fallback takes an expensive unfiltered snapshot: once, on the first miss. */
+        /* invariant: the scroll fallback takes an expensive unfiltered snapshot: once, on the first miss. */
         let scrollAttempted = false;
         for (;;) {
             const resolved = await this.resolveChain(driver, chain, cardinality, {
@@ -232,18 +232,18 @@ export class AppiumAdapter implements DevicePort {
             const matches = await matching(scope, level);
             const count = await matches.length;
             if (count === 0) {
-                /* Actionability includes scroll-into-view: the next pass re-resolves the element as visible. */
+                /* invariant: actionability includes scroll-into-view: the next pass re-resolves the element as visible. */
                 if (options?.tryScroll) {
                     const offscreen = await matching(scope, level, { anyVisibility: true });
                     const first = offscreen[0];
                     if (first !== undefined) {
                         try {
-                            // `mobile: scroll`'s `toVisible` is for table and collection views: scroll the found element by id.
+                            // outside: `mobile: scroll`'s `toVisible` is for table and collection views: scroll the found element by id.
                             await driver.executeScript('mobile: scrollToElement', [
                                 { elementId: first.elementId },
                             ]);
                         } catch {
-                            // Not scrollable (or already settling) — keep polling.
+                            // invariant: not scrollable (or already settling) — keep polling.
                         }
                     }
                 }
@@ -304,7 +304,7 @@ export class AppiumAdapter implements DevicePort {
                 excerpt = `\nCurrently on screen: ${labels.join(' | ')}`;
             }
         } catch {
-            // The excerpt is best-effort evidence — never mask the timeout.
+            // invariant: the excerpt is best-effort evidence — never mask the timeout.
         }
         return new Error(
             refusal({

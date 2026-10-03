@@ -116,7 +116,7 @@ export class RedisHandle implements ServiceHandle {
     }
 
     async initialize(): Promise<void> {
-        // Redis doesn't need initialization scripts
+        // invariant: Redis doesn't need initialization scripts
     }
 
     async reset(): Promise<void> {
@@ -157,10 +157,10 @@ export class RedisHandle implements ServiceHandle {
                 }
                 this.pair = { service, worker: workerId };
                 this.dbIndex = 1 + SERVICES_PER_WORKER * (Math.max(worker, 1) - 1) + slot;
-                // The index is in the string the app is handed, or the app would write to index 0 while reset flushes this one.
+                // hazard: the index is in the string the app is handed, or the app would write to index 0 while reset flushes this one.
                 this.sharedConnectionString = this.connectionString;
                 this.connectionString = `${this.connectionString}/${this.dbIndex}`;
-                // The container outlives the file that held this index before.
+                // invariant: the container outlives the file that held this index before.
                 await this.reset();
             },
 

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-/* Capability probes: a `waitFor` block is cut at an arbitrary instant (`output-asserted-as-a-golden`(b)). */
+/* invariant: capability probes: a `waitFor` block is cut at an arbitrary instant (`output-asserted-as-a-golden`(b)). */
 
 describe('wait-for', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — resolves when the waitFor pattern is matched in stdout', async () => {

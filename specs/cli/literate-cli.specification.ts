@@ -9,7 +9,7 @@ export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     env: {
         frozen: { MY_VAR: 'from-the-frozen-set', TZ: 'UTC' },
     },
-    // A served command runs from the project root, so the server's own folder is stated.
+    // invariant: a served command runs from the project root, so the server's own folder is stated.
     root: './_fixtures/specimen-cli-literate',
     serve: {
         echo: {

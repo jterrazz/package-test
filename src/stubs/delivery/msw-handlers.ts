@@ -15,14 +15,14 @@ const NEVER_CACHED = { 'cache-control': 'no-store' };
 function toMswResponse(msw: any, response: StubResponse): unknown {
     const { body, headers, status = 200 } = response;
     if (response.transport === 'network-error') {
-        // Not a reply: the request fails in transport, as `fetch` sees when nothing listens.
+        // outside: not a reply: the request fails in transport, as `fetch` sees when nothing listens.
         return msw.HttpResponse.error();
     }
     if (body === null || body === undefined) {
         return new msw.HttpResponse(null, { headers: { ...NEVER_CACHED, ...headers }, status });
     }
     if (isStreamBody(body)) {
-        // A stream is the one body not serialised: the pieces and their order are what the subject reads.
+        // invariant: a stream is the one body not serialised: the pieces and their order are what the subject reads.
         return new msw.HttpResponse(toReadableStream(body), {
             headers: { ...NEVER_CACHED, 'content-type': body.contentType, ...headers },
             status,
@@ -66,7 +66,7 @@ export function buildStubHandlers(
                     const observed = await observe(request);
                     const stub = queue.take(observed);
                     if (!stub) {
-                        // Nothing matches, or everything that matches is spent (`network-strict-after-first-stub`).
+                        // invariant: nothing matches, or everything that matches is spent (`network-strict-after-first-stub`).
                         return recordViolation(request.method, request.url);
                     }
                     const response =
@@ -82,7 +82,7 @@ export function buildStubHandlers(
         }
     }
 
-    // Catch-all last: handlers of one `use()` match in order. `bypass` spares the runner's own module requests, which a 501 would stop.
+    // invariant: catch-all last: handlers of one `use()` match in order. `bypass` spares the runner's own module requests, which a 501 would stop.
     handlers.push(
         msw.http.all('*', ({ request }: { request: Request }) =>
             bypass?.(request.url) === true
@@ -101,7 +101,7 @@ async function observe(request: Request): Promise<MatchableRequest> {
         try {
             body = JSON.parse(rawText);
         } catch {
-            // Not JSON — expose the raw text for string/RegExp filters.
+            // invariant: not JSON — expose the raw text for string/RegExp filters.
             body = rawText;
         }
     }

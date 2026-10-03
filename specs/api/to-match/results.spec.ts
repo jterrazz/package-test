@@ -25,7 +25,7 @@ describe('results', () => {
         expect(result.response).toMatch(file('./_expected/all-users.http'));
     });
 
-    /* The framework's own mismatch diff is the product under test, so it is goldened in full. */
+    /* invariant: the framework's own mismatch diff is the product under test, so it is goldened in full. */
 
     test('toMatch shows diff on body mismatch', async () => {
         // Given - response differs from expected file

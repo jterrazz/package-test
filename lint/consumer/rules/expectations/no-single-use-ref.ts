@@ -82,7 +82,7 @@ export const noSingleUseRef = defineRule(
                     const featureDir = dirname(context.physicalFilename);
                     const counts = new Map<string, number>();
                     const codeNodes = new Map<string, AstNode>();
-                    // A ref living only in a golden has no code site: it is reported on the matcher that pulled the golden in.
+                    // invariant: a ref living only in a golden has no code site: it is reported on the matcher that pulled the golden in.
                     const fixtureNodes = new Map<string, AstNode>();
                     const bump = (ref: string): void => {
                         counts.set(ref, (counts.get(ref) ?? 0) + 1);

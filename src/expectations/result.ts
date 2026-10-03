@@ -58,7 +58,7 @@ export class BaseResult {
         this.config = options.config;
         this.testDir = options.testDir;
         this.workDir = options.workDir;
-        // The realpath form is what child processes print as `$PWD` (macOS resolves the tmpdir symlink).
+        // outside: the realpath form is what child processes print as `$PWD` (macOS resolves the tmpdir symlink).
         this.captures = new CaptureScope(
             options.workDir ? safeRealpath(options.workDir) : undefined,
         );

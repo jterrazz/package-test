@@ -66,7 +66,7 @@ function scratchTest(call: string): { file: string; read: () => string; stack: s
     const scratch = mkdtempSync(join(tmpdir(), 'whole-in-place-'));
     const testFile = join(scratch, 'scratch.test.ts');
     writeFileSync(testFile, `test('records', async () => {\n    ${call}\n});\n`);
-    // A scratch test is read back by the test that wrote it: written at once.
+    // invariant: a scratch test is read back by the test that wrote it: written at once.
     deferRewritesTo(null);
     onTestFinished(() => {
         rmSync(scratch, { force: true, recursive: true });

@@ -6,8 +6,8 @@ const TEST_FILE = '/repo/src/domain/order.test.ts';
 
 ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
     invalid: [
-        // Sampled into the Given, read back through the subject.
         {
+            name: 'Sampled into the Given, read back through the subject.',
             code: `test('stamps', () => {
                 const started = Date.now();
                 expect(stamp(started).at).toBe(started);
@@ -15,8 +15,8 @@ ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
             errors: [{ column: 32, line: 2, messageId: 'ambientValue' }],
             filename: TEST_FILE,
         },
-        // Entropy anywhere in the body.
         {
+            name: 'Entropy anywhere in the body.',
             code: `test('rolls', () => {
                 const seed = Math.random();
                 expect(roll(seed)).toBeLessThan(7);
@@ -83,23 +83,23 @@ ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
             });`,
             filename: TEST_FILE,
         },
-        // Silent where `no-sampled-value-in-expectation` already refuses: one fault, one diagnostic.
         {
+            name: 'Silent where `no-sampled-value-in-expectation` already refuses: one fault, one diagnostic.',
             code: `test('stamps', () => {
                 expect(stamp().at).toBe(Date.now());
             });`,
             filename: TEST_FILE,
         },
-        // A per-run name is the one sample the framework cannot mint.
         {
+            name: 'A per-run name is the one sample the framework cannot mint.',
             code: `test('writes', () => {
                 const directory = \`run-\${Date.now()}\`;
                 expect(write(directory)).toBe(true);
             });`,
             filename: TEST_FILE,
         },
-        // Pinned time, nothing sampled.
         {
+            name: 'Pinned time, nothing sampled.',
             code: `test('stamps', () => {
                 using _ = clock.at('2026-03-04T09:30:00Z');
                 expect(stamp().at).toEqual(new Date('2026-03-04T09:30:00Z'));

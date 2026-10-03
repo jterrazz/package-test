@@ -20,7 +20,7 @@ export class RenderResult {
         html: string;
         tree: string;
     }) {
-        // The golden commands resolve the test's directory server-side: a page-captured accessor carries none.
+        // invariant: the golden commands resolve the test's directory server-side: a page-captured accessor carries none.
         this.console = new RenderedText(streams.console, 'console', '');
         this.content = new RenderedText(streams.content, 'content', '');
         this.errors = new RenderedText(streams.errors, 'errors', '');

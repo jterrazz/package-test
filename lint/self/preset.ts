@@ -1,6 +1,7 @@
 import type { Preset } from '@jterrazz/typescript/config';
 import { fileURLToPath } from 'node:url';
 
+import { TEST_COMMENT_OPENINGS } from '../consumer/rulebook/preset.js';
 import { COVERAGE_SECTION } from '../kit/baseline/coverage.js';
 import { ARCHITECTURE } from './checks/architecture.js';
 import { sourceRootHoldsKnownEntries } from './checks/source-root-holds-known-entries.js';
@@ -19,7 +20,13 @@ export function self(): Preset {
         names: [sourceRootHoldsKnownEntries],
         oxlint: {
             jsPlugins: [fileURLToPath(new URL('self-oxlint.js', import.meta.url))],
-            rules: selfPluginRules,
+            rules: {
+                ...selfPluginRules,
+                'jterrazz-typescript/comment-states-its-kind': [
+                    'error',
+                    { openings: [...TEST_COMMENT_OPENINGS, 'env-sanction:', 'RUNTIME '] },
+                ],
+            },
         },
         package: '@jterrazz/test',
     };

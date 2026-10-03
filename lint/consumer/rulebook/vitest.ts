@@ -42,11 +42,11 @@ export const vitestOnTests: Override = {
             'error',
             { pattern: String.raw`.*\.(?:test\.[tj]sx?|spec\.[tj]s)$` },
         ],
-        // `one-describe-level` — one level of `describe`.
+        // invariant: `one-describe-level` — one level of `describe`.
         'vitest/max-nested-describe': ['error', { max: 1 }],
         'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
         'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],
-        // `one-describe-per-file` — the describe is titled with its subject: `LocaleNote` keeps its case.
+        // invariant: `one-describe-per-file` — the describe is titled with its subject: `LocaleNote` keeps its case.
         'vitest/prefer-lowercase-title': ['error', { ignoreTopLevelDescribe: true }],
     },
 };

@@ -19,7 +19,7 @@ export function checkFacetTestUsesItsRunner(specsRoot: string): Spotted[] {
     const violations: Spotted[] = [];
     for (const { facet, path } of facetFoldersOf(specsRoot)) {
         if (specificationsIn(path).length === 0) {
-            // `facet-folder-has-specification` owns the folder with no runner at all.
+            // invariant: `facet-folder-has-specification` owns the folder with no runner at all.
             continue;
         }
         for (const file of walkFiles(path)) {
@@ -27,7 +27,7 @@ export function checkFacetTestUsesItsRunner(specsRoot: string): Spotted[] {
             if (!isTestFileName(name)) {
                 continue;
             }
-            // A test file under ground is a golden or its input, never a spec.
+            // invariant: a test file under ground is a golden or its input, never a spec.
             if (isUnderGround(relative(path, file))) {
                 continue;
             }

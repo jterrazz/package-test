@@ -15,7 +15,7 @@ function removeGolden(path: string): void {
     }
 }
 
-/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
+/* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('tree', () => {
     test('cwd points to the temp working directory', async () => {

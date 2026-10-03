@@ -36,7 +36,7 @@ async function unmountHeld(): Promise<void> {
         try {
             await surface.unmount();
         } catch {
-            // A scenario that called `visitor.unmount()` already took it down.
+            // invariant: a scenario that called `visitor.unmount()` already took it down.
         }
     }
 }

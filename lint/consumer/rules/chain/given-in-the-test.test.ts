@@ -6,8 +6,8 @@ const TEST_FILE = '/repo/src/domain/order.test.ts';
 
 ruleTester().run('given-in-the-test', givenInTheTest, {
     invalid: [
-        // The Given, above the tests that stand on it.
         {
+            name: 'The Given, above the tests that stand on it.',
             code: `beforeEach(() => { order = paid(); });`,
             errors: [{ column: 0, line: 1, messageId: 'givenInAHook' }],
             filename: TEST_FILE,
@@ -19,8 +19,8 @@ ruleTester().run('given-in-the-test', givenInTheTest, {
         },
     ],
     valid: [
-        // A teardown gives back what the tests took: a temp directory, a server, a restore.
         {
+            name: 'A teardown gives back what the tests took: a temp directory, a server, a restore.',
             code: `afterAll(() => { rmSync(tmp, { force: true, recursive: true }); });`,
             filename: TEST_FILE,
         },
@@ -33,13 +33,19 @@ ruleTester().run('given-in-the-test', givenInTheTest, {
             code: `afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });`,
             filename: TEST_FILE,
         },
-        // `cleanup-passed-to-after-all`'s own idiom, in a test file that owns a runner's cleanup.
-        { code: `afterAll(cleanup);`, filename: TEST_FILE },
-        // The same idiom with a `vi` member: a restore handed over by name.
-        { code: `afterEach(vi.restoreAllMocks);`, filename: TEST_FILE },
-        { code: `afterEach(vi.useRealTimers);`, filename: TEST_FILE },
-        // The Given, in the test.
         {
+            name: "`cleanup-passed-to-after-all`'s own idiom, in a test file that owns a runner's cleanup.",
+            code: `afterAll(cleanup);`,
+            filename: TEST_FILE,
+        },
+        {
+            name: 'The same idiom with a `vi` member: a restore handed over by name.',
+            code: `afterEach(vi.restoreAllMocks);`,
+            filename: TEST_FILE,
+        },
+        { code: `afterEach(vi.useRealTimers);`, filename: TEST_FILE },
+        {
+            name: 'The Given, in the test.',
             code: `test('ships', () => {
                 // Given - a paid order
                 const order = paid();
@@ -48,7 +54,10 @@ ruleTester().run('given-in-the-test', givenInTheTest, {
             });`,
             filename: TEST_FILE,
         },
-        // Out of reach outside a test role.
-        { code: `beforeEach(() => { order = paid(); });`, filename: '/repo/src/domain/order.ts' },
+        {
+            name: 'Out of reach outside a test role.',
+            code: `beforeEach(() => { order = paid(); });`,
+            filename: '/repo/src/domain/order.ts',
+        },
     ],
 });
