@@ -30,25 +30,26 @@ function fittingCells(
 }
 
 function pairInOrder(expected: Rows, actual: unknown[][], scope: CaptureScope): RowPairing {
-    const count = Math.max(expected.length, actual.length);
-    const pairs: RowPair[] = [];
-    for (let index = 0; index < count; index += 1) {
-        const stated = expected[index];
-        const row = actual[index];
-        const matched = stated !== undefined && row !== undefined && rowFits(stated, row, scope);
-        pairs.push({ actual: row, expected: stated, matched });
-    }
+    const pairs = Array.from(
+        { length: Math.max(expected.length, actual.length) },
+        (_, index): RowPair => {
+            const stated = expected[index];
+            const row = actual[index];
+            const matched =
+                stated !== undefined && row !== undefined && rowFits(stated, row, scope);
+            return { actual: row, expected: stated, matched };
+        },
+    );
     return { pairs, pass: pairs.every((pair) => pair.matched) };
 }
 
-function maximumMatching(
-    fits: readonly (readonly boolean[])[],
-    width: number,
-): Map<number, number> {
+/** Kuhn's augmenting paths: each stated row holds an actual row it fits, as many as can at once. */
+function maximumMatching(fits: readonly (readonly boolean[])[]): Map<number, number> {
     const taken = new Map<number, number>();
     const augment = (row: number, seen: Set<number>): boolean => {
-        for (let column = 0; column < width; column += 1) {
-            if (fits[row]?.[column] !== true || seen.has(column)) {
+        // Stryker disable next-line ArrayDeclaration: a row index read from the fits themselves always has its row
+        for (const [column, fit] of (fits[row] ?? []).entries()) {
+            if (!fit || seen.has(column)) {
                 continue;
             }
             seen.add(column);
@@ -60,36 +61,32 @@ function maximumMatching(
         }
         return false;
     };
-    for (let row = 0; row < fits.length; row += 1) {
+    for (const row of fits.keys()) {
         augment(row, new Set());
     }
     return taken;
 }
 
+/** The pairing that holds with the captures shared across rows, searched in stated order; the fits each row holds alone bound nothing a shared capture can widen. */
 function consistentPairing(
     expected: Rows,
     actual: unknown[][],
-    fits: readonly (readonly boolean[])[],
     scope: CaptureScope,
-): number[] | undefined {
-    const chosen: number[] = [];
+): Map<number, number> | undefined {
+    const chosen = new Map<number, number>();
     const used = new Set<number>();
     const search = (row: number, current: CaptureScope): CaptureScope | undefined => {
         const stated = expected[row];
         if (stated === undefined) {
             return current;
         }
-        for (let column = 0; column < actual.length; column += 1) {
-            const candidate = actual[column];
-            if (used.has(column) || fits[row]?.[column] !== true || candidate === undefined) {
-                continue;
-            }
+        for (const [column, candidate] of actual.entries()) {
             const fork = current.fork();
-            if (!rowFits(stated, candidate, fork)) {
+            if (used.has(column) || !rowFits(stated, candidate, fork)) {
                 continue;
             }
             used.add(column);
-            chosen[row] = column;
+            chosen.set(row, column);
             const settled = search(row + 1, fork);
             if (settled !== undefined) {
                 return settled;
@@ -108,6 +105,7 @@ function consistentPairing(
 
 type Leftovers = { rows: number[]; stated: number[] };
 
+/** Each stated row no actual row fits is shown against the free row it resembles most, the first on a tie; one resembling none stands alone. */
 function pairLeftovers(
     expected: Rows,
     actual: unknown[][],
@@ -118,18 +116,13 @@ function pairLeftovers(
     const free = new Set(rows);
     for (const index of stated) {
         const row = expected[index] ?? [];
-        let best: number | undefined;
-        let bestScore = 0;
-        for (const column of free) {
-            const score = fittingCells(row, actual[column] ?? [], scope);
-            if (score > bestScore) {
-                best = column;
-                bestScore = score;
-            }
-        }
+        const [best] = [...free]
+            .map((column) => ({ column, score: fittingCells(row, actual[column] ?? [], scope) }))
+            .filter(({ score }) => score > 0)
+            .toSorted((one, other) => other.score - one.score);
         if (best !== undefined) {
-            paired.set(index, best);
-            free.delete(best);
+            paired.set(index, best.column);
+            free.delete(best.column);
         }
     }
     return paired;
@@ -139,33 +132,30 @@ function pairAsMultiset(expected: Rows, actual: unknown[][], scope: CaptureScope
     const fits = expected.map((row) =>
         actual.map((candidate) => rowFits(row, candidate, scope.fork())),
     );
-    const taken = maximumMatching(fits, actual.length);
+    const taken = maximumMatching(fits);
     const holds = new Map([...taken].map(([column, row]) => [row, column]));
     const complete = holds.size === expected.length && expected.length === actual.length;
-    const consistent = complete ? consistentPairing(expected, actual, fits, scope) : undefined;
+    const consistent = complete ? consistentPairing(expected, actual, scope) : undefined;
     if (consistent !== undefined) {
         return {
             pairs: expected.map((row, index) => ({
-                actual: actual[consistent[index] ?? -1],
+                actual: actual[consistent.get(index) ?? actual.length],
                 expected: row,
                 matched: true,
             })),
             pass: true,
         };
     }
-    const unstated = expected.flatMap((_, index) => (holds.has(index) ? [] : [index]));
-    const unheld = actual.flatMap((_, column) => (taken.has(column) ? [] : [column]));
+    const unstated = [...expected.keys()].filter((index) => !holds.has(index));
+    const unheld = [...actual.keys()].filter((column) => !taken.has(column));
     const leftovers = pairLeftovers(expected, actual, { rows: unheld, stated: unstated }, scope);
     const shown = new Set([...holds.values(), ...leftovers.values()]);
-    const pairs: RowPair[] = expected.map((row, index) => {
-        const column = holds.get(index) ?? leftovers.get(index);
-        return {
-            actual: column === undefined ? undefined : actual[column],
-            expected: row,
-            // invariant: a pairing each row holds alone but not with the captures shared across rows matches none.
-            matched: holds.has(index) && !complete,
-        };
-    });
+    const pairs: RowPair[] = expected.map((row, index) => ({
+        actual: actual[holds.get(index) ?? leftovers.get(index) ?? actual.length],
+        expected: row,
+        // invariant: a pairing each row holds alone but not with the captures shared across rows matches none.
+        matched: holds.has(index) && !complete,
+    }));
     for (const [column, row] of actual.entries()) {
         if (!shown.has(column)) {
             pairs.push({ actual: row, matched: false });
