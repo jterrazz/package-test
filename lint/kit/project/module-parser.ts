@@ -6,6 +6,7 @@ import type { parseSync } from 'oxc-parser';
 let parse: typeof parseSync | undefined;
 
 export function parsedModule(filename: string, source: string): ReturnType<typeof parseSync> {
+    // Stryker disable next-line ConditionalExpression: a cache: loading the binding again answers the same parser
     if (parse === undefined) {
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `require` answers `any`: `parseSync` is the one export this reads, typed by oxc-parser's own declaration
         const loaded = createRequire(import.meta.url)('oxc-parser') as {

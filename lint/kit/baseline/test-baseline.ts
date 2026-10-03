@@ -18,6 +18,7 @@ export function writeBaseline(root: string, counts: Readonly<Counts>): void {
     writeSection(
         root,
         TEST_SECTION,
+        // Stryker disable next-line ConditionalExpression,ObjectLiteral: a key set to undefined is dropped when the section is written
         held === undefined ? { ...counts } : { ...counts, [ROUTES_KEY]: held },
     );
 }

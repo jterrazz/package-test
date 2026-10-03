@@ -13,9 +13,7 @@ function configOf(dir: string): null | string {
 
 function anchoredTo(label: string): (findings: Spotted[]) => Spotted[] {
     return (findings) =>
-        label === '.'
-            ? findings
-            : findings.map((finding) => ({ ...finding, path: join(label, finding.path) }));
+        findings.map((finding) => ({ ...finding, path: join(label, finding.path) }));
 }
 
 /** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */

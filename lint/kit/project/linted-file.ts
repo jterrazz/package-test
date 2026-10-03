@@ -46,10 +46,12 @@ export function isProductionFile(file: LintedFile): boolean {
 
 export function specsAnchorOf(file: LintedFile): SpecsAnchor | undefined {
     const kept = answersFor(file);
+    // Stryker disable ConditionalExpression,BooleanLiteral: a cache: reading the anchor again answers the same
     if (!kept.anchorRead) {
         kept.anchor = specsAnchor(kept.filename);
         kept.anchorRead = true;
     }
+    // Stryker restore ConditionalExpression,BooleanLiteral
     return kept.anchor;
 }
 

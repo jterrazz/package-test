@@ -20,6 +20,7 @@ describe('module-tests', () => {
         const root = member([
             'lint/consumer/checks/checker.test.ts',
             'src/report/report.test.ts',
+            'src/report/report.ts',
             'src/report/_fixtures/tool/tool.test.ts',
             'specs/api/users/listed.spec.ts',
             'packages/inner/package.json',
