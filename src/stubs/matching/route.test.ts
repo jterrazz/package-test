@@ -73,4 +73,37 @@ describe('route', () => {
             'GET /events (without headers cookie, authorization)',
         ]);
     });
+
+    test('route — url forms — a path is matched as sent or decoded, a declared query value is found for each time it is declared, and a malformed escape is read as sent', () => {
+        // Given - paths declared encoded and decoded, a query declared twice, and an escape that decodes to nothing
+        // Then - each match as it is read
+        expect([
+            urlMatches('/caf%C3%A9', 'http://app.test/caf%C3%A9'),
+            urlMatches('/café', 'http://app.test/caf%C3%A9'),
+            urlMatches('https://api.test/caf%C3%A9', 'https://api.test/caf%C3%A9'),
+            urlMatches('https://api.test/café', 'https://api.test/caf%C3%A9'),
+            urlMatches('https://api.test/café', 'https://other.test/caf%C3%A9'),
+            urlMatches('/tags?tag=a&tag=b', 'http://app.test/tags?tag=a&tag=b'),
+            urlMatches('/tags?tag=a&tag=b', 'http://app.test/tags?tag=a'),
+            urlMatches('/broken%E0%A4%A', 'http://app.test/broken%E0%A4%A'),
+            urlMatches('/events', 'http://['),
+        ]).toStrictEqual([true, true, true, true, false, true, false, true, false]);
+    });
+
+    test('route — url forms — an absolute url with a token listens on a pattern of that origin, and one without on itself', () => {
+        // Given - an absolute url holding a token, and one without
+        const tokened = routePatternOf('https://api.test/users/{{uuid}}?x=1');
+
+        // Then - a pattern taking any id at that origin, query or fragment after it, and the plain url as written
+        expect([
+            tokened instanceof RegExp &&
+                tokened.test(
+                    'https://api.test/users/3f2504e0-4f89-41d3-9a0c-0305e82c3301?page=2#top',
+                ),
+            tokened instanceof RegExp &&
+                tokened.test('https://other.test/users/3f2504e0-4f89-41d3-9a0c-0305e82c3301'),
+            routePatternOf(/users/u),
+            describeRoute({ ...http.get('/events'), absentHeaders: [] }),
+        ]).toStrictEqual([true, false, /users/u, 'GET /events']);
+    });
 });

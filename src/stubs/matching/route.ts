@@ -8,6 +8,8 @@ import type { StubRequest } from '../exchange.js';
 
 const RELATIVE_BASE = 'http://stub.invalid';
 
+const UNICODE = 'u';
+
 /** Never through `new URL()`, which would percent-encode `{{token}}` braces. */
 function splitDeclared(url: string): { base: string; query: URLSearchParams } {
     const separator = url.indexOf('?');
@@ -17,12 +19,22 @@ function splitDeclared(url: string): { base: string; query: URLSearchParams } {
     return { base: url.slice(0, separator), query: new URLSearchParams(url.slice(separator + 1)) };
 }
 
+// Stryker disable BlockStatement: an escape that decodes to nothing reads as sent, which the raw comparison before it already made
 function safeDecode(text: string): string {
     try {
         return decodeURIComponent(text);
     } catch {
         return text;
     }
+}
+// Stryker restore BlockStatement
+
+/** A URL from its start, its query and fragment free. */
+function wholeUrl(prefix: string, base: string): RegExp {
+    return new RegExp(
+        String.raw`^${prefix}${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`,
+        UNICODE,
+    );
 }
 
 function valueMatches(declared: string, observed: string): boolean {
@@ -71,13 +83,10 @@ export function routePatternOf(declared: RegExp | string): RegExp | string {
     }
     const { base } = splitDeclared(declared);
     if (base.startsWith('/')) {
-        return new RegExp(
-            String.raw`^https?:\/\/[^/?#]+${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`,
-            'u',
-        );
+        return wholeUrl(String.raw`https?:\/\/[^/?#]+`, base);
     }
     if (hasPlaceholders(base)) {
-        return new RegExp(String.raw`^${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`, 'u');
+        return wholeUrl('', base);
     }
     return base;
 }
