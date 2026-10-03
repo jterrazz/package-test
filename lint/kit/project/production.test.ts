@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { packageWith } from '../testing/package-tree.fixtures.js';
-import { lintBegins, reachOf } from './production.js';
+import { allowedTestPackagesAt, lintBegins, reachOf } from './production.js';
 
 const ROOT = packageWith({
     'package.json': JSON.stringify({ imports: { '#data/*': { default: './specs/_fixtures/*' } } }),
@@ -22,6 +22,17 @@ const ROOT = packageWith({
         "import { readFileSync } from 'node:fs';\nexport const sql = readFileSync('./specs/_seeds/a.sql');\n",
     'tests/typed.ts':
         "import type { Row } from '../specs/_fixtures/row.js';\nexport type { Row };\n",
+    'tests/broken.ts': 'export const = ;\n',
+    'tests/cycle-a.ts': "import { b } from './cycle-b.js';\nexport { b };\n",
+    'tests/cycle-b.ts': "import { a } from './cycle-a.js';\nexport { a };\n",
+    'tests/dynamic.ts': [
+        'export const a = require(name);',
+        "export const b = require.main('../specs/_fixtures/a.js');",
+        "export const c = path.resolve('../specs/_fixtures/c.js');",
+        '',
+    ].join('\n'),
+    'tests/mixed.ts':
+        "import { readFileSync } from 'node:fs';\nreadFileSync('./README.md');\nexport { x } from '../specs/_fixtures/x.js';\n",
     'tools/a.ts': "import { b } from './b.js';\nexport { b };\n",
     'tools/b.ts': "import { a } from './a.js';\nexport { a };\n",
     'tsconfig.json': '{ "compilerOptions": { "baseUrl": "./src", "paths": { "@/*": ["*"] } } }',
@@ -62,10 +73,65 @@ describe('production', () => {
         expect(reachOf(join(ROOT, 'src/domain/order.ts'), '../../tests/named.js')).toBeUndefined();
     });
 
-    test('reachOf — ends on a cycle of modules that reach nothing', () => {
-        // Given - two tool modules importing each other
+    test('reachOf — ends on a cycle of modules that reach nothing, a module it cannot parse, and calls that name no module', () => {
+        // Given - tool modules and test modules importing each other, a module that does not parse, and one calling look-alikes of require
+        const from = join(ROOT, 'src/domain/order.ts');
+
         // Then - the walk visits each once and finds no material
-        expect(reachOf(join(ROOT, 'src/domain/order.ts'), '../../tools/a.js')).toBeUndefined();
+        expect(
+            [
+                '../../tools/a.js',
+                '../../tests/cycle-a.js',
+                '../../tests/broken.js',
+                '../../tests/dynamic.js',
+            ].map((specifier) => reachOf(from, specifier)),
+        ).toStrictEqual([undefined, undefined, undefined, undefined]);
+    });
+
+    test('reachOf — a path that names no material does not end the walk before the import that does', () => {
+        // Given - a module reading a README, then re-exporting a fixture
+        // Then - the fixture is the reach
+        expect(reachOf(join(ROOT, 'src/domain/order.ts'), '../../tests/mixed.js')?.what).toBe(
+            join(ROOT, 'specs/_fixtures/x.js'),
+        );
+    });
+
+    test('reachOf — an alias with two targets is walked through the second when the first reaches nothing', () => {
+        // Given - an alias whose first target is clean and whose second reaches a fixture
+        const root = packageWith({
+            'tests/a/h.ts': 'export const h = 1;\n',
+            'tests/b/h.ts': "export { x } from '../../specs/_fixtures/x.js';\n",
+            'package.json': '{}',
+            'src/m.ts': 'export {};\n',
+            'tsconfig.json': JSON.stringify({
+                compilerOptions: { paths: { '@x/*': ['./tests/a/*', './tests/b/*'] } },
+            }),
+        });
+
+        // Then - the second target's fixture
+        expect(reachOf(join(root, 'src/m.ts'), '@x/h.js')?.what).toBe(
+            join(root, 'specs/_fixtures/x.js'),
+        );
+    });
+
+    test('reachOf — the test packages allowed are part of the question', () => {
+        // Given - a production module importing the framework, asked without and with it allowed
+        const from = join(ROOT, 'src/stubs/engine.ts');
+
+        // Then - refused, then allowed, in one run
+        expect([
+            reachOf(from, '@jterrazz/test')?.kind,
+            reachOf(from, '@jterrazz/test', new Set(['@jterrazz/test'])),
+        ]).toStrictEqual(['a test package', undefined]);
+    });
+
+    test('allowedTestPackagesAt — names none for a file in no package, or in one that allows none', () => {
+        // Given - a path outside every package, and a package with no settings
+        // Then - nothing allowed
+        expect([
+            allowedTestPackagesAt('/nowhere/x.ts'),
+            allowedTestPackagesAt(join(ROOT, 'src/x.ts')),
+        ]).toStrictEqual([new Set(), new Set()]);
     });
 
     test('reachOf across a run — a specifier is walked once per folder: a module that changes after is not read again in the run', () => {

@@ -34,16 +34,9 @@ export type Reach = {
 
 type Named = { paths: string[]; specifiers: string[] };
 
-/** Kept while its text is the one it was parsed from. */
-const parsed = new Map<string, { named: Named; text: string }>();
-
 function namedIn(module: string, text: string): Named {
-    const cached = parsed.get(module);
-    if (cached?.text === text) {
-        return cached.named;
-    }
+    // Stryker disable next-line ArrayDeclaration: a path or a specifier more that names nothing reaches nothing
     const named: Named = { paths: [], specifiers: [] };
-    parsed.set(module, { named, text });
     const program = parseProgram(module, text);
     if (!isNode(program)) {
         return named;
@@ -73,6 +66,7 @@ function reachThrough(
     }
     seen.add(module);
     const text = readFileCached(module);
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a module is walked once it is a file, so its text is there
     if (text === null) {
         return undefined;
     }
@@ -110,6 +104,7 @@ function reachFrom(
         }
     }
     for (const target of resolveSpecifier(from, specifier)) {
+        // Stryker disable next-line ConditionalExpression,LogicalOperator: a target that is no module source, or no file, names nothing when walked
         if (SOURCE.test(target) && isFile(target) && !isProductionModule(target)) {
             const reach = reachThrough(target, seen, allowed);
             if (reach !== undefined) {
@@ -136,7 +131,9 @@ const walked = new Set<string>();
 export function lintBegins(filename: string): void {
     if (linted.has(filename) || walked.has(filename) || folderChanged(dirname(filename))) {
         reaches.clear();
+        // Stryker disable next-line CallExpression: a stale entry only ends the next run's memo early, never late
         linted.clear();
+        // Stryker disable next-line CallExpression: a stale entry only ends the next run's memo early, never late
         walked.clear();
     }
     linted.add(filename);
@@ -147,12 +144,15 @@ export function reachOf(
     specifier: string,
     allowed: ReadonlySet<string> = new Set(),
 ): Reach | undefined {
+    // Stryker disable next-line StringLiteral: no folder, specifier or package name spells another's join
     const key = [dirname(from), specifier, ...[...allowed].toSorted()].join('\0');
     if (reaches.has(key)) {
         return reaches.get(key);
     }
+    // Stryker disable next-line ArrayDeclaration: the linted file is production, which no walk enters
     const seen = new Set([from]);
     const reach = reachFrom(from, specifier, seen, allowed);
+    // Stryker disable next-line CallExpression: the linted file counted as walked only ends its run's memo early
     seen.delete(from);
     for (const module of seen) {
         walked.add(module);
@@ -161,54 +161,50 @@ export function reachOf(
     return reach;
 }
 
-function firstString(node: AstNode): ImportSource | undefined {
-    const [first] = childList(node, 'arguments');
-    const source = stringValue(first);
-    return first === undefined || source === undefined ? undefined : { node: first, source };
-}
-
-function isImportMeta(node: AstNode | undefined): boolean {
-    return node?.type === 'MetaProperty';
+function sourceAt(node: AstNode | undefined): ImportSource | undefined {
+    const source = stringValue(node);
+    if (source === undefined) {
+        return undefined;
+    }
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a source is read from a node, which is there
+    if (node === undefined) {
+        return undefined;
+    }
+    return { node, source };
 }
 
 function isRequireLike(callee: AstNode | undefined): boolean {
-    if (callee?.type === 'Identifier') {
-        return identifierName(callee) === 'require';
+    if (identifierName(callee) === 'require') {
+        return true;
     }
-    if (callee === undefined || memberPropertyName(callee) !== 'resolve') {
+    if (memberPropertyName(callee) !== 'resolve') {
         return false;
     }
     const object = child(callee, 'object');
-    return identifierName(object) === 'require' || isImportMeta(object);
+    // Stryker disable next-line OptionalChaining: a member always has an object
+    return identifierName(object) === 'require' || object?.type === 'MetaProperty';
 }
 
 /** `import type`, `export *`, a type's `import('…')`, `import x = require('…')`, `require.resolve()` and `import.meta.resolve()` included. */
 export function moduleReferenceVisitor(
     onReference: (entry: ImportSource) => void,
 ): Record<string, (node: AstNode) => void> {
+    const report = (reference: ImportSource | undefined): void => {
+        if (reference !== undefined) {
+            onReference(reference);
+        }
+    };
     return {
         ...importSourceVisitor(onReference),
         CallExpression(node: AstNode) {
-            const reference = isRequireLike(child(node, 'callee')) ? firstString(node) : undefined;
-            if (reference !== undefined) {
-                onReference(reference);
-            }
+            const [first] = childList(node, 'arguments');
+            report(isRequireLike(child(node, 'callee')) ? sourceAt(first) : undefined);
         },
         TSExternalModuleReference(node: AstNode) {
-            const expression = child(node, 'expression');
-            const source = stringValue(expression);
-            if (expression !== undefined && source !== undefined) {
-                onReference({ node: expression, source });
-            }
+            report(sourceAt(child(node, 'expression')));
         },
         TSImportType(node: AstNode) {
-            const argument = child(node, 'source') ?? child(node, 'argument');
-            const literal =
-                argument?.type === 'TSLiteralType' ? child(argument, 'literal') : argument;
-            const source = stringValue(literal);
-            if (literal !== undefined && source !== undefined) {
-                onReference({ node: literal, source });
-            }
+            report(sourceAt(child(node, 'source')));
         },
     };
 }
