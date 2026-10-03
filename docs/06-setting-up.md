@@ -82,15 +82,15 @@ export default defineConfig({
 });
 ```
 
-`vitest.config.ts` is the line those projects derive, which `typescript fix` writes and `typescript check` holds ([`@jterrazz/typescript`'s Config pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-config-one-file-pass)):
+`vitest.config.ts` is the file those projects derive, which `typescript fix` writes and `typescript check` holds ([`@jterrazz/typescript`'s Config pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-config-one-file-pass)):
 
 ```typescript
 import { vitestConfig } from '@jterrazz/test/vitest/config';
 
-export default vitestConfig();
+export default vitestConfig(import.meta.url);
 ```
 
-It reads `jterrazz.config.ts` from the directory vitest runs in — the project root for `npm test`, and for the Vitest extension, which starts its worker in the config's own directory — and builds each project with its helper over the preset below. A project declares no `name`, `environment` or `browser`: its helper names it for its facet and sets what the facet needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. With no `projects`, the config is the preset alone. It is a call rather than a value because knip requires the config to find the tests, and a required module may not await at its top.
+It reads the `jterrazz.config.ts` beside the module whose `import.meta.url` it is handed — the config file's own folder, wherever vitest, the Vitest extension or knip loads it — and builds each project with its helper over the preset below. A project declares no `name`, `environment` or `browser`: its helper names it for its facet and sets what the facet needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. With no `projects`, the config is the preset alone. It is a call rather than a value because knip requires the config to find the tests, and a required module may not await at its top.
 
 ### The project helpers
 

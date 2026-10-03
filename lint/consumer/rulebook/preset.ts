@@ -229,7 +229,7 @@ export function testPreset(): Preset {
         files: {
             'vitest.config.ts': {
                 scope: 'unit',
-                text: "import { vitestConfig } from '@jterrazz/test/vitest/config';\n\nexport default vitestConfig();\n",
+                text: "import { vitestConfig } from '@jterrazz/test/vitest/config';\n\nexport default vitestConfig(import.meta.url);\n",
             },
         },
         package: '@jterrazz/test',

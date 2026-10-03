@@ -1,6 +1,6 @@
 import { readSettings } from '@jterrazz/typescript/rules';
-import { isAbsolute, resolve } from 'node:path';
-import process from 'node:process';
+import { dirname, isAbsolute, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration, ViteUserConfig } from 'vitest/config';
 
@@ -85,8 +85,7 @@ async function projectOf(root: string, declared: unknown): Promise<TestProjectIn
           );
 }
 
-// A promise rather than a top-level await: knip requires the config, and Node cannot require a module that awaits at its top.
-export async function vitestConfig(root: string = process.cwd()): Promise<ViteUserConfig> {
+async function derivedFrom(root: string): Promise<ViteUserConfig> {
     const { resolved } = await readSettings(root);
     const section = resolved.sections[TEST_SECTION];
     const projects = isRecord(section) && Array.isArray(section.projects) ? section.projects : [];
@@ -103,3 +102,7 @@ export async function vitestConfig(root: string = process.cwd()): Promise<ViteUs
               },
     );
 }
+
+// A promise rather than a top-level await: knip requires the config, and Node cannot require a module that awaits at its top.
+export const vitestConfig = async (configUrl: string): Promise<ViteUserConfig> =>
+    await derivedFrom(dirname(fileURLToPath(configUrl)));

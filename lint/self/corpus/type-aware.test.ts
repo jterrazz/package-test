@@ -1,11 +1,13 @@
-import derived from '@jterrazz/typescript/oxlint';
+import { oxlintConfig } from '@jterrazz/typescript/oxlint';
 import { mkdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
 import { typeAwareFindings } from './type-aware.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
+const derived = await oxlintConfig(pathToFileURL(join(ROOT, 'oxlint.config.ts')).href);
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 const FLOATING = 'typescript/no-floating-promises';
 const THENABLE = 'typescript/await-thenable';

@@ -1,6 +1,7 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
 import { vitestConfig } from './index.vitest.config.js';
@@ -16,6 +17,8 @@ function projectDeclaring(projects: string): string {
     return root;
 }
 
+const configIn = (root: string): string => pathToFileURL(join(root, 'vitest.config.ts')).href;
+
 describe('vitestConfig', () => {
     test('builds each declared project with the helper of its facet, its setups read from the project root', async () => {
         // Given - a project declaring a unit project and a cli project with a global setup of its own
@@ -24,7 +27,7 @@ describe('vitestConfig', () => {
         );
 
         // When - the config is derived for it
-        const config = await vitestConfig(root);
+        const config = await vitestConfig(configIn(root));
         const projects = (config.test?.projects ?? []).flatMap((project) =>
             typeof project === 'object' && 'test' in project ? [project.test] : [],
         );
@@ -40,7 +43,7 @@ describe('vitestConfig', () => {
         const root = projectDeclaring('[]');
 
         // Then - no project is built, and the preset's budgets stand
-        const config = await vitestConfig(root);
+        const config = await vitestConfig(configIn(root));
         expect(config.test?.projects).toBeUndefined();
         expect(config.test?.testTimeout).toBe(30_000);
     });
@@ -50,8 +53,9 @@ describe('vitestConfig', () => {
         const root = projectDeclaring("[{ facet: 'browser' }]");
 
         // Then - the refusal names the facet and the helpers
-        await expect(vitestConfig(root)).rejects.toThrow(
+        await expect(vitestConfig(configIn(root))).rejects.toThrow(
             'found: a project of `test.projects` names the facet `browser`',
         );
     });
+
 });

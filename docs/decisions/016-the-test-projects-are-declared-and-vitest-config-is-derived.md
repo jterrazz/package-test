@@ -21,8 +21,11 @@ and the `test()` preset hands it the files it owns.
   each a `facet` — one of the helpers this package ships — the options that
   helper takes, and the global setups it runs (`setup`).
 - `vitest.config.ts` is the file the `test()` preset derives,
-  `export default vitestConfig()` from `@jterrazz/test/vitest/config`, which
-  builds each project with its helper over the preset. It is a call that
+  `export default vitestConfig(import.meta.url)` from
+  `@jterrazz/test/vitest/config`, which reads the `jterrazz.config.ts`
+  beside the config module — never the directory vitest runs in, which
+  dropped every declared project when vitest started elsewhere — and builds
+  each project with its helper over the preset. It is a call that
   returns the config's promise, never a top-level await or a bare
   re-export: knip skips a config that only re-exports from a package, and a
   module that awaits at its top cannot be required.
