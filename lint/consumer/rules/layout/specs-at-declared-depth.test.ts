@@ -48,6 +48,29 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
     ],
     valid: [
         {
+            name: 'A helper module anywhere a test would be misplaced is no test, a ground module is no spec, and `_shared/` holds modules.',
+            code: 'const x = 1;',
+            filename: '/repo/specs/api/helpers.ts',
+        },
+        { code: 'const x = 1;', filename: '/repo/specs/api/users/list/deep/helpers.ts' },
+        { code: 'const x = 1;', filename: '/repo/specs/api/_fixtures/app/server.ts' },
+        { code: 'const x = 1;', filename: '/repo/specs/_shared/helpers.ts' },
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/api/helpers.ts',
+            options: [{ depth: 'facet' }],
+        },
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/api/users/list/deep/helpers.ts',
+            options: [{ depth: 'facet' }],
+        },
+        {
+            code: 'const x = 1;',
+            filename: '/repo/specs/cli/add/helpers.ts',
+            options: [{ depth: 'mirror' }],
+        },
+        {
             name: 'Tests at facet/domain depth (aspect name is free).',
             code: 'const x = 1;',
             filename: '/repo/specs/api/responses/responses.test.ts',

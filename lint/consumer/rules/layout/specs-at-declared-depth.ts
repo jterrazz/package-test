@@ -26,6 +26,7 @@ function isNodeTest(base: string): boolean {
 
 function stemOf(base: string): string {
     const suffix = NODE_TEST_SUFFIXES.find((candidate) => base.endsWith(candidate));
+    // Stryker disable next-line ConditionalExpression: only a test's name is ever stemmed
     return suffix === undefined ? base : base.slice(0, -suffix.length);
 }
 
@@ -41,10 +42,12 @@ const SPECS_DEPTHS = ['facet', 'facet-domain', 'mirror', 'off'] as const;
 export type SpecsDepth = (typeof SPECS_DEPTHS)[number];
 
 function depthOf(option: unknown): SpecsDepth | undefined {
+    // Stryker disable ConditionalExpression: the schema admits only an object
     const depth: unknown =
         typeof option === 'object' && option !== null && 'depth' in option
             ? option.depth
             : undefined;
+    // Stryker restore ConditionalExpression
     return SPECS_DEPTHS.find((known) => known === depth);
 }
 
@@ -107,6 +110,7 @@ function reservedVerdict(placement: Placement): undefined | Verdict {
     if (!isNodeTest(base) && !base.endsWith(SPECIFICATION_SUFFIX)) {
         return undefined;
     }
+    // Stryker disable next-line MethodExpression: a test's own name is never a reserved folder's
     const folder = relative
         .slice(0, -1)
         .find((segment) => isGroundFolder(segment) || segment === SETUP_FOLDER);
@@ -162,6 +166,7 @@ const DEPTH_VERDICTS: Record<SpecsDepth, (placement: Placement) => Verdict> = {
 function verdictOf(placement: Placement, directory: string, depth: SpecsDepth): Verdict {
     const { base, nesting, relative } = placement;
     if (!declaresTests(base) && isStrayFolder(directory, relative)) {
+        // Stryker disable next-line LogicalOperator: a stray folder always has a name
         return { data: { folder: relative[0] ?? '' }, messageId: 'strayFolder' };
     }
     const reserved = reservedVerdict(placement);
@@ -169,6 +174,7 @@ function verdictOf(placement: Placement, directory: string, depth: SpecsDepth): 
         return reserved;
     }
     const spec = isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX);
+    // Stryker disable next-line ConditionalExpression: a file at the specs root is never `_shared` itself
     if (spec && nesting >= 1 && relative[0] === SHARED_FOLDER) {
         return { messageId: 'specInShared' };
     }
@@ -200,9 +206,12 @@ export const specsAtDeclaredDepth = defineRule(
     {
         createOnce(context: Context): Visitor {
             return {
+                // Stryker disable ArrowFunction,ConditionalExpression: `Program` reads the anchor again, and returns where there is none
                 before: () => specsAnchorOf(context) !== undefined,
                 Program(node: AstNode) {
                     const anchor = specsAnchorOf(context);
+                    // Stryker restore ArrowFunction,ConditionalExpression
+                    // Stryker disable next-line ConditionalExpression: `before` found the anchor
                     if (anchor === undefined) {
                         return;
                     }

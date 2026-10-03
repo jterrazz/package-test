@@ -20,6 +20,7 @@ function isRegExp(node: AstNode | undefined): boolean {
 
 /** A RegExp argument is exempt: a pattern carries no token grammar to lose. */
 function unnegated(node: AstNode | undefined): AstNode | undefined {
+    // Stryker disable next-line ConditionalExpression: a member always has an object
     return node !== undefined && memberPropertyName(node) === 'not' ? child(node, 'object') : node;
 }
 
@@ -42,15 +43,19 @@ export const noRawBypass = defineRule(
             return {
                 CallExpression(node: AstNode) {
                     const callee = child(node, 'callee');
+                    // Stryker disable next-line ConditionalExpression: a call always has a callee
                     const matcher = callee === undefined ? undefined : memberPropertyName(callee);
+                    // Stryker disable next-line ConditionalExpression: no matcher is in the set
                     if (matcher === undefined || !TEXT_MATCHERS.has(matcher)) {
                         return;
                     }
                     const expectCall = unnegated(child(callee, 'object'));
+                    // Stryker disable next-line ConditionalExpression,OptionalChaining: a receiver that is no call has no callee below
                     if (expectCall?.type !== 'CallExpression') {
                         return;
                     }
                     const expectCallee = child(expectCall, 'callee');
+                    // Stryker disable next-line ConditionalExpression,OptionalChaining,LogicalOperator: a call always has a callee, and only an identifier has a name
                     if (expectCallee?.type !== 'Identifier' || expectCallee.name !== 'expect') {
                         return;
                     }
