@@ -32,9 +32,9 @@ function wordsOf(text: string, open: number): string[] {
 
 function constantWords(text: string, name: string): string[] | undefined {
     const escaped = name.replaceAll('$', String.raw`\$`);
-    const binding = new RegExp(String.raw`\bconst\s+${escaped}\s*(?::[^=]+)?=\s*\[`, 'u').exec(
-        text,
-    );
+    const pattern = String.raw`\bconst\s+${escaped}\s*(?::[^=]+)?=\s*\[`;
+    // Stryker disable next-line StringLiteral: a name is plain ASCII, read alike with the unicode flag or without
+    const binding = new RegExp(pattern, 'u').exec(text);
     return binding === null ? undefined : wordsOf(text, binding.index + binding[0].length - 1);
 }
 
@@ -46,13 +46,15 @@ export function declaredCommands(door: string): string[] | undefined {
         return undefined;
     }
     const open = call.index + call[0].length - 1;
+    // Stryker disable next-line StringLiteral: no stand-in for absent options names commands
     const [, options = ''] = argumentsOf(text.slice(open + 1, closingOf(text, open)));
-    const list = /(?:^|[{,\s])commands\s*:\s*\[/u.exec(options);
+    // invariant: the options are an object literal, so each key follows a brace, a comma or a space.
+    const list = /[{,\s]commands\s*:\s*\[/u.exec(options);
     if (list !== null) {
         return wordsOf(options, list.index + list[0].length - 1);
     }
-    const named =
-        /(?:^|[{,\s])commands\s*:\s*(?<name>[A-Za-z_$][\w$]*)/u.exec(options)?.groups?.name ??
-        (/(?:^|[{,\s])commands\s*(?=[,}])/u.test(options) ? 'commands' : undefined);
+    // Stryker disable next-line OptionalChaining: a match always carries its named group
+    const bound = /[{,\s]commands\s*:\s*(?<name>[A-Za-z_$][\w$]*)/u.exec(options)?.groups?.name;
+    const named = bound ?? (/[{,\s]commands\s*(?=[,}])/u.test(options) ? 'commands' : undefined);
     return named === undefined ? undefined : constantWords(text, named);
 }

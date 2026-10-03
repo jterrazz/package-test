@@ -21,6 +21,7 @@ describe('commandWords', () => {
         ['migrate db', ['migrate', 'db']],
         ['shop', []],
         ['--help', []],
+        ['  db  migrate', ['db', 'migrate']],
     ])('with the list db, migrate, spawn, the command line %j names %j', (line, words) => {
         // Given - a runner declaring the words its commands are spelled with
         const commands = ['db', 'migrate', 'spawn'];
@@ -59,5 +60,22 @@ describe('commandWords', () => {
 
         // Then - the words the const binds
         expect(declaredCommands(door)).toStrictEqual(['db', 'migrate']);
+    });
+
+    test.each([
+        ["specification.cli(BIN, { commands: ['db', name] });", ['db']],
+        ["specification.cli(BIN, { commands :['db'] });", ['db']],
+        ["specification.cli(BIN, {commands:['db']});", ['db']],
+        ["const $LIST = ['db'];\nspecification.cli(BIN, { commands: $LIST });", ['db']],
+        ["const commands = ['db'];\nspecification.cli(BIN, {commands});", ['db']],
+        ["const commands = ['db'];\nspecification.cli(BIN, { commands, defaults: {} });", ['db']],
+        ["const LIST = ['db'];\nspecification.cli(BIN, { commands:LIST });", ['db']],
+        ["const LIST = ['db'];\nspecification.cli(BIN, { commands : LIST });", ['db']],
+        ['specification.cli(BIN, { commands: ELSEWHERE });', undefined],
+        ['specification.api({});', undefined],
+    ])('the door %j declares %j', (door, words) => {
+        // Given - a runner module declaring its words that way
+        // Then - the literal words it holds, or nothing
+        expect(declaredCommands(door)).toStrictEqual(words);
     });
 });
