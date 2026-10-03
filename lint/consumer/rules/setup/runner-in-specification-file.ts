@@ -32,6 +32,7 @@ export const runnerInSpecificationFile = defineRule(
         createOnce(context: Context): Visitor {
             return {
                 before: () =>
+                    // Stryker disable next-line ConditionalExpression,LogicalOperator: a source that never names the member holds no call to it, which the visitor would find
                     context.sourceCode.text.includes(MEMBER_CALL) &&
                     !SPECIFICATION_SUFFIXES.some((suffix) => context.filename.endsWith(suffix)) &&
                     identityOf(context).role !== 'component',
