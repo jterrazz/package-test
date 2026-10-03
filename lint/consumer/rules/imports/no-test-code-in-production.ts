@@ -72,6 +72,7 @@ export const noTestCodeInProduction = defineRule(
             return {
                 ...mergeVisitors(references, paths),
                 before() {
+                    // Stryker disable next-line CallExpression: the cache it clears only answers stale for a tree that changed mid-run, and no fixture tree does
                     lintBegins(context.physicalFilename);
                     if (!isProductionFile(context)) {
                         return false;

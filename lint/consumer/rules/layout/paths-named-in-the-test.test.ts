@@ -39,6 +39,11 @@ ruleTester().run('paths-named-in-the-test', pathsNamedInTheTest, {
     ],
     valid: [
         {
+            name: 'An entry no relative path names, a source that only starts like one, a default import and another name build no path.',
+            code: "import { file } from 'other/src/index.js';\nimport { directory } from '../../../src/index.json';\nimport dflt, { api } from '@jterrazz/test';\nexport const a = file('./x');\nexport const b = directory('./y');\nexport const c = dflt('./z');\nexport const d = api('./w');",
+            filename: HELPER,
+        },
+        {
             name: 'Built in the test, on the line a reader reads.',
             code: `${IMPORT}api.seed(file('./_seeds/orders.sql'));`,
             filename: '/repo/specs/api/orders/orders.spec.ts',

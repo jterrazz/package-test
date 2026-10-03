@@ -8,18 +8,24 @@ function testOf(lines: number, opener = "test('a', () => {"): string {
     return [opener, ...Array.from({ length: lines - 2 }, () => '    // …'), '});'].join('\n');
 }
 
-function claimedTestOf(gestures: number, claim: number): string {
+function claimedTestOf(gestures: number, claim: number, matcher = 'toMatch'): string {
     const value = ['`', ...Array.from({ length: claim - 2 }, () => '        line'), '    `'];
     return [
         "test('a', () => {",
         ...Array.from({ length: gestures - 3 }, () => '    // …'),
-        `    expect(result).toMatch(${value.join('\n')});`,
+        `    expect(result).${matcher}(${value.join('\n')});`,
         '});',
     ].join('\n');
 }
 
 ruleTester().run('test-body-within-line-limit', testBodyWithinLineLimit, {
     invalid: [
+        {
+            name: 'A value another matcher compares claims no line: its lines are gestures.',
+            code: claimedTestOf(20, 50, 'toBe'),
+            errors: [{ column: 10, line: 1, messageId: 'tooLong' }],
+            filename: SPEC,
+        },
         {
             code: testOf(MAX_TEST_LINES + 1),
             errors: [
@@ -82,6 +88,11 @@ ruleTester().run('test-body-within-line-limit', testBodyWithinLineLimit, {
         {
             name: "The file's describe is as long as the file: only the test is capped.",
             code: `describe('pagination', () => {\n${testOf(MAX_TEST_LINES)}\n${testOf(MAX_TEST_LINES)}\n});`,
+            filename: SPEC,
+        },
+        {
+            name: 'A test whose last argument is no function holds no body here.',
+            code: `test('a', () => {}, 5000);\ntest('b');\ntest('c', run, {\n${Array.from({ length: MAX_TEST_LINES }, () => '    retry: 0,').join('\n')}\n});`,
             filename: SPEC,
         },
         {

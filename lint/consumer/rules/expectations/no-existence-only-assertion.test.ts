@@ -11,7 +11,13 @@ ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
             code: `test('builds', () => {
                 expect(build()).toBeDefined();
             });`,
-            errors: [{ column: 0, line: 1, messageId: 'existenceOnly' }],
+            errors: [
+                {
+                    column: 0,
+                    line: 1,
+                    message: /^found: `toBeDefined\(\)` is this test's only oracle/u,
+                },
+            ],
             filename: TEST_FILE,
         },
         {
@@ -19,7 +25,13 @@ ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
             code: `test('builds', () => {
                 expect(build()).not.toBeNull();
             });`,
-            errors: [{ column: 0, line: 1, messageId: 'existenceOnly' }],
+            errors: [
+                {
+                    column: 0,
+                    line: 1,
+                    message: /^found: `not\.toBeNull\(\)` is this test's only oracle/u,
+                },
+            ],
             filename: TEST_FILE,
         },
         {
@@ -32,6 +44,23 @@ ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
         },
     ],
     valid: [
+        {
+            name: 'A call checked with its arguments is no bare check, a call that is no test and production code are not judged.',
+            code: `test('notifies', () => {
+                expect(onClose).toHaveBeenCalled(1);
+            });
+            run(() => {
+                expect(x).toBeDefined();
+            });
+            test('t');`,
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('builds', () => {
+                expect(build()).toBeDefined();
+            });`,
+            filename: '/repo/src/domain/order.ts',
+        },
         {
             name: 'A precondition beside the real oracle.',
             code: `test('builds', () => {

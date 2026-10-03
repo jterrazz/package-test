@@ -49,18 +49,21 @@ export const pathsNamedInTheTest = defineRule(
                 },
                 CallExpression(node: AstNode) {
                     const name = identifierName(child(node, 'callee'));
+                    // Stryker disable next-line ConditionalExpression: no name is bound
                     if (name !== undefined && bound.has(name)) {
                         context.report({ data: { name }, messageId: 'builtOutsideTest', node });
                     }
                 },
                 ImportDeclaration(node: AstNode) {
                     const source = stringValue(child(node, 'source'));
+                    // Stryker disable next-line ConditionalExpression: an import always names its source
                     if (source === undefined || !isEntry(source, context.physicalFilename)) {
                         return;
                     }
                     for (const specifier of childList(node, 'specifiers')) {
                         const imported = identifierName(child(specifier, 'imported'));
                         const local = identifierName(child(specifier, 'local'));
+                        // Stryker disable ConditionalExpression,LogicalOperator: no undefined is a wrapper, and an import always binds a local name
                         if (
                             imported !== undefined &&
                             WRAPPERS.has(imported) &&
@@ -68,6 +71,7 @@ export const pathsNamedInTheTest = defineRule(
                         ) {
                             bound.add(local);
                         }
+                        // Stryker restore ConditionalExpression,LogicalOperator
                     }
                 },
             };

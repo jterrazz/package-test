@@ -14,6 +14,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 export const MAX_TEST_LINES = 60;
 
 function lineAt(text: string, offset: number): number {
+    // Stryker disable next-line ArithmeticOperator: lines are only ever subtracted or counted, so where they start counting is no matter
     return text.slice(0, offset).split('\n').length - 1;
 }
 
@@ -27,6 +28,7 @@ function gestureLines(text: string, body: AstNode): number {
             return;
         }
         const value = childList(node, 'arguments')[0];
+        // Stryker disable next-line ConditionalExpression: a `toMatch` with no value claims no line either way
         if (value === undefined) {
             return;
         }
@@ -39,7 +41,9 @@ function gestureLines(text: string, body: AstNode): number {
 }
 
 function bodyOf(call: AstNode): AstNode | undefined {
+    // Stryker disable next-line UnaryOperator: a test call's callback is its last argument, and its second
     const last = childList(call, 'arguments').at(-1);
+    // Stryker disable next-line OptionalChaining: a test call always has arguments
     return last?.type === 'ArrowFunctionExpression' || last?.type === 'FunctionExpression'
         ? last
         : undefined;

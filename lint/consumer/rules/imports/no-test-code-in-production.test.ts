@@ -16,6 +16,7 @@ const ROOT = packageWith({
     'src/features/stubs/http/events.ts': 'export default {};\n',
     'src/features/stubs/news.stubs.ts': 'export const news = {};\n',
     'src/model/stubs/network.ts': 'export const network = {};\n',
+    'tests/chain.ts': "export * from './render.js';\n",
     'tests/data.ts': "export * from '../specs/_fixtures/users.js';\n",
     'tests/render.ts': "export { render } from '@testing-library/react';\n",
     'tests/format.ts': 'export const format = String;\n',
@@ -57,6 +58,45 @@ const refused = (
 
 ruleTester().run('no-test-code-in-production', noTestCodeInProduction, {
     invalid: [
+        {
+            name: 'The messages name the package as written, a module and a path from where the file sits, and each module a reach runs through.',
+            code: 'import { expect } from "vitest";\nimport { data } from "./user.fixtures.js";\nconst rows = new URL("./_fixtures/rows.json", import.meta.url);',
+            errors: [
+                {
+                    column: 23,
+                    line: 1,
+                    message: /^found: production code references "vitest", .* \(vitest\) · /u,
+                },
+                {
+                    column: 21,
+                    line: 2,
+                    message:
+                        /^found: production code references "\.\/user\.fixtures\.js", .* \(user\.fixtures\.js\) · /u,
+                },
+                {
+                    column: 21,
+                    line: 3,
+                    message: /^found: production code names the path "_fixtures\/rows\.json", /u,
+                },
+            ],
+            filename: PROD,
+        },
+        {
+            code: 'export * from "../tests/render.js";',
+            errors: [{ column: 14, line: 1, message: /through \.\.\/tests\/render\.ts · /u }],
+            filename: BARREL,
+        },
+        {
+            code: 'export * from "../tests/chain.js";',
+            errors: [
+                {
+                    column: 14,
+                    line: 1,
+                    message: /through \.\.\/tests\/chain\.ts → \.\.\/tests\/render\.ts · /u,
+                },
+            ],
+            filename: BARREL,
+        },
         // invariant: an allowed package is the only one: the unit's other test packages stay refused.
         refused('import { expect } from "vitest";', 'reach', [1, 23], GATE_SERVICE),
         // invariant: through a relay that is not production, the other packages stay refused too.
