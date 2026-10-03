@@ -11,7 +11,7 @@ import { basename, dirname, join, relative } from 'node:path';
 
 import { finding } from '../../kit/project/document-model.js';
 import { FACETS, reachesRunner } from '../../kit/project/facets.js';
-import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';

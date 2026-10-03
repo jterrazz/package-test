@@ -15,7 +15,8 @@ import { parseProgram } from './module-parser.js';
 import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isRelativePath } from './relative-path.js';
 import { isTestFileName } from './role.js';
-import { documentPaths, parseSpecDocument, SPEC_EXTENSION } from './spec-document.js';
+import { documentPaths, parseSpecDocument } from './spec-document.js';
+import { SPEC_EXTENSION } from './spec-grammar.js';
 
 export function isSharedFolder(dir: string): boolean {
     return basename(dir) === SHARED_FOLDER && basename(dirname(dir)) === 'specs';

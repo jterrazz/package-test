@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { PRESENCE } from '../../kit/project/spec-document.js';
-import type { PresenceShape } from '../../kit/project/spec-document.js';
 import { documentData, isFixture, specDocuments } from '../../kit/project/spec-documents.js';
+import { PRESENCE } from '../../kit/project/spec-grammar.js';
+import type { PresenceShape } from '../../kit/project/spec-grammar.js';
 import { parserRefusal, schemaVerdicts } from './schema-documents.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');

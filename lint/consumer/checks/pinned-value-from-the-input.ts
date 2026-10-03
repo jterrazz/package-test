@@ -1,6 +1,6 @@
 import { finding, fixedData } from '../../kit/project/document-model.js';
 import { assertedStreams } from '../../kit/project/spec-document.js';
-import type { SpecDocument } from '../../kit/project/spec-document.js';
+import type { SpecDocument } from '../../kit/project/spec-grammar.js';
 import type { DocumentFinding } from './checker.js';
 
 const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/u;

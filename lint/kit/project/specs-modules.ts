@@ -14,7 +14,7 @@ import { parseProgram } from './module-parser.js';
 import { visitProgram } from './path-references.js';
 import { resolveSpecifier } from './production.js';
 import { isRelativePath } from './relative-path.js';
-import { SPEC_EXTENSION } from './spec-document.js';
+import { SPEC_EXTENSION } from './spec-grammar.js';
 import { isWithin, lowestCommonFolder, readText } from './tree.js';
 
 export const COMPONENT_TREE = 'component';

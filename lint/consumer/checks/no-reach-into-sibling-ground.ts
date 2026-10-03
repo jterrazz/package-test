@@ -13,7 +13,7 @@ import {
     repointModuleTests,
     repointSource,
 } from '../../kit/checker/repoint.js';
-import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import {
     collectFixtureReferences,
     DISK_CALL,

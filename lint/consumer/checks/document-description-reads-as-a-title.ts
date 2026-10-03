@@ -1,5 +1,5 @@
 import { finding } from '../../kit/project/document-model.js';
-import type { SpecDocument } from '../../kit/project/spec-document.js';
+import type { SpecDocument } from '../../kit/project/spec-grammar.js';
 import type { DocumentFinding } from './checker.js';
 
 const MAX_DESCRIPTION = 100;

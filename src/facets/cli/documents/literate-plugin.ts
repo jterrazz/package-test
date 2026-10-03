@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { basename, isAbsolute, resolve } from 'node:path';
 
-import { readSpecFile, SpecSyntaxError } from '../../../../lint/kit/project/spec-document.js';
-import type { SpecFile } from '../../../../lint/kit/project/spec-document.js';
+import { readSpecFile } from '../../../../lint/kit/project/spec-document.js';
+import { SpecSyntaxError } from '../../../../lint/kit/project/spec-grammar.js';
+import type { SpecFile } from '../../../../lint/kit/project/spec-grammar.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { DISK_KEY } from '../../../disk/spec-path.js';
 

@@ -1,7 +1,7 @@
 import { GROUND_FIXTURES, PRUNED, treeEntries } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
-import { SPEC_EXTENSION } from './spec-document.js';
+import { SPEC_EXTENSION } from './spec-grammar.js';
 import { parseYamlSource } from './yaml-document.js';
 
 export function isFixture(file: string): boolean {

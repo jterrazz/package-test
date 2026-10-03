@@ -1,4 +1,5 @@
-import { assertedStreams, readSpecFile, SpecSyntaxError } from '../../kit/project/spec-document.js';
+import { assertedStreams, readSpecFile } from '../../kit/project/spec-document.js';
+import { SpecSyntaxError } from '../../kit/project/spec-grammar.js';
 import type { Spotted } from './checker.js';
 import { noMalformedRefFindings } from './no-malformed-ref.js';
 import { noUnknownTokenFindings } from './no-unknown-token.js';

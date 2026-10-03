@@ -2,11 +2,8 @@ import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
 import { specsAnchor } from '../../kit/project/ast.js';
-import {
-    documentPaths,
-    parseSpecDocument,
-    SPEC_EXTENSION,
-} from '../../kit/project/spec-document.js';
+import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { isModuleName } from '../../kit/project/specs-modules.js';
 import {
     collectFixtureReferences,

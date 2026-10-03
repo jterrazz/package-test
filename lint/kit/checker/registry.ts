@@ -2,7 +2,7 @@ import type { Chapter, Manifest, Teaching } from '@jterrazz/typescript/rules';
 
 import type { Row } from '../catalogue/row.js';
 import type { DocumentFinding } from '../project/document-model.js';
-import type { SpecFile } from '../project/spec-document.js';
+import type { SpecFile } from '../project/spec-grammar.js';
 
 export type Spotted<Rule extends string = string> = Teaching & {
     column?: number;

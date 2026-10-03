@@ -9,8 +9,8 @@ import type { Teaching } from '@jterrazz/typescript/rules';
 import { join, resolve } from 'node:path';
 
 import { isRelativePath } from './relative-path.js';
-import { SPEC_EXTENSION } from './spec-document.js';
-import type { SpecDocument, SpecFile } from './spec-document.js';
+import { SPEC_EXTENSION } from './spec-grammar.js';
+import type { SpecDocument, SpecFile } from './spec-grammar.js';
 import { readText } from './tree.js';
 import { isMap, isScalar, isSeq, nodeItems, nodePairs } from './yaml-document.js';
 import type { Node, Pair, Scalar, YAMLMap } from './yaml-document.js';

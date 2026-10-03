@@ -3,7 +3,7 @@ import type { Teaching } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
 import {
     anchoredPaths,

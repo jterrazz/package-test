@@ -2,7 +2,7 @@ import { treeNames } from '@jterrazz/typescript/rules';
 import { dirname, join } from 'node:path';
 
 import { finding } from '../../kit/project/document-model.js';
-import type { SpecDocument } from '../../kit/project/spec-document.js';
+import type { SpecDocument } from '../../kit/project/spec-grammar.js';
 import { readText } from '../../kit/project/tree.js';
 import type { DocumentFinding } from './checker.js';
 

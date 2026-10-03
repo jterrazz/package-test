@@ -99,16 +99,6 @@
             "count": 1
         }
     },
-    "lint/kit/project/spec-document.test.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/spec-document.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "lint/kit/project/subject.test.ts": {
         "max-lines": {
             "count": 1

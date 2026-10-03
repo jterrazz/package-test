@@ -10,8 +10,9 @@ import {
     runMaps,
     streamScalars,
 } from '../project/document-model.js';
-import { DOCUMENT_KEYS, readSpecFile, RUN_KEYS } from '../project/spec-document.js';
-import type { SpecFile } from '../project/spec-document.js';
+import { readSpecFile } from '../project/spec-document.js';
+import { DOCUMENT_KEYS, RUN_KEYS } from '../project/spec-grammar.js';
+import type { SpecFile } from '../project/spec-grammar.js';
 import { readText } from '../project/tree.js';
 import { renderYamlSource, Scalar } from '../project/yaml-document.js';
 import type { YAMLMap } from '../project/yaml-document.js';

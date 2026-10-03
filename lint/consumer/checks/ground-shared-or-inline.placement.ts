@@ -11,7 +11,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { relativeLiterals } from '../../kit/checker/repoint.js';
 import { moduleTestsOf } from '../../kit/project/module-tests.js';
 import { SETTINGS_FILE } from '../../kit/project/settings-file.js';
-import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { literalSpans } from '../../kit/project/spec-values.js';
 import { placeOf } from '../../kit/project/specs-modules.js';
 import {
