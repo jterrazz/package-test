@@ -37,6 +37,31 @@ function manifestIn(workDir: string): unknown {
     return JSON.parse(readFileSync(manifest, 'utf8'));
 }
 
+const LINK_CHAPTER = 'read: docs/14-cli.md#link--a-package-the-working-directory-resolves';
+
+const DISK_CHAPTER = 'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime';
+
+const DISK_WHY =
+    'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.';
+
+function refusalOf(work: () => void): string {
+    try {
+        work();
+        return '';
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+    }
+}
+
+function symlinkRefusal(ancestor: string): string {
+    return [
+        `found: link('@acme/greeter'): ${ancestor} is a symlink, so the link would replace @acme/greeter wherever it points`,
+        'why: A link is laid inside the working directory only; through a symlinked folder it would delete a real install outside it.',
+        `fix: drop the symlink at ${ancestor} from the fixture or the command that lays it, so the working directory holds its own node_modules`,
+        LINK_CHAPTER,
+    ].join('\n');
+}
+
 describe('fsLinks', () => {
     test('installedPackage — a bare name — is found in the first node_modules above the spec that holds it', () => {
         // Given - the spec's own folder holds no node_modules
@@ -56,55 +81,54 @@ describe('fsLinks', () => {
         expect(installedPackage('@acme/absent', testDir)).toBeNull();
     });
 
-    test('fsLinks — a symlinked node_modules — is refused, and the install it points to is kept', () => {
-        // Given - a working directory whose node_modules is a symlink to the project's own install
+    test('fsLinks — a symlinked node_modules or scope folder — is refused, and the install it points to is kept', () => {
+        // Given - one working directory whose node_modules links to the project's install, and one whose scope folder does
         const { root, testDir } = project();
-        const workDir = workDirectory();
-        symlinkSync(resolve(root, 'node_modules'), resolve(workDir, 'node_modules'), 'dir');
-
-        // Then - the link is refused, naming the symlink, and the real package is untouched
-        expect(() => {
-            fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
-        }).toThrow(
-            `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules')} is a symlink`,
-        );
-        expect(existsSync(resolve(root, 'node_modules/@acme/greeter/package.json'))).toBe(true);
-    });
-
-    test('fsLinks — a symlinked scope folder — is refused, and the install it points to is kept', () => {
-        // Given - a working directory whose own node_modules holds the scope as a symlink to the project's
-        const { root, testDir } = project();
-        const workDir = workDirectory();
-        mkdirSync(resolve(workDir, 'node_modules'));
+        const [whole, scoped] = [workDirectory(), workDirectory()];
+        symlinkSync(resolve(root, 'node_modules'), resolve(whole, 'node_modules'), 'dir');
+        mkdirSync(resolve(scoped, 'node_modules'));
         symlinkSync(
             resolve(root, 'node_modules/@acme'),
-            resolve(workDir, 'node_modules/@acme'),
+            resolve(scoped, 'node_modules/@acme'),
             'dir',
         );
 
-        // Then - the link is refused, naming the scope folder, and the real package is untouched
-        expect(() => {
-            fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
-        }).toThrow(
-            `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules/@acme')} is a symlink`,
-        );
-        expect(existsSync(resolve(root, 'node_modules/@acme/greeter/package.json'))).toBe(true);
+        // Then - each link refused, naming the symlink, and the real package untouched
+        expect([
+            refusalOf(() => {
+                fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, whole);
+            }),
+            refusalOf(() => {
+                fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, scoped);
+            }),
+            existsSync(resolve(root, 'node_modules/@acme/greeter/package.json')),
+        ]).toStrictEqual([
+            symlinkRefusal(resolve(whole, 'node_modules')),
+            symlinkRefusal(resolve(scoped, 'node_modules/@acme')),
+            true,
+        ]);
     });
 
-    test('fsLinks — a file where a folder goes — is refused as a refusal, naming the file', () => {
+    test('fsLinks — a file where a folder goes — is refused, naming the file', () => {
         // Given - a working directory a fixture laid with node_modules as a file
         const { testDir } = project();
         const workDir = workDirectory();
         writeFileSync(resolve(workDir, 'node_modules'), '');
+        const file = resolve(workDir, 'node_modules');
 
-        // Then - the link is refused, naming the file and the chapter
-        const laying = (): void => {
-            fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
-        };
-        expect(laying).toThrow(
-            `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules')} is a file, not a folder`,
+        // Then - the link is refused, naming the file
+        expect(
+            refusalOf(() => {
+                fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
+            }),
+        ).toBe(
+            [
+                `found: link('@acme/greeter'): ${file} is a file, not a folder`,
+                'why: A link is laid at node_modules/<name> inside the working directory, and a file on that path leaves it no folder to lay it in.',
+                `fix: drop the file at ${file} from the fixture or the command that lays it, so the link can lay its folder there`,
+                LINK_CHAPTER,
+            ].join('\n'),
         );
-        expect(laying).toThrow('docs/14-cli.md#link--a-package-the-working-directory-resolves');
     });
 
     test('fsLinks — a bare name — links the package the spec’s project resolves', () => {
@@ -115,18 +139,6 @@ describe('fsLinks', () => {
 
         // Then - the working directory resolves the project's install
         expect(manifestIn(workDir)).toStrictEqual({ name: '@acme/greeter', version: '2.0.0' });
-    });
-
-    test('fsLinks — a bare name — refuses a name no node_modules above the spec holds, naming where it looked', () => {
-        // Given - a name nothing installed
-        const { testDir } = project();
-
-        // Then - the refusal names the walk's start
-        expect(() => {
-            fsLinks.link('@acme/absent', null, testDir, workDirectory());
-        }).toThrow(
-            `found: link('@acme/absent'): no node_modules from ${testDir} up holds @acme/absent`,
-        );
     });
 
     test('fsLinks — a named directory — replaces the package a fixture already laid under the name', () => {
@@ -140,25 +152,45 @@ describe('fsLinks', () => {
         expect(manifestIn(workDir)).toStrictEqual({ name: '@acme/greeter', version: '1.0.0' });
     });
 
-    test('fsLinks — a named directory — refuses a path naming nothing, with the path it resolved to', () => {
-        // Given - a directory the leaf does not carry
-        const { testDir } = project();
+    test('fsLinks — what it is handed — refuses a name nothing installed, a path naming nothing, one naming a file, and one not relative', () => {
+        // Given - a project and its spec folder
+        const { root, testDir } = project();
+        const linked = (name: string, path: null | string): string =>
+            refusalOf(() => {
+                fsLinks.link(name, path, testDir, workDirectory());
+            }).replaceAll(root, '<root>');
 
-        // Then - the refusal carries the absolute path it looked at
-        expect(() => {
-            fsLinks.link('@acme/greeter', './_fixtures/absent/', testDir, workDirectory());
-        }).toThrow(`${resolve(testDir, '_fixtures/absent')} does not exist`);
-    });
-
-    test('fsLinks — a named directory — refuses a path naming a file', () => {
-        // Given - a file named in directory form
-        const { testDir } = project();
-
-        // Then - the refusal names the directory holding it
-        expect(() => {
-            fsLinks.link('@acme/greeter', './_fixtures/readme.md/', testDir, workDirectory());
-        }).toThrow(
-            /names a file\n.*\nfix: name the directory that holds the package's package\.json: directory\('\.\/_fixtures\/'\)/u,
-        );
+        // Then - each refusal whole
+        expect([
+            linked('@acme/absent', null),
+            linked('@acme/greeter', './_fixtures/absent/'),
+            linked('@acme/greeter', './_fixtures/readme.md/'),
+            linked('@acme/greeter', '/abs/greeter/'),
+        ]).toStrictEqual([
+            [
+                "found: link('@acme/absent'): no node_modules from <root>/specs/cli/feature up holds @acme/absent",
+                'why: A bare name links the package the spec’s own project resolves, found as Node finds it.',
+                "fix: install @acme/absent in the project the spec belongs to, or name the package's directory: link('@acme/absent', directory('./_fixtures/…/'))",
+                LINK_CHAPTER,
+            ].join('\n'),
+            [
+                `found: link('@acme/greeter', directory("./_fixtures/absent/")) names nothing — <root>/specs/cli/feature/_fixtures/absent does not exist`,
+                DISK_WHY,
+                'fix: create <root>/specs/cli/feature/_fixtures/absent, or correct the path',
+                DISK_CHAPTER,
+            ].join('\n'),
+            [
+                `found: link('@acme/greeter', directory("./_fixtures/readme.md/")) names a file`,
+                DISK_WHY,
+                "fix: name the directory that holds the package's package.json: directory('./_fixtures/')",
+                DISK_CHAPTER,
+            ].join('\n'),
+            [
+                'found: link("/abs/greeter/"), a path that is not relative to the spec file',
+                DISK_WHY,
+                "fix: start it with ./ or ../, from the spec file: link('./abs/greeter/')",
+                DISK_CHAPTER,
+            ].join('\n'),
+        ]);
     });
 });
