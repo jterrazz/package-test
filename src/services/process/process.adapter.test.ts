@@ -58,10 +58,38 @@ describe('process.adapter', () => {
             ready: READY,
         });
 
-        // Then - the specification stops there, naming the exit and the output
+        // Then - the specification stops there, naming itself, the exit and the output
         await expect(handle.spawnWith(process.cwd(), {}, 'run-4')).rejects.toThrow(
-            'the build failed',
+            /^found: specification\.process\(\): `before` exited 2\.\nCommand: node -e .*\nOutput:\nthe build failed\n/u,
         );
+    });
+
+    test('process — the one shape an external process takes — is an embedded service with no image, no database and no address until it runs, and stops even unstarted', async () => {
+        // Given - a declared but unstarted process
+        const handle = processService({ command: SERVER, ready: READY });
+
+        // When - it is shut down before it ever ran, twice
+        await handle.shutdown();
+        await handle.shutdown();
+
+        // Then - its declared shape
+        expect({
+            connectionString: handle.connectionString,
+            database: handle.createDatabaseAdapter(),
+            defaultImage: handle.defaultImage,
+            defaultPort: handle.defaultPort,
+            environment: handle.environment,
+            serviceName: handle.serviceName,
+            type: handle.type,
+        }).toStrictEqual({
+            connectionString: '',
+            database: null,
+            defaultImage: '',
+            defaultPort: 0,
+            environment: {},
+            serviceName: null,
+            type: 'process',
+        });
     });
 
     test('process — the one shape an external process takes — refuses to name a url before it is up', () => {
