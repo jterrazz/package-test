@@ -1,15 +1,13 @@
 import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { child, childList, isNode, stringField, walk } from '../../kit/project/ast.js';
+import { isNode, stringValue, walk } from '../../kit/project/ast.js';
 import { parseProgram } from '../../kit/project/module-parser.js';
-import { collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { specsAnchor } from '../../kit/project/specs-anchor.js';
 import { isModuleName } from '../../kit/project/specs-modules.js';
 import {
-    DISK_CALL,
     findPools,
     isConventionalSubdir,
     isReferrer,
@@ -35,18 +33,10 @@ function collectSpecLiterals(path: string): Set<string> {
 }
 
 /** Over-collection only ever hides a dead-fixture finding, so a greedy regex is safe as the fallback for a source the parser refuses. */
-const STRING_LITERAL =
-    /'(?<single>(?:[^'\\\n]|\\.)*)'|"(?<double>(?:[^"\\\n]|\\.)*)"|`(?<template>(?:[^`$\\]|\\.)*)`/gu;
+const STRING_LITERAL = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`$\\]|\\.)*`/gu;
 
 function scannedLiterals(text: string): Set<string> {
-    const found = new Set<string>();
-    for (const match of text.matchAll(STRING_LITERAL)) {
-        const value = match.groups?.single ?? match.groups?.double ?? match.groups?.template;
-        if (value !== undefined && value.length > 0) {
-            found.add(value);
-        }
-    }
-    return found;
+    return new Set([...text.matchAll(STRING_LITERAL)].map(([literal]) => literal.slice(1, -1)));
 }
 
 /** Read from the syntax tree: a scan of quotes can pair a quote inside a template's hole with one far below it, and lose every literal in between. */
@@ -57,13 +47,9 @@ function collectLiterals(file: string, text: string): Set<string> {
     }
     const found = new Set<string>();
     walk(program, (node) => {
-        if (node.type === 'Literal' && typeof node.value === 'string' && node.value.length > 0) {
-            found.add(node.value);
-        } else if (node.type === 'TemplateLiteral' && childList(node, 'expressions').length === 0) {
-            const cooked = stringField(child(childList(node, 'quasis')[0], 'value'), 'cooked');
-            if (cooked !== undefined && cooked.length > 0) {
-                found.add(cooked);
-            }
+        const value = stringValue(node);
+        if (value !== undefined) {
+            found.add(value);
         }
     });
     return found;
@@ -72,59 +58,46 @@ function collectLiterals(file: string, text: string): Set<string> {
 /** The hole is unreadable but its static ends are not: an entry matching the prefix and suffix could be asked for by the table, which is all `no-unused-ground` needs. */
 export type LiteralPattern = { directory: string; prefix: string; suffix: string };
 
-const TEMPLATE_WITH_HOLE = /`(?<body>(?:[^`\\]|\\.)*\$\{(?:[^`\\]|\\.)*)`/gu;
+const TEMPLATE_WITH_HOLE = /`(?:[^`\\]|\\.)*\$\{(?:[^`\\]|\\.)*`/gu;
 
 function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
-    const found: LiteralPattern[] = [];
-    for (const match of text.matchAll(TEMPLATE_WITH_HOLE)) {
-        const body = match.groups?.body ?? '';
-        const opens = body.indexOf('${');
-        const closes = body.lastIndexOf('}');
-        if (opens === -1 || closes === -1 || closes < opens) {
-            continue;
-        }
-        const before = body.slice(0, opens);
-        const cut = before.lastIndexOf('/');
-        const prefix = before.slice(cut + 1);
-        const suffix = body.slice(closes + 1);
-        if (prefix.length > 0 || suffix.length > 0) {
-            const folders = before.slice(0, Math.max(cut, 0));
-            found.push({
-                directory: resolve(from, folders),
-                prefix,
-                suffix: suffix.split('/')[0] ?? '',
-            });
-        }
-    }
-    return found;
+    return [...text.matchAll(TEMPLATE_WITH_HOLE)]
+        .map(([template]) => {
+            const body = template.slice(1, -1);
+            const before = body.slice(0, body.indexOf('${'));
+            const cut = before.lastIndexOf('/');
+            const tail = body.slice(body.lastIndexOf('}') + 1);
+            return {
+                directory: resolve(from, before.slice(0, Math.max(cut, 0))),
+                prefix: before.slice(cut + 1),
+                suffix: tail.slice(0, tail.search(/\/|$/u)),
+            };
+        })
+        .filter(({ prefix, suffix }) => prefix !== '' || suffix !== '');
 }
 
 /** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
 type References = { paths: Set<string>; patterns: LiteralPattern[] };
 
-/** A source's other literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/_shared/_fixtures/app/server.mjs`). */
-function referencesOf(file: string, into: References): void {
+/** A source's literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/_shared/_fixtures/app/server.mjs`). */
+function pathsNamedBy(file: string): string[] {
     const from = dirname(file);
     if (file.endsWith(SPEC_EXTENSION)) {
-        for (const literal of collectSpecLiterals(file)) {
-            into.paths.add(resolve(from, literal));
-        }
-        return;
-    }
-    for (const { path } of collectFixtureReferences(file, DISK_CALL)) {
-        into.paths.add(resolve(from, path));
+        return [...collectSpecLiterals(file)].map((literal) => resolve(from, literal));
     }
     const anchor = specsAnchor(file);
+    // Stryker disable next-line ConditionalExpression: a reader always sits under a specs root
     const bases = anchor === undefined ? [from] : [from, dirname(anchor.directory)];
-    const text = readSource(file);
-    for (const literal of collectLiterals(file, text)) {
-        for (const word of literal.split(/\s+/u).filter((part) => part.length > 0)) {
-            for (const base of bases) {
-                into.paths.add(resolve(base, word));
-            }
-        }
-    }
-    into.patterns.push(...collectLiteralPatterns(text, from));
+    return [...collectLiterals(file, readSource(file))].flatMap((literal) =>
+        literal.split(/\s/u).flatMap((word) => bases.map((base) => resolve(base, word))),
+    );
+}
+
+function referencesOf(files: readonly string[]): References {
+    return {
+        paths: new Set(files.flatMap((file) => pathsNamedBy(file))),
+        patterns: files.flatMap((file) => collectLiteralPatterns(readSource(file), dirname(file))),
+    };
 }
 
 function entryReferenced(path: string, references: References): boolean {
@@ -172,13 +145,10 @@ function unreferencedEntries(
     groundSubdirs: readonly string[],
     testFiles: readonly string[],
 ): Spotted[] {
-    const references: References = { paths: new Set(), patterns: [] };
-    for (const reader of listFiles(dir, (path) => isModuleName(basename(path)))) {
-        referencesOf(reader, references);
-    }
-    for (const testFile of testFiles) {
-        referencesOf(testFile, references);
-    }
+    const references = referencesOf([
+        ...listFiles(dir, (path) => isModuleName(basename(path))),
+        ...testFiles,
+    ]);
     return groundSubdirs.flatMap((sub) => {
         const subPath = join(dir, sub);
         return treeEntries(subPath)
@@ -226,10 +196,7 @@ function checkPoolFixtures(rootDir: string): Spotted[] {
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
         // invariant: a reference made from inside the pool is left out: a dead entry cannot vouch for another.
-        const references: References = { paths: new Set(), patterns: [] };
-        for (const file of listReferrers(specsRoot, pool)) {
-            referencesOf(file, references);
-        }
+        const references = referencesOf(listReferrers(specsRoot, pool));
         for (const entry of treeEntries(pool)) {
             if (!entryReferenced(join(pool, entry.name), references)) {
                 const relEntry = relative(rootDir, join(pool, entry.name));
