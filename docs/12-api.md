@@ -312,7 +312,7 @@ api routes: all 12 declared routes reached
 
 #### The ratchet
 
-A route no test reached fails the run, each one named. The count is a ratchet, held under `jterrazz.baseline.json › test › routes/unreached`: `TEST_UPDATE=1` records where the run stands, and the checker's own recordings keep that key. The entry is exact in both directions — a run that reaches more routes than it held fails too, since the debt fell, until `TEST_UPDATE=1` records the lower count.
+A route no test reached fails the run, each one named. The count is a ratchet, held under `.jterrazz/baseline.json › test › routes/unreached`: `TEST_UPDATE=1` records where the run stands, and the checker's own recordings keep that key. The entry is exact in both directions — a run that reaches more routes than it held fails too, since the debt fell, until `TEST_UPDATE=1` records the lower count.
 
 #### When a run is not judged
 

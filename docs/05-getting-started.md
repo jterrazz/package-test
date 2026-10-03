@@ -47,17 +47,21 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest better-sqlite3
 ### 2. Configure vitest
 
 ```typescript
-// vitest.config.ts
-import { api, defineSpecConfig, unit } from '@jterrazz/test/vitest';
+// jterrazz.config.ts
+import { test } from '@jterrazz/test/config';
+import { defineConfig } from '@jterrazz/typescript/config';
 
-export default defineSpecConfig({
-    test: { projects: [unit(), api()] },
+export default defineConfig({
+    kind: 'api',
+    platform: 'node',
+    presets: [test()],
+    test: { projects: [{ facet: 'unit' }, { facet: 'api' }] },
 });
 ```
 
-`defineSpecConfig()` sets the shared defaults (timeouts, artefact paths, no retries). Each helper is a vitest project: `unit()` collects the `*.test.ts` files next to your modules, `api()` collects `specs/api/**/*.spec.ts`. [06 — Setting up](06-setting-up.md#the-vitest-config) lists every helper and default.
+Then `npx typescript fix` writes the `vitest.config.ts` those projects derive, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and each project is built by the helper its `facet` names: `unit` collects the `*.test.ts` files next to your modules, `api` collects `specs/api/**/*.spec.ts`. [06 — Setting up](06-setting-up.md#the-vitest-config) lists every helper and default.
 
-This `api()`, from `@jterrazz/test/vitest`, only names a vitest project. The `api` you send requests with is a different thing: the runner that step 3 builds.
+This `api` project only names a vitest project. The `api` you send requests with is a different thing: the runner that step 3 builds.
 
 ### 3. Build the runner, once per suite
 
@@ -116,7 +120,7 @@ The folder says what is tested (`users/list/` is `GET /users`), the file name sa
 npx vitest --run --project api
 ```
 
-The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `jterrazz.baseline.json`, which you commit, and the count can only go down from there ([12 — API specs § Route coverage](12-api.md#route-coverage)).
+The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `.jterrazz/baseline.json`, which you commit, and the count can only go down from there ([12 — API specs § Route coverage](12-api.md#route-coverage)).
 
 To write the expected value instead of typing it, leave it empty — `toMatch('')` — and run once with `TEST_UPDATE=1`. The framework writes what came back into the test, with tokens where values move; you read the diff before you commit it ([22 — Tokens § Update mode](22-tokens.md#update-mode-tokens-are-preserved)).
 

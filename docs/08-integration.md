@@ -143,20 +143,20 @@ The golden is named by a template literal, and the checker's `no-unused-ground` 
 
 ### The `integration()` project
 
-`integration()` from `@jterrazz/test/vitest` is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node facets.
+The `integration` facet is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node facets.
 
 ```typescript
-import { defineSpecConfig, integration, unit } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({ test: { projects: [unit(), integration()] } });
+// jterrazz.config.ts — its test section
+const test = { projects: [{ facet: 'unit' }, { facet: 'integration' }] };
 ```
 
 An env-gated sub-suite is an option, not a second project — the whole point of `{ include, exclude, timeout }`:
 
 ```typescript
-integration({
+const integration = {
     exclude: process.env.E2E_NETWORK ? [] : ['specs/integration/network/**'],
-});
+    facet: 'integration',
+};
 ```
 
 ### Folder layout

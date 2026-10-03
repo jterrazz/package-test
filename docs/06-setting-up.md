@@ -60,29 +60,41 @@ To try an unreleased build of the framework, install the tarball `npm pack` writ
 
 ## The vitest config
 
-`vitest.config.ts` starts from `defineSpecConfig()` and lists one project per kind of test the repository has:
+The projects a repository runs are declared in `jterrazz.config.ts`, one per kind of test it has, each named by its facet with that helper's options beside it:
 
 ```typescript
-// vitest.config.ts
-import { api, component, defineSpecConfig, unit, website } from '@jterrazz/test/vitest';
+// jterrazz.config.ts
+import { test } from '@jterrazz/test/config';
+import { defineConfig } from '@jterrazz/typescript/config';
 
-export default defineSpecConfig({
+export default defineConfig({
+    kind: 'api',
+    platform: 'node',
+    presets: [test()],
     test: {
         projects: [
-            unit(), // `**/*.test.ts` outside specs/ — modules, no browser
-            component({ vite: './vite.config.ts', wrap: './src/providers.tsx' }),
-            website(), // `specs/website/**`
-            api(), // `specs/api/**/*.spec.ts`
+            { facet: 'unit' }, // `**/*.test.ts` outside specs/ — modules, no browser
+            { facet: 'component', vite: './vite.config.ts', wrap: './src/providers.tsx' },
+            { facet: 'website' }, // `specs/website/**`
+            { facet: 'api' }, // `specs/api/**/*.spec.ts`
         ],
     },
 });
 ```
 
-What you pass is an ordinary vite/vitest config, merged over the defaults below: a scalar you state wins, an array you state is added to the default one.
+`vitest.config.ts` is the line those projects derive, which `typescript fix` writes and `typescript check` holds ([`@jterrazz/typescript`'s Config pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-config-one-file-pass)):
+
+```typescript
+import { vitestConfig } from '@jterrazz/test/vitest/config';
+
+export default vitestConfig();
+```
+
+It reads `jterrazz.config.ts` from the directory vitest runs in — the project root for `npm test`, and for the Vitest extension, which starts its worker in the config's own directory — and builds each project with its helper over the preset below. A project declares no `name`, `environment` or `browser`: its helper names it for its facet and sets what the facet needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. With no `projects`, the config is the preset alone. It is a call rather than a value because knip requires the config to find the tests, and a required module may not await at its top.
 
 ### The project helpers
 
-There is one helper per kind: `unit()`, `integration()`, `component()`, `website()`, `mobile()`, `api()`, `job()`, `cli()` and `lint()`, all from `@jterrazz/test/vitest`. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([18 — Services § One container per run](18-services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
+There is one helper per kind — `unit`, `integration`, `component`, `website`, `mobile`, `api`, `job`, `cli` and `lint` — named by a project's `facet`, and exported from `@jterrazz/test/vitest` for a config written by a tool of your own. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([18 — Services § One container per run](18-services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
 
 | Option                | Does                                                                                                            |
 | --------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -92,12 +104,15 @@ There is one helper per kind: `unit()`, `integration()`, `component()`, `website
 
 `unit()` and `component()` are a pair: `unit()` collects `**/*.test.ts` outside `specs/` and leaves out `**/*.test.tsx`, which `component()` collects. So the suffix beside a file decides which project runs it. `unit()` also takes `roots` when the modules are not at the repository root, and `isolate: false` to run a worker's files in one module graph — only for a project whose tests leave no state behind in a module. `component()` takes the options of the app it renders (`vite`, `wrap`, `viewport`, `clock`, `timezone`, `locale`, `root`), described in [09 — Component specs](09-component.md#the-constructor-there-is-none); `mobile()` takes the simulator the run shares ([11 — Mobile specs](11-mobile.md#one-session-per-run)).
 
-Projects run in groups — the node kinds first, then `website`, then `component`, then `mobile` — so two browser projects never open two Chromiums at once and a simulator runs alone. `component()` returns a promise; vitest accepts it in `projects` as it is.
+Projects run in groups — the node kinds first, then `website`, then `component`, then `mobile` — so two browser projects never open two Chromiums at once and a simulator runs alone.
 
 An env-gated sub-suite is an `exclude`, not a second project:
 
 ```typescript
-integration({ exclude: process.env.E2E_NETWORK ? [] : ['specs/integration/network/**'] });
+const integration = {
+    exclude: process.env.E2E_NETWORK ? [] : ['specs/integration/network/**'],
+    facet: 'integration',
+};
 ```
 
 ### What the preset sets
@@ -116,24 +131,16 @@ It sets nothing else on purpose. `fileParallelism`, `reporters`, `environment`, 
 
 The defaults reach every inline project too, since vitest resolves each project as its own config. A project given as a glob string, a promise or a function is handed back untouched.
 
-With several projects, `literate()` goes in the one project that collects the documents, not in the top-level `literate:` key, because its glob must join that project's `include`:
+The `<case>.spec.yaml` documents are collected by the `cli` project, which takes `literate` beside its own options:
 
 ```typescript
-import { defineSpecConfig, literate } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({
-    test: {
-        projects: [
-            {
-                plugins: [literate({ specification: './specs/cli/cli.specification.ts' })],
-                test: { include: ['specs/cli/**/*.spec.ts'], name: 'cli' },
-            },
-        ],
-    },
-});
+const cli = {
+    facet: 'cli',
+    literate: { specification: './specs/cli/cli.specification.ts' },
+};
 ```
 
-To adopt the preset in a config written by hand, swap `defineConfig` for `defineSpecConfig`, delete what the table above already says (the 30 s timeouts, `...configDefaults.exclude`, the ground exclusions), and keep what is yours. A timeout lower or higher than 30 s stays stated: the preset is a starting point, not a ceiling. Then add `.artifacts/` to `.gitignore`.
+To adopt the preset from a config written by hand, move each project into `test.projects` as its facet and the options you passed its helper, delete what the table above already says (the 30 s timeouts, `...configDefaults.exclude`, the ground exclusions), and run `typescript fix`, which writes the derived `vitest.config.ts`. A timeout lower or higher than 30 s stays stated, as the project's `timeout`: the preset is a starting point, not a ceiling. Then add `.artifacts/` to `.gitignore`.
 
 ## Turning the conventions on
 
@@ -184,7 +191,7 @@ export default defineConfig(fromPresets(settings));
 
 - **Forgetting `afterAll(cleanup)` in a specification file.** The services leak into the next suite (rule `cleanup-passed-to-after-all`).
 - **Importing from a subpath the package does not publish** (`@jterrazz/test/services`). Every name a test uses comes from `@jterrazz/test`; the tool entries are `/vitest`, `/config`, `/oxlint` and `/schema` (rule `no-unpublished-subpath`).
-- **Writing `browser:` in a config by hand.** `component()` pins the provider to the runner's version, serves the service worker and pre-bundles cold dependencies; rule `browser-project-from-component` refuses the hand-written form.
+- **Writing `browser:` in a config by hand.** `component()` pins the provider to the runner's version, serves the service worker and pre-bundles cold dependencies; a derived config has no place for a hand-written one: a project's `facet` is its helper.
 - **A CommonJS `oxlint.config`.** oxlint loads the plugin as ESM only; from a CommonJS config it prints a warning, registers nothing and exits 0. Use `oxlint.config.ts` or `.mjs` — [24 — Linting § Pitfalls](24-linting.md#pitfalls).
 
 ## Related

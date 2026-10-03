@@ -39,26 +39,20 @@ Every other facet starts something — a server, a database, a binary, a simulat
 
 | What                                               | Whose      | Where                                                           |
 | -------------------------------------------------- | ---------- | --------------------------------------------------------------- |
-| The providers every render is dressed in           | the app's  | `component({ wrap })` in `vitest.config.ts`                     |
-| The Vite pipeline the app builds with              | the app's  | `component({ vite })`                                           |
-| The viewport, the timezone, the locale             | the app's  | `component({ viewport, timezone, locale })`                     |
+| The providers every render is dressed in           | the app's  | the `component` project's `wrap`, in `jterrazz.config.ts`       |
+| The Vite pipeline the app builds with              | the app's  | its `vite`                                                      |
+| The viewport, the timezone, the locale             | the app's  | its `viewport`, `timezone`, `locale`                            |
 | The stubs, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
-// apps/web/vitest.config.ts
-import { component, defineSpecConfig, unit } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({
-    test: {
-        projects: [
-            unit({ roots: ['src', 'web'] }),
-            component({ vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' }),
-        ],
-    },
-});
+// apps/web/jterrazz.config.ts — its test section
+const projects = [
+    { facet: 'unit', roots: ['src', 'web'] },
+    { facet: 'component', vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' },
+];
 ```
 
-**A relative `vite` or `wrap` is the CONFIG's path, never the cwd's.** Both are resolved against the directory of the config that called `component()`, so the two paths above mean `apps/web/web/…` whoever loaded the file — the runner from the app, knip and `typescript check` from the repository root, where every config of a repository is read. State `root` when the anchor cannot be read that way: a call written outside the config it configures (a shared config factory), or a runner started in another tree entirely (`vitest --config apps/web/vitest.config.ts` from the root).
+**A relative `vite` or `wrap` is the project's path.** Both are resolved against the component project's `root`, which is the directory holding `jterrazz.config.ts` unless the project states one, so the two paths above mean `apps/web/web/…`. A `root` the project states is read from that same directory.
 
 `wrap` is a MODULE PATH whose default export is `(ui) => ReactNode` — a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
 
@@ -69,7 +63,7 @@ export default defineSpecConfig({
 | `clock`               | An ISO instant pinned for every render — a project whose components stamp the time                                       |
 | `viewport`            | `{ width, height }` of the page. Default `1280 × 720`                                                                    |
 | `timezone` / `locale` | The browser context's. Defaults `'UTC'` and `'en-US'`                                                                    |
-| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory of the config that called `component()`     |
+| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory holding `jterrazz.config.ts`                |
 | `include` / `exclude` | The globs. Default `['**/*.test.tsx']`, kept out of `specs/` — state your own `include` and the exclusion is yours too   |
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                |
 | `serial`              | `fileParallelism: false` — the project's renders run one file at a time                                                  |
@@ -81,16 +75,13 @@ export default defineSpecConfig({
 **A framework's config function is called as a dev server under test.** `component()` calls it with `{ command: 'serve', mode: 'test', isSsrBuild: false }` and adopts what it returns through the same allow-list, so an Astro app hands over its whole pipeline — its integrations' plugins, React's and Tailwind's among them, its `import.meta.env` defines, its `tsconfig` paths:
 
 ```typescript
-// vitest.config.ts of an Astro app
-import { component, defineSpecConfig } from '@jterrazz/test/vitest';
+// jterrazz.config.ts of an Astro app — its component project
 import { getViteConfig } from 'astro/config';
 
-export default defineSpecConfig({
-    test: { projects: [component({ vite: getViteConfig({}, { root: import.meta.dirname }) })] },
-});
+const component = { facet: 'component', vite: getViteConfig({}, { root: import.meta.dirname }) };
 ```
 
-Both arguments are Astro's. The first is required: Astro reads the app's `root` off it. The second's `root` is the one `component({ root })` cannot give: Astro looks for `astro.config.*` in the CWD, not beside the config that calls it, so a config loaded from elsewhere — knip or `typescript check` at a repository root, an app nested in a workspace — finds none, warns `Missing pages directory`, and hands back a pipeline without the app's integrations, its defines or its plugins. Nothing fails then; a component that needed them renders wrong.
+Both arguments are Astro's. The first is required: Astro reads the app's `root` off it. The second's `root` is the one the project's `root` cannot give: Astro looks for `astro.config.*` in the CWD, not beside the config that calls it, so a config loaded from elsewhere — knip or `typescript check` at a repository root, an app nested in a workspace — finds none, warns `Missing pages directory`, and hands back a pipeline without the app's integrations, its defines or its plugins. Nothing fails then; a component that needed them renders wrong.
 
 **A `resolve.alias` is an unlisted dependency.** An alias tells the bundler where a specifier resolves; it tells knip nothing, so a package reached only through an alias reads as undeclared, and a `paths`-less `tsconfig` makes the compiler disagree with the bundler besides. Mirror the alias in the `tsconfig`'s `paths` (the compiler and the bundler then answer alike), or name the package in `knip.ignoreDependencies` with the alias as the reason.
 
@@ -239,7 +230,7 @@ const result = await component.render((container) => {
 
 - **Reaching for `@testing-library/react` or `happy-dom`.** Rule `no-second-test-runtime` refuses both, and the second is the reason the facet exists: a simulated DOM behaves almost like a browser, and what ships is judged by a real one.
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
-- **Hand-rolling `browser:` in a config.** Rule `browser-project-from-component` refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
+- **Hand-rolling `browser:` in a config.** A derived config has no place for it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
 - **Asserting focus with a golden.** The tree carries no focus — [20 § Modifiers](20-visitor.md#modifiers) says what asserts it.
 - **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./_expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.

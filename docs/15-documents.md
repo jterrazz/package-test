@@ -138,7 +138,7 @@ The whole [token vocabulary](22-tokens.md) works in what a document ASSERTS — 
 | `{ include: [...] }`              | a narrower glob                                                               |
 | `false`                           | no documents at all — a suite written entirely in code                        |
 
-The `specification` is **stated, never guessed** beyond that convention: a repository may declare several cli runners, and nothing could pick the right one without silently binding a case to the wrong app. With `projects`, the door goes in the ONE project that collects those documents, never the root config. A member without `"type": "module"` names its config `vitest.config.mts`.
+The `specification` is **stated, never guessed** beyond that convention: a repository may declare several cli runners, and nothing could pick the right one without silently binding a case to the wrong app. The door is the `literate` option of the one `cli` project that collects those documents.
 
 **The bridge.** `cli.run(file('./<case>.spec.yaml'))` runs a document from a spec and resolves with the LAST run's result, so code adds what the document cannot express.
 
