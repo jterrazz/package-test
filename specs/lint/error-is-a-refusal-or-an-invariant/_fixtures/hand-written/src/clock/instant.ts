@@ -1,4 +1,4 @@
-import { refusal } from '../../lint/refusal.js';
+import { refusal } from '../chain/refusals/refusal.js';
 
 export function instantOf(iso: string): Date {
     throw new TypeError(

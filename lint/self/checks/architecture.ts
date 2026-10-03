@@ -55,7 +55,7 @@ function treeOf(layer: string): string {
     return layer === 'lint' ? 'lint/' : `src/${layer}/`;
 }
 
-/** A declared path as the map writes it: `chain/` a folder, `lint/refusal` one module, relative to `src/` unless it opens on `lint/`. */
+/** A declared path as the map writes it: `chain/` a folder, `chain/refusals/rows` one module, relative to `src/` unless it opens on `lint/`. */
 function targetOf(path: string): string {
     const rooted = path.startsWith('lint/') ? path : `src/${path}`;
 

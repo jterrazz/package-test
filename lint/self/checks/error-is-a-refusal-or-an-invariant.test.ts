@@ -5,7 +5,7 @@ import { checkErrorIsARefusalOrAnInvariant } from './error-is-a-refusal-or-an-in
 
 const CHAPTER = '# 19\n\n## The clock\n';
 
-const REFUSED = `import { refusal } from '../../lint/refusal.js';
+const REFUSED = `import { refusal } from '../chain/refusals/refusal.js';
 
 export function pinned(): never {
     throw new Error(refusal({ fix: 'f', found: 'x', read: 'docs/19-time-and-doubles.md#the-clock', why: 'w' }));

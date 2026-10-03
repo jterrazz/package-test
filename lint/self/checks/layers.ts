@@ -11,7 +11,7 @@ export type LayerOptions = {
     seams?: Record<string, string[]>;
 };
 
-const CHAIN_AND_REFUSALS = ['chain/', 'lint/kit/'];
+const CHAIN_AND_KIT = ['chain/', 'lint/kit/'];
 
 /** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
@@ -22,13 +22,13 @@ export const FRAMEWORK_LAYERS = {
             paths: ['vitest'],
             refusals: [],
         },
-        imports: CHAIN_AND_REFUSALS,
+        imports: CHAIN_AND_KIT,
         // The four-part lesson a refusal prints is the toolchain's rules kit.
         packages: ['@jterrazz/typescript/rules'],
     },
-    visitor: { imports: [...CHAIN_AND_REFUSALS, 'visitor/'] },
+    visitor: { imports: [...CHAIN_AND_KIT, 'visitor/'] },
     expectations: {
-        imports: [...CHAIN_AND_REFUSALS, 'expectations/'],
+        imports: [...CHAIN_AND_KIT, 'expectations/'],
         packages: ['vitest'],
         seams: {
             // A table read names its database by the rule a seed names it by: one validation.
@@ -40,7 +40,7 @@ export const FRAMEWORK_LAYERS = {
         },
     },
     stubs: {
-        imports: [...CHAIN_AND_REFUSALS, 'stubs/'],
+        imports: [...CHAIN_AND_KIT, 'stubs/'],
         packages: librariesOwnedIn('src/stubs/'),
         seams: {
             // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
@@ -50,7 +50,7 @@ export const FRAMEWORK_LAYERS = {
         },
     },
     services: {
-        imports: [...CHAIN_AND_REFUSALS, 'services/'],
+        imports: [...CHAIN_AND_KIT, 'services/'],
         // The container server's reader is a provided value (`vitest`).
         packages: [...librariesOwnedIn('src/services/'), 'vitest'],
         seams: {
@@ -59,10 +59,10 @@ export const FRAMEWORK_LAYERS = {
             'services/seed/seed.capability.ts': ['disk/spec-path'],
         },
     },
-    disk: { imports: [...CHAIN_AND_REFUSALS, 'disk/'] },
-    clock: { imports: [...CHAIN_AND_REFUSALS, 'clock/'], packages: ['vitest'] },
+    disk: { imports: [...CHAIN_AND_KIT, 'disk/'] },
+    clock: { imports: [...CHAIN_AND_KIT, 'clock/'], packages: ['vitest'] },
     mocks: {
-        imports: [...CHAIN_AND_REFUSALS, 'mocks/'],
+        imports: [...CHAIN_AND_KIT, 'mocks/'],
         packages: ['vitest', ...librariesOwnedIn('src/mocks/')],
     },
     // A folder owns its files, and no facet lists another.
@@ -78,7 +78,7 @@ export const FRAMEWORK_LAYERS = {
             website: librariesOwnedIn('src/facets/website/'),
         },
         imports: [
-            ...CHAIN_AND_REFUSALS,
+            ...CHAIN_AND_KIT,
             'visitor/',
             'expectations/',
             'stubs/',
