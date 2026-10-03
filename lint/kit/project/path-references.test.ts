@@ -54,6 +54,8 @@ describe('path-references', () => {
             "const b = join(here, '_seeds', name);",
             `const c = \`\${__dirname}/_expected/c.txt\`;`,
             "const d = readFileSync('./specs/d.sql');",
+            'export const there = __dirname;',
+            "const e = join(there, '_e');",
         ].join('\n');
 
         // Then - the four paths, each resolved where the module or the project sits
@@ -62,15 +64,25 @@ describe('path-references', () => {
             join(ROOT, 'src/_seeds'),
             join(ROOT, 'src/_expected/c.txt'),
             join(ROOT, 'specs/d.sql'),
+            join(ROOT, 'src/_e'),
         ]);
     });
 
     test('pathReferenceVisitor — names no path built from a root the caller hands in', () => {
-        // Given - paths that do not start where the module sits
+        // Given - paths that do not start where the module sits, or name nothing, or are read by no reader
         const source = [
+            'const root = cwd();',
+            'let unset;',
+            "const unsetPath = join(unset, '_fixtures');",
+            'const { dirname } = import.meta;',
             "const a = join(root, '_fixtures');",
             "const b = new URL('./x', base);",
             'const c = readFileSync(name);',
+            "const d = join(cwd(), '_fixtures');",
+            "const e = [join(), join(import.meta.dirname), copy(import.meta.dirname, 'x')];",
+            `const f = [\`x\${__dirname}/a\`, \`\${__dirname}a\`, \`plain\`];`,
+            "const g = [new Foo('./x', import.meta.url), new URL(name, import.meta.url)];",
+            "const h = [readFileSync('specs/x'), readFileSync('a/./b'), fetch('./x')];",
         ].join('\n');
 
         // Then - none of them is the module's own tree
@@ -103,6 +115,9 @@ describe('path-references', () => {
             "const b = join(here, '_fixtures');",
             "const c = resolve(import.meta.filename, 'x');",
             'const d = resolve(import.meta.dirname);',
+            "const e = copy(import.meta.dirname, 'x');",
+            "const f = join(other.dirname, 'x');",
+            "const g = [new URL('./x', base), new URL('./x', other.url)];",
         ].join('\n');
 
         // Then - none of them is a path named whole

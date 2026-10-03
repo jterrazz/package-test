@@ -1,63 +1,66 @@
 import { dirname, resolve } from 'node:path';
 
-import { child, childList, identifierName, memberPropertyName, stringValue, walk } from './ast.js';
+import {
+    child,
+    childList,
+    cookedText,
+    identifierName,
+    memberPropertyName,
+    stringValue,
+    walk,
+} from './ast.js';
 import type { AstNode, Visitor } from './ast.js';
 import { projectRootOf } from './role.js';
 
 export type PathReference = { node: AstNode; path: string };
 
+type LiteralArgument = { literal: string; target: AstNode };
+
 const FS_READ = /^(?:createReadStream|opendir(?:Sync)?|read\w*)$/u;
+
+const RELATIVE = /^\.\.?\//u;
 
 const PATH_BUILDERS = new Set(['join', 'resolve']);
 
-const COMMONJS_ANCHORS = new Set(['__dirname', '__filename']);
+const COMMONJS_ANCHORS = ['__dirname', '__filename'];
+
+function isMetaMember(node: AstNode | undefined, name: string): boolean {
+    return child(node, 'object')?.type === 'MetaProperty' && memberPropertyName(node) === name;
+}
 
 function isOwnDirectory(node: AstNode | undefined): boolean {
-    return (
-        identifierName(node) === '__dirname' ||
-        (node?.type === 'MemberExpression' &&
-            child(node, 'object')?.type === 'MetaProperty' &&
-            memberPropertyName(node) === 'dirname')
-    );
+    return identifierName(node) === '__dirname' || isMetaMember(node, 'dirname');
 }
 
 function calleeName(node: AstNode): string | undefined {
     const callee = child(node, 'callee');
-    return (
-        identifierName(callee) ?? (callee === undefined ? undefined : memberPropertyName(callee))
-    );
+    return identifierName(callee) ?? memberPropertyName(callee);
 }
 
 function argumentsOf(node: AstNode): AstNode[] {
     return childList(node, 'arguments');
 }
 
-function isImportMetaUrl(node: AstNode | undefined): boolean {
-    return (
-        node?.type === 'MemberExpression' &&
-        child(node, 'object')?.type === 'MetaProperty' &&
-        memberPropertyName(node) === 'url'
-    );
+function literalArguments(node: AstNode): (LiteralArgument | undefined)[] {
+    return argumentsOf(node).map((target) => {
+        const literal = stringValue(target);
+        return literal === undefined ? undefined : { literal, target };
+    });
 }
 
-function isAnchor(node: AstNode | undefined, anchors: Set<string>): boolean {
+function isAnchor(node: AstNode | undefined, anchors: ReadonlySet<string | undefined>): boolean {
     if (node === undefined) {
         return false;
     }
     let found = false;
     walk(node, (inner) => {
-        if (inner.type === 'MetaProperty') {
-            found = true;
-        } else {
-            const name = identifierName(inner) ?? '';
-            found ||= COMMONJS_ANCHORS.has(name) || anchors.has(name);
-        }
+        found ||= inner.type === 'MetaProperty' || anchors.has(identifierName(inner));
     });
     return found;
 }
 
-function anchorsOf(program: AstNode): Set<string> {
-    const anchors = new Set<string>();
+function anchorsOf(program: AstNode): Set<string | undefined> {
+    const anchors = new Set<string | undefined>(COMMONJS_ANCHORS);
     for (const statement of childList(program, 'body')) {
         const declaration =
             statement.type === 'ExportNamedDeclaration'
@@ -86,83 +89,86 @@ function literalTail(pieces: AstNode[]): string[] {
 }
 
 /** `join(import.meta.dirname, '_fixtures', name)` names `<here>/_fixtures`. */
-function anchoredPath(node: AstNode, here: string, anchors: Set<string>): string | undefined {
-    if (node.type === 'CallExpression' && PATH_BUILDERS.has(calleeName(node) ?? '')) {
-        const [first, ...rest] = argumentsOf(node);
-        const tail = literalTail(rest);
-        if (!isAnchor(first, anchors) || tail.length === 0) {
-            return undefined;
-        }
-        return resolve(here, ...tail);
+function builtPath(
+    node: AstNode,
+    here: string,
+    anchors: ReadonlySet<string | undefined>,
+): string | undefined {
+    const [first, ...rest] = argumentsOf(node);
+    const tail = literalTail(rest);
+    if (
+        !PATH_BUILDERS.has(calleeName(node) ?? '') ||
+        !isAnchor(first, anchors) ||
+        tail.length === 0
+    ) {
+        return undefined;
     }
-    if (node.type === 'TemplateLiteral') {
-        const [hole] = childList(node, 'expressions');
-        const quasis = childList(node, 'quasis');
-        const cooked = (index: number): string => {
-            const value = quasis[index]?.value;
-            const text =
-                typeof value === 'object' && value !== null && 'cooked' in value
-                    ? value.cooked
-                    : undefined;
-            return typeof text === 'string' ? text : '';
-        };
-        if (!isAnchor(hole, anchors) || cooked(0) !== '' || !cooked(1).startsWith('/')) {
-            return undefined;
-        }
-        return resolve(here, `.${cooked(1)}`);
-    }
-    return undefined;
+    return resolve(here, ...tail);
 }
 
-function urlLiteral(node: AstNode): undefined | { literal: string; target: AstNode } {
-    const [target, base] = argumentsOf(node);
-    const literal = stringValue(target);
-    return identifierName(child(node, 'callee')) === 'URL' &&
-        target !== undefined &&
-        literal !== undefined &&
-        isImportMetaUrl(base)
-        ? { literal, target }
+/** `` `${import.meta.dirname}/_fixtures/a.json` `` names `<here>/_fixtures/a.json`. */
+function templatePath(
+    node: AstNode,
+    here: string,
+    anchors: ReadonlySet<string | undefined>,
+): string | undefined {
+    const [hole] = childList(node, 'expressions');
+    const [head, tail] = childList(node, 'quasis').map(cookedText);
+    // Stryker disable next-line OptionalChaining: an anchored hole always has a text after it
+    if (!isAnchor(hole, anchors) || head !== '' || tail?.startsWith('/') !== true) {
+        return undefined;
+    }
+    return resolve(here, `.${tail}`);
+}
+
+function urlLiteral(node: AstNode): LiteralArgument | undefined {
+    const [first] = literalArguments(node);
+    const [, base] = argumentsOf(node);
+    return identifierName(child(node, 'callee')) === 'URL' && isMetaMember(base, 'url')
+        ? first
         : undefined;
 }
 
-/** Its `Program` handler reads the module's place and anchors first, so it must see the program before any node inside it. */
+/** Its `Program` handler reads the module's anchors first, so it must see the program before any node inside it. */
 export function pathReferenceVisitor(
     file: () => string,
     onPath: (entry: PathReference) => void,
 ): Visitor {
-    let here = '';
-    let anchors = new Set<string>();
-    const anchored = (node: AstNode): void => {
-        const path = anchoredPath(node, here, anchors);
+    const here = (): string => dirname(file());
+    let anchors = new Set<string | undefined>();
+    const report = (node: AstNode, path: string | undefined): void => {
         if (path !== undefined) {
             onPath({ node, path });
         }
     };
     return {
         CallExpression(node: AstNode) {
-            anchored(node);
-            const [first] = argumentsOf(node);
-            const literal = stringValue(first);
+            const place = here();
+            report(node, builtPath(node, place, anchors));
+            const [first] = literalArguments(node);
             if (
-                FS_READ.test(calleeName(node) ?? '') &&
                 first !== undefined &&
-                literal !== undefined &&
-                /^\.\.?\//u.test(literal)
+                FS_READ.test(calleeName(node) ?? '') &&
+                RELATIVE.test(first.literal)
             ) {
-                onPath({ node: first, path: resolve(projectRootOf(here) ?? here, literal) });
+                onPath({
+                    node: first.target,
+                    path: resolve(projectRootOf(place) ?? place, first.literal),
+                });
             }
         },
         NewExpression(node: AstNode) {
             const url = urlLiteral(node);
             if (url !== undefined) {
-                onPath({ node: url.target, path: resolve(here, url.literal) });
+                onPath({ node: url.target, path: resolve(here(), url.literal) });
             }
         },
         Program(node: AstNode) {
-            here = dirname(file());
             anchors = anchorsOf(node);
         },
-        TemplateLiteral: anchored,
+        TemplateLiteral(node: AstNode) {
+            report(node, templatePath(node, here(), anchors));
+        },
     };
 }
 

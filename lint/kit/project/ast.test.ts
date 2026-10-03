@@ -71,7 +71,7 @@ describe('ast', () => {
     });
 
     test('memberPropertyName and memberPath — name a member written as it is, never a computed one', () => {
-        // Given - members, calls and names
+        // Given - members, calls and names, and no node at all
         const names = ['a.b', 'a[b]', "a['b']", 'a', 'a.#b'];
         const paths = [
             'a',
@@ -90,9 +90,11 @@ describe('ast', () => {
             read(names, memberPropertyName),
             read(paths, memberPath),
             memberPath(NOTHING),
+            memberPropertyName(NOTHING),
         ]).toStrictEqual([
             ['b', undefined, undefined, undefined, undefined],
             ['a', 'a.b.c', 'a.b()', undefined, 'f()', undefined, undefined, undefined, undefined],
+            undefined,
             undefined,
         ]);
     });

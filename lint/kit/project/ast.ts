@@ -26,15 +26,20 @@ export function stringValue(node: AstNode | undefined): string | undefined {
     if (node.type !== 'TemplateLiteral' || childList(node, 'expressions').length > 0) {
         return undefined;
     }
-    // Stryker disable next-line OptionalChaining: a template always has a first text
-    const cooked = fieldOf(childList(node, 'quasis')[0]?.value, 'cooked');
+    const [text] = childList(node, 'quasis');
+    return cookedText(text);
+}
+
+export function cookedText(quasi: AstNode | undefined): string | undefined {
+    // Stryker disable next-line OptionalChaining: a template always has a text around each hole
+    const cooked = fieldOf(quasi?.value, 'cooked');
     // Stryker disable next-line ConditionalExpression: an untagged template always cooks its text
     return typeof cooked === 'string' ? cooked : undefined;
 }
 
-export function memberPropertyName(node: AstNode): string | undefined {
+export function memberPropertyName(node: AstNode | undefined): string | undefined {
     // Stryker disable next-line ConditionalExpression: only a member has a property
-    if (node.type !== 'MemberExpression' || node.computed === true) {
+    if (node?.type !== 'MemberExpression' || node.computed === true) {
         return undefined;
     }
     const property = child(node, 'property');
