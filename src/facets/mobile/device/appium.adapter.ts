@@ -9,7 +9,7 @@ import { asWritten } from '../../../visitor/targets/as-written.js';
 import { scopeChain } from '../../../visitor/targets/landmarks.js';
 import type { Target } from '../../../visitor/targets/target.js';
 import { openSession } from '../session/driver-session.js';
-import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
+import type { Driver, Webdriverio } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
 import { ambiguousScreenElementError } from './ambiguous.js';
 import type {
@@ -33,26 +33,23 @@ const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 /** One driver session, opened lazily and reused: WebDriverAgent startup is the expensive part. Every `open()` relaunches the app. */
 export class AppiumAdapter implements DevicePort {
     private readonly actionTimeoutMs: number;
-    private readonly attach?: AttachFn | undefined;
     private opened: null | { driver: Driver; shared: boolean } = null;
     private readonly launchTimeoutMs: number;
     private readonly ledger?: SessionLedger | undefined;
     private readonly options: { device: MobileDevice; serverUrl: string };
     /** Injected by the unit test; production loads webdriverio lazily. */
-    private readonly remote?: RemoteFn | undefined;
+    private readonly webdriverio?: undefined | Webdriverio;
 
     constructor(options: {
-        attach?: AttachFn | undefined;
         device: MobileDevice;
         ledger?: SessionLedger | undefined;
-        remote?: RemoteFn | undefined;
         serverUrl: string;
         timeouts?: DeviceTimeouts | undefined;
+        webdriverio?: undefined | Webdriverio;
     }) {
         this.options = { device: options.device, serverUrl: options.serverUrl };
-        this.attach = options.attach;
         this.ledger = options.ledger;
-        this.remote = options.remote;
+        this.webdriverio = options.webdriverio;
         this.actionTimeoutMs = options.timeouts?.action ?? DEFAULT_ACTION_TIMEOUT_MS;
         this.launchTimeoutMs = options.timeouts?.launch ?? DEFAULT_WDA_LAUNCH_TIMEOUT_MS;
     }
@@ -199,13 +196,12 @@ export class AppiumAdapter implements DevicePort {
 
     private async session(bundleId: string): Promise<Driver> {
         this.opened ??= await openSession({
-            attach: this.attach,
             bundleId,
             device: this.options.device,
             launchTimeoutMs: this.launchTimeoutMs,
             ledger: this.ledger,
-            remote: this.remote,
             serverUrl: this.options.serverUrl,
+            webdriverio: this.webdriverio,
         });
         return this.opened.driver;
     }

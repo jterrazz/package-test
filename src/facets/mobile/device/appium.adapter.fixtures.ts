@@ -62,7 +62,7 @@ export function element(
 export function fakeDevice(
     log: DeviceLog,
     screen: FakeScreen = {},
-): { remote: never; sessions: Session[] } {
+): { sessions: Session[]; webdriverio: never } {
     const sessions: Session[] = [];
     const { query = () => [], refusing = [], screenshot, source = '<App />' } = screen;
     const remote = async (options: Session) => {
@@ -89,11 +89,11 @@ export function fakeDevice(
                     : Promise.resolve(screenshot)),
         });
     };
-    return { remote: asSeam(remote), sessions };
+    return { sessions, webdriverio: asSeam({ attach: remote, remote }) };
 }
 
 export function adapterOver(
-    remote: never,
+    webdriverio: never,
     options: { device?: MobileDevice; shared?: boolean; timeouts?: DeviceTimeouts } = {},
 ): AppiumAdapter {
     const { device = { name: 'iPhone 17', udid: 'SIM-UDID' }, shared = false, timeouts } = options;
@@ -101,9 +101,9 @@ export function adapterOver(
     return new AppiumAdapter({
         device,
         ledger: shared ? sessionLedger(mkdtempSync(ledgerDirectory)) : undefined,
-        remote,
         serverUrl: 'http://127.0.0.1:4723',
         timeouts,
+        webdriverio,
     });
 }
 
@@ -117,7 +117,7 @@ export async function scenarioOn(
     action = 30_000,
 ): Promise<{ error: Error | undefined; log: DeviceLog }> {
     const log: DeviceLog = [];
-    const adapter = adapterOver(fakeDevice(log, screen(log)).remote, { timeouts: { action } });
+    const adapter = adapterOver(fakeDevice(log, screen(log)).webdriverio, { timeouts: { action } });
     const outcome: Outcome = {};
     await settleInto(outcome, adapter.open({ bundleId: BUNDLE_ID, scenario }));
     return {

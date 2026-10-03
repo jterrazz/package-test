@@ -32,11 +32,11 @@ describe('AppiumAdapter', () => {
     test('appium adapter — opening — relaunches the app over one session it reuses, a deep link followed, and answers the projected screen', async () => {
         // Given - a device whose app is not running at first
         const log: DeviceLog = [];
-        const { remote, sessions } = fakeDevice(log, {
+        const { sessions, webdriverio } = fakeDevice(log, {
             refusing: ['mobile: terminateApp'],
             source: SOURCE,
         });
-        const adapter = adapterOver(remote);
+        const adapter = adapterOver(webdriverio);
 
         // When - it opens plainly, then on a deep link, then closes twice
         const screen = await adapter.open({ bundleId: BUNDLE_ID });
@@ -71,7 +71,7 @@ describe('AppiumAdapter', () => {
     test('appium adapter — opening — a session the run shares is the run’s to end, and close leaves it open', async () => {
         // Given - an adapter whose session the run's ledger records
         const log: DeviceLog = [];
-        const adapter = adapterOver(fakeDevice(log).remote, { shared: true });
+        const adapter = adapterOver(fakeDevice(log).webdriverio, { shared: true });
         await adapter.open({ bundleId: BUNDLE_ID });
 
         // When - it closes
@@ -224,11 +224,13 @@ describe('AppiumAdapter', () => {
         const declared = fakeDevice([]);
         const fallback = fakeDevice([]);
         const named = fakeDevice([]);
-        await adapterOver(declared.remote, { timeouts: { launch: 90_000 } }).open({
+        await adapterOver(declared.webdriverio, { timeouts: { launch: 90_000 } }).open({
             bundleId: BUNDLE_ID,
         });
-        await adapterOver(fallback.remote).open({ bundleId: BUNDLE_ID });
-        await adapterOver(named.remote, { device: { name: 'iPhone 17', os: 'iOS 26.5' } }).open({
+        await adapterOver(fallback.webdriverio).open({ bundleId: BUNDLE_ID });
+        await adapterOver(named.webdriverio, {
+            device: { name: 'iPhone 17', os: 'iOS 26.5' },
+        }).open({
             bundleId: BUNDLE_ID,
         });
 
@@ -249,7 +251,7 @@ describe('AppiumAdapter', () => {
         'appium adapter — the declared timeouts — a verb waits the declared action budget or the 30s default: $action',
         async ({ action, early }) => {
             // Given - an adapter opened before the fake clock takes over: a faked timer cannot advance a real await
-            const adapter = adapterOver(fakeDevice([]).remote, { timeouts: { action } });
+            const adapter = adapterOver(fakeDevice([]).webdriverio, { timeouts: { action } });
             await adapter.open({ bundleId: BUNDLE_ID });
             vi.useFakeTimers();
             try {

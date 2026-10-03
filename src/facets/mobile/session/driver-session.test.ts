@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import type { MobileDevice } from '../device/device.port.js';
 import { openSession } from './driver-session.js';
 import { sessionLedger } from './session-ledger.js';
 
@@ -30,40 +31,52 @@ async function appiumHolding(live: Set<string>): Promise<string> {
     return `http://127.0.0.1:${port}`;
 }
 
-type Calls = { asked: Record<string, unknown>[]; attached: string[]; created: number };
+type Options = Record<string, unknown> & { capabilities: Record<string, unknown> };
+
+type Calls = {
+    asked: Record<string, unknown>[];
+    attached: string[];
+    created: number;
+    options: Options[];
+};
 
 function session(sessionId: string): { capabilities: Record<string, unknown>; sessionId: string } {
     return { capabilities: { platformName: 'iOS' }, sessionId };
 }
 
 /** Cast at the seam: a stub session carries only id and capabilities. */
-function stubFactories(): { attach: never; calls: Calls; remote: never } {
-    const calls: Calls = { asked: [], attached: [], created: 0 };
-    const remote = async (options: { capabilities: Record<string, unknown> }) => {
+function stubFactories(): { calls: Calls; webdriverio: never } {
+    const calls: Calls = { asked: [], attached: [], created: 0, options: [] };
+    const remote = async (options: Options) => {
+        calls.options.push(options);
         calls.asked.push(options.capabilities);
         calls.created += 1;
         return session(`s-${calls.created}`);
     };
-    const attach = async (options: { sessionId: string }) => {
+    const attach = async (options: Options & { sessionId: string }) => {
+        calls.options.push(options);
         calls.attached.push(options.sessionId);
         return session(options.sessionId);
     };
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the two calls opening a session makes, never webdriverio's whole type
-    return { attach: attach as never, calls, remote: remote as never };
+    return { calls, webdriverio: { attach, remote } as never };
 }
+
+const IPHONE: MobileDevice = { name: 'iPhone 17' };
 
 function request(
     serverUrl: string,
-    factories: { attach: never; remote: never },
+    factories: { webdriverio: never },
     ledger?: ReturnType<typeof sessionLedger>,
+    device: MobileDevice = IPHONE,
 ) {
     return {
-        ...factories,
         bundleId: 'com.example.app',
-        device: { name: 'iPhone 17' },
+        device,
         launchTimeoutMs: 240_000,
         ledger,
         serverUrl,
+        webdriverio: factories.webdriverio,
     };
 }
 
@@ -83,9 +96,19 @@ describe('openSession', () => {
         const first = await openSession(request(serverUrl, factories, ledger));
         const second = await openSession(request(serverUrl, factories, ledger));
 
-        // Then - one session was created, the second runner drove it, and both hold it as the run's
-        expect(factories.calls).toMatchObject({ attached: ['s-1'], created: 1 });
-        expect([first.shared, second.shared]).toStrictEqual([true, true]);
+        // Then - one session was created, the second runner drove it with the capabilities the server answered, and both hold it as the run's
+        const { port } = new URL(serverUrl);
+        expect([factories.calls.options.at(-1), first.shared, second.shared]).toStrictEqual([
+            {
+                capabilities: { platformName: 'iOS' },
+                hostname: '127.0.0.1',
+                logLevel: 'error',
+                port: Number(port),
+                sessionId: 's-1',
+            },
+            true,
+            true,
+        ]);
     });
 
     test("openSession — the run's one session — a runner outside a run that shares one creates a session of its own", async () => {
@@ -115,8 +138,14 @@ describe('openSession', () => {
         live.add('s-2');
         await openSession(request(serverUrl, factories, ledger));
 
-        // Then - the second created a session in place of the dead one, the third drove it
-        expect(factories.calls).toMatchObject({ attached: ['s-2'], created: 2 });
+        // Then - the second created a session in place of the dead one, which the ledger forgot, and the third drove it
+        expect([
+            factories.calls.attached,
+            factories.calls.created,
+            ledger
+                .lookup(serverUrl, factories.calls.asked[0] ?? {})
+                .map(({ sessionId }) => sessionId),
+        ]).toStrictEqual([['s-2'], 2, ['s-2']]);
     });
 
     test("openSession — the run's one session — a runner probes every session recorded for its server and device before it creates one", async () => {
@@ -168,15 +197,48 @@ describe('openSession', () => {
         expect(factories.calls).toMatchObject({ attached: [], created: 2 });
     });
 
-    test('openSession — the session it asks for — states an idle budget that outlives the gap between two files', async () => {
-        // Given - a runner on a server
+    test('openSession — the session it asks for — names the device by name, bare version and udid when given, with an idle budget that outlives the gap between two files', async () => {
+        // Given - a device named with its OS and udid, and one by name alone
         const serverUrl = await appiumHolding(new Set());
         const factories = stubFactories();
 
-        // When - it opens its session
+        // When - each opens its session
+        await openSession(
+            request(serverUrl, factories, undefined, {
+                name: 'iPhone 17',
+                os: 'iOS 26.5',
+                udid: 'SIM-UDID',
+            }),
+        );
         await openSession(request(serverUrl, factories));
 
-        // Then - the server keeps it through five idle minutes
-        expect(factories.calls.asked[0]?.['appium:newCommandTimeout']).toBe(300);
+        // Then - the capabilities each asked for, on the server's host and port
+        const asked = {
+            'appium:automationName': 'XCUITest',
+            'appium:bundleId': 'com.example.app',
+            'appium:deviceName': 'iPhone 17',
+            'appium:newCommandTimeout': 300,
+            'appium:noReset': true,
+            'appium:wdaLaunchTimeout': 240_000,
+            platformName: 'iOS',
+        };
+        expect(factories.calls.options).toStrictEqual([
+            {
+                capabilities: {
+                    ...asked,
+                    'appium:platformVersion': '26.5',
+                    'appium:udid': 'SIM-UDID',
+                },
+                hostname: '127.0.0.1',
+                logLevel: 'error',
+                port: Number(new URL(serverUrl).port),
+            },
+            {
+                capabilities: asked,
+                hostname: '127.0.0.1',
+                logLevel: 'error',
+                port: Number(new URL(serverUrl).port),
+            },
+        ]);
     });
 });
