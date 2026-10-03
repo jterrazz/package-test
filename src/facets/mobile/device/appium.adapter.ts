@@ -34,13 +34,12 @@ const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 export class AppiumAdapter implements DevicePort {
     private readonly actionTimeoutMs: number;
     private readonly attach?: AttachFn | undefined;
-    private driver: Driver | null = null;
+    private opened: null | { driver: Driver; shared: boolean } = null;
     private readonly launchTimeoutMs: number;
     private readonly ledger?: SessionLedger | undefined;
     private readonly options: { device: MobileDevice; serverUrl: string };
     /** Injected by the unit test; production loads webdriverio lazily. */
     private readonly remote?: RemoteFn | undefined;
-    private shared = false;
 
     constructor(options: {
         attach?: AttachFn | undefined;
@@ -59,10 +58,10 @@ export class AppiumAdapter implements DevicePort {
     }
 
     async close(): Promise<void> {
-        if (this.driver && !this.shared) {
-            await this.driver.deleteSession();
+        if (this.opened?.shared === false) {
+            await this.opened.driver.deleteSession();
         }
-        this.driver = null;
+        this.opened = null;
     }
 
     async open(options: DeviceOpenOptions): Promise<DeviceScreen> {
@@ -96,14 +95,14 @@ export class AppiumAdapter implements DevicePort {
     private createVisitor(driver: Driver): MobileVisitor {
         return {
             fill: async (target, value) => {
-                const match = await this.resolveOne(driver, target, 'fill', 'one');
+                const match = await this.resolveOne(driver, target, 'fill');
                 await match.setValue(value);
             },
             see: async (target) => {
-                await this.resolveOne(driver, target, 'see', 'any');
+                await this.resolveOne(driver, target, 'see');
             },
             tap: async (target) => {
-                const match = await this.resolveOne(driver, target, 'tap', 'one');
+                const match = await this.resolveOne(driver, target, 'tap');
                 await match.click();
             },
         };
@@ -113,22 +112,21 @@ export class AppiumAdapter implements DevicePort {
     private async resolveOne(
         driver: Driver,
         target: Target,
-        verb: string,
-        cardinality: 'any' | 'one',
+        verb: 'fill' | 'see' | 'tap',
     ): Promise<DriverElement> {
         const chain = scopeChain(target);
+        const anyTarget = verb === 'see';
         const deadline = Date.now() + this.actionTimeoutMs;
 
         /* invariant: the scroll fallback takes an expensive unfiltered snapshot: once, on the first miss. */
-        let scrollAttempted = false;
+        let tryScroll = true;
         for (;;) {
-            const resolved = await this.resolveChain(driver, chain, cardinality, {
-                tryScroll: !scrollAttempted,
-            });
-            scrollAttempted = true;
+            const resolved = await this.resolveChain(driver, chain, anyTarget, tryScroll);
+            tryScroll = false;
             if (resolved) {
                 return resolved;
             }
+            // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
             if (Date.now() > deadline) {
                 throw await this.timeoutError(driver, target, verb);
             }
@@ -139,33 +137,29 @@ export class AppiumAdapter implements DevicePort {
     private async resolveChain(
         driver: Driver,
         chain: Target[],
-        cardinality: 'any' | 'one',
-        options?: { tryScroll?: boolean },
+        anyTarget: boolean,
+        tryScroll: boolean,
     ): Promise<DriverElement | null> {
         let scope: MatchScope = driver;
         let element: DriverElement | null = null;
         for (const [index, level] of chain.entries()) {
             const matches = await matching(scope, level);
-            const count = await matches.length;
-            if (count === 0) {
-                if (options?.tryScroll === true) {
+            const first = matches[0];
+            if (first === undefined) {
+                if (tryScroll) {
                     await scrollToOffscreen(driver, scope, level);
                 }
                 return null;
             }
             const isTarget = index === chain.length - 1;
-            if (count > 1 && (cardinality === 'one' || !isTarget)) {
+            if ((await matches.length) > 1 && (!anyTarget || !isTarget)) {
                 throw ambiguousScreenElementError({
                     target: level,
                     matches: await captureMatches(matches),
                 });
             }
-            const next = matches[0];
-            if (next === undefined) {
-                return null;
-            }
-            scope = next;
-            element = next;
+            scope = first;
+            element = first;
         }
         return element;
     }
@@ -204,10 +198,7 @@ export class AppiumAdapter implements DevicePort {
     }
 
     private async session(bundleId: string): Promise<Driver> {
-        if (this.driver) {
-            return this.driver;
-        }
-        const opened = await openSession({
+        this.opened ??= await openSession({
             attach: this.attach,
             bundleId,
             device: this.options.device,
@@ -216,8 +207,6 @@ export class AppiumAdapter implements DevicePort {
             remote: this.remote,
             serverUrl: this.options.serverUrl,
         });
-        this.shared = opened.shared;
-        this.driver = opened.driver;
-        return this.driver;
+        return this.opened.driver;
     }
 }

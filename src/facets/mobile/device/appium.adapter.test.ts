@@ -1,231 +1,281 @@
 /* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
+import { readFileSync } from 'node:fs';
 import { describe, expect, test, vi } from 'vitest';
 
 import { within } from '../../../visitor/targets/landmarks.js';
-import { button, testId } from '../../../visitor/targets/roles.js';
-import { AppiumAdapter } from './appium.adapter.js';
+import { button, field, testId } from '../../../visitor/targets/roles.js';
+import type { Target } from '../../../visitor/targets/target.js';
+import {
+    adapterOver,
+    ambiguousPay,
+    BUNDLE_ID,
+    capabilityOf,
+    element,
+    fakeDevice,
+    SCENARIO_LESSON,
+    scenarioOn,
+    settleInto,
+    SOURCE,
+    TIMEOUT_LESSON,
+    twoPays,
+    unscrollable,
+} from './appium.adapter.fixtures.js';
+import type { DeviceLog, Outcome } from './appium.adapter.fixtures.js';
 
-/** A stub driver that resolves no element: every verb runs to its deadline, the value under test. */
+const inCard = (target: Target): Target => within(testId('card'), target);
 
-const BUNDLE_ID = 'com.example.app';
-const SERVER_URL = 'http://127.0.0.1:4723';
+const failing = async (): Promise<void> => {
+    await Promise.reject(new Error('boom'));
+};
 
-type Session = { capabilities: Record<string, unknown> };
-
-/** Cast at the seam: only the handful of calls below are exercised. */
-function asRemote(stub: unknown): never {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the handful of calls these tests drive, never webdriverio's whole session type
-    return stub as never;
-}
-
-function stubDriver(): { remote: never; sessions: Session[] } {
-    const sessions: Session[] = [];
-    const remote = async (options: Session) => {
-        sessions.push(options);
-        return {
-            $$: async () => [],
-            deleteSession: async () => {},
-            executeScript: async () => {},
-            getPageSource: async () => '<XCUIElementTypeApplication name="App" />',
-            takeScreenshot: async () =>
-                await Promise.reject(new Error('no screenshots in the stub')),
-        };
-    };
-    return { remote: asRemote(remote), sessions };
-}
-
-/** Opened before a fake clock takes over: a faked timer cannot advance a real await. */
-async function openedAdapter(timeouts?: { action?: number; launch?: number }): Promise<{
-    adapter: AppiumAdapter;
-    sessions: Session[];
-}> {
-    const { remote, sessions } = stubDriver();
-    const adapter = new AppiumAdapter({
-        remote,
-        serverUrl: SERVER_URL,
-        timeouts,
-        device: { name: 'iPhone 17', udid: 'SIM-UDID' },
-    });
-    await adapter.open({ bundleId: BUNDLE_ID });
-    return { adapter, sessions };
-}
-
-function tapTheAbsent(adapter: AppiumAdapter): { error?: Error; settled: Promise<void> } {
-    const outcome: { error?: Error; settled: Promise<void> } = { settled: Promise.resolve() };
-    const tap = async (): Promise<void> => {
-        try {
-            await adapter.open({
-                bundleId: BUNDLE_ID,
-                scenario: async (visitor) => {
-                    await visitor.tap(button('Absent'));
-                },
-            });
-        } catch (error) {
-            outcome.error = error instanceof Error ? error : new Error(String(error));
-            return;
-        }
-        throw new Error('the tap resolved, though nothing was ever on screen');
-    };
-    outcome.settled = tap();
-    return outcome;
-}
-
-/** It answers `CONTAINS` and refuses `==`: a name that only begins the label designates nothing. */
-function partialLabelDriver(): { remote: never; state: { taps: number } } {
-    const state = { taps: 0 };
-    const element = {
-        click: async () => {
-            state.taps += 1;
-        },
-        elementId: 'button-1',
-        getAttribute: async (name: string) =>
-            name === 'label' ? 'Continue to payment' : `XCUIElementType${name}`,
-        setValue: async () => {},
-    };
-    const remote = async () => ({
-        $$: async (selector: string) => (selector.includes('CONTAINS') ? [element] : []),
-        deleteSession: async () => {},
-        executeScript: async () => {},
-        getPageSource: async () => '<XCUIElementTypeApplication name="App" />',
-        takeScreenshot: async () => await Promise.reject(new Error('no screenshots in the stub')),
-    });
-    return { remote: asRemote(remote), state };
-}
-function scopedDriver(): { remote: never; tapped: string[] } {
-    const tapped: string[] = [];
-    const buy = (id: string) => ({
-        click: async () => {
-            tapped.push(id);
-        },
-        elementId: id,
-    });
-    const card = {
-        $$: async (selector: string) => (selector.includes('Buy') ? [buy('inside')] : []),
-        elementId: 'card',
-    };
-    const remote = async () => ({
-        $$: async (selector: string) => (selector.includes("'card'") ? [card] : [buy('outside')]),
-        deleteSession: async () => {},
-        executeScript: async () => {},
-        getPageSource: async () => '<XCUIElementTypeApplication name="App" />',
-        takeScreenshot: async () => await Promise.reject(new Error('no screenshots in the stub')),
-    });
-    return { remote: asRemote(remote), tapped };
-}
 describe('AppiumAdapter', () => {
-    test('appium adapter — the declared timeouts — waits the declared action timeout, not the framework default', async () => {
-        // Given - a runner declaring 45s, because its dev-mode cold boot outlasts the 30s default
-        const { adapter } = await openedAdapter({ action: 45_000 });
-        vi.useFakeTimers();
-        try {
-            const outcome = tapTheAbsent(adapter);
-
-            // Then - the default deadline passes without a refusal
-            await vi.advanceTimersByTimeAsync(31_000);
-            expect(outcome.error).toBeUndefined();
-
-            // Then - the DECLARED deadline is the one that ends the wait
-            await vi.advanceTimersByTimeAsync(15_000);
-            await outcome.settled;
-            expect(outcome.error?.message).toContain('timed out after 45000ms');
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    test('appium adapter — the declared timeouts — falls back to the 30s action default when none is declared', async () => {
-        // Given - a runner that declares no timeouts at all
-        const { adapter } = await openedAdapter();
-        vi.useFakeTimers();
-        try {
-            const outcome = tapTheAbsent(adapter);
-
-            // Then - the framework's own default is what the verb waits
-            await vi.advanceTimersByTimeAsync(29_000);
-            expect(outcome.error).toBeUndefined();
-            await vi.advanceTimersByTimeAsync(2000);
-            await outcome.settled;
-            expect(outcome.error?.message).toContain('timed out after 30000ms');
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    test('appium adapter — the declared timeouts — hands the declared launch timeout to the session capabilities', async () => {
-        // Given - a runner shortening the WebDriverAgent launch budget
-        const { sessions } = await openedAdapter({ launch: 90_000 });
-
-        // Then - the session was created with that budget
-        expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(90_000);
-    });
-
-    test('appium adapter — the declared timeouts — asks the server for the device by name and platform version', async () => {
-        // Given - an adapter over a device named with its OS, and no udid
-        const { remote, sessions } = stubDriver();
-        const adapter = new AppiumAdapter({
-            device: { name: 'iPhone 17', os: 'iOS 26.5' },
-            remote,
-            serverUrl: SERVER_URL,
+    test('appium adapter — opening — relaunches the app over one session it reuses, a deep link followed, and answers the projected screen', async () => {
+        // Given - a device whose app is not running at first
+        const log: DeviceLog = [];
+        const { remote, sessions } = fakeDevice(log, {
+            refusing: ['mobile: terminateApp'],
+            source: SOURCE,
         });
+        const adapter = adapterOver(remote);
+
+        // When - it opens plainly, then on a deep link, then closes twice
+        const screen = await adapter.open({ bundleId: BUNDLE_ID });
+        await adapter.open({ bundleId: BUNDLE_ID, deepLink: 'app://orders' });
+        await adapter.close();
+        await adapter.close();
+
+        // Then - one session, each open a terminate before a launch, the session ended once
+        expect([sessions.length, log, screen]).toStrictEqual([
+            1,
+            [
+                'mobile: terminateApp {"bundleId":"com.example.app"}',
+                'mobile: activateApp {"bundleId":"com.example.app"}',
+                'mobile: terminateApp {"bundleId":"com.example.app"}',
+                'mobile: deepLink {"bundleId":"com.example.app","url":"app://orders"}',
+                'deleteSession',
+            ],
+            {
+                texts: ['Welcome', 'Pay'],
+                tree: {
+                    children: [
+                        { label: 'Welcome', type: 'StaticText' },
+                        { label: 'Pay', type: 'Button' },
+                    ],
+                    label: 'App',
+                    type: 'Application',
+                },
+            },
+        ]);
+    });
+
+    test('appium adapter — opening — a session the run shares is the run’s to end, and close leaves it open', async () => {
+        // Given - an adapter whose session the run's ledger records
+        const log: DeviceLog = [];
+        const adapter = adapterOver(fakeDevice(log).remote, { shared: true });
         await adapter.open({ bundleId: BUNDLE_ID });
 
-        // Then - the capabilities carry the name and the bare version, and no udid
-        expect(sessions[0]?.capabilities).toMatchObject({
-            'appium:deviceName': 'iPhone 17',
-            'appium:platformVersion': '26.5',
-        });
-        expect(sessions[0]?.capabilities).not.toHaveProperty('appium:udid');
+        // When - it closes
+        await adapter.close();
+
+        // Then - nothing ended the session
+        expect(log).not.toContain('deleteSession');
     });
 
-    test('appium adapter — the declared timeouts — falls back to the 240s launch default when none is declared', async () => {
-        // Given - a runner that declares no timeouts at all
-        const { sessions } = await openedAdapter();
-
-        // Then - the session carries the framework's own default
-        expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(240_000);
-    });
-
-    test('appium adapter — names are exact — a name that only begins the label designates nothing, and nothing is tapped', async () => {
-        // Given - a screen whose only button is labelled "Continue to payment", and a scenario naming part of it
-        const { remote, state } = partialLabelDriver();
-        const adapter = new AppiumAdapter({
-            remote,
-            serverUrl: SERVER_URL,
-            timeouts: { action: 1 },
-            device: { name: 'iPhone 17', udid: 'SIM-UDID' },
-        });
-
-        // When - the scenario taps the partial name
-        const opened = adapter.open({
-            bundleId: BUNDLE_ID,
-            scenario: async (visitor) => {
-                await visitor.tap(button('Continue'));
+    test('appium adapter — the verbs — fill and tap act on their one match, see takes any of several, inside a scope', async () => {
+        // Given - a card holding an email field, a Pay button and two Total texts
+        const outcome = await scenarioOn(
+            (log) => ({
+                query: (selector) =>
+                    selector.includes("'card'")
+                        ? [
+                              element(log, 'card', {}, (inner) =>
+                                  [
+                                      ['Email', 'email'],
+                                      ['Pay', 'pay'],
+                                      ['Total', 'total-1'],
+                                      ['Total', 'total-2'],
+                                  ]
+                                      .filter(([name]) => inner.includes(`'${name}'`))
+                                      .map(([, id]) => element(log, id ?? '')),
+                              ),
+                          ]
+                        : [],
+            }),
+            async (visitor) => {
+                await visitor.fill(inCard(field('Email')), 'a@b.c');
+                await visitor.see(inCard(button('Total')));
+                await visitor.tap(inCard(button('Pay')));
             },
-        });
+        );
 
-        // Then - the verb runs to its deadline on an exact name, and no substring is widened to
-        await expect(opened).rejects.toThrow(/timed out/u);
-        expect(state.taps).toBe(0);
+        // Then - the field took the value, the button the click
+        expect(outcome).toStrictEqual({
+            error: undefined,
+            log: ['setValue email a@b.c', 'click pay'],
+        });
     });
 
-    test('appium adapter — a scope is translated on the device — within() resolves its target inside the scope, not on the whole screen', async () => {
-        // Given - a screen with a Buy button outside the card and one inside it
-        const { remote, tapped } = scopedDriver();
-        const adapter = new AppiumAdapter({
-            remote,
-            serverUrl: SERVER_URL,
-            device: { name: 'iPhone 17', udid: 'SIM-UDID' },
+    test('appium adapter — the verbs — more than one match is refused for an action, and for a scope even under see', async () => {
+        // Given - two Pay buttons, answered for a card as well
+        // When - a tap names the button, a see names the Pay inside a card
+        const tapped = await scenarioOn(twoPays, async (visitor) => {
+            await visitor.tap(button('Pay'));
+        });
+        const seen = await scenarioOn(twoPays, async (visitor) => {
+            await visitor.see(within(testId('card'), button('Total')));
         });
 
-        // When - the scenario taps the card's Buy
-        await adapter.open({
-            bundleId: BUNDLE_ID,
-            scenario: async (visitor) => {
-                await visitor.tap(within(testId('card'), button('Buy')));
+        // Then - both refused, naming the matches; nothing clicked
+        expect([tapped.error?.message, seen.error?.message, tapped.log, seen.log]).toStrictEqual([
+            ambiguousPay('button("Pay")'),
+            ambiguousPay('testId("card")'),
+            [],
+            [],
+        ]);
+    });
+
+    test('appium adapter — the verbs — an element off screen is scrolled to once, on the first miss, and then acted on', async () => {
+        // Given - a Pay button visible only once scrolled to
+        const outcome = await scenarioOn(
+            (log) => ({
+                query: (selector) =>
+                    selector.includes('1 == 1') ||
+                    log.some((line) => line.includes('scrollToElement'))
+                        ? [element(log, 'pay')]
+                        : [],
+            }),
+            async (visitor) => {
+                await visitor.tap(button('Pay'));
             },
+        );
+
+        // Then - one scroll to its id, then the click
+        expect(outcome).toStrictEqual({
+            error: undefined,
+            log: ['mobile: scrollToElement {"elementId":"pay"}', 'click pay'],
+        });
+    });
+
+    test('appium adapter — the verbs — a verb with no visible match times out naming what the screen shows, having scrolled once', async () => {
+        // Given - a Pay button that never becomes visible, on a screen that cannot scroll, and an empty screen
+        // When - each runs past a short action budget
+        const labelled = await scenarioOn(
+            unscrollable,
+            async (visitor) => {
+                await visitor.tap(button('Pay'));
+            },
+            600,
+        );
+        const bare = await scenarioOn(
+            () => ({}),
+            async (visitor) => {
+                await visitor.fill(field('Email'), 'a@b.c');
+            },
+            1,
+        );
+
+        // Then - each timeout, the labels in sight named when there are some
+        expect([labelled.error?.message, labelled.log, bare.error?.message]).toStrictEqual([
+            [
+                'found: tap(button("Pay")) timed out after 600ms — no visible match.',
+                'Currently on screen: App | Welcome | Pay',
+                ...TIMEOUT_LESSON,
+            ].join('\n'),
+            ['mobile: scrollToElement {"elementId":"pay"}'],
+            [
+                'found: fill(field("Email")) timed out after 1ms — no visible match.',
+                ...TIMEOUT_LESSON,
+            ].join('\n'),
+        ]);
+    });
+
+    test('appium adapter — a failed scenario — carries a screenshot of the screen it failed on, when the device gives one', async () => {
+        // Given - a scenario that fails, on a device with a screenshot and one without
+        // When - each fails
+        const shot = await scenarioOn(
+            () => ({ screenshot: Buffer.from('png').toString('base64') }),
+            failing,
+        );
+        const none = await scenarioOn(() => ({}), failing);
+
+        // Then - the evidence path names a file holding the screenshot
+        const evidence =
+            /Evidence: (?<path>\S+)/u.exec(shot.error?.message ?? '')?.groups?.path ?? '';
+        expect([
+            shot.error?.message.replace(evidence, '<evidence>'),
+            /\/\.artifacts\/vitest\/evidence\/mobile-\w+\/failure\.png$/u.test(evidence),
+            readFileSync(evidence, 'utf8'),
+            none.error?.message,
+        ]).toStrictEqual([
+            [
+                'found: the open scenario failed:',
+                '  boom',
+                'Evidence: <evidence>',
+                ...SCENARIO_LESSON,
+            ].join('\n'),
+            true,
+            'png',
+            ['found: the open scenario failed:', '  boom', ...SCENARIO_LESSON].join('\n'),
+        ]);
+    });
+
+    test('appium adapter — the declared timeouts — the session takes the declared launch budget or the 240s default, and the device by name and bare version', async () => {
+        // Given - an adapter declaring a launch budget, one declaring none, and one over a device named with its OS
+        const declared = fakeDevice([]);
+        const fallback = fakeDevice([]);
+        const named = fakeDevice([]);
+        await adapterOver(declared.remote, { timeouts: { launch: 90_000 } }).open({
+            bundleId: BUNDLE_ID,
+        });
+        await adapterOver(fallback.remote).open({ bundleId: BUNDLE_ID });
+        await adapterOver(named.remote, { device: { name: 'iPhone 17', os: 'iOS 26.5' } }).open({
+            bundleId: BUNDLE_ID,
         });
 
-        // Then - the one inside the card is tapped
-        expect(tapped).toStrictEqual(['inside']);
+        // Then - each session's capabilities
+        expect([
+            capabilityOf(declared.sessions, 'appium:wdaLaunchTimeout'),
+            capabilityOf(fallback.sessions, 'appium:wdaLaunchTimeout'),
+            capabilityOf(named.sessions, 'appium:deviceName'),
+            capabilityOf(named.sessions, 'appium:platformVersion'),
+            capabilityOf(named.sessions, 'appium:udid'),
+        ]).toStrictEqual([90_000, 240_000, 'iPhone 17', '26.5', undefined]);
     });
+
+    test.each([
+        { action: 45_000, early: 31_000 },
+        { action: undefined, early: 29_000 },
+    ])(
+        'appium adapter — the declared timeouts — a verb waits the declared action budget or the 30s default: $action',
+        async ({ action, early }) => {
+            // Given - an adapter opened before the fake clock takes over: a faked timer cannot advance a real await
+            const adapter = adapterOver(fakeDevice([]).remote, { timeouts: { action } });
+            await adapter.open({ bundleId: BUNDLE_ID });
+            vi.useFakeTimers();
+            try {
+                const outcome: Outcome = {};
+                const settled = settleInto(
+                    outcome,
+                    adapter.open({
+                        bundleId: BUNDLE_ID,
+                        scenario: async (visitor) => {
+                            await visitor.tap(button('Absent'));
+                        },
+                    }),
+                );
+
+                // Then - the wait outlives an earlier deadline, and ends at the budget
+                await vi.advanceTimersByTimeAsync(early);
+                const before = outcome.error;
+                await vi.advanceTimersByTimeAsync(16_000);
+                await settled;
+                expect([
+                    before,
+                    outcome.error?.message.includes(`timed out after ${action ?? 30_000}ms`),
+                ]).toStrictEqual([undefined, true]);
+            } finally {
+                vi.useRealTimers();
+            }
+        },
+    );
 });

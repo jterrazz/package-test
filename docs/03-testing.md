@@ -414,7 +414,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 6      |
 | `intercept()` | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
-| `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 7      |
+| `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |
 
 ### Token
 
