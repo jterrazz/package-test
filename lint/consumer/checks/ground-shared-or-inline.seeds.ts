@@ -14,10 +14,9 @@ import { isInside, kebabName, literalSpans, titleAround } from '../../kit/projec
 import { suppressedLines } from '../../kit/project/suppression.js';
 import { findSpecsRoots, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
+import { TEST_FILE } from './ground-shared-or-inline.forms.js';
 
 /** The seed name is the first `--` comment of the SQL, else the first four meaningful words of the test's title, else `seed`; a name taken by other bytes gains `-2`, `-3`, … */
-
-const TEST_FILE = /\.(?:spec|test)\.[cm]?[jt]sx?$/u;
 
 /** Never a member (`db.sql`) nor a longer name. */
 const SQL_TAG = /(?<![.\w$])sql\s*(?=`)/gu;
@@ -34,6 +33,7 @@ type InlineSeed = {
 };
 
 export function commentName(statements: string): string | undefined {
+    // Stryker disable next-line OptionalChaining: a match always carries its named group
     const comment = /^\s*--\s*(?<words>.*\S)/mu.exec(statements)?.groups?.words;
     const name = comment === undefined ? '' : kebabName(comment);
     return name === '' ? undefined : name;
@@ -80,6 +80,7 @@ function statementsOf(template: string): string | undefined {
         return undefined;
     }
     const value: unknown = runInNewContext(template, {});
+    // Stryker disable next-line ConditionalExpression: a template without a hole always evaluates to a string
     return typeof value === 'string' ? dedent(value) : undefined;
 }
 
@@ -99,15 +100,14 @@ function inlineSeedsIn(file: string): InlineSeed[] {
         const end = skipString(text, open);
         const statements = statementsOf(text.slice(open, end));
         const before = text.slice(0, found.index);
+        // Stryker disable next-line ConditionalExpression: built statements read as no text, which holds no comment either
+        const commented = statements === undefined ? undefined : commentName(statements);
         seeds.push({
             column: found.index - before.lastIndexOf('\n'),
             end,
             file,
             line: before.split('\n').length,
-            name:
-                (statements === undefined ? undefined : commentName(statements)) ??
-                titleName(titleAround(text, found.index) ?? '') ??
-                'seed',
+            name: commented ?? titleName(titleAround(text, found.index) ?? '') ?? 'seed',
             start: found.index,
             statements,
         });
@@ -150,12 +150,14 @@ export function fixInlineSeeds(rootDir: string): string[] {
         (seed) => seed.file,
     );
     for (const [file, seeds] of byFile) {
+        // Stryker disable next-line StringLiteral: the text is cut and joined as read, decoded or not
         let text = readFileSync(file, 'utf8');
         for (const seed of seeds.toSorted((a, b) => b.start - a.start)) {
             const statements = seed.statements ?? '';
             const path = seedPath(file, seed.name, statements);
             mkdirSync(dirname(path), { recursive: true });
             writeFileSync(path, statements);
+            // Stryker disable next-line StringLiteral: a POSIX path holds no backslash to rejoin
             const named = `./${relative(dirname(file), path).split('\\').join('/')}`;
             text = `${text.slice(0, seed.start)}file('${named}')${text.slice(seed.end)}`;
             done.push(`${relative(rootDir, file)}:${seed.line} → ${relative(rootDir, path)}`);
@@ -168,6 +170,7 @@ export function fixInlineSeeds(rootDir: string): string[] {
                 : withoutEntryImport(named, 'sql'),
         );
     }
+    // Stryker disable next-line CallExpression: outside a git work tree the walk reads the disk afresh
     forgetTree();
     return done;
 }
