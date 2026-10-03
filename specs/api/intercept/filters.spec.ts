@@ -86,8 +86,20 @@ describe('filters', () => {
                 defineStub({
                     request: http.post(QUOTES_URL),
                     response: (request) => {
-                        const body = request.body as { action: string; user: { role: string } };
-                        return http.json({ echoedAction: body.action, forRole: body.user.role });
+                        const { body } = request;
+                        const action =
+                            typeof body === 'object' && body !== null && 'action' in body
+                                ? body.action
+                                : null;
+                        const user =
+                            typeof body === 'object' && body !== null && 'user' in body
+                                ? body.user
+                                : null;
+                        const role =
+                            typeof user === 'object' && user !== null && 'role' in user
+                                ? user.role
+                                : null;
+                        return http.json({ echoedAction: action, forRole: role });
                     },
                 }),
             )

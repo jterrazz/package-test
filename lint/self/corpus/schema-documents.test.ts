@@ -12,9 +12,17 @@ const ROOT = resolve(import.meta.dirname, '../../..');
 
 const SCHEMA = resolve(ROOT, 'schema/spec.schema.json');
 
+function schemaOf(text: string): Record<string, unknown> {
+    const parsed: unknown = JSON.parse(text);
+    return typeof parsed === 'object' && parsed !== null ? { ...parsed } : {};
+}
+
+const shapesOf = (record: Readonly<Record<PresenceShape, unknown>>): PresenceShape[] =>
+    Object.keys(record).filter((key): key is PresenceShape => key in record);
+
 function schemaValidator(): (data: unknown) => string[] {
     const validate = new Ajv2020({ allErrors: true }).compile(
-        JSON.parse(readFileSync(SCHEMA, 'utf8')) as object,
+        schemaOf(readFileSync(SCHEMA, 'utf8')),
     );
     return (data) =>
         validate(data)
@@ -101,7 +109,7 @@ function breachesOf(shape: PresenceShape, lawIndex: number): Breach[] {
     });
 }
 
-const LAWS = (Object.keys(PRESENCE) as PresenceShape[]).flatMap((shape) =>
+const LAWS = shapesOf(PRESENCE).flatMap((shape) =>
     PRESENCE[shape].map((law, index) => [shape, law.law, index] as const),
 );
 
@@ -214,7 +222,7 @@ describe('schema-documents', () => {
         },
     );
 
-    test.each(Object.keys(SHAPES) as PresenceShape[])(
+    test.each(shapesOf(SHAPES))(
         'the schema holds every presence law the parser holds (meta-test) — %s: every well-formed instance, the parser reads and the schema validates',
         (shape) => {
             // Given - each instance of the shape, set in its document

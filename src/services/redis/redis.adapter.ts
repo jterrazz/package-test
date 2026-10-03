@@ -2,6 +2,7 @@ import { invariant, refusal } from '../../chain/refusals/refusal.js';
 import type { ContainerOptions } from '../containers/container.port.js';
 import { SERVICE_IMAGES } from '../containers/service-images.js';
 import type { DatabasePort } from '../database.port.js';
+import { driverReason } from '../driver-reason.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer } from '../peer.js';
 import type { ServiceHandle } from '../service.port.js';
@@ -102,11 +103,11 @@ export class RedisHandle implements ServiceHandle {
             await client.connect();
             await client.ping();
             client.destroy();
-        } catch (error: any) {
+        } catch (error) {
             throw new Error(
                 refusal({
                     fix: 'check the container is running and reachable (`docker ps`), and run again',
-                    found: `redis() did not answer its healthcheck: ${error.message || error.code || String(error)}`,
+                    found: `redis() did not answer its healthcheck: ${driverReason(error)}`,
                     read: 'docs/18-services.md#service-factories',
                     why: 'A declared service is handed to the chain once it answers its healthcheck.',
                 }),

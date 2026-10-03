@@ -205,9 +205,9 @@ describe('StubBackend', () => {
 
         // Then - 501, and the body says what exists
         expect(response.status).toBe(501);
-        const body = await response.json();
-        expect(body.error).toContain('no stub matches GET /articles?x=1');
-        expect(body.declared).toStrictEqual(['GET /events']);
+        const body: unknown = await response.json();
+        expect(body).toMatchObject({ declared: ['GET /events'] });
+        expect(JSON.stringify(body)).toContain('no stub matches GET /articles?x=1');
     });
 
     test('stub backend — strictness (the external-block analog) — violation() enumerates unmatched requests with their counts', async () => {

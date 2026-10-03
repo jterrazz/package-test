@@ -4,13 +4,16 @@ import { isRelativePath } from './relative-path.js';
 import {
     blockScalar,
     isMap,
+    isNode,
     isScalar,
     isSeq,
+    nodeItems,
+    nodePairs,
     parseYamlSource,
     renderYamlSource,
     yamlSyntaxErrors,
 } from './yaml-document.js';
-import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from './yaml-document.js';
+import type { Node, Pair, YAMLMap, YamlSource } from './yaml-document.js';
 
 /** The grammar alone: no path resolution, no command, no filesystem. The runner, the lint checker and the JSON Schema read the same constants. */
 
@@ -204,10 +207,8 @@ function nodeRange(node: Node | Pair): [number, number, number] | undefined {
     if ('range' in node && Array.isArray(node.range)) {
         return node.range;
     }
-    const { key } = node as Pair;
-    return key !== null && typeof key === 'object' && 'range' in key
-        ? ((key as Node).range ?? undefined)
-        : undefined;
+    const key: unknown = 'key' in node ? node.key : undefined;
+    return isNode(key) ? (key.range ?? undefined) : undefined;
 }
 
 function contentLine(context: Context, node: Node | null): number {
@@ -229,7 +230,7 @@ function closedPairs(
     what: string,
 ): Pair<Node, Node>[] {
     const pairs: Pair<Node, Node>[] = [];
-    for (const pair of pairsIn(map)) {
+    for (const pair of nodePairs(map)) {
         const key = scalarString(pair.key);
         if (key === null) {
             fail(context, pair, `${what}: a key must be a plain word`);
@@ -247,15 +248,6 @@ function closedPairs(
         pairs.push(pair);
     }
     return pairs;
-}
-
-/** The YAML library types pairs loosely: the one cast lives here. */
-function pairsIn(map: YAMLMap): Pair<Node, Node>[] {
-    return map.items as Pair<Node, Node>[];
-}
-
-function itemsIn(seq: YAMLSeq): Node[] {
-    return seq.items as Node[];
 }
 
 function keyed(pairs: readonly Pair<Node, Node>[]): Map<string, Pair<Node, Node>> {
@@ -322,7 +314,7 @@ function stringList(
     what: string,
 ): { line: number; value: string }[] {
     if (isSeq(node)) {
-        return itemsIn(node).map((item) => ({
+        return nodeItems(node).map((item) => ({
             line: lineOf(context, item),
             value: requireString(context, item, `each entry of ${what}`),
         }));
@@ -365,14 +357,17 @@ function readServeEntry(context: Context, node: Node | null): SpecServeEntry {
     if (map.items.length !== 1) {
         fail(context, node, 'a serve: entry names ONE server: `- <name>: { KEY: value }`');
     }
-    const pair = map.items[0] as Pair<Node, Node>;
+    const [pair] = nodePairs(map);
+    if (pair === undefined) {
+        fail(context, node, 'a serve: entry names ONE server: `- <name>: { KEY: value }`');
+    }
     const serverName = scalarString(pair.key);
     if (serverName === null) {
         fail(context, pair, 'a serve: entry must name its server with a plain word');
     }
     const env: Record<string, string> = {};
     const envMap = requireMap(context, pair.value, `serve: ${serverName}`);
-    for (const entry of pairsIn(envMap)) {
+    for (const entry of nodePairs(envMap)) {
         const key = scalarString(entry.key);
         if (key === null) {
             fail(context, entry, `serve: ${serverName} — a variable name must be a plain word`);
@@ -383,13 +378,13 @@ function readServeEntry(context: Context, node: Node | null): SpecServeEntry {
 }
 
 function readServe(context: Context, node: Node | null): SpecServeEntry[] {
-    const items: (Node | null)[] = isSeq(node) ? itemsIn(node) : [node];
+    const items: (Node | null)[] = isSeq(node) ? nodeItems(node) : [node];
     return items.map((item) => readServeEntry(context, item));
 }
 
 function readFiles(context: Context, node: Node | null): SpecFileAssertion[] {
     const map = requireMap(context, node, 'files:');
-    return pairsIn(map).map((pair) => {
+    return nodePairs(map).map((pair) => {
         const path = scalarString(pair.key);
         if (path === null) {
             fail(context, pair, 'files: each key is a path relative to the working directory');
@@ -397,14 +392,15 @@ function readFiles(context: Context, node: Node | null): SpecFileAssertion[] {
         const line = lineOf(context, pair);
         const state = scalarString(pair.value);
         if (state !== null) {
-            if (!FILE_STATES.includes(state as (typeof FILE_STATES)[number])) {
+            const kind = FILE_STATES.find((known) => known === state);
+            if (kind === undefined) {
                 fail(
                     context,
                     pair,
                     `files: "${path}: ${state}" is not a state — write ${FILE_STATES.join(' or ')}, or a { ${FILE_CONTENT_KEYS.join(', ')} } assertion`,
                 );
             }
-            return { kind: state as 'absent' | 'exists', line, path };
+            return { kind, line, path };
         }
         const assertion = requireMap(context, pair.value, `files: ${path}`);
         const pairs = closedPairs(context, assertion, FILE_CONTENT_KEYS, `files: ${path}`);
@@ -414,7 +410,7 @@ function readFiles(context: Context, node: Node | null): SpecFileAssertion[] {
         for (const entry of pairs) {
             if (scalarString(entry.key) === 'contains') {
                 if (isSeq(entry.value)) {
-                    for (const item of itemsIn(entry.value)) {
+                    for (const item of nodeItems(entry.value)) {
                         contains.push(readStream(context, item, `files: ${path}.contains`));
                     }
                 } else {
@@ -551,7 +547,7 @@ function readCliFields(
     if (!isSeq(runsNode.value) || runsNode.value.items.length === 0) {
         fail(context, runsNode, 'runs: is a list of at least one run');
     }
-    const runItems = itemsIn(runsNode.value);
+    const runItems = nodeItems(runsNode.value);
     const fixturePair = found.get('fixture');
     const envPair = found.get('env');
     const servePair = found.get('serve');
@@ -607,7 +603,7 @@ export function parseSpecDocument(content: string, fileName: string): SpecDocume
 }
 
 function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly string[]): void {
-    const items = map.items as Pair<Node, Node>[];
+    const items = nodePairs(map);
     const existing = items.findIndex((pair) => scalarString(pair.key) === key);
     if (existing !== -1) {
         map.set(key, value);
@@ -621,14 +617,17 @@ function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly s
     map.set(key, value);
     if (at !== -1) {
         // invariant: `set` appended: move the new pair to its canonical place.
-        const added = (map.items as Pair<Node, Node>[]).pop()!;
-        map.items.splice(at, 0, added);
+        const added = map.items.pop();
+        if (added !== undefined) {
+            map.items.splice(at, 0, added);
+        }
     }
 }
 
 /** The YAML document is edited, not re-emitted, so everything but exit codes and streams comes back byte-identical. */
 export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string {
-    const runs = (file.source.document.contents as YAMLMap).get('runs', true);
+    const root = file.source.document.contents;
+    const runs = isMap(root) ? root.get('runs', true) : undefined;
     if (!isSeq(runs)) {
         return renderYamlSource(file.source);
     }

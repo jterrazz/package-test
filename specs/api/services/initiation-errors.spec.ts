@@ -19,7 +19,7 @@ const BROKEN_SECOND_POSTGRES = resolve(import.meta.dirname, './_fixtures/broken-
 
 async function startAndCapture(
     root: string,
-    services: Record<string, unknown>,
+    services: NonNullable<Parameters<typeof specification.api>[0]['services']>,
 ): Promise<{ failure: Error | undefined; output: string }> {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     let failure: Error | undefined;
@@ -27,13 +27,13 @@ async function startAndCapture(
         const { cleanup } = await specification.api({
             root,
             server: () => unreachedApp,
-            services: services as never,
+            services,
         });
         await cleanup();
-    } catch (error: any) {
-        failure = error;
+    } catch (error) {
+        failure = error instanceof Error ? error : new Error(String(error));
     }
-    const output = stripAnsi(spy.mock.calls[0]?.[0] ?? '');
+    const output = stripAnsi(String(spy.mock.calls[0]?.[0] ?? ''));
     spy.mockRestore();
     return { failure, output };
 }

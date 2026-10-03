@@ -7,7 +7,7 @@ async function catchMessage(assertion: () => Promise<unknown>): Promise<string> 
     try {
         await assertion();
     } catch (error) {
-        return (error as Error).message;
+        return error instanceof Error ? error.message : String(error);
     }
     throw new Error('expected the assertion to throw, but it passed');
 }

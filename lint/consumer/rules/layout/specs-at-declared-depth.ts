@@ -36,9 +36,17 @@ function sitsInASubjectPath(relative: string[], base: string): boolean {
     return base.endsWith('.spec.ts') && SUBJECT_PATH_FACETS.has(relative[0] ?? '');
 }
 
-export type SpecsDepth = 'facet' | 'facet-domain' | 'mirror' | 'off';
+const SPECS_DEPTHS = ['facet', 'facet-domain', 'mirror', 'off'] as const;
 
-type Options = { depth?: SpecsDepth };
+export type SpecsDepth = (typeof SPECS_DEPTHS)[number];
+
+function depthOf(option: unknown): SpecsDepth | undefined {
+    const depth: unknown =
+        typeof option === 'object' && option !== null && 'depth' in option
+            ? option.depth
+            : undefined;
+    return SPECS_DEPTHS.find((known) => known === depth);
+}
 
 const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
 
@@ -116,8 +124,7 @@ export const specsAtDeclaredDepth = defineRule(
                     if (anchor === undefined) {
                         return;
                     }
-                    const depth =
-                        (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
+                    const depth = depthOf(context.options[0]) ?? DEFAULT_DEPTH;
                     const base = anchor.relative.at(-1) ?? '';
                     if (!declaresTests(base) && isStrayFolder(anchor.directory, anchor.relative)) {
                         context.report({

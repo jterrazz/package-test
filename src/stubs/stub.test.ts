@@ -22,8 +22,11 @@ function route(method: 'GET' | 'POST', url: RegExp | string, tag: string): Stub 
 
 function tagsOf(stubs: readonly Stub[]): string[] {
     return stubs.map((stub) => {
-        const response = stub.response as { body: { tag: string } };
-        return response.body.tag;
+        const body: unknown =
+            typeof stub.response === 'object' && 'body' in stub.response
+                ? stub.response.body
+                : null;
+        return typeof body === 'object' && body !== null && 'tag' in body ? String(body.tag) : '';
     });
 }
 
@@ -46,8 +49,10 @@ describe('stub', () => {
         const stub = defineStub({
             request: anthropic.messages(),
             response: (request) => {
-                const body = request.body as { q: string };
-                return anthropic.reply(`echo:${body.q}`);
+                const { body } = request;
+                const question =
+                    typeof body === 'object' && body !== null && 'q' in body ? String(body.q) : '';
+                return anthropic.reply(`echo:${question}`);
             },
         });
 
@@ -62,8 +67,7 @@ describe('stub', () => {
                       url: 'https://x.test/',
                   })
                 : stub.response;
-        const { content } = produced.body as { content: { text: string }[] };
-        expect(content[0]?.text).toBe('echo:hi');
+        expect(produced.body).toMatchObject({ content: [{ text: 'echo:hi' }] });
     });
 
     test('stubs — defineStubs composition — flattens stubs, lists, and other composites, order preserved', () => {

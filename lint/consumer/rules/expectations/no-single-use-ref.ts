@@ -11,7 +11,14 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { goldenOf, memberPropertyName, stringValue, walk } from '../../../kit/project/ast.js';
+import {
+    child,
+    childList,
+    goldenOf,
+    memberPropertyName,
+    stringValue,
+    walk,
+} from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isRelativePath } from '../../../kit/project/relative-path.js';
@@ -26,11 +33,11 @@ function goldenPathOf(node: AstNode): string | undefined {
 const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
 
 function isMatchRef(node: AstNode): boolean {
-    const callee = node.callee as AstNode | undefined;
+    const callee = child(node, 'callee');
     if (callee?.type !== 'MemberExpression' || memberPropertyName(callee) !== 'ref') {
         return false;
     }
-    const object = callee.object as AstNode | undefined;
+    const object = child(callee, 'object');
     return object?.type === 'Identifier' && object.name === 'match';
 }
 
@@ -93,7 +100,7 @@ export const noSingleUseRef = defineRule(
                             return;
                         }
                         if (isMatchRef(node)) {
-                            const ref = stringValue((node.arguments as AstNode[] | undefined)?.[0]);
+                            const ref = stringValue(childList(node, 'arguments')[0]);
                             if (ref !== undefined) {
                                 bump(ref);
                                 if (!codeNodes.has(ref)) {

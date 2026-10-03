@@ -3,6 +3,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
+    child,
+    childList,
     findTestCallback,
     isTestCallee,
     memberPropertyName,
@@ -22,7 +24,7 @@ function isExpectCall(node: AstNode | undefined): boolean {
     if (node?.type !== 'CallExpression') {
         return false;
     }
-    const callee = node.callee as AstNode | undefined;
+    const callee = child(node, 'callee');
     return callee?.type === 'Identifier' && callee.name === 'expect';
 }
 
@@ -39,7 +41,7 @@ function isStatusProbe(node: AstNode): boolean {
     if (node.type !== 'CallExpression') {
         return false;
     }
-    const callee = node.callee as AstNode | undefined;
+    const callee = child(node, 'callee');
     if (callee?.type !== 'MemberExpression') {
         return false;
     }
@@ -47,15 +49,15 @@ function isStatusProbe(node: AstNode): boolean {
     if (matcher === undefined || !EQUALITY_MATCHERS.has(matcher)) {
         return false;
     }
-    const expectCall = callee.object as AstNode | undefined;
+    const expectCall = child(callee, 'object');
     if (!isExpectCall(expectCall)) {
         return false;
     }
-    const subject = ((expectCall?.arguments as AstNode[] | undefined) ?? [])[0];
+    const subject = childList(expectCall, 'arguments')[0];
     if (subject?.type !== 'MemberExpression' || memberPropertyName(subject) !== 'status') {
         return false;
     }
-    const expected = ((node.arguments as AstNode[] | undefined) ?? [])[0];
+    const expected = childList(node, 'arguments')[0];
     return isStatusLiteral(expected);
 }
 
@@ -79,12 +81,10 @@ export const noStatusOnlyTest = defineRule(
             return {
                 before: () => isTestRole(identityOf(context).role),
                 CallExpression(node: AstNode) {
-                    if (!isTestCallee(node.callee as AstNode | undefined)) {
+                    if (!isTestCallee(child(node, 'callee'))) {
                         return;
                     }
-                    const callback = findTestCallback(
-                        (node.arguments as AstNode[] | undefined) ?? [],
-                    );
+                    const callback = findTestCallback(childList(node, 'arguments'));
                     if (callback === undefined) {
                         return;
                     }

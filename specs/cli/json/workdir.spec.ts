@@ -24,7 +24,11 @@ describe('workdir', () => {
             const result = await cli
                 .fixture(directory('../_fixtures/specimen-cli/'))
                 .exec('json-cwd');
-            const rawCwd = (result.json.value as { cwd: string }).cwd;
+            const { value } = result.json;
+            const rawCwd =
+                typeof value === 'object' && value !== null && 'cwd' in value
+                    ? String(value.cwd)
+                    : '';
             vi.stubEnv('TEST_UPDATE', '1');
             try {
                 expect(result.json).toMatch(file(`./_expected/${fixtureName}`));

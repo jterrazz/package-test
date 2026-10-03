@@ -12,6 +12,16 @@ const DEPCRUISE = join(ROOT, 'node_modules/.bin/depcruise');
 
 type Row = { message: string; path: string; rule: string };
 
+const isRow = (value: unknown): value is Row =>
+    typeof value === 'object' &&
+    value !== null &&
+    'message' in value &&
+    typeof value.message === 'string' &&
+    'path' in value &&
+    typeof value.path === 'string' &&
+    'rule' in value &&
+    typeof value.rule === 'string';
+
 function writeTargets(tree: string, files: Record<string, string>): void {
     for (const [from, text] of Object.entries(files)) {
         for (const { groups } of text.matchAll(/['"](?<target>\.{1,2}\/[^'"]+)['"]/gu)) {
@@ -39,7 +49,10 @@ function violationsIn(files: Record<string, string>): string[] {
             [CHECKER, 'architecture', '.', '--depcruise', DEPCRUISE, '--format', 'json'],
             { cwd: tree, encoding: 'utf8' },
         );
-        const rows = JSON.parse(stdout) as Row[];
+        const parsed: unknown = JSON.parse(stdout);
+        const rows: Row[] = Array.isArray(parsed)
+            ? parsed.filter((row): row is Row => isRow(row))
+            : [];
 
         return rows
             .map(({ message, path, rule }) => {

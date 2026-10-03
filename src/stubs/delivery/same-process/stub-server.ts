@@ -1,22 +1,24 @@
+import type { SetupServer } from 'msw/node';
+
 import type { StubRegistration } from '../../intercept/intercept.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
+import type { Msw } from '../msw-handlers.js';
 import { owningBodies } from './owned-body.js';
 
-/* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import */
+let loaded: null | { msw: Msw; setupServer: () => SetupServer } = null;
 
-let mswModule: any = null;
-let mswHttp: any = null;
-
-async function loadMsw(): Promise<{ msw: any; node: any }> {
-    if (mswModule === null) {
-        mswModule = await import('msw/node');
-        mswHttp = await import('msw');
+async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> {
+    if (loaded !== null) {
+        return loaded;
     }
-    return { msw: mswHttp, node: mswModule };
+    const [{ setupServer }, msw] = await Promise.all([import('msw/node'), import('msw')]);
+    const modules = { msw, setupServer: () => setupServer() };
+    loaded = modules;
+    return modules;
 }
 
-let serverInstance: any = null;
+let serverInstance: null | SetupServer = null;
 
 /** The `fetch` msw installed, which the owning wrapper sits on while it listens. */
 let installedFetch: null | typeof fetch = null;
@@ -26,9 +28,10 @@ async function ensureStubServer(): Promise<void> {
     if (serverInstance !== null) {
         return;
     }
-    const { node } = await loadMsw();
-    serverInstance = node.setupServer();
-    serverInstance.listen({ onUnhandledRequest: 'bypass' });
+    const { setupServer } = await loadMsw();
+    const server = setupServer();
+    server.listen({ onUnhandledRequest: 'bypass' });
+    serverInstance = server;
     installedFetch = globalThis.fetch;
     globalThis.fetch = owningBodies(installedFetch);
 }
@@ -38,11 +41,11 @@ export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistr
     await ensureStubServer();
     const { msw } = await loadMsw();
     const { handlers, violation } = buildStubHandlers(msw, stubs);
-    serverInstance.use(...handlers);
+    serverInstance?.use(...handlers);
 
     return {
         cleanup: () => {
-            serverInstance.resetHandlers();
+            serverInstance?.resetHandlers();
         },
         violation,
     };

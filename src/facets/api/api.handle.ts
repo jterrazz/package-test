@@ -4,7 +4,7 @@ import { getCallerDir } from '../../chain/paths/caller.js';
 import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import { declaredDatabaseKeys } from '../../services/services.js';
+import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
 import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
 import type { ApiSpecification } from './api.facet.js';
@@ -41,7 +41,7 @@ export async function startApi<Services extends ServiceRecord>(
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);
-    const services = (options.services ?? {}) as Services;
+    const services = declaredServices(options.services);
     const databaseKeys = declaredDatabaseKeys(services);
 
     const { database, databases, orchestrator, stopProcesses } = await startServices(

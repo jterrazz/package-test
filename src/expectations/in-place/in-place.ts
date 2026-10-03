@@ -177,6 +177,14 @@ const LEDGERS = new Map<string, Ledger>();
 
 type Pending = { file: string; source: string };
 
+const isPending = (value: unknown): value is Pending =>
+    typeof value === 'object' &&
+    value !== null &&
+    'file' in value &&
+    typeof value.file === 'string' &&
+    'source' in value &&
+    typeof value.source === 'string';
+
 let pendingFolder: (() => string | undefined) | null = null;
 
 /** Read at each write: the folder is the project's, and one worker may serve several. */
@@ -200,8 +208,10 @@ export function writePendingRewrites(folder: string): void {
         return;
     }
     for (const name of readdirSync(folder).filter((entry) => entry.endsWith('.json'))) {
-        const pending = JSON.parse(readFileSync(join(folder, name), 'utf8')) as Pending;
-        writeFileSync(pending.file, pending.source);
+        const pending: unknown = JSON.parse(readFileSync(join(folder, name), 'utf8'));
+        if (isPending(pending)) {
+            writeFileSync(pending.file, pending.source);
+        }
     }
     rmSync(folder, { force: true, recursive: true });
 }

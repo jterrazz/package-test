@@ -6,7 +6,7 @@ import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
-import { declaredDatabaseKeys } from '../../services/services.js';
+import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
 import type { Orchestrator } from '../../services/startup/orchestrator.js';
 import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
@@ -84,7 +84,7 @@ export async function startCli<Services extends ServiceRecord>(
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);
     const resolvedBin = resolveCommand(bin, root);
-    const services = (options.services ?? {}) as Services;
+    const services = declaredServices(options.services);
     const databaseKeys = declaredDatabaseKeys(services);
 
     let started: null | StartedServices = null;

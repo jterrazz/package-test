@@ -1,5 +1,4 @@
 import { file, specification } from '@jterrazz/test';
-import type { ApiSpecification } from '@jterrazz/test';
 import { Hono } from 'hono';
 import { describe, expect, test } from 'vitest';
 
@@ -95,11 +94,10 @@ describe('files', () => {
 
     test('throws on unknown database key', async () => {
         // Given - reference to nonexistent database service (bypass the typed keys on purpose)
-        const untypedApi = api as ApiSpecification;
-
         // Then - the chain rejects naming the unknown key
         await expect(
-            untypedApi
+            api
+                // @ts-expect-error -- `nonexistent-db` is no database key, which the compiler refuses too
                 .seed(file('../_seeds/one-user.sql'), { database: 'nonexistent-db' })
                 .get('/users'),
         ).rejects.toThrow(

@@ -53,11 +53,18 @@ export function stringValue(node: AstNode | undefined): string | undefined {
         return node.value;
     }
     if (node.type === 'TemplateLiteral') {
-        const expressions = node.expressions as AstNode[] | undefined;
-        const quasis = node.quasis as AstNode[] | undefined;
-        const onlyQuasi = quasis?.[0];
-        if (expressions?.length === 0 && quasis?.length === 1 && onlyQuasi !== undefined) {
-            return (onlyQuasi.value as undefined | { cooked?: string })?.cooked;
+        const expressions = childList(node, 'expressions');
+        const quasis = childList(node, 'quasis');
+        const [onlyQuasi] = quasis;
+        const value = onlyQuasi?.value;
+        if (
+            expressions.length === 0 &&
+            quasis.length === 1 &&
+            typeof value === 'object' &&
+            value !== null &&
+            'cooked' in value
+        ) {
+            return typeof value.cooked === 'string' ? value.cooked : undefined;
         }
     }
     return undefined;
@@ -67,8 +74,8 @@ export function memberPropertyName(node: AstNode): string | undefined {
     if (node.type !== 'MemberExpression' || node.computed === true) {
         return undefined;
     }
-    const property = node.property as AstNode | undefined;
-    return property?.type === 'Identifier' ? (property.name as string) : undefined;
+    const property = child(node, 'property');
+    return property?.type === 'Identifier' ? (stringField(property, 'name') ?? '') : undefined;
 }
 
 /** `dockerCli.fixture(x).exec(y)` → `dockerCli`. */
@@ -76,14 +83,14 @@ export function chainRootName(node: AstNode | undefined): string | undefined {
     let current = node;
     while (current !== undefined) {
         if (current.type === 'Identifier') {
-            return current.name as string;
+            return stringField(current, 'name') ?? '';
         }
         if (current.type === 'MemberExpression') {
-            current = current.object as AstNode | undefined;
+            current = child(current, 'object');
         } else if (current.type === 'CallExpression') {
-            current = current.callee as AstNode | undefined;
+            current = child(current, 'callee');
         } else if (current.type === 'AwaitExpression' || current.type === 'ChainExpression') {
-            current = (current.argument ?? current.expression) as AstNode | undefined;
+            current = child(current, 'argument') ?? child(current, 'expression');
         } else {
             return undefined;
         }
@@ -92,11 +99,11 @@ export function chainRootName(node: AstNode | undefined): string | undefined {
 }
 
 export function specificationMember(callNode: AstNode): string | undefined {
-    const callee = callNode.callee as AstNode | undefined;
+    const callee = child(callNode, 'callee');
     if (callee?.type !== 'MemberExpression') {
         return undefined;
     }
-    const object = callee.object as AstNode | undefined;
+    const object = child(callee, 'object');
     if (object?.type !== 'Identifier' || object.name !== 'specification') {
         return undefined;
     }
@@ -107,7 +114,7 @@ export function findProperty(objectNode: AstNode, name: string): AstNode | undef
     if (objectNode.type !== 'ObjectExpression') {
         return undefined;
     }
-    const properties = (objectNode.properties as AstNode[] | undefined) ?? [];
+    const properties = childList(objectNode, 'properties');
     return properties.find((property) => propertyKeyName(property) === name);
 }
 
@@ -115,9 +122,9 @@ export function propertyKeyName(property: AstNode): string | undefined {
     if (property.type !== 'Property' || property.computed === true) {
         return undefined;
     }
-    const key = property.key as AstNode | undefined;
+    const key = child(property, 'key');
     if (key?.type === 'Identifier') {
-        return key.name as string;
+        return stringField(key, 'name') ?? '';
     }
     if (key?.type === 'Literal') {
         return String(key.value);
@@ -165,13 +172,13 @@ export function isTestCallee(callee: AstNode | undefined): boolean {
         return false;
     }
     if (callee.type === 'Identifier') {
-        return TEST_IDENTIFIERS.has(callee.name as string);
+        return TEST_IDENTIFIERS.has(stringField(callee, 'name') ?? '');
     }
     if (callee.type === 'MemberExpression') {
-        return isTestCallee(callee.object as AstNode | undefined);
+        return isTestCallee(child(callee, 'object'));
     }
     if (callee.type === 'CallExpression') {
-        return isTestCallee(callee.callee as AstNode | undefined);
+        return isTestCallee(child(callee, 'callee'));
     }
     return false;
 }
@@ -183,11 +190,11 @@ export function testCalleeHasModifier(callee: AstNode | undefined, modifier: str
     if (callee.type === 'MemberExpression') {
         return (
             memberPropertyName(callee) === modifier ||
-            testCalleeHasModifier(callee.object as AstNode | undefined, modifier)
+            testCalleeHasModifier(child(callee, 'object'), modifier)
         );
     }
     if (callee.type === 'CallExpression') {
-        return testCalleeHasModifier(callee.callee as AstNode | undefined, modifier);
+        return testCalleeHasModifier(child(callee, 'callee'), modifier);
     }
     return false;
 }
@@ -199,7 +206,7 @@ export function findTestCallback(args: AstNode[]): AstNode | undefined {
 }
 
 export function testName(callNode: AstNode): string | undefined {
-    const args = (callNode.arguments as AstNode[] | undefined) ?? [];
+    const args = childList(callNode, 'arguments');
     return stringValue(args[0]);
 }
 
@@ -209,7 +216,7 @@ export function importSourceVisitor(
     onSource: (entry: ImportSource) => void,
 ): Record<string, (node: AstNode) => void> {
     const fromSourceField = (node: AstNode): void => {
-        const source = (node.source ?? undefined) as AstNode | undefined;
+        const source = child(node, 'source');
         const value = stringValue(source);
         if (value !== undefined) {
             onSource({ node: source ?? node, source: value });
@@ -240,6 +247,11 @@ export function child(node: AstNode | undefined, key: string): AstNode | undefin
 export function childList(node: AstNode | undefined, key: string): AstNode[] {
     const value = node?.[key];
     return Array.isArray(value) ? value.filter((item) => isNode(item)) : [];
+}
+
+export function stringField(node: AstNode | undefined, key: string): string | undefined {
+    const value = node?.[key];
+    return typeof value === 'string' ? value : undefined;
 }
 
 export function identifierName(node: AstNode | undefined): string | undefined {

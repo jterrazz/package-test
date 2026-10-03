@@ -6,9 +6,9 @@ import {
     readSpecFile,
     RUN_KEYS,
     SPEC_SCHEMA,
+    SpecSyntaxError,
     updateSpecFile,
 } from './spec-document.js';
-import type { SpecSyntaxError } from './spec-document.js';
 
 const MINIMAL = [
     'description: does the thing',
@@ -42,7 +42,10 @@ function refusalOf(content: string): SpecSyntaxError {
     try {
         parseSpecDocument(content, 'case.spec.yaml');
     } catch (error) {
-        return error as SpecSyntaxError;
+        if (error instanceof SpecSyntaxError) {
+            return error;
+        }
+        throw error;
     }
     throw new Error('expected the document to be refused, but it parsed');
 }

@@ -6,6 +6,7 @@ import { invariant, refusal } from '../../chain/refusals/refusal.js';
 import type { ContainerOptions } from '../containers/container.port.js';
 import { SERVICE_IMAGES } from '../containers/service-images.js';
 import type { DatabasePort } from '../database.port.js';
+import { driverReason } from '../driver-reason.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import type { ServiceHandle } from '../service.port.js';
 import {
@@ -90,11 +91,11 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             await client.connect();
             await client.query('SELECT 1');
             await client.end();
-        } catch (error: any) {
+        } catch (error) {
             throw new Error(
                 refusal({
                     fix: 'check the container is running and reachable (`docker ps`), and run again',
-                    found: `postgres() did not answer its healthcheck: ${error.message || error.code || String(error)}`,
+                    found: `postgres() did not answer its healthcheck: ${driverReason(error)}`,
                     read: 'docs/18-services.md#service-factories',
                     why: 'A declared service is handed to the chain once it answers its healthcheck.',
                 }),

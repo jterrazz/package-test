@@ -1,4 +1,5 @@
 import { hostname } from 'node:os';
+import type { StartedTestContainer } from 'testcontainers';
 
 import { invariant } from '../../chain/refusals/refusal.js';
 import { loadPeer } from '../peer.js';
@@ -35,7 +36,7 @@ export class TestcontainersAdapter implements ContainerPort {
     private readonly command: string[] | undefined;
     private readonly tmpfs: Record<string, string> | undefined;
     private readonly reuse: boolean;
-    private container: any = null;
+    private container: null | StartedTestContainer = null;
 
     constructor(options: ContainerRequest & { reuse?: boolean }) {
         this.image = options.image;
@@ -118,8 +119,8 @@ export class TestcontainersAdapter implements ContainerPort {
         );
         return await new Promise((resolve) => {
             let output = '';
-            stream.on('data', (chunk: Buffer) => {
-                output += chunk.toString();
+            stream.on('data', (chunk: unknown) => {
+                output += Buffer.isBuffer(chunk) ? chunk.toString() : String(chunk);
             });
             stream.on('end', () => {
                 resolve(output);

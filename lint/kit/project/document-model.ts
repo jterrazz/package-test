@@ -12,7 +12,7 @@ import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-document.js';
 import type { SpecDocument, SpecFile } from './spec-document.js';
 import { readText } from './tree.js';
-import { isMap, isScalar, isSeq } from './yaml-document.js';
+import { isMap, isScalar, isSeq, nodeItems, nodePairs } from './yaml-document.js';
 import type { Node, Pair, Scalar, YAMLMap } from './yaml-document.js';
 
 export type DocumentFinding<PassId extends string = string> = Teaching & {
@@ -61,7 +61,7 @@ export function documentMap(file: SpecFile): null | YAMLMap {
 }
 
 export function pairsOf(map: YAMLMap): Pair<Node, Node>[] {
-    return map.items as Pair<Node, Node>[];
+    return nodePairs(map);
 }
 
 export function keyName(pair: Pair<Node, Node>): null | string {
@@ -71,7 +71,7 @@ export function keyName(pair: Pair<Node, Node>): null | string {
 export function runMaps(file: SpecFile): YAMLMap[] {
     const map = documentMap(file);
     const items = map?.get('runs', true);
-    return isSeq(items) ? (items.items as Node[]).filter((item) => isMap(item)) : [];
+    return isSeq(items) ? nodeItems(items).filter((item) => isMap(item)) : [];
 }
 
 export function streamScalars(run: YAMLMap): { key: string; scalar: Scalar }[] {

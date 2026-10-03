@@ -32,8 +32,10 @@ function isStubs(value: unknown): value is Stubs {
     return (
         typeof value === 'object' &&
         value !== null &&
-        Array.isArray((value as Stubs).stubs) &&
-        typeof (value as Stubs).with === 'function'
+        'stubs' in value &&
+        Array.isArray(value.stubs) &&
+        'with' in value &&
+        typeof value.with === 'function'
     );
 }
 

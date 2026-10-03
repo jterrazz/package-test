@@ -102,7 +102,7 @@ export class Orchestrator {
                     durationMs: Date.now() - serviceStartTime,
                 });
                 this.running.push({ handle, container });
-            } catch (error: any) {
+            } catch (error) {
                 let logs = '';
                 try {
                     // invariant: a container of the project logs every file's work: the report reads from this start's.
@@ -120,7 +120,7 @@ export class Orchestrator {
                     name: handle.serviceName ?? handle.type,
                     type: handle.type,
                     durationMs: Date.now() - serviceStartTime,
-                    error: error.message,
+                    error: error instanceof Error ? error.message : String(error),
                     logs,
                 });
 

@@ -263,7 +263,7 @@ function literalValue(source: string): unknown {
         return undefined;
     }
     try {
-        return runInNewContext(`(${source})`, Object.create(null) as object, { timeout: 1000 });
+        return runInNewContext(`(${source})`, {}, { timeout: 1000 });
     } catch {
         return undefined;
     }

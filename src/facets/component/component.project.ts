@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
-import type { Plugin, UserConfig, UserConfigFn } from 'vite';
+import type { Plugin, PluginOption, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/kit/project/artifacts.js';
@@ -119,6 +119,8 @@ function mswWorkerPlugin(): Plugin {
         name: '@jterrazz/test:msw-worker',
     };
 }
+
+const isPluginList = (plugins: unknown): plugins is PluginOption[] => Array.isArray(plugins);
 
 /** An allow-list: an unknown key (`environments`, `ssr`, …) could re-root the run. The consumer's `plugins` are concatenated after the project's. */
 async function reroot(
@@ -295,7 +297,7 @@ export async function component(
     assertProviderPin(versionOf('vitest'), installedVersion('@vitest/browser-playwright'));
     const { playwright } = await import('@vitest/browser-playwright');
     const pipeline = options.vite === undefined ? {} : await reroot(options.vite, root);
-    const consumerPlugins = Array.isArray(pipeline.plugins) ? pipeline.plugins : [];
+    const consumerPlugins = isPluginList(pipeline.plugins) ? pipeline.plugins : [];
 
     const project = {
         ...pipeline,

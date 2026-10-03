@@ -1,3 +1,5 @@
+import type { http, HttpHandler, HttpResponse, passthrough } from 'msw';
+
 import { pause } from '../../chain/pause.js';
 import { isStreamBody } from '../exchange.js';
 import type { MatchableRequest, StubResponse } from '../exchange.js';
@@ -5,14 +7,17 @@ import { StubQueue } from '../matching/stub-queue.js';
 import type { Stub } from '../stub.js';
 import { toReadableStream } from './stream-body.js';
 
-/** msw runs one handler shape in node and in a page: what a stub becomes is stated once here. Typed loosely: msw is reached through a lazy import. */
-
-/* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
+/** The msw a stub is built with, reached through a lazy import: node and a page load their own. */
+export type Msw = {
+    readonly http: typeof http;
+    readonly HttpResponse: typeof HttpResponse;
+    readonly passthrough: typeof passthrough;
+};
 
 /** In a page, a real service worker and HTTP cache could serve an earlier test's answer and never reach the queue. */
 const NEVER_CACHED = { 'cache-control': 'no-store' };
 
-function toMswResponse(msw: any, response: StubResponse): unknown {
+function toMswResponse(msw: Msw, response: StubResponse): Response {
     const { body, headers, status = 200 } = response;
     if (response.transport === 'network-error') {
         // outside: not a reply: the request fails in transport, as `fetch` sees when nothing listens.
@@ -38,15 +43,29 @@ function toMswResponse(msw: any, response: StubResponse): unknown {
 }
 
 /** An empty stub list is still a guard: the catch-all alone says the subject has no network. `bypass` is the runner's own traffic in a page. */
+function handlerOf(msw: Msw, method: string): typeof http.all | undefined {
+    const handlers: Readonly<Record<string, typeof http.all>> = {
+        '*': msw.http.all,
+        DELETE: msw.http.delete,
+        GET: msw.http.get,
+        HEAD: msw.http.head,
+        OPTIONS: msw.http.options,
+        PATCH: msw.http.patch,
+        POST: msw.http.post,
+        PUT: msw.http.put,
+    };
+    return handlers[method.toUpperCase()];
+}
+
 export function buildStubHandlers(
-    msw: any,
+    msw: Msw,
     stubs: readonly Stub[],
     bypass?: (url: string) => boolean,
-): { handlers: unknown[]; violation: () => Error | null } {
+): { handlers: HttpHandler[]; violation: () => Error | null } {
     const queue = new StubQueue(stubs);
     let violation: Error | null = null;
 
-    const recordViolation = (method: string, url: string): unknown => {
+    const recordViolation = (method: string, url: string): Response => {
         violation ??= queue.unmatchedError(method, url);
         return msw.HttpResponse.json(
             { error: `@jterrazz/test strict stubs: unmatched request ${method} ${url}` },
@@ -54,11 +73,11 @@ export function buildStubHandlers(
         );
     };
 
-    const handlers: unknown[] = [];
+    const handlers: HttpHandler[] = [];
     for (const route of queue.routes) {
         for (const method of route.methods) {
-            const handlerFn = method === '*' ? msw.http.all : msw.http[method.toLowerCase()];
-            if (!handlerFn) {
+            const handlerFn = handlerOf(msw, method);
+            if (handlerFn === undefined) {
                 continue;
             }
             handlers.push(

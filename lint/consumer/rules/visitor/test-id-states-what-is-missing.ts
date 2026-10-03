@@ -2,7 +2,13 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Comment, Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../../../kit/project/ast.js';
+import {
+    child,
+    childList,
+    memberPropertyName,
+    SCENARIO_ACTIONS,
+    walk,
+} from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
@@ -61,12 +67,12 @@ export const testIdStatesWhatIsMissing = defineRule(
                     return true;
                 },
                 CallExpression(node: AstNode) {
-                    const callee = node.callee as AstNode | undefined;
+                    const callee = child(node, 'callee');
                     const member = callee ? memberPropertyName(callee) : undefined;
                     if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
                         return;
                     }
-                    const args = node.arguments as AstNode[] | undefined;
+                    const args = childList(node, 'arguments');
                     const scenario = args?.[1];
                     if (
                         scenario?.type !== 'ArrowFunctionExpression' &&
@@ -78,7 +84,7 @@ export const testIdStatesWhatIsMissing = defineRule(
                         if (inner.type !== 'CallExpression') {
                             return;
                         }
-                        const innerCallee = inner.callee as AstNode | undefined;
+                        const innerCallee = child(inner, 'callee');
                         if (innerCallee?.type !== 'Identifier' || innerCallee.name !== 'testId') {
                             return;
                         }

@@ -7,18 +7,20 @@ import { CliResult } from './cli.result.js';
 import {
     containerLogs,
     execInContainer,
+    fieldOf,
     inspectContainer,
     readContainerFile,
 } from './docker-cli.js';
 
-function readInspectState(inspect: any): { running: boolean; status: string } {
-    const state = inspect?.State ?? inspect?.state;
-    if (!state) {
+function readInspectState(inspect: unknown): { running: boolean; status: string } {
+    const state = fieldOf(inspect, 'State', 'state');
+    if (state === undefined || state === null) {
         return { running: false, status: 'unknown' };
     }
+    const status = fieldOf(state, 'Status', 'status');
     return {
-        running: Boolean(state.Running ?? state.running ?? false),
-        status: String(state.Status ?? state.status ?? 'unknown'),
+        running: fieldOf(state, 'Running', 'running') === true,
+        status: typeof status === 'string' ? status : 'unknown',
     };
 }
 

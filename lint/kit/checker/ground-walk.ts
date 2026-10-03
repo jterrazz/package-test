@@ -41,8 +41,10 @@ function groundFindings(
     return inside === GROUND_REQUESTS ? passes.request(file) : passes.expected(file);
 }
 
+const isGround = (name: string): name is Ground => GROUND_DIRS.has(name);
+
 function nextGround(name: string, inside: Ground | null): Ground | null {
-    return GROUND_DIRS.has(name) ? (name as Ground) : inside;
+    return isGround(name) ? name : inside;
 }
 
 export function walkGround(rootDir: string, passes: GroundPasses): Spotted[] {

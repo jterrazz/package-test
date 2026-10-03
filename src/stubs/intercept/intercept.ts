@@ -88,9 +88,7 @@ export function interceptThrough(
         const stubs = declared(
             'intercept',
             requestOrStubs,
-            options === maybeResponseOrOptions
-                ? undefined
-                : (maybeResponseOrOptions as StubResponder | StubResponse | undefined),
+            isOptions(maybeResponseOrOptions) ? undefined : maybeResponseOrOptions,
         );
         if (stubs.length === 0) {
             throw new Error(

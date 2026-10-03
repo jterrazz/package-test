@@ -6,7 +6,12 @@ import type { ResultConfig } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { ContainerAccessor } from './container.js';
-import { findContainersByLabel, inspectContainer, removeContainers } from './docker-cli.js';
+import {
+    fieldOf,
+    findContainersByLabel,
+    inspectContainer,
+    removeContainers,
+} from './docker-cli.js';
 
 /** Raw output of a command: exit code and captured streams. */
 export type CliOutput = {
@@ -164,12 +169,15 @@ export class CliResult extends BaseResult {
             } catch {
                 continue;
             }
-            const labels =
-                (inspect as any)?.Config?.Labels ?? (inspect as any)?.config?.labels ?? {};
-            const nameValue = labels[this.dockerConfig!.nameLabel];
+            const nameValue = labelsOf(inspect)[this.dockerConfig!.nameLabel];
             const key = typeof nameValue === 'string' && nameValue.length > 0 ? nameValue : id;
             map.set(key, { id, inspect });
         }
         this.containersCache = map;
     }
+}
+
+function labelsOf(inspect: unknown): Readonly<Record<string, unknown>> {
+    const labels = fieldOf(fieldOf(inspect, 'Config', 'config'), 'Labels', 'labels');
+    return typeof labels === 'object' && labels !== null ? { ...labels } : {};
 }

@@ -9,8 +9,7 @@ function rewritten(step: number, text: string): string {
 }
 
 function readBack(rendered: string): unknown {
-    return (parseYamlSource(rendered).document.toJS() as { runs: { stdout: unknown }[] }).runs[0]
-        ?.stdout;
+    return parseYamlSource(rendered).document.getIn(['runs', 0, 'stdout']);
 }
 
 const FORMATTED = [

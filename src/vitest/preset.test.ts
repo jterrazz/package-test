@@ -100,9 +100,9 @@ describe('preset', () => {
         expect(project).toMatchObject({
             test: { hookTimeout: 30_000, testTimeout: 30_000 },
         });
-        expect((project as { test: { exclude: string[] } }).test.exclude).toContain(
-            '**/{_expected,_fixtures,_requests,_seeds}/**',
-        );
+        const exclude =
+            typeof project === 'object' && 'test' in project ? project.test?.exclude : undefined;
+        expect(exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
     });
 
     test('presetConfig() — what the consumer states wins — a stated timeout replaces the default instead of adding to it', () => {

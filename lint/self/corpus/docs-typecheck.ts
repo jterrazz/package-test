@@ -91,11 +91,14 @@ export function typecheckDocBlocks(options: {
             });
             return { blocks: blocks.length, ok: true, output: '' };
         } catch (error) {
-            const shell = error as { stderr?: string; stdout?: string };
+            const streamOf = (key: 'stderr' | 'stdout'): string =>
+                typeof error === 'object' && error !== null && key in error
+                    ? String(Reflect.get(error, key) ?? '')
+                    : '';
             return {
                 blocks: blocks.length,
                 ok: false,
-                output: `${shell.stdout ?? ''}${shell.stderr ?? ''}`.trim(),
+                output: `${streamOf('stdout')}${streamOf('stderr')}`.trim(),
             };
         }
     } finally {

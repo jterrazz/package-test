@@ -41,23 +41,23 @@ export const noRawBypass = defineRule(
         createOnce(context: Context): Visitor {
             return {
                 CallExpression(node: AstNode) {
-                    const callee = node.callee as AstNode | undefined;
+                    const callee = child(node, 'callee');
                     const matcher = callee === undefined ? undefined : memberPropertyName(callee);
                     if (matcher === undefined || !TEXT_MATCHERS.has(matcher)) {
                         return;
                     }
-                    const expectCall = unnegated(callee?.object as AstNode | undefined);
+                    const expectCall = unnegated(child(callee, 'object'));
                     if (expectCall?.type !== 'CallExpression') {
                         return;
                     }
-                    const expectCallee = expectCall.callee as AstNode | undefined;
+                    const expectCallee = child(expectCall, 'callee');
                     if (expectCallee?.type !== 'Identifier' || expectCallee.name !== 'expect') {
                         return;
                     }
                     if (isRegExp(childList(node, 'arguments')[0])) {
                         return;
                     }
-                    const subject = (expectCall.arguments as AstNode[] | undefined)?.[0];
+                    const subject = childList(expectCall, 'arguments')[0];
                     if (subject !== undefined && memberPropertyName(subject) === 'raw') {
                         context.report({ data: { matcher }, messageId: 'rawBypass', node });
                     }

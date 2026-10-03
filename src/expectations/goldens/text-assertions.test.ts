@@ -37,18 +37,29 @@ function chaiWith(
         util: {
             flag: () => subject,
             overwriteMethod: (target, name, method) => {
-                const record = target as Record<string, (...args: unknown[]) => unknown>;
-                const original = record[name];
-                if (original !== undefined) {
-                    record[name] = method(original);
+                const original: unknown = Reflect.get(target, name);
+                if (typeof original === 'function') {
+                    Reflect.set(
+                        target,
+                        name,
+                        method(function overwritten(this: unknown, ...args: unknown[]): unknown {
+                            return Reflect.apply(original, this, args);
+                        }),
+                    );
                 }
             },
         },
     };
 }
 
-function toMatchOf(chai: ReturnType<typeof chaiWith>): (this: unknown, value: unknown) => void {
-    return chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
+function toMatchOf(chai: ReturnType<typeof chaiWith>): (value: unknown) => unknown {
+    const { prototype } = chai.Assertion;
+    return (value) => {
+        const toMatch: unknown = prototype.toMatch;
+        const answer: unknown =
+            typeof toMatch === 'function' ? Reflect.apply(toMatch, prototype, [value]) : undefined;
+        return answer;
+    };
 }
 
 describe('text-assertions', () => {
@@ -61,9 +72,9 @@ describe('text-assertions', () => {
 
         // When - a file, a string and a RegExp reach toMatch
         // checker-disable-next-line named-path-exists -- the routing under test hands the path to a recorder: nothing reads the disk
-        toMatch.call(chai.Assertion.prototype, file('./_expected/out.txt'));
-        toMatch.call(chai.Assertion.prototype, 'out');
-        toMatch.call(chai.Assertion.prototype, /out/u);
+        toMatch(file('./_expected/out.txt'));
+        toMatch('out');
+        toMatch(/out/u);
 
         // Then - one golden, and two answers that are vitest's own
         expect(answered).toStrictEqual(['golden', 'vitest', 'vitest']);
@@ -80,12 +91,12 @@ describe('text-assertions', () => {
 
         // When - a file reaches toMatch
         // checker-disable-next-line named-path-exists -- the routing under test hands the path to a recorder: nothing reads the disk
-        toMatch.call(chai.Assertion.prototype, file('./_expected/out.txt'));
+        toMatch(file('./_expected/out.txt'));
 
         // Then - the golden answered it, and a value is refused before vitest is asked
         expect(answered).toStrictEqual(['golden']);
         expect(() => {
-            toMatch.call(chai.Assertion.prototype, 'out');
+            toMatch('out');
         }).toThrow('takes toMatch(file(…))');
     });
 
@@ -97,12 +108,12 @@ describe('text-assertions', () => {
         const toMatch = toMatchOf(chai);
 
         // When - a text reaches toMatch
-        toMatch.call(chai.Assertion.prototype, 'built\n');
+        toMatch('built\n');
 
         // Then - compared whole, handed the stack of the call; a RegExp is refused naming the text
         expect(answered).toStrictEqual(['whole']);
         expect(() => {
-            toMatch.call(chai.Assertion.prototype, /built/u);
+            toMatch(/built/u);
         }).toThrow(
             "fix: write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(…)",
         );

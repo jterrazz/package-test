@@ -38,16 +38,8 @@
             "count": 1
         }
     },
-    "lint/consumer/checks/ground-shared-or-inline.seeds.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "lint/consumer/checks/ground-shared-or-inline.ts": {
         "max-lines": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
@@ -85,56 +77,9 @@
             "count": 1
         }
     },
-    "lint/consumer/rules/chain/cli-runs-the-product-binary.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 5
-        }
-    },
-    "lint/consumer/rules/chain/no-redundant-service-url.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 4
-        }
-    },
-    "lint/consumer/rules/chain/trigger-name-in-kebab-case.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        }
-    },
-    "lint/consumer/rules/expectations/negative-golden-frozen.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 11
-        }
-    },
-    "lint/consumer/rules/expectations/no-raw-bypass.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 4
-        }
-    },
-    "lint/consumer/rules/expectations/no-single-use-ref.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 3
-        }
-    },
-    "lint/consumer/rules/expectations/no-status-only-test.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 7
-        }
-    },
     "lint/consumer/rules/expectations/no-transform-duplicating-tokens.ts": {
         "complexity": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 8
         }
     },
     "lint/consumer/rules/layout/specs-at-declared-depth.ts": {
@@ -143,59 +88,31 @@
         },
         "max-lines-per-function": {
             "count": 2
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
         }
     },
     "lint/consumer/rules/layout/verb-reads-its-ground-folder.ts": {
         "complexity": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 5
         }
     },
     "lint/consumer/rules/setup/cleanup-passed-to-after-all.ts": {
         "no-loop-func": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 6
-        }
-    },
-    "lint/consumer/rules/setup/no-redundant-root.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
         }
     },
     "lint/consumer/rules/setup/no-runner-alias.ts": {
         "complexity": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 7
-        }
-    },
-    "lint/consumer/rules/setup/no-unknown-constructor.ts": {
-        "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
     "lint/consumer/rules/stubs/stubs-root-holds-facades-and-kinds.ts": {
         "max-lines": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 4
         }
     },
     "lint/consumer/rules/visitor/test-id-states-what-is-missing.ts": {
         "max-lines-per-function": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 3
         }
     },
     "lint/kit/catalogue/chapter.ts": {
@@ -211,17 +128,9 @@
             "count": 1
         }
     },
-    "lint/kit/checker/ground-walk.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "lint/kit/project/ast.ts": {
         "max-lines": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 21
         }
     },
     "lint/kit/project/document-model.ts": {
@@ -230,9 +139,6 @@
         },
         "typescript/no-unnecessary-type-conversion": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
         }
     },
     "lint/kit/project/production.ts": {
@@ -254,9 +160,6 @@
         "max-lines": {
             "count": 1
         },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "unicorn/no-array-sort": {
             "count": 4
         }
@@ -266,13 +169,10 @@
             "count": 1
         },
         "typescript/no-non-null-assertion": {
-            "count": 3
+            "count": 2
         },
         "typescript/no-unnecessary-type-conversion": {
             "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 10
         }
     },
     "lint/kit/project/subject.test.ts": {
@@ -298,11 +198,6 @@
             "count": 1
         }
     },
-    "lint/kit/project/yaml-document.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "lint/kit/project/yaml-document.ts": {
         "typescript/consistent-return": {
             "count": 1
@@ -322,15 +217,7 @@
             "count": 2
         }
     },
-    "lint/self/checks/architecture.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "lint/self/corpus/docs-typecheck.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "unicorn/no-array-for-each": {
             "count": 1
         }
@@ -352,10 +239,7 @@
     },
     "lint/self/corpus/messages.test.ts": {
         "jterrazz/no-expect-in-a-loop": {
-            "count": 10
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
+            "count": 6
         }
     },
     "lint/self/corpus/meta-tests.test.ts": {
@@ -366,9 +250,6 @@
     "lint/self/corpus/schema-documents.test.ts": {
         "jterrazz/no-expect-in-a-loop": {
             "count": 2
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 3
         }
     },
     "lint/self/corpus/siblings.test.ts": {
@@ -386,65 +267,17 @@
             "count": 2
         }
     },
-    "specs/api/intercept/filters.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "specs/api/params/templates.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "specs/api/response/comparison.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "specs/api/seed/files.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "specs/api/services/initiation-errors.spec.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
         },
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-argument": {
-            "count": 1
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "vitest/max-expects": {
-            "count": 1
-        }
-    },
-    "specs/api/to-match/results.spec.ts": {
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 1
-        },
-        "typescript/no-unsafe-return": {
             "count": 1
         }
     },
     "specs/cli/container/labels.spec.ts": {
         "vitest/max-expects": {
             "count": 8
-        }
-    },
-    "specs/cli/directory/changed.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
         }
     },
     "specs/cli/env/env.spec.ts": {
@@ -462,38 +295,7 @@
             "count": 1
         }
     },
-    "specs/cli/json/assertions.spec.ts": {
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 2
-        }
-    },
-    "specs/cli/json/workdir.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "specs/cli/run/bridge.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "specs/cli/run/refusals.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        }
-    },
-    "specs/cli/run/update-mode.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        }
-    },
     "specs/cli/stdout/comparison.spec.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        },
         "typescript/restrict-template-expressions": {
             "count": 1
         }
@@ -523,39 +325,17 @@
             "count": 3
         }
     },
-    "src/chain/refusals/node-only.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/clock/clock.test.ts": {
         "jterrazz/no-sampled-value-in-test": {
             "count": 1
-        }
-    },
-    "src/disk/spec-path.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
         }
     },
     "src/expectations/command/cli.result.ts": {
         "import/no-cycle": {
             "count": 1
         },
-        "typescript/no-explicit-any": {
-            "count": 2
-        },
         "typescript/no-non-null-assertion": {
             "count": 5
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 2
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 3
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
         },
         "typescript/require-await": {
             "count": 1
@@ -568,31 +348,8 @@
         "import/no-cycle": {
             "count": 1
         },
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 6
-        },
         "typescript/require-await": {
             "count": 1
-        },
-        "typescript/strict-boolean-expressions": {
-            "count": 1
-        }
-    },
-    "src/expectations/command/docker-cli.ts": {
-        "typescript/no-explicit-any": {
-            "count": 2
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 4
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 10
         }
     },
     "src/expectations/disk/directory.ts": {
@@ -620,9 +377,6 @@
         "max-lines": {
             "count": 1
         },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 4
-        },
         "vitest/require-to-throw-message": {
             "count": 1
         }
@@ -634,31 +388,15 @@
         "max-params": {
             "count": 1
         },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "typescript/require-await": {
             "count": 1
         },
         "typescript/strict-boolean-expressions": {
-            "count": 3
-        }
-    },
-    "src/expectations/goldens/text-assertions.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
             "count": 2
         }
     },
     "src/expectations/http/http-file.ts": {
         "typescript/strict-boolean-expressions": {
-            "count": 1
-        }
-    },
-    "src/expectations/in-place/in-place.ts": {
-        "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
@@ -712,10 +450,7 @@
             "count": 1
         },
         "typescript/no-non-null-assertion": {
-            "count": 9
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
+            "count": 7
         },
         "typescript/strict-boolean-expressions": {
             "count": 5
@@ -727,16 +462,6 @@
             "count": 2
         }
     },
-    "src/facets/api/api.handle.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "src/facets/api/routes/ledger.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/facets/api/routes/route-judge.test.ts": {
         "max-lines": {
             "count": 1
@@ -744,11 +469,6 @@
     },
     "src/facets/api/server/hono.adapter.ts": {
         "unicorn/no-array-for-each": {
-            "count": 1
-        }
-    },
-    "src/facets/cli/cli.handle.ts": {
-        "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
@@ -799,18 +519,10 @@
     "src/facets/component/component.project.ts": {
         "max-lines": {
             "count": 1
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
         }
     },
     "src/facets/component/page/vitest-browser-dom.ts": {
         "max-lines-per-function": {
-            "count": 1
-        }
-    },
-    "src/facets/job/job.handle.ts": {
-        "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
@@ -841,9 +553,6 @@
         "promise/param-names": {
             "count": 1
         },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "typescript/strict-boolean-expressions": {
             "count": 5
         },
@@ -868,9 +577,6 @@
         }
     },
     "src/facets/mobile/server/simulator.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "typescript/strict-void-return": {
             "count": 1
         }
@@ -901,47 +607,13 @@
             "count": 1
         }
     },
-    "src/services/containers/testcontainers.adapter.ts": {
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-call": {
-            "count": 6
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 6
-        },
-        "typescript/no-unsafe-return": {
-            "count": 2
-        },
-        "typescript/strict-boolean-expressions": {
-            "count": 4
-        }
-    },
     "src/services/database-option.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 2
         }
     },
     "src/services/postgres/postgres.adapter.ts": {
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 2
-        },
         "typescript/strict-boolean-expressions": {
-            "count": 3
-        }
-    },
-    "src/services/postgres/template.ts": {
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
             "count": 1
         }
     },
@@ -954,23 +626,6 @@
         },
         "max-lines-per-function": {
             "count": 1
-        },
-        "typescript/no-unsafe-call": {
-            "count": 2
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 2
-        }
-    },
-    "src/services/redis/redis.adapter.ts": {
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 2
-        },
-        "typescript/strict-boolean-expressions": {
-            "count": 2
         }
     },
     "src/services/sqlite/sqlite.adapter.test.ts": {
@@ -988,9 +643,6 @@
         "max-lines": {
             "count": 1
         },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 3
-        },
         "typescript/require-await": {
             "count": 5
         },
@@ -1007,15 +659,6 @@
         },
         "no-console": {
             "count": 2
-        },
-        "typescript/no-explicit-any": {
-            "count": 1
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 1
         }
     },
     "src/services/startup/startup-report.ts": {
@@ -1027,11 +670,8 @@
         }
     },
     "src/stubs/delivery/msw-handlers.ts": {
-        "typescript/no-unsafe-return": {
-            "count": 1
-        },
         "typescript/strict-boolean-expressions": {
-            "count": 2
+            "count": 1
         },
         "unicorn/no-array-for-each": {
             "count": 1
@@ -1043,12 +683,6 @@
         },
         "typescript/no-non-null-assertion": {
             "count": 10
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 1
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 2
         }
     },
     "src/stubs/delivery/other-process/stub-backend.ts": {
@@ -1059,9 +693,6 @@
             "count": 1
         },
         "max-lines-per-function": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
             "count": 1
         },
         "typescript/strict-boolean-expressions": {
@@ -1078,40 +709,14 @@
             "count": 3
         }
     },
-    "src/stubs/intercept/intercept.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/stubs/kinds/anthropic.test.ts": {
         "typescript/no-non-null-assertion": {
             "count": 5
         }
     },
     "src/stubs/kinds/anthropic.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "typescript/no-explicit-any": {
-            "count": 3
-        },
-        "typescript/no-unsafe-argument": {
-            "count": 2
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 2
-        },
-        "typescript/no-unsafe-call": {
-            "count": 4
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 10
-        },
-        "typescript/no-unsafe-return": {
-            "count": 1
-        },
         "typescript/strict-boolean-expressions": {
-            "count": 2
+            "count": 1
         }
     },
     "src/stubs/kinds/http.test.ts": {
@@ -1122,60 +727,14 @@
             "count": 3
         }
     },
-    "src/stubs/kinds/openai.ts": {
-        "complexity": {
-            "count": 2
-        },
-        "typescript/no-explicit-any": {
-            "count": 9
-        },
-        "typescript/no-unsafe-argument": {
-            "count": 6
-        },
-        "typescript/no-unsafe-assignment": {
-            "count": 4
-        },
-        "typescript/no-unsafe-call": {
-            "count": 12
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 30
-        },
-        "typescript/no-unsafe-return": {
-            "count": 3
-        },
-        "typescript/strict-boolean-expressions": {
-            "count": 3
-        }
-    },
-    "src/stubs/matching/stub-queue.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/stubs/matching/stub-queue.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 1
         }
     },
-    "src/stubs/stub.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 3
-        }
-    },
-    "src/stubs/stub.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        }
-    },
     "src/visitor/matching/ambiguous.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 3
-        }
-    },
-    "src/vitest/preset.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
         }
     }
 }

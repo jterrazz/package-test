@@ -71,12 +71,12 @@ export async function buildTemplate(
                 await withClient(withDatabase(connectionString, template), async (builder) => {
                     await builder.query(sql);
                 });
-            } catch (error: any) {
+            } catch (error) {
                 await admin.query(`DROP DATABASE IF EXISTS "${template}" WITH (FORCE)`);
                 throw new Error(
                     refusal({
                         fix: `correct ${initPath}: the SQL fails as written`,
-                        found: `the postgres init script ${initPath} failed: ${error.message}`,
+                        found: `the postgres init script ${initPath} failed: ${error instanceof Error ? error.message : String(error)}`,
                         read: 'docs/18-services.md#dockerserviceinitsql',
                         why: 'A postgres service’s template database is built by its init script, run whole.',
                     }),

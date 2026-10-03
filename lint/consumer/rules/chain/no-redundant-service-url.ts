@@ -2,7 +2,7 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { memberPropertyName, propertyKeyName } from '../../../kit/project/ast.js';
+import { child, childList, memberPropertyName, propertyKeyName } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -26,20 +26,20 @@ export const noRedundantServiceUrl = defineRule(
         createOnce(context: Context): Visitor {
             return {
                 CallExpression(node: AstNode) {
-                    const callee = node.callee as AstNode | undefined;
+                    const callee = child(node, 'callee');
                     if (callee === undefined || memberPropertyName(callee) !== 'env') {
                         return;
                     }
-                    const argument = (node.arguments as AstNode[] | undefined)?.[0];
+                    const argument = childList(node, 'arguments')[0];
                     if (argument?.type !== 'ObjectExpression') {
                         return;
                     }
-                    for (const property of (argument.properties as AstNode[] | undefined) ?? []) {
+                    for (const property of childList(argument, 'properties')) {
                         const key = propertyKeyName(property);
                         if (key === undefined || !URL_KEY.test(key)) {
                             continue;
                         }
-                        const value = property.value as AstNode | undefined;
+                        const value = child(property, 'value');
                         if (
                             value?.type === 'MemberExpression' &&
                             memberPropertyName(value) === 'connectionString'

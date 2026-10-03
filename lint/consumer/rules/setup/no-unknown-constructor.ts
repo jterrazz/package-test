@@ -2,7 +2,7 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { memberPropertyName } from '../../../kit/project/ast.js';
+import { child, memberPropertyName } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -34,7 +34,7 @@ export const noUnknownConstructor = defineRule(
         createOnce(context: Context): Visitor {
             return {
                 MemberExpression(node: AstNode) {
-                    const object = node.object as AstNode | undefined;
+                    const object = child(node, 'object');
                     if (object?.type !== 'Identifier' || object.name !== 'specification') {
                         return;
                     }

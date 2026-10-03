@@ -43,11 +43,14 @@ export function file<const Path extends RelativePath>(
             }),
         );
     }
-    return diskValue('file', path) as FileAt<Path>;
+    return diskValue('file', path);
 }
 
 /** Refuses when read as a pattern: a plain object would match `[object Object]` against any text. */
-function diskValue(brand: 'directory' | 'file', path: string): object {
+function diskValue<Brand extends 'directory' | 'file', Path extends string>(
+    brand: Brand,
+    path: Path,
+): { readonly [DISK]: Brand; readonly path: Path } {
     const value = { [DISK]: brand, path };
     Object.defineProperty(value, Symbol.match, {
         value: () => {
@@ -75,9 +78,7 @@ export function directory<const Path extends RelativePath<'/'>>(
             }),
         );
     }
-    return diskValue('directory', path) as DiskDirectory & {
-        readonly path: Path;
-    };
+    return diskValue('directory', path);
 }
 
 export function isDiskFile(value: unknown): value is DiskFile {

@@ -9,7 +9,13 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { findProperty, specificationMember, stringValue } from '../../../kit/project/ast.js';
+import {
+    child,
+    childList,
+    findProperty,
+    specificationMember,
+    stringValue,
+} from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -38,9 +44,9 @@ export const noRedundantRoot = defineRule(
                     if (specificationMember(node) === undefined) {
                         return;
                     }
-                    for (const argument of (node.arguments as AstNode[] | undefined) ?? []) {
+                    for (const argument of childList(node, 'arguments')) {
                         const root = findProperty(argument, 'root');
-                        const literal = stringValue(root?.value as AstNode | undefined);
+                        const literal = stringValue(child(root, 'value'));
                         if (root === undefined || literal === undefined) {
                             continue;
                         }

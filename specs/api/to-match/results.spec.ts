@@ -7,8 +7,8 @@ import { api } from '../api.specification.js';
 async function catchMessage(assertion: () => unknown): Promise<string> {
     try {
         await assertion();
-    } catch (error: any) {
-        return error.message;
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error);
     }
     throw new Error('expected the assertion to throw, but it passed');
 }

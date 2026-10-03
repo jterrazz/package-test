@@ -16,9 +16,15 @@ export type SimulatorDevice = {
     udid: string;
 };
 
-type SimctlList = {
-    devices: Record<string, { isAvailable?: boolean; name: string; state: string; udid: string }[]>;
-};
+type SimctlDevices = Record<
+    string,
+    { isAvailable?: boolean; name: string; state: string; udid: string }[]
+>;
+
+const isSimctlDevices = (value: unknown): value is SimctlDevices =>
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value).every((devices) => Array.isArray(devices));
 
 function runtimeLabel(runtime: string): string {
     const match = /SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/u.exec(runtime);
@@ -30,9 +36,16 @@ function runtimeLabel(runtime: string): string {
 }
 
 export function listSimulators(listJson: string): SimulatorDevice[] {
-    const parsed = JSON.parse(listJson) as SimctlList;
-    return Object.entries(parsed.devices).flatMap(([runtime, devices]) =>
-        devices
+    const parsed: unknown = JSON.parse(listJson);
+    const devices =
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        'devices' in parsed &&
+        isSimctlDevices(parsed.devices)
+            ? parsed.devices
+            : {};
+    return Object.entries(devices).flatMap(([runtime, listed]) =>
+        listed
             .filter((device) => device.isAvailable !== false)
             .map((device) => ({
                 name: device.name,

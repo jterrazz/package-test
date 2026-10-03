@@ -2,7 +2,7 @@ import type { StubRequest, StubResponse } from '../exchange.js';
 import type { Stub } from '../stub.js';
 import { http } from './http.js';
 import type { SseEvent } from './http.js';
-import { matchesText } from './text-filter.js';
+import { fieldOf, listOf, matchesText, messageText, namesOf, textOf } from './text-filter.js';
 import type { TextFilter } from './text-filter.js';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
@@ -16,36 +16,18 @@ export type OpenAIChatFilter = {
     temperature?: number;
 };
 
-function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
-    if (!matchesText(filter.model, body?.model ?? '')) {
-        return false;
-    }
-    if (
-        !matchesText(
-            filter.system,
-            body?.messages?.find((m: any) => m.role === 'system')?.content ?? '',
-        )
-    ) {
-        return false;
-    }
-    if (
-        !matchesText(
-            filter.user,
-            body?.messages?.find((m: any) => m.role === 'user')?.content ?? '',
-        )
-    ) {
-        return false;
-    }
-    if (filter.tools) {
-        const names = body?.tools?.map((t: any) => t.function?.name).filter(Boolean) ?? [];
-        if (!filter.tools.every((t) => names.includes(t))) {
-            return false;
-        }
-    }
-    if (filter.temperature !== undefined && body?.temperature !== filter.temperature) {
-        return false;
-    }
-    return true;
+function matchesChatFilter(body: unknown, filter: OpenAIChatFilter): boolean {
+    const messages = fieldOf(body, 'messages');
+    const names = namesOf(fieldOf(body, 'tools'), (tool) =>
+        fieldOf(fieldOf(tool, 'function'), 'name'),
+    );
+    return (
+        matchesText(filter.model, textOf(fieldOf(body, 'model'))) &&
+        matchesText(filter.system, messageText(messages, 'system')) &&
+        matchesText(filter.user, messageText(messages, 'user')) &&
+        (filter.tools?.every((tool) => names.includes(tool)) ?? true) &&
+        (filter.temperature === undefined || fieldOf(body, 'temperature') === filter.temperature)
+    );
 }
 
 export type OpenAIResponsesFilter = {
@@ -55,29 +37,29 @@ export type OpenAIResponsesFilter = {
     tools?: string[];
 };
 
-function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boolean {
-    if (!matchesText(filter.model, body?.model ?? '')) {
-        return false;
-    }
-    const systemInput = body?.input?.find?.((m: any) => m.role === 'system')?.content ?? '';
-    if (!matchesText(filter.system, body?.instructions || systemInput)) {
-        return false;
-    }
-    const userText = (body?.input ?? [])
-        .filter((m: any) => m.role === 'user')
-        .map((m: any) => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)))
+function matchesResponsesFilter(body: unknown, filter: OpenAIResponsesFilter): boolean {
+    const input = fieldOf(body, 'input');
+    const instructions = textOf(fieldOf(body, 'instructions'));
+    const userText = listOf(input)
+        .filter((message) => fieldOf(message, 'role') === 'user')
+        .map((message) => {
+            const content = fieldOf(message, 'content');
+            return typeof content === 'string' ? content : JSON.stringify(content);
+        })
         .join(' ');
-    if (!matchesText(filter.user, userText)) {
-        return false;
-    }
-    if (filter.tools) {
-        const names =
-            body?.tools?.map((t: any) => t.name ?? t.function?.name).filter(Boolean) ?? [];
-        if (!filter.tools.every((t) => names.includes(t))) {
-            return false;
-        }
-    }
-    return true;
+    const names = namesOf(
+        fieldOf(body, 'tools'),
+        (tool) => fieldOf(tool, 'name') ?? fieldOf(fieldOf(tool, 'function'), 'name'),
+    );
+    return (
+        matchesText(filter.model, textOf(fieldOf(body, 'model'))) &&
+        matchesText(
+            filter.system,
+            instructions === '' ? messageText(input, 'system') : instructions,
+        ) &&
+        matchesText(filter.user, userText) &&
+        (filter.tools?.every((tool) => names.includes(tool)) ?? true)
+    );
 }
 
 function buildChatReply(data: unknown): StubResponse {

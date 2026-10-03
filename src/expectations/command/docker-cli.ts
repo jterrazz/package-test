@@ -19,13 +19,31 @@ export function findContainersByLabel(key: string, value: string): string[] {
     }
 }
 
+/** A field of a value read off docker's JSON or a failed process: absent wherever the value does not hold it. */
+export function fieldOf(value: unknown, ...keys: readonly string[]): unknown {
+    if (typeof value !== 'object' || value === null) {
+        return undefined;
+    }
+    const key = keys.find((candidate) => candidate in value);
+    return key === undefined ? undefined : Reflect.get(value, key);
+}
+
+const streamOf = (error: unknown, key: 'stderr' | 'stdout'): string | undefined => {
+    const stream = fieldOf(error, key);
+    return typeof stream === 'string' ? stream : undefined;
+};
+
 export function inspectContainer(id: string): unknown {
     const raw = execSync(`docker inspect ${id}`, {
         encoding: 'utf8',
         timeout: DEFAULT_TIMEOUT,
     });
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed[0] : parsed;
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+        return parsed;
+    }
+    const inspected: unknown[] = parsed;
+    return inspected[0];
 }
 
 export function removeContainers(ids: string[]): void {
@@ -50,10 +68,8 @@ export function containerLogs(id: string): string {
             stdio: ['ignore', 'pipe', 'pipe'],
             timeout: DEFAULT_TIMEOUT,
         });
-    } catch (error: any) {
-        return typeof error?.stdout === 'string'
-            ? String(error.stdout)
-            : String(error?.stderr ?? '');
+    } catch (error) {
+        return streamOf(error, 'stdout') ?? streamOf(error, 'stderr') ?? '';
     }
 }
 
@@ -73,11 +89,12 @@ export function execInContainer(id: string, argv: readonly string[]): CliOutput 
             timeout: DEFAULT_TIMEOUT,
         });
         return { exitCode: 0, stderr: '', stdout };
-    } catch (error: any) {
+    } catch (error) {
+        const status = fieldOf(error, 'status');
         return {
-            exitCode: typeof error?.status === 'number' ? error.status : 1,
-            stderr: typeof error?.stderr === 'string' ? error.stderr : String(error?.message ?? ''),
-            stdout: typeof error?.stdout === 'string' ? error.stdout : '',
+            exitCode: typeof status === 'number' ? status : 1,
+            stderr: streamOf(error, 'stderr') ?? (error instanceof Error ? error.message : ''),
+            stdout: streamOf(error, 'stdout') ?? '',
         };
     }
 }

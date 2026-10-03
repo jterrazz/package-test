@@ -79,7 +79,7 @@ function statementsOf(template: string): string | undefined {
     if (/(?<!\\)\$\{/u.test(template)) {
         return undefined;
     }
-    const value: unknown = runInNewContext(template, Object.create(null) as object);
+    const value: unknown = runInNewContext(template, {});
     return typeof value === 'string' ? dedent(value) : undefined;
 }
 

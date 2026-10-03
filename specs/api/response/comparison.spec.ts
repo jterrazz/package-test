@@ -26,7 +26,8 @@ describe('comparison', () => {
     test('a journey sends what an earlier response carried, and gets the same session back', async () => {
         // Given - a session, then two calls that send its id
         const session = await api.get('/session');
-        const { id } = session.response.body as { id: string };
+        const { body } = session.response;
+        const id = typeof body === 'object' && body !== null && 'id' in body ? String(body.id) : '';
         const echoed = await api.get(`/echo/${id}`);
         const posted = await api.headers({ 'x-chain': id }).post('/echo', { session: id });
 

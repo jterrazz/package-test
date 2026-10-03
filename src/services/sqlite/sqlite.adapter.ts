@@ -148,7 +148,7 @@ export function acquireTemplateLock(lockPath: string): boolean {
     try {
         fd = openSync(lockPath, 'wx');
     } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+        if (error instanceof Error && 'code' in error && error.code === 'EEXIST') {
             return false;
         }
         throw error;
@@ -318,8 +318,8 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     async query(table: string, columns: string[]): Promise<unknown[][]> {
         const columnList = columns.join(', ');
         const rows = this.getDb()
-            .prepare(`SELECT ${columnList} FROM "${table}" ORDER BY 1`)
-            .all() as Record<string, unknown>[];
+            .prepare<[], Record<string, unknown>>(`SELECT ${columnList} FROM "${table}" ORDER BY 1`)
+            .all();
         return rows.map((row) => columns.map((col) => row[col]));
     }
 
@@ -334,10 +334,10 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     async reset(): Promise<void> {
         const db = this.getDb();
         const tables = db
-            .prepare(
+            .prepare<[], { name: string }>(
                 `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_prisma%' AND name != 'sqlite_sequence'`,
             )
-            .all() as { name: string }[];
+            .all();
         for (const { name } of tables) {
             db.exec(`DELETE FROM "${name}"`);
         }

@@ -2,6 +2,7 @@ import { resolveRoot } from '../../../lint/kit/project/resolve.js';
 import type { Started } from '../../chain/config.js';
 import { getCallerDir } from '../../chain/paths/caller.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
+import { declaredServices } from '../../services/services.js';
 import type { ServiceRecord } from '../../services/services.js';
 import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
@@ -73,8 +74,7 @@ export async function startMobile<Services extends ServiceRecord>(
     const { appium, device: driven, outlivesFile } = await reachAppium(options, root);
 
     // invariant: services come up before the app launches: a dev build reaches its bundler on its first frame.
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the empty record stands for an absent one, and every facet states the default the same way
-    const services = (options.services ?? {}) as Services;
+    const services = declaredServices(options.services);
     let started: null | StartedServices = null;
     if (Object.keys(services).length > 0) {
         try {

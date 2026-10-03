@@ -3,6 +3,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
+    child,
+    childList,
     findProperty,
     memberPropertyName,
     specificationMember,
@@ -22,27 +24,27 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
     if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') {
         return false;
     }
-    let expression = fn.body as AstNode | undefined;
+    let expression = child(fn, 'body');
     if (expression?.type === 'BlockStatement') {
-        const statements = (expression.body as AstNode[] | undefined) ?? [];
+        const statements = childList(expression, 'body');
         const [only] = statements;
         if (statements.length !== 1 || only?.type !== 'ReturnStatement') {
             return false;
         }
-        expression = only.argument as AstNode | undefined;
+        expression = child(only, 'argument');
     }
     let sawReplace = false;
     while (expression?.type === 'CallExpression') {
-        const callee = expression.callee as AstNode | undefined;
+        const callee = child(expression, 'callee');
         if (callee === undefined || memberPropertyName(callee) !== 'replace') {
             return false;
         }
-        const replacement = stringValue((expression.arguments as AstNode[] | undefined)?.[1]);
+        const replacement = stringValue(childList(expression, 'arguments')[1]);
         if (replacement === undefined || !KNOWN_TOKEN_LITERAL.test(replacement)) {
             return false;
         }
         sawReplace = true;
-        expression = callee.object as AstNode | undefined;
+        expression = child(callee, 'object');
     }
     return sawReplace && expression?.type === 'Identifier';
 }
@@ -68,9 +70,9 @@ export const noTransformDuplicatingTokens = defineRule(
                     if (specificationMember(node) === undefined) {
                         return;
                     }
-                    for (const argument of (node.arguments as AstNode[] | undefined) ?? []) {
+                    for (const argument of childList(node, 'arguments')) {
                         const transform = findProperty(argument, 'transform');
-                        const fn = transform?.value as AstNode | undefined;
+                        const fn = child(transform, 'value');
                         if (fn !== undefined && isTokenEquivalentTransform(fn)) {
                             context.report({
                                 messageId: 'tokenEquivalent',

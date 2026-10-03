@@ -35,8 +35,8 @@ const ROLES: Record<string, { argument: number; grounds: readonly (string | unde
 };
 
 function blockOf(declarator: AstNode): AstNode | undefined {
-    const declaration = declarator.parent as AstNode | undefined;
-    return declaration?.parent as AstNode | undefined;
+    const declaration = child(declarator, 'parent');
+    return child(declaration, 'parent');
 }
 
 /** An identifier resolves to the nearest `const` of that name whose block encloses the call, as the language resolves it. */
@@ -50,14 +50,14 @@ function diskArgument(
         return inline;
     }
     const declarators = bindings.get(name) ?? [];
-    let scope = argument?.parent as AstNode | null | undefined;
+    let scope = child(argument, 'parent');
     while (scope !== null && scope !== undefined) {
         const block = scope;
         const declarator = declarators.findLast((candidate) => blockOf(candidate) === block);
         if (declarator !== undefined) {
             return diskCallOf(child(declarator, 'init'));
         }
-        scope = scope.parent as AstNode | null | undefined;
+        scope = child(scope, 'parent');
     }
     return undefined;
 }
@@ -123,7 +123,7 @@ export const verbReadsItsGroundFolder = defineRule(
                     });
                 },
                 VariableDeclarator(node: AstNode) {
-                    const declaration = node.parent as AstNode | undefined;
+                    const declaration = child(node, 'parent');
                     const name = identifierName(child(node, 'id'));
                     if (declaration?.kind !== 'const' || name === undefined) {
                         return;

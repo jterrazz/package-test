@@ -227,7 +227,7 @@ export class StubBackend {
 async function readBody(request: IncomingMessage): Promise<unknown> {
     const chunks: Buffer[] = [];
     for await (const chunk of request) {
-        chunks.push(chunk as Buffer);
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
     }
     const raw = Buffer.concat(chunks).toString('utf8');
     if (raw.length === 0) {

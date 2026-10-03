@@ -18,3 +18,30 @@ export function matchesText(filter: TextFilter | undefined, actual: string): boo
     // invariant: a code matcher: the one structural comparison every assertion makes.
     return structuralEquals(filter, actual, new CaptureScope());
 }
+
+/** A field of a request body read as JSON: absent wherever the body is not an object holding it. */
+export function fieldOf(value: unknown, key: string): unknown {
+    return typeof value === 'object' && value !== null && key in value
+        ? Reflect.get(value, key)
+        : undefined;
+}
+
+export const listOf = (value: unknown): readonly unknown[] => (Array.isArray(value) ? value : []);
+
+export const textOf = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+/** The content of the first message of `role`, as text: a structured content is its JSON. */
+export function messageText(messages: unknown, role: string): string {
+    const content = fieldOf(
+        listOf(messages).find((message) => fieldOf(message, 'role') === role),
+        'content',
+    );
+    return content === undefined || typeof content === 'string'
+        ? textOf(content)
+        : JSON.stringify(content);
+}
+
+export const namesOf = (tools: unknown, read: (tool: unknown) => unknown): string[] =>
+    listOf(tools)
+        .map((tool) => textOf(read(tool)))
+        .filter((name) => name !== '');

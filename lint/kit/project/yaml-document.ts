@@ -1,8 +1,19 @@
-import { LineCounter, parseDocument, Scalar, visit } from 'yaml';
-import type { CollectionTag, Document, ScalarTag } from 'yaml';
+import { isNode, LineCounter, parseDocument, Scalar, visit } from 'yaml';
+import type { CollectionTag, Document, Node, Pair, ScalarTag, YAMLMap, YAMLSeq } from 'yaml';
 
-export { isMap, isPair, isScalar, isSeq, Scalar } from 'yaml';
+export { isMap, isNode, isPair, isScalar, isSeq, Scalar } from 'yaml';
 export type { Document, Node, Pair, YAMLMap, YAMLSeq } from 'yaml';
+
+export function nodePairs(map: YAMLMap): Pair<Node, Node>[] {
+    return map.items.filter(
+        (pair): pair is Pair<Node, Node> =>
+            isNode(pair.key) && (pair.value === null || isNode(pair.value)),
+    );
+}
+
+export function nodeItems(seq: YAMLSeq): Node[] {
+    return seq.items.filter((item): item is Node => isNode(item));
+}
 
 export type YamlSource = {
     document: Document.Parsed;

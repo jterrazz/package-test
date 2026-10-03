@@ -2,14 +2,20 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { propertyKeyName, specificationMember } from '../../../kit/project/ast.js';
+import {
+    child,
+    childList,
+    propertyKeyName,
+    specificationMember,
+    stringField,
+} from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     let current = node;
     while (current?.type === 'AwaitExpression') {
-        current = current.argument as AstNode | undefined;
+        current = child(current, 'argument');
     }
     return current?.type === 'CallExpression' ? current : undefined;
 }
@@ -33,26 +39,26 @@ export const noRunnerAlias = defineRule(
         createOnce(context: Context): Visitor {
             return {
                 VariableDeclarator(node: AstNode) {
-                    const call = unwrapAwaitedCall(node.init as AstNode | undefined);
+                    const call = unwrapAwaitedCall(child(node, 'init'));
                     if (call === undefined || specificationMember(call) === undefined) {
                         return;
                     }
-                    const id = node.id as AstNode | undefined;
+                    const id = child(node, 'id');
                     if (id?.type !== 'ObjectPattern') {
                         return;
                     }
-                    for (const property of (id.properties as AstNode[] | undefined) ?? []) {
+                    for (const property of childList(id, 'properties')) {
                         const key = propertyKeyName(property);
                         if (key === undefined) {
                             continue;
                         }
-                        let value = property.value as AstNode | undefined;
+                        let value = child(property, 'value');
                         if (value?.type === 'AssignmentPattern') {
-                            value = value.left as AstNode | undefined;
+                            value = child(value, 'left');
                         }
                         if (value?.type === 'Identifier' && value.name !== key) {
                             context.report({
-                                data: { alias: value.name as string, key },
+                                data: { alias: stringField(value, 'name') ?? '', key },
                                 messageId: 'aliased',
                                 node: property,
                             });

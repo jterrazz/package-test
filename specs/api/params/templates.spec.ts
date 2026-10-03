@@ -29,7 +29,8 @@ describe('templates', () => {
     // RUNTIME route-written-as-template-at-runtime — a route template is handed exactly its parameters, and a value no parameter takes is refused before a request is sent.
     test('a template handed a parameter it does not name is refused', async () => {
         // Given - the item route, handed past the compiler a value under another name
-        const sent = api.get('/users/:id', { params: { userId: 1 } } as never);
+        // @ts-expect-error -- `userId` is no parameter of the template, which the compiler refuses too
+        const sent = api.get('/users/:id', { params: { userId: 1 } });
 
         // Then - refused, naming both halves of the mismatch
         await expect(sent).rejects.toThrow(

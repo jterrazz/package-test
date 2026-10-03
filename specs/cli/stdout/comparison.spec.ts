@@ -28,7 +28,7 @@ function catchMessage(assertion: () => unknown): string {
     try {
         assertion();
     } catch (error) {
-        return (error as Error).message;
+        return error instanceof Error ? error.message : String(error);
     }
     throw new Error('expected the assertion to throw, but it passed');
 }
@@ -135,7 +135,8 @@ describe('comparison', () => {
     test('a fixture named by a bare string is refused where it is written', () => {
         // Given - a bare name, resolved against a folder the line does not show
         // Then - refused at the call, naming the wrapper to write
-        expect(() => cli.fixture('cli-app/' as never)).toThrow(
+        // @ts-expect-error -- a bare string is no disk value, which the compiler refuses too
+        expect(() => cli.fixture('cli-app/')).toThrow(
             /^found: fixture\("cli-app\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,
         );
     });

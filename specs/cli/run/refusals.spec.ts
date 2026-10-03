@@ -19,8 +19,15 @@ function scratchFile(content: string): string {
     return path;
 }
 
+const isRelativeDocument = (path: string): path is RelativePath<'.spec.yaml'> =>
+    (path.startsWith('./') || path.startsWith('../')) && path.endsWith('.spec.yaml');
+
 function documentAt(path: string): DiskFile<'.spec.yaml'> {
-    return file(relative(import.meta.dirname, path) as RelativePath<'.spec.yaml'>);
+    const from = relative(import.meta.dirname, path);
+    if (!isRelativeDocument(from)) {
+        throw new Error(`${path} is no document a spec can name by a relative path`);
+    }
+    return file(from);
 }
 
 async function failureOf(run: Promise<unknown>): Promise<string> {
@@ -32,7 +39,10 @@ async function errorOf(run: Promise<unknown>): Promise<Error> {
     try {
         await run;
     } catch (error) {
-        return error as Error;
+        if (error instanceof Error) {
+            return error;
+        }
+        throw error;
     }
     throw new Error('expected the spec document to fail, but it passed');
 }

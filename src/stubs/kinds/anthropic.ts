@@ -2,7 +2,7 @@ import type { StubRequest, StubResponse } from '../exchange.js';
 import type { Stub } from '../stub.js';
 import { http } from './http.js';
 import type { SseEvent } from './http.js';
-import { matchesText } from './text-filter.js';
+import { fieldOf, matchesText, messageText, namesOf, textOf } from './text-filter.js';
 import type { TextFilter } from './text-filter.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
@@ -14,26 +14,14 @@ export type AnthropicMessagesFilter = {
     tools?: string[];
 };
 
-function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
-    if (!matchesText(filter.model, body?.model ?? '')) {
-        return false;
-    }
-    if (!matchesText(filter.system, typeof body?.system === 'string' ? body.system : '')) {
-        return false;
-    }
-    const userMsg = body?.messages?.find((m: any) => m.role === 'user')?.content ?? '';
-    if (
-        !matchesText(filter.user, typeof userMsg === 'string' ? userMsg : JSON.stringify(userMsg))
-    ) {
-        return false;
-    }
-    if (filter.tools) {
-        const names = body?.tools?.map((t: any) => t.name).filter(Boolean) ?? [];
-        if (!filter.tools.every((t) => names.includes(t))) {
-            return false;
-        }
-    }
-    return true;
+function matchesFilter(body: unknown, filter: AnthropicMessagesFilter): boolean {
+    const names = namesOf(fieldOf(body, 'tools'), (tool) => fieldOf(tool, 'name'));
+    return (
+        matchesText(filter.model, textOf(fieldOf(body, 'model'))) &&
+        matchesText(filter.system, textOf(fieldOf(body, 'system'))) &&
+        matchesText(filter.user, messageText(fieldOf(body, 'messages'), 'user')) &&
+        (filter.tools?.every((tool) => names.includes(tool)) ?? true)
+    );
 }
 
 function buildReply(data: unknown): StubResponse {

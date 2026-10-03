@@ -7,6 +7,13 @@ import type { Route, SentRequest } from './routes.js';
 
 export type Ledger = { declared?: Route[] | undefined; reached: SentRequest[] };
 
+const isLedger = (value: unknown): value is Ledger =>
+    typeof value === 'object' &&
+    value !== null &&
+    'reached' in value &&
+    Array.isArray(value.reached) &&
+    (!('declared' in value) || value.declared === undefined || Array.isArray(value.declared));
+
 export const ROUTES_DIR = `${VITEST_ARTIFACTS_DIR}/routes`;
 
 export type Shard = { count: number; index: number };
@@ -30,7 +37,8 @@ export function readLedgers(directory: string): Ledger[] {
     }
     return readdirSync(directory)
         .filter((name) => name.endsWith('.json'))
-        .map((name) => JSON.parse(readFileSync(join(directory, name), 'utf8')) as Ledger);
+        .map((name): unknown => JSON.parse(readFileSync(join(directory, name), 'utf8')))
+        .filter((ledger) => isLedger(ledger));
 }
 
 const PARTIAL_MARK = 'partial';

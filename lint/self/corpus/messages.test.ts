@@ -64,16 +64,27 @@ describe('messages', () => {
     test('`message-has-four-parts` — every refusal of the runtime opens on its row’s sentence, and is thrown somewhere', () => {
         // Given - the runtime rows that refuse, and the source that throws them
         const source = sourcesUnder(resolve(ROOT, 'src'));
-        for (const [row, why] of Object.entries(REFUSAL_WHY)) {
-            const entry = RUNTIME_RULES.find((rule) => rule.name === row);
+        const rows = Object.keys(REFUSAL_WHY).filter(
+            (row): row is RefusalRow => row in REFUSAL_WHY,
+        );
+        expect(rows.length).toBeGreaterThan(0);
 
-            // Then - the row exists, opens on the refusal's why, and a module throws it
-            expect(entry?.channel).toBe('runtime');
-            expect(firstSentence(entry?.sentence ?? '')).toBe(why);
-            expect(source).toContain(`refusal('${row}'`);
-            expect(
-                missingParts(refusal(row as RefusalRow, { fix: 'the gesture', found: 'the case' })),
-            ).toStrictEqual([]);
-        }
+        // Then - each row exists, opens on the refusal's why, is thrown by a module, and states four parts
+        expect(
+            rows.flatMap((row) => {
+                const entry = RUNTIME_RULES.find((rule) => rule.name === row);
+                return [
+                    entry?.channel === 'runtime' ? null : `${row} is no runtime row`,
+                    firstSentence(entry?.sentence ?? '') === REFUSAL_WHY[row]
+                        ? null
+                        : `${row} opens on another sentence than its why`,
+                    source.includes(`refusal('${row}'`) ? null : `${row} is thrown by no module`,
+                    missingParts(refusal(row, { fix: 'the gesture', found: 'the case' })).length ===
+                    0
+                        ? null
+                        : `${row} misses a part`,
+                ].filter((broken) => broken !== null);
+            }),
+        ).toStrictEqual([]);
     });
 });

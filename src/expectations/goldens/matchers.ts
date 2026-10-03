@@ -118,7 +118,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
         );
     }
 
-    const expected = JSON.parse(readFileSync(filePath, 'utf8'));
+    const expected: unknown = JSON.parse(readFileSync(filePath, 'utf8'));
     if (structuralEquals(expected, actual, accessor.captures)) {
         return passed(`expected JSON not to match ${name}`);
     }
@@ -673,11 +673,10 @@ const REGISTERED = Symbol.for('@jterrazz/test:matchers-registered');
 
 /** Idempotent; a missing vitest peer is tolerated. */
 export async function registerMatchers(): Promise<void> {
-    const globals = globalThis as { [REGISTERED]?: boolean };
-    if (globals[REGISTERED]) {
+    if (Reflect.get(globalThis, REGISTERED) === true) {
         return;
     }
-    globals[REGISTERED] = true;
+    Reflect.set(globalThis, REGISTERED, true);
 
     try {
         const { chai, expect, inject } = await import('vitest');
@@ -690,6 +689,6 @@ export async function registerMatchers(): Promise<void> {
         });
         matchThroughGolden(chai, routeValue);
     } catch {
-        globals[REGISTERED] = false;
+        Reflect.set(globalThis, REGISTERED, false);
     }
 }

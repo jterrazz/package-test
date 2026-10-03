@@ -94,11 +94,11 @@ export class ServedProcess {
         if (this.child.pid !== undefined && process.platform !== 'win32') {
             this.watchdog = watchGroup(this.child.pid);
         }
-        this.child.stdout?.on('data', (data) => {
-            this.output += data.toString();
+        this.child.stdout?.on('data', (data: unknown) => {
+            this.output += String(data);
         });
-        this.child.stderr?.on('data', (data) => {
-            this.output += data.toString();
+        this.child.stderr?.on('data', (data: unknown) => {
+            this.output += String(data);
         });
 
         let exited = false;

@@ -16,12 +16,25 @@ function stub(request: Stub['request'], tag: string, extra: Partial<Stub> = {}):
     return { request, response: http.json({ tag }), ...extra };
 }
 
+function tagOf(response: unknown): null | string {
+    const body: unknown =
+        typeof response === 'object' && response !== null && 'body' in response
+            ? response.body
+            : null;
+    return typeof body === 'object' &&
+        body !== null &&
+        'tag' in body &&
+        typeof body.tag === 'string'
+        ? body.tag
+        : null;
+}
+
 function serve(queue: StubQueue, overrides: Partial<MatchableRequest> = {}): null | string {
     const served = queue.take(req(overrides));
     if (!served) {
         return null;
     }
-    return (served.response as { body: { tag: string } }).body.tag;
+    return tagOf(served.response);
 }
 
 describe('StubQueue', () => {

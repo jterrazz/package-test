@@ -25,9 +25,9 @@ const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
 
 function exportsDefault(node: AstNode): boolean {
-    const specifiers = (node.specifiers as AstNode[] | undefined) ?? [];
+    const specifiers = childList(node, 'specifiers');
     return specifiers.some((specifier) => {
-        const exported = specifier.exported as AstNode | undefined;
+        const exported = child(specifier, 'exported');
         return (
             (exported?.type === 'Identifier' && exported.name === 'default') ||
             stringValue(exported) === 'default'
@@ -204,8 +204,7 @@ function checkComposite(context: Context, program: AstNode, base: string): void 
             if (exportsDefault(node)) {
                 hasDefault = true;
                 // invariant: a composition re-export is a legitimate way to build the world.
-                composed =
-                    stringValue(node.source as AstNode | undefined) !== undefined || composed;
+                composed = stringValue(child(node, 'source')) !== undefined || composed;
             }
         } else if (composes(node)) {
             composed = true;
@@ -233,8 +232,7 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
         if (node.type === 'ExportDefaultDeclaration') {
             hasDefault = true;
             wellFormed =
-                producesStub(node.declaration as AstNode | undefined, bindings.namespaces) ||
-                wellFormed;
+                producesStub(child(node, 'declaration'), bindings.namespaces) || wellFormed;
         } else if (node.type === 'ExportNamedDeclaration' && exportsDefault(node)) {
             hasDefault = true;
             wellFormed = true;

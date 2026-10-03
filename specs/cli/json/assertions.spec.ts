@@ -184,9 +184,8 @@ describe('assertions', () => {
             });
 
             // Then - the placeholder survived, the stale literal was replaced
-            const written = JSON.parse(readFileSync(fixturePath, 'utf8'));
-            expect(written.name).toBe('{{string}}');
-            expect(written.version).toBe('1.0.0');
+            const written: unknown = JSON.parse(readFileSync(fixturePath, 'utf8'));
+            expect(written).toMatchObject({ name: '{{string}}', version: '1.0.0' });
         } finally {
             removeGolden(fixturePath);
         }

@@ -2,7 +2,13 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { propertyKeyName, specificationMember, walk } from '../../../kit/project/ast.js';
+import {
+    child,
+    childList,
+    propertyKeyName,
+    specificationMember,
+    walk,
+} from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
@@ -11,34 +17,32 @@ function destructuresCleanup(node: AstNode): boolean {
     if (node.type !== 'VariableDeclarator') {
         return false;
     }
-    let init = node.init as AstNode | undefined;
+    let init = child(node, 'init');
     while (init?.type === 'AwaitExpression') {
-        init = init.argument as AstNode | undefined;
+        init = child(init, 'argument');
     }
     if (init?.type !== 'CallExpression' || specificationMember(init) === undefined) {
         return false;
     }
-    const id = node.id as AstNode | undefined;
+    const id = child(node, 'id');
     if (id?.type !== 'ObjectPattern') {
         return false;
     }
-    return ((id.properties as AstNode[] | undefined) ?? []).some(
-        (property) => propertyKeyName(property) === 'cleanup',
-    );
+    return childList(id, 'properties').some((property) => propertyKeyName(property) === 'cleanup');
 }
 
 function isAfterAllWithCleanup(node: AstNode): boolean {
     if (node.type !== 'CallExpression') {
         return false;
     }
-    const callee = node.callee as AstNode | undefined;
+    const callee = child(node, 'callee');
     if (callee?.type !== 'Identifier' || callee.name !== 'afterAll') {
         return false;
     }
     let found = false;
-    for (const argument of (node.arguments as AstNode[] | undefined) ?? []) {
-        walk(argument, (child) => {
-            if (child.type === 'Identifier' && child.name === 'cleanup') {
+    for (const argument of childList(node, 'arguments')) {
+        walk(argument, (visited) => {
+            if (visited.type === 'Identifier' && visited.name === 'cleanup') {
                 found = true;
             }
         });
@@ -67,11 +71,11 @@ export const cleanupPassedToAfterAll = defineRule(
                 Program(node: AstNode) {
                     let cleanupDeclarator: AstNode | undefined;
                     let registered = false;
-                    walk(node, (child) => {
-                        if (cleanupDeclarator === undefined && destructuresCleanup(child)) {
-                            cleanupDeclarator = child;
+                    walk(node, (visited) => {
+                        if (cleanupDeclarator === undefined && destructuresCleanup(visited)) {
+                            cleanupDeclarator = visited;
                         }
-                        if (!registered && isAfterAllWithCleanup(child)) {
+                        if (!registered && isAfterAllWithCleanup(visited)) {
                             registered = true;
                         }
                     });

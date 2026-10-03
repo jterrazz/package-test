@@ -352,7 +352,8 @@ describe('matchers', () => {
     test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — an empty stream is an empty text: toBeEmpty refuses a stream, naming the form to write", async () => {
         // Given - an empty stream, and a table's matcher handed to it past the compiler
         const stream = new TextAccessor('', 'stderr', '/tmp');
-        const subject = stream as unknown as TableAccessor;
+        // @ts-expect-error -- a table's matcher handed a stream, past the compiler
+        const subject: TableAccessor = stream;
 
         // Then - refused with vitest's own form, which holds on the comparable text
         await expect(expect(subject).toBeEmpty()).rejects.toThrow(
@@ -363,7 +364,8 @@ describe('matchers', () => {
 
     test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a file golden refuses a tree subject, naming directory()", () => {
         // Given - a directory subject handed a file golden, past the compiler
-        const subject = new DirectoryAccessor('/tmp', '/tmp') as unknown as TextAccessor;
+        // @ts-expect-error -- a directory handed where a text subject belongs, past the compiler
+        const subject: TextAccessor = new DirectoryAccessor('/tmp', '/tmp');
 
         // Then - the refusal names the wrapper a tree takes
         expect(() => {
@@ -374,7 +376,8 @@ describe('matchers', () => {
 
     test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a file golden refuses a value subject", () => {
         // Given - a plain string, which has no golden, past the compiler
-        const subject = 'abc' as unknown as TextAccessor;
+        // @ts-expect-error -- a bare string handed where a text subject belongs, past the compiler
+        const subject: TextAccessor = 'abc';
 
         // Then - the file is refused, naming the subjects a file golden compares against
         expect(() => {
@@ -385,7 +388,8 @@ describe('matchers', () => {
 
     test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a directory golden refuses a stream subject, as a rejection", async () => {
         // Given - a stream subject handed a directory golden, past the compiler
-        const subject = new TextAccessor('out', 'stdout', '/tmp') as unknown as DirectoryAccessor;
+        // @ts-expect-error -- a text subject handed where a directory belongs, past the compiler
+        const subject: DirectoryAccessor = new TextAccessor('out', 'stdout', '/tmp');
 
         // Then - the refusal is awaited like the golden it stands for
         await expect(

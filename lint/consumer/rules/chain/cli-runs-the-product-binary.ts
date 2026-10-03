@@ -2,7 +2,14 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { specificationMember, stringValue, walk } from '../../../kit/project/ast.js';
+import {
+    child,
+    childList,
+    specificationMember,
+    stringField,
+    stringValue,
+    walk,
+} from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
@@ -51,10 +58,10 @@ export const cliRunsTheProductBinary = defineRule(
                         if (node.type !== 'VariableDeclarator') {
                             return;
                         }
-                        const id = node.id as AstNode | undefined;
-                        const init = node.init as AstNode | null | undefined;
+                        const id = child(node, 'id');
+                        const init = child(node, 'init');
                         if (id?.type === 'Identifier' && embedsThirdPartyBin(init)) {
-                            binVars.add(id.name as string);
+                            binVars.add(stringField(id, 'name') ?? '');
                         }
                     });
 
@@ -62,13 +69,14 @@ export const cliRunsTheProductBinary = defineRule(
                         if (node.type !== 'CallExpression' || specificationMember(node) !== 'cli') {
                             return;
                         }
-                        const arg = (node.arguments as AstNode[] | undefined)?.[0];
+                        const arg = childList(node, 'arguments')[0];
                         if (arg === undefined) {
                             return;
                         }
                         const flagged =
                             embedsThirdPartyBin(arg) ||
-                            (arg.type === 'Identifier' && binVars.has(arg.name as string));
+                            (arg.type === 'Identifier' &&
+                                binVars.has(stringField(arg, 'name') ?? ''));
                         if (flagged) {
                             context.report({ messageId: 'thirdPartyBinary', node });
                         }

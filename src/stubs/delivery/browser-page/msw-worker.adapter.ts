@@ -1,14 +1,14 @@
+import type { SetupWorker } from 'msw/browser';
+
 import type { StubRegistration } from '../../intercept/intercept.js';
 import type { InterceptPort } from '../../intercept/intercept.port.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
 
-/* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
-
 /** What the runner itself fetches, everything else being the subject's traffic (`network-strict-after-first-stub`); matched by prefix, never by extension: msw bypasses a "common asset" path before `onUnhandledRequest`, which would let `/api/posts.json` through. */
 const RUNNER_PREFIXES = ['/.artifacts/', '/@fs/', '/@id/', '/@vite', '/node_modules/', '/__vitest'];
 
-let workerInstance: any = null;
+let workerInstance: null | SetupWorker = null;
 
 export function isRunnerRequest(url: string): boolean {
     const { pathname } = new URL(url);
@@ -21,8 +21,9 @@ async function ensureStubWorker(): Promise<void> {
         return;
     }
     const { setupWorker } = await import('msw/browser');
-    workerInstance = setupWorker();
-    await workerInstance.start({
+    const worker = setupWorker();
+    workerInstance = worker;
+    await worker.start({
         onUnhandledRequest: (request: Request, print: { error: () => void }) => {
             if (!isRunnerRequest(request.url)) {
                 print.error();
@@ -38,10 +39,10 @@ export async function registerWorkerStubs(stubs: readonly Stub[]): Promise<StubR
     await ensureStubWorker();
     const msw = await import('msw');
     const { handlers, violation } = buildStubHandlers(msw, stubs, isRunnerRequest);
-    workerInstance.use(...handlers);
+    workerInstance?.use(...handlers);
     return {
         cleanup: () => {
-            workerInstance.resetHandlers();
+            workerInstance?.resetHandlers();
         },
         violation,
     };

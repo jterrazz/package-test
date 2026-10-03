@@ -228,6 +228,7 @@ export class AppiumAdapter implements DevicePort {
         options?: { tryScroll?: boolean },
     ): Promise<DriverElement | null> {
         let scope: MatchScope = driver;
+        let element: DriverElement | null = null;
         for (const [index, level] of chain.entries()) {
             const matches = await matching(scope, level);
             const count = await matches.length;
@@ -261,8 +262,9 @@ export class AppiumAdapter implements DevicePort {
                 return null;
             }
             scope = next;
+            element = next;
         }
-        return scope as DriverElement;
+        return element;
     }
 
     private async captureMatches(matches: ElementList): Promise<MobileElementMatch[]> {

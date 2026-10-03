@@ -66,7 +66,7 @@ function stableStringify(value: unknown): string {
         return `[${value.map((item) => stableStringify(item)).join(',')}]`;
     }
     if (value !== null && typeof value === 'object') {
-        const entries = Object.entries(value as Record<string, unknown>)
+        const entries = Object.entries(value)
             .sort(([a], [b]) => (a < b ? -1 : 1))
             .map(([key, item]) => `${JSON.stringify(key)}:${stableStringify(item)}`);
         return `{${entries.join(',')}}`;
@@ -204,8 +204,11 @@ function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPl
     let count = 0;
 
     for (const found of expected.matchAll(PLACEHOLDER_RE)) {
-        const kind = found.groups!.kind as MatcherKind;
-        const { ref } = found.groups!;
+        const kind = TOKEN_KINDS.find((known) => known === found.groups?.kind);
+        if (kind === undefined) {
+            continue;
+        }
+        const ref = found.groups?.ref;
         source += escapeRegExp(expected.slice(lastIndex, found.index));
         source += `(${placeholderSource(kind, scope)})`;
         refs.push({ index: count, kind, ref });

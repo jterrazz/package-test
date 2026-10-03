@@ -9,6 +9,7 @@ import {
     goldenOf,
     identifierName,
     memberPropertyName,
+    stringField,
     walk,
 } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
@@ -22,7 +23,7 @@ function hasFrozenOption(args: AstNode[]): boolean {
         return false;
     }
     const frozen = findProperty(options, 'frozen');
-    const value = frozen?.value as AstNode | undefined;
+    const value = child(frozen, 'value');
     return value?.type === 'Literal' && value.value === true;
 }
 
@@ -38,16 +39,16 @@ const TRANSPARENT_ANCESTORS = new Set([
 ]);
 
 function isWrappedInExpect(node: AstNode): boolean {
-    let current = node.parent as AstNode | undefined;
+    let current = child(node, 'parent');
     while (current !== undefined) {
         if (current.type === 'CallExpression') {
-            const callee = current.callee as AstNode | undefined;
+            const callee = child(current, 'callee');
             return callee?.type === 'Identifier' && callee.name === 'expect';
         }
         if (!TRANSPARENT_ANCESTORS.has(current.type)) {
             return false;
         }
-        current = current.parent as AstNode | undefined;
+        current = child(current, 'parent');
     }
     return false;
 }
@@ -74,31 +75,33 @@ function assertsAThrow(body: AstNode): boolean {
 }
 
 function isTestCallback(fn: AstNode): boolean {
-    const parent = fn.parent as AstNode | undefined;
+    const parent = child(fn, 'parent');
     if (parent?.type !== 'CallExpression') {
         return false;
     }
-    const callee = parent.callee as AstNode | undefined;
+    const callee = child(parent, 'callee');
     if (callee === undefined) {
         return false;
     }
     const name =
-        callee.type === 'Identifier' ? (callee.name as string) : memberPropertyName(callee);
+        callee.type === 'Identifier'
+            ? (stringField(callee, 'name') ?? '')
+            : memberPropertyName(callee);
     return name === 'it' || name === 'test';
 }
 
 /** The enclosing function must not be the test callback itself: a test writing a fixture under `TEST_UPDATE` and later asserting a diff holds both halves unrelated. */
 function inAThrowingHelper(node: AstNode): boolean {
-    let current = node.parent as AstNode | undefined;
+    let current = child(node, 'parent');
     while (current !== undefined) {
         if (FUNCTION_NODES.has(current.type)) {
             if (isTestCallback(current)) {
                 return false;
             }
-            const body = current.body as AstNode | undefined;
+            const body = child(current, 'body');
             return body !== undefined && assertsAThrow(body);
         }
-        current = current.parent as AstNode | undefined;
+        current = child(current, 'parent');
     }
     return false;
 }
@@ -178,7 +181,7 @@ export const negativeGoldenFrozen = defineRule(
                     if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {
                         return;
                     }
-                    if (hasFrozenOption((node.arguments as AstNode[] | undefined) ?? [])) {
+                    if (hasFrozenOption(childList(node, 'arguments'))) {
                         return;
                     }
                     context.report({ messageId: 'unfrozenNegativeFixture', node });
