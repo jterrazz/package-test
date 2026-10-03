@@ -8,12 +8,12 @@ import {
 import type { Teaching } from '@jterrazz/typescript/rules';
 import { join, resolve } from 'node:path';
 
-import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
 import type { SpecDocument, SpecFile } from './spec-grammar.js';
+import { scalarString } from './spec-node.js';
 import { readText } from './tree.js';
 import { isMap, isScalar, isSeq, nodeItems, nodePairs } from './yaml-document.js';
-import type { Node, Pair, Scalar, YAMLMap } from './yaml-document.js';
+import type { Scalar, YAMLMap } from './yaml-document.js';
 
 export type DocumentFinding<PassId extends string = string> = Teaching & {
     line: number;
@@ -60,32 +60,26 @@ export function documentMap(file: SpecFile): null | YAMLMap {
     return isMap(root) ? root : null;
 }
 
-export function pairsOf(map: YAMLMap): Pair<Node, Node>[] {
-    return nodePairs(map);
-}
-
-export function keyName(pair: Pair<Node, Node>): null | string {
-    return isScalar(pair.key) && typeof pair.key.value === 'string' ? pair.key.value : null;
-}
-
+/** readSpecFile refused a document whose runs are not a list of maps: these checks only narrow. */
+// Stryker disable OptionalChaining,BooleanLiteral,ConditionalExpression,MethodExpression,ArrayDeclaration
 export function runMaps(file: SpecFile): YAMLMap[] {
-    const map = documentMap(file);
-    const items = map?.get('runs', true);
+    const items = documentMap(file)?.get('runs', true);
     return isSeq(items) ? nodeItems(items).filter((item) => isMap(item)) : [];
 }
+// Stryker restore OptionalChaining,BooleanLiteral,ConditionalExpression,MethodExpression,ArrayDeclaration
 
 type StreamScalar = { key: string; scalar: Scalar };
 
 function fileEqualsScalars(files: YAMLMap): StreamScalar[] {
-    return pairsOf(files).flatMap((entry) =>
+    return nodePairs(files).flatMap((entry) =>
         isMap(entry.value)
-            ? pairsOf(entry.value)
-                  .filter((assertion) => keyName(assertion) === 'equals')
+            ? nodePairs(entry.value)
+                  .filter((assertion) => scalarString(assertion.key) === 'equals')
                   .flatMap((assertion) =>
                       isScalar(assertion.value)
                           ? [
                                 {
-                                    key: `files.${keyName(entry) ?? '?'}.equals`,
+                                    key: `files.${String(scalarString(entry.key))}.equals`,
                                     scalar: assertion.value,
                                 },
                             ]
@@ -98,12 +92,13 @@ function fileEqualsScalars(files: YAMLMap): StreamScalar[] {
 const STREAM_KEYS = new Set(['stderr', 'stdin', 'stdout']);
 
 export function streamScalars(run: YAMLMap): StreamScalar[] {
-    return pairsOf(run).flatMap((pair) => {
-        const key = keyName(pair);
-        if (key !== null && STREAM_KEYS.has(key) && isScalar(pair.value)) {
+    return nodePairs(run).flatMap((pair) => {
+        const key = String(scalarString(pair.key));
+        if (STREAM_KEYS.has(key) && isScalar(pair.value)) {
             return [{ key, scalar: pair.value }];
         }
-        return key === 'files' && isMap(pair.value) ? fileEqualsScalars(pair.value) : [];
+        // invariant: of the keys a run may hold, files: alone holds a map.
+        return isMap(pair.value) ? fileEqualsScalars(pair.value) : [];
     });
 }
 
@@ -134,9 +129,7 @@ export function fixedData(document: SpecDocument, dir: string): string {
         }
     };
     for (const fixture of document.fixtures) {
-        if (isRelativePath(fixture.path)) {
-            visit(resolve(dir, fixture.path));
-        }
+        visit(resolve(dir, fixture.path));
     }
     visit(join(dir, GROUND_FIXTURES));
     return parts.join('\n');

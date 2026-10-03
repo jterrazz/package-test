@@ -4,17 +4,16 @@ import { dirname, join, relative } from 'node:path';
 import {
     documentMap,
     isBlock,
-    keyName,
     listSpecFiles,
-    pairsOf,
     runMaps,
     streamScalars,
 } from '../project/document-model.js';
 import { readSpecFile } from '../project/spec-document.js';
 import { DOCUMENT_KEYS, RUN_KEYS } from '../project/spec-grammar.js';
 import type { SpecFile } from '../project/spec-grammar.js';
+import { scalarString } from '../project/spec-node.js';
 import { readText } from '../project/tree.js';
-import { renderYamlSource, Scalar } from '../project/yaml-document.js';
+import { nodePairs, renderYamlSource, Scalar } from '../project/yaml-document.js';
 import type { Node, Pair, YAMLMap } from '../project/yaml-document.js';
 import type { GroundPasses, Spotted } from './registry.js';
 
@@ -41,8 +40,8 @@ export function runDocument(
 
 /** The grammar refuses any key outside `order`, so every pair has its rank. */
 function reorder(map: YAMLMap, order: readonly string[]): void {
-    const rank = (pair: Pair<Node, Node>): number => order.indexOf(String(keyName(pair)));
-    map.items = pairsOf(map).toSorted((a, b) => rank(a) - rank(b));
+    const rank = (pair: Pair<Node, Node>): number => order.indexOf(String(scalarString(pair.key)));
+    map.items = nodePairs(map).toSorted((a, b) => rank(a) - rank(b));
 }
 
 /** `null` when nothing moved: the caller writes only what changed, so a clean tree keeps its mtimes. */
