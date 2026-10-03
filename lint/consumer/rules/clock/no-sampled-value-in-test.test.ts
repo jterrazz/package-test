@@ -64,8 +64,54 @@ ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
             errors: [{ column: 32, line: 3, messageId: 'ambientValue' }],
             filename: TEST_FILE,
         },
+        {
+            name: 'Only a `using` of clock.at or clock.run with an instant pins, and a sample inside a non-structural expectation stays the test’s.',
+            code: `test('stamps', () => {
+                const _ = clock.at('2026-03-04T09:30:00Z');
+                using a = clock.advance(5000);
+                using b = clock.at();
+                const after = new Date();
+                expect(x).toBeLessThan(Date.now() + 1);
+                expect(Date.now() + 1).toBe(2);
+            });`,
+            errors: [
+                { column: 30, line: 5, messageId: 'ambientValue' },
+                { column: 39, line: 6, messageId: 'ambientValue' },
+                { column: 23, line: 7, messageId: 'ambientValue' },
+            ],
+            filename: TEST_FILE,
+        },
     ],
     valid: [
+        {
+            name: 'An awaited using pins too, and so does one of several declarators.',
+            code: `test('pins', async () => {
+                await using _ = await clock.at('2026-03-04T09:30:00Z');
+                expect(stamp(new Date())).toBe(true);
+            });
+            test('pins', () => {
+                using a = other(), b = clock.at('2026-03-04T09:30:00Z');
+                expect(stamp(new Date())).toBe(true);
+            });`,
+            filename: TEST_FILE,
+        },
+        {
+            name: 'A sample handed to expect itself, or nested in a structural expectation, is that rule’s.',
+            code: `test('stamps', () => {
+                expect(Date.now()).toBe(1);
+                expect(stamp()).toEqual({ at: Date.now() });
+            });`,
+            filename: TEST_FILE,
+        },
+        {
+            name: 'A call that is no test, a test with no callback, and production code are not judged.',
+            code: "run(() => { Date.now(); });\ntest('t');",
+            filename: TEST_FILE,
+        },
+        {
+            code: "test('t', () => { Date.now(); });",
+            filename: '/repo/src/domain/order.ts',
+        },
         {
             code: `test('pins', async () => {
                 using _ = clock.at('2026-03-04T09:30:00Z');

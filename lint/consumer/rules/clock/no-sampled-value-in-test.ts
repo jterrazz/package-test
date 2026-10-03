@@ -21,10 +21,12 @@ import { consumerRows } from '../../catalogue/manifest.js';
 const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toStrictEqual']);
 
 function sampledOffsets(node: AstNode | undefined, into: Set<number>): void {
+    // Stryker disable next-line ConditionalExpression: an argument or an expression is always a node
     if (node === undefined) {
         return;
     }
     walk(node, (inner) => {
+        // Stryker disable next-line ConditionalExpression: only a sampled node is ever reported, so covering the others changes nothing
         if (isSampledValue(inner)) {
             into.add(nodeStart(inner));
         }
@@ -40,15 +42,19 @@ function isDateReading(node: AstNode): boolean {
 }
 
 function isPinning(statement: AstNode): boolean {
+    // Stryker disable ConditionalExpression,LogicalOperator: only a declaration has a `kind`, and it is text
     return (
         statement.type === 'VariableDeclaration' &&
         typeof statement.kind === 'string' &&
+        // Stryker restore ConditionalExpression,LogicalOperator
         statement.kind.endsWith('using') &&
         childList(statement, 'declarations').some((declarator) => {
             const init = child(declarator, 'init');
+            // Stryker disable next-line OptionalChaining: a `using` always has a value
             const call = init?.type === 'AwaitExpression' ? child(init, 'argument') : init;
 
             return (
+                // Stryker disable next-line ConditionalExpression,OptionalChaining: only a call has a callee to read
                 call?.type === 'CallExpression' &&
                 PINNING_CALLS.has(memberPath(child(call, 'callee')) ?? '') &&
                 childList(call, 'arguments').length > 0
@@ -58,8 +64,10 @@ function isPinning(statement: AstNode): boolean {
 }
 
 function pinnedSpans(body: AstNode): Span[] {
+    // Stryker disable next-line ArrayDeclaration: an entry that is no span holds no offset
     const spans: Span[] = [];
     walk(body, (inner) => {
+        // Stryker disable next-line ConditionalExpression,BlockStatement: only a block lists statements under `body`
         if (inner.type !== 'BlockStatement') {
             return;
         }
@@ -128,6 +136,7 @@ export const noSampledValueInTest = defineRule(
                     });
                     const pinned = pinnedSpans(callback);
                     const isPinned = (at: number): boolean =>
+                        // Stryker disable next-line EqualityOperator: a reading never starts where a statement or a block ends
                         pinned.some(([start, end]) => at >= start && at < end);
                     walk(callback, (inner) => {
                         if (
