@@ -1,5 +1,4 @@
 import { component, content } from '@jterrazz/test';
-import type { TableAccessor } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { NoisyPanel } from './noisy-panel.js';
@@ -23,10 +22,9 @@ describe('NoisyPanel', () => {
             await visitor.see(content('Panel'));
         });
 
-        // Then - a table's matcher handed the console, past the compiler, names the form to write
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a stream handed to toBeEmpty
-        const table = result.console as unknown as TableAccessor;
-        await expect(expect(table).toBeEmpty()).rejects.toThrow(
+        // Then - a table's matcher handed the console is refused by the type, and by the run naming the form to write
+        // @ts-expect-error -- toBeEmpty is a table's matcher, and a stream is no table
+        await expect(expect(result.console).toBeEmpty()).rejects.toThrow(
             /an empty stream is an empty text\n.*\nfix: compare its text: expect\(<result>\.console\.text\)\.toBe\(''\)/u,
         );
     });

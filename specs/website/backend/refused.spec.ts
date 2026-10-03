@@ -4,12 +4,12 @@ import { describe, expect, test } from 'vitest';
 
 describe('refused', () => {
     test('a stub backend beside a deployed url is refused, for a caller the types do not reach', async () => {
-        // Given - an untyped caller pointing a deployed site at a local stub
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the pair is what the type refuses; this test IS the caller the type does not reach
-        const options = { backend: { env: 'API_URL' }, url: 'https://example.test' } as never;
-
-        // Then - refused in the words of the type it slipped past: the deployed site would never call the stub
-        await expect(specification.website(options)).rejects.toThrow(
+        // Given - a caller pointing a deployed site at a local stub, which the type refuses
+        // Then - refused at run time too, in the words of the type: the deployed site would never call the stub
+        await expect(
+            // @ts-expect-error -- `backend` requires `server`: the pair is what the type refuses
+            specification.website({ backend: { env: 'API_URL' }, url: 'https://example.test' }),
+        ).rejects.toThrow(
             [
                 'found: specification.website({ url, backend }), a backend beside a deployed url',
                 'why: `backend` requires `server` mode: a deployed `url` cannot be pointed at a local stub.',

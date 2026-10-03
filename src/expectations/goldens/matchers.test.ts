@@ -37,8 +37,8 @@ describe('registerMatchers', () => {
 
         // Then - a RegExp matches a part, which is vitest's on the comparable text
         expect(() => {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a RegExp on a stream
-            expect(subject).toMatch(/built in/u as unknown as string);
+            // @ts-expect-error -- a RegExp on a stream is refused by the type before the run refuses it
+            expect(subject).toMatch(/built in/u);
         }).toThrow(
             "fix: write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.stdout.text).toMatch(…)",
         );
@@ -72,15 +72,16 @@ describe('registerMatchers', () => {
     ])(
         "matchers — toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — $name takes no value: a value handed to it is refused, naming $golden",
         ({ golden, subject }) => {
-            // Given - a result accessor handed a string and a RegExp, past the compiler
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value on these subjects
-            const accessor = subject() as unknown as string;
+            // Given - a result accessor handed a string and a RegExp
+            const accessor = subject();
 
-            // Then - the refusal names what the subject takes, never vitest's "expects to receive a string"
+            // Then - the type refuses both, and so does the run, naming what the subject takes, never vitest's "expects to receive a string"
             expect(() => {
+                // @ts-expect-error -- these subjects take no value
                 expect(accessor).toMatch('1');
             }).toThrow(golden);
             expect(() => {
+                // @ts-expect-error -- these subjects take no value
                 expect(accessor).not.toMatch(/1/u);
             }).toThrow(golden);
         },
@@ -111,12 +112,12 @@ describe('registerMatchers', () => {
     ])(
         "matchers — toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — $name is refused a value of the wrong shape, naming the one it takes",
         ({ refusal, subject, value }) => {
-            // Given - a result accessor handed a value it cannot be compared to, past the compiler
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses the shape
-            const accessor = subject() as unknown as string;
+            // Given - a result accessor handed a value it cannot be compared to
+            const accessor = subject();
 
-            // Then - refused before anything is read, naming the form to write
+            // Then - refused by the type, and by the run before anything is read, naming the form to write
             expect(() => {
+                // @ts-expect-error -- the value is not of the shape this subject takes
                 expect(accessor).toMatch(value);
             }).toThrow(refusal);
         },
@@ -129,8 +130,8 @@ describe('registerMatchers', () => {
         // Then - the comparable text holds the words; the accessor itself is no list vitest can search
         expect(subject.text).toContain('built in 3s');
         expect(() => {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a stream handed to toContain
-            expect(subject as unknown as string[]).toContain('built in 3s');
+            // @ts-expect-error -- a stream is no list: the type refuses toContain on it
+            expect(subject).toContain('built in 3s');
         }).toThrow(/to include 'built in 3s'/u);
     });
 

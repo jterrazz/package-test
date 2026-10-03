@@ -1,5 +1,4 @@
 import { ruleTester } from '@jterrazz/test';
-import type { PositionedCases } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 const NO_DEBUGGER = {
@@ -10,10 +9,6 @@ const NO_DEBUGGER = {
     }),
     meta: { messages: { debugger: 'no debugger' } },
 };
-
-const unpositioned = (errors: unknown): PositionedCases =>
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the case a caller outside the types can still hand in, which the tester refuses at run time
-    ({ invalid: [{ code: 'debugger;', errors }], valid: [] }) as unknown as PositionedCases;
 
 const lessonFor = (found: string): string =>
     [
@@ -28,7 +23,11 @@ describe('refused', () => {
         // Given - a case stating how many errors, and not where
         // Then - refused, naming the case
         expect(() => {
-            ruleTester().run('no-debugger', NO_DEBUGGER, unpositioned(1));
+            ruleTester().run('no-debugger', NO_DEBUGGER, {
+                // @ts-expect-error -- a count states no position: the type refuses it
+                invalid: [{ code: 'debugger;', errors: 1 }],
+                valid: [],
+            });
         }).toThrow(lessonFor('whose errors are a count'));
     });
 
@@ -36,11 +35,11 @@ describe('refused', () => {
         // Given - an error placed on its line alone
         // Then - the error it names is the one with no position
         expect(() => {
-            ruleTester().run(
-                'no-debugger',
-                NO_DEBUGGER,
-                unpositioned([{ line: 1, messageId: 'debugger' }]),
-            );
+            ruleTester().run('no-debugger', NO_DEBUGGER, {
+                // @ts-expect-error -- an error with no column states no position: the type refuses it
+                invalid: [{ code: 'debugger;', errors: [{ line: 1, messageId: 'debugger' }] }],
+                valid: [],
+            });
         }).toThrow(lessonFor('whose error 0 states no line and column'));
     });
 
@@ -48,7 +47,10 @@ describe('refused', () => {
         // Given - a case whose errors are an empty list
         // Then - the refusal says what the author wrote
         expect(() => {
-            ruleTester().run('no-debugger', NO_DEBUGGER, unpositioned([]));
+            ruleTester().run('no-debugger', NO_DEBUGGER, {
+                invalid: [{ code: 'debugger;', errors: [] }],
+                valid: [],
+            });
         }).toThrow(lessonFor('which states no error'));
     });
 });
