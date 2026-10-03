@@ -62,23 +62,8 @@
             "count": 1
         }
     },
-    "src/expectations/tokens/structural.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "src/facets/api/routes/route-judge.test.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "src/facets/cli/process/exec.adapter.ts": {
         "typescript/require-await": {
-            "count": 1
-        }
-    },
-    "src/facets/component/component.project.ts": {
-        "max-lines": {
             "count": 1
         }
     },
@@ -87,15 +72,7 @@
             "count": 1
         }
     },
-    "src/services/sqlite/sqlite.adapter.test.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "src/services/sqlite/sqlite.adapter.ts": {
-        "max-lines": {
-            "count": 1
-        },
         "typescript/require-await": {
             "count": 5
         }
