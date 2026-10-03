@@ -8,10 +8,11 @@ import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import {
     findTestCallback,
-    firstMarkerAt,
+    hasMarker,
     isTestCallee,
     markerComments,
 } from '../../../kit/project/test-calls.js';
+import type { Marker } from '../../../kit/project/test-calls.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'when-between-given-and-then');
@@ -41,21 +42,22 @@ export const whenBetweenGivenAndThen = defineRule(
                         return;
                     }
                     const callback = findTestCallback(childList(node, 'arguments'));
+                    // Stryker disable next-line ConditionalExpression,BlockStatement: a test with no callback holds no comment to read
                     if (callback === undefined) {
                         return;
                     }
                     const markers = markerComments(context.sourceCode.getCommentsInside(callback));
-                    const when = firstMarkerAt(markers, 'When');
-                    if (when < 0) {
+                    if (!hasMarker(markers, 'When')) {
                         return;
                     }
-                    const given = firstMarkerAt(markers, 'Given');
-                    const then = firstMarkerAt(markers, 'Then');
-                    if (given >= 0 && when < given) {
+                    const firstOf = (one: Marker, other: Marker): Marker | undefined =>
+                        // Stryker disable next-line OptionalChaining: asked of When, which is there
+                        markers.find(({ marker }) => marker === one || marker === other)?.marker;
+                    if (hasMarker(markers, 'Given') && firstOf('When', 'Given') === 'When') {
                         context.report({ messageId: 'beforeGiven', node });
                         return;
                     }
-                    if (then >= 0 && when > then) {
+                    if (hasMarker(markers, 'Then') && firstOf('When', 'Then') === 'Then') {
                         context.report({ messageId: 'afterThen', node });
                     }
                 },
