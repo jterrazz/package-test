@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { kebabName, literalSpans, nameAround, titleAround } from './spec-values.js';
+import { isInside, kebabName, literalSpans, nameAround, titleAround } from './spec-values.js';
 
 describe('spec-values', () => {
     test('spec values — what a fix names a value written in a test by — words become a kebab-case file name, punctuation and case dropped', () => {
@@ -10,14 +10,20 @@ describe('spec-values', () => {
         expect(kebabName('  --lists the users!  ')).toBe('lists-the-users');
         expect(kebabName('ÉTÉ')).toBe('t');
         expect(kebabName('')).toBe('');
+        expect(kebabName('a - b')).toBe('a-b');
     });
 
     test('spec values — what a fix names a value written in a test by — a value is named by the title of the test around it, the innermost one', () => {
-        // Given - a value inside a test, and one outside every test
+        // Given - a value inside a test, one outside every test, one after a test, and one inside a parameterised test's callback
         const text = [
             "const SHARED = 'x';",
             "test('lists the users', async () => {",
             "    await api.post('/users', { name: 'Ada' });",
+            '});',
+            "const AFTER = 'y';",
+            "test('(a) reads', () => { read({ at: 'r' }); });",
+            "test.each([1, 2])('pages %s', async () => {",
+            "    await api.get('/users', { page: 'p' });",
             '});',
         ].join('\n');
 
@@ -25,6 +31,8 @@ describe('spec-values', () => {
         expect(titleAround(text, text.indexOf('{ name'))).toBe('lists the users');
         expect(nameAround(text, text.indexOf('{ name'), 'value')).toBe('lists-the-users');
         expect(nameAround(text, text.indexOf("'x'"), 'value')).toBe('value');
+        expect(nameAround(text, text.indexOf("'y'"), 'value')).toBe('value');
+        expect(nameAround(text, text.indexOf('{ page'), 'value')).toBe('pages-s');
     });
 
     test('spec values — what a fix names a value written in a test by — a call spelled in a string is text, never code', () => {
@@ -35,6 +43,23 @@ describe('spec-values', () => {
         expect(literalSpans(text).map(({ end, start }) => text.slice(start, end))).toStrictEqual([
             '"api.post(\'/x\', {})"',
             "'/y'",
+        ]);
+    });
+
+    test('spec values — a position is inside a span from its start up to, not at, its end', () => {
+        // Given - two spans
+        const spans = [
+            { end: 5, start: 2 },
+            { end: 9, start: 7 },
+        ];
+
+        // Then - each position against both
+        expect([1, 2, 4, 5, 7].map((index) => isInside(spans, index))).toStrictEqual([
+            false,
+            true,
+            true,
+            false,
+            true,
         ]);
     });
 });

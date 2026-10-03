@@ -10,11 +10,12 @@ export function kebabName(words: string): string {
     return words
         .toLowerCase()
         .replaceAll(/[^a-z0-9]+/gu, '-')
-        .replaceAll(/^-+|-+$/gu, '');
+        .replaceAll(/^-|-$/gu, '');
 }
 
 export function literalSpans(text: string): Span[] {
     const spans: Span[] = [];
+    // Stryker disable next-line EqualityOperator: past the text's end no literal opens
     for (let index = 0; index < text.length;) {
         const end = literalEnd(text, index);
         if (end === index) {
@@ -34,11 +35,17 @@ export function isInside(spans: readonly Span[], index: number): boolean {
 export function titleAround(text: string, index: number): string | undefined {
     let title: string | undefined;
     for (const found of text.matchAll(TITLED_TEST)) {
+        // Stryker disable next-line EqualityOperator: a value never starts where a test call does
         if (found.index > index) {
             break;
         }
-        if (closingOf(text, text.indexOf('(', found.index)) > index) {
-            title = found.groups?.title;
+        // Stryker disable next-line OptionalChaining,StringLiteral: a match always carries its named group
+        const written = found.groups?.title ?? '';
+        // invariant: the call's own parenthesis is the last before its title, past any `.each(…)` table.
+        const call = text.lastIndexOf('(', found.index + found[0].length - written.length - 2);
+        // Stryker disable next-line EqualityOperator: a value never starts on a test's closing parenthesis
+        if (closingOf(text, call) > index) {
+            title = written;
         }
     }
     return title;
