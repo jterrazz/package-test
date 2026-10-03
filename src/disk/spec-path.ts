@@ -97,7 +97,7 @@ function brandOf(value: unknown): 'directory' | 'file' | undefined {
     if (value === null || typeof value !== 'object') {
         return undefined;
     }
-    const brand = (value as { [DISK]?: unknown })[DISK];
+    const brand: unknown = Reflect.get(value, DISK);
     return brand === 'file' || brand === 'directory' ? brand : undefined;
 }
 
