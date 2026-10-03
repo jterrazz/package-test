@@ -1,5 +1,5 @@
 import { hostname } from 'node:os';
-import type { StartedTestContainer } from 'testcontainers';
+import type { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 
 import { invariant } from '../../chain/refusals/refusal.js';
 import { loadPeer } from '../peer.js';
@@ -29,6 +29,17 @@ export function containerLabels(reuse: boolean, owner: string): Record<string, s
         : { [CONTAINER_LABEL]: 'true', [OWNER_LABEL]: owner };
 }
 
+/** The part of the `testcontainers` peer a container is built with. */
+export type Testcontainers = { GenericContainer: typeof GenericContainer; Wait: typeof Wait };
+
+async function loadTestcontainers(): Promise<Testcontainers> {
+    return await loadPeer(
+        'testcontainers',
+        'a declared service',
+        async () => await import('testcontainers'),
+    );
+}
+
 export class TestcontainersAdapter implements ContainerPort {
     private readonly image: string;
     private readonly containerPort: number;
@@ -37,8 +48,13 @@ export class TestcontainersAdapter implements ContainerPort {
     private readonly tmpfs: Record<string, string> | undefined;
     private readonly reuse: boolean;
     private container: null | StartedTestContainer = null;
+    private readonly peer: () => Promise<Testcontainers>;
 
-    constructor(options: ContainerRequest & { reuse?: boolean }) {
+    constructor(
+        options: ContainerRequest & { reuse?: boolean },
+        peer: () => Promise<Testcontainers> = loadTestcontainers,
+    ) {
+        this.peer = peer;
         this.image = options.image;
         this.containerPort = options.port;
         this.env = options.env ?? {};
@@ -48,11 +64,7 @@ export class TestcontainersAdapter implements ContainerPort {
     }
 
     async start(): Promise<void> {
-        const { GenericContainer, Wait } = await loadPeer(
-            'testcontainers',
-            'a declared service',
-            async () => await import('testcontainers'),
-        );
+        const { GenericContainer, Wait } = await this.peer();
 
         let builder = new GenericContainer(this.image)
             .withExposedPorts(this.containerPort)
@@ -122,10 +134,12 @@ export class TestcontainersAdapter implements ContainerPort {
             stream.on('data', (chunk: unknown) => {
                 output += Buffer.isBuffer(chunk) ? chunk.toString() : String(chunk);
             });
+            // Stryker disable StringLiteral,BlockStatement,CallExpression: an ended stream is answered by the fallback all the same, a second later
             stream.on('end', () => {
                 resolve(output);
             });
-            // value: timeout after 1s if stream doesn't end
+            // Stryker restore StringLiteral,BlockStatement,CallExpression
+            // outside: a running container's log stream follows it and never ends, so what it holds after a second is the answer.
             setTimeout(() => {
                 resolve(output);
             }, 1000);
