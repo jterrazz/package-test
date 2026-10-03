@@ -194,7 +194,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/disk/fs-fixtures.adapter.ts',
             'src/disk/in-process-steps.adapter.ts',
             'src/facets/mobile/screen/appium-app.adapter.ts',
-            'src/services/seed/database-set.adapter.ts',
         ),
         name: 'an adapter',
         why: 'an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)',
