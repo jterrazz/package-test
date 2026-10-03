@@ -125,16 +125,17 @@ describe('source-scan', () => {
     );
 
     test('arguments drop a trailing comma, and a literal is read whole, trimmed, holes only in a template', () => {
-        // Given - arguments with a trailing comma, literals padded and quoted every way
+        // Given - arguments one per line with a trailing comma, literals padded and quoted every way
         const written = ['  "a"  ', "'a#{b}'", '`a#{b}`'];
 
         // Then - two arguments, and each literal as its quote reads it
-        expect([argumentsOf('a, b,'), written.map((one) => literalOf(spelled(one)))]).toStrictEqual(
-            [
-                ['a', 'b'],
-                ['a', spelled('a#{b}'), `a${HOLE}`],
-            ],
-        );
+        expect([
+            argumentsOf('\n    a,\n    b,\n'),
+            written.map((one) => literalOf(spelled(one))),
+        ]).toStrictEqual([
+            ['a', 'b'],
+            ['a', spelled('a#{b}'), `a${HOLE}`],
+        ]);
     });
 
     test('comments end at the text’s end when they never close, and a block opened by its own slash runs to its close', () => {

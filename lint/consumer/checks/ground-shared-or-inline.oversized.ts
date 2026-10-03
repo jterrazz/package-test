@@ -10,7 +10,7 @@ import { runInNewContext } from 'node:vm';
 
 import { withEntryImport } from '../../kit/checker/entry-import.js';
 import { dedent } from '../../kit/project/dedent.js';
-import { closingOf, literalEnd } from '../../kit/project/source-scan.js';
+import { argumentSpans, closingOf } from '../../kit/project/source-scan.js';
 import { isInside, literalSpans, nameAround } from '../../kit/project/spec-values.js';
 import type { Span } from '../../kit/project/spec-values.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
@@ -48,34 +48,6 @@ const STRING_SUBJECT = /\.(?:text|raw)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 /** vitest's own `toMatch` takes no file: its long value is reported, never written to one. */
 const PLAIN_SUBJECT =
     /expect\s*\(\s*(?<subject>[A-Za-z_$][\w$]*|'[^'\n]*'|"[^"\n]*")\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
-
-function argumentSpans(text: string, open: number): Span[] {
-    const close = closingOf(text, open);
-    const spans: Span[] = [];
-    let start = open + 1;
-    for (let index = open + 1; index <= close;) {
-        const past = literalEnd(text, index);
-        if (past !== index) {
-            index = past;
-            continue;
-        }
-        const character = text[index] ?? '';
-        if (character === '(' || character === '[' || character === '{') {
-            index = closingOf(text, index) + 1;
-            continue;
-        }
-        if (character === ',' || index === close) {
-            const raw = text.slice(start, index);
-            const lead = raw.length - raw.trimStart().length;
-            if (raw.trim() !== '') {
-                spans.push({ end: start + raw.trimEnd().length, start: start + lead });
-            }
-            start = index + 1;
-        }
-        index += 1;
-    }
-    return spans;
-}
 
 function literalValue(source: string): unknown {
     if (/\$\{/u.test(source)) {
@@ -123,7 +95,9 @@ function candidateAt(
     if (isInside(literals, call.index) || (verb === 'toMatch' && STRING_SUBJECT.test(before))) {
         return undefined;
     }
-    const argument = argumentSpans(text, open)[verb === 'post' || verb === 'put' ? 1 : 0];
+    const argument = argumentSpans(text, open + 1, closingOf(text, open))[
+        verb === 'post' || verb === 'put' ? 1 : 0
+    ];
     const source = argument === undefined ? '' : text.slice(argument.start, argument.end);
     if (argument === undefined || !VALUE_START.test(source)) {
         return undefined;

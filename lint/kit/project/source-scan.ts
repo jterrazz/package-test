@@ -97,30 +97,44 @@ export function closingOf(text: string, open: number): number {
     return text.length;
 }
 
-export function argumentsOf(text: string): string[] {
-    const parts: string[] = [];
-    let start = 0;
-    let index = 0;
-    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
-    while (index < text.length) {
-        const character = text[index] ?? '';
+/** Each comma-separated argument between `start` and `end`, trimmed, an empty one dropped. */
+export function argumentSpans(
+    text: string,
+    start = 0,
+    end = text.length,
+): { end: number; start: number }[] {
+    const spans: { end: number; start: number }[] = [];
+    let from = start;
+    const close = (to: number): void => {
+        const raw = text.slice(from, to);
+        if (raw.trim() !== '') {
+            const lead = raw.length - raw.trimStart().length;
+            spans.push({ end: from + raw.trimEnd().length, start: from + lead });
+        }
+        from = to + 1;
+    };
+    let index = start;
+    // Stryker disable next-line EqualityOperator: past the end there is no character to read
+    while (index < end) {
         const past = literalEnd(text, index);
+        const character = text[index];
         if (past !== index) {
             index = past;
-            continue;
-        }
-        if (character === '(' || character === '[' || character === '{') {
+        } else if (character === '(' || character === '[' || character === '{') {
             index = closingOf(text, index) + 1;
-            continue;
+        } else {
+            if (character === ',') {
+                close(index);
+            }
+            index += 1;
         }
-        if (character === ',') {
-            parts.push(text.slice(start, index).trim());
-            start = index + 1;
-        }
-        index += 1;
     }
-    const last = text.slice(start).trim();
-    return last === '' ? parts : [...parts, last];
+    close(end);
+    return spans;
+}
+
+export function argumentsOf(text: string): string[] {
+    return argumentSpans(text).map(({ end, start }) => text.slice(start, end));
 }
 
 export function literalOf(argument: string | undefined): string | undefined {
