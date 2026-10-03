@@ -1,4 +1,13 @@
-import { isNode, walk } from './ast.js';
+import {
+    child,
+    childList,
+    cookedText,
+    identifierName,
+    isNode,
+    memberPropertyName,
+    stringValue,
+    walk,
+} from './ast.js';
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 
@@ -36,6 +45,7 @@ function argumentOf(text: string, probe: string): Argument {
     if (text.startsWith("'") || text.startsWith('"')) {
         return { kind: 'string', prefix: text.slice(1) };
     }
+    // Stryker disable next-line OptionalChaining: a match always carries its named group
     const inner = INNER_CALL.exec(text)?.groups?.callee;
     if (inner !== undefined) {
         return { callee: inner, kind: 'call' };
@@ -48,28 +58,26 @@ export function callShapeOf(probe: string): CallShape | undefined {
     if (!probe.includes('(')) {
         return undefined;
     }
-    const groups = CALL_PROBE.exec(probe)?.groups;
-    const name = groups?.name;
-    if (groups === undefined || name === undefined) {
+    const match = CALL_PROBE.exec(probe);
+    if (match === null) {
         throw new Error(`capability probe ${probe}: outside the call grammar`);
     }
-    const method = groups.dot !== undefined || groups.object !== undefined;
+    // Stryker disable next-line StringLiteral: a matched probe always names its call and its argument, if empty
+    const { argument = '', chain, dot, name = '', object } = match.groups ?? {};
     return {
-        argument: argumentOf(groups.argument ?? '', probe),
-        callee: method
-            ? {
-                  kind: 'method',
-                  name,
-                  ...(groups.object === undefined ? {} : { object: groups.object }),
-              }
-            : { kind: 'bare', name },
-        onACall: groups.chain !== undefined,
+        argument: argumentOf(argument, probe),
+        callee:
+            dot !== undefined || object !== undefined
+                ? { kind: 'method', name, ...(object === undefined ? {} : { object }) }
+                : { kind: 'bare', name },
+        onACall: chain !== undefined,
     };
 }
 
 export function callsOf(filename: string, source: string): AstNode[] {
     const program = parseProgram(filename, source);
     const calls: AstNode[] = [];
+    // Stryker disable next-line ConditionalExpression: a source the parser refuses walks as no call
     if (isNode(program)) {
         walk(program, (node) => {
             if (node.type === 'CallExpression') {
@@ -80,29 +88,13 @@ export function callsOf(filename: string, source: string): AstNode[] {
     return calls;
 }
 
-function identifier(node: unknown): string | undefined {
-    return isNode(node) && node.type === 'Identifier' ? String(node.name) : undefined;
-}
-
-function propertyOf(member: AstNode): string | undefined {
-    return member.computed === true ? undefined : identifier(member.property);
-}
-
-function stringOf(node: AstNode): string | undefined {
-    if (node.type === 'Literal' && typeof node.value === 'string') {
-        return node.value;
+/** A template is read by the text before its first hole: `/users/${id}` opens on `/users/`. */
+function openingOf(node: AstNode): string | undefined {
+    if (node.type === 'TemplateLiteral') {
+        const [first] = childList(node, 'quasis');
+        return cookedText(first);
     }
-    if (node.type === 'TemplateLiteral' && Array.isArray(node.quasis)) {
-        const [first] = node.quasis as unknown[];
-        const value: unknown = isNode(first) ? first.value : undefined;
-        return typeof value === 'object' &&
-            value !== null &&
-            'cooked' in value &&
-            typeof value.cooked === 'string'
-            ? value.cooked
-            : undefined;
-    }
-    return undefined;
+    return stringValue(node);
 }
 
 const TRANSPARENT = new Set([
@@ -114,56 +106,53 @@ const TRANSPARENT = new Set([
 ]);
 
 /** `file('x') as never` is `file('x')`. */
-function unwrapped(node: unknown): unknown {
-    let current = node;
-    while (isNode(current) && TRANSPARENT.has(current.type)) {
-        current = current.expression;
-    }
-    return current;
+function unwrapped(node: AstNode | undefined): AstNode | undefined {
+    return node !== undefined && TRANSPARENT.has(node.type)
+        ? unwrapped(child(node, 'expression'))
+        : node;
 }
 
 function argumentMatches(call: AstNode, argument: Argument): boolean {
     if (argument.kind === 'any') {
         return true;
     }
-    const first = unwrapped(
-        Array.isArray(call.arguments) ? (call.arguments as unknown[])[0] : undefined,
-    );
-    if (!isNode(first)) {
+    const [written] = childList(call, 'arguments');
+    const first = unwrapped(written);
+    if (first === undefined) {
         return false;
     }
     if (argument.kind === 'call') {
-        return first.type === 'CallExpression' && identifier(first.callee) === argument.callee;
+        return (
+            first.type === 'CallExpression' &&
+            identifierName(child(first, 'callee')) === argument.callee
+        );
     }
     if (argument.kind === 'string') {
-        return stringOf(first)?.startsWith(argument.prefix) === true;
+        return openingOf(first)?.startsWith(argument.prefix) === true;
     }
-    return first.type === (argument.kind === 'array' ? 'ArrayExpression' : 'ObjectExpression');
+    return first.type === (argument.kind === 'object' ? 'ObjectExpression' : 'ArrayExpression');
 }
 
-function wrapsACall(node: unknown): boolean {
-    if (!isNode(node) || node.type !== 'CallExpression' || !Array.isArray(node.arguments)) {
-        return false;
-    }
-    const last = unwrapped((node.arguments as unknown[]).at(-1));
-    return isNode(last) && last.type === 'CallExpression';
+/** Only a call has arguments to end on. */
+function wrapsACall(node: AstNode | undefined): boolean {
+    return unwrapped(childList(node, 'arguments').at(-1))?.type === 'CallExpression';
 }
 
 export function isCallOf(call: AstNode, shape: CallShape): boolean {
-    const { callee } = call;
-    if (!isNode(callee)) {
-        return false;
-    }
+    const callee = child(call, 'callee');
     if (shape.callee.kind === 'bare') {
-        return identifier(callee) === shape.callee.name && argumentMatches(call, shape.argument);
+        return (
+            identifierName(callee) === shape.callee.name && argumentMatches(call, shape.argument)
+        );
     }
-    if (callee.type !== 'MemberExpression' || propertyOf(callee) !== shape.callee.name) {
+    if (memberPropertyName(callee) !== shape.callee.name) {
         return false;
     }
-    if (shape.callee.object !== undefined && identifier(callee.object) !== shape.callee.object) {
+    const object = child(callee, 'object');
+    if (shape.callee.object !== undefined && identifierName(object) !== shape.callee.object) {
         return false;
     }
-    if (shape.onACall && !wrapsACall(callee.object)) {
+    if (shape.onACall && !wrapsACall(object)) {
         return false;
     }
     return argumentMatches(call, shape.argument);

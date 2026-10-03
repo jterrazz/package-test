@@ -41,17 +41,23 @@ describe('call-shapes', () => {
         const source = [
             "api.seed(file('./_seeds/a.sql') as never);",
             "api.seed('./_seeds/a.sql');",
+            "api.seed(new file('./_seeds/a.sql'));",
+            'api.get();',
+            'result.toMatch([[1]]);',
             `api.get('/users'); api.get(\`/users/\${id}\`); api.get('users');`,
             'api.with({ headers: {} });',
+            'api.with([1]);',
+            'api.post("/users");',
             "expect(result.table('users')).toMatch([[1]]);",
             'expect(rows).toMatch([[1]]);',
         ].join('\n');
 
         // Then - each shape finds what it names, and nothing else
-        expect(count('.seed(file(', source)).toBe(1);
-        expect(count(".get('/", source)).toBe(2);
-        expect(count('.with({', source)).toBe(1);
-        expect(count(')).toMatch([', source)).toBe(1);
+        expect(
+            ['.seed(file(', ".get('/", '.with({', '.with([', '.post("/', ')).toMatch(['].map(
+                (probe) => count(probe, source),
+            ),
+        ).toStrictEqual([1, 2, 1, 1, 1, 1]);
     });
 
     test('the matrix reads a call probe as a shape of the syntax tree — a call written in a string or a comment is no call', () => {
@@ -69,5 +75,40 @@ describe('call-shapes', () => {
         expect(() => callShapeOf('.seed(42')).toThrow(
             'capability probe .seed(42: no call shape reads the argument `42`',
         );
+    });
+
+    test('the matrix reads a call probe as a shape of the syntax tree — each probe reads as its parts', () => {
+        // Given - a bare call, a method on any object, a method on one name, and one on a call's result
+        // Then - each shape, whole; a probe that opens on no name is refused
+        expect([
+            callShapeOf('table('),
+            callShapeOf('.table("users'),
+            callShapeOf('result.table({'),
+            callShapeOf(')).toMatch(['),
+        ]).toStrictEqual([
+            { argument: { kind: 'any' }, callee: { kind: 'bare', name: 'table' }, onACall: false },
+            {
+                argument: { kind: 'string', prefix: 'users' },
+                callee: { kind: 'method', name: 'table' },
+                onACall: false,
+            },
+            {
+                argument: { kind: 'object' },
+                callee: { kind: 'method', name: 'table', object: 'result' },
+                onACall: false,
+            },
+            {
+                argument: { kind: 'array' },
+                callee: { kind: 'method', name: 'toMatch' },
+                onACall: true,
+            },
+        ]);
+        expect(() => callShapeOf('1x(')).toThrow('capability probe 1x(: outside the call grammar');
+    });
+
+    test('the matrix reads a call probe as a shape of the syntax tree — every call of the program is read, nested ones too', () => {
+        // Given - two calls, one inside the other, and a member read
+        // Then - both calls, nothing else
+        expect(callsOf('a.ts', 'f(g()); x.y;')).toHaveLength(2);
     });
 });
