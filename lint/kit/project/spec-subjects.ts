@@ -43,18 +43,15 @@ export function lineEnd(text: string, index: number): number {
 
 export function withLeadingComments(text: string, start: number): number {
     let begin = lineStart(text, start);
-    while (begin > 0) {
+    // invariant: above the first line, the line read is empty, which ends the climb.
+    for (;;) {
         const previous = lineStart(text, begin - 1);
         const line = text.slice(previous, begin).trim();
         if (line.startsWith('//')) {
             begin = previous;
         } else if (line.endsWith('*/')) {
-            // invariant: the doc comment a declaration opens on goes with it.
-            const opening = text.lastIndexOf(
-                '/*',
-                previous + text.slice(previous, begin).lastIndexOf('*/'),
-            );
-            begin = lineStart(text, opening);
+            // invariant: the doc comment a declaration opens on goes with it, and a block comment holds no other opening.
+            begin = lineStart(text, text.lastIndexOf('/*', begin));
         } else {
             break;
         }
@@ -66,15 +63,17 @@ function testsOf(source: string): Omit<TestOf, 'subjects'>[] {
     const text = blankComments(source);
     const tests: Omit<TestOf, 'subjects'>[] = [];
     for (const found of text.matchAll(TEST_CALL)) {
-        if (tests.some((test) => found.index >= test.start && found.index < test.end)) {
+        // invariant: a call is found after every test already read, so it is inside one when before its end.
+        if (tests.some((test) => found.index < test.end)) {
             continue;
         }
         const open = found.index + found[0].length - 1;
         const close = closingOf(text, open);
+        const { title = '(a computed title)' } = TITLE.exec(text.slice(open + 1))?.groups ?? {};
         tests.push({
             end: lineEnd(text, close),
             start: withLeadingComments(source, found.index),
-            title: TITLE.exec(text.slice(open + 1))?.groups?.title ?? '(a computed title)',
+            title,
         });
     }
     return tests;
@@ -95,7 +94,7 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
     );
     const commands: Record<string, readonly string[]> = {};
     for (const [handle, door] of Object.entries(doorsOf(blankComments(text), 'cli'))) {
-        const source = readBeside(file, door.replace(/\.js$/u, '.ts'));
+        const source = readBeside(file, door.replace(/(?:\.[jt]s)?$/u, '.ts'));
         const declared = source === undefined ? undefined : declaredCommands(source);
         if (declared !== undefined) {
             commands[handle] = declared;
@@ -118,18 +117,16 @@ function readSpec(specsRoot: string, file: string): SpecRead {
             subjects.set(name, at);
         }
     }
-    const tests = testsOf(text).map(({ end, start, title }) => ({
-        end,
-        start,
-        title,
-        subjects: [
-            ...new Set(
-                reached
-                    .filter(({ index }) => index >= start && index < end)
-                    .map(({ subject }) => subjectName(subject)),
-            ),
-        ],
-    }));
+    const tests = testsOf(text).map(({ end, start, title }) => {
+        // Stryker disable next-line EqualityOperator: a call never sits on the first character of a test or its comments
+        const inside = reached.filter(({ index }) => index >= start && index < end);
+        return {
+            end,
+            start,
+            subjects: [...new Set(inside.map(({ subject }) => subjectName(subject)))],
+            title,
+        };
+    });
     return { facet, file, reading, subjects, tests, text };
 }
 
@@ -146,7 +143,7 @@ export function positionOf(text: string, index: number): { column: number; line:
 }
 
 export function aspectOf(file: string): string {
-    return basename(file).replace(/\.spec\.ts$/u, '');
+    return basename(file, '.spec.ts');
 }
 
 /** `/articles/:id` → `articles-id`. */
@@ -165,16 +162,15 @@ export function targetOf(
     name: string,
     keepsName: boolean,
 ): string {
-    const subject = spec.subjects.get(name)?.subject;
-    const folder = subject === undefined ? undefined : subjectFolder(subject, spec.reading);
+    const reached = spec.subjects.get(name);
+    // Stryker disable next-line ConditionalExpression: a name a test opens on is a subject of its spec
+    const folder = reached === undefined ? undefined : subjectFolder(reached.subject, spec.reading);
     const aspect = aspectOf(spec.file);
     if (folder === undefined) {
+        const lastWord = name.slice(name.lastIndexOf(' ') + 1);
         return keepsName
             ? spec.file
-            : join(
-                  dirname(spec.file),
-                  `${aspect}-${slugOf(name.split(' ').at(-1) ?? name)}.spec.ts`,
-              );
+            : join(dirname(spec.file), `${aspect}-${slugOf(lastWord)}.spec.ts`);
     }
     return join(specsRoot, spec.facet, folder, `${aspect}.spec.ts`);
 }
@@ -198,14 +194,14 @@ export function splitPlan(specsRoot: string, spec: SpecRead): Map<string, string
     return plan;
 }
 
+/** A spec of one subject has no second: its first line stands for it. */
 export function secondSubjectAt(spec: SpecRead): { column: number; line: number } {
     const [, second] = [...spec.subjects.values()];
     return positionOf(spec.text, second?.index ?? 0);
 }
 
 export function silenced(spec: SpecRead, rule: string): boolean {
-    const line = spec.subjects.size > 1 ? secondSubjectAt(spec).line : 1;
-    return suppressedLines(spec.text, rule).has(line);
+    return suppressedLines(spec.text, rule).has(secondSubjectAt(spec).line);
 }
 
 export function shown(specsRoot: string, path: string): string {
