@@ -55,12 +55,8 @@ export function formatStartupReport(services: ServiceReport[], app?: AppInfo): s
                 }
             }
         } else {
-            const conn =
-                service.connectionString === undefined || service.connectionString === ''
-                    ? ''
-                    : `${DIM}${service.connectionString}${RESET}`;
             lines.push(
-                `  ${GREEN}${CHECK}${RESET} ${service.type} (${service.name})  ${conn}  ${DIM}${service.durationMs}ms${RESET}`,
+                `  ${GREEN}${CHECK}${RESET} ${service.type} (${service.name})  ${DIM}${service.connectionString ?? ''}${RESET}  ${DIM}${service.durationMs}ms${RESET}`,
             );
         }
     }
