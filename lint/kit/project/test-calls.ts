@@ -1,12 +1,12 @@
 import type { Comment } from '@oxlint/plugins';
 
 import {
+    chainRootName,
     child,
     childList,
     identifierName,
     memberPropertyName,
     nodeStart,
-    stringField,
     stringValue,
 } from './ast.js';
 import type { AstNode } from './ast.js';
@@ -15,35 +15,17 @@ const TEST_IDENTIFIERS = new Set(['it', 'test']);
 
 /** Handles `test.only(...)`, `test.concurrent(...)` and the call-returning `test.skipIf(cond)(...)` / `test.each(...)(...)`. */
 export function isTestCallee(callee: AstNode | undefined): boolean {
-    if (callee === undefined) {
-        return false;
-    }
-    if (callee.type === 'Identifier') {
-        return TEST_IDENTIFIERS.has(stringField(callee, 'name') ?? '');
-    }
-    if (callee.type === 'MemberExpression') {
-        return isTestCallee(child(callee, 'object'));
-    }
-    if (callee.type === 'CallExpression') {
-        return isTestCallee(child(callee, 'callee'));
-    }
-    return false;
+    return (TEST_IDENTIFIERS as ReadonlySet<unknown>).has(chainRootName(callee));
 }
 
 export function testCalleeHasModifier(callee: AstNode | undefined, modifier: string): boolean {
     if (callee === undefined) {
         return false;
     }
-    if (callee.type === 'MemberExpression') {
-        return (
-            memberPropertyName(callee) === modifier ||
-            testCalleeHasModifier(child(callee, 'object'), modifier)
-        );
-    }
-    if (callee.type === 'CallExpression') {
-        return testCalleeHasModifier(child(callee, 'callee'), modifier);
-    }
-    return false;
+    return (
+        memberPropertyName(callee) === modifier ||
+        testCalleeHasModifier(child(callee, 'object') ?? child(callee, 'callee'), modifier)
+    );
 }
 
 export function findTestCallback(args: AstNode[]): AstNode | undefined {
@@ -90,13 +72,7 @@ export function firstMarkerAt(markers: MarkerComment[], marker: Marker): number 
 }
 
 export function isDescribeCallee(callee: AstNode | undefined): boolean {
-    if (callee?.type === 'Identifier') {
-        return identifierName(callee) === 'describe';
-    }
-    if (callee?.type === 'MemberExpression') {
-        return isDescribeCallee(child(callee, 'object'));
-    }
-    return callee?.type === 'CallExpression' && isDescribeCallee(child(callee, 'callee'));
+    return chainRootName(callee) === 'describe';
 }
 
 export function calleeOf(statement: AstNode): AstNode | undefined {
@@ -118,8 +94,7 @@ export function groupBodyOf(group: AstNode): AstNode | undefined {
 }
 
 export function escapedFor(title: AstNode, text: string): string {
-    const raw = typeof title.raw === 'string' ? title.raw : "'";
-    const delimiter = title.type === 'TemplateLiteral' ? '`' : raw.charAt(0);
+    const delimiter = title.type === 'TemplateLiteral' ? '`' : String(title.raw).charAt(0);
     const escaped = text.replaceAll('\\', String.raw`\\`).replaceAll(delimiter, `\\${delimiter}`);
     return delimiter === '`' ? escaped.replaceAll('${', '\\${') : escaped;
 }
