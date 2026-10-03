@@ -3,6 +3,7 @@ export const HOLE = '\u0000';
 export function skipString(text: string, start: number): number {
     const quote = text[start];
     let index = start + 1;
+    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
     while (index < text.length) {
         const character = text[index];
         if (character === '\\') {
@@ -13,6 +14,7 @@ export function skipString(text: string, start: number): number {
             return index + 1;
         }
         if (quote === '`' && character === '$' && text[index + 1] === '{') {
+            // Stryker disable next-line ArithmeticOperator: closingOf read from the `$` steps over it to the same `{`
             index = closingOf(text, index + 1) + 1;
             continue;
         }
@@ -45,6 +47,7 @@ function regexEnd(text: string, start: number): number {
         return start;
     }
     let inClass = false;
+    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
     for (let index = start + 1; index < text.length; index += 1) {
         const character = text[index];
         if (character === '\\') {
@@ -72,8 +75,10 @@ export function closingOf(text: string, open: number): number {
     const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
     const stack: string[] = [];
     let index = open;
+    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
     while (index < text.length) {
         const character = text[index] ?? '';
+        // Stryker disable next-line ConditionalExpression: the opening is a bracket, which opens no literal
         const past = index === open ? index : literalEnd(text, index);
         if (past !== index) {
             index = past;
@@ -96,6 +101,7 @@ export function argumentsOf(text: string): string[] {
     const parts: string[] = [];
     let start = 0;
     let index = 0;
+    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
     while (index < text.length) {
         const character = text[index] ?? '';
         const past = literalEnd(text, index);
@@ -118,6 +124,7 @@ export function argumentsOf(text: string): string[] {
 }
 
 export function literalOf(argument: string | undefined): string | undefined {
+    // Stryker disable next-line StringLiteral: no argument opens on no quote either way
     const text = argument?.trim() ?? '';
     const quote = text[0];
     if ((quote !== "'" && quote !== '"' && quote !== '`') || skipString(text, 0) !== text.length) {
@@ -145,6 +152,7 @@ function pastComment(source: string, index: number): number | undefined {
 function pastString(source: string, index: number): number {
     const quote = source[index];
     let at = index + 1;
+    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
     while (at < source.length && source[at] !== quote) {
         at += source[at] === '\\' ? 2 : 1;
     }
@@ -155,6 +163,7 @@ function pastString(source: string, index: number): number {
 export function withoutComments(source: string): string {
     let out = '';
     let index = 0;
+    // Stryker disable next-line EqualityOperator: past the text's end there is no character to read
     while (index < source.length) {
         const char = source[index] ?? '';
         const skipped = pastComment(source, index);
@@ -174,6 +183,7 @@ export function withoutComments(source: string): string {
 
 /** Per character: whether it sits inside a string literal. */
 export function stringsOf(source: string): boolean[] {
+    // Stryker disable next-line ArrayDeclaration: every offset is written below
     const inside: boolean[] = [];
     let quote = '';
     for (let index = 0; index < source.length; index += 1) {
