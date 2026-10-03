@@ -2,7 +2,8 @@ import { blankComments, GROUND_FIXTURES, treeKind } from '@jterrazz/typescript/r
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { closingOf, literalEnd } from './source-scan.js';
+import { closingOf } from './source-scan.js';
+import { literalSpans } from './spec-values.js';
 
 /** Read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground. */
 
@@ -26,21 +27,15 @@ const RUNS_A_COMMAND = /\bcommand\s*:/u;
 const CALLS_A_MODULE = 'integration';
 
 function literalsOf(blank: string): { at: number; literal: string }[] {
-    const literals: { at: number; literal: string }[] = [];
-    for (let index = 0; index < blank.length;) {
-        const end = literalEnd(blank, index);
-        if (end === index) {
-            index += 1;
-        } else {
-            literals.push({ at: index, literal: blank.slice(index, end) });
-            index = end;
-        }
-    }
-    return literals;
+    return literalSpans(blank).map(({ end, start }) => ({
+        at: start,
+        literal: blank.slice(start, end),
+    }));
 }
 
 function runnerCalls(blank: string): { end: number; start: number }[] {
     return [...blank.matchAll(BUILDS_A_RUNNER)].map((match) => {
+        // Stryker disable next-line ArithmeticOperator: a scan from inside the parenthesis still closes on the call's last bracket
         const open = match.index + match[0].length - 1;
         return { end: closingOf(blank, open), start: open };
     });
@@ -49,7 +44,7 @@ function runnerCalls(blank: string): { end: number; start: number }[] {
 function runsAServerCommand(call: string): boolean {
     return [...call.matchAll(SERVER_OBJECT)].some((match) => {
         const open = match.index + match[0].length - 1;
-        return RUNS_A_COMMAND.test(call.slice(open, closingOf(call, open) + 1));
+        return RUNS_A_COMMAND.test(call.slice(open, closingOf(call, open)));
     });
 }
 
@@ -58,11 +53,13 @@ function constHolding(blank: string, at: number): string | undefined {
     if (last === undefined || blank.slice(last.index, at).includes(';')) {
         return undefined;
     }
+    // Stryker disable next-line OptionalChaining: a match always carries its named group
     return last.groups?.name;
 }
 
 function rootOfAServer(blank: string, at: number): boolean {
     const calls = runnerCalls(blank);
+    // Stryker disable next-line EqualityOperator: a literal never starts on a call's parenthesis
     const around = calls.filter(({ end, start }) => start < at && at < end);
     const name = around.length === 0 ? constHolding(blank, at) : undefined;
     const named =
@@ -70,13 +67,14 @@ function rootOfAServer(blank: string, at: number): boolean {
             ? undefined
             : new RegExp(
                   String.raw`(?<![\w$.])${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
+                  // Stryker disable next-line StringLiteral: a name is plain ASCII, read alike with the unicode flag or without
                   'u',
               );
     const fed =
         named === undefined
             ? around
             : calls.filter(({ end, start }) => named.test(blank.slice(start, end)));
-    return fed.some(({ end, start }) => runsAServerCommand(blank.slice(start, end + 1)));
+    return fed.some(({ end, start }) => runsAServerCommand(blank.slice(start, end)));
 }
 
 function specimenNamedIn(text: string): string | undefined {
@@ -94,9 +92,11 @@ function specimenNamedIn(text: string): string | undefined {
 }
 
 function doorsOf(file: string, text: string): string[] {
-    return [...blankComments(text).matchAll(SPECIFICATION_FROM)].map(({ groups }) =>
-        resolve(dirname(file), (groups?.from ?? '').replace(/\.js$/u, '.ts')),
-    );
+    return [...blankComments(text).matchAll(SPECIFICATION_FROM)].map(({ groups }) => {
+        // Stryker disable next-line OptionalChaining,Regex: a match always carries its named group, which ends on its extension
+        const module = (groups?.from ?? '').replace(/\.js$/u, '.ts');
+        return resolve(dirname(file), module);
+    });
 }
 
 function specimenOfDoor(door: string, seen: Set<string>): string | undefined {
@@ -120,6 +120,7 @@ function specimenOfDoor(door: string, seen: Set<string>): string | undefined {
 
 function importedSpecimen(text: string): string | undefined {
     for (const { groups } of blankComments(text).matchAll(IMPORT_FROM)) {
+        // Stryker disable next-line OptionalChaining: a match always carries its named groups
         const name = INTO_FIXTURES.exec(groups?.from ?? '')?.groups?.name;
         if (name !== undefined) {
             return name;
