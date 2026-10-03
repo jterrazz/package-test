@@ -147,4 +147,14 @@ describe('no-unused-ground', () => {
         // Then - the reference is still seen; no false dead-fixture finding
         expect(result.report).toMatch('');
     });
+
+    test('a pool entry a shared _setup module names after a template with a hole is a reference', async () => {
+        // Given - a shared module whose template literal holds a quoted hole, and a later string naming the pool's app
+        const result = await checker
+            .fixture(directory('./_fixtures/no-unused-ground-shared-setup-ok/'))
+            .run();
+
+        // Then - the app is named: the literal is read from the syntax tree, not paired quote by quote
+        expect(result.report).toMatch('');
+    });
 });

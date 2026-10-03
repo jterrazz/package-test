@@ -1,7 +1,8 @@
 import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { specsAnchor } from '../../kit/project/ast.js';
+import { child, childList, isNode, specsAnchor, stringField, walk } from '../../kit/project/ast.js';
+import { parseProgram } from '../../kit/project/module-parser.js';
 import { collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
@@ -32,11 +33,11 @@ function collectSpecLiterals(path: string): Set<string> {
     }
 }
 
-/** Over-collection only ever hides a dead-fixture finding, so a greedy regex is safe. */
+/** Over-collection only ever hides a dead-fixture finding, so a greedy regex is safe as the fallback for a source the parser refuses. */
 const STRING_LITERAL =
     /'(?<single>(?:[^'\\\n]|\\.)*)'|"(?<double>(?:[^"\\\n]|\\.)*)"|`(?<template>(?:[^`$\\]|\\.)*)`/gu;
 
-function collectLiterals(text: string): Set<string> {
+function scannedLiterals(text: string): Set<string> {
     const found = new Set<string>();
     for (const match of text.matchAll(STRING_LITERAL)) {
         const value = match.groups?.single ?? match.groups?.double ?? match.groups?.template;
@@ -44,6 +45,26 @@ function collectLiterals(text: string): Set<string> {
             found.add(value);
         }
     }
+    return found;
+}
+
+/** Read from the syntax tree: a scan of quotes can pair a quote inside a template's hole with one far below it, and lose every literal in between. */
+function collectLiterals(file: string, text: string): Set<string> {
+    const program = parseProgram(file, text);
+    if (!isNode(program)) {
+        return scannedLiterals(text);
+    }
+    const found = new Set<string>();
+    walk(program, (node) => {
+        if (node.type === 'Literal' && typeof node.value === 'string' && node.value.length > 0) {
+            found.add(node.value);
+        } else if (node.type === 'TemplateLiteral' && childList(node, 'expressions').length === 0) {
+            const cooked = stringField(child(childList(node, 'quasis')[0], 'value'), 'cooked');
+            if (cooked !== undefined && cooked.length > 0) {
+                found.add(cooked);
+            }
+        }
+    });
     return found;
 }
 
@@ -95,7 +116,7 @@ function referencesOf(file: string, into: References): void {
     const anchor = specsAnchor(file);
     const bases = anchor === undefined ? [from] : [from, dirname(anchor.directory)];
     const text = readSource(file);
-    for (const literal of collectLiterals(text)) {
+    for (const literal of collectLiterals(file, text)) {
         for (const word of literal.split(/\s+/u).filter((part) => part.length > 0)) {
             for (const base of bases) {
                 into.paths.add(resolve(base, word));
