@@ -1,71 +1,41 @@
 import { describe, expect, test } from 'vitest';
 
-import { EVENTS_SCREEN_SOURCE, FORM_SCREEN_SOURCE } from './projection.fixtures.js';
+import {
+    EVENTS_SCREEN_SOURCE,
+    FORM_SCREEN_SOURCE,
+    NESTED_SCREEN_SOURCE,
+} from './projection.fixtures.js';
 import { projectScreen } from './projection.js';
 
 describe('projectScreen', () => {
-    test('collapses the wrapper towers into a flat, labeled tree', () => {
-        // Given - a real events screen: dozens of unlabeled Other/Window layers
-        const { tree } = projectScreen(EVENTS_SCREEN_SOURCE);
+    test('collapses the wrapper towers into a flat, labeled tree, and collects the visible texts in order without repeats', () => {
+        // Given - a real events screen: dozens of unlabeled Other/Window layers, a StaticText nested in itself, a row below the fold
+        const screen = projectScreen(EVENTS_SCREEN_SOURCE);
 
-        // Then - only the application root and the labeled nodes survive
-        expect(tree).toStrictEqual({
-            children: [
-                { label: 'Signals', type: 'StaticText' },
-                { label: 'Événements', type: 'Other' },
-                { label: 'Articles', type: 'Other' },
-                { label: 'Conflit militaire États-Unis Iran 2026', type: 'Button' },
-                { label: "Guerre d'Ukraine", type: 'Button' },
-                { label: 'Jazz night at the harbour', type: 'Button' },
-                { label: "Cyberattaque sur systèmes d'eau Minnesota", type: 'Button' },
+        // Then - the application root and the labeled nodes, each once; the texts on screen, app chrome excluded
+        expect(screen).toStrictEqual({
+            texts: [
+                'Signals',
+                'Événements',
+                'Articles',
+                'Conflit militaire États-Unis Iran 2026',
+                "Guerre d'Ukraine",
+                'Jazz night at the harbour',
             ],
-            label: 'SigNews',
-            type: 'Application',
+            tree: {
+                children: [
+                    { label: 'Signals', type: 'StaticText' },
+                    { label: 'Événements', type: 'Other' },
+                    { label: 'Articles', type: 'Other' },
+                    { label: 'Conflit militaire États-Unis Iran 2026', type: 'Button' },
+                    { label: "Guerre d'Ukraine", type: 'Button' },
+                    { label: 'Jazz night at the harbour', type: 'Button' },
+                    { label: "Cyberattaque sur systèmes d'eau Minnesota", type: 'Button' },
+                ],
+                label: 'SigNews',
+                type: 'Application',
+            },
         });
-    });
-
-    test('strips the XCUIElementType prefix from every type name', () => {
-        // Given - the projected events screen
-        const { tree } = projectScreen(EVENTS_SCREEN_SOURCE);
-
-        // Then - types read as their bare role names
-        expect(tree.type).toBe('Application');
-        const prefixed = tree.children?.filter((node) => node.type.includes('XCUIElementType'));
-        expect(prefixed).toStrictEqual([]);
-    });
-
-    test('drops a child that merely repeats its parent accessibility element', () => {
-        // Given - the "Signals" StaticText, which XCUITest nests inside itself
-        const { tree } = projectScreen(EVENTS_SCREEN_SOURCE);
-
-        // Then - it survives once, childless
-        const signals = tree.children?.filter((node) => node.label === 'Signals');
-        expect(signals).toStrictEqual([{ label: 'Signals', type: 'StaticText' }]);
-    });
-
-    test('keeps off-screen rows — the tree describes the whole mounted list', () => {
-        // Given - a list row below the fold (visible="false" in the source)
-        const { texts, tree } = projectScreen(EVENTS_SCREEN_SOURCE);
-
-        // Then - the tree carries it, the visible texts do not
-        const labels = tree.children?.map((node) => node.label);
-        expect(labels).toContain("Cyberattaque sur systèmes d'eau Minnesota");
-        expect(texts).not.toContain("Cyberattaque sur systèmes d'eau Minnesota");
-    });
-
-    test('collects the visible texts in document order without repeats', () => {
-        // Given - the events screen, whose nested StaticText repeats its label
-        const { texts } = projectScreen(EVENTS_SCREEN_SOURCE);
-
-        // Then - one entry per rendered text, app chrome excluded
-        expect(texts).toStrictEqual([
-            'Signals',
-            'Événements',
-            'Articles',
-            'Conflit militaire États-Unis Iran 2026',
-            "Guerre d'Ukraine",
-            'Jazz night at the harbour',
-        ]);
     });
 
     test('keeps a value and an identifier only when they add information', () => {
@@ -84,11 +54,76 @@ describe('projectScreen', () => {
         ]);
     });
 
+    test('a node with an identifier or a value alone is kept with its children, and a child repeats its parent only when it matches it whole', () => {
+        // Given - a cell known by its identifier, a slider by its value, and children that differ from them by one field each
+        const screen = projectScreen(NESTED_SCREEN_SOURCE);
+
+        // Then - the empty attributes count as none, the entities decode, and only the exact childless repeats go
+        expect(screen).toStrictEqual({
+            texts: ['Row AB'],
+            tree: {
+                children: [
+                    {
+                        children: [
+                            { label: 'Row AB', type: 'StaticText' },
+                            {
+                                children: [{ label: 'x', type: 'Other' }],
+                                identifier: 'row-1',
+                                type: 'Cell',
+                            },
+                        ],
+                        identifier: 'row-1',
+                        type: 'Cell',
+                    },
+                    {
+                        children: [
+                            { type: 'Other', value: '50%' },
+                            { type: 'Slider', value: '60%' },
+                            { identifier: 'thumb', type: 'Slider', value: '50%' },
+                            { label: 'Volume', type: 'Slider', value: '50%' },
+                        ],
+                        type: 'Slider',
+                        value: '50%',
+                    },
+                ],
+                label: 'App',
+                type: 'Application',
+            },
+        });
+    });
+
+    test('the Appium envelope is opened only when it wraps one application', () => {
+        // Given - an envelope around two applications, an empty one, and an application of one child
+        const sources = [
+            '<AppiumAUT><XCUIElementTypeApplication label="A"/><XCUIElementTypeApplication label="B"/></AppiumAUT>',
+            '<AppiumAUT/>',
+            '<XCUIElementTypeApplication label="A"><XCUIElementTypeButton label="B"/></XCUIElementTypeApplication>',
+        ];
+
+        // Then - each stays the root
+        expect(sources.map((source) => projectScreen(source).tree)).toStrictEqual([
+            {
+                children: [
+                    { label: 'A', type: 'Application' },
+                    { label: 'B', type: 'Application' },
+                ],
+                type: 'AppiumAUT',
+            },
+            { type: 'AppiumAUT' },
+            { children: [{ label: 'B', type: 'Button' }], label: 'A', type: 'Application' },
+        ]);
+    });
+
     test('refuses a source with no element at all', () => {
         // Given - an empty capture
         // Then - the failure names the projection, not a downstream accessor
         expect(() => projectScreen('<?xml version="1.0"?>')).toThrow(
-            'the page source Appium answered holds no XML element',
+            [
+                'found: the page source Appium answered holds no XML element',
+                'why: A screen is read from the XML page source Appium answers.',
+                'fix: restart the Appium server, or upgrade Appium and its XCUITest driver',
+                'read: docs/11-mobile.md#requirements--what-the-machine-must-have',
+            ].join('\n'),
         );
     });
 });

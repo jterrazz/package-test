@@ -10,7 +10,7 @@ type RawNode = {
 };
 
 const TAG_PATTERN =
-    /<(?<openTag>[A-Za-z][\w.]*)(?<rawAttributes>(?:\s+[\w:.-]+="[^"]*")*)\s*(?<selfClosing>\/?)>|<\/(?<closeTag>[\w.]*)\s*>/gu;
+    /<(?<openTag>[A-Za-z][\w.]*)(?<rawAttributes>(?:\s+[\w:.-]+="[^"]*")*)\s*(?<selfClosing>\/?)>|<\/[\w.]*\s*>/gu;
 const ATTRIBUTE_PATTERN = /(?<key>[\w:.-]+)="(?<value>[^"]*)"/gu;
 
 const NAMED_ENTITIES: Record<string, string> = {
@@ -37,14 +37,12 @@ function decodeEntities(value: string): string {
 }
 
 function attributesOf(raw: string): Record<string, string> {
-    const attributes: Record<string, string> = {};
-    for (const attribute of raw.matchAll(ATTRIBUTE_PATTERN)) {
-        const { key, value } = attribute.groups ?? {};
-        if (key !== undefined && value !== undefined) {
-            attributes[key] = decodeEntities(value);
-        }
-    }
-    return attributes;
+    return Object.fromEntries(
+        [...raw.matchAll(ATTRIBUTE_PATTERN)].map(([, key, value]) => [
+            String(key),
+            decodeEntities(String(value)),
+        ]),
+    );
 }
 
 function parsePageSource(xml: string): RawNode {
@@ -52,13 +50,13 @@ function parsePageSource(xml: string): RawNode {
     let root: null | RawNode = null;
 
     for (const match of xml.matchAll(TAG_PATTERN)) {
-        const { closeTag, openTag, rawAttributes, selfClosing } = match.groups ?? {};
-        if (closeTag !== undefined || openTag === undefined) {
+        const { openTag, rawAttributes, selfClosing } = match.groups ?? {};
+        if (openTag === undefined) {
             stack.pop();
             continue;
         }
         const node: RawNode = {
-            attributes: attributesOf(rawAttributes ?? ''),
+            attributes: attributesOf(String(rawAttributes)),
             children: [],
             tag: openTag,
         };
@@ -68,7 +66,7 @@ function parsePageSource(xml: string): RawNode {
         } else {
             parent.children.push(node);
         }
-        if (selfClosing === undefined || selfClosing === '') {
+        if (selfClosing !== '/') {
             stack.push(node);
         }
     }
@@ -94,6 +92,7 @@ function substance(node: RawNode): Omit<ScreenNode, 'children'> {
     const value = present(node.attributes.value);
     const identifier = present(node.attributes.name);
     return {
+        // Stryker disable next-line Regex: an XCUITest tag names its type once, at its start
         type: node.tag.replace(/^XCUIElementType/u, ''),
         ...(label === undefined ? {} : { label }),
         // outside: a value or identifier echoing the label is XCUITest noise.
@@ -143,8 +142,8 @@ function collectTexts(node: RawNode, texts: string[]): void {
 export function projectScreen(xml: string): DeviceScreen {
     let root = parsePageSource(xml);
     // outside: the page source wraps the application in an `AppiumAUT` envelope.
-    const [onlyChild] = root.children;
-    if (root.tag === 'AppiumAUT' && root.children.length === 1 && onlyChild !== undefined) {
+    const [onlyChild, ...others] = root.children;
+    if (root.tag === 'AppiumAUT' && onlyChild !== undefined && others.length === 0) {
         root = onlyChild;
     }
 

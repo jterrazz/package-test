@@ -40,3 +40,21 @@ export const FORM_SCREEN_SOURCE = `<?xml version="1.0" encoding="UTF-8"?>
     </XCUIElementTypeOther>
   </XCUIElementTypeApplication>
 </AppiumAUT>`;
+
+export const NESTED_SCREEN_SOURCE = `<XCUIElementTypeApplication label="App" visible="true">
+  <XCUIElementTypeApplication label="App"/>
+  <XCUIElementTypeOther label="" value="" name="" visible="true">
+    <XCUIElementTypeCell name="row-1">
+      <XCUIElementTypeStaticText label="Row &#x41;&#66;" visible="true"/>
+      <XCUIElementTypeCell name="row-1"><XCUIElementTypeOther label="x"/></XCUIElementTypeCell>
+      <XCUIElementTypeCell name="row-1"/>
+    </XCUIElementTypeCell>
+  </XCUIElementTypeOther>
+  <XCUIElementTypeSlider value="50%">
+    <XCUIElementTypeSlider value="50%"/>
+    <XCUIElementTypeOther value="50%"/>
+    <XCUIElementTypeSlider value="60%"/>
+    <XCUIElementTypeSlider value="50%" name="thumb"/>
+    <XCUIElementTypeSlider value="50%" label="Volume"/>
+  </XCUIElementTypeSlider>
+</XCUIElementTypeApplication>`;
