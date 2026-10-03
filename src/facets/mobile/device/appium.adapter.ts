@@ -5,7 +5,6 @@ import { evidenceDirectory } from '../../../../lint/kit/project/artifacts.js';
 import { pause } from '../../../chain/pause.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
-import { MAX_REPORTED_MATCHES, shortened } from '../../../visitor/matching/candidates.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';
 import { scopeChain } from '../../../visitor/targets/landmarks.js';
 import type { Target } from '../../../visitor/targets/target.js';
@@ -19,98 +18,17 @@ import type {
     DeviceScreen,
     DeviceTimeouts,
     MobileDevice,
-    MobileElementKind,
-    MobileElementMatch,
     MobileVisitor,
 } from './device.port.js';
 import { projectScreen } from './projection.js';
-
-type ElementList = Awaited<ReturnType<Driver['$$']>>;
-
-type DriverElement = ElementList[number];
-
-type MatchScope = Driver | DriverElement;
+import { captureMatches, matching, onScreenLabels, scrollToOffscreen } from './xcui-query.js';
+import type { DriverElement, MatchScope } from './xcui-query.js';
 
 /* outside: 30s absorbs a cold app boot, as playwright's actionability default; a slower app raises `timeouts`. */
 const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
 /** WebDriverAgent builds once per simulator: the first session is the slow one. */
 const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
-
-function escapePredicate(value: string): string {
-    return value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`);
-}
-
-type PredicateParts = {
-    contains: (attribute: string) => string;
-    name: string;
-    visible: string;
-};
-
-const PREDICATES: Record<MobileElementKind, (parts: PredicateParts) => string> = {
-    button: ({ contains, visible }) =>
-        `type == 'XCUIElementTypeButton' AND ${contains('label')} AND ${visible}`,
-    field: ({ contains, visible }) =>
-        `type IN {'XCUIElementTypeTextField','XCUIElementTypeSecureTextField'}` +
-        ` AND (${contains('label')} OR ${contains('value')}) AND ${visible}`,
-    testId: ({ name, visible }) => `name == '${name}' AND ${visible}`,
-    text: ({ contains, visible }) =>
-        `(${contains('label')} OR ${contains('value')}) AND ${visible}`,
-};
-
-function isMobileKind(kind: Target['kind']): kind is MobileElementKind {
-    return Object.hasOwn(PREDICATES, kind);
-}
-
-/** Landmarks have no XCUITest analog: the boundary is refused, not approximated. */
-function compilePredicate(target: Target, options?: { anyVisibility?: boolean }): string {
-    if (!isMobileKind(target.kind)) {
-        throw new Error(
-            refusal('no-landmark-on-mobile', {
-                fix: `scope with within(testId('…'), …) — any target works as the scope`,
-                found: `${asWritten(target)}, a landmark — an iOS screen has no '${target.kind}' region`,
-            }),
-        );
-    }
-    const name = escapePredicate(target.name ?? '');
-    return PREDICATES[target.kind]({
-        contains: (attribute) =>
-            target.exact === false
-                ? `${attribute} CONTAINS '${name}'`
-                : `${attribute} == '${name}'`,
-        name,
-        visible: options?.anyVisibility === true ? '1 == 1' : 'visible == 1',
-    });
-}
-
-/** `$$` answers a chainable typed as its array: the one await of it lives here. */
-async function matching(
-    scope: MatchScope,
-    target: Target,
-    options?: { anyVisibility?: boolean },
-): Promise<ElementList> {
-    /* oxlint-disable typescript/await-thenable -- webdriverio's chainable is TYPED as the array it resolves to and is a promise at runtime: the await is what runs the query */
-    /* oxlint-disable typescript/return-await -- same reason: the value returned is a promise, whatever its type says */
-    return await scope.$$(`-ios predicate string:${compilePredicate(target, options)}`);
-    /* oxlint-enable typescript/return-await */
-    /* oxlint-enable typescript/await-thenable */
-}
-
-async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {
-    const [type, label, value, identifier] = await Promise.all([
-        element.getAttribute('type'),
-        element.getAttribute('label'),
-        element.getAttribute('value'),
-        element.getAttribute('name'),
-    ]);
-    const shortLabel = label === null || label === '' ? undefined : shortened(label);
-    return {
-        type: (type ?? 'Unknown').replace(/^XCUIElementType/u, ''),
-        ...(shortLabel === undefined ? {} : { label: shortLabel }),
-        ...(value === null || value === '' || value === label ? {} : { value }),
-        ...(identifier === null || identifier === '' || identifier === label ? {} : { identifier }),
-    };
-}
 
 /** One driver session, opened lazily and reused: WebDriverAgent startup is the expensive part. Every `open()` relaunches the app. */
 export class AppiumAdapter implements DevicePort {
@@ -230,20 +148,8 @@ export class AppiumAdapter implements DevicePort {
             const matches = await matching(scope, level);
             const count = await matches.length;
             if (count === 0) {
-                /* invariant: actionability includes scroll-into-view: the next pass re-resolves the element as visible. */
                 if (options?.tryScroll === true) {
-                    const offscreen = await matching(scope, level, { anyVisibility: true });
-                    const first = offscreen[0];
-                    if (first !== undefined) {
-                        try {
-                            // outside: `mobile: scroll`'s `toVisible` is for table and collection views: scroll the found element by id.
-                            await driver.executeScript('mobile: scrollToElement', [
-                                { elementId: first.elementId },
-                            ]);
-                        } catch {
-                            // invariant: not scrollable (or already settling) — keep polling.
-                        }
-                    }
+                    await scrollToOffscreen(driver, scope, level);
                 }
                 return null;
             }
@@ -251,7 +157,7 @@ export class AppiumAdapter implements DevicePort {
             if (count > 1 && (cardinality === 'one' || !isTarget)) {
                 throw ambiguousScreenElementError({
                     target: level,
-                    matches: await this.captureMatches(matches),
+                    matches: await captureMatches(matches),
                 });
             }
             const next = matches[0];
@@ -262,18 +168,6 @@ export class AppiumAdapter implements DevicePort {
             element = next;
         }
         return element;
-    }
-
-    private async captureMatches(matches: ElementList): Promise<MobileElementMatch[]> {
-        const count = Math.min(await matches.length, MAX_REPORTED_MATCHES);
-        const evidence: MobileElementMatch[] = [];
-        for (let index = 0; index < count; index++) {
-            const match = matches[index];
-            if (match !== undefined) {
-                evidence.push(await captureMatch(match));
-            }
-        }
-        return evidence;
     }
 
     /** Screenshot the failing state into a temp file; never masks the original error. */
@@ -292,13 +186,7 @@ export class AppiumAdapter implements DevicePort {
         let excerpt = '';
         try {
             const source = await driver.getPageSource();
-            const labels = [
-                ...new Set(
-                    [...source.matchAll(/label="(?<label>[^"]{2,60})"/gu)].map(
-                        (match) => match.groups?.label ?? '',
-                    ),
-                ),
-            ].slice(0, 15);
+            const labels = onScreenLabels(source);
             if (labels.length > 0) {
                 excerpt = `\nCurrently on screen: ${labels.join(' | ')}`;
             }
