@@ -1,20 +1,34 @@
 import { defineConfig } from '@jterrazz/typescript/config';
 import type { Preset } from '@jterrazz/typescript/config';
+import { refusal } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
+import process from 'node:process';
 
 // This repository's presets are its own build, and the build reads this file before there is one to import.
 const PRESETS = ['./dist/config.js', './.artifacts/dev/self-config.js'];
 
 const built = PRESETS.every((path) => existsSync(new URL(path, import.meta.url)));
 
+const building = process.argv[2] === 'build';
+
 async function builtPresets(): Promise<Preset[]> {
+    if (!built) {
+        throw new Error(
+            refusal({
+                fix: 'run `npm run build`, then run the command again',
+                found: `this repository's presets are not built: ${PRESETS.filter((path) => !existsSync(new URL(path, import.meta.url))).join(', ')} missing`,
+                read: 'docs/02-developing.md#the-build-comes-first',
+                why: 'test() and self() are this repository’s own build, and a run without them judges none of what they hold, so it would pass on nothing',
+            }),
+        );
+    }
     const { test } = await import('./dist/config.js');
     const { self } = await import('./.artifacts/dev/self-config.js');
 
     return [test(), self()];
 }
 
-const presets: Preset[] = built ? await builtPresets() : [];
+const presets: Preset[] = building && !built ? [] : await builtPresets();
 
 const UNTESTED_IN_PRODUCTION = [
     'src/index.vitest.ts',

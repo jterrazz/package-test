@@ -58,4 +58,15 @@ describe('vitestConfig', () => {
         );
     });
 
+    test('refuses a settings file that does not load, rather than running no project', async () => {
+        // Given - a project whose jterrazz.config.ts throws as it loads
+        const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
+        writeFileSync(join(root, 'package.json'), '{ "name": "derived", "type": "module" }\n');
+        writeFileSync(join(root, 'jterrazz.config.ts'), "throw new Error('presets not built');\n");
+
+        // Then - the refusal names the file and what went wrong
+        await expect(vitestConfig(configIn(root))).rejects.toThrow(
+            'found: jterrazz.config.ts does not load — presets not built',
+        );
+    });
 });

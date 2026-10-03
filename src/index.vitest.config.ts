@@ -86,7 +86,17 @@ async function projectOf(root: string, declared: unknown): Promise<TestProjectIn
 }
 
 async function derivedFrom(root: string): Promise<ViteUserConfig> {
-    const { resolved } = await readSettings(root);
+    const { problem, resolved } = await readSettings(root);
+    if (problem !== null) {
+        throw new Error(
+            refusal({
+                fix: 'correct jterrazz.config.ts as the finding says, then run vitest again',
+                found: `jterrazz.config.ts ${problem}`,
+                read: 'docs/06-setting-up.md#the-vitest-config',
+                why: 'the test projects are declared there, and a config read without them would run none of them',
+            }),
+        );
+    }
     const section = resolved.sections[TEST_SECTION];
     const projects = isRecord(section) && Array.isArray(section.projects) ? section.projects : [];
 
