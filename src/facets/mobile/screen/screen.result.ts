@@ -22,6 +22,7 @@ export class ScreenResult extends BaseResult {
 
     /** The projected accessibility tree, the one golden per screen. */
     get screen(): JsonAccessor {
+        // Stryker disable next-line StringLiteral: a projected tree is always JSON, and a stream is named only by the refusal of one that is not
         return new JsonAccessor(JSON.stringify(this.capturedScreen.tree), 'screen', this.testDir, {
             captures: this.captures,
         });

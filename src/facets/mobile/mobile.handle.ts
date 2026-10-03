@@ -11,7 +11,7 @@ import type { StubsConfig } from '../../stubs/delivery/other-process/stub-backen
 import type { DevicePort, DeviceTimeouts, MobileDevice } from './device/device.port.js';
 import type { MobileSpecification } from './mobile.facet.js';
 import { mobileFacet } from './mobile.facet.js';
-import { reachAppium } from './server/appium-server.js';
+import { mobileServer, reachAppium } from './server/appium-server.js';
 import type { SessionLedger } from './session/session-ledger.js';
 import { mobileSessions, sessionLedger } from './session/session-ledger.js';
 
@@ -59,10 +59,12 @@ export type MobileHandle = {
     udid: string | undefined;
 };
 
+// Stryker disable all: outside: only a mobile project's setup provides the run's ledger folder, which no module test runs; the mobile specs judge it
 async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefined> {
     const directory = outlivesFile ? await mobileSessions() : undefined;
     return directory === undefined ? undefined : sessionLedger(directory);
 }
+// Stryker restore all
 
 /** invariant: one session per runner; per run under a server that outlives the file. A server this runner spawned stops with it. */
 function lazyDevice(session: {
@@ -115,7 +117,11 @@ export async function startMobile<Services extends ServiceRecord>(
     await registerMatchers();
 
     const root = resolveRoot(options.root, callerDir);
-    const { appium, device: driven, outlivesFile } = await reachAppium(options, root);
+    const {
+        appium,
+        device: driven,
+        outlivesFile,
+    } = await reachAppium(options, root, await mobileServer());
 
     // invariant: services come up before the app launches: a dev build reaches its bundler on its first frame.
     const services = declaredServices(options.services);
@@ -131,6 +137,7 @@ export async function startMobile<Services extends ServiceRecord>(
 
     const device = lazyDevice({
         driven,
+        // Stryker disable next-line ArrowFunction: outside: see runLedger
         ledger: async () => await runLedger(outlivesFile),
         serverUrl: appium.url,
         timeouts: options.timeouts,
