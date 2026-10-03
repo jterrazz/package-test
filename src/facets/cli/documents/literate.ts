@@ -20,11 +20,8 @@ import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { stripAnsiCodes } from '../../../expectations/text/ansi.js';
 import { CaptureScope } from '../../../expectations/tokens/match.js';
-import {
-    mergeTextPreservingPlaceholders,
-    textContains,
-    textEquals,
-} from '../../../expectations/tokens/structural.js';
+import { textContains, textEquals } from '../../../expectations/tokens/structural.js';
+import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/update-merge.js';
 import { ServedProcess } from '../../../services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';

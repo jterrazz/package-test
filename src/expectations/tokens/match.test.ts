@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
 import { CaptureScope, match } from './match.js';
-import { mergePreservingPlaceholders, renderExpected, structuralEquals } from './structural.js';
+import { renderExpected, structuralEquals } from './structural.js';
+import { mergePreservingPlaceholders } from './update-merge.js';
 
 const UUID_A = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 const UUID_B = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';

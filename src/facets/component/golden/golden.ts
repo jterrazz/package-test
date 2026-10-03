@@ -17,7 +17,7 @@ import {
 import type { WholeCall } from '../../../expectations/goldens/text-assertions.js';
 import { missingHint } from '../../../expectations/in-place/update.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
-import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/structural.js';
+import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/update-merge.js';
 import { readGolden, writeGolden, writeInPlaceText } from '../page/vitest-browser-dom.js';
 
 /** The comparison is `goldens/text-assertions.ts`'s in both builds; only the transport differs: two server commands and one `provide`. */

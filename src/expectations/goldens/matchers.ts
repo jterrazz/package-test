@@ -28,13 +28,11 @@ import { TableAccessor } from '../table/table.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { CaptureScope } from '../tokens/match.js';
+import { hasPlaceholders, renderExpected, structuralEquals } from '../tokens/structural.js';
 import {
-    hasPlaceholders,
     mergePreservingPlaceholders,
     mergeTextPreservingPlaceholders,
-    renderExpected,
-    structuralEquals,
-} from '../tokens/structural.js';
+} from '../tokens/update-merge.js';
 import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from './diff.js';
 import type { MatchFixtureOptions, TableMatchOptions } from './match-options.js';
 import {
