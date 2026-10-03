@@ -74,6 +74,7 @@ function toMatchWhole(
     const context: InPlace = {
         negated: this.isNot === true,
         options: call?.options,
+        // Stryker disable next-line StringLiteral: a stack of any text but a test frame's points nowhere to write
         stack: call?.stack ?? '',
     };
     if (received instanceof JsonAccessor) {
@@ -220,6 +221,7 @@ const REGISTERED = Symbol.for('@jterrazz/test:matchers-registered');
 
 /** Idempotent; a missing vitest peer is tolerated. */
 export async function registerMatchers(): Promise<void> {
+    // Stryker disable next-line BlockStatement: registering again registers the same matchers
     if (Reflect.get(globalThis, REGISTERED) === true) {
         return;
     }
