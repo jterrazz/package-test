@@ -104,6 +104,75 @@ describe('lintReport', () => {
         ].join('\n');
 
         // Then - the runner is told to state the format
-        expect(() => diagnosticsOf(output)).toThrow(/--format=unix or --format=agent/u);
+        expect(() => diagnosticsOf(output)).toThrow(
+            new Error(
+                [
+                    "found: a report in oxlint's graphical rendering (! jterrazz(no-probe-cluster): 3 probes in one test)",
+                    'why: A report is read one line per diagnostic.',
+                    'fix: run oxlint with --format=unix or --format=agent: without it, oxlint picks its renderer off the environment',
+                    'read: docs/16-lint.md#the-report',
+                ].join('\n'),
+            ),
+        );
+    });
+
+    test('lintReport — a report as a golden keeps it — findings at one place are ordered by rule and message, a file named with a colon keeps it, a nested rule name keeps its path, and a lesson keeps only the parts it states', () => {
+        // Given - two findings at one place, a file whose name holds a colon, a rule name of two segments, a lesson with no read part
+        const diagnostics = [
+            presetDiagnostic({ column: 2, line: 3, message: 'aa', path: 'a.ts', rule: 'layers/y' }),
+            presetDiagnostic({ column: 2, line: 1, message: 'a', path: 'a.ts', rule: 'names/z' }),
+            presetDiagnostic({ column: 2, line: 1, message: 'c', path: 'a.ts', rule: 'layers/y' }),
+            presetDiagnostic({ column: 2, line: 1, message: 'b', path: 'a.ts', rule: 'names/z' }),
+            presetDiagnostic({
+                column: 1,
+                line: 3,
+                message: 'found: f · why: w · fix: x',
+                path: 'c:d.ts',
+                rule: 'names/one/two',
+            }),
+            presetDiagnostic({
+                column: 9,
+                line: 1,
+                message: 'later',
+                path: 'a.ts',
+                rule: 'names/z',
+            }),
+            presetDiagnostic({
+                column: 1,
+                line: 2,
+                message: 'below',
+                path: 'a.ts',
+                rule: 'names/z',
+            }),
+            presetDiagnostic({ column: 1, line: 1, message: 'x', path: 'b;.ts', rule: 'names/z' }),
+            presetDiagnostic({ column: 1, line: 1, message: 'x', path: 'b:x.ts', rule: 'names/z' }),
+        ];
+
+        // Then - the whole report in order
+        expect(lintReport(diagnostics)).toBe(
+            [
+                'a.ts:1:2  layers(y)',
+                '    c',
+                'a.ts:1:2  names(z)',
+                '    a',
+                'a.ts:1:2  names(z)',
+                '    b',
+                'a.ts:1:9  names(z)',
+                '    later',
+                'a.ts:2:1  names(z)',
+                '    below',
+                'a.ts:3:2  layers(y)',
+                '    aa',
+                'b:x.ts:1:1  names(z)',
+                '    x',
+                'b;.ts:1:1  names(z)',
+                '    x',
+                'c:d.ts:3:1  names(one/two)',
+                '    found: f',
+                '    why: w',
+                '    fix: x',
+                '',
+            ].join('\n'),
+        );
     });
 });

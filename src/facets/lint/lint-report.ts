@@ -53,17 +53,20 @@ function byPosition(a: Diagnostic, b: Diagnostic): number {
     const [fileA, rowA, columnA] = positionOf(a);
     const [fileB, rowB, columnB] = positionOf(b);
     if (fileA !== fileB) {
+        // Stryker disable next-line EqualityOperator: two files are never the same here
         return fileA < fileB ? -1 : 1;
     }
     if (rowA !== rowB || columnA !== columnB) {
         return rowA === rowB ? columnA - columnB : rowA - rowB;
     }
     const [textA, textB] = [`${a.rule} ${a.message}`, `${b.rule} ${b.message}`];
-    return textA < textB ? -1 : Number(textA > textB);
+    // Stryker disable next-line EqualityOperator: two diagnostics alike in every part read the same in either order
+    return textA < textB ? -1 : 1;
 }
 
 function messageLines(message: string): string[] {
     const parts = lessonParts(message);
+    // Stryker disable next-line OptionalChaining: outside: lessonParts answers parts for any text, a plain one with none found
     if (parts?.found === undefined) {
         return [`${INDENT}${message}`];
     }
