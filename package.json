@@ -71,8 +71,6 @@
         "docs": "npm run build && node .artifacts/dev/self.js chapters && node .artifacts/dev/schema.js",
         "lint": "typescript check",
         "test": "vitest --run",
-        "coverage": "npm run build && vitest --run --coverage && node .artifacts/dev/self.js coverage --write",
-        "coverage:check": "node .artifacts/dev/self.js coverage",
         "test:repeat": "vitest --run --repeats 10"
     },
     "dependencies": {

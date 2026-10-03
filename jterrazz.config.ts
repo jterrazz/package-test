@@ -145,6 +145,10 @@ export default defineConfig({
             },
         },
         mutation: {
+            ignore: {
+                'lint/self/**':
+                    'the repository’s own checks ship nowhere, and the gate they hold is this tree’s',
+            },
             exclude: {
                 'lint/self/checks/error-is-a-refusal-or-an-invariant.test.ts': READS_THE_SOURCES,
                 'lint/self/corpus/docs-typecheck.test.ts': READS_THE_SOURCES,

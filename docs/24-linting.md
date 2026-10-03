@@ -153,7 +153,7 @@ The member pass also carries the two findings a tree walk of the member makes: `
 
 ### The ratchet: the `test` section of `.jterrazz/baseline.json`
 
-This package records and judges its own debt. The family keeps one tracked ratchet file, `.jterrazz/baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns one, `test`, this section. A section of this package's is named `test`, then `.<part>` for a part only one preset writes: `test.coverage`, the floor this repository's own suite is held to, is written and judged by `self()`, the preset this repository alone declares ([03 — Testing](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#coverage-is-a-ratchet-not-a-threshold)), since the gate is not one a consumer runs. Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `typescript baseline` to record, `typescript fix` to re-record a fall.
+This package records and judges its consumers' debt. The family keeps one tracked ratchet file, `.jterrazz/baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...} }` — and the `test()` preset owns one, `test`, this section. It is read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `typescript baseline` to record, `typescript fix` to re-record a fall. This repository holds none: its own tree carries no debt to record.
 
 #### The section
 

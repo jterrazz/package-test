@@ -15,22 +15,20 @@ lint: node_modules/.install
 fix: build
 	npx typescript fix
 
-# With coverage, since `coverage:check` reads the last `--coverage` report. `SHARD=<index>/<count>` runs one shard; the floor and the route ratchet are judged once, by `test-merge`.
+# `SHARD=<index>/<count>` runs one shard; the route ratchet is judged once, by `test-merge`.
 test: node_modules/.install
 ifdef SHARD
 	@if [ -f .artifacts/vitest/blob ]; then rm .artifacts/vitest/blob; fi
 	rm -rf .artifacts/vitest/routes/shard-$(subst /,-,$(SHARD))
-	npm test -- --coverage --shard=$(SHARD) --reporter=default --reporter=blob
+	npm test -- --shard=$(SHARD) --reporter=default --reporter=blob
 else
 	rm -rf .artifacts/vitest/blob
-	npm test -- --coverage
-	npm run coverage:check
+	npm test
 endif
 
-# The merge runs no global setup, so no teardown judges: the floor and the route ratchet are judged here.
+# The merge runs no global setup, so no teardown judges: the route ratchet is judged here.
 test-merge: node_modules/.install
-	npx vitest --merge-reports .artifacts/vitest/blob --coverage
-	npm run coverage:check
+	npx vitest --merge-reports .artifacts/vitest/blob
 	node .artifacts/dev/route-split.js
 
 # The local loop, never a verdict.

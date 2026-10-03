@@ -10,11 +10,9 @@ import { FORK_CHAPTER, FORK_MARKERS, forkTable } from '../consumer/catalogue/for
 import { consumerRows } from '../consumer/catalogue/manifest.js';
 import { CATALOGUE_CHAPTER, catalogueBody } from '../kit/catalogue/chapter.js';
 import { atZeroPass } from '../kit/checker/at-zero-pass.js';
-import { coverageFloor } from '../kit/checker/coverage-run.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './catalogue/chapter.js';
 import { SELF_CHAPTER } from './catalogue/manifest.js';
 import { SELF_CHECKER } from './checks/checker.js';
-import { checkCoverageFloor } from './checks/coverage-floor.js';
 import { MATRIX_LAYERS_MARKERS, renderMatrixLayers } from './corpus/matrix-layers.js';
 import { MATRIX_MARKERS, renderMatrixBody } from './corpus/matrix.js';
 import { META_TESTS_MARKERS, renderMetaTests } from './corpus/meta-tests.js';
@@ -68,7 +66,6 @@ function regenerate(cliArguments: readonly string[]): number {
 const selfChecks: Contribution = {
     commands: {
         chapters: async () => regenerate,
-        coverage: async () => coverageFloor(checkCoverageFloor),
     },
     passes: { check: async () => atZeroPass(SELF_CHECKER) },
 };

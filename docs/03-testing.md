@@ -115,7 +115,7 @@ The conventions checker is the toolchain's checker program handed this package's
 - **`--format json`** prints the kit's findings, `[{ column, line, message, path, rule }]`, on stdout and nothing else, whatever the verdict, and the exit is still the verdict; `rule` is the key the ratchet counts, `jterrazz-check/<name>`.
 - **`--verbose`** adds, above the held line, where the run stood and what ran.
 
-## Coverage is a ratchet, not a threshold
+## Coverage is a report, not a gate
 
 `npx vitest --run --coverage` turns on v8 — the runtime's own counter, so there
 is no instrumentation pass and the numbers do not move when the bundler does —
@@ -132,40 +132,18 @@ child executed. The build writes source maps, which take each bundle back to
 the `lint/` and `src/` modules it was built from; `dist/` itself is judged
 only after that remap, so no bundle is ever counted as a file of its own.
 
-`npm run coverage` records where the suite stands in `.jterrazz/baseline.json`'s
-`test.coverage` section, a floor this repository's own `self()` preset
-declares beside `test()`, since no consumer runs this gate;
-`npm run coverage:check` refuses a run that fell below it. Neither runs the
-suite: both read the report of the LAST `--coverage` run, which is why
-`make test` runs the suite WITH coverage (`npm test -- --coverage`) before the
-gate — a plain `npm test` would leave it judging an older run, or, on a fresh
-clone where `.artifacts/` does not exist yet, nothing at all. That target is
-the one CI calls ([What CI runs](#what-ci-runs)), so the floor is judged on
-every push. It only ever rises: lowering it is an edit to a committed file,
-with a commit body saying why.
-
-### One floor, over the whole suite
-
-The baseline is keyed by scope and the CLI
-takes `--scope`, so a project can keep its own; this repository records `all`
-and nothing else, because the projects overlap — the browser projects and the
-node ones both execute `chain/` and `expectations/`, and a floor per project would sum to more than the tree
-and ratchet on which project happened to run. A scope missing any of the four
-metrics is refused rather than read as a zero, since a floor of zero forbids
-nothing.
-
-### Why a ratchet and not a threshold
-
-A fixed threshold would be a number somebody picked. Set it where the project
-stands and it forbids nothing; set it where the project should be and every run
-is red until it gets there, which is how a gate becomes something people pass
-with `--no-verify`. A ratchet asks the only question a gate can answer
-honestly: is this change worse than the last one?
+Coverage is a report, never a gate. It tells a person chasing a line where to
+look; it cannot tell a line a test proves from one a test merely runs, since a
+line that executes under no assertion counts the same as one an assertion pins.
+This repository held its suite to a coverage floor in `.jterrazz/baseline.json`
+until October 2026, and dropped it for the measure that can tell the two apart:
+a mutant that survives names the assertion that is missing ([The mutants no test
+kills](#the-mutants-no-test-kills)). `make test` runs the suite without coverage;
+`npx vitest --run --coverage` writes the report when someone wants to read it.
 
 ### What the report excludes
 
-What the report EXCLUDES is the shape of the answer, not a way to raise the
-number: `node_modules/` (Browser Mode instruments the page's bundle, and
+What the report EXCLUDES is the shape of the answer: `node_modules/` (Browser Mode instruments the page's bundle, and
 react-dom alone is 19 000 statements), `specs/` and `_fixtures/` (a spec is a
 test and the app it drives is ground), the type-only and config files.
 
@@ -190,7 +168,7 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **244 modules** have no sibling test, and every one of them is claimed:
+Today **243 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -202,7 +180,7 @@ Today **244 modules** have no sibling test, and every one of them is claimed:
 | a facet module (34)                                       | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                                                                                                                                                                                                                                                         |
 | a result accessor (21)                                    | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result                                                                                                                                                                                                                                                                                                                                                                             |
 | an adapter (19)                                           | an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)                                                                                                                                                                                                                                                                            |
-| a bundled CLI entry (8)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                              |
+| a bundled CLI entry (7)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                              |
 | a lint-layer module (65)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint facet                                                                                                                                                                                                                                                         |
 | a chain or runner internal (7)                            | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                  |
 | a module the specs reach through the published entry (17) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                      |
@@ -616,7 +594,7 @@ npm run test:repeat -- --project unit lint/self/corpus/type-channel.test.ts
 
 It is aimed at named files, not at a whole project. A rule test declares its cases through oxlint's `RuleTester`, which refuses a case it has already seen, so a repeated rule test fails on its second pass whatever the rule does. A test that fails on its own second pass is a defect all the same: it cannot run twice in one process.
 
-One flake is known and not reproduced. In a whole-suite run under `--coverage`, the first few component files have failed on `import('vitest-browser-react')` with a SyntaxError whose token varies (`':'`, `'}'`, `Illegal return statement`, `Undefined label 'a'`), and every later file passed. The page parsed a slice of react-dom's client chunk, not a broken file: fifty-two repeated runs, a probe parsing every optimised dependency the server sent, and `DEBUG=vite:deps` over all of them found no malformed response and no re-optimisation mid-run — so `optimizeDeps.noDiscovery` is not the fix, and would cost a consumer its undeclared CommonJS dependencies. What is left is in the browser (a module compiled while the coverage mode switches) or outside the tree (another process installing or running in the same clone). If it recurs, keep the log, the listing of Vite's dependency cache with its `_metadata.json`, and whether another process ran in the clone. It recurred once more, in October 2026, alone in the clone: the failing modules carried `?v=cddaf309`, the browser hash of the coverage configuration. A run with `--coverage` and one without hash the optimiser's configuration differently, so the first run of either kind after the other removes the dependency cache and bundles it again at start — that run was the first coverage run after plain ones. Four runs set up the same way — a cold cache, a warm one, two `make check`, a coverage run straight after a plain one — passed; the alternation is the lead, not yet the cause.
+One flake is known and not reproduced. In a whole-suite run under `--coverage`, the first few component files have failed on `import('vitest-browser-react')` with a SyntaxError whose token varies (`':'`, `'}'`, `Illegal return statement`, `Undefined label 'a'`), and every later file passed. The page parsed a slice of react-dom's client chunk, not a broken file: fifty-two repeated runs, a probe parsing every optimised dependency the server sent, and `DEBUG=vite:deps` over all of them found no malformed response and no re-optimisation mid-run — so `optimizeDeps.noDiscovery` is not the fix, and would cost a consumer its undeclared CommonJS dependencies. What is left is in the browser (a module compiled while the coverage mode switches) or outside the tree (another process installing or running in the same clone). If it recurs, keep the log, the listing of Vite's dependency cache with its `_metadata.json`, and whether another process ran in the clone. It recurred once more, in October 2026, alone in the clone: the failing modules carried `?v=cddaf309`, the browser hash of the coverage configuration. A run with `--coverage` and one without hash the optimiser's configuration differently, so the first run of either kind after the other removes the dependency cache and bundles it again at start — that run was the first coverage run after plain ones. Four runs set up the same way — a cold cache, a warm one, two `make check`, a coverage run straight after a plain one — passed; the alternation is the lead, not yet the cause. Since `make test` dropped coverage the same month, that alternation happens only where a person runs a coverage report between plain runs.
 
 ## Probing the container sweep
 
@@ -644,9 +622,7 @@ kill $holder
 
 The workflow is `.github/workflows/validate.yaml`, on every push to `main` and every pull request, delegating to the shared `validate.yaml` of [jterrazz-actions](https://github.com/jterrazz/jterrazz-actions). It restores `.artifacts/`, then runs `make build`, `make lint` and `make test` in that order, with chromium provisioned because the website specs drive a real browser. The same three targets are what a local run owes before a push; the ordering is not decorative, since lint loads what build produced.
 
-**`make test` carries the floor.** It runs the suite WITH coverage and then `npm run coverage:check`, so the ratchet is judged on every push rather than trusted to whoever remembered to type `make check` — a gate CI never runs is a courtesy, not a gate. `make check` is still the whole verdict locally: build, lint, then that same target.
-
-**A run can be split.** `make test SHARD=<index>/<count>` runs one shard of the suite with coverage, and writes its blob report to `.artifacts/vitest/blob/blob-<index>-<count>.json` — the preset names the blob for its shard, so the shards of one run land side by side. A shard judges neither the coverage floor nor the route ratchet, since its coverage and its requests are a part of the run's: it writes its route ledgers to `.artifacts/vitest/routes/shard-<index>-<count>/` and prints `api routes: not judged`. `make test-merge`, run once every shard's blob is in that folder, reads them back as one run with coverage, judges the floor on it, then judges the routes over every shard's ledgers (`node .artifacts/dev/route-split.js`, since a merge runs no global teardown). It reads every blob and every shard's ledgers, so both folders must hold one split's shards alone: a whole `make test` empties them, and a split with another shard count starts after one, or after `rm -rf .artifacts/vitest/blob .artifacts/vitest/routes`. A merge that finds no shard's ledgers at all fails instead of passing unjudged: the shards never ran, or a whole run emptied their folders since. A shard run with `-t` leaves a `partial` mark in its folder, and the merge of a split holding one prints `api routes: not judged`, naming it, since it reached only some routes. Each shard empties its own ledger folder before it runs, as it overwrites its own blob: vitest runs no global setup for a shard that holds no api file, and the folder would keep an earlier split's ledgers. A clone that still holds the `blob` FILE an earlier preset wrote there has it removed by the first shard. The shared workflow does not split the run: it has no shard input.
+**A run can be split.** `make test SHARD=<index>/<count>` runs one shard of the suite, and writes its blob report to `.artifacts/vitest/blob/blob-<index>-<count>.json` — the preset names the blob for its shard, so the shards of one run land side by side. A shard does not judge the route ratchet, since its requests are a part of the run's: it writes its route ledgers to `.artifacts/vitest/routes/shard-<index>-<count>/` and prints `api routes: not judged`. `make test-merge`, run once every shard's blob is in that folder, reads them back as one run, then judges the routes over every shard's ledgers (`node .artifacts/dev/route-split.js`, since a merge runs no global teardown). It reads every blob and every shard's ledgers, so both folders must hold one split's shards alone: a whole `make test` empties them, and a split with another shard count starts after one, or after `rm -rf .artifacts/vitest/blob .artifacts/vitest/routes`. A merge that finds no shard's ledgers at all fails instead of passing unjudged: the shards never ran, or a whole run emptied their folders since. A shard run with `-t` leaves a `partial` mark in its folder, and the merge of a split holding one prints `api routes: not judged`, naming it, since it reached only some routes. Each shard empties its own ledger folder before it runs, as it overwrites its own blob: vitest runs no global setup for a shard that holds no api file, and the folder would keep an earlier split's ledgers. A clone that still holds the `blob` FILE an earlier preset wrote there has it removed by the first shard. The shared workflow does not split the run: it has no shard input.
 
 ## Pitfalls
 

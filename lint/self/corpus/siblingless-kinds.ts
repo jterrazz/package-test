@@ -217,7 +217,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/self-cli.ts',
             'lint/kit/checker/at-zero-pass.ts',
             'lint/kit/checker/conventions.ts',
-            'lint/kit/checker/coverage-run.ts',
             'lint/kit/checker/record.ts',
             'src/facets/api/routes/route-split-cli.ts',
             'src/facets/cli/documents/schema-cli.ts',
