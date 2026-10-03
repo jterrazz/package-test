@@ -2,6 +2,7 @@ import { GROUND_EXPECTED, GROUND_REQUESTS } from '@jterrazz/typescript/rules';
 import { dirname, extname, relative } from 'node:path';
 
 import { dedent } from '../../kit/project/dedent.js';
+import { parsedJson } from '../../kit/project/json-shape.js';
 
 /** A role absent here is never written in place. */
 export const INLINE_CAPS: Readonly<Record<string, number>> = {
@@ -12,16 +13,18 @@ export const INLINE_CAPS: Readonly<Record<string, number>> = {
 export const TEST_FILE = /\.(?:spec|test)\.[cm]?[jt]sx?$/u;
 
 export function written(file: string, target: string): string {
+    // Stryker disable next-line StringLiteral: a POSIX path holds no backslash to rejoin
     return relative(dirname(file), target).split('\\').join('/');
 }
 
 /** Its closing newline is no line of its own. */
 export function valueLines(text: string): number {
+    // Stryker disable next-line StringLiteral: a trailing newline replaced by any text on its line adds no line
     return text.replace(/\n$/u, '').split('\n').length;
 }
 
 export const JSON_SUBJECT =
-    /\.(?:head|json|jsonLd|screen|value)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
+    /\.(?:head|json|jsonLd|screen|value)\s*\)\s*\.(?:not\s*\.)?toMatch\s*\($/u;
 
 function escapeTemplate(text: string): string {
     return text
@@ -49,12 +52,11 @@ export function value(parsed: unknown, indent: string): string {
     return (JSON.stringify(parsed, null, 4) ?? 'null').split('\n').join(`\n${indent}`);
 }
 
+const NO_JSON = Symbol('no JSON');
+
 export function jsonOf(text: string): unknown {
-    try {
-        return JSON.parse(text) as unknown;
-    } catch {
-        return undefined;
-    }
+    const parsed = parsedJson(text, NO_JSON);
+    return parsed === NO_JSON ? undefined : parsed;
 }
 
 /** `undefined` for a shape the fixer does not rewrite. */
@@ -79,7 +81,8 @@ export function replacementOf(
         const parsed = jsonOf(content);
         return parsed === undefined ? undefined : value(parsed, indent);
     }
-    return extension === '.json' && !/\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u.test(before)
+    // invariant: the gate above reads `.toMatch` unspaced, so no space follows a dot here.
+    return extension === '.json' && !/\)\s*\.(?:not\s*\.)?toMatch\s*\($/u.test(before)
         ? undefined
         : block(content, indent);
 }
