@@ -6,7 +6,8 @@ import { landmarkOfTagOrRole } from './landmark-of-tag.js';
 
 /** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
 function landmarkOf(match: ElementMatch): string | undefined {
-    const kind = match.context === undefined ? undefined : landmarkOfTagOrRole(match.context);
+    // Stryker disable next-line StringLiteral: no landmark is named by any text a mutant writes here either
+    const kind = landmarkOfTagOrRole(match.context ?? '');
     if (kind !== 'region') {
         return kind === undefined ? undefined : `${FUNCTION_NAME_OF_KIND[kind]}()`;
     }
@@ -59,8 +60,7 @@ function formatFixes(target: Target, matches: ElementMatch[]): string[] {
         );
     }
 
-    const optedOutOfExact = target.exact === false && target.name !== undefined;
-    if (optedOutOfExact) {
+    if (target.exact === false) {
         const remaining = matches.filter((match) => match.text === target.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
