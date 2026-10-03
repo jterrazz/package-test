@@ -22,6 +22,7 @@ export const SIBLINGLESS_LINT_LAYER = [
     'lint/kit/project/spec-model.ts',
     'lint/kit/project/spec-node.ts',
     'lint/kit/project/spec-subjects.ts',
+    'lint/kit/project/named-paths.ts',
     'lint/kit/project/tree.ts',
     'lint/consumer/checks/document-follows-its-grammar.ts',
     'lint/consumer/checks/http-first-line-follows-its-grammar.ts',

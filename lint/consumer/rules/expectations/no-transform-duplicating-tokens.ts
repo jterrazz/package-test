@@ -19,34 +19,46 @@ const KNOWN_TOKEN_LITERAL = new RegExp(
     'u',
 );
 
+/** The expression a function returns: its concise body, or the one `return` of a block. */
+function returned(fn: AstNode): AstNode | undefined {
+    const body = child(fn, 'body');
+    if (body?.type !== 'BlockStatement') {
+        return body;
+    }
+    const statements = childList(body, 'body');
+    const [only] = statements;
+    return statements.length === 1 && only?.type === 'ReturnStatement'
+        ? child(only, 'argument')
+        : undefined;
+}
+
+/** The receiver of a `.replace(…, '{{token}}')` call, or undefined when the call is anything else. */
+function tokenReplaceReceiver(call: AstNode): AstNode | undefined {
+    const callee = child(call, 'callee');
+    if (callee === undefined || memberPropertyName(callee) !== 'replace') {
+        return undefined;
+    }
+    const replacement = stringValue(childList(call, 'arguments')[1]);
+    return replacement !== undefined && KNOWN_TOKEN_LITERAL.test(replacement)
+        ? child(callee, 'object')
+        : undefined;
+}
+
 /** Every replacement must be a string literal that is exactly a known `{{token}}`. */
 function isTokenEquivalentTransform(fn: AstNode): boolean {
     if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') {
         return false;
     }
-    let expression = child(fn, 'body');
-    if (expression?.type === 'BlockStatement') {
-        const statements = childList(expression, 'body');
-        const [only] = statements;
-        if (statements.length !== 1 || only?.type !== 'ReturnStatement') {
-            return false;
-        }
-        expression = child(only, 'argument');
-    }
-    let sawReplace = false;
+    let expression = returned(fn);
+    let replaces = 0;
     while (expression?.type === 'CallExpression') {
-        const callee = child(expression, 'callee');
-        if (callee === undefined || memberPropertyName(callee) !== 'replace') {
+        expression = tokenReplaceReceiver(expression);
+        if (expression === undefined) {
             return false;
         }
-        const replacement = stringValue(childList(expression, 'arguments')[1]);
-        if (replacement === undefined || !KNOWN_TOKEN_LITERAL.test(replacement)) {
-            return false;
-        }
-        sawReplace = true;
-        expression = child(callee, 'object');
+        replaces += 1;
     }
-    return sawReplace && expression?.type === 'Identifier';
+    return replaces > 0 && expression?.type === 'Identifier';
 }
 
 const row = rowNamed(consumerRows, 'no-transform-duplicating-tokens');

@@ -2,11 +2,11 @@ import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
 import { specsAnchor } from '../../kit/project/ast.js';
+import { collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { isModuleName } from '../../kit/project/specs-modules.js';
 import {
-    collectFixtureReferences,
     DISK_CALL,
     findPools,
     isConventionalSubdir,
@@ -124,19 +124,14 @@ function entryReferenced(path: string, references: References): boolean {
     return false;
 }
 
-export function checkNoUnusedGround(rootDir: string): Spotted[] {
-    const violations: Spotted[] = [];
-    for (const dir of listDirs(rootDir)) {
-        if (basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER || isSharedFolder(dir)) {
-            continue;
-        }
-        let entries;
-        try {
-            entries = treeEntries(dir);
-        } catch {
-            continue;
-        }
-        const groundSubdirs = entries
+function groundSubdirsOf(dir: string): string[] {
+    const ignored =
+        basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER || isSharedFolder(dir);
+    if (ignored) {
+        return [];
+    }
+    try {
+        return treeEntries(dir)
             .filter(
                 (entry) =>
                     entry.isDirectory() &&
@@ -144,52 +139,64 @@ export function checkNoUnusedGround(rootDir: string): Spotted[] {
                     isConventionalSubdir(join(dir, entry.name)),
             )
             .map((entry) => entry.name);
-        if (groundSubdirs.length === 0) {
-            continue;
-        }
-        const feature = basename(dir);
-        const testFiles = listFiles(dir, (path) => isReferrer(basename(path)));
-        const rel = relative(rootDir, dir);
+    } catch {
+        return [];
+    }
+}
 
-        // invariant: a domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.
-        if (testFiles.length === 0) {
-            violations.push({
-                path: rel,
+function unreferencedEntries(
+    rootDir: string,
+    dir: string,
+    groundSubdirs: readonly string[],
+    testFiles: readonly string[],
+): Spotted[] {
+    const references: References = { paths: new Set(), patterns: [] };
+    for (const reader of listFiles(dir, (path) => isModuleName(basename(path)))) {
+        referencesOf(reader, references);
+    }
+    for (const testFile of testFiles) {
+        referencesOf(testFile, references);
+    }
+    return groundSubdirs.flatMap((sub) => {
+        const subPath = join(dir, sub);
+        return treeEntries(subPath)
+            .filter((entry) => !entryReferenced(join(subPath, entry.name), references))
+            .map((entry) => ({
+                path: relative(rootDir, join(subPath, entry.name)),
+                line: 1,
+                fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
+                found: `${sub}/${entry.name}, which no test of ${basename(dir)} names`,
+                rule: 'no-unused-ground',
+            }));
+    });
+}
+
+function checkDomain(rootDir: string, dir: string): Spotted[] {
+    const groundSubdirs = groundSubdirsOf(dir);
+    if (groundSubdirs.length === 0) {
+        return [];
+    }
+    const testFiles = listFiles(dir, (path) => isReferrer(basename(path)));
+    // invariant: a domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.
+    if (testFiles.length === 0) {
+        return [
+            {
+                path: relative(rootDir, dir),
                 line: 1,
                 fix: `write the test that stands on ${groundSubdirs.join(', ')}, or delete the folder`,
                 found: `a domain folder holding ${groundSubdirs.join(', ')} and no test or document`,
                 rule: 'no-unused-ground',
-            });
-            continue;
-        }
-
-        const references: References = { paths: new Set(), patterns: [] };
-        for (const reader of listFiles(dir, (path) => isModuleName(basename(path)))) {
-            referencesOf(reader, references);
-        }
-        for (const testFile of testFiles) {
-            referencesOf(testFile, references);
-        }
-
-        for (const sub of groundSubdirs) {
-            const subPath = join(dir, sub);
-            for (const entry of treeEntries(subPath)) {
-                if (entryReferenced(join(subPath, entry.name), references)) {
-                    continue;
-                }
-                const relEntry = relative(rootDir, join(subPath, entry.name));
-                violations.push({
-                    path: relEntry,
-                    line: 1,
-                    fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
-                    found: `${sub}/${entry.name}, which no test of ${feature} names`,
-                    rule: 'no-unused-ground',
-                });
-            }
-        }
+            },
+        ];
     }
-    violations.push(...checkPoolFixtures(rootDir));
-    return violations;
+    return unreferencedEntries(rootDir, dir, groundSubdirs, testFiles);
+}
+
+export function checkNoUnusedGround(rootDir: string): Spotted[] {
+    return [
+        ...listDirs(rootDir).flatMap((dir) => checkDomain(rootDir, dir)),
+        ...checkPoolFixtures(rootDir),
+    ];
 }
 
 function checkPoolFixtures(rootDir: string): Spotted[] {

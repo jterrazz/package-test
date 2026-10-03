@@ -74,35 +74,37 @@ export function runMaps(file: SpecFile): YAMLMap[] {
     return isSeq(items) ? nodeItems(items).filter((item) => isMap(item)) : [];
 }
 
-export function streamScalars(run: YAMLMap): { key: string; scalar: Scalar }[] {
-    const found: { key: string; scalar: Scalar }[] = [];
-    for (const pair of pairsOf(run)) {
+type StreamScalar = { key: string; scalar: Scalar };
+
+function fileEqualsScalars(files: YAMLMap): StreamScalar[] {
+    return pairsOf(files).flatMap((entry) =>
+        isMap(entry.value)
+            ? pairsOf(entry.value)
+                  .filter((assertion) => keyName(assertion) === 'equals')
+                  .flatMap((assertion) =>
+                      isScalar(assertion.value)
+                          ? [
+                                {
+                                    key: `files.${keyName(entry) ?? '?'}.equals`,
+                                    scalar: assertion.value,
+                                },
+                            ]
+                          : [],
+                  )
+            : [],
+    );
+}
+
+const STREAM_KEYS = new Set(['stderr', 'stdin', 'stdout']);
+
+export function streamScalars(run: YAMLMap): StreamScalar[] {
+    return pairsOf(run).flatMap((pair) => {
         const key = keyName(pair);
-        if (key === null) {
-            continue;
+        if (key !== null && STREAM_KEYS.has(key) && isScalar(pair.value)) {
+            return [{ key, scalar: pair.value }];
         }
-        if (['stderr', 'stdin', 'stdout'].includes(key) && isScalar(pair.value)) {
-            found.push({ key, scalar: pair.value });
-            continue;
-        }
-        if (key !== 'files' || !isMap(pair.value)) {
-            continue;
-        }
-        for (const entry of pairsOf(pair.value)) {
-            if (!isMap(entry.value)) {
-                continue;
-            }
-            for (const assertion of pairsOf(entry.value)) {
-                if (keyName(assertion) === 'equals' && isScalar(assertion.value)) {
-                    found.push({
-                        key: `files.${keyName(entry) ?? '?'}.equals`,
-                        scalar: assertion.value,
-                    });
-                }
-            }
-        }
-    }
-    return found;
+        return key === 'files' && isMap(pair.value) ? fileEqualsScalars(pair.value) : [];
+    });
 }
 
 export function isBlock(scalar: Scalar): boolean {

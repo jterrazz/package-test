@@ -13,9 +13,9 @@ import {
     repointModuleTests,
     repointSource,
 } from '../../kit/checker/repoint.js';
+import { collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import {
-    collectFixtureReferences,
     DISK_CALL,
     findSpecsRoots,
     isDir,

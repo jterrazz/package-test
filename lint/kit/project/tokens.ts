@@ -33,26 +33,22 @@ const KNOWN = new Set<string>(TOKEN_KINDS);
 type TokenSite = { line: number; token: string };
 
 /** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored. */
-function misfitTokens(text: string): (TokenSite & { malformed: boolean })[] {
-    const misfits: (TokenSite & { malformed: boolean })[] = [];
-    const lines = text.split('\n');
-    for (const [index, lineText] of lines.entries()) {
-        for (const match of lineText.matchAll(BRACE_BLOCK)) {
-            const inner = match.groups?.inner ?? '';
-            if (VALID_TOKEN.test(inner)) {
-                if (!KNOWN.has(inner.split('#')[0] ?? '')) {
-                    misfits.push({ line: index + 1, malformed: false, token: match[0] });
-                }
-                continue;
-            }
-            // invariant: flagged only when a known kind is followed by junk, never arbitrary noise.
-            const kind = LEADING_WORD.exec(inner)?.groups?.kind;
-            if (kind !== undefined && KNOWN.has(kind) && inner !== kind) {
-                misfits.push({ line: index + 1, malformed: true, token: match[0] });
-            }
-        }
+function misfitOf(inner: string): null | { malformed: boolean } {
+    if (VALID_TOKEN.test(inner)) {
+        return KNOWN.has(inner.split('#')[0] ?? '') ? null : { malformed: false };
     }
-    return misfits;
+    // invariant: flagged only when a known kind is followed by junk, never arbitrary noise.
+    const kind = LEADING_WORD.exec(inner)?.groups?.kind;
+    return kind !== undefined && KNOWN.has(kind) && inner !== kind ? { malformed: true } : null;
+}
+
+function misfitTokens(text: string): (TokenSite & { malformed: boolean })[] {
+    return text.split('\n').flatMap((lineText, index) =>
+        [...lineText.matchAll(BRACE_BLOCK)].flatMap((match) => {
+            const misfit = misfitOf(match.groups?.inner ?? '');
+            return misfit === null ? [] : [{ line: index + 1, ...misfit, token: match[0] }];
+        }),
+    );
 }
 
 export function findUnknownTokens(text: string): TokenSite[] {

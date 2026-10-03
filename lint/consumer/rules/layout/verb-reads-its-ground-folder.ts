@@ -66,6 +66,17 @@ function groundOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
+function crossing(reads: string | undefined, found: string | undefined): Record<string, string> {
+    return {
+        found: found === undefined ? 'no ground folder' : `${found}/`,
+        reads: reads === undefined ? 'a document beside the test' : `${reads}/`,
+        where:
+            reads === undefined
+                ? 'the folder its verb reads'
+                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across facets)`,
+    };
+}
+
 const row = rowNamed(consumerRows, 'verb-reads-its-ground-folder');
 
 /** Judged by the first ground folder the literal path passes through; a computed path is out of reach. */
@@ -105,18 +116,12 @@ export const verbReadsItsGroundFolder = defineRule(
                     if (role.grounds.includes(found)) {
                         return;
                     }
-                    const [reads] = role.grounds;
                     context.report({
                         data: {
-                            found: found === undefined ? 'no ground folder' : `${found}/`,
+                            ...crossing(role.grounds[0], found),
                             kind: disk.kind,
                             path: disk.path,
-                            reads: reads === undefined ? 'a document beside the test' : `${reads}/`,
                             verb,
-                            where:
-                                reads === undefined
-                                    ? 'the folder its verb reads'
-                                    : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across facets)`,
                         },
                         messageId: 'crossed',
                         node: argument?.type === 'Identifier' ? argument : disk.node,

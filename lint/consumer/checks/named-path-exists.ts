@@ -3,16 +3,10 @@ import type { Teaching } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
+import { anchoredPaths, collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
-import {
-    anchoredPaths,
-    collectFixtureReferences,
-    DISK_CALL,
-    findSpecsRoots,
-    listReaders,
-    readText,
-} from '../../kit/project/tree.js';
+import { DISK_CALL, findSpecsRoots, listReaders, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 /** Inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout. */

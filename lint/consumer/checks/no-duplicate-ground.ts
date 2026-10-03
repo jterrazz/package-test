@@ -139,51 +139,55 @@ export function checkNoDuplicateGround(rootDir: string): Spotted[] {
     });
 }
 
+function repointReferrers(specsRoot: string, copies: readonly string[], target: string): void {
+    for (const file of listFiles(specsRoot, isReferrer)) {
+        const from = dirname(file);
+        const move = (path: string): string | undefined =>
+            copies
+                .map((copy) => repointed(from, path, { copy, target }))
+                .find((next) => next !== undefined);
+        const text = readText(file);
+        const next = file.endsWith(SPEC_EXTENSION)
+            ? repointDocument(file, move)
+            : repointSource(file, move);
+        if (next !== text) {
+            writeFileSync(file, next);
+        }
+    }
+    repointModuleTests(
+        specsRoot,
+        copies.map((copy) => ({ copy, target })),
+    );
+}
+
+function keepOne(copies: readonly string[], target: string, held: boolean): void {
+    const [first, ...others] = copies;
+    if (first !== undefined && !held) {
+        mkdirSync(dirname(target), { recursive: true });
+        moveKeepingHistory(first, target);
+    }
+    for (const copy of held ? copies : others) {
+        rmSync(copy, { force: true, recursive: true });
+    }
+    for (const ground of new Set(copies.map((copy) => dirname(copy)))) {
+        if (existsSync(ground) && readdirSync(ground).length === 0) {
+            rmSync(ground, { recursive: true });
+        }
+    }
+}
+
 /** An entry the target already holds byte for byte deletes every copy; one holding something else, or copies of several names, are the author's call and nothing moves. */
 export function fixNoDuplicateGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const { copies, fingerprint, specsRoot, target } of copiedGround(rootDir)) {
-        if (target === null) {
-            continue;
+        const held = target !== null && treeKind(target) !== undefined;
+        if (target !== null && !(held && fingerprintOf(target) !== fingerprint)) {
+            repointReferrers(specsRoot, copies, target);
+            keepOne(copies, target, held);
+            moved.push(
+                `${copies.map((copy) => relative(rootDir, copy)).join(', ')} → ${relative(rootDir, target)}`,
+            );
         }
-        const held = treeKind(target) !== undefined;
-        if (held && fingerprintOf(target) !== fingerprint) {
-            continue;
-        }
-        for (const file of listFiles(specsRoot, isReferrer)) {
-            const from = dirname(file);
-            const move = (path: string): string | undefined =>
-                copies
-                    .map((copy) => repointed(from, path, { copy, target }))
-                    .find((next) => next !== undefined);
-            const text = readText(file);
-            const next = file.endsWith(SPEC_EXTENSION)
-                ? repointDocument(file, move)
-                : repointSource(file, move);
-            if (next !== text) {
-                writeFileSync(file, next);
-            }
-        }
-        repointModuleTests(
-            specsRoot,
-            copies.map((copy) => ({ copy, target })),
-        );
-        const [first, ...others] = copies;
-        if (first !== undefined && !held) {
-            mkdirSync(dirname(target), { recursive: true });
-            moveKeepingHistory(first, target);
-        }
-        for (const copy of held ? copies : others) {
-            rmSync(copy, { force: true, recursive: true });
-        }
-        for (const ground of new Set(copies.map((copy) => dirname(copy)))) {
-            if (existsSync(ground) && readdirSync(ground).length === 0) {
-                rmSync(ground, { recursive: true });
-            }
-        }
-        moved.push(
-            `${copies.map((copy) => relative(rootDir, copy)).join(', ')} → ${relative(rootDir, target)}`,
-        );
     }
     return moved;
 }

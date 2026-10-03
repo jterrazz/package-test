@@ -38,73 +38,85 @@ function memberObjectIdentifier(text: string, dotIndex: number): null | string {
     return match === null ? match : (match.groups?.name ?? null);
 }
 
-export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Spotted[] {
-    const violations: Spotted[] = [];
+function enforcedSpecifications(rootDir: string): Map<string, SpecModel> {
     const enforced = new Map<string, SpecModel>();
     for (const file of listFiles(rootDir, (path) => path.endsWith('.specification.ts'))) {
         const model = modelSpecFile(file);
-        if (
-            model.sqlDatabaseCount !== null &&
-            model.sqlDatabaseCount >= 1 &&
-            model.runnerExports.size > 0
-        ) {
+        if ((model.sqlDatabaseCount ?? 0) >= 1 && model.runnerExports.size > 0) {
             enforced.set(file, model);
         }
     }
-    if (enforced.size === 0) {
-        return violations;
+    return enforced;
+}
+
+/** invariant: enforced only when exactly one imported spec applies: mixed database configurations are ambiguous. */
+function onlyApplicable(
+    testFile: string,
+    text: string,
+    enforced: ReadonlyMap<string, SpecModel>,
+): SpecModel | undefined {
+    const applicable = new Set<SpecModel>();
+    for (const binding of namedImports(text)) {
+        const target = resolveRelativeImport(testFile, binding.source);
+        const model = target === undefined ? undefined : enforced.get(target);
+        if (model?.runnerExports.has(binding.name) === true) {
+            applicable.add(model);
+        }
     }
+    const [only] = applicable;
+    return applicable.size === 1 ? only : undefined;
+}
 
-    for (const testFile of listFiles(rootDir, isNodeTestFileName)) {
-        const text = readSource(testFile);
-        // invariant: enforced only when exactly one imported spec applies: mixed database configurations are ambiguous.
-        const applicable = new Set<SpecModel>();
-        for (const binding of namedImports(text)) {
-            const target = resolveRelativeImport(testFile, binding.source);
-            const model = target === undefined ? undefined : enforced.get(target);
-            if (model?.runnerExports.has(binding.name) === true) {
-                applicable.add(model);
-            }
-        }
-        const [onlyApplicable] = applicable;
-        if (applicable.size !== 1 || onlyApplicable === undefined) {
-            continue;
-        }
-        const count = onlyApplicable.sqlDatabaseCount ?? 0;
-        const locals = localRunnerBindings(text);
-        const suppressed = suppressedLines(readText(testFile), 'database-named-only-when-several');
-        const rel = relative(rootDir, testFile);
+function misnamed(
+    verb: string,
+    count: number,
+    hasDatabase: boolean,
+): null | Pick<Spotted, 'fix' | 'found'> {
+    if (count >= 2 && !hasDatabase) {
+        return {
+            fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
+            found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
+        };
+    }
+    if (count === 1 && hasDatabase) {
+        return {
+            fix: `delete the \`{ database }\` option of \`.${verb}()\``,
+            found: `\`.${verb}()\` passes \`{ database }\`, while a single SQL database is declared`,
+        };
+    }
+    return null;
+}
 
-        for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
-            const verb = match.groups?.verb ?? '';
-            const object = memberObjectIdentifier(text, match.index);
-            if (object !== null && locals.has(object)) {
-                continue;
-            }
-            const args = balancedParens(text, text.indexOf('(', match.index));
-            const hasDatabase = /\bdatabase\s*:/u.test(args);
-            const line = lineAt(text, match.index);
-            if (suppressed.has(line)) {
-                continue;
-            }
-            if (count >= 2 && !hasDatabase) {
-                violations.push({
-                    path: rel,
-                    line,
-                    fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
-                    found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
-                    rule: 'database-named-only-when-several',
-                });
-            } else if (count === 1 && hasDatabase) {
-                violations.push({
-                    path: rel,
-                    line,
-                    fix: `delete the \`{ database }\` option of \`.${verb}()\``,
-                    found: `\`.${verb}()\` passes \`{ database }\`, while a single SQL database is declared`,
-                    rule: 'database-named-only-when-several',
-                });
-            }
+function checkTestFile(testFile: string, model: SpecModel, rootDir: string): Spotted[] {
+    const text = readSource(testFile);
+    const count = model.sqlDatabaseCount ?? 0;
+    const locals = localRunnerBindings(text);
+    const suppressed = suppressedLines(readText(testFile), 'database-named-only-when-several');
+    const violations: Spotted[] = [];
+    for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
+        const object = memberObjectIdentifier(text, match.index);
+        const line = lineAt(text, match.index);
+        const args = balancedParens(text, text.indexOf('(', match.index));
+        const spotted = misnamed(match.groups?.verb ?? '', count, /\bdatabase\s*:/u.test(args));
+        if ((object === null || !locals.has(object)) && !suppressed.has(line) && spotted !== null) {
+            violations.push({
+                ...spotted,
+                line,
+                path: relative(rootDir, testFile),
+                rule: 'database-named-only-when-several',
+            });
         }
     }
     return violations;
+}
+
+export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Spotted[] {
+    const enforced = enforcedSpecifications(rootDir);
+    if (enforced.size === 0) {
+        return [];
+    }
+    return listFiles(rootDir, isNodeTestFileName).flatMap((testFile) => {
+        const model = onlyApplicable(testFile, readSource(testFile), enforced);
+        return model === undefined ? [] : checkTestFile(testFile, model, rootDir);
+    });
 }

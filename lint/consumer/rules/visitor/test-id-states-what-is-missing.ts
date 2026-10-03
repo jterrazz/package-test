@@ -33,62 +33,30 @@ export const testIdStatesWhatIsMissing = defineRule(
     },
     {
         createOnce(context: Context): Visitor {
-            let lines: string[] = [];
-            let comments: Comment[] = [];
-
-            const lineOf = (node: AstNode): number => {
-                const offset = startOf(node);
-                if (offset === undefined) {
-                    return 0;
-                }
-                return context.sourceCode.text.slice(0, offset).split('\n').length;
-            };
-
-            const stated = (line: number): boolean => {
-                const own = lines[line - 1] ?? '';
-                const above = lines[line - 2] ?? '';
-                if (REASON.test(own) || REASON.test(above)) {
-                    return true;
-                }
-                // invariant: a block comment, or one the formatter moved, is invisible to the text scan.
-                return comments.some((comment) => {
-                    const at = commentLine(context, comment);
-                    return (at === line || at === line - 1) && REASON.test(`//${comment.value}`);
-                });
-            };
-
+            let source: Source = { comments: [], lines: [], text: '' };
             return {
                 before() {
                     if (!isTestRole(identityOf(context).role)) {
                         return false;
                     }
-                    lines = context.sourceCode.text.split('\n');
-                    comments = context.sourceCode.getAllComments();
+                    const { text } = context.sourceCode;
+                    source = {
+                        comments: context.sourceCode.getAllComments(),
+                        lines: text.split('\n'),
+                        text,
+                    };
                     return true;
                 },
                 CallExpression(node: AstNode) {
-                    const callee = child(node, 'callee');
-                    const member = callee ? memberPropertyName(callee) : undefined;
-                    if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
-                        return;
-                    }
-                    const args = childList(node, 'arguments');
-                    const scenario = args?.[1];
-                    if (
-                        scenario?.type !== 'ArrowFunctionExpression' &&
-                        scenario?.type !== 'FunctionExpression'
-                    ) {
+                    const scenario = scenarioOf(node);
+                    if (scenario === undefined) {
                         return;
                     }
                     walk(scenario, (inner: AstNode) => {
-                        if (inner.type !== 'CallExpression') {
-                            return;
-                        }
-                        const innerCallee = child(inner, 'callee');
-                        if (innerCallee?.type !== 'Identifier' || innerCallee.name !== 'testId') {
-                            return;
-                        }
-                        if (!stated(lineOf(inner))) {
+                        if (
+                            isTestIdCall(inner) &&
+                            !stated(source, lineAt(source.text, startOf(inner)))
+                        ) {
                             context.report({ messageId: 'unexplainedTestId', node: inner });
                         }
                     });
@@ -98,6 +66,8 @@ export const testIdStatesWhatIsMissing = defineRule(
     },
 );
 
+type Source = { comments: Comment[]; lines: string[]; text: string };
+
 function startOf(node: AstNode): number | undefined {
     if (typeof node.start === 'number') {
         return node.start;
@@ -106,10 +76,36 @@ function startOf(node: AstNode): number | undefined {
     return range?.[0];
 }
 
-function commentLine(context: Context, comment: Comment): number {
-    const offset = comment.start ?? comment.range?.[0];
-    if (offset === undefined) {
-        return 0;
+function lineAt(text: string, offset: number | undefined): number {
+    return offset === undefined ? 0 : text.slice(0, offset).split('\n').length;
+}
+
+function stated(source: Source, line: number): boolean {
+    const own = source.lines[line - 1] ?? '';
+    const above = source.lines[line - 2] ?? '';
+    if (REASON.test(own) || REASON.test(above)) {
+        return true;
     }
-    return context.sourceCode.text.slice(0, offset).split('\n').length;
+    // invariant: a block comment, or one the formatter moved, is invisible to the text scan.
+    return source.comments.some((comment) => {
+        const at = lineAt(source.text, comment.start ?? comment.range?.[0]);
+        return (at === line || at === line - 1) && REASON.test(`//${comment.value}`);
+    });
+}
+
+function scenarioOf(node: AstNode): AstNode | undefined {
+    const callee = child(node, 'callee');
+    const member = callee ? memberPropertyName(callee) : undefined;
+    if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
+        return undefined;
+    }
+    const scenario = childList(node, 'arguments')[1];
+    return scenario?.type === 'ArrowFunctionExpression' || scenario?.type === 'FunctionExpression'
+        ? scenario
+        : undefined;
+}
+
+function isTestIdCall(node: AstNode): boolean {
+    const callee = node.type === 'CallExpression' ? child(node, 'callee') : undefined;
+    return callee?.type === 'Identifier' && callee.name === 'testId';
 }

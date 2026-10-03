@@ -2,20 +2,14 @@ import {
     blankComments,
     isGroundFolder,
     PRUNED,
-    quotedMask,
     SHARED_FOLDER,
     treeEntries,
     treeKind,
 } from '@jterrazz/typescript/rules';
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative } from 'node:path';
 
-import { isNode, nodeStart } from './ast.js';
-import { parseProgram } from './module-parser.js';
-import { literalPathVisitor, visitProgram } from './path-references.js';
-import { isRelativePath } from './relative-path.js';
 import { isTestFileName } from './role.js';
-import { documentPaths, parseSpecDocument } from './spec-document.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
 
 export function isSharedFolder(dir: string): boolean {
@@ -149,7 +143,7 @@ export function isDir(path: string): boolean {
     return treeKind(path) === 'directory';
 }
 
-function columnAt(text: string, index: number): number {
+export function columnAt(text: string, index: number): number {
     return index - text.lastIndexOf('\n', index - 1);
 }
 
@@ -184,54 +178,6 @@ export function isConventionalSubdir(path: string): boolean {
     return !children.some((child) => child.isDirectory() && isGroundFolder(child.name));
 }
 
-type FixtureReference = {
-    column: number;
-    file: string;
-    key?: string;
-    kind: 'directory' | 'file';
-    line: number;
-    path: string;
-};
-
-const FIXTURE_CALL =
-    /\.fixture\(\s*(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
-
-export function collectFixtureReferences(
-    file: string,
-    pattern = FIXTURE_CALL,
-    codeOnly = false,
-): FixtureReference[] {
-    if (file.endsWith(SPEC_EXTENSION)) {
-        try {
-            return documentPaths(parseSpecDocument(readText(file), file)).map(
-                ({ key, kind, line, path }) => ({ column: 1, file, key, kind, line, path }),
-            );
-        } catch {
-            return [];
-        }
-    }
-    const text = readSource(file);
-    const quoted = codeOnly ? quotedMask(text) : [];
-    const references: FixtureReference[] = [];
-    for (const match of text.matchAll(pattern)) {
-        if (quoted[match.index] === true) {
-            continue;
-        }
-        const path = match.groups?.path;
-        if (path !== undefined && path.length > 0 && isRelativePath(path) && !path.includes('${')) {
-            const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
-            references.push({
-                column: columnAt(text, at),
-                file,
-                kind: match.groups?.kind === 'directory' ? 'directory' : 'file',
-                line: lineAt(text, at),
-                path,
-            });
-        }
-    }
-    return references;
-}
-
 export function listReaders(specsRoot: string): string[] {
     return listFiles(specsRoot, (path) => path.endsWith('.ts') || path.endsWith(SPEC_EXTENSION));
 }
@@ -253,36 +199,6 @@ export function isLeaf(directory: string): boolean {
         (entry) =>
             entry.isFile() && (isTestFileName(entry.name) || entry.name.endsWith(SPEC_EXTENSION)),
     );
-}
-
-/** A lone piece counts only when spelled `./` or `../`: a bare one (`resolve(import.meta.dirname, '../_expected')`) is as often an output folder as a path read; a piece opening on `/` restarts the path. */
-export function anchoredPaths(
-    file: string,
-): { column: number; line: number; named: string; target: string }[] {
-    const text = readText(file);
-    const program = parseProgram(file, text);
-    if (!isNode(program)) {
-        return [];
-    }
-    const found: { column: number; line: number; named: string; target: string }[] = [];
-    visitProgram(
-        program,
-        literalPathVisitor(({ node, pieces }) => {
-            const [only] = pieces;
-            const lone = pieces.length === 1 && !isRelativePath(only ?? '');
-            if (lone || pieces.some((piece) => isAbsolute(piece))) {
-                return;
-            }
-            const at = nodeStart(node);
-            found.push({
-                column: columnAt(text, at),
-                line: lineAt(text, at),
-                named: pieces.map((piece) => `'${piece}'`).join(', '),
-                target: resolve(dirname(file), ...pieces),
-            });
-        }),
-    );
-    return found;
 }
 
 export function isWithin(directory: string, path: string): boolean {

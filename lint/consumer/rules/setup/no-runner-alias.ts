@@ -20,6 +20,13 @@ function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     return current?.type === 'CallExpression' ? current : undefined;
 }
 
+/** The local name a destructured property binds, past any default value. */
+function aliasOf(property: AstNode): string | undefined {
+    const value = child(property, 'value');
+    const bound = value?.type === 'AssignmentPattern' ? child(value, 'left') : value;
+    return bound?.type === 'Identifier' ? stringField(bound, 'name') : undefined;
+}
+
 const row = rowNamed(consumerRows, 'no-runner-alias');
 
 /** Renaming at the import site stays legal: the canonical name is enforced where the record is destructured. */
@@ -49,16 +56,10 @@ export const noRunnerAlias = defineRule(
                     }
                     for (const property of childList(id, 'properties')) {
                         const key = propertyKeyName(property);
-                        if (key === undefined) {
-                            continue;
-                        }
-                        let value = child(property, 'value');
-                        if (value?.type === 'AssignmentPattern') {
-                            value = child(value, 'left');
-                        }
-                        if (value?.type === 'Identifier' && value.name !== key) {
+                        const alias = aliasOf(property);
+                        if (key !== undefined && alias !== undefined && alias !== key) {
                             context.report({
-                                data: { alias: stringField(value, 'name') ?? '', key },
+                                data: { alias, key },
                                 messageId: 'aliased',
                                 node: property,
                             });
