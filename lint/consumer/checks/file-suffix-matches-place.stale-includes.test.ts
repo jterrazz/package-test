@@ -20,7 +20,7 @@ describe('staleIncludes', () => {
             [
                 'export default {',
                 "    // include: ['specs/**/*.test.ts'],",
-                "    include: ['http://localhost/a', 'specs/api/**/*.test.ts', 'specs/api/orders.test.ts', 'src/**/*.test.ts'],",
+                "    include: ['http://localhost/a', 'specs/api/**/*.test.ts', 'specs/api/orders.test.ts', 'specs/api/users.test.ts', 'specs/**', 'src/**/*.test.ts'],",
                 "    exclude: ['specs/api/orders.test.ts'],",
                 '};',
                 '',
@@ -28,10 +28,14 @@ describe('staleIncludes', () => {
         );
         const from = join(root, 'specs', 'api', 'orders.test.ts');
 
-        // When - the notices for a run that renamed that one spec
-        const notices = staleIncludes(root, [{ from, to: from.replace('.test.ts', '.spec.ts') }]);
+        // When - the notices for a run that renamed that spec and one elsewhere
+        const other = join(root, 'specs', 'cli', 'run.test.ts');
+        const notices = staleIncludes(root, [
+            { from: other, to: other.replace('.test.ts', '.spec.ts') },
+            { from, to: from.replace('.test.ts', '.spec.ts') },
+        ]);
 
-        // Then - the glob and both literal entries are named; the commented-out entry and the unrelated glob are not
+        // Then - the glob and both literal entries are named; the commented-out entry, the other literal, the glob naming no `.test.ts` and the unrelated glob are not
         expect(notices).toStrictEqual([
             'jterrazz.config.ts: specs/api/**/*.test.ts still names `.test.ts` — the files it collected are `.spec.ts` now, and the project collects nothing until the glob follows (file-suffix-matches-place)',
             'jterrazz.config.ts: specs/api/orders.test.ts names a file this run renamed — it is `specs/api/orders.spec.ts` now, and the entry collects nothing until it follows (file-suffix-matches-place)',

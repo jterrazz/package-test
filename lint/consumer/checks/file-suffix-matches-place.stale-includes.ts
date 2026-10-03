@@ -11,7 +11,7 @@ const CONFIG_NAMES = [SETTINGS_FILE];
 
 const COLLECTION = /\b(?:include|exclude)\s*:\s*\[(?<entries>[^\]]*)\]/gu;
 
-const ENTRY = /['"`](?<entry>[^'"`\n]*)['"`]/gu;
+const ENTRY = /['"`][^'"`\n]*['"`]/gu;
 
 /** A glob reaches what its literal prefix (everything before the first `*`) contains, resolved against the config's own directory, as vitest does. */
 function reaches(dir: string, entry: string, file: string): boolean {
@@ -19,18 +19,14 @@ function reaches(dir: string, entry: string, file: string): boolean {
     if (star === -1) {
         return resolve(dir, entry) === file;
     }
-    const prefix = resolve(dir, entry.slice(0, star));
-    return file === prefix || file.startsWith(`${prefix}/`);
+    return file.startsWith(`${resolve(dir, entry.slice(0, star))}/`);
 }
 
 function collectedEntries(text: string): string[] {
-    const entries: string[] = [];
-    for (const list of text.matchAll(COLLECTION)) {
-        for (const match of (list.groups?.entries ?? '').matchAll(ENTRY)) {
-            entries.push(match.groups?.entry ?? '');
-        }
-    }
-    return entries;
+    return [...text.matchAll(COLLECTION)].flatMap((list) =>
+        // Stryker disable next-line OptionalChaining,StringLiteral: a match always carries its named group
+        [...(list.groups?.entries ?? '').matchAll(ENTRY)].map(([quoted]) => quoted.slice(1, -1)),
+    );
 }
 
 function noticeFor(where: string, entry: string): string {
@@ -49,9 +45,6 @@ function staleEntriesIn(path: string, owner: string, renamed: Rename[]): string[
 
 /** The mover cannot rewrite a config it does not parse, so it names the `include`/`exclude` entries reaching a file this run moved, and nothing else: vitest would otherwise collect fewer files and exit 0. */
 export function staleIncludes(root: string, renamed: Rename[]): string[] {
-    if (renamed.length === 0) {
-        return [];
-    }
     const owner = packageRootOf(root) ?? dirname(root);
     const paths = [...new Set([root, owner, dirname(root)])].flatMap((directory) =>
         CONFIG_NAMES.map((name) => join(directory, name)).filter((path) => existsSync(path)),
