@@ -145,9 +145,11 @@ export default defineConfig({
             },
         },
         mutation: {
-            ignore: {
-                'lint/self/**':
-                    'the repository’s own checks ship nowhere, and the gate they hold is this tree’s',
+            mutate: {
+                'lint/*.ts': 'the entries of the lint rules and checks the package ships',
+                'lint/consumer/**/*.ts':
+                    'the lint rules and checks the package ships, beside the src/ every node project measures',
+                'lint/kit/**/*.ts': 'the kit those rules and checks run on',
             },
             exclude: {
                 'lint/self/checks/error-is-a-refusal-or-an-invariant.test.ts': READS_THE_SOURCES,
@@ -170,6 +172,11 @@ export default defineConfig({
                     files: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
                     reason: 'these module tests unit-test the constructors, which is creating a runner outside a specification',
                     rules: { 'jterrazz/runner-in-specification-file': 'off' },
+                },
+                {
+                    files: ['lint/consumer/rules/**/*.test.ts'],
+                    reason: 'a rule test is one table of cases for one rule, so its length is the count of what the rule decides, never two subjects in one file',
+                    rules: { 'eslint/max-lines': 'off' },
                 },
                 {
                     files: PRODUCTION_REACHING_TEST_MATERIAL,
