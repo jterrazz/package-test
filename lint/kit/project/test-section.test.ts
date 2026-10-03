@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { testSettingsAt, testSettingsAtSync } from './test-section.js';
+import { testSettingsAt, testSettingsAtSync, testSettingsOf } from './test-section.js';
 
 function unit(config?: string): string {
     const root = mkdtempSync(join(tmpdir(), 'test-section-'));
@@ -127,5 +127,23 @@ describe('test-section', () => {
             methodless: [],
             production: { allow: {} },
         });
+    });
+
+    test('the test section, read value by value — a list holding one word of another type, a reason list that is no map or holds a blank reason, and a section that is no map are each their default', () => {
+        // Given - sections whose every key is half right
+        const sections = [
+            { collections: ['data', 1], methodless: [null] },
+            { production: { allow: 'playwright' } },
+            { production: { allow: { playwright: '   ' } } },
+            { production: { allow: { playwright: true } } },
+            { production: null },
+            ['collections'],
+            null,
+        ];
+
+        // Then - each reads as the defaults
+        expect(sections.map((section) => testSettingsOf(section))).toStrictEqual(
+            sections.map(() => DEFAULTS),
+        );
     });
 });

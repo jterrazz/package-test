@@ -1,5 +1,6 @@
 import { readSettings, readSettingsSync } from '@jterrazz/typescript/rules';
 
+import { isRecord } from './json-shape.js';
 import type { TestSettings } from './settings.js';
 
 export const TEST_SECTION = 'test';
@@ -12,10 +13,6 @@ export const TEST_DEFAULTS: Readonly<Omit<ReadTestSettings, 'routes'>> = Object.
     methodless: [],
     production: { allow: {} },
 });
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
 
 function wordsOf(value: unknown): string[] | undefined {
     return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
