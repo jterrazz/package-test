@@ -12,18 +12,19 @@ describe('setupEntry', () => {
         writeFileSync(join(directory, 'run-setup.ts'), '');
 
         // Then - the source is what the runner loads
-        expect(setupEntry(directory, 'run-setup.ts', 'services-setup.js')).toBe(
+        expect(setupEntry(directory, 'run-setup', 'services-setup')).toBe(
             join(directory, 'run-setup.ts'),
         );
     });
 
-    test('the built package — no source beside it — the setup is its bundled entry', () => {
+    test('the built package — no source beside it — the setup is its bundled entry, named by its stem unless the bundle names it otherwise', () => {
         // Given - the bundle's folder, where no .ts ships
         const directory = scratchDirectory('setup-bundle-');
 
         // Then - the entry the bundle built for it, in the same folder
-        expect(setupEntry(directory, 'run-setup.ts', 'services-setup.js')).toBe(
-            join(directory, 'services-setup.js'),
-        );
+        expect([
+            setupEntry(directory, 'run-setup', 'services-setup'),
+            setupEntry(directory, 'temp-root'),
+        ]).toStrictEqual([join(directory, 'services-setup.js'), join(directory, 'temp-root.js')]);
     });
 });

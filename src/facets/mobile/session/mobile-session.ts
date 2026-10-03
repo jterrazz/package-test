@@ -12,8 +12,7 @@ type SessionProject = Pick<TestProject, 'provide'> & {
 };
 
 export function mobileSessionSetup(): string {
-    // Stryker disable next-line StringLiteral: the bundled name is read only from dist, which no module test runs
-    return setupEntry(import.meta.dirname, 'mobile-session.ts', 'mobile-session.js');
+    return setupEntry(import.meta.dirname, 'mobile-session');
 }
 
 /** One driver session per run: the first runner records it in the provided folder, later files attach, the teardown ends them. With `mobile({ device, root })` it also owns the Appium server. */

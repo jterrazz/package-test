@@ -40,7 +40,7 @@ function setVariables(values: Record<string, string | undefined>): void {
 }
 
 export function tempRootSetup(): string {
-    return setupEntry(import.meta.dirname, 'temp-root.ts', 'temp-root.js');
+    return setupEntry(import.meta.dirname, 'temp-root');
 }
 
 /** Each project loads this module anew: the run is recognised by the variable itself. */

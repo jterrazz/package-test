@@ -7,7 +7,7 @@ import { setupEntry } from '../../chain/paths/setup-entry.js';
 import { writePendingRewrites } from './in-place.js';
 
 export function inPlaceSetup(): string {
-    return setupEntry(import.meta.dirname, 'in-place-setup.ts', 'in-place-setup.js');
+    return setupEntry(import.meta.dirname, 'in-place-setup');
 }
 
 export const IN_PLACE_DIR = `${VITEST_ARTIFACTS_DIR}/in-place`;

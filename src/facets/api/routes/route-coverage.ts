@@ -43,7 +43,7 @@ async function scopeOf(project: RouteProject): Promise<RunScope> {
 }
 
 export function routeCoverageSetup(): string {
-    return setupEntry(import.meta.dirname, 'route-coverage.ts', 'route-coverage.js');
+    return setupEntry(import.meta.dirname, 'route-coverage');
 }
 
 export function setupRoutes(project: RouteProject): () => Promise<void> {
