@@ -1,10 +1,26 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { fixGroundPlacement } from './ground-shared-or-inline.placement.js';
+import { packageWith } from '../../kit/testing/package-tree.fixtures.js';
+import {
+    API_READS,
+    APP_KEPT_FOR_API,
+    NOT_MISPLACED,
+    POOL,
+    READERS,
+} from './ground-shared-or-inline.placement.fixtures.js';
+import { checkGroundPlacement, fixGroundPlacement } from './ground-shared-or-inline.placement.js';
+
+function findingsIn(files: Record<string, string>): string[] {
+    const root = packageWith(files);
+    return checkGroundPlacement(root).map(
+        ({ fix, found, line, path, rule }) =>
+            `${path}: ${found} — ${fix}${line === 1 && rule === 'ground-shared-or-inline' ? '' : ' (misfiled)'}`,
+    );
+}
 
 function singleReaderPool(git: boolean): string {
     const root = mkdtempSync(join(tmpdir(), 'pool-'));
@@ -48,5 +64,104 @@ describe('ground-shared-or-inline.placement', () => {
         // Then - the disk holds it at its new place only
         expect(existsSync(join(root, 'specs', 'api', '_fixtures', 'app', 'index.txt'))).toBe(true);
         expect(existsSync(join(root, 'specs', '_shared'))).toBe(false);
+    });
+
+    test('a pool entry one leaf reads is named, by the form that names it from there', () => {
+        // Given - a directory and a file of the pool, each read by one leaf
+        const directory = findingsIn({ ...POOL, ...API_READS });
+        const file = findingsIn({
+            'specs/_shared/_fixtures/a.json': '{}\n',
+            'specs/api/boot.spec.ts': "api.fixture(file('../_shared/_fixtures/a.json'));\n",
+        });
+
+        // Then - each is to move beside its reader, named as a directory or a file
+        expect([directory, file]).toStrictEqual([
+            APP_KEPT_FOR_API,
+            [
+                "specs/_shared/_fixtures/a.json: ground only specs/api reaches for, kept above it — move it to specs/api/_fixtures/a.json and name it file('./_fixtures/a.json') — `typescript fix` does both",
+            ],
+        ]);
+    });
+
+    test('a pool entry the leaves of one folder read, the folder among them or not, is to move to that folder', () => {
+        // Given - two leaves under specs/api reading the pool, then specs/api and one leaf under it
+        const found = findingsIn({
+            ...POOL,
+            'specs/api/a/x.spec.ts': "api.fixture(directory('../../_shared/_fixtures/app/'));\n",
+            'specs/api/b/y.spec.ts': "api.fixture(directory('../../_shared/_fixtures/app/'));\n",
+        });
+        const withTheFolderItself = findingsIn({
+            ...POOL,
+            ...API_READS,
+            'specs/api/b/y.spec.ts': "api.fixture(directory('../../_shared/_fixtures/app/'));\n",
+        });
+
+        // Then - the lowest folder they share is its home, whether or not it reads the entry itself
+        const spread = [
+            'specs/_shared/_fixtures/app: ground only the leaves under specs/api reach for, kept above them — move it to specs/api/_fixtures/app, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — `typescript fix` does both',
+        ];
+        expect([found, withTheFolderItself]).toStrictEqual([spread, spread]);
+    });
+
+    test.each(NOT_MISPLACED)('a pool entry is not misplaced when %s', (_, files) => {
+        // Given - a tree whose pool entry is shared, outside the placement's reach, or not a read
+        // Then - nothing is to move
+        expect(findingsIn(files)).toStrictEqual([]);
+    });
+
+    test.each(READERS)('a pool entry read by %s is a read like a spec module', (_, reader) => {
+        // Given - the pool entry, read by that reader alone
+        // Then - its leaf is the one that reaches for it
+        expect(findingsIn({ ...POOL, ...reader })).toStrictEqual(APP_KEPT_FOR_API);
+    });
+
+    test('the fix moves the entry and repoints every reader by the path that reaches it now', () => {
+        // Given - a single-reader entry, and one read by two leaves of a folder whose ground already holds another entry
+        const root = packageWith({
+            ...POOL,
+            ...API_READS,
+            'specs/_shared/_fixtures/users.json': '[]\n',
+            'specs/cli/_fixtures/kept.txt': '',
+            'specs/cli/a/x.spec.ts': "cli.fixture(file('../../_shared/_fixtures/users.json'));\n",
+            'specs/cli/b/y.spec.ts': "cli.fixture(file('../../_shared/_fixtures/users.json'));\n",
+        });
+
+        // When - the fixer runs
+        const moved = fixGroundPlacement(root);
+
+        // Then - both moved, each reader names the new place, and the emptied pool is gone
+        const read = (path: string): string => readFileSync(join(root, path), 'utf8');
+        expect([
+            moved,
+            read('specs/api/boot.spec.ts'),
+            read('specs/cli/a/x.spec.ts'),
+            existsSync(join(root, 'specs/cli/_fixtures/users.json')),
+            existsSync(join(root, 'specs/_shared')),
+        ]).toStrictEqual([
+            [
+                'specs/_shared/_fixtures/app → specs/api/_fixtures/app',
+                'specs/_shared/_fixtures/users.json → specs/cli/_fixtures/users.json',
+            ],
+            "api.fixture(directory('./_fixtures/app/'));\n",
+            "cli.fixture(file('../_fixtures/users.json'));\n",
+            true,
+            false,
+        ]);
+    });
+
+    test('the fix leaves an entry whose new place is taken', () => {
+        // Given - a single-reader entry whose destination already exists
+        const root = packageWith({
+            ...POOL,
+            ...API_READS,
+            'specs/api/_fixtures/app/index.txt': 'other\n',
+        });
+
+        // When - the fixer runs
+        // Then - nothing moved, and the reader still names the pool
+        expect([
+            fixGroundPlacement(root),
+            readFileSync(join(root, 'specs/api/boot.spec.ts'), 'utf8'),
+        ]).toStrictEqual([[], API_READS['specs/api/boot.spec.ts']]);
     });
 });

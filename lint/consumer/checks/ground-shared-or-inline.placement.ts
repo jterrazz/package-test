@@ -1,5 +1,4 @@
 import {
-    blankComments,
     isGroundFolder,
     moveKeepingHistory,
     SHARED_FOLDER,
@@ -8,12 +7,11 @@ import {
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { relativeLiterals } from '../../kit/checker/repoint.js';
+import { pathFrom, quotedLiterals, relativeLiterals } from '../../kit/checker/repoint.js';
 import { moduleTestsOf } from '../../kit/project/module-tests.js';
 import { anchoredPaths, collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { SETTINGS_FILE } from '../../kit/project/settings-file.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
-import { literalSpans } from '../../kit/project/spec-values.js';
 import { placeOf } from '../../kit/project/specs-modules.js';
 import {
     DISK_CALL,
@@ -37,7 +35,7 @@ function entryOf(specsRoot: string, target: string): Entry | undefined {
     const segments = relative(specsRoot, target).split(sep);
     const at = segments.findIndex((segment) => isGroundFolder(segment));
     const entry = segments[at + 1];
-    if (at === -1 || entry === undefined || entry === '' || segments[0] === '..') {
+    if (at === -1 || entry === undefined) {
         return undefined;
     }
     return { entry, ground: join(specsRoot, ...segments.slice(0, at + 1)) };
@@ -56,12 +54,9 @@ const WHOLE_LITERAL = /^(?:\.\/)?specs\/[^\s]*$/gu;
 const WORD_IN_LITERAL = /(?<=^|\s)(?:\.\/)?specs\/[\w./@-]+/gu;
 
 function memberAnchoredLiterals(member: string, file: string, pattern: RegExp): string[] {
-    const scanned = blankComments(readText(file));
-    return literalSpans(scanned).flatMap(({ end, start }) => {
-        const value = scanned.slice(start + 1, end - 1);
-        const quoted = `'"\``.includes(scanned[start] ?? '') && !value.includes('${');
-        return quoted ? [...value.matchAll(pattern)].map(([path]) => resolve(member, path)) : [];
-    });
+    return quotedLiterals(readText(file)).flatMap(({ value }) =>
+        [...value.matchAll(pattern)].map(([path]) => resolve(member, path)),
+    );
 }
 
 function pathsNamedIn(member: string, file: string): string[] {
@@ -106,31 +101,26 @@ function usageUnder(specsRoot: string): Map<string, Usage> {
 
 /** A module test reads its ground from outside every leaf, so what it names is shared, whatever the specs say. */
 export function pathsModuleTestsName(member: string): string[] {
-    const named: string[] = [];
-    for (const file of moduleTestsOf(member)) {
-        for (const { value } of relativeLiterals(readText(file))) {
-            named.push(resolve(dirname(file), value));
-        }
-        for (const { target } of anchoredPaths(file)) {
-            named.push(target);
-        }
-        named.push(...memberAnchoredLiterals(member, file, WHOLE_LITERAL));
-    }
-    return named;
+    return moduleTestsOf(member).flatMap((file) =>
+        relativeLiterals(readText(file))
+            .map(({ value }) => resolve(dirname(file), value))
+            .concat(
+                anchoredPaths(file).map(({ target }) => target),
+                memberAnchoredLiterals(member, file, WHOLE_LITERAL),
+            ),
+    );
 }
 
 const MAKEFILE_PATH = /(?<![\w./-])(?:\.\/)?specs\/[\w./@-]+/gu;
 
+/** A missing file reads as empty, and so names nothing. */
 function pathsMemberConfigsName(member: string): string[] {
-    const makefile = join(member, 'Makefile');
-    const fromMakefile =
-        treeKind(makefile) === 'file'
-            ? [...readText(makefile).matchAll(MAKEFILE_PATH)].map(([path]) => resolve(member, path))
-            : [];
-    const fromVitest = [join(member, SETTINGS_FILE)]
-        .filter((file) => treeKind(file) === 'file')
-        .flatMap((file) => memberAnchoredLiterals(member, file, WORD_IN_LITERAL));
-    return fromMakefile.concat(fromVitest);
+    return [
+        ...[...readText(join(member, 'Makefile')).matchAll(MAKEFILE_PATH)].map(([path]) =>
+            resolve(member, path),
+        ),
+        ...memberAnchoredLiterals(member, join(member, SETTINGS_FILE), WORD_IN_LITERAL),
+    ];
 }
 
 function misplacedGround(rootDir: string): Misplaced[] {
@@ -140,16 +130,15 @@ function misplacedGround(rootDir: string): Misplaced[] {
             [
                 ...pathsModuleTestsName(dirname(specsRoot)),
                 ...pathsMemberConfigsName(dirname(specsRoot)),
-            ].flatMap((path) => {
-                const found = entryOf(specsRoot, path);
-                return found === undefined ? [] : [join(found.ground, found.entry)];
-            }),
+            ]
+                .map((path) => entryOf(specsRoot, path))
+                .filter((found) => found !== undefined)
+                .map(({ entry, ground }) => join(ground, entry)),
         );
         for (const [key, { entry, ground, leaves, referrers }] of usageUnder(specsRoot)) {
-            const lowest = lowestCommonFolder([...leaves]);
+            const lowest = lowestCommonFolder([...leaves]) ?? specsRoot;
             const owner = ownerOf(specsRoot, ground);
             if (
-                lowest === undefined ||
                 owner === undefined ||
                 !isWithin(owner, lowest) ||
                 readOutside.has(key) ||
@@ -203,19 +192,11 @@ export function fixGroundPlacement(rootDir: string): string[] {
         for (const file of referrers) {
             const text = readText(file);
             const climb = relative(dirname(file), ground).split(sep).join('/');
-            const down = relative(dirname(file), join(lowest, role)).split(sep).join('/');
-            const next = text.replaceAll(
-                `${climb}/${entry}`,
-                `${down.startsWith('.') ? down : `./${down}`}/${entry}`,
-            );
-            if (next !== text) {
-                writeFileSync(file, next);
-            }
+            const down = pathFrom(dirname(file), join(lowest, role));
+            writeFileSync(file, text.replaceAll(`${climb}/${entry}`, `${down}/${entry}`));
         }
         removeIfEmpty(ground);
-        if (basename(dirname(ground)) === SHARED_FOLDER) {
-            removeIfEmpty(dirname(ground));
-        }
+        removeIfEmpty(dirname(ground));
         moved.push(`${relative(rootDir, join(ground, entry))} → ${relative(rootDir, destination)}`);
     }
     return moved;

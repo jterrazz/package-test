@@ -8,7 +8,7 @@ import { documentPaths, parseSpecDocument } from '../project/spec-document.js';
 import { literalSpans } from '../project/spec-values.js';
 import { isWithin, readText } from '../project/tree.js';
 
-function pathFrom(from: string, to: string): string {
+export function pathFrom(from: string, to: string): string {
     const rest = relative(from, to).split(sep).join('/');
     return rest.startsWith('.') ? rest : `./${rest}`;
 }
@@ -21,16 +21,23 @@ export function repointed(from: string, path: string, { copy, target }: Move): s
         return undefined;
     }
     const moved = pathFrom(from, join(target, relative(copy, reached)));
-    return path.endsWith('/') && !moved.endsWith('/') ? `${moved}/` : moved;
+    return path.endsWith('/') ? `${moved}/` : moved;
 }
 
-export function relativeLiterals(text: string): { end: number; start: number; value: string }[] {
+type QuotedLiteral = { end: number; start: number; value: string };
+
+/** A template with a hole names no path whole. */
+export function quotedLiterals(text: string): QuotedLiteral[] {
     const scanned = blankComments(text);
     return literalSpans(scanned).flatMap(({ end, start }) => {
         const value = scanned.slice(start + 1, end - 1);
-        const quoted = `'"\``.includes(scanned[start] ?? '') && !value.includes('${');
-        return quoted && isRelativePath(value) ? [{ end, start, value }] : [];
+        const quoted = `'"\``.includes(scanned.charAt(start)) && !value.includes('${');
+        return quoted ? [{ end, start, value }] : [];
     });
+}
+
+export function relativeLiterals(text: string): QuotedLiteral[] {
+    return quotedLiterals(text).filter(({ value }) => isRelativePath(value));
 }
 
 export function repointSource(file: string, move: (path: string) => string | undefined): string {
@@ -59,14 +66,19 @@ export function repointDocument(file: string, move: (path: string) => string | u
     for (const { line, path } of named) {
         const moved = move(path);
         const at = line - 1;
-        if (moved === undefined || lines[at] === undefined) {
+        const original = lines[at];
+        if (moved === undefined) {
+            continue;
+        }
+        // Stryker disable next-line ConditionalExpression,BlockStatement: a parsed fixture's line is always in its text
+        if (original === undefined) {
             continue;
         }
         const escaped = path.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
-        lines[at] = lines[at].replace(
-            new RegExp(String.raw`(^|[\s'"[,])${escaped}(?=$|[\s'"\],])`, 'u'),
-            (_whole, lead: string) => `${lead}${moved}`,
-        );
+        const pattern = String.raw`(^|[\s'"[,])${escaped}(?=$|[\s'"\],])`;
+        // Stryker disable next-line StringLiteral: a path holds no character the unicode flag reads otherwise
+        const bounded = new RegExp(pattern, 'u');
+        lines[at] = original.replace(bounded, (_whole, lead: string) => `${lead}${moved}`);
     }
     return lines.join('\n');
 }
