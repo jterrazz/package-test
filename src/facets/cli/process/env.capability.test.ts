@@ -132,6 +132,51 @@ describe('env', () => {
         });
     });
 
+    test('env.capability — childEnv — what a child of the chain starts with — the defaults, then the services, then the docker run id, then the chain, $WORKDIR expanded and null kept', () => {
+        // Given - defaults and a chain each naming the working directory and unsetting a variable, a database, and a docker run
+        const docker = { envVar: 'TEST_RUN_ID', nameLabel: 'name', testRunLabel: 'run' };
+        const config = {
+            defaultEnv: { DATABASE_URL: 'sqlite://default', GONE: null, HOME: '$WORKDIR/home' },
+            dockerConfig: docker,
+            dockerTestRunId: 'run-1',
+            services: { db: postgres('postgres://db:5432/app') },
+        };
+
+        // Then - each layer over the one before
+        expect(
+            childEnv(config, { OUT: '$WORKDIR/out/$WORKDIR', TEST_RUN_ID: 'mine' }, WORKDIR),
+        ).toStrictEqual({
+            DATABASE_URL: 'postgres://db:5432/app',
+            DB_URL: 'postgres://db:5432/app',
+            GONE: null,
+            HOME: `${WORKDIR}/home`,
+            OUT: `${WORKDIR}/out/${WORKDIR}`,
+            TEST_RUN_ID: 'mine',
+        });
+    });
+
+    test('env.capability — childEnv — what a child of the chain starts with — nothing set is no environment, and a docker run id counts only when there is one under a docker config', () => {
+        // Given - configs with nothing to set, and docker halves alone
+        const docker = { envVar: 'TEST_RUN_ID', nameLabel: 'name', testRunLabel: 'run' };
+
+        // Then - none hands an environment
+        expect([
+            childEnv({}, {}, WORKDIR),
+            childEnv({ services: {} }, {}, WORKDIR),
+            childEnv({ dockerConfig: docker, dockerTestRunId: '' }, {}, WORKDIR),
+            childEnv({ dockerConfig: docker }, {}, WORKDIR),
+            childEnv({ dockerTestRunId: 'run-1' }, {}, WORKDIR),
+            childEnv({ dockerConfig: docker, dockerTestRunId: 'run-1' }, {}, WORKDIR),
+        ]).toStrictEqual([
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            { TEST_RUN_ID: 'run-1' },
+        ]);
+    });
+
     test('env.capability — .env() — the environment a chain states — every chain of a with() view starts from the context, and its own .env() merges over it', async () => {
         // Given - a file's environment, and one chain adding to it
         const chain = defineFacet<Chain>()({

@@ -42,6 +42,11 @@ export function expandWorkdir(variables: CliEnv, workdir: string): CliEnv {
     return expanded;
 }
 
+function onlyOf(handles: ServiceHandle[]): ServiceHandle | undefined {
+    const [only, ...others] = handles;
+    return others.length === 0 ? only : undefined;
+}
+
 /** `service-urls-injected`: `<KEY>_URL` each, `DATABASE_URL` / `REDIS_URL` when exactly one of that kind. */
 function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefined): CliEnv {
     const injected: CliEnv = {};
@@ -56,12 +61,12 @@ function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefine
             redis.push(handle);
         }
     }
-    const [onlySql] = sql;
-    if (sql.length === 1 && onlySql !== undefined) {
+    const onlySql = onlyOf(sql);
+    if (onlySql !== undefined) {
         injected.DATABASE_URL = onlySql.connectionString;
     }
-    const [onlyRedis] = redis;
-    if (redis.length === 1 && onlyRedis !== undefined) {
+    const onlyRedis = onlyOf(redis);
+    if (onlyRedis !== undefined) {
         injected.REDIS_URL = onlyRedis.connectionString;
     }
     return injected;
