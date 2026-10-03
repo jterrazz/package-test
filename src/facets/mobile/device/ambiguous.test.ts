@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../../../chain/refusals/rows.js';
 import { within } from '../../../visitor/targets/landmarks.js';
 import { button, content, testId } from '../../../visitor/targets/roles.js';
+import type { Target } from '../../../visitor/targets/target.js';
 import { ambiguousScreenElementError } from './ambiguous.js';
 import type { MobileElementMatch } from './device.port.js';
 
@@ -12,129 +12,107 @@ const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch 
     ...overrides,
 });
 
+const OTHER_ELEMENT =
+    '  • other element  a button() or field() may name one thing where this does not';
+
+const SCOPE_BOOKMARK = `  • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any target works as the scope`;
+
+/** The fixes a refusal offers, one line each. */
+function fixesOf(target: Target, matches: MobileElementMatch[]): string[] {
+    const { message } = ambiguousScreenElementError({ matches, target });
+    const lines = message.split('\n');
+    return lines.slice(lines.indexOf('fix: designate one of them:') + 1, -1);
+}
+
 describe('ambiguousScreenElementError', () => {
-    test('names the target and the count', () => {
-        // Given - three candidates for one button
-        const { message } = ambiguousScreenElementError({
-            target: button('Bookmark'),
-            matches: [match(), match({ label: 'Bookmark all' }), match()],
-        });
-
-        // Then - the headline carries the caller's own vocabulary
-        expect(message).toContain('button("Bookmark") matched 3 elements on the screen');
-    });
-
-    test('enumerates every candidate with its type, label and identifier', () => {
-        // Given - candidates carrying accessibility identifiers
-        const { message } = ambiguousScreenElementError({
-            target: button('Bookmark'),
-            matches: [
-                match({ identifier: 'event-1-bookmark' }),
-                match({ identifier: 'event-2-bookmark' }),
-            ],
-        });
-
-        // Then - each line is readable without opening the simulator
-        expect(message).toContain('1. Button "Bookmark"  [testId: event-1-bookmark]');
-        expect(message).toContain('2. Button "Bookmark"  [testId: event-2-bookmark]');
-    });
-
-    test('renders a value when the candidate carries one', () => {
-        // Given - two text fields distinguished only by their content
-        const { message } = ambiguousScreenElementError({
-            target: content('a@b.test'),
-            matches: [
-                match({ label: 'Email', type: 'TextField', value: 'a@b.test' }),
-                match({ label: 'Confirm email', type: 'TextField', value: 'a@b.test' }),
-            ],
-        });
-
-        // Then - the value is part of the evidence
-        expect(message).toContain('1. TextField "Email"  value="a@b.test"');
-    });
-
     // RUNTIME no-landmark-on-mobile — the vocabulary is ONE across the facets, and the part with no iOS equivalent is refused rather than approximated: a screen has no ARIA landmarks, so the fix it offers is `within(testId(…), …)`.
-    test('suggests scoping first — a screen has no landmarks to name', () => {
-        // Given - an unscoped ambiguous target
+    test('names the target, the count and every candidate with what it carries, then the rule and where it is documented', () => {
+        // Given - candidates with a label alone, a value, an identifier, and nothing but a type
         const { message } = ambiguousScreenElementError({
-            target: button('Bookmark'),
-            matches: [match(), match()],
-        });
-
-        // Then - within() is offered with any-target scoping spelled out
-        expect(message).toContain('within(testId(\'…\'), button("Bookmark"))');
-    });
-
-    test('offers exact to a target that opted OUT, with what it leaves', () => {
-        // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
-        const { message } = ambiguousScreenElementError({
-            target: button('Bookmark', { exact: false }),
-            matches: [match(), match({ label: 'Bookmark all' })],
-        });
-
-        // Then - the remaining count keeps the suggestion honest
-        expect(message).toContain('button("Bookmark", { exact: true })');
-        expect(message).toContain('leaves 1 of 2');
-    });
-
-    test('never offers exact to an ordinary target — it is already exact', () => {
-        // Given - a target stating nothing, which is the whole-label default
-        const { message } = ambiguousScreenElementError({
-            target: button('Bookmark'),
-            matches: [match(), match({ label: 'Bookmark all' })],
-        });
-
-        // Then - the suggestion would be telling it to do what it already does
-        expect(message).not.toContain('exact name');
-    });
-
-    test('omits the exact suggestion when every candidate matches the name whole', () => {
-        // Given - two identical labels, where exact would change nothing
-        const { message } = ambiguousScreenElementError({
-            target: button('Bookmark'),
-            matches: [match(), match()],
-        });
-
-        // Then - no suggestion that would leave the spec just as ambiguous
-        expect(message).not.toContain('exact: true');
-    });
-
-    test('offers the distinct identifiers as a concrete testId rewrite', () => {
-        // Given - candidates whose identifiers differ
-        const { message } = ambiguousScreenElementError({
-            target: button('Bookmark'),
             matches: [
+                match(),
+                match({ label: 'Email', type: 'TextField', value: 'a@b.test' }),
                 match({ identifier: 'event-1-bookmark' }),
-                match({ identifier: 'event-2-bookmark' }),
+                { type: 'Other' },
             ],
-        });
-
-        // Then - the rewrite is copy-pasteable and names the alternative
-        expect(message).toContain('testId("event-1-bookmark")');
-        expect(message).toContain('also here: event-2-bookmark');
-    });
-
-    test('does not re-suggest scoping a target that is already scoped', () => {
-        // Given - an ambiguity inside an existing scope
-        const { message } = ambiguousScreenElementError({
-            target: within(testId('event-list'), button('Bookmark')),
-            matches: [match(), match()],
-        });
-
-        // Then - scoping is not offered again; the other routes remain
-        expect(message).not.toContain('scope it');
-        expect(message).toContain('other element');
-    });
-
-    test('states the rule and where it is documented', () => {
-        // Given - any refusal
-        const { message } = ambiguousScreenElementError({
             target: button('Bookmark'),
-            matches: [match(), match()],
         });
 
-        // Then - an agent reading the failure reads the rule, and where it is whole
-        expect(message).toContain(`why: ${REFUSAL_WHY['target-matches-one-element']}`);
-        expect(message).toContain('read: docs/24-linting.md#target-matches-one-element');
+        // Then - the whole refusal, readable without opening the simulator
+        expect(message).toBe(
+            [
+                'found: Ambiguous element: button("Bookmark") matched 4 elements on the screen —',
+                '  1. Button "Bookmark"',
+                '  2. TextField "Email"  value="a@b.test"',
+                '  3. Button "Bookmark"  [testId: event-1-bookmark]',
+                '  4. Other',
+                'why: A verb acts on exactly ONE element: a target that matches several is refused, never settled by the first.',
+                'fix: designate one of them:',
+                SCOPE_BOOKMARK,
+                OTHER_ELEMENT,
+                'read: docs/24-linting.md#target-matches-one-element',
+            ].join('\n'),
+        );
+    });
+
+    test('offers exact only to a target that opted out, and only when it would leave some of the candidates but not all', () => {
+        // Given - a target that opted out over a mix, over whole matches only, over substring matches only, and an ordinary target over a mix
+        const loose = button('Bookmark', { exact: false });
+        const mixed = [match(), match({ label: 'Bookmark all' }), match()];
+
+        // Then - the suggestion, with what it leaves, for the first alone
+        expect([
+            fixesOf(loose, mixed),
+            fixesOf(loose, [match(), match()]),
+            fixesOf(loose, [match({ label: 'Bookmarks' }), match({ label: 'Bookmark all' })]),
+            fixesOf(button('Bookmark'), mixed),
+        ]).toStrictEqual([
+            [
+                `  • scope it       within(testId('…'), button("Bookmark", { exact: false })) — a screen has no landmarks; any target works as the scope`,
+                '  • exact name     button("Bookmark", { exact: true })   [leaves 2 of 3]',
+                OTHER_ELEMENT,
+            ],
+            [
+                `  • scope it       within(testId('…'), button("Bookmark", { exact: false })) — a screen has no landmarks; any target works as the scope`,
+                OTHER_ELEMENT,
+            ],
+            [
+                `  • scope it       within(testId('…'), button("Bookmark", { exact: false })) — a screen has no landmarks; any target works as the scope`,
+                OTHER_ELEMENT,
+            ],
+            [SCOPE_BOOKMARK, OTHER_ELEMENT],
+        ]);
+    });
+
+    test('offers distinct identifiers as a testId rewrite, except to a testId target or for a single identifier, and scoping only to an unscoped target', () => {
+        // Given - candidates with two identifiers, with one shared, and a testId or scoped target over two
+        const two = [
+            match({ identifier: 'event-1-bookmark' }),
+            match({ identifier: 'event-2-bookmark' }),
+            match({ identifier: 'event-2-bookmark' }),
+            match({ identifier: 'event-3-bookmark' }),
+        ];
+
+        const scoped = within(testId('event-list'), content('Bookmark'));
+
+        // Then - the rewrite names the first and the others found
+        expect([
+            fixesOf(button('Bookmark'), two),
+            fixesOf(button('Bookmark'), two.slice(1, 3)),
+            fixesOf(testId('row'), two),
+            fixesOf(scoped, [match(), match()]),
+        ]).toStrictEqual([
+            [
+                SCOPE_BOOKMARK,
+                '  • test id        testId("event-1-bookmark")   [also here: event-2-bookmark, event-3-bookmark]',
+                OTHER_ELEMENT,
+            ],
+            [SCOPE_BOOKMARK, OTHER_ELEMENT],
+            [
+                `  • scope it       within(testId('…'), testId("row")) — a screen has no landmarks; any target works as the scope`,
+                OTHER_ELEMENT,
+            ],
+            [OTHER_ELEMENT],
+        ]);
     });
 });

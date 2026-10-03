@@ -20,7 +20,7 @@ function formatFixes(target: Target, matches: MobileElementMatch[]): string[] {
         );
     }
 
-    if (target.exact === false && target.name !== undefined) {
+    if (target.exact === false) {
         const remaining = matches.filter((match) => match.label === target.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(

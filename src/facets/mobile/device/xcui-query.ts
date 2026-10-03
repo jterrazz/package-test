@@ -70,7 +70,9 @@ export async function matching(
     /* oxlint-enable typescript/await-thenable */
 }
 
-async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {
+async function captureMatch(
+    element: Pick<DriverElement, 'getAttribute'>,
+): Promise<MobileElementMatch> {
     const [type, label, value, identifier] = await Promise.all([
         element.getAttribute('type'),
         element.getAttribute('label'),
@@ -79,6 +81,7 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
     ]);
     const shortLabel = label === null || label === '' ? undefined : shortened(label);
     return {
+        // Stryker disable next-line Regex: an XCUITest type names itself once, at its start
         type: (type ?? 'Unknown').replace(/^XCUIElementType/u, ''),
         ...(shortLabel === undefined ? {} : { label: shortLabel }),
         ...(value === null || value === '' || value === label ? {} : { value }),
@@ -87,15 +90,9 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
 }
 
 export async function captureMatches(matches: ElementList): Promise<MobileElementMatch[]> {
-    const count = Math.min(await matches.length, MAX_REPORTED_MATCHES);
-    const evidence: MobileElementMatch[] = [];
-    for (let index = 0; index < count; index++) {
-        const match = matches[index];
-        if (match !== undefined) {
-            evidence.push(await captureMatch(match));
-        }
-    }
-    return evidence;
+    return await Promise.all(
+        [...matches].slice(0, MAX_REPORTED_MATCHES).map(async (match) => await captureMatch(match)),
+    );
 }
 
 /** invariant: actionability includes scroll-into-view: the next pass re-resolves the element as visible. */
@@ -105,13 +102,13 @@ export async function scrollToOffscreen(
     level: Target,
 ): Promise<void> {
     const offscreen = await matching(scope, level, { anyVisibility: true });
-    const first = offscreen[0];
-    if (first === undefined) {
+    const elementId = offscreen[0]?.elementId;
+    if (elementId === undefined) {
         return;
     }
     try {
         // outside: `mobile: scroll`'s `toVisible` is for table and collection views: scroll the found element by id.
-        await driver.executeScript('mobile: scrollToElement', [{ elementId: first.elementId }]);
+        await driver.executeScript('mobile: scrollToElement', [{ elementId }]);
     } catch {
         // invariant: not scrollable (or already settling) — keep polling.
     }
@@ -121,8 +118,8 @@ export async function scrollToOffscreen(
 export function onScreenLabels(source: string): string[] {
     return [
         ...new Set(
-            [...source.matchAll(/label="(?<label>[^"]{2,60})"/gu)].map(
-                (match) => match.groups?.label ?? '',
+            [...source.matchAll(/label="(?<label>[^"]{2,60})"/gu)].map(([, label]) =>
+                String(label),
             ),
         ),
     ].slice(0, 15);
