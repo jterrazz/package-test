@@ -1,9 +1,4 @@
 {
-    "lint/consumer/catalogue/manifest.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "lint/consumer/checks/database-named-only-when-several.ts": {
         "complexity": {
             "count": 1
