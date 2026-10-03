@@ -7,6 +7,23 @@ const SETUP_MODULE = '/repo/specs/cli/_setup/built.ts';
 ruleTester().run('no-expect-outside-a-test', noExpectOutsideATest, {
     invalid: [
         {
+            name: 'A destructured expect renamed, one imported without await, and an expect.soft are bound expects.',
+            code: `export async function expectBuilt(stdout: string): Promise<void> {
+    const { expect: check } = await import('vitest');
+    const later = import('vitest');
+    check(stdout).toContain('Built.');
+    later.expect(stdout);
+    check.soft(stdout);
+    check.a.b(stdout);
+}`,
+            errors: [
+                { column: 4, line: 4, messageId: 'expectOutsideATest' },
+                { column: 4, line: 5, messageId: 'expectOutsideATest' },
+                { column: 4, line: 6, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
+        {
             code: `import { expect } from 'vitest';
 export function expectBuilt(stdout: string): void {
     expect(stdout).toContain('Built.');
@@ -60,6 +77,26 @@ export function expectBuilt(stdout: string): void {
         },
     ],
     valid: [
+        {
+            name: 'An expect of another module, another name from vitest, or an import of another module is none of vitest’s.',
+            code: `import { expect } from 'node:assert';
+import vitest from 'vitest';
+export async function probe(): Promise<void> {
+    const { test } = await import('vitest');
+    const mine = await import('./mine.js');
+    let pending;
+    expect(1);
+    vitest.expect(1);
+    test(1);
+    mine.expect(1);
+}`,
+            filename: SETUP_MODULE,
+        },
+        {
+            name: 'Ground is no module of this suite.',
+            code: `import { expect } from 'vitest';\nexpect(1);`,
+            filename: '/repo/specs/cli/_fixtures/app/check.ts',
+        },
         {
             code: `import * as vitest from 'vitest';
 vitest.expectTypeOf(build).returns.toBeString();`,

@@ -34,12 +34,14 @@ function bindImport(node: AstNode, into: Bindings): void {
     }
     for (const specifier of childList(node, 'specifiers')) {
         const local = identifierName(child(specifier, 'local'));
+        // Stryker disable next-line ConditionalExpression: an import's local name is always read
         if (local === undefined) {
             continue;
         }
         if (specifier.type === 'ImportNamespaceSpecifier') {
             into.namespaces.add(local);
         } else if (
+            // Stryker disable next-line ConditionalExpression: only a named specifier names what it imports
             specifier.type === 'ImportSpecifier' &&
             identifierName(child(specifier, 'imported')) === 'expect'
         ) {
@@ -51,6 +53,7 @@ function bindImport(node: AstNode, into: Bindings): void {
 function isVitestImport(init: AstNode | undefined): boolean {
     const imported = init?.type === 'AwaitExpression' ? child(init, 'argument') : init;
     return (
+        // Stryker disable next-line ConditionalExpression: only an import expression has a source
         imported?.type === 'ImportExpression' && stringValue(child(imported, 'source')) === 'vitest'
     );
 }
@@ -60,23 +63,26 @@ function bindDynamicImport(declarator: AstNode, into: Bindings): void {
         return;
     }
     const id = child(declarator, 'id');
+    // Stryker disable next-line OptionalChaining: a declarator always declares something
     if (id?.type === 'Identifier') {
         into.namespaces.add(identifierName(id) ?? '');
         return;
     }
     for (const property of childList(id, 'properties')) {
         if (identifierName(child(property, 'key')) === 'expect') {
+            // Stryker disable next-line LogicalOperator,StringLiteral: a destructured property always binds a name
             into.expects.add(identifierName(child(property, 'value')) ?? 'expect');
         }
     }
 }
 
 function isBoundExpect(callee: AstNode | undefined, bound: Bindings): boolean {
+    // Stryker disable next-line StringLiteral: a callee no name reaches binds nothing either way
     const [root = '', member, ...rest] = (memberPath(callee) ?? identifierName(callee) ?? '').split(
         '.',
     );
     return bound.expects.has(root)
-        ? member === undefined || rest.length === 0
+        ? rest.length === 0
         : bound.namespaces.has(root) && member === 'expect';
 }
 
@@ -98,11 +104,13 @@ export const noExpectOutsideATest = defineRule(
         createOnce(context: Context): Visitor {
             const bound: Bindings = { expects: new Set(), namespaces: new Set() };
             return {
+                // Stryker disable BlockStatement,CallExpression: the bindings are a file's own, and the tester lints each case alone
                 before: () => {
                     bound.expects.clear();
                     bound.namespaces.clear();
                     return assertsHere(context);
                 },
+                // Stryker restore BlockStatement,CallExpression
                 ImportDeclaration(node: AstNode) {
                     bindImport(node, bound);
                 },

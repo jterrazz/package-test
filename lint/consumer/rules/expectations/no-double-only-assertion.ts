@@ -29,20 +29,24 @@ function makesADouble(init: AstNode | undefined): boolean {
     if (init.type === 'AwaitExpression') {
         return makesADouble(child(init, 'argument'));
     }
+    // Stryker disable next-line ConditionalExpression,BlockStatement: only a call has a callee path
     if (init.type !== 'CallExpression') {
         return false;
     }
     const path = memberPath(child(init, 'callee'));
+    // Stryker disable next-line ConditionalExpression: no path is in the set
     return path !== undefined && DOUBLE_FACTORIES.has(path);
 }
 
 function doubleBindings(root: AstNode): Set<string> {
     const names = new Set<string>();
     walk(root, (node) => {
+        // Stryker disable next-line ConditionalExpression: only a declarator's `init` is a call a factory makes
         if (node.type !== 'VariableDeclarator' || !makesADouble(child(node, 'init'))) {
             return;
         }
         const name = identifierName(child(node, 'id'));
+        // Stryker disable next-line ConditionalExpression: undefined names no subject an assertion reads
         if (name !== undefined) {
             names.add(name);
         }
@@ -76,6 +80,7 @@ export const noDoubleOnlyAssertion = defineRule(
                     const doubles = doubleBindings(program);
                     walk(program, (node) => {
                         if (
+                            // Stryker disable next-line ConditionalExpression,LogicalOperator: only a call has a test callee
                             node.type !== 'CallExpression' ||
                             !isTestCallee(child(node, 'callee'))
                         ) {
@@ -96,6 +101,7 @@ export const noDoubleOnlyAssertion = defineRule(
                             assertions += 1;
                             const root = chainRootName(assertion.subject);
                             if (
+                                // Stryker disable next-line ConditionalExpression,LogicalOperator: undefined names no double
                                 root !== undefined &&
                                 local.has(root) &&
                                 readsTheCallLog(assertion.matcher)
