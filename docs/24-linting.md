@@ -172,7 +172,7 @@ This package records and judges its own debt. The family keeps one tracked ratch
 
 #### What `typescript fix` does to it
 
-- **It re-records both falls** — lowering an entry or dropping it — before it judges, and `typescript fix` runs it.
+- **It re-records both falls** — lowering an entry or dropping it — before it judges.
 - **It runs the plugin's own autofixes first**, after its own rewrites and movers: the project's oxlint, under a wrapper of its root config that arms the `jterrazz/*` rules alone, in that config and in every config it extends — a plugin armed through `extends` keeps its fixes, and a JSON config, `.jsonc` or extended, is read as oxlint reads it, comments and trailing commas allowed. So no other rulebook's fixer writes a byte, and the ratchets count the checker's findings and the plugin's diagnostics over the one tree they leave: one `typescript fix` settles a diagnostic its fix writes (`no-repeated-chain-setting`'s view, `one-describe-per-file`'s describe, `expected-constant-shared`'s shared expectation).
 - **A nested oxlint config gets a run of its own**, under the same wrapper of ITS config: a config handed with `-c` turns oxlint's nested discovery off, so the root's run leaves the subtree alone rather than write where another config governs, and the subtree's run fixes it by the config the ratchet's count judges it by.
 - **A config oxlint could not load under the wrapper stops `typescript fix`**, naming it: oxlint exits 1 for it as for diagnostics left, and a pass that read it as the latter would have fixed nothing and said nothing.
