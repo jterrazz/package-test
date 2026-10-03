@@ -13,7 +13,9 @@ const VOLATILE = [
     { pattern: /(?:^|[\s"'(=])\/(?:Users|home)\/[^\s"'/]+\//u, token: '{{workdir}} or {{path}}' },
 ] as const;
 
-/** A `{{token}}` is removed first: a path written after one is the token's tail, not a literal. */
+/** The character a path pattern reads before the path, which is no part of it. */
+const LEAD = /^[\s"'(=]/u;
+
 /** A pattern matches the shape that makes a value volatile, so the carve-out looks up the whole word, or one pinned `/tmp/` would exempt every temp path. */
 function wordAround(text: string, index: number): string {
     let start = index;
@@ -21,6 +23,7 @@ function wordAround(text: string, index: number): string {
     while (start > 0 && !/[\s"'(),;=]/u.test(text[start - 1] ?? '')) {
         start -= 1;
     }
+    // Stryker disable next-line EqualityOperator: one step past the end slices the same word
     while (end < text.length && !/[\s"'(),;=]/u.test(text[end] ?? '')) {
         end += 1;
     }
@@ -30,12 +33,13 @@ function wordAround(text: string, index: number): string {
 export function volatileLiteralIn(
     line: string,
 ): undefined | { found: string; token: string; word: string } {
-    const bare = line.replaceAll(/\{\{[^}]*\}\}/gu, ' ');
+    // invariant: a path written right after a `{{token}}` follows its `}`, which opens no path: it is the token's tail, not a literal.
     for (const { pattern, token } of VOLATILE) {
-        const found = pattern.exec(bare);
+        const found = pattern.exec(line);
         if (found !== null) {
-            const at = found.index + found[0].length - found[0].trimStart().length;
-            return { found: found[0].trim(), token, word: wordAround(bare, at) };
+            const value = found[0].replace(LEAD, '');
+            const at = found.index + found[0].length - value.length;
+            return { found: value, token, word: wordAround(line, at) };
         }
     }
     return undefined;
