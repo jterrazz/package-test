@@ -420,7 +420,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability     | api | job | cli | lint | integration | website | mobile | component | module |
 | -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `{{any}}`      | 0   | —   | 3   | —    | 0           | 0       | —      | —         | 2      |
+| `{{any}}`      | 0   | —   | 3   | —    | 0           | 0       | —      | —         | 3      |
 | `{{base64}}`   | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
 | `{{date}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{duration}}` | 0   | —   | 1   | —    | 0           | 0       | —      | —         | 2      |
@@ -439,7 +439,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `{{time}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{ulid}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{url}}`      | 0   | —   | 4   | —    | 0           | 0       | —      | —         | 1      |
-| `{{uuid}}`     | 2   | —   | 2   | —    | 0           | 0       | —      | —         | 3      |
+| `{{uuid}}`     | 2   | —   | 2   | —    | 0           | 0       | —      | —         | 4      |
 | `{{workdir}}`  | 0   | —   | 8   | —    | 0           | 0       | —      | —         | 1      |
 
 ### Exemptions

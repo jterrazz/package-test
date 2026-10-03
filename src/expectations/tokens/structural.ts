@@ -12,75 +12,57 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-/** Captures are recorded in traversal order: arrays left to right, object keys in expected-key order. */
+/** Captures are recorded in traversal order: arrays left to right, object keys in expected-key order. A subset allows the actual object keys the expected does not state; arrays need equal length either way. */
+function structurally(
+    expected: unknown,
+    actual: unknown,
+    scope: CaptureScope,
+    subset: boolean,
+): boolean {
+    if (expected instanceof Matcher) {
+        return matcherMatches(expected, actual, scope);
+    }
+    if (typeof expected === 'string' && hasPlaceholders(expected)) {
+        return placeholderStringMatches(expected, actual, scope);
+    }
+    if (Array.isArray(expected)) {
+        return (
+            Array.isArray(actual) &&
+            actual.length === expected.length &&
+            expected.every((item, index) => structurally(item, actual[index], scope, subset))
+        );
+    }
+    if (isPlainObject(expected)) {
+        return (
+            isPlainObject(actual) &&
+            (subset || Object.keys(actual).length === Object.keys(expected).length) &&
+            Object.keys(expected).every(
+                (key) => key in actual && structurally(expected[key], actual[key], scope, subset),
+            )
+        );
+    }
+    return Object.is(expected, actual);
+}
+
 export function structuralEquals(expected: unknown, actual: unknown, scope: CaptureScope): boolean {
-    if (expected instanceof Matcher) {
-        return matcherMatches(expected, actual, scope);
-    }
-    if (typeof expected === 'string' && hasPlaceholders(expected)) {
-        return placeholderStringMatches(expected, actual, scope);
-    }
-    if (Array.isArray(expected)) {
-        if (!Array.isArray(actual) || actual.length !== expected.length) {
-            return false;
-        }
-        return expected.every((item, i) => structuralEquals(item, actual[i], scope));
-    }
-    if (isPlainObject(expected)) {
-        if (!isPlainObject(actual)) {
-            return false;
-        }
-        const expectedKeys = Object.keys(expected);
-        const actualKeys = Object.keys(actual);
-        if (expectedKeys.length !== actualKeys.length) {
-            return false;
-        }
-        return expectedKeys.every(
-            (key) => key in actual && structuralEquals(expected[key], actual[key], scope),
-        );
-    }
-    return Object.is(expected, actual);
+    return structurally(expected, actual, scope, false);
 }
 
-/** Subset match: extra keys on the actual value are allowed; arrays still need equal length. */
 export function structuralSubset(expected: unknown, actual: unknown, scope: CaptureScope): boolean {
-    if (expected instanceof Matcher) {
-        return matcherMatches(expected, actual, scope);
-    }
-    if (typeof expected === 'string' && hasPlaceholders(expected)) {
-        return placeholderStringMatches(expected, actual, scope);
-    }
-    if (Array.isArray(expected)) {
-        if (!Array.isArray(actual) || actual.length !== expected.length) {
-            return false;
-        }
-        return expected.every((item, i) => structuralSubset(item, actual[i], scope));
-    }
-    if (isPlainObject(expected)) {
-        if (!isPlainObject(actual)) {
-            return false;
-        }
-        return Object.keys(expected).every(
-            (key) => key in actual && structuralSubset(expected[key], actual[key], scope),
-        );
-    }
-    return Object.is(expected, actual);
+    return structurally(expected, actual, scope, true);
 }
 
+/** A text without tokens reads as itself, every character literal. */
 export function textEquals(expected: string, actual: string, scope: CaptureScope): boolean {
-    if (!hasPlaceholders(expected)) {
-        return expected === actual;
-    }
     return placeholderStringMatches(expected, actual, scope);
 }
 
-/** With placeholders the fixture text becomes an unanchored pattern. */
+const UNICODE = 'u';
+
+/** The fixture text becomes an unanchored pattern, a text without tokens a literal one. */
 export function textContains(expected: string, actual: string, scope: CaptureScope): boolean {
-    if (!hasPlaceholders(expected)) {
-        return actual.includes(expected);
-    }
     const parsed = parsePlaceholderString(expected, scope);
-    const found = new RegExp(parsed.source, 'u').exec(actual);
+    const found = new RegExp(parsed.source, UNICODE).exec(actual);
     if (!found) {
         return false;
     }
