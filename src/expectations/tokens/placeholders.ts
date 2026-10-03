@@ -1,3 +1,4 @@
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { TOKEN_KINDS } from '../../../lint/kit/project/tokens.js';
 import { CaptureScope } from './capture-scope.js';
 import type { Matcher, MatcherKind } from './match.js';
@@ -52,6 +53,7 @@ const WHOLE_RES: Partial<Record<MatcherKind, RegExp>> = Object.fromEntries(
 );
 
 const wholeMatches = (kind: MatcherKind, actual: string): boolean =>
+    // Stryker disable next-line OptionalChaining: every kind read here has a pattern; any, string and workdir are answered before
     WHOLE_RES[kind]?.test(actual) === true;
 
 const PLACEHOLDER_RE = new RegExp(
@@ -64,17 +66,19 @@ export function hasPlaceholders(value: string): boolean {
     return PLACEHOLDER_RE.test(value);
 }
 
-function stableStringify(value: unknown): string {
+/** Its keys sorted at every depth, so two captures of one object read alike whatever their key order. */
+function canonical(value: unknown): unknown {
     if (Array.isArray(value)) {
-        return `[${value.map((item) => stableStringify(item)).join(',')}]`;
+        return value.map((item) => canonical(item));
     }
-    if (value !== null && typeof value === 'object') {
-        const entries = Object.entries(value)
-            .toSorted(([a], [b]) => (a < b ? -1 : 1))
-            .map(([key, item]) => `${JSON.stringify(key)}:${stableStringify(item)}`);
-        return `{${entries.join(',')}}`;
+    if (!isRecord(value)) {
+        return value;
     }
-    return JSON.stringify(value) ?? 'undefined';
+    return Object.fromEntries(
+        Object.keys(value)
+            .toSorted()
+            .map((key) => [key, canonical(value[key])]),
+    );
 }
 
 function capturedEquals(a: unknown, b: unknown): boolean {
@@ -88,11 +92,11 @@ function capturedEquals(a: unknown, b: unknown): boolean {
     ) {
         return String(a) === String(b);
     }
-    if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
-        // invariant: sorted-key form: two captures of one object are equal whatever the key order.
-        return stableStringify(a) === stableStringify(b);
-    }
-    return false;
+    return (
+        typeof a === 'object' &&
+        typeof b === 'object' &&
+        JSON.stringify(canonical(a)) === JSON.stringify(canonical(b))
+    );
 }
 
 export function recordRef(name: string, actual: unknown, scope: CaptureScope): boolean {
@@ -119,9 +123,7 @@ export function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureSc
         return true;
     }
     if (kind === 'workdir') {
-        return (
-            typeof actual === 'string' && scope.workdir !== undefined && actual === scope.workdir
-        );
+        return typeof actual === 'string' && actual === scope.workdir;
     }
     const numeric = NUMERIC_KINDS[kind];
     if (numeric !== undefined && typeof actual === 'number') {
@@ -133,7 +135,8 @@ export function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureSc
     if (kind === 'string') {
         return true;
     }
-    return wholeMatches(kind, actual) && (kind !== 'port' || isPortValue(Number(actual)));
+    // invariant: the port pattern holds the range itself.
+    return wholeMatches(kind, actual);
 }
 
 export function matcherMatches(matcher: Matcher, actual: unknown, scope: CaptureScope): boolean {
@@ -149,6 +152,7 @@ export function matcherMatches(matcher: Matcher, actual: unknown, scope: Capture
     }
     if (matcher.kind === 'ref') {
         if (
+            // Stryker disable next-line ConditionalExpression,LogicalOperator: no capture is held under no name
             matcher.notRef !== undefined &&
             scope.has(matcher.notRef) &&
             capturedEquals(scope.get(matcher.notRef), actual)
@@ -188,30 +192,27 @@ export function parsePlaceholderString(
     scope: CaptureScope,
 ): ParsedPlaceholderString {
     PLACEHOLDER_RE.lastIndex = 0;
-    const refs: ParsedPlaceholderString['refs'] = [];
+    const tokens = [...expected.matchAll(PLACEHOLDER_RE)].flatMap((found) => {
+        const { kind: written, ref } = found.groups ?? {};
+        const kind = TOKEN_KINDS.find((known) => known === written);
+        // Stryker disable next-line ConditionalExpression,ArrayDeclaration: the pattern names the token kinds alone
+        return kind === undefined ? [] : [{ found, kind, ref }];
+    });
     let source = '';
     let lastIndex = 0;
-    let single: ParsedPlaceholderString['single'] = null;
-    let count = 0;
-
-    for (const found of expected.matchAll(PLACEHOLDER_RE)) {
-        const kind = TOKEN_KINDS.find((known) => known === found.groups?.kind);
-        if (kind === undefined) {
-            continue;
-        }
-        const ref = found.groups?.ref;
-        source += escapeRegExp(expected.slice(lastIndex, found.index));
-        source += `(${placeholderSource(kind, scope)})`;
-        refs.push({ index: count, kind, ref });
-        count++;
+    for (const { found, kind } of tokens) {
+        source += `${escapeRegExp(expected.slice(lastIndex, found.index))}(${placeholderSource(kind, scope)})`;
         lastIndex = found.index + found[0].length;
-        if (found.index === 0 && found[0].length === expected.length) {
-            single = { kind, ref };
-        }
     }
     source += escapeRegExp(expected.slice(lastIndex));
-
-    return { pattern: new RegExp(`^${source}$`, 'u'), refs, single, source };
+    const [only] = tokens;
+    return {
+        // Stryker disable next-line StringLiteral: the token patterns are ASCII, read alike without the unicode flag
+        pattern: new RegExp(`^${source}$`, 'u'),
+        refs: tokens.map(({ kind, ref }, index) => ({ index, kind, ref })),
+        single: only?.found[0] === expected ? { kind: only.kind, ref: only.ref } : null,
+        source,
+    };
 }
 
 export function placeholderPatternSource(expected: string): string {

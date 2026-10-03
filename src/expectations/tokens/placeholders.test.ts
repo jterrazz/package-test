@@ -2,7 +2,12 @@ import { describe, expect, test } from 'vitest';
 
 import { CaptureScope } from './capture-scope.js';
 import { match, Matcher } from './match.js';
-import { matcherMatches, placeholderStringMatches } from './placeholders.js';
+import {
+    kindMatches,
+    matcherMatches,
+    placeholderStringMatches,
+    recordRef,
+} from './placeholders.js';
 
 const UUID_A = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 
@@ -118,5 +123,126 @@ describe('placeholders', () => {
         // Then - each token still rejects a value outside its alphabet (the overlap is not an "accepts anything" escape hatch)
         expect(tokenMatches(match.hex(), 'xyzt', scope)).toBe(false);
         expect(tokenMatches(match.base64(), 'not base64!', scope)).toBe(false);
+    });
+
+    test('recordRef — a second capture under one name equals the first across number and text, and objects whatever their key order', () => {
+        // Given - pairs captured under one name each
+        const pairs: [unknown, unknown][] = [
+            [1, '1'],
+            ['1', 1],
+            [1, '2'],
+            [true, 'true'],
+            [
+                { a: 1, b: [2, { c: 3, d: 4 }] },
+                { b: [2, { d: 4, c: 3 }], a: 1 },
+            ],
+            [[1, 2], { 0: 1, 1: 2 }],
+            [{ a: 1 }, { a: 2 }],
+            [null, {}],
+            [{}, null],
+            [Number.NaN, Number.NaN],
+            [[1], [2]],
+            [1, [1]],
+            ['1', [1]],
+            [[1], 1],
+            [Number.NaN, null],
+            [null, Number.NaN],
+        ];
+
+        // Then - the second capture holds only where it is the same value
+        expect(
+            pairs.map(([first, second], at) => {
+                const scope = new CaptureScope();
+                recordRef(`r${at}`, first, scope);
+                return recordRef(`r${at}`, second, scope);
+            }),
+        ).toStrictEqual([
+            true,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+        ]);
+    });
+
+    test('kindMatches — a value of each kind, numbers in range, and a workdir only when the scope knows one', () => {
+        // Given - a scope that knows its workdir, and one that does not
+        const scope = new CaptureScope();
+        scope.workdir = '/tmp/run';
+        const blind = new CaptureScope();
+
+        // Then - each value against its kind
+        expect([
+            [0, 65_535, 65_536, -1, 1.5, '65535', '65536', '0'].map((value) =>
+                kindMatches('port', value, scope),
+            ),
+            [
+                kindMatches('workdir', '/tmp/run', scope),
+                kindMatches('workdir', '/tmp/run', blind),
+                kindMatches('workdir', undefined, blind),
+            ],
+            [
+                kindMatches('workdir', 1, scope),
+                kindMatches('uuid', 7, scope),
+                kindMatches('string', 'x', scope),
+            ],
+        ]).toStrictEqual([
+            [true, true, false, false, false, true, false, true],
+            [true, false, false],
+            [false, false, true],
+        ]);
+    });
+
+    test('matcherMatches — an includes, regex or ref matcher missing what it needs matches nothing, and a ref refuses its excluded capture', () => {
+        // Given - a scope holding one capture
+        const scope = new CaptureScope();
+        scope.set('first', 'a');
+
+        // Then - each matcher read
+        expect([
+            matcherMatches(new Matcher('includes'), 'is undefined', scope),
+            matcherMatches(new Matcher('includes', { includes: 'b' }), 'abc', scope),
+            matcherMatches(new Matcher('includes', { includes: 'b' }), 1, scope),
+            matcherMatches(new Matcher('regex'), 'abc', scope),
+            matcherMatches(new Matcher('regex', { regex: /^a/u }), 'abc', scope),
+            matcherMatches(new Matcher('regex', { regex: /1/u }), 1, scope),
+            matcherMatches(new Matcher('ref'), 'a', scope),
+            matcherMatches(new Matcher('ref', { notRef: 'first', refName: 'second' }), 'a', scope),
+            matcherMatches(new Matcher('ref', { notRef: 'first', refName: 'third' }), 'b', scope),
+            matcherMatches(new Matcher('ref', { notRef: 'unset', refName: 'fourth' }), 'a', scope),
+        ]).toStrictEqual([false, true, false, false, true, false, false, false, true, true]);
+    });
+
+    test('placeholderStringMatches — tokens inside text, each capture read from its own group, and a single token read as the whole value', () => {
+        // Given - a scope, and texts holding tokens in each position
+        const scope = new CaptureScope();
+        const matches = (expected: string, actual: unknown): boolean =>
+            placeholderStringMatches(expected, actual, scope);
+
+        // Then - each text against its value
+        expect([
+            matches('{{int#a}} and {{int#b}}', '1 and 2'),
+            matches('{{int#b}} then {{int#a}}', '2 then 1'),
+            matches('{{int#a}} then {{int#b}}', '2 then 1'),
+            matches('{{uuid}} and more', `${UUID_A} and more`),
+            matches('x{{int}}', 'x7'),
+            matches('{{int}}', 7),
+            matches('n={{int}}', 7),
+            matches('{{string}}e', true),
+            matches('at {{workdir}}', 'at /tmp'),
+            matches('at {{workdir}}', 'at '),
+            matches('{{int}}{{int}}', 12),
+        ]).toStrictEqual([true, true, false, true, true, true, false, false, false, false, true]);
     });
 });
