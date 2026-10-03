@@ -5,6 +5,7 @@ import { packageWith } from '../testing/package-tree.fixtures.js';
 import { isProductionModule, materialAt, testPackageOf } from './material.js';
 
 const ROOT = packageWith({
+    'app.stubs.ts': 'export const app = {};\n',
     'package.json': JSON.stringify({ imports: { '#data/*': { default: './specs/_fixtures/*' } } }),
     'src/stubs/engine.ts': 'export const engine = 1;\n',
     'src/domain/order.ts': 'export const order = 1;\n',
@@ -56,6 +57,7 @@ describe('material', () => {
         { kind: 'the specs tree', path: 'specs/_shared/_setup/seed.ts' },
         { kind: 'ground', path: 'src/_requests/create.http' },
         { kind: 'a stub', path: 'src/news/stubs/http/events.ts' },
+        { kind: 'a stub', path: 'src/news/stubs/news.stubs.ts' },
         { kind: undefined, path: 'src/stubs/engine.ts' },
     ])('materialAt — `$path` is $kind', ({ kind, path }) => {
         // Given - a path of one kind

@@ -41,8 +41,8 @@ function holdsFacade(directory: string): boolean {
 export function materialAt(path: string, directory = false): MaterialKind | undefined {
     const parts = projectSegments(path);
     const folders = directory ? parts : parts.slice(0, -1);
-    const base = directory ? '' : (parts.at(-1) ?? '');
-    if (TEST_SUFFIX.test(base)) {
+    const isNamed = (pattern: RegExp): boolean => !directory && pattern.test(basename(path));
+    if (isNamed(TEST_SUFFIX)) {
         return 'a test file';
     }
     if (folders.includes('specs')) {
@@ -51,7 +51,7 @@ export function materialAt(path: string, directory = false): MaterialKind | unde
     if (folders.some((folder) => isGroundFolder(folder))) {
         return 'ground';
     }
-    if (STUBS_FACADE.test(base)) {
+    if (isNamed(STUBS_FACADE)) {
         return 'a stub';
     }
     return inStubsFolder(directory ? path : dirname(path), folders);
