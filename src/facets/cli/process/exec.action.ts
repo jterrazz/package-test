@@ -1,3 +1,6 @@
+import { statSync } from 'node:fs';
+import { isAbsolute, normalize, resolve, sep } from 'node:path';
+
 import { safeRealpath } from '../../../../lint/kit/project/resolve.js';
 import { defineAction } from '../../../chain/action.js';
 import type { ChainSignature } from '../../../chain/capability.js';
@@ -15,6 +18,45 @@ export type ExecSignature = ChainSignature & {
     };
 };
 
+function isLongRunning(options: ExecOptions | undefined): options is ExecOptions {
+    return options?.waitFor !== undefined || options?.timeout !== undefined;
+}
+
+function requireRelativeFolder(cwd: string | undefined): void {
+    if (cwd === undefined) {
+        return;
+    }
+    const inside = normalize(cwd);
+    if (isAbsolute(cwd) || inside === '..' || inside.startsWith(`..${sep}`)) {
+        throw new Error(
+            refusal({
+                fix: "name a folder below the working directory, relative to it: .exec('check', { cwd: 'packages/site' })",
+                found: `.exec(…, { cwd: ${JSON.stringify(cwd)} }), a folder outside the working directory`,
+                read: 'docs/14-cli.md#cwd--a-folder-of-the-working-directory',
+                why: 'A command runs in the working directory the chain laid, or in one of its folders: anywhere else is the machine, not the fixture.',
+            }),
+        );
+    }
+}
+
+function runFolder(root: string, cwd: string | undefined): string {
+    if (cwd === undefined) {
+        return root;
+    }
+    const folder = resolve(root, cwd);
+    if (statSync(folder, { throwIfNoEntry: false })?.isDirectory() !== true) {
+        throw new Error(
+            refusal({
+                fix: 'lay the folder with a fixture, or name one the fixtures laid',
+                found: `.exec(…, { cwd: ${JSON.stringify(cwd)} }), a folder the working directory does not hold`,
+                read: 'docs/14-cli.md#cwd--a-folder-of-the-working-directory',
+                why: 'A command runs in a folder the chain laid: one that does not exist has no files of the fixture.',
+            }),
+        );
+    }
+    return folder;
+}
+
 /** A sequence stops at the first non-zero exit. The one execution method (`disk-named-by-relative-path`). */
 export const exec = defineAction<
     'exec',
@@ -28,10 +70,11 @@ export const exec = defineAction<
     name: 'exec',
     perform: async ([args = '', options], read, { command }, { config, testDir, workDir }) => {
         // oxlint-disable-next-line typescript/no-non-null-assertion -- `prepare` always answers a directory: a command never runs in the source tree
-        const cwd = workDir!;
-        const env = childEnv(config, read(chainEnv), safeRealpath(cwd));
+        const root = workDir!;
+        const cwd = runFolder(root, options?.cwd);
+        const env = childEnv(config, read(chainEnv), safeRealpath(root));
         let output: CliOutput;
-        if (options) {
+        if (isLongRunning(options)) {
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `prepare` refused a sequence with options: one command is what reaches here
             output = await command.watch(args as string, cwd, options, env);
         } else if (Array.isArray(args)) {
@@ -52,7 +95,7 @@ export const exec = defineAction<
             testDir,
             testRunId: config.dockerTestRunId ?? undefined,
             transform: config.transform,
-            workDir: cwd,
+            workDir: root,
         });
     },
     prepare: ([args = '', options]) => {
@@ -66,7 +109,7 @@ export const exec = defineAction<
                 }),
             );
         }
-        if (options && Array.isArray(args)) {
+        if (isLongRunning(options) && Array.isArray(args)) {
             throw new Error(
                 refusal({
                     fix: 'wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
@@ -76,6 +119,7 @@ export const exec = defineAction<
                 }),
             );
         }
+        requireRelativeFolder(options?.cwd);
         return { workDir: scratchDirectory('spec-command-') };
     },
     row: { group: 'Terminal action', name: '.exec()', probe: '.exec(' },

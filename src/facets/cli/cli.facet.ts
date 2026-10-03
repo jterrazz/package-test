@@ -8,7 +8,9 @@ import { getCallerDir } from '../../chain/paths/caller.js';
 import { fixture } from '../../disk/fixture.capability.js';
 import { fsFixtures } from '../../disk/fs-fixtures.adapter.js';
 import { fsLinks } from '../../disk/fs-links.adapter.js';
+import { inProcessSteps } from '../../disk/in-process-steps.adapter.js';
 import { link } from '../../disk/link.capability.js';
+import { prepare } from '../../disk/prepare.capability.js';
 import { databaseSet } from '../../services/seed/database-set.adapter.js';
 import { seed } from '../../services/seed/seed.capability.js';
 import type { CliConfig, CliSpecificationOptions } from './cli.handle.js';
@@ -18,7 +20,7 @@ import { exec } from './process/exec.action.js';
 
 const composition = {
     actions: [exec, run],
-    capabilities: [env, fixture, link, seed, sharing],
+    capabilities: [env, fixture, link, prepare, seed, sharing],
     options: {
         commands: { group: 'Constructor option', name: 'commands', probe: 'commands:' },
         defaults: { group: 'Constructor option', name: 'defaults', probe: 'defaults:' },
@@ -44,6 +46,7 @@ export const cliFacet = defineFacet<CliSpecification, Started<CliConfig, 'comman
         command: config.command,
         databases: databaseSet(config),
         links: fsLinks,
+        steps: inProcessSteps,
         workdir: fsFixtures,
     }),
     locate: getCallerDir,

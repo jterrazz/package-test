@@ -79,6 +79,10 @@ test('dev server boots', async () => {
 - Termination targets the **whole process group**, not just the direct shell child: the process is spawned detached (its own group on POSIX) and signalled via the negative pid, so descendants — a `tsdown --watch` grandchild under a `dev` command, a background server the script forked — die with it instead of leaking past the spec. On platforms without group support (Windows), or when the group is already gone, it degrades to the direct child kill.
 - Passing either option marks the run as long-running; combining them with the array (sequence) form is an error.
 
+#### `cwd` — a folder of the working directory
+
+`{ cwd: 'packages/site' }` runs the command in a folder of the working directory, named relative to it — a workspace member a tool judges from inside, a clone whose parent holds what the tool must not read. The folder is one the fixtures laid; a path leaving the working directory, absolute or climbing out of it, is refused before anything runs, and so is a folder the working directory does not hold. `cwd` is no long-running option: it combines with a sequence, and with `waitFor`. The result still reads the working directory as a whole — `result.file('packages/site/out.txt')`.
+
 Quoting is identical between the one-shot and `waitFor` forms: both run the full command line through the shell (`spawnSync` vs `spawn`, `shell: true`), so a quoted argument behaves the same either way — there is no naive whitespace split.
 
 #### Sequences: array form
@@ -103,7 +107,7 @@ Every spec gets a brand-new temp directory (`mkdtemp`) as its cwd. The runner ne
 
 That directory lives in the **OS temp dir**, inside the run's own temp root, and it stays there on purpose. It is scratch — created for one spec, removed once that spec's test has finished (at the run's end under `test.concurrent`, see [06 — Setting up](06-setting-up.md#where-a-run-writes)) — not something the project produced, so it does not belong under `.artifacts/` with the caches a next run reuses (see [06 — Setting up](06-setting-up.md#where-a-run-writes)). Writing it inside the project would also change what a spec sees: a binary that walks up looking for a `package.json` would find yours instead of nothing.
 
-Two disjoint verbs shape a spec's state (rule `seeds-are-sql`): **`.fixture()` carries file state** (an isolated tree copied into the cwd), **`.seed()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree.
+Two disjoint verbs shape a spec's state (rule `seeds-are-sql`): **`.fixture()` carries file state** (an isolated tree copied into the cwd), **`.seed()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree; only what git cannot carry is laid by a step ([`.prepare()`](#prepare--what-no-fixture-can-carry)).
 
 A fixture is named by `file()` or `directory()`, with its path from the spec file spelled in full — the wrapper states what it names:
 
@@ -253,6 +257,29 @@ test('loads the plugin the project installed', async () => {
 ```
 
 A link is armed after every fixture, so it replaces a package a fixture laid under the same name. The name is a package name — `@scope/name` or `name` — and one name is linked once per chain; a bare name no `node_modules` above the spec holds, or a `directory()` naming nothing, is refused before the binary runs. So is a working directory whose `node_modules` (or scope folder) is a symlink — a fixture can carry one, a binary can lay one: the link would replace the real install it points to — or a file, which leaves the link no folder to be laid in.
+
+### `.prepare()` — what no fixture can carry
+
+A fixture tree is what git tracks, and some ground git never tracks: a `.git` for a tool that reads a repository, an empty folder, a file the repository's own `.gitignore` keeps out of the fixture, an index holding one file and not another. `.prepare(step)` runs a function of the working directory's absolute path once every fixture and link is laid, in the order the steps are stated, before the binary runs; a step may be async, and one that throws fails the chain before anything runs.
+
+```typescript
+test('refuses a tracked build artefact', async () => {
+    // Given - a project, made a repository whose index holds a buildinfo its .gitignore excludes
+    const result = await cli
+        .fixture(directory('./_fixtures/project/'))
+        .prepare((workdir) => {
+            writeFileSync(join(workdir, 'tsconfig.tsbuildinfo'), '{}\n');
+            execFileSync('git', ['init', '--quiet'], { cwd: workdir });
+            execFileSync('git', ['add', '--force', 'tsconfig.tsbuildinfo'], { cwd: workdir });
+        })
+        .exec('check');
+
+    // Then
+    expect(result.exitCode).toBe(1);
+});
+```
+
+A step is the Given of state no fixture can hold, never a second way to write one: a file a fixture could carry belongs in the fixture, where it is read in the tree rather than in code, and a package belongs to `.link()`.
 
 ### The chain never reaches a real system
 

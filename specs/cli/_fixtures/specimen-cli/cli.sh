@@ -196,6 +196,14 @@ case "$COMMAND" in
     package)
         node -p "const manifest = require('$2/package.json'); manifest.name + '@' + manifest.version"
         ;;
+    tracked)
+        # What the repository around the working directory holds in its index.
+        git ls-files
+        ;;
+    here)
+        # The folder the command runs in, by its own name.
+        basename "$PWD"
+        ;;
     help)
         echo "Usage: cli <command>"
         echo ""

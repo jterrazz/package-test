@@ -32,7 +32,7 @@ How to test with `@jterrazz/test`, and how this repository is built. New here: r
 | [18 — Services](18-services.md)                 | Real databases, caches and processes: `postgres()`, `redis()`, `sqlite()`, `process()` |
 | [19 — Time and doubles](19-time-and-doubles.md) | `clock`, `mockOf()`, and the doubles ladder                                            |
 
-The disk a subject reads is laid by its chain — `.fixture()` and `.link()` on a CLI ([14](14-cli.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([16](16-lint.md)) — and every path a test names is spelled with `file()` or `directory()` ([23 § The naming recap](23-conventions.md#the-naming-recap)).
+The disk a subject reads is laid by its chain — `.fixture()`, `.link()` and, for what git cannot carry, `.prepare()` on a CLI ([14](14-cli.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([16](16-lint.md)) — and every path a test names is spelled with `file()` or `directory()` ([23 § The naming recap](23-conventions.md#the-naming-recap)).
 
 ### Acting on a screen
 

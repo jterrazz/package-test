@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 
-import type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './cli.port.js';
+import type { CliEnv, CliInput, CliOutput, CliPort, WatchOptions } from './cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
 /** Grace period between SIGTERM and the SIGKILL escalation. */
@@ -49,7 +49,7 @@ function exitCodeOf(code: null | number, waitFor: string | undefined): number {
 /** Resolves 0 when `waitFor` appears, the exit code when the process ends first, 124 at the timeout; the timeout timer is unref'd. */
 export async function observeProcess(
     child: ObservableProcess,
-    options: ExecOptions,
+    options: WatchOptions,
 ): Promise<CliOutput> {
     const { waitFor } = options;
     return await new Promise((resolve) => {
@@ -128,7 +128,7 @@ export class ExecAdapter implements CliPort {
     async watch(
         args: string,
         cwd: string,
-        options: ExecOptions,
+        options: WatchOptions,
         extraEnv?: CliEnv,
     ): Promise<CliOutput> {
         const env = buildEnv(extraEnv);

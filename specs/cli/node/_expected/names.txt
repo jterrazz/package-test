@@ -92,6 +92,7 @@
     PositionedCases
     PositionedRuleTester
     PostgresOptions
+    PrepareStep
     ProcessHandle
     ProcessOptions
     RedisOptions

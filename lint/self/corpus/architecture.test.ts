@@ -15,6 +15,7 @@ const SETUPS = [
     'headers',
     'intercept',
     'link',
+    'prepare',
     'rules',
     'seed',
     'viewport',

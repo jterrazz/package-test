@@ -15,3 +15,4 @@ export type {
     SpecStream,
 } from '../../../lint/kit/project/spec-grammar.js';
 export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './process/cli.port.js';
+export type { PrepareStep } from '../../disk/prepare.port.js';

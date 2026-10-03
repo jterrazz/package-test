@@ -116,6 +116,11 @@ export async function typeRows(): Promise<void> {
     await cli.run(file('./case.yaml'));
     // @ts-expect-error disk-named-by-relative-path — a path is a value where a verb takes one [`Argument of type 'FileAt<"./_requests/orders.http">' is not assignable to parameter of type 'string'`]
     await api.get(file('./_requests/orders.http'));
+    // @ts-expect-error what-no-fixture-can-carry — a step is a function of the working directory [`Argument of type 'string' is not assignable to parameter of type 'PrepareStep'`]
+    cli.prepare('git init');
+    // @ts-expect-error cwd-is-a-folder — a folder is named by its relative path [`Type 'number' is not assignable to type 'string'`]
+    await cli.exec('check', { cwd: 1 });
+    await cli.prepare(() => undefined).exec('check', { cwd: 'packages/site' });
     // @ts-expect-error disk-named-by-relative-path — a command is a value where a verb takes one [`Argument of type 'FileAt<"./_fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
     await cli.exec(file('./_fixtures/args.txt'));
 
