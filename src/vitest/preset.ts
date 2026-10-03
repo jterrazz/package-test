@@ -15,7 +15,6 @@ const COVERAGE = {
         '**/*.d.ts',
         '**/*.test-d.ts',
         '**/*.fixtures.ts',
-        'dist/**',
         '.artifacts/**',
         '**/*.config.ts',
         '**/*.config.mts',

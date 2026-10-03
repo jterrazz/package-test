@@ -127,6 +127,8 @@ const integration = {
 | `test.globalSetup`                                                                     | update mode, the run's temp root                                   | Update mode writes after the run is reported; the temp root is [below](#where-a-run-writes)                       |
 | `plugins`                                                                              | `literate()`, when `literate:` is given                            | Turns each `<case>.spec.yaml` into a test file ([15 — Spec documents](15-documents.md))                           |
 
+Coverage attaches to every process a run spawns (`autoAttachSubprocess`), and reads `dist/` only to map each bundle back to the source it was built from (`excludeAfterRemap`): a spec that runs the built command counts toward the sources it exercised.
+
 It sets nothing else on purpose. `fileParallelism`, `reporters`, `environment`, `env` and every `include` are true of one project and not of another, so a project states them — a helper does it for you. The coverage provider is yours to install.
 
 The defaults reach every inline project too, since vitest resolves each project as its own config. A project given as a glob string, a promise or a function is handed back untouched.

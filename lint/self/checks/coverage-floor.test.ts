@@ -34,15 +34,16 @@ describe('checkCoverageFloor', () => {
         const config = await derived;
         const coverage = config.test?.coverage;
 
-        // Then - children attached, and every path judged after the remap, so a bundle under `dist/` counts as the source it maps back to
+        // Then - children attached, `dist/` read, and every path judged after the remap, so a bundle counts as the source it maps back to
         expect(
             coverage?.provider === 'v8'
                 ? {
                       afterRemap: coverage.excludeAfterRemap,
                       attached: coverage.autoAttachSubprocess,
+                      distRead: !(coverage.exclude ?? []).includes('dist/**'),
                   }
                 : coverage,
-        ).toStrictEqual({ afterRemap: true, attached: true });
+        ).toStrictEqual({ afterRemap: true, attached: true, distRead: true });
     });
 
     test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — the tarball ships no map of the bundles it carries', () => {
