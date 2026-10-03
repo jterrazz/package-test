@@ -230,12 +230,11 @@ describe('facet-matrix', () => {
     test('facet capability declaration (`discovery-grows-a-guard` guard) — each kind declares exactly the accessors its result publishes', () => {
         // Given - every result class, pinned to its own `keyof`
         // Then - the declaration names the same accessors, per column
-        for (const column of FACET_COLUMNS) {
-            const names = [
-                ...new Set(RESULTS[column].flatMap((result) => published(result))),
-            ].toSorted();
-            expect(declared(column, 'Result accessor'), `${column} result`).toStrictEqual(names);
-        }
+        expect(FACET_COLUMNS.map((column) => declared(column, 'Result accessor'))).toStrictEqual(
+            FACET_COLUMNS.map((column) =>
+                [...new Set(RESULTS[column].flatMap((result) => published(result)))].toSorted(),
+            ),
+        );
     });
 
     test('facet capability declaration (`discovery-grows-a-guard` guard) — each drawing surface declares exactly the verbs its visitor hands out', () => {

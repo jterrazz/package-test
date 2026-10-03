@@ -31,9 +31,11 @@ describe('vitest', () => {
             'toThrowErrorMatchingInlineSnapshot',
             'toThrowErrorMatchingSnapshot',
         ]);
-        for (const [matcher, message] of Object.entries(matchers)) {
-            expect(message.length, `${matcher} states no fix`).toBeGreaterThan(0);
-        }
+        expect(
+            Object.entries(matchers)
+                .filter(([, message]) => message.length === 0)
+                .map(([matcher]) => matcher),
+        ).toStrictEqual([]);
     });
 
     test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — `no-vitest-time-or-global-stub` — the four vi methods that take a seam, and not the one that restores itself', () => {

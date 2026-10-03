@@ -145,9 +145,9 @@ describe('matrix', () => {
         // Then - none of them is a claim with nothing behind it
         const found = layers(ROOT);
         expect(found).toHaveLength(5);
-        for (const layer of found) {
-            expect(layer.count, `${layer.layer} is empty`).toBeGreaterThan(0);
-        }
+        expect(
+            found.filter((layer) => layer.count === 0).map((layer) => layer.layer),
+        ).toStrictEqual([]);
     });
 
     test('capability matrix (meta-test `every-capability-exercised`) — the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {

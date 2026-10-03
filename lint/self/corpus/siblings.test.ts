@@ -43,12 +43,11 @@ describe('siblings', () => {
         const rows = classified(ROOT);
 
         // Then - a kind nobody matches is a reason for a shape that left; it goes
-        for (const kind of SIBLINGLESS_KINDS) {
-            expect(
-                rows.some((row) => row.kind === kind),
-                `no module matches the kind "${kind.name}"`,
-            ).toBe(true);
-        }
+        expect(
+            SIBLINGLESS_KINDS.filter((kind) => !rows.some((row) => row.kind === kind)).map(
+                (kind) => kind.name,
+            ),
+        ).toStrictEqual([]);
     });
 
     test('modules with no sibling test (meta-test `siblingless-module-declared`) — a module no kind LISTS is unclaimed, whatever tree it is written in', () => {
@@ -62,12 +61,9 @@ describe('siblings', () => {
         ];
 
         // Then - none of them is claimed: `siblingless-module-declared` asks for the test, or for the kind
-        for (const path of newcomers) {
-            expect(
-                SIBLINGLESS_KINDS.some((kind) => kind.claims(path)),
-                `${path} is claimed by a kind that never listed it`,
-            ).toBe(false);
-        }
+        expect(
+            newcomers.filter((path) => SIBLINGLESS_KINDS.some((kind) => kind.claims(path))),
+        ).toStrictEqual([]);
     });
 
     test('modules with no sibling test (meta-test `siblingless-module-declared`) — the table chapter 03 publishes is byte-identical to a fresh generation', () => {

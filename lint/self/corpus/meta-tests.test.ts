@@ -18,10 +18,9 @@ describe('metaTests', () => {
         expect(rows.length).toBeGreaterThan(15);
         expect(rows.some((row) => row.file.startsWith('lint/self/'))).toBe(true);
         expect(rows.some((row) => row.file.startsWith('specs/lint/meta/'))).toBe(true);
-        for (const row of rows) {
-            expect(row.holds.length, `${row.file} declares no describe`).toBeGreaterThan(0);
-            expect(row.tests, `${row.file} declares no test`).toBeGreaterThan(0);
-        }
+        expect(
+            rows.filter((row) => row.holds.length === 0 || row.tests === 0).map((row) => row.file),
+        ).toStrictEqual([]);
     });
 
     test('the meta-test channel, read off its own files — this file is one of the rows, under the title it declares', () => {

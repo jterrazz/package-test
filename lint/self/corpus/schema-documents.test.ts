@@ -229,11 +229,17 @@ describe('schema-documents', () => {
             const { embed, instances } = SHAPES[shape];
 
             // Then - both readers accept it: the breaches below are the law, not the shape
-            for (const instance of instances) {
-                const text = JSON.stringify(embed(instance));
-                expect(parserRefusal(text, 'case.spec.yaml')).toBeNull();
-                expect(validate(documentData(text))).toStrictEqual([]);
-            }
+            expect(instances.length).toBeGreaterThan(0);
+            expect(
+                instances.flatMap((instance) => {
+                    const text = JSON.stringify(embed(instance));
+                    return (
+                        parserRefusal(text, 'case.spec.yaml') === null
+                            ? []
+                            : [`the parser refuses ${text}`]
+                    ).concat(validate(documentData(text)).map((verdict) => `${text}: ${verdict}`));
+                }),
+            ).toStrictEqual([]);
         },
     );
 

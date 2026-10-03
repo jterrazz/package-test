@@ -43,13 +43,20 @@ describe('type-channel', () => {
             const byLine = refusalsByLine(source);
 
             // Then - each marked line carries its own error, and no unmarked line carries any
-            for (const row of rows) {
-                const said = byLine.get(row.line) ?? [];
-                expect(
-                    said.some((message) => message.includes(row.expected)),
-                    `${row.id} — ${row.reason} (line ${row.line}): the compiler said ${JSON.stringify(said)}`,
-                ).toBe(true);
-            }
+            expect(rows.length).toBeGreaterThan(0);
+            expect(
+                rows
+                    .filter(
+                        (row) =>
+                            !(byLine.get(row.line) ?? []).some((message) =>
+                                message.includes(row.expected),
+                            ),
+                    )
+                    .map(
+                        (row) =>
+                            `${row.id} — ${row.reason} (line ${row.line}): the compiler said ${JSON.stringify(byLine.get(row.line) ?? [])}`,
+                    ),
+            ).toStrictEqual([]);
             const marked = new Set(rows.map((row) => row.line));
             expect([...byLine.keys()].filter((line) => !marked.has(line))).toStrictEqual([]);
         },

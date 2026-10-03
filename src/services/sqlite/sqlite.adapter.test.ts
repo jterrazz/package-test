@@ -227,11 +227,13 @@ describe('sqlite', () => {
         }
 
         // Then - each template sits inside its own project, and the two are different files that both exist
-        for (const { root, templatePath } of templates) {
-            const expected = resolve(root, '.artifacts/vitest/sqlite');
-            expect(templatePath.startsWith(`${expected}/`)).toBe(true);
-            expect(isValidSqliteTemplate(templatePath)).toBe(true);
-        }
+        expect(
+            templates.map(
+                ({ root, templatePath }) =>
+                    templatePath.startsWith(`${resolve(root, '.artifacts/vitest/sqlite')}/`) &&
+                    isValidSqliteTemplate(templatePath),
+            ),
+        ).toStrictEqual([true, true]);
         expect(templates[0]?.templatePath).not.toBe(templates[1]?.templatePath);
 
         for (const { root } of roots) {
@@ -294,10 +296,9 @@ describe('sqlite', () => {
             '.artifacts/vitest/sqlite',
             sqliteTemplateName({ init: initSqlPath }),
         );
-        for (const db of handles) {
-            expect(db.started).toBe(true);
-            expect(db.connectionString).toBe(`file:${templatePath}`);
-        }
+        expect(handles.map((db) => [db.started, db.connectionString])).toStrictEqual(
+            handles.map(() => [true, `file:${templatePath}`]),
+        );
 
         const check = new Database(templatePath, { readonly: true });
         try {

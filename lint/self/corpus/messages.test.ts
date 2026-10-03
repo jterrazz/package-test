@@ -20,31 +20,48 @@ import { chapterOf, goldenCheckerLines, ROOT, rowNamed, sourcesUnder } from './m
 describe('messages', () => {
     test('`message-has-four-parts` — every message of a static rule states the four parts, its why and read its row’s', () => {
         // Given - every message the shipped plugin can print, before oxlint fills its data
-        for (const [name, rule] of Object.entries({ ...plugin.rules, ...selfPlugin.rules })) {
-            const convention = rule.meta?.docs?.sentence ?? '';
-            for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
-                // Then - no part is missing, and the row's own sentence and heading are the ones it states
-                expect(missingParts(message), `${name}.${key}`).toStrictEqual([]);
-                expect(lessonParts(message)?.why, `${name}.${key}`).toBe(firstSentence(convention));
-                expect(lessonParts(message)?.read, `${name}.${key}`).toBe(
-                    readAt(rowNamed(name), chapterOf(name)),
-                );
-            }
-        }
+        const messages = Object.entries({ ...plugin.rules, ...selfPlugin.rules }).flatMap(
+            ([name, rule]) =>
+                Object.entries(rule.meta?.messages ?? {}).map(([key, message]) => ({
+                    convention: rule.meta?.docs?.sentence ?? '',
+                    key,
+                    message,
+                    name,
+                })),
+        );
+        expect(messages.length).toBeGreaterThan(50);
+
+        // Then - no part is missing, and the row's own sentence and heading are the ones it states
+        expect(
+            messages
+                .filter(
+                    ({ convention, message, name }) =>
+                        missingParts(message).length > 0 ||
+                        lessonParts(message)?.why !== firstSentence(convention) ||
+                        lessonParts(message)?.read !== readAt(rowNamed(name), chapterOf(name)),
+                )
+                .map(({ key, name }) => `${name}.${key}`),
+        ).toStrictEqual([]);
     });
 
     test('`message-has-four-parts` — every checker pass renders a whole lesson from its row', () => {
         // Given - one finding of each pass a checker runs, the published one and this package's own
-        for (const pass of [...CHECKER_PASS_IDS, ...SELF_CHECKER_PASS_IDS]) {
-            const message = lessonOf(rowNamed(pass), readAt(rowNamed(pass), chapterOf(pass)), {
-                fix: 'the gesture',
-                found: 'the finding',
-            });
+        const passes = [...CHECKER_PASS_IDS, ...SELF_CHECKER_PASS_IDS];
+        expect(passes.length).toBeGreaterThan(5);
 
-            // Then - the row's sentence and heading fill the two parts a finding does not write
-            expect(missingParts(message)).toStrictEqual([]);
-            expect(lessonParts(message)?.why).toBe(firstSentence(rowNamed(pass).sentence));
-        }
+        // Then - the row's sentence and heading fill the two parts a finding does not write
+        expect(
+            passes.filter((pass) => {
+                const message = lessonOf(rowNamed(pass), readAt(rowNamed(pass), chapterOf(pass)), {
+                    fix: 'the gesture',
+                    found: 'the finding',
+                });
+                return (
+                    missingParts(message).length > 0 ||
+                    lessonParts(message)?.why !== firstSentence(rowNamed(pass).sentence)
+                );
+            }),
+        ).toStrictEqual([]);
     });
 
     test('`message-has-four-parts` — every checker finding a spec goldens is a whole lesson', () => {
@@ -56,9 +73,7 @@ describe('messages', () => {
 
         // Then - each line the checker printed states the four parts
         expect(lines.length).toBeGreaterThan(20);
-        for (const message of lines) {
-            expect(missingParts(message)).toStrictEqual([]);
-        }
+        expect(lines.filter((message) => missingParts(message).length > 0)).toStrictEqual([]);
     });
 
     test('`message-has-four-parts` — every refusal of the runtime opens on its row’s sentence, and is thrown somewhere', () => {

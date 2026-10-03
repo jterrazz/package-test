@@ -94,7 +94,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 51    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 188   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
-| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 22    |
+| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 25    |
 
 <!-- /GENERATED:layers -->
 
@@ -480,14 +480,17 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->
 
-**23 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**26 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                    | Holds              | Tests |
 | -------------------------------------------- | ------------------ | ----- |
-| `lint/self/catalogue/manifest.test.ts`       | manifest           | 31    |
+| `lint/self/catalogue/manifest.test.ts`       | manifest           | 5     |
 | `lint/self/corpus/architecture.test.ts`      | architecture       | 4     |
 | `lint/self/corpus/audience.test.ts`          | audience           | 9     |
+| `lint/self/corpus/catalogue-proofs.test.ts`  | catalogue-proofs   | 11    |
+| `lint/self/corpus/catalogue-rows.test.ts`    | catalogue-rows     | 12    |
 | `lint/self/corpus/compositions.test.ts`      | compositions       | 4     |
+| `lint/self/corpus/coordinates.test.ts`       | coordinates        | 3     |
 | `lint/self/corpus/docs-typecheck.test.ts`    | docs-typecheck     | 6     |
 | `lint/self/corpus/env-allowlist.test.ts`     | env-allowlist      | 4     |
 | `lint/self/corpus/facet-matrix.test.ts`      | facet-matrix       | 5     |
