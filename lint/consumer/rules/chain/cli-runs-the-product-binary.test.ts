@@ -25,6 +25,11 @@ ruleTester().run('cli-runs-the-product-binary', cliRunsTheProductBinary, {
     ],
     valid: [
         {
+            name: 'A runner handed nothing, or a name holding the product, and a name declared with no value.',
+            code: "let BIN;\nconst PRODUCT = resolve(dir, '../bin/typescript.sh');\nconst a = await specification.cli();\nconst b = await specification.cli(PRODUCT);\nconst c = await specification.cli(BIN);\nrun('./node_modules/.bin/oxlint');",
+            filename: '/repo/specs/cli/cli.specification.ts',
+        },
+        {
             name: "The product's own command wrapper — the real command under test.",
             code: "const { cli } = await specification.cli(resolve(dir, '../bin/typescript.sh'));",
             filename: '/repo/specs/cli/cli.specification.ts',

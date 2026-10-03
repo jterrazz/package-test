@@ -23,11 +23,13 @@ function isDirective(comment: Comment): boolean {
 }
 
 function lineStartAt(text: string, offset: number): number {
+    // Stryker disable next-line ArithmeticOperator: a comment's offset and the one after it are both `/`, never a newline
     return text.lastIndexOf('\n', offset - 1) + 1;
 }
 
 function lineEndAt(text: string, offset: number): number {
     const newline = text.indexOf('\n', offset);
+    // Stryker disable next-line ConditionalExpression,UnaryOperator: a comment inside a test's callback always has the callback's close on a line below
     return newline === -1 ? text.length : newline;
 }
 
@@ -61,10 +63,10 @@ export const markerOnOneLine = defineRule(
                     const { text } = context.sourceCode;
                     const comments = context.sourceCode
                         .getCommentsInside(callback)
-                        .filter((comment) => comment.type === 'Line' && nodeStart(comment) >= 0)
-                        .toSorted((a, b) => nodeStart(a) - nodeStart(b));
+                        .filter((comment) => comment.type === 'Line');
                     for (const found of markerComments(comments)) {
                         const { start } = found;
+                        // Stryker disable next-line ConditionalExpression,EqualityOperator: a marker found inside a comment always has its offset
                         if (start < 0) {
                             continue;
                         }
@@ -77,7 +79,9 @@ export const markerOnOneLine = defineRule(
                         const continuation = comments.find((comment: Comment) => {
                             const at = nodeStart(comment);
                             return (
+                                // Stryker disable next-line EqualityOperator: a comment never starts on a line's newline
                                 at >= nextLineStart &&
+                                // Stryker disable next-line EqualityOperator: a comment never starts on a line's newline
                                 at <= lineEndAt(text, nextLineStart) &&
                                 text.slice(lineStartAt(text, at), at) === indent &&
                                 markerOf(comment) === undefined &&

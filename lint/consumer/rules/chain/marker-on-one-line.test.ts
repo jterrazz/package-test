@@ -37,6 +37,33 @@ ruleTester().run('marker-on-one-line', markerOnOneLine, {
     ],
     valid: [
         {
+            name: 'A block comment under a marker, and a marker trailing code above more code and its comment, are no wrap.',
+            code: `test('ships', () => {
+    // Given - a paid order
+    /* the order comes from the fixture */
+    run(); // Given - a paid order
+    run(); // the same again
+    expect(ship(order)).toBe(true);
+});`,
+            filename: TEST_FILE,
+        },
+        {
+            name: 'A call that is no test, a test with no callback, and production code are not judged.',
+            code: `run(() => {
+    // Given - a paid order
+    // continued
+});
+test('ships');`,
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('ships', () => {
+    // Given - a paid order
+    // continued
+});`,
+            filename: '/repo/src/domain/order.ts',
+        },
+        {
             name: 'One line each.',
             code: `test('ships', () => {
     // Given - a paid order
