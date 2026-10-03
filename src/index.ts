@@ -41,7 +41,8 @@ export { intercept } from './stubs/delivery/same-process/intercept.js';
 export type { Intercept, InterceptOptions, InterceptScope } from './stubs/intercept/intercept.js';
 export { postgres, type PostgresOptions } from './services/postgres/postgres.adapter.js';
 export { redis, type RedisOptions } from './services/redis/redis.adapter.js';
-export { sqlite, type SqliteOptions } from './services/sqlite/sqlite.adapter.js';
+export { sqlite } from './services/sqlite/sqlite.adapter.js';
+export type { SqliteOptions } from './services/sqlite/sqlite-template.js';
 export {
     processService as process,
     ProcessHandle,
