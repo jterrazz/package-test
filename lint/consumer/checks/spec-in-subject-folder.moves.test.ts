@@ -185,23 +185,6 @@ describe('fixSpecInSubjectFolder', () => {
         ]);
     });
 
-    test('subject-moves — a finding its author silenced is neither reported nor fixed', () => {
-        // Given - a misfiled spec whose first line says why
-        const source = [
-            "import { api } from '../api.specification.js'; // checker-disable-line spec-in-subject-folder -- the folder is the case",
-            "test('a', async () => { await api.get('/orders'); });",
-            '',
-        ].join('\n');
-        const root = specsTree({
-            'api/api.specification.ts': RUNNER,
-            'api/orders/listing.spec.ts': source,
-        });
-
-        // Then - nothing
-        expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
-        expect(fixSpecInSubjectFolder(root)).toStrictEqual([]);
-    });
-
     test('subject-moves — a spec of a specimen is no subject: its routes are neither split nor filed', () => {
         // Given - a runner driving a specimen, and a spec under seed/ reaching two of its routes
         const root = specsTree({
@@ -266,5 +249,40 @@ describe('fixSpecInSubjectFolder', () => {
             pricing: true,
             pricingCopied: false,
         });
+    });
+
+    test('subject-moves — a lift repoints the document that reads the ground it moves', () => {
+        // Given - a check document and a spec of the fix command, both standing on the check folder's project
+        const root = specsTree({
+            'cli/check/_fixtures/project/index.ts': 'export {};\n',
+            'cli/check/fixed.spec.ts': [
+                "import { directory } from '@jterrazz/test';",
+                "import { cli } from '../cli.specification.js';",
+                "test('fixes', async () => { await cli.fixture(directory('./_fixtures/project/')).exec('fix'); });",
+                '',
+            ].join('\n'),
+            'cli/check/recorded.spec.yaml': [
+                'description: checks the project',
+                'fixture: ./_fixtures/project/',
+                'runs:',
+                '    - command: check',
+                '      exit: 0',
+                '',
+            ].join('\n'),
+            'cli/cli.specification.ts':
+                "export const { cleanup, cli } = await specification.cli('./bin.sh');\n",
+        });
+
+        // When - the fix files the spec under its command
+        fixSpecInSubjectFolder(root);
+
+        // Then - the project lands where both readers reach it, and the document names it there
+        expect({
+            document: readFileSync(join(root, 'cli/check/recorded.spec.yaml'), 'utf8').includes(
+                'fixture: ../_fixtures/project/',
+            ),
+            lifted: existsSync(join(root, 'cli/_fixtures/project/index.ts')),
+            moved: existsSync(join(root, 'cli/fix/fixed.spec.ts')),
+        }).toStrictEqual({ document: true, lifted: true, moved: true });
     });
 });

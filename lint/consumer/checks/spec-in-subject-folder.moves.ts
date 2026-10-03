@@ -9,6 +9,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve, sep } from 'node:path';
 
 import { repointModuleTests } from '../../kit/checker/repoint.js';
+import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { shown, silenced, splitPlan, subjectSpecs } from '../../kit/project/spec-subjects.js';
 import type { SpecRead } from '../../kit/project/spec-subjects.js';
 import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../kit/project/tree.js';
@@ -16,7 +18,24 @@ import { RELATIVE_LITERAL, relativePath } from './spec-in-subject-folder.prune.j
 import { splitFiles } from './spec-in-subject-folder.split.js';
 import type { Draft } from './spec-in-subject-folder.split.js';
 
+function documentReferences(specsRoot: string): { file: string; target: string }[] {
+    return listFiles(specsRoot, (path) => path.endsWith(SPEC_EXTENSION)).flatMap((file) => {
+        try {
+            return documentPaths(parseSpecDocument(readFileSync(file, 'utf8'), file)).map(
+                ({ path }) => ({ file, target: resolve(dirname(file), path) }),
+            );
+        } catch {
+            return [];
+        }
+    });
+}
+
+/** A document reads its ground by its `fixture:` lines as a spec does by its literals: both follow a lifted entry. */
 function diskReferences(specsRoot: string): { file: string; target: string }[] {
+    return [...sourceReferences(specsRoot), ...documentReferences(specsRoot)];
+}
+
+function sourceReferences(specsRoot: string): { file: string; target: string }[] {
     return listFiles(specsRoot, (path) => /\.(?:spec|test)\.tsx?$/u.test(path)).flatMap((file) =>
         [...readFileSync(file, 'utf8').matchAll(RELATIVE_LITERAL)]
             .filter(

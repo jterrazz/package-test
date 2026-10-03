@@ -4,6 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { CHARTS, migrating, RUNNER, specsTree } from '../../kit/testing/subject.fixtures.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
+import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
 
 describe('checkSpecInSubjectFolder', () => {
     test('spec-in-subject-folder — a route written as its template is filed under the route, and a filled one that reads two ways teaches the template', () => {
@@ -70,5 +71,22 @@ describe('checkSpecInSubjectFolder', () => {
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
             'move it to api/data/list/listing.spec.ts — `typescript fix` moves it, and the ground it stands on',
         ]);
+    });
+
+    test('a finding its author silenced is neither reported nor fixed', () => {
+        // Given - a misfiled spec whose first line says why
+        const source = [
+            "import { api } from '../api.specification.js'; // checker-disable-line spec-in-subject-folder -- the folder is the case",
+            "test('a', async () => { await api.get('/orders'); });",
+            '',
+        ].join('\n');
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/listing.spec.ts': source,
+        });
+
+        // Then - nothing
+        expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
+        expect(fixSpecInSubjectFolder(root)).toStrictEqual([]);
     });
 });
