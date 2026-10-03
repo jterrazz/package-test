@@ -27,10 +27,20 @@ export function stringListAt(value: unknown, key: string): string[] {
 /** `npm pack --json` prints one report per package, keyed by name (npm ≥ 11) or in an array (earlier). */
 export function packedFilenames(report: string): string[] {
     const parsed: unknown = JSON.parse(report);
-    const reports: unknown[] =
-        typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : [];
+    const reports: unknown[] = Array.isArray(parsed)
+        ? parsed
+        : Object.values(isRecord(parsed) ? parsed : {});
     return reports.flatMap((entry) => {
         const filename = isRecord(entry) ? entry.filename : undefined;
         return typeof filename === 'string' ? [filename] : [];
     });
+}
+
+/** What a text that is no JSON stands for is the caller's to say. */
+export function parsedJson(text: string, otherwise: unknown): unknown {
+    try {
+        return JSON.parse(text) as unknown;
+    } catch {
+        return otherwise;
+    }
 }

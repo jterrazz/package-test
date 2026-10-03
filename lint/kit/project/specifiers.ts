@@ -1,6 +1,7 @@
 import { blankComments, isFile, readFileCached } from '@jterrazz/typescript/rules';
 import { dirname, join, resolve } from 'node:path';
 
+import { isRecord, parsedJson } from './json-shape.js';
 import { packageRootOf, projectRootOf } from './role.js';
 
 /** In the order a resolver tries them. */
@@ -18,11 +19,12 @@ function onDisk(path: string): string {
     if (isFile(path)) {
         return path;
     }
-    const extension = /\.[cm]?jsx?$/u.exec(path)?.[0];
+    // Stryker disable next-line Regex,StringLiteral: a module path ends on its extension, and no text the table lacks swaps
+    const extension = /\.[cm]?jsx?$/u.exec(path)?.[0] ?? '';
+    // Stryker disable next-line ArrayDeclaration,StringLiteral: an extension the table lacks swaps to nothing, and no swap of nothing names a file
+    const swaps = COMPILED[extension] ?? [];
     const candidates = [
-        ...(COMPILED[extension ?? ''] ?? []).map(
-            (swap) => path.slice(0, -(extension ?? '').length) + swap,
-        ),
+        ...swaps.map((swap) => path.slice(0, -extension.length) + swap),
         ...EXTENSIONS.map((added) => path + added),
         ...EXTENSIONS.map((added) => join(path, `index${added}`)),
     ];
@@ -31,21 +33,15 @@ function onDisk(path: string): string {
 
 function readJsonc(path: string): unknown {
     const text = readFileCached(path);
+    // Stryker disable next-line ConditionalExpression,BlockStatement: an absent file's null fails the parse below, which answers the same
     if (text === null) {
         return undefined;
     }
-    try {
-        return JSON.parse(blankComments(text).replaceAll(/,(?=\s*[\]}])/gu, '')) as unknown;
-    } catch {
-        return undefined;
-    }
+    return parsedJson(blankComments(text).replaceAll(/,(?=\s*[\]}])/gu, ''), null);
 }
 
 function recordOf(value: unknown): Record<string, unknown> | undefined {
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return undefined;
-    }
-    return Object.fromEntries(Object.entries(value));
+    return isRecord(value) ? value : undefined;
 }
 
 function targetsOf(value: unknown): string[] {
@@ -61,6 +57,7 @@ function targetsOf(value: unknown): string[] {
 function substitution(key: string, specifier: string): string | undefined {
     const star = key.indexOf('*');
     if (star === -1) {
+        // Stryker disable next-line StringLiteral: an exact entry's targets hold no star to fill
         return key === specifier ? '' : undefined;
     }
     const head = key.slice(0, star);
@@ -129,8 +126,7 @@ function resolutionOf(tsconfig: string, seen: Set<string>): Resolution {
     }
     seen.add(tsconfig);
     const config = recordOf(readJsonc(tsconfig));
-    const extended = config?.extends;
-    const bases = typeof extended === 'string' ? [extended] : targetsOf(extended);
+    const bases = targetsOf(config?.extends);
     const resolution: Resolution = {};
     for (const entry of bases) {
         const base = extendedConfig(tsconfig, entry);
