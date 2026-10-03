@@ -44,8 +44,65 @@ ruleTester().run('negative-golden-frozen', negativeGoldenFrozen, {
             errors: [{ column: 16, line: 2, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
+        {
+            name: 'A helper declared as a function, asserting with toThrowError, is where both halves meet.',
+            code: `function failing() {
+                expect(result.stdout).toMatch(file('./_expected/wrong.txt'));
+                expect(run).toThrowError();
+            }`,
+            errors: [{ column: 16, line: 2, messageId: 'unfrozenNegativeFixture' }],
+            filename: SPEC,
+        },
+        {
+            name: 'A helper asserting a rejection is one too.',
+            code: `const failing = async () => {
+                expect(result.stdout).toMatch(file('./_expected/wrong.txt'));
+                await expect(run()).rejects.toBeDefined();
+            };`,
+            errors: [{ column: 16, line: 2, messageId: 'unfrozenNegativeFixture' }],
+            filename: SPEC,
+        },
+        {
+            name: 'Options that name no frozen value, or one that is no literal, freeze nothing.',
+            code: `test('t', () => { expect(() => expect(a.stdout).toMatch(file('./_expected/w.txt'), { timeout: 1 })).toThrow(); expect(() => expect(a.stdout).toMatch(file('./_expected/w.txt'), { frozen: FROZEN })).toThrow(); });`,
+            errors: [
+                { column: 31, line: 1, messageId: 'unfrozenNegativeFixture' },
+                { column: 124, line: 1, messageId: 'unfrozenNegativeFixture' },
+            ],
+            filename: SPEC,
+        },
+        {
+            name: 'A string in place against a result stream, behind a `.not`, or against a text() read, is rewritten in place.',
+            code: "test('t', () => { expect(() => expect(result.stderr).toMatch('x')).toThrow(); expect(() => expect(result.json).not.toMatch('x')).toThrow(); expect(() => expect(text(r)).toMatch('x')).toThrow(); });",
+            errors: [
+                { column: 31, line: 1, messageId: 'unfrozenNegativeFixture' },
+                { column: 91, line: 1, messageId: 'unfrozenNegativeFixture' },
+                { column: 153, line: 1, messageId: 'unfrozenNegativeFixture' },
+            ],
+            filename: SPEC,
+        },
     ],
     valid: [
+        {
+            name: "A test declared through a suite's member is a test callback too, and a call that is no text() read is no result.",
+            code: "suite.test('t', () => { expect(r.stdout).toMatch(file('./_expected/x.txt')); expect(run).toThrow(); });\ntest('t', () => { expect(() => expect(other(r)).toMatch('x')).toThrow(); });",
+            filename: SPEC,
+        },
+        {
+            name: "The test's own body asserting a throw is no helper, whether it is `test` or `it`.",
+            code: `test('t', () => { expect(r.stdout).toMatch(file('./_expected/x.txt')); expect(run).toThrow(); });\nit('t', () => { expect(r.stdout).toMatch(file('./_expected/x.txt')); expect(run).toThrow(); });`,
+            filename: SPEC,
+        },
+        {
+            name: 'A golden at the top of the file sits in no helper, and one inside a block the expect wraps is past a statement.',
+            code: "expect(r.stdout).toMatch(file('./_expected/x.txt'));\ntest('t', () => { expect(() => { run(); expect(r.stdout).toMatch(file('./_expected/x.txt')); }).toThrow(); });",
+            filename: SPEC,
+        },
+        {
+            name: 'No subject, a subject that is no result, another matcher, no argument, or another assertion than expect, is nothing rewritten in place.',
+            code: "test('t', () => { expect(() => expect().toMatch('x')).toThrow(); expect(() => expect(r.other).toMatch('x')).toThrow(); expect(() => expect(stdout).toMatch('x')).toThrow(); expect(() => expect(r.stdout).toContain('x')).toThrow(); expect(() => expect(r.stdout).toMatch()).toThrow(); expect(() => assert(r.stdout).toMatch('x')).toThrow(); });",
+            filename: SPEC,
+        },
         {
             name: "A part of a text is vitest's, and a string's toMatch is vitest's: update mode writes neither.",
             code: "test('t', () => { expect(() => expect(result.stdout).toMatch(/x/)).toThrow(); });",
