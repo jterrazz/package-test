@@ -7,7 +7,7 @@ import { teacherOf } from '../../kit/checker/teacher.js';
 import { CHECKER } from './checker.js';
 import { CARRIED, CARRIED_IN_DEV } from './no-redundant-test-dependency.js';
 
-const LINT_ENGINE = new Set(['@oxlint/plugins', 'oxc-parser']);
+const LINT_PLUGIN_RUNTIME = new Set(['@oxlint/plugins', 'oxc-parser']);
 
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
@@ -83,7 +83,7 @@ describe('no-redundant-test-dependency', () => {
     });
 
     test('what the framework carries — the rule reads exactly the dependencies this package ships (ADR-008)', () => {
-        // Given - the dependencies of the published manifest, the lint engine's own aside
+        // Given - the dependencies of the published manifest, the lint plugin's own runtime set aside
         const manifest: unknown = JSON.parse(
             readFileSync(resolve(import.meta.dirname, '../../../package.json'), 'utf8'),
         );
@@ -98,7 +98,7 @@ describe('no-redundant-test-dependency', () => {
 
         // Then - a seam added to or dropped from `dependencies` moves the rule with it
         expect([...CARRIED, ...CARRIED_IN_DEV].toSorted()).toStrictEqual(
-            shipped.filter((name) => !LINT_ENGINE.has(name)).toSorted(),
+            shipped.filter((name) => !LINT_PLUGIN_RUNTIME.has(name)).toSorted(),
         );
     });
 });
