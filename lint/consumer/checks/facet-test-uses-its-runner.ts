@@ -1,5 +1,5 @@
 import { isGroundFolder } from '@jterrazz/typescript/rules';
-import { relative } from 'node:path';
+import { basename, relative } from 'node:path';
 
 import {
     facetFoldersOf,
@@ -23,14 +23,14 @@ export function checkFacetTestUsesItsRunner(specsRoot: string): Spotted[] {
             continue;
         }
         for (const file of walkFiles(path)) {
-            const name = file.slice(file.lastIndexOf('/') + 1);
-            if (!isTestFileName(name)) {
+            if (!isTestFileName(basename(file))) {
                 continue;
             }
             // invariant: a test file under ground is a golden or its input, never a spec.
             if (isUnderGround(relative(path, file))) {
                 continue;
             }
+            // Stryker disable next-line StringLiteral: a file the walk listed reads, and no stand-in for none reaches a runner
             if (reachesRunner(textOf(file) ?? '')) {
                 continue;
             }
