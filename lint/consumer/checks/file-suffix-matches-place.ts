@@ -16,14 +16,16 @@ import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';
 
-function* walk(dir: string): Generator<string> {
-    let entries;
+function entriesOf(dir: string): ReturnType<typeof treeEntries> {
     try {
-        entries = treeEntries(dir);
+        return treeEntries(dir);
     } catch {
-        return;
+        return [];
     }
-    for (const entry of entries) {
+}
+
+function* walk(dir: string): Generator<string> {
+    for (const entry of entriesOf(dir)) {
         const path = join(dir, entry.name);
         if (entry.isDirectory()) {
             if (PRUNED.has(entry.name)) {
@@ -44,26 +46,16 @@ function textOf(path: string): string {
     }
 }
 
-export type PlacementMove = {
-    fix: string;
-    from: string;
-    /** `undefined` when only the author can choose the facet. */
-    to?: string;
-};
+export type PlacementMove = { from: string; to: string };
 
 /** ls-lint never judges a file at the root it runs from, so a project's own root stays this rule's: every folder below it is `spec-file-in-a-specs-tree`'s. */
 export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Spotted[] {
-    let entries;
-    try {
-        entries = treeEntries(memberDir);
-    } catch {
-        return [];
-    }
-    return entries
+    return entriesOf(memberDir)
         .filter((entry) => entry.isFile() && entry.name.endsWith('.spec.ts'))
         .map(({ name }) => ({
             path: name,
             line: 1,
+            // Stryker disable next-line Regex: the name filtered above ends on the suffix
             fix: `move it under \`specs/<facet>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
             found: "a `.spec.ts` at the project's root, outside every `specs/` tree",
             rule: 'file-suffix-matches-place',
@@ -79,6 +71,7 @@ export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
         return {
             path: rel,
             line: 1,
+            // Stryker disable next-line Regex: every move is of a name ending on the suffix
             fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`typescript fix\` does it with \`git mv\``,
             found: `a \`.test.ts\` under \`${where}\`, where a file specifies the assembled product`,
             rule: 'file-suffix-matches-place',
@@ -87,13 +80,9 @@ export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
 }
 
 function isRootedFacetTree(specsRoot: string): boolean {
-    try {
-        return treeEntries(specsRoot).some(
-            (entry) => entry.isFile() && entry.name.includes('.specification.'),
-        );
-    } catch {
-        return false;
-    }
+    return entriesOf(specsRoot).some(
+        (entry) => entry.isFile() && entry.name.includes('.specification.'),
+    );
 }
 
 function movesUnderFacet(specsRoot: string): PlacementMove[] {
@@ -104,9 +93,10 @@ function movesUnderFacet(specsRoot: string): PlacementMove[] {
             continue;
         }
         const parts = relative(specsRoot, path).split(/[/\\]/u);
-        const facet = parts[0];
+        const [facet] = parts;
         // invariant: a file loose at the specs root is `specs-at-declared-depth`'s, and a non-facet first level is a repository suite, unless the tree itself is one facet's.
-        if (!rooted && (parts.length < 2 || facet === undefined || !FACETS.has(facet))) {
+        // Stryker disable next-line StringLiteral: a split path always has a first part, and a test file's name is no facet's
+        if (!rooted && !FACETS.has(facet ?? '')) {
             continue;
         }
         // invariant: a `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
@@ -117,7 +107,6 @@ function movesUnderFacet(specsRoot: string): PlacementMove[] {
             continue;
         }
         moves.push({
-            fix: 'rename to `.spec.ts`',
             from: path,
             to: `${path.slice(0, -'.test.ts'.length)}.spec.ts`,
         });
@@ -166,7 +155,7 @@ export function checkFileSuffixMatchesPlaceOfDocument(rel: string): DocumentFind
 export function fixFileSuffixMatchesPlace(root: string): string[] {
     const renamed: Rename[] = [];
     for (const { from, to } of movesUnderFacet(root)) {
-        if (to === undefined || existsSync(to)) {
+        if (existsSync(to)) {
             continue;
         }
         moveKeepingHistory(from, to);
