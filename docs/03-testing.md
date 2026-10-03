@@ -106,7 +106,14 @@ The counts are generated: a layer that stops growing while the surface does is v
 
 A rule is specified in `specs/lint/<rule-id>/<rule-id>.spec.ts` — a folder growing an aspect file of its own when one grows past the line limit — over the trees in its local `_fixtures/`, on one of five runners at the facet root: `lint.specification.ts` (both oxlint plugins, every rule on), `checker-lint.specification.ts` (the conventions checker), `self-lint.specification.ts` (the passes only this package runs), `preset-lint.specification.ts` (the `test()` preset's laws) and `self-preset-lint.specification.ts` (the same preset and this package's own name rule). Every report golden names each finding at its `file:line:column`, then its lesson a part per line; a meta-test holds every rule of the two plugins and every checker pass to a spec there, and every one of them to a golden naming the line and column it fires on. `meta/` holds the reach meta-test, and `kitchen-sink/` the checker's whole-surface regression net.
 
-The checker's own command line — the ratchet, `baseline`, `--member`, `--verbose`, `--format json`, what a document out of its format prints — is a binary, so it is a cli spec: `specs/cli/checker/` and `specs/cli/baseline/`, on `specs/cli/checker-cli.specification.ts`, whose goldens are the exact streams the checker prints.
+### The checker's command line
+
+The conventions checker is the toolchain's checker program handed this package's `#checker` contribution, and its command line is no consumer's surface: `typescript check`, `fix` and `baseline` drive it, and so do the specs — `specs/cli/checker/` and `specs/cli/baseline/`, on `specs/cli/checker-cli.specification.ts`, whose goldens are the exact streams it prints. What it reads, for whoever maintains it:
+
+- **A path is read for what it is.** A directory with a `specs` segment below the project root that holds it is a tree, walked as one. Anything else is a project root, and takes the run over the whole project anchored there — every `specs/` tree the workspaces declare below it, plus every member. A named root holding no `specs/` tree at all is refused with a non-zero exit, because the run asked for had nothing to walk.
+- **`--member <dir>`** runs the member pass over one member — the run the toolchain makes again in a member that declares presets of its own.
+- **`--format json`** prints the kit's findings, `[{ column, line, message, path, rule }]`, on stdout and nothing else, whatever the verdict, and the exit is still the verdict; `rule` is the key the ratchet counts, `jterrazz-check/<name>`.
+- **`--verbose`** adds, above the held line, where the run stood and what ran.
 
 ## Coverage is a ratchet, not a threshold
 

@@ -99,11 +99,9 @@ oxlint reads JavaScript and TypeScript only, and some conventions are about othe
 typescript check     # every pass, the conventions among them, over the whole project
 typescript fix       # the conventions' fixes first, then oxlint's and the formatter
 typescript baseline  # records .jterrazz/baseline.json › test beside the toolchain's sections
-node node_modules/@jterrazz/typescript/dist/checker.js \
-    --preset node_modules/@jterrazz/test/dist/checker.js specs   # one specs tree alone
 ```
 
-The last form takes the arguments read below — a specs tree or a project root by path, `--member <dir>`, `--format json`, `--verbose`, `baseline`.
+Those three are the whole surface: the checker's own command line is the toolchain's to drive, never a gesture a project types ([03 — Testing](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#the-checkers-command-line) keeps what it reads, for this repository's maintainers).
 
 **It is the rules kit's checker** — `runChecker` of `@jterrazz/typescript/rules`, the conventions pass and the `baseline` command handed to it — and **it prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding on stdout, the message last:
 
@@ -114,11 +112,7 @@ specs/api/_requests/x.http:3:1: error jterrazz-check(no-token-in-request): found
 
 The code is the pass's name, so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A check spots what it finds and teaches it — the position, what was found, the fix for this case — and the pass makes each finding with the kit's `defineCheck(row).finding(…)`, the row giving the why and the read. A spec proves a finding with `specification.lint()` ([16](16-lint.md)): its report reads oxlint's `unix` lines and these alike, heads each finding `file:line:column  jterrazz-check(<code>)` and writes its lesson a part per line below it, and drops every other line — a tally, a summary. It states oxlint's format itself, `--format=unix`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and the report refuses them rather than read them as a clean run.
 
-**A path is read for what it IS.** A directory with a `specs` segment below
-the project root that holds it is a tree, walked as one. Anything else is a project root, and takes the
-path-less run anchored there — every `specs/` tree the workspaces declare
-below it, plus every member. The tree passes read the first level of a tree (`file-suffix-matches-place`, `facet-test-uses-its-runner`, `facet-folder-has-specification`), so a project root is anchored on each specs tree it declares. A named root holding no `specs/` tree at all is refused with a non-zero
-exit, because the run the operator asked for had nothing to walk.
+A run judges the whole project: every `specs/` tree the workspaces declare below its root, plus every member. The tree passes read the first level of a tree (`file-suffix-matches-place`, `facet-test-uses-its-runner`, `facet-folder-has-specification`), so the run is anchored on each specs tree the project declares.
 
 What it checks:
 
@@ -139,7 +133,7 @@ The same listing answers every single path a pass probes — `named-path-exists`
 
 `typescript fix` applies the rewritable passes and writes every spec document in [its format](15-documents.md#the-schema-and-the-format), then checks what is left. A document out of its format is no finding and no baseline holds it: a check run names it and fails, as oxfmt's check does for a source file.
 
-## The member pass, and the JSON contract
+## The member pass
 
 Two findings are about a MEMBER rather than about a spec tree, and a member with no `specs/` root has to be judged all the same. A member's `vitest.config.ts` is no longer one of them: it is the line `jterrazz.config.ts` derives, which `@jterrazz/typescript`'s Config pass writes and holds.
 
@@ -155,9 +149,7 @@ The workspace it searches is walked UP to, from the member, and never taken from
 
 The member pass also carries the two findings a tree walk of the member makes: `no-snapshot-folder` (a folder named for goldens in another word) and `named-path-exists`'s module half — a `file()`/`directory()` in a module test under `src/` or `lint/` names an entry that exists, as surely as one in a spec.
 
-`--member <dir>` runs them over one member. With NO path — the run `typescript check` makes — both halves run over the whole project: every `specs/` root discovered from the root manifest's `workspaces`, and every member. That is the run the ratchet rests on ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)), so the contract is exactly "a path-less run reports what the per-root and per-member runs report" — and the discovery is the toolchain's, to the segment: a `workspaces` glob expands with `*` for one segment and `**` for any depth (bounded at six), and each member is walked for the spec roots it owns, a nested `web/specs` included. A shape `@jterrazz/typescript` reaches and this run did not would be a root its Test Conventions pass runs and the ratchet never counts.
-
-`--format json` prints the kit's findings, `[{ column, line, message, path, rule }]`, on stdout and nothing else, and the exit is still the verdict. `rule` is the key the ratchet counts, `jterrazz-check/<name>` — `jterrazz-check/no-unknown-token`, `jterrazz-check/no-redundant-test-dependency`.
+`typescript check` runs both halves over the whole project: every `specs/` root discovered from the root manifest's `workspaces`, and every member. That is the run the ratchet rests on ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)), so the contract is exactly "the run over the whole project reports what a run over each root and each member would" — and the discovery is the toolchain's, to the segment: a `workspaces` glob expands with `*` for one segment and `**` for any depth (bounded at six), and each member is walked for the spec roots it owns, a nested `web/specs` included. A shape `@jterrazz/typescript` reaches and this run did not would be a root its Test Conventions pass runs and the ratchet never counts.
 
 ### The ratchet: the `test` section of `.jterrazz/baseline.json`
 
@@ -179,7 +171,7 @@ This package records and judges its own debt. The family keeps one tracked ratch
 
 #### Which run owns the verdict
 
-ONE run owns it: the run over the whole project — path-less, a named project root, or `--member` on the project root, the run `typescript check` always makes. Every other run under a project that keeps the section — one `specs/` root, another member — prints what it found and leaves the verdict to that run, naming the file that judges it relative to the project, `judged by .jterrazz/baseline.json › test`.
+ONE run owns it: the run over the whole project, the one `typescript check` always makes. The run the toolchain makes again in a member that declares presets of its own prints what it found and leaves the verdict to that run, naming the file that judges it relative to the project, `judged by .jterrazz/baseline.json › test`.
 
 It counts the project's checker findings; oxlint judges the plugin's diagnostics itself, against its suppressions file, in the Oxlint pass. It fails on a count above its entry, a key with findings and no entry, a count below its entry, an entry at zero, or a `jterrazz/<rule>` key left from before oxlint held its own.
 
@@ -187,15 +179,14 @@ A project with no `test` section fails on any finding, and says in four parts, b
 
 #### What it prints
 
-- **Green, exactly one line** — `.jterrazz/baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `.jterrazz/baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run, and where the run stood and what ran are added above it only by `--verbose`. A fall `typescript fix` re-records is named above it, `re-recorded .jterrazz/baseline.json › test › <key> <was> → <now>`.
+- **Green, exactly one line** — `.jterrazz/baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `.jterrazz/baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run. A fall `typescript fix` re-records is named above it, `re-recorded .jterrazz/baseline.json › test › <key> <was> → <now>`.
 - **Failing**, every checker finding it counts, before the reasons, so a failing verdict and its evidence are one log. The plugin's diagnostics are oxlint's to print, in the Oxlint pass.
-- **`--format json`** prints the checker's findings whatever the verdict, and nothing else.
 
-The toolchain's side of this — when the pass runs, which install it resolves the binary from, and what the floor version is — is `@jterrazz/typescript`'s [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-test-conventions-pass).
+The toolchain's side of this — when the pass runs, which install it resolves the checker from, and what the floor version is — is `@jterrazz/typescript`'s [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-test-conventions-pass).
 
 ## Cross-file checker passes
 
-The same binary also runs the analyses oxlint structurally cannot — those that need to read **two files at once** (a `*.specification.ts` record and the `specs/` tests importing it) or a **whole feature tree** at once. They live in the checker channel and follow its doctrine: **precision over recall** — a heuristic that cannot decide stays silent (under-reports) rather than block a legitimate shape. All are string/scan based (no TS parser in the light lint bundle). The specs root's shared ground (`<specs>/_shared/_fixtures/`, `<specs>/_shared/_seeds/`, `<specs>/_shared/_requests/`, `<specs>/_shared/_expected/`) is pruned from the per-feature walks (verbatim material, the on-purpose violation trees included) and inspected only at its top level.
+The same checker also runs the analyses oxlint structurally cannot — those that need to read **two files at once** (a `*.specification.ts` record and the `specs/` tests importing it) or a **whole feature tree** at once. They live in the checker channel and follow its doctrine: **precision over recall** — a heuristic that cannot decide stays silent (under-reports) rather than block a legitimate shape. All are string/scan based (no TS parser in the light lint bundle). The specs root's shared ground (`<specs>/_shared/_fixtures/`, `<specs>/_shared/_seeds/`, `<specs>/_shared/_requests/`, `<specs>/_shared/_expected/`) is pruned from the per-feature walks (verbatim material, the on-purpose violation trees included) and inspected only at its top level.
 
 - **`reserved-folder-in-closed-list`**, **`spec-code-in-setup-folder`**, **`setup-module-at-lowest-common-folder`**, **`adapter-named-for-its-port`** — the shape of a specs tree [23 — Conventions § The naming recap](23-conventions.md#the-naming-recap) states: a root of facets and `_shared/`, the closed list of `_` folders, code in `_setup/`, a shared module at the lowest folder its importers share, a test adapter named for its port. They read the tree and its imports, never a test's body.
 - **`no-unused-ground`** — the mirror of `named-path-exists`: a fixture file no test literal references is dead weight, and a folder holding ground with no test at or below it is an orphan. A referenced `_expected/<name>/` (or `_fixtures/<name>/`) tree counts entirely as used; an entry of the shared ground unreferenced across all of `specs/**` is dead. A template literal with an expression is read as a pattern — its folder, the text before the hole and the text after it — and every entry it can reach counts as referenced; a path built any other way (a variable, `resolve(DIR, name)`) names no entry, so what only it reaches is reported. Nothing is ever downgraded: the rule errors like every other.
@@ -272,7 +263,7 @@ Standard oxlint disable comments work, and every suppression must carry its reas
 
 The framework's own repo keeps its sanctioned exemptions visible, as config `overrides` in its `oxlint.config.ts`, each with its reason: one for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose), and one turning `no-test-code-in-production` off by path for every module whose job is the runner coupling or a test package — [01 — Architecture § The source trees](https://github.com/jterrazz/package-test/blob/main/docs/01-architecture.md#the-source-trees) names them and says why.
 
-The **cross-file checker passes** carry their own suppression comment (oxlint disable comments don't reach them — they are a separate binary):
+The **cross-file checker passes** carry their own suppression comment (oxlint disable comments don't reach them — they are the checker's, not oxlint's):
 
 ```typescript
 // checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
