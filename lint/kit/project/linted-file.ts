@@ -1,10 +1,10 @@
 import type { Context } from '@oxlint/plugins';
 
-import { specsAnchor } from './ast.js';
-import type { SpecsAnchor } from './ast.js';
 import { isProductionModule } from './material.js';
 import { projectSegments, roleOf } from './role.js';
 import type { FileIdentity } from './role.js';
+import { specsAnchor } from './specs-anchor.js';
+import type { SpecsAnchor } from './specs-anchor.js';
 
 /** Keyed on `context.sourceCode`, the one object oxlint hands every rule for a file, so a `WeakMap` drops the answers when its lint ends; the filename is checked too, for a map created before oxlint patched `WeakMap`. */
 

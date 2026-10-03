@@ -1,33 +1,28 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { afterAll, describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import { child, childList, isNamedKey, isNode, isUnderSpecs, specsAnchor } from './ast.js';
+import {
+    chainRootName,
+    child,
+    childList,
+    findProperty,
+    identifierName,
+    isNamedKey,
+    isNode,
+    isReference,
+    isSampledValue,
+    memberPath,
+    memberPropertyName,
+    nodeEnd,
+    nodeStart,
+    propertyKeyName,
+    rootOf,
+    specificationMember,
+    stringField,
+    stringValue,
+    walk,
+} from './ast.js';
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
-
-/** The anchor probes the real filesystem for `package.json`, so the fixtures are real directories. */
-const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
-
-const project = join(root, 'project');
-const underSpecs = join(root, 'specs', 'project');
-const nested = join(project, 'specs', '_fixtures', 'lint-violations', 'case', 'specs');
-
-for (const dir of [
-    join(project, 'specs', 'api', '_requests'),
-    join(project, 'src', 'core'),
-    join(nested, 'integrations'),
-    join(underSpecs, 'src'),
-]) {
-    mkdirSync(dir, { recursive: true });
-}
-writeFileSync(join(project, 'package.json'), '{}');
-writeFileSync(join(underSpecs, 'package.json'), '{}');
-
-afterAll(() => {
-    rmSync(root, { force: true, recursive: true });
-});
 
 function propertiesOf(expression: string): AstNode[] {
     const program = parseProgram('value.ts', `const value = ${expression};`);
@@ -35,75 +30,201 @@ function propertiesOf(expression: string): AstNode[] {
     return childList(child(childList(statement, 'declarations')[0], 'init'), 'properties');
 }
 
+function expressionOf(code: string): AstNode {
+    const program = parseProgram('value.ts', `const value = ${code};`);
+    const [statement] = isNode(program) ? childList(program, 'body') : [];
+    const init = child(childList(statement, 'declarations')[0], 'init');
+    if (init === undefined) {
+        throw new Error(`no expression in ${code}`);
+    }
+
+    return init;
+}
+
+const NOTHING = child(expressionOf('x'), 'nothing');
+
+const read = <T>(codes: readonly string[], reader: (node: AstNode) => T): T[] =>
+    codes.map((code) => reader(expressionOf(code)));
+
 describe('ast', () => {
-    test('specsAnchor — anchors a spec on its specs/ directory and lists the way down', () => {
-        // Given - a test at facet/domain depth
-        const file = join(project, 'specs', 'api', '_requests', 'headers.test.ts');
-
-        // Then - the anchor is the specs dir, and the relative segments are [facet, domain, basename] — the depth `specs-at-declared-depth` measures
-        const anchor = specsAnchor(file);
-        expect(anchor?.directory).toBe(join(project, 'specs'));
-        expect(anchor?.relative).toStrictEqual(['api', '_requests', 'headers.test.ts']);
-    });
-
-    test('specsAnchor — returns undefined for a file outside any specs tree', () => {
-        // Given - production code in the same package
-        const file = join(project, 'src', 'core', 'match.ts');
-
-        // Then - no anchor
-        expect(specsAnchor(file)).toBeUndefined();
-        expect(isUnderSpecs(file)).toBe(false);
-    });
-
-    test('specsAnchor — takes the NEAREST specs ancestor, not the outermost', () => {
-        // Given - a fixture project nested inside the repo's own specs tree — the shape where an innermost search and an outermost one read one file as two different facets
-        const file = join(nested, 'integrations', 'adapter.test.ts');
-
-        // Then - one answer: the innermost tree owns the file
-        const anchor = specsAnchor(file);
-        expect(anchor?.directory).toBe(nested);
-        expect(anchor?.relative).toStrictEqual(['integrations', 'adapter.test.ts']);
-    });
-
-    test('specsAnchor — stops at the package root — a checkout under ~/specs/ is not a specs tree', () => {
-        // Given - the package cloned inside a directory that happens to be named `specs` (the hazard: a bare "is `specs` a segment" test matched it, and `no-test-code-in-production` then stopped protecting this repo's production code entirely)
-        const file = join(underSpecs, 'src', 'app.ts');
-
-        // Then - the search never climbs past the package's own package.json
-        expect(specsAnchor(file)).toBeUndefined();
-        expect(isUnderSpecs(file)).toBe(false);
-    });
-
-    test('specsAnchor — anchors a specs tree that lives under that same outer directory', () => {
-        // Given - a real spec inside the package cloned under ~/specs/
-        const file = join(underSpecs, 'specs', 'cli', 'exec', 'exec.test.ts');
-
-        // Then - its OWN specs/ anchors it; the outer directory is irrelevant
-        expect(specsAnchor(file)?.directory).toBe(join(underSpecs, 'specs'));
-    });
-
-    test('specsAnchor — anchors a file sitting directly in specs/', () => {
-        // Given - a runner at the specs root
-        const file = join(project, 'specs', 'api.specification.ts');
-
-        // Then - the relative path is the basename alone (`specs-at-declared-depth` depth 0)
-        expect(specsAnchor(file)?.relative).toStrictEqual(['api.specification.ts']);
-    });
-
-    test('specsAnchor — answers for a path with no package.json anywhere above it', () => {
-        // Given - a filename that exists only as a string (how the rule testers address the rules, and how a virtual/in-memory file arrives)
-        const file = '/nowhere/repo/specs/lint/hygiene/title.test.ts';
-
-        // Then - the walk simply runs out of ancestors, and the specs dir wins
-        expect(specsAnchor(file)?.directory).toBe('/nowhere/repo/specs');
-        expect(specsAnchor(file)?.relative).toStrictEqual(['lint', 'hygiene', 'title.test.ts']);
-    });
-
     test('isNamedKey — a key is named when it is written as it is, never when it is computed', () => {
         // Given - a bare key, a string key and a computed one
         const keys = propertiesOf("{ root: 1, 'as-written': 2, [String(3)]: 3 }");
 
         // Then - the computed key runs an expression
         expect(keys.map(isNamedKey)).toStrictEqual([true, true, false]);
+    });
+
+    test('stringValue — reads a string literal or a template with no expression, nothing else', () => {
+        // Given - literals, templates and a name
+        const codes = ["'a'", '1', '`t`', `\`t\${'x'}\``, 'x'];
+
+        // Then - only the two written strings read
+        expect([...read(codes, stringValue), stringValue(NOTHING)]).toStrictEqual([
+            'a',
+            undefined,
+            't',
+            undefined,
+            undefined,
+            undefined,
+        ]);
+    });
+
+    test('memberPropertyName and memberPath — name a member written as it is, never a computed one', () => {
+        // Given - members, calls and names
+        const names = ['a.b', 'a[b]', "a['b']", 'a', 'a.#b'];
+        const paths = [
+            'a',
+            'a.b.c',
+            'a.b()',
+            'a.b(1)',
+            'f()',
+            'a[b].c',
+            "'s'.length",
+            '(1).x',
+            'a[b]()',
+        ];
+
+        // Then - each written member, and each path of names and argument-less calls
+        expect([
+            read(names, memberPropertyName),
+            read(paths, memberPath),
+            memberPath(NOTHING),
+        ]).toStrictEqual([
+            ['b', undefined, undefined, undefined, undefined],
+            ['a', 'a.b.c', 'a.b()', undefined, 'f()', undefined, undefined, undefined, undefined],
+            undefined,
+        ]);
+    });
+
+    test('chainRootName and rootOf — find the name a chain starts from, through calls, awaits and optional links', () => {
+        // Given - chains of every link
+        const chains = ['x.y(1).z', 'await x.y()', 'x?.y.z', '(a, b).c', 'f().b'];
+
+        // Then - the first name, or none when the chain starts on no name
+        expect([
+            read(chains, chainRootName),
+            chainRootName(NOTHING),
+            read(['a.b.c', '(a satisfies X).b', 'f().b'], rootOf),
+            rootOf(NOTHING),
+        ]).toStrictEqual([
+            ['x', 'x', 'x', undefined, 'f'],
+            undefined,
+            ['a', 'a', undefined],
+            undefined,
+        ]);
+    });
+
+    test('specificationMember — names the facet a specification call constructs', () => {
+        // Given - the constructor and look-alikes
+        const calls = [
+            "specification.cli('./bin')",
+            "other.cli('./bin')",
+            "cli('./bin')",
+            "a.specification.cli('./bin')",
+            "specification['cli']('./bin')",
+        ];
+
+        // Then - the specification's own member alone
+        expect(read(calls, specificationMember)).toStrictEqual([
+            'cli',
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+        ]);
+    });
+
+    test('findProperty and propertyKeyName — read a key written as a name, a string or a number, never a computed key or a spread', () => {
+        // Given - an object of every key, and a value that is no object
+        const keys = propertiesOf("{ a: 1, 'b': 2, 3: 3, [c]: 4, ...d }");
+
+        // Then - the three written keys
+        expect([
+            keys.map(propertyKeyName),
+            findProperty(expressionOf('{ a: 1 }'), 'a')?.type,
+            findProperty(expressionOf('[1]'), 'a'),
+        ]).toStrictEqual([['a', 'b', '3', undefined, undefined], 'Property', undefined]);
+    });
+
+    test('isSampledValue — knows each reading that answers differently on the next run', () => {
+        // Given - the samples and their pinned or foreign look-alikes
+        const samples = [
+            'new Date()',
+            'Date.now()',
+            'performance.now()',
+            'Math.random()',
+            'randomUUID()',
+            'crypto.randomUUID()',
+        ];
+        const pinned = [
+            'new Date(1)',
+            'new Other()',
+            'Date.now',
+            'uuid.random()',
+            'x[0]()',
+            'randomUUIDs()',
+            '1',
+        ];
+
+        // Then - every sample, and none of the rest
+        expect([read(samples, isSampledValue), read(pinned, isSampledValue)]).toStrictEqual([
+            [true, true, true, true, true, true],
+            [false, false, false, false, false, false, false],
+        ]);
+    });
+
+    test('isReference — a read of names and written members, through casts', () => {
+        // Given - reads and what is none
+        const codes = ['a', 'a.b', "a['b']", 'a[b]', 'f().b', '(a as X).b'];
+
+        // Then - names and written members alone
+        expect([read(codes, isReference), isReference(NOTHING)]).toStrictEqual([
+            [true, true, true, false, false, true],
+            false,
+        ]);
+    });
+
+    test('the node primitives — positions, children, fields and names of what is and is not a node', () => {
+        // Given - a node, and values that are not one
+        const node = expressionOf('x');
+
+        // Then - each primitive answers for both
+        expect([
+            nodeStart(NOTHING),
+            nodeEnd(NOTHING),
+            nodeEnd(node) > nodeStart(node),
+            [isNode(null), isNode({}), isNode({ type: 1 }), isNode(node)],
+            childList(expressionOf('[x, , y]'), 'elements').length,
+            childList(node, 'name'),
+            stringField(expressionOf('1'), 'value'),
+            stringField(undefined, 'name'),
+            identifierName(expressionOf("'x'")),
+        ]).toStrictEqual([
+            -1,
+            -1,
+            true,
+            [false, false, false, true],
+            2,
+            [],
+            undefined,
+            undefined,
+            undefined,
+        ]);
+    });
+
+    test('walk — visits every child once, never back up through the parent', () => {
+        // Given - a member whose parent is set, as the linter sets it
+        const node = expressionOf('a.b');
+        Reflect.set(node, 'parent', expressionOf('c'));
+        const visited: string[] = [];
+
+        // When - it is walked
+        walk(node, (inner) => {
+            visited.push(identifierName(inner) ?? inner.type);
+        });
+
+        // Then - the member and its two names, and not the parent's
+        expect(visited).toStrictEqual(['MemberExpression', 'a', 'b']);
     });
 });

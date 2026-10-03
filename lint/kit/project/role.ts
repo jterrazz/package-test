@@ -7,8 +7,8 @@ import {
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, relative } from 'node:path';
 
-import { isUnderSpecs, segments } from './ast.js';
 import { SETTINGS_FILE } from './settings-file.js';
+import { isUnderSpecs, segments } from './specs-anchor.js';
 
 /** The suffix decides the kind, and folders are read below the project root: a checkout under `_fixtures/` or `__tests__/` is the machine's business. */
 

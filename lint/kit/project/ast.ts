@@ -1,6 +1,4 @@
-import { isProjectRoot } from '@jterrazz/typescript/rules';
 import type { AfterHook, BeforeHook, Comment, Node } from '@oxlint/plugins';
-import { basename, dirname } from 'node:path';
 
 /** A rule reads a node by its `type` and span and every other field defensively, decoupled from the generated ESTree union. The published declarations import `@oxlint/plugins`, so it is a dependency. */
 
@@ -11,99 +9,71 @@ export type Visitor = Record<string, (node: AstNode) => void> & {
     before?: BeforeHook;
 };
 
-export function segments(path: string): string[] {
-    return path.split(/[/\\]/u).filter(Boolean);
-}
-
-export type SpecsAnchor = {
-    directory: string;
-    /** `[facet, domain, basename]`. */
-    relative: string[];
-};
-
-/** The NEAREST `specs` ancestor, never above the project root: a checkout living under `~/specs/` must not read as one whole specs tree. */
-export function specsAnchor(filename: string): SpecsAnchor | undefined {
-    const relative = [basename(filename)];
-    let directory = dirname(filename);
-    for (;;) {
-        if (basename(directory) === 'specs') {
-            return { directory, relative };
-        }
-        if (isProjectRoot(directory)) {
-            return undefined;
-        }
-        const parent = dirname(directory);
-        if (parent === directory) {
-            return undefined;
-        }
-        relative.unshift(basename(directory));
-        directory = parent;
-    }
-}
-
-export function isUnderSpecs(filename: string): boolean {
-    return specsAnchor(filename) !== undefined;
+function fieldOf(value: unknown, key: string): unknown {
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: a template's text is always an object
+    return typeof value === 'object' && value !== null ? Reflect.get(value, key) : undefined;
 }
 
 export function stringValue(node: AstNode | undefined): string | undefined {
     if (node === undefined) {
         return undefined;
     }
+    // Stryker disable next-line ConditionalExpression: only a literal carries a string value among the nodes a string is read from
     if (node.type === 'Literal' && typeof node.value === 'string') {
         return node.value;
     }
-    if (node.type === 'TemplateLiteral') {
-        const expressions = childList(node, 'expressions');
-        const quasis = childList(node, 'quasis');
-        const [onlyQuasi] = quasis;
-        const value = onlyQuasi?.value;
-        if (
-            expressions.length === 0 &&
-            quasis.length === 1 &&
-            typeof value === 'object' &&
-            value !== null &&
-            'cooked' in value
-        ) {
-            return typeof value.cooked === 'string' ? value.cooked : undefined;
-        }
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no template has no text to cook
+    if (node.type !== 'TemplateLiteral' || childList(node, 'expressions').length > 0) {
+        return undefined;
     }
-    return undefined;
+    // Stryker disable next-line OptionalChaining: a template always has a first text
+    const cooked = fieldOf(childList(node, 'quasis')[0]?.value, 'cooked');
+    // Stryker disable next-line ConditionalExpression: an untagged template always cooks its text
+    return typeof cooked === 'string' ? cooked : undefined;
 }
 
 export function memberPropertyName(node: AstNode): string | undefined {
+    // Stryker disable next-line ConditionalExpression: only a member has a property
     if (node.type !== 'MemberExpression' || node.computed === true) {
         return undefined;
     }
     const property = child(node, 'property');
+    // Stryker disable next-line OptionalChaining: a member always has a property
     return property?.type === 'Identifier' ? (stringField(property, 'name') ?? '') : undefined;
 }
 
 /** `dockerCli.fixture(x).exec(y)` → `dockerCli`. */
+const CHAIN_LINKS: Readonly<Record<string, string>> = {
+    AwaitExpression: 'argument',
+    CallExpression: 'callee',
+    ChainExpression: 'expression',
+    MemberExpression: 'object',
+};
+
 export function chainRootName(node: AstNode | undefined): string | undefined {
     let current = node;
     while (current !== undefined) {
         if (current.type === 'Identifier') {
             return stringField(current, 'name') ?? '';
         }
-        if (current.type === 'MemberExpression') {
-            current = child(current, 'object');
-        } else if (current.type === 'CallExpression') {
-            current = child(current, 'callee');
-        } else if (current.type === 'AwaitExpression' || current.type === 'ChainExpression') {
-            current = child(current, 'argument') ?? child(current, 'expression');
-        } else {
+        const link = CHAIN_LINKS[current.type];
+        // Stryker disable next-line ConditionalExpression,BlockStatement: no link reads no child, which ends the chain on undefined all the same
+        if (link === undefined) {
             return undefined;
         }
+        current = child(current, link);
     }
     return undefined;
 }
 
 export function specificationMember(callNode: AstNode): string | undefined {
     const callee = child(callNode, 'callee');
+    // Stryker disable next-line ConditionalExpression,OptionalChaining,BlockStatement: a call always has a callee, and only a member has an object
     if (callee?.type !== 'MemberExpression') {
         return undefined;
     }
     const object = child(callee, 'object');
+    // Stryker disable next-line ConditionalExpression,OptionalChaining: a member always has an object, and only an identifier has a name
     if (object?.type !== 'Identifier' || object.name !== 'specification') {
         return undefined;
     }
@@ -111,6 +81,7 @@ export function specificationMember(callNode: AstNode): string | undefined {
 }
 
 export function findProperty(objectNode: AstNode, name: string): AstNode | undefined {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: only an object lists properties
     if (objectNode.type !== 'ObjectExpression') {
         return undefined;
     }
@@ -119,13 +90,16 @@ export function findProperty(objectNode: AstNode, name: string): AstNode | undef
 }
 
 export function propertyKeyName(property: AstNode): string | undefined {
+    // Stryker disable next-line ConditionalExpression: only a property has a key
     if (property.type !== 'Property' || property.computed === true) {
         return undefined;
     }
     const key = child(property, 'key');
+    // Stryker disable next-line OptionalChaining: a property always has a key
     if (key?.type === 'Identifier') {
         return stringField(key, 'name') ?? '';
     }
+    // Stryker disable next-line ConditionalExpression,OptionalChaining: a property's key is a name, a literal, or computed
     if (key?.type === 'Literal') {
         return String(key.value);
     }
@@ -154,14 +128,7 @@ export function walk(root: AstNode, visit: (node: AstNode) => void): void {
 type Positioned = AstNode | Comment;
 
 export function nodeStart(node: Positioned | undefined): number {
-    if (node === undefined) {
-        return -1;
-    }
-    if (typeof node.start === 'number') {
-        return node.start;
-    }
-    const range = node.range as number[] | undefined;
-    return Array.isArray(range) && typeof range[0] === 'number' ? range[0] : -1;
+    return typeof node?.start === 'number' ? node.start : -1;
 }
 
 export function isNode(value: unknown): value is AstNode {
@@ -193,18 +160,12 @@ export function identifierName(node: AstNode | undefined): string | undefined {
         return undefined;
     }
     const { name } = node;
+    // Stryker disable next-line ConditionalExpression: an identifier's name is always text
     return typeof name === 'string' ? name : undefined;
 }
 
 export function nodeEnd(node: Positioned | undefined): number {
-    if (node === undefined) {
-        return -1;
-    }
-    if (typeof node.end === 'number') {
-        return node.end;
-    }
-    const range = node.range as number[] | undefined;
-    return Array.isArray(range) && typeof range[1] === 'number' ? range[1] : -1;
+    return typeof node?.end === 'number' ? node.end : -1;
 }
 
 /** `result.stdout`, `result.meta()`; `undefined` for a computed access: two subjects a rule cannot spell must never be equated. */
@@ -221,6 +182,7 @@ export function memberPath(node: AstNode | undefined): string | undefined {
             ? undefined
             : `${callee}()`;
     }
+    // Stryker disable next-line ConditionalExpression,BlockStatement: only a member has an object
     if (node.type !== 'MemberExpression') {
         return undefined;
     }
@@ -237,6 +199,7 @@ export function isSampledValue(node: AstNode): boolean {
             childList(node, 'arguments').length === 0
         );
     }
+    // Stryker disable next-line ConditionalExpression,BlockStatement: only a call has a callee
     if (node.type !== 'CallExpression') {
         return false;
     }

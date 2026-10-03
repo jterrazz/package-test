@@ -1,11 +1,12 @@
 import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { child, childList, isNode, specsAnchor, stringField, walk } from '../../kit/project/ast.js';
+import { child, childList, isNode, stringField, walk } from '../../kit/project/ast.js';
 import { parseProgram } from '../../kit/project/module-parser.js';
 import { collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
+import { specsAnchor } from '../../kit/project/specs-anchor.js';
 import { isModuleName } from '../../kit/project/specs-modules.js';
 import {
     DISK_CALL,

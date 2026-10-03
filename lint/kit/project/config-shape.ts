@@ -1,17 +1,10 @@
 import { isDirectory, listDirectory } from '@jterrazz/typescript/rules';
 import { join } from 'node:path';
 
-import {
-    child,
-    childList,
-    findProperty,
-    propertyKeyName,
-    specsAnchor,
-    stringValue,
-    walk,
-} from './ast.js';
+import { child, childList, findProperty, propertyKeyName, stringValue, walk } from './ast.js';
 import type { AstNode } from './ast.js';
 import { FACETS } from './facets.js';
+import { specsAnchor } from './specs-anchor.js';
 
 /** Only the literal form is read: a project a helper builds carries the framework's canonical name and include, with nothing to disagree with. */
 

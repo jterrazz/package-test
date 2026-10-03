@@ -1,8 +1,8 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { segments } from '../../../kit/project/ast.js';
 import type { Visitor } from '../../../kit/project/ast.js';
+import { segments } from '../../../kit/project/specs-anchor.js';
 import { SELF_CHAPTER, selfRows } from '../../catalogue/manifest.js';
 import { facetFileFindings } from './facet-is-a-composition.file.js';
 import { handleFileFindings } from './facet-is-a-composition.handle.js';
