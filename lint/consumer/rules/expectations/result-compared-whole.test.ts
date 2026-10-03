@@ -55,8 +55,33 @@ ruleTester().run('result-compared-whole', resultComparedWhole, {
             ],
             filename: SPEC,
         },
+        {
+            name: 'A read inside a callback no expect holds, or a whole result with no argument, is no refusal and no comparison.',
+            code: "test('t', async () => { const result = await api.get('/x'); wrap(() => result.json.value); expect(result.response).toMatch(); });",
+            errors: [
+                { column: 71, line: 1, messageId: 'partialOracle' },
+                { column: 98, line: 1, messageId: 'partialOracle' },
+            ],
+            filename: SPEC,
+        },
+        {
+            name: 'A whole result asserted with toBe is no whole comparison.',
+            code: "test('t', async () => { const result = await api.get('/x'); expect(result.response).toBe(x); });",
+            errors: [{ column: 67, line: 1, messageId: 'partialOracle' }],
+            filename: SPEC,
+        },
     ],
     valid: [
+        {
+            name: 'A read whose throw is the subject, through an arrow or a function, compares nothing; a whole string is a whole comparison.',
+            code: "test('t', async () => { const result = await api.get('/x'); expect(() => result.json.value).toThrow(); expect(function () { return result.json.value; }).toThrow(); expect(result.response).toMatch('HTTP/1.1 200 OK'); });",
+            filename: SPEC,
+        },
+        {
+            name: 'What no awaited result names, a table read by a computed name or another method, and a call that is no test, are out of reach.',
+            code: "test('t', async () => { const pending = api.get('/x'); const result = await api.get('/x'); expect(pending.json.a).toBe(1); expect(result.query('a')).toBe(1); expect(result.table(name)).toBe(1); expect(table('a')).toBe(1); expect(pending.table('a')).toBe(1); });\nrun(async () => { const result = await api.get('/x'); expect(result.json.a).toBe(1); });\ntest('t');",
+            filename: SPEC,
+        },
         {
             name: 'A cursor passed through four names on its way to the next request is still carried.',
             code: "test('t', async () => { const first = await api.get('/facts'); const a = first.json.next; const b = a; const c = b; const d = c; const second = await api.get('/facts?cursor=' + d); expect(second.response).toMatch(`HTTP/1.1 200 OK`); });",
