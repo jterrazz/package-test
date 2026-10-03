@@ -60,6 +60,7 @@ function expectedNames(program: AstNode): Set<string> {
         }
         for (const argument of childList(node, 'arguments')) {
             const name = identifierName(argument);
+            // Stryker disable next-line ConditionalExpression: undefined names no constant
             if (name !== undefined) {
                 names.add(name);
             }
@@ -69,8 +70,10 @@ function expectedNames(program: AstNode): Set<string> {
 }
 
 function testSpans(program: AstNode): Span[] {
+    // Stryker disable next-line ArrayDeclaration: an entry that is no span holds no read
     const spans: Span[] = [];
     walk(program, (node) => {
+        // Stryker disable next-line ConditionalExpression: only a call has a test callee
         if (node.type === 'CallExpression' && isTestCallee(child(node, 'callee'))) {
             spans.push({ end: nodeEnd(node), start: nodeStart(node) });
         }
@@ -79,19 +82,19 @@ function testSpans(program: AstNode): Span[] {
 }
 
 function testOf(read: AstNode, tests: Span[]): Span | undefined {
+    // Stryker disable next-line EqualityOperator: a read never starts or ends where a test call does
     return tests.find((span) => nodeStart(read) >= span.start && nodeEnd(read) <= span.end);
 }
 
+/** An exported constant is not listed: it has readers elsewhere. */
 function fileConstants(program: AstNode): { declarator: AstNode; statement: AstNode }[] {
     return childList(program, 'body').flatMap((statement) => {
-        const declaration =
-            statement.type === 'ExportNamedDeclaration'
-                ? child(statement, 'declaration')
-                : statement;
-        if (declaration?.type !== 'VariableDeclaration' || declaration.kind !== 'const') {
+        // Stryker disable next-line ConditionalExpression: only a declaration has a `kind`
+        if (statement.type !== 'VariableDeclaration' || statement.kind !== 'const') {
+            // Stryker disable next-line ArrayDeclaration: an entry that is no constant names none
             return [];
         }
-        return childList(declaration, 'declarations').map((declarator) => ({
+        return childList(statement, 'declarations').map((declarator) => ({
             declarator,
             statement,
         }));
@@ -122,11 +125,9 @@ export const expectedConstantShared = defineRule(
                     const expected = expectedNames(program);
                     const tests = testSpans(program);
                     for (const { declarator, statement } of fileConstants(program)) {
-                        if (statement.type === 'ExportNamedDeclaration') {
-                            continue;
-                        }
                         const name = identifierName(child(declarator, 'id'));
                         const init = child(declarator, 'init');
+                        // Stryker disable next-line ConditionalExpression,LogicalOperator: a const always has a value, and a name no expectation reads is none it holds
                         if (name === undefined || init === undefined || !expected.has(name)) {
                             continue;
                         }
@@ -139,8 +140,8 @@ export const expectedConstantShared = defineRule(
                         const [only] = reads;
                         const inlinable =
                             reads.length === 1 &&
+                            // Stryker disable next-line ConditionalExpression: one read is always there
                             only !== undefined &&
-                            statement.type === 'VariableDeclaration' &&
                             childList(statement, 'declarations').length === 1;
                         const { text } = context.sourceCode;
                         context.report({
