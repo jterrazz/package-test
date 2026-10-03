@@ -32,7 +32,6 @@ const presets: Preset[] = building && !built ? [] : await builtPresets();
 
 const PRODUCTION_REACHING_TEST_MATERIAL = [
     'src/index.vitest.ts',
-    'src/index.vitest.config.ts',
     'src/vitest/**',
     'src/facets/*/*.project.ts',
     'src/facets/api/routes/**',

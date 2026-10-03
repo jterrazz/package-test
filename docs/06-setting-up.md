@@ -85,16 +85,16 @@ export default defineConfig({
 `vitest.config.ts` is the file those projects derive, which `typescript fix` writes and `typescript check` holds ([`@jterrazz/typescript`'s Config pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-config-one-file-pass)):
 
 ```typescript
-import { vitestConfig } from '@jterrazz/test/vitest/config';
+import { vitestConfig } from '@jterrazz/test/vitest';
 
-export default vitestConfig(import.meta.url);
+export default await vitestConfig(import.meta.url);
 ```
 
-It reads the `jterrazz.config.ts` beside the module whose `import.meta.url` it is handed — the config file's own folder, wherever vitest, the Vitest extension or knip loads it — and builds each project with its helper over the preset below. A project declares no `name`, `environment` or `browser`: its helper names it for its facet and sets what the facet needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. With no `projects`, the config is the preset alone. It is a call rather than a value because knip requires the config to find the tests, and a required module may not await at its top.
+It reads the `jterrazz.config.ts` beside the module whose `import.meta.url` it is handed — the config file's own folder, wherever vitest, the Vitest extension or knip loads it — and builds each project with its helper over the preset below. A project declares no `name`, `environment` or `browser`: its helper names it for its facet and sets what the facet needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. With no `projects`, the config is the preset alone. It is the one-liner `@jterrazz/typescript` derives for every editor file — the entry handed the module's own `import.meta.url`, awaited at the top — which vitest and knip's loader both read whole.
 
 ### The project helpers
 
-There is one helper per kind — `unit`, `integration`, `component`, `website`, `mobile`, `api`, `job`, `cli` and `lint` — named by a project's `facet`, and exported from `@jterrazz/test/vitest` for a config written by a tool of your own. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([18 — Services § One container per run](18-services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
+There is one helper per kind — `unit`, `integration`, `component`, `website`, `mobile`, `api`, `job`, `cli` and `lint` — named by a project's `facet`, and exported from `@jterrazz/test/vitest` beside `vitestConfig`, for a config written by a tool of your own. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([18 — Services § One container per run](18-services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
 
 | Option                | Does                                                                                                            |
 | --------------------- | --------------------------------------------------------------------------------------------------------------- |

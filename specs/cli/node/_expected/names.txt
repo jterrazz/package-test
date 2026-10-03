@@ -212,10 +212,8 @@
     literate
     mobile
     unit
-    website
-
-@jterrazz/test/vitest/config:
     vitestConfig
+    website
 
 @jterrazz/test/config:
     TestFacet

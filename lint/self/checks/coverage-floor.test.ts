@@ -30,8 +30,7 @@ describe('checkCoverageFloor', () => {
 
     test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — every child is counted, and judged on the source its bundle maps back to', async () => {
         // Given - this repository's own config, which the documents running `dist/checker.js` run under
-        const { default: derived } = await import('../../../vitest.config.js');
-        const config = await derived;
+        const { default: config } = await import('../../../vitest.config.js');
         const coverage = config.test?.coverage;
 
         // Then - children attached, `dist/` read, and every path judged after the remap, so a bundle counts as the source it maps back to

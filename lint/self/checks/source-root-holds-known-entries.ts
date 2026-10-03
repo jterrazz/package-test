@@ -19,7 +19,7 @@ const TREES = [
 const ENTRIES: Readonly<Record<string, string>> = {
     '.browser.ts': 'index',
     '.ts': 'index',
-    '.vitest.config.ts': 'index',
+    '.vitest.test.ts': 'index',
     '.vitest.ts': 'index',
 };
 

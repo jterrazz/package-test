@@ -1,9 +1,22 @@
+import { readSettings } from '@jterrazz/typescript/rules';
+import { dirname, isAbsolute, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vitest/config';
-import type { ViteUserConfig } from 'vitest/config';
+import type { TestProjectInlineConfiguration, ViteUserConfig } from 'vitest/config';
 
-import { literate } from './facets/cli/cli.project.js';
+import { TEST_SECTION } from '../lint/kit/project/test-section.js';
+import { refusal } from './chain/refusals/refusal.js';
+import { api } from './facets/api/api.project.js';
+import { cli, literate } from './facets/cli/cli.project.js';
 import type { LiterateOptions } from './facets/cli/cli.project.js';
+import { component } from './facets/component/component.project.js';
+import { integration } from './facets/integration/integration.project.js';
+import { job } from './facets/job/job.project.js';
+import { lint } from './facets/lint/lint.project.js';
+import { mobile } from './facets/mobile/mobile.project.js';
+import { website } from './facets/website/website.project.js';
 import { presetConfig } from './vitest/preset.js';
+import { unit } from './vitest/unit.project.js';
 
 export { api, type ApiProjectOptions } from './facets/api/api.project.js';
 export {
@@ -41,3 +54,100 @@ export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
             : userConfig,
     );
 }
+
+type Project = Promise<TestProjectInlineConfiguration> | TestProjectInlineConfiguration;
+
+type Builder = (options: Readonly<Record<string, unknown>>) => Project;
+
+const BUILDERS: Readonly<Record<string, Builder>> = Object.freeze({
+    api,
+    cli,
+    component,
+    integration,
+    job,
+    lint,
+    mobile,
+    unit,
+    website,
+});
+
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const anchored = (root: string, path: string): string =>
+    isAbsolute(path) ? path : resolve(root, path);
+
+function aliasesFrom(root: string, vite: unknown): unknown {
+    if (!isRecord(vite) || !isRecord(vite.resolve) || !isRecord(vite.resolve.alias)) {
+        return vite;
+    }
+    const alias = Object.fromEntries(
+        Object.entries(vite.resolve.alias).map(([name, target]) => [
+            name,
+            typeof target === 'string' && target.startsWith('.') ? anchored(root, target) : target,
+        ]),
+    );
+
+    return { ...vite, resolve: { ...vite.resolve, alias } };
+}
+
+async function projectOf(root: string, declared: unknown): Promise<TestProjectInlineConfiguration> {
+    const { facet, setup, ...options } = isRecord(declared) ? declared : {};
+    const builder = typeof facet === 'string' ? BUILDERS[facet] : undefined;
+    if (builder === undefined) {
+        throw new Error(
+            refusal({
+                fix: `name one of ${Object.keys(BUILDERS).join(', ')} as its \`facet\``,
+                found: `a project of \`test.projects\` names the facet \`${String(facet)}\``,
+                read: 'docs/06-setting-up.md#the-vitest-config',
+                why: 'a project is built by the helper of its facet, which owns its include, its budget and its seam',
+            }),
+        );
+    }
+    const project = await builder({
+        ...options,
+        ...(facet === 'component'
+            ? { root: anchored(root, typeof options.root === 'string' ? options.root : '.') }
+            : {}),
+        ...(options.vite === undefined ? {} : { vite: aliasesFrom(root, options.vite) }),
+    });
+    const setups = Array.isArray(setup) ? setup.filter((path) => typeof path === 'string') : [];
+
+    return setups.length === 0
+        ? project
+        : mergeConfig(
+              { test: { globalSetup: setups.map((path) => anchored(root, path)) } },
+              project,
+          );
+}
+
+async function derivedFrom(root: string): Promise<ViteUserConfig> {
+    const { problem, resolved } = await readSettings(root);
+    if (problem !== null) {
+        throw new Error(
+            refusal({
+                fix: 'correct jterrazz.config.ts as the finding says, then run vitest again',
+                found: `jterrazz.config.ts ${problem}`,
+                read: 'docs/06-setting-up.md#the-vitest-config',
+                why: 'the test projects are declared there, and a config read without them would run none of them',
+            }),
+        );
+    }
+    const section = resolved.sections[TEST_SECTION];
+    const projects = isRecord(section) && Array.isArray(section.projects) ? section.projects : [];
+
+    return presetConfig(
+        projects.length === 0
+            ? {}
+            : {
+                  test: {
+                      projects: await Promise.all(
+                          projects.map(async (declared) => await projectOf(root, declared)),
+                      ),
+                  },
+              },
+    );
+}
+
+export const vitestConfig = async (configUrl: string): Promise<ViteUserConfig> =>
+    await derivedFrom(dirname(fileURLToPath(configUrl)));

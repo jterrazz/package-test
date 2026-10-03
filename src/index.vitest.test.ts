@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
-import { vitestConfig } from './index.vitest.config.js';
+import { vitestConfig } from './index.vitest.js';
 
 function projectDeclaring(projects: string): string {
     const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
@@ -19,8 +19,8 @@ function projectDeclaring(projects: string): string {
 
 const configIn = (root: string): string => pathToFileURL(join(root, 'vitest.config.ts')).href;
 
-describe('vitestConfig', () => {
-    test('builds each declared project with the helper of its facet, its setups read from the project root', async () => {
+describe('index.vitest', () => {
+    test('vitestConfig — builds each declared project with the helper of its facet, its setups read from the project root', async () => {
         // Given - a project declaring a unit project and a cli project with a global setup of its own
         const root = projectDeclaring(
             "[{ facet: 'unit', include: ['src/**/*.test.ts'] }, { facet: 'cli', setup: ['specs/cli/_setup/start.ts'] }]",
@@ -38,7 +38,7 @@ describe('vitestConfig', () => {
         expect(projects[1]?.globalSetup).toContain(join(root, 'specs/cli/_setup/start.ts'));
     });
 
-    test('is the preset alone for a project that declares no test project', async () => {
+    test('vitestConfig — is the preset alone for a project that declares no test project', async () => {
         // Given - a project with an empty list of projects
         const root = projectDeclaring('[]');
 
@@ -48,7 +48,7 @@ describe('vitestConfig', () => {
         expect(config.test?.testTimeout).toBe(30_000);
     });
 
-    test('refuses a facet the package ships no helper for, naming the ones it does', async () => {
+    test('vitestConfig — refuses a facet the package ships no helper for, naming the ones it does', async () => {
         // Given - a project naming a facet that does not exist
         const root = projectDeclaring("[{ facet: 'browser' }]");
 
@@ -58,7 +58,7 @@ describe('vitestConfig', () => {
         );
     });
 
-    test('refuses a settings file that does not load, rather than running no project', async () => {
+    test('vitestConfig — refuses a settings file that does not load, rather than running no project', async () => {
         // Given - a project whose jterrazz.config.ts throws as it loads
         const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
         writeFileSync(join(root, 'package.json'), '{ "name": "derived", "type": "module" }\n');
