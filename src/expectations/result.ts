@@ -60,11 +60,13 @@ export class BaseResult {
         this.workDir = options.workDir;
         // outside: the realpath form is what child processes print as `$PWD` (macOS resolves the tmpdir symlink).
         this.captures = new CaptureScope(
+            // Stryker disable next-line ConditionalExpression: safeRealpath answers a path it cannot resolve as given, so no directory reads as none either way
             options.workDir === undefined ? undefined : safeRealpath(options.workDir),
         );
     }
 
     /** Access a directory (relative to the working directory) for snapshot assertions. */
+    // Stryker disable next-line StringLiteral: an empty path resolves to the base as '.' does
     directory(path = '.'): DirectoryAccessor {
         const baseDir = this.workDir ?? this.testDir;
         return new DirectoryAccessor(resolve(baseDir, path), this.testDir, this.captures);
