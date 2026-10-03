@@ -1,61 +1,75 @@
 import { treeKind } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
-import { dirname, join, relative, sep } from 'node:path';
+import { dirname, join } from 'node:path';
 
-export function pathFrom(from: string, to: string): string {
-    const path = relative(from, to).split(sep).join('/');
-    return path.startsWith('..') ? path : `./${path}`;
-}
+import { pathFrom } from './repoint.js';
 
 const NAMED_IMPORT =
     /^import\s*\{(?<names>[^}]*)\}\s*from\s*(?<quote>['"])(?<from>[^'"]+)\k<quote>;?/gmu;
+
+type Clause = { from: string; names: string[]; quote: string; text: string };
+
+function namesIn(list: string): string[] {
+    return list
+        .split(',')
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
+}
+
+function clausesOf(text: string): Clause[] {
+    // Stryker disable OptionalChaining,StringLiteral,LogicalOperator: a match always carries its named groups
+    return [...text.matchAll(NAMED_IMPORT)].map((match) => ({
+        from: match.groups?.from ?? '',
+        names: namesIn(match.groups?.names ?? ''),
+        quote: match.groups?.quote ?? "'",
+        text: match[0],
+    }));
+    // Stryker restore OptionalChaining,StringLiteral,LogicalOperator
+}
 
 function isEntry(from: string): boolean {
     return from === '@jterrazz/test' || /(?:^|\/)src\/index\.js$/u.test(from);
 }
 
 export function entryFor(text: string, file: string): string {
-    for (const match of text.matchAll(NAMED_IMPORT)) {
-        const from = match.groups?.from ?? '';
+    for (const { from } of clausesOf(text)) {
+        // Stryker disable next-line Regex: an import names a module, never a longer extension after its own
         if (!from.startsWith('.') || !/\.specification\.[jt]s$/u.test(from)) {
             continue;
         }
+        // Stryker disable next-line Regex: a specification's name holds no .js before its extension
         const specification = join(dirname(file), from.replace(/\.js$/u, '.ts'));
         if (treeKind(specification) !== 'file') {
             continue;
         }
-        for (const inner of readFileSync(specification, 'utf8').matchAll(NAMED_IMPORT)) {
-            const entry = inner.groups?.from ?? '';
-            if (isEntry(entry)) {
-                return entry.startsWith('.')
-                    ? pathFrom(dirname(file), join(dirname(specification), entry))
-                    : entry;
-            }
+        const entry = clausesOf(readFileSync(specification, 'utf8')).find((clause) =>
+            isEntry(clause.from),
+        )?.from;
+        if (entry !== undefined) {
+            return entry.startsWith('.')
+                ? pathFrom(dirname(file), join(dirname(specification), entry))
+                : entry;
         }
     }
     return '@jterrazz/test';
 }
 
+/** Sorted as a reader scans them: case aside. */
+function byName(a: string, b: string): number {
+    // Stryker disable next-line EqualityOperator: the names are distinct
+    return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
+}
+
 export function mergedIntoEntry(text: string, called: Set<string>): string | undefined {
-    for (const match of text.matchAll(NAMED_IMPORT)) {
-        const from = match.groups?.from ?? '';
-        if (!isEntry(from)) {
-            continue;
-        }
-        const present = (match.groups?.names ?? '')
-            .split(',')
-            .map((name) => name.trim())
-            .filter((name) => name.length > 0);
-        const names = [...new Set([...present, ...called])].toSorted((a, b) =>
-            a.toLowerCase() < b.toLowerCase() ? -1 : 1,
-        );
-        const quote = match.groups?.quote ?? "'";
-        return text.replace(
-            match[0],
-            `import { ${names.join(', ')} } from ${quote}${from}${quote};`,
-        );
+    const clause = clausesOf(text).find(({ from }) => isEntry(from));
+    if (clause === undefined) {
+        return undefined;
     }
-    return undefined;
+    const names = [...new Set([...clause.names, ...called])].toSorted(byName);
+    return text.replace(
+        clause.text,
+        `import { ${names.join(', ')} } from ${clause.quote}${clause.from}${clause.quote};`,
+    );
 }
 
 const IMPORT_STATEMENT = /^import[\s\S]*?from\s*(?<quote>['"])(?<from>[^'"]+)\k<quote>;?$/gmu;
@@ -93,31 +107,19 @@ export function withEntryImport(text: string, file: string, name: string): strin
 }
 
 export function importsFromEntry(text: string, name: string): boolean {
-    return [...text.matchAll(NAMED_IMPORT)].some(
-        (match) =>
-            isEntry(match.groups?.from ?? '') &&
-            (match.groups?.names ?? '').split(',').some((each) => each.trim() === name),
-    );
+    return clausesOf(text).some(({ from, names }) => isEntry(from) && names.includes(name));
 }
 
 export function withoutEntryImport(text: string, name: string): string {
-    for (const match of text.matchAll(NAMED_IMPORT)) {
-        const from = match.groups?.from ?? '';
-        if (!isEntry(from)) {
-            continue;
-        }
-        const names = (match.groups?.names ?? '')
-            .split(',')
-            .map((each) => each.trim())
-            .filter((each) => each.length > 0);
-        if (!names.includes(name)) {
-            continue;
-        }
-        const kept = names.filter((each) => each !== name);
-        const quote = match.groups?.quote ?? "'";
-        return kept.length === 0
-            ? text.replace(`${match[0]}\n`, '')
-            : text.replace(match[0], `import { ${kept.join(', ')} } from ${quote}${from}${quote};`);
+    const clause = clausesOf(text).find(({ from, names }) => isEntry(from) && names.includes(name));
+    if (clause === undefined) {
+        return text;
     }
-    return text;
+    const kept = clause.names.filter((each) => each !== name);
+    return kept.length === 0
+        ? text.replace(`${clause.text}\n`, '')
+        : text.replace(
+              clause.text,
+              `import { ${kept.join(', ')} } from ${clause.quote}${clause.from}${clause.quote};`,
+          );
 }

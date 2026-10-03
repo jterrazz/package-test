@@ -34,13 +34,15 @@ describe('repoint', () => {
         expect(repointed('/m/specs/api', path, MOVE)).toBe(moved);
     });
 
-    test('a path from a folder climbs or descends, and a descent states its dot', () => {
+    test('a path from a folder climbs or descends, and a descent, into a dot folder too, states its dot', () => {
         // Given - a target above, and one below
         // Then - the climb is as relative() writes it, the descent opens on ./
-        expect([pathFrom('/m/a/b', '/m/c'), pathFrom('/m/a', '/m/a/b/c')]).toStrictEqual([
-            '../../c',
-            './b/c',
-        ]);
+        expect([
+            pathFrom('/m/a/b', '/m/c'),
+            pathFrom('/m/a', '/m/a/b/c'),
+            pathFrom('/m/a', '/m'),
+            pathFrom('/m', '/m/.cache/x'),
+        ]).toStrictEqual(['../../c', './b/c', '..', './.cache/x']);
     });
 
     test('the literals read are the quoted ones, whole, and only relative ones name a path', () => {

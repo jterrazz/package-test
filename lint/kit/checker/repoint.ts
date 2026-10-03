@@ -8,9 +8,10 @@ import { documentPaths, parseSpecDocument } from '../project/spec-document.js';
 import { literalSpans } from '../project/spec-values.js';
 import { isWithin, readText } from '../project/tree.js';
 
+/** A dot folder is named from here too: only a climb opens on `..`. */
 export function pathFrom(from: string, to: string): string {
     const rest = relative(from, to).split(sep).join('/');
-    return rest.startsWith('.') ? rest : `./${rest}`;
+    return rest === '..' || rest.startsWith('../') ? rest : `./${rest}`;
 }
 
 type Move = { copy: string; target: string };
