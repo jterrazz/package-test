@@ -22,13 +22,13 @@ function listed(
     };
 }
 
-/** Answers as `kill(pid, 0)` would: 7 is gone, 8 another user's. */
+/** Answers as `kill(pid, 0)` would: 6 runs, 8 is another user's, every other pid is gone. */
 function probe(pid: number): void {
-    if (pid === 7) {
-        throw Object.assign(new Error('no such process'), { code: 'ESRCH' });
-    }
     if (pid === 8) {
         throw Object.assign(new Error('not permitted'), { code: 'EPERM' });
+    }
+    if (pid !== 6) {
+        throw Object.assign(new Error('no such process'), { code: 'ESRCH' });
     }
 }
 describe('orphans', () => {
@@ -63,17 +63,20 @@ describe('orphans', () => {
         ];
 
         // Then - the dead owner's containers go, the live one's, the reused one and the unowned one stay
-        expect(orphans(containers, (owner) => owner !== 'host:2')).toStrictEqual([
+        expect(orphans(containers, (owner) => owner === 'host:1')).toStrictEqual([
             'killed-running',
             'killed-created',
         ]);
     });
 
     test('ownerAlive — whether the process a container names still runs — is dead only for a pid of this host no process answers', () => {
-        // Given - owners of this host and of another, and labels that name no pid
+        // Given - owners of this host and of another, and labels that name no pid, a process group, or no host
         const answered = {
             gone: ownerAlive('here:7', 'here', probe),
+            group: ownerAlive('here:0', 'here', probe),
             malformed: ownerAlive('here', 'here', probe),
+            negative: ownerAlive('here:-3', 'here', probe),
+            noHost: ownerAlive('7', '', probe),
             notANumber: ownerAlive('here:x', 'here', probe),
             otherHost: ownerAlive('there:7', 'here', probe),
             running: ownerAlive('here:6', 'here', probe),
@@ -83,7 +86,10 @@ describe('orphans', () => {
         // Then - only the gone pid is dead; a process another user owns still runs
         expect(answered).toStrictEqual({
             gone: false,
+            group: true,
             malformed: true,
+            negative: true,
+            noHost: true,
             notANumber: true,
             otherHost: true,
             running: true,
@@ -94,14 +100,14 @@ describe('orphans', () => {
     test('ownerAlive — whether the process a container names still runs — removes every orphan with its volumes, and answers the ones it removed', async () => {
         // Given - a runtime listing two orphans, one of which refuses removal
         const asked: unknown[] = [];
-        const removed: string[] = [];
+        const removed: [string, unknown][] = [];
         const runtime = {
             getContainer: (id: string) => ({
                 remove: async (options: unknown) => {
                     if (id === 'stuck') {
                         throw new Error('removal already in progress');
                     }
-                    removed.push(id);
+                    removed.push([id, options]);
                     return options;
                 },
             }),
@@ -117,14 +123,14 @@ describe('orphans', () => {
         // When - the sweep runs
         const answered = await sweepOrphans(runtime, () => true);
 
-        // Then - it listed every session container and every owned one, removed the orphan once, and skipped the refusal
+        // Then - it listed every session container and every owned one, removed the orphan once, running or not and with its volumes, and skipped the refusal
         expect({ answered, asked, removed }).toStrictEqual({
             answered: ['orphan'],
             asked: [
                 { all: true, filters: { label: ['org.testcontainers.session-id'] } },
                 { all: true, filters: { label: ['com.jterrazz.test.owner'] } },
             ],
-            removed: ['orphan'],
+            removed: [['orphan', { force: true, v: true }]],
         });
     });
 });

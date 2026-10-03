@@ -44,9 +44,7 @@ export function ownerAlive(
         probe(pid);
         return true;
     } catch (error) {
-        const code: unknown =
-            typeof error === 'object' && error !== null ? Reflect.get(error, 'code') : undefined;
-        return code !== 'ESRCH';
+        return Reflect.get(new Object(error), 'code') !== 'ESRCH';
     }
 }
 
