@@ -2,6 +2,7 @@ import { blankComments, SETUP_FOLDER } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { pathFrom } from '../../kit/checker/repoint.js';
 import { closingOf } from '../../kit/project/source-scan.js';
 import {
     aspectOf,
@@ -20,7 +21,6 @@ import {
     isRead,
     pruned,
     rebased,
-    relativePath,
     without,
 } from './spec-in-subject-folder.prune.js';
 import type { Declaration } from './spec-in-subject-folder.prune.js';
@@ -194,7 +194,7 @@ function withSharedHelpers(
                 declarationsOf(draft.text).filter((d) => names.has(d.name)),
             );
             const read = [...names].filter((name) => reads(kept, name)).toSorted();
-            const specifier = relativePath(dirname(draft.target), module).replace(/\.ts$/u, '.js');
+            const specifier = pathFrom(dirname(draft.target), module).replace(/\.ts$/u, '.js');
             return {
                 target: draft.target,
                 text: pruned(withImportLine(kept, importLine(read, types, specifier))),

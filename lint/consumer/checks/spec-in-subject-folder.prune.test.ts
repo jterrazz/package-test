@@ -1,8 +1,12 @@
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { pruned } from './spec-in-subject-folder.prune.js';
+import { packageWith } from '../../kit/testing/package-tree.fixtures.js';
+import { pruned, rebased } from './spec-in-subject-folder.prune.js';
 
 const lines = (...text: string[]): string => text.join('\n');
+
+const HOLE = ['`$', '{$read}`'].join('');
 
 describe('spec-in-subject-folder.prune', () => {
     test('drops an import only a string of the file names', () => {
@@ -58,5 +62,109 @@ describe('spec-in-subject-folder.prune', () => {
 
         // Then - nothing is pruned: a spread is no member access
         expect(pruned(cut)).toBe(cut);
+    });
+
+    test('keeps of each import clause only the names read, its kind, and drops a clause left empty', () => {
+        // Given - default, named, type-only and trailing-comma clauses, read in part
+        const cut = lines(
+            "import api, { other } from '../a.js';",
+            "import cli, { unread } from '../b.js';",
+            "import type { Kept, Gone } from '../c.js';",
+            "import { $read, $gone, } from '../d.js';",
+            "import { never } from '../e.js';",
+            "import both, { too } from '../f.js';",
+            'const value: Kept = 1;',
+            `test('reads', async () => { await other.get(${HOLE}); await cli.exec(String(value), both, too); });`,
+            '',
+        );
+
+        // Then - each clause keeps what is read, in the form it was written
+        expect(pruned(cut)).toBe(
+            lines(
+                "import { other } from '../a.js';",
+                "import cli from '../b.js';",
+                "import type { Kept } from '../c.js';",
+                "import { $read } from '../d.js';",
+                "import both, { too } from '../f.js';",
+                'const value: Kept = 1;',
+                `test('reads', async () => { await other.get(${HOLE}); await cli.exec(String(value), both, too); });`,
+                '',
+            ),
+        );
+    });
+
+    test('drops each unread declaration whole, through literals, brackets and bodies, and what only it read', () => {
+        // Given - unread declarations of every shape, each followed by a line that stays
+        const cut = lines(
+            "const message = 'a;b';",
+            'const banner = `a;',
+            'b`;',
+            'const kept = 1;',
+            'function head(',
+            '    options: { a: number }',
+            '): void {',
+            '    return;',
+            '}',
+            'const alsoKept = 2;',
+            'function pair(): [',
+            '    { a: number }',
+            '] {',
+            '    return [{ a: 1 }];',
+            '}',
+            'interface Shape {',
+            '    a: number;',
+            '}',
+            'const built = build(',
+            '    1,',
+            ')',
+            '    .then(next);',
+            'const base = 1;',
+            'const derived = base + 1;',
+            "test('reads', () => { use(kept, alsoKept); });",
+            '',
+        );
+
+        // Then - only the read lines are left
+        expect(pruned(cut)).toBe(
+            lines(
+                'const kept = 1;',
+                'const alsoKept = 2;',
+                "test('reads', () => { use(kept, alsoKept); });",
+                '',
+            ),
+        );
+    });
+
+    test('a path is rebased to the new folder, a directory keeping its slash, and one inside a string or naming nothing is left', () => {
+        // Given - a file moving from specs/a to specs/b/c, naming paths every way
+        const root = packageWith({ 'specs/a/_fixtures/app/x.txt': '', 'specs/a/x.json': '' });
+        const text = lines(
+            "import { api } from '../api.js';",
+            "api.fixture(directory('./_fixtures/app/'));",
+            "api.fixture(file('./x.json'));",
+            "api.fixture(directory('../'));",
+            "api.fixture(directory('../a/_fixtures/app/'));",
+            'log("file(\'./x.json\')");',
+            "api.fixture(file('./missing.json'));",
+            "join(import.meta.dirname, './gone');",
+            "await import('../mod.js');",
+            '',
+        );
+
+        // Then - each existing path, and each module, is named from the new folder
+        expect(rebased(text, join(root, 'specs/a'), join(root, 'specs/b/c'))).toBe(
+            lines(
+                "import { api } from '../../api.js';",
+                "api.fixture(directory('../../a/_fixtures/app/'));",
+                "api.fixture(file('../../a/x.json'));",
+                "api.fixture(directory('../..'));",
+                "api.fixture(directory('../../a/_fixtures/app/'));",
+                'log("file(\'./x.json\')");',
+                "api.fixture(file('./missing.json'));",
+                "join(import.meta.dirname, './gone');",
+                "await import('../../mod.js');",
+                '',
+            ),
+        );
     });
 });

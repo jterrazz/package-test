@@ -1,10 +1,12 @@
 import { blankComments } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
-import { relative, resolve, sep } from 'node:path';
+import { resolve } from 'node:path';
 
+import { pathFrom } from '../../kit/checker/repoint.js';
 import { closingOf, literalEnd } from '../../kit/project/source-scan.js';
 import { lineEnd, withLeadingComments } from '../../kit/project/spec-subjects.js';
 import type { Span } from '../../kit/project/spec-subjects.js';
+import { literalSpans } from '../../kit/project/spec-values.js';
 
 type ImportClause = Span & {
     defaultName: string | undefined;
@@ -16,7 +18,9 @@ type ImportClause = Span & {
 const IMPORT =
     /^import\s+(?<type>type\s+)?(?:(?<plain>[\w$]+)\s*,?\s*)?(?:\{(?<named>[^}]*)\})?\s*from\s+(?<quote>['"])(?<source>[^'"]+)\k<quote>;?[ \t]*\n?/gmu;
 
+/** An import names a single space-separated alias, so every spelling of the split reads it alike. */
 export function importsOf(text: string): ImportClause[] {
+    // Stryker disable OptionalChaining,Regex,UnaryOperator: a match carries its named groups, and an alias is one word after one `as`
     return [...text.matchAll(IMPORT)].map((found) => ({
         defaultName: found.groups?.plain,
         end: found.index + found[0].length,
@@ -32,6 +36,7 @@ export function importsOf(text: string): ImportClause[] {
         start: found.index,
         typeOnly: found.groups?.type !== undefined,
     }));
+    // Stryker restore OptionalChaining,Regex,UnaryOperator
 }
 
 function importText(clause: ImportClause, keeps: (local: string) => boolean): string {
@@ -51,27 +56,25 @@ function importText(clause: ImportClause, keeps: (local: string) => boolean): st
 /** A name written in a message is no read of it; a template stays whole, since its holes hold code. */
 export function codeOnly(text: string): string {
     const blank = blankComments(text);
-    let out = '';
-    for (let index = 0; index < blank.length;) {
-        const end = literalEnd(blank, index);
-        if (end === index) {
-            out += blank[index] ?? '';
-            index += 1;
-            continue;
-        }
-        const literal = blank.slice(index, end);
-        out += literal.startsWith('`') ? literal : literal.replaceAll(/[^\n]/gu, ' ');
-        index = end;
-    }
-    return out;
+    return literalSpans(blank)
+        .filter(({ start }) => blank[start] !== '`')
+        .reduce(
+            (out, { end, start }) =>
+                out.slice(0, start) +
+                out.slice(start, end).replaceAll(/[^\n]/gu, ' ') +
+                out.slice(end),
+            blank,
+        );
+}
+
+function isReadIn(text: string, name: string): boolean {
+    const written = String.raw`(?<![\w$])(?<!(?<!\.\.)\.)${name.replaceAll('$', String.raw`\$`)}(?![\w$])`;
+    // Stryker disable next-line StringLiteral: a name is plain ASCII, read alike with the unicode flag or without
+    return new RegExp(written, 'u').test(codeOnly(text));
 }
 
 export function isRead(text: string, name: string, declared: Span): boolean {
-    const body = codeOnly(`${text.slice(0, declared.start)}\n${text.slice(declared.end)}`);
-    return new RegExp(
-        String.raw`(?<![\w$])(?<!(?<!\.\.)\.)${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
-        'u',
-    ).test(body);
+    return isReadIn(`${text.slice(0, declared.start)}\n${text.slice(declared.end)}`, name);
 }
 
 export type Declaration = Span & { name: string; type: boolean };
@@ -79,8 +82,10 @@ export type Declaration = Span & { name: string; type: boolean };
 const DECLARATION =
     /^(?:(?:const|let)\s+(?<variable>[\w$]+)|(?:async\s+)?function\s*\*?\s*(?<fn>[\w$]+)|type\s+(?<alias>[\w$]+)|interface\s+(?<shape>[\w$]+))/gmu;
 
-function statementEnd(blank: string, start: number, isFunction: boolean): number {
+/** A body closing at the end of its line ends the statement: oxfmt closes every other braced value with `;` or `,`. */
+function statementEnd(blank: string, start: number): number {
     let index = start;
+    // Stryker disable next-line EqualityOperator: past the text's end no character opens a bracket or ends a statement
     while (index < blank.length) {
         const character = blank[index] ?? '';
         const past = literalEnd(blank, index);
@@ -91,17 +96,14 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
         if (character === '(' || character === '[' || character === '{') {
             const close = closingOf(blank, index);
             // invariant: an object type in a return annotation is followed by more of the head.
-            if (
-                isFunction &&
-                character === '{' &&
-                /^[ \t]*(?:\n|$)/u.test(blank.slice(close + 1))
-            ) {
+            if (character === '{' && /^[ \t]*(?:\n|$)/u.test(blank.slice(close + 1))) {
                 return close + 1;
             }
             index = close + 1;
             continue;
         }
         if (character === ';') {
+            // Stryker disable next-line ArithmeticOperator: the statement is cut to its line's end either way
             return index + 1;
         }
         index += 1;
@@ -115,14 +117,11 @@ export function declarationsOf(text: string): Declaration[] {
     return [...blank.matchAll(DECLARATION)].flatMap((match) => {
         const { alias, fn, shape, variable } = match.groups ?? {};
         const name = variable ?? fn ?? alias ?? shape;
+        // Stryker disable next-line ConditionalExpression,BlockStatement: every alternative of the pattern names its declaration
         if (name === undefined) {
             return [];
         }
-        const end = statementEnd(
-            blank,
-            match.index + match[0].length,
-            fn !== undefined || shape !== undefined,
-        );
+        const end = statementEnd(blank, match.index + match[0].length);
         return [
             {
                 end: lineEnd(text, end - 1),
@@ -149,62 +148,43 @@ function withImportsPruned(text: string): string {
         .reduce((rest, clause) => rest.slice(0, clause.start) + rest.slice(clause.end), text);
     let current = text;
     for (const clause of clauses.toReversed()) {
-        const kept = importText(clause, (local) => isRead(code, local, { end: 0, start: 0 }));
+        const kept = importText(clause, (local) => isReadIn(code, local));
         current = current.slice(0, clause.start) + kept + current.slice(clause.end);
     }
     return current;
 }
 
-export function pruned(text: string): string {
-    let current = text;
-    for (let previous = ''; previous !== current;) {
-        previous = current;
-        current = withoutAnUnreadDeclaration(current);
-    }
-    return withImportsPruned(current)
-        .replaceAll(/\n{3,}/gu, '\n\n')
-        .replace(/(?:\n[ \t]*\/\/[^\n]*|\n[ \t]*)+$/u, '\n');
+function withoutUnreadDeclarations(text: string): string {
+    const next = withoutAnUnreadDeclaration(text);
+    return next === text ? text : withoutUnreadDeclarations(next);
 }
 
-export function relativePath(from: string, to: string): string {
-    const path = relative(from, to).split(sep).join('/');
-    return path.startsWith('.') ? path : `./${path}`;
+export function pruned(text: string): string {
+    return withImportsPruned(withoutUnreadDeclarations(text))
+        .replaceAll(/\n{3,}/gu, '\n\n')
+        .replace(/(?:\n[ \t]*\/\/[^\n]*|\n[ \t]*)+$/u, '\n');
 }
 
 export const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
-function literalSpans(text: string): Span[] {
-    const blank = blankComments(text);
-    const spans: Span[] = [];
-    for (let index = 0; index < blank.length;) {
-        const end = literalEnd(blank, index);
-        if (end === index) {
-            index += 1;
-        } else {
-            spans.push({ end, start: index });
-            index = end;
-        }
-    }
-    return spans;
-}
-
 /** A path naming nothing, a negative spec's missing file, says the same from anywhere. */
 export function rebased(text: string, from: string, to: string): string {
-    const strings = literalSpans(text);
+    const strings = literalSpans(blankComments(text));
     let out = '';
     let last = 0;
     for (const found of text.matchAll(RELATIVE_LITERAL)) {
         const { lead = '', path = '', quote = "'" } = found.groups ?? {};
         const target = resolve(from, path);
+        // Stryker disable next-line EqualityOperator: a call's lead never starts nor ends a literal
         const inText = strings.some((span) => found.index > span.start && found.index < span.end);
-        const isModule = /^(?:from|import)\b/u.test(lead);
+        const isModule = /^(?:from\b|import\()/u.test(lead);
         if (inText || (!isModule && !existsSync(target))) {
             continue;
         }
         const next =
-            relativePath(to, target) + (path.endsWith('/') && !path.endsWith('../') ? '/' : '');
-        out += `${text.slice(last, found.index)}${lead}${quote}${next.replace(/\/\/$/u, '/')}${quote}`;
+            pathFrom(to, target) + (path.endsWith('/') && !path.endsWith('../') ? '/' : '');
+        out += `${text.slice(last, found.index)}${lead}${quote}${next}${quote}`;
         last = found.index + found[0].length;
     }
     return out + text.slice(last);

@@ -8,13 +8,13 @@ import {
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 
-import { repointModuleTests } from '../../kit/checker/repoint.js';
+import { pathFrom, repointModuleTests } from '../../kit/checker/repoint.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { shown, silenced, splitPlan, subjectSpecs } from '../../kit/project/spec-subjects.js';
 import type { SpecRead } from '../../kit/project/spec-subjects.js';
 import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../kit/project/tree.js';
-import { RELATIVE_LITERAL, relativePath } from './spec-in-subject-folder.prune.js';
+import { RELATIVE_LITERAL } from './spec-in-subject-folder.prune.js';
 import { splitFiles } from './spec-in-subject-folder.split.js';
 import type { Draft } from './spec-in-subject-folder.split.js';
 
@@ -78,8 +78,8 @@ function liftGround(specsRoot: string, leaf: string): string[] {
             for (const file of new Set(readers.map((reader) => reader.file))) {
                 const text = readFileSync(file, 'utf8');
                 const next = text.replaceAll(
-                    relativePath(dirname(file), path),
-                    relativePath(dirname(file), destination),
+                    pathFrom(dirname(file), path),
+                    pathFrom(dirname(file), destination),
                 );
                 if (next !== text) {
                     writeFileSync(file, next);
