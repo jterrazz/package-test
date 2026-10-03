@@ -1,5 +1,4 @@
 import {
-    isGroundFolder,
     isReservedFolder,
     PRUNED,
     SETUP_FOLDER,
@@ -16,7 +15,7 @@ import { visitProgram } from './path-references.js';
 import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
 import { resolveSpecifier } from './specifiers.js';
-import { isWithin, lowestCommonFolder, readText } from './tree.js';
+import { isWithin, listFiles, lowestCommonFolder, readText } from './tree.js';
 
 export const COMPONENT_TREE = 'component';
 
@@ -41,27 +40,7 @@ export function isRunnerName(name: string): boolean {
 }
 
 export function modulesUnder(specsRoot: string): string[] {
-    const found: string[] = [];
-    const visit = (dir: string): void => {
-        let entries;
-        try {
-            entries = treeEntries(dir);
-        } catch {
-            return;
-        }
-        for (const entry of entries) {
-            const path = join(dir, entry.name);
-            if (entry.isDirectory()) {
-                if (!PRUNED.has(entry.name) && !isGroundFolder(entry.name)) {
-                    visit(path);
-                }
-            } else if (isModuleName(entry.name)) {
-                found.push(path);
-            }
-        }
-    };
-    visit(specsRoot);
-    return found;
+    return listFiles(specsRoot, (path) => isModuleName(basename(path)));
 }
 
 export function setupFolderOf(specsRoot: string, file: string): string | undefined {
