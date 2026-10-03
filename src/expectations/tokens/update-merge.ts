@@ -73,6 +73,18 @@ function anchorOf(lines: readonly string[], from: number, step: -1 | 1): Anchor 
     return undefined;
 }
 
+const PREFIX = 20;
+
+function indexOfAnchor(lines: readonly string[], anchor: string, from: number): number {
+    const exact = lines.indexOf(anchor, from);
+    if (exact !== -1 || anchor.length <= PREFIX) {
+        return exact;
+    }
+    const prefix = anchor.slice(0, PREFIX);
+
+    return lines.findIndex((line, index) => index >= from && line.startsWith(prefix));
+}
+
 function anyRuns(
     prevLines: readonly string[],
     actualLines: readonly string[],
@@ -85,12 +97,12 @@ function anyRuns(
         }
         const before = anchorOf(prevLines, index, -1);
         const after = anchorOf(prevLines, index, 1);
-        const found = before === undefined ? -1 : actualLines.indexOf(before.line, cursor);
+        const found = before === undefined ? -1 : indexOfAnchor(actualLines, before.line, cursor);
         const start = before === undefined ? 0 : found === -1 ? -1 : found - before.offset;
         const anchored =
             after === undefined
                 ? actualLines.length
-                : actualLines.indexOf(after.line, Math.max(start, 0));
+                : indexOfAnchor(actualLines, after.line, Math.max(start, 0));
         const end = after === undefined ? anchored : anchored - after.offset + 1;
         if (start >= 0 && anchored !== -1 && end >= start) {
             runs.set(start, { end, line });

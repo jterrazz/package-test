@@ -49,6 +49,20 @@ describe('update-merge', () => {
         );
     });
 
+    test('structural — update-mode merges — a {{any}} block ends at the reworded line that follows it, by its opening words', () => {
+        // Given - a golden whose line after the block was since reworded, and a run that printed more inside the block
+        const scope = new CaptureScope();
+        const previous =
+            ' RUN  lint\n{{any}}\nfound: a diagnostic the old file does not hold\n✗ failed';
+        const actual =
+            ' RUN  lint\nfirst\nsecond\nfound: a diagnostic the new file does not hold\n✗ failed';
+
+        // Then - the block stays one token, and the reworded line is the run's
+        expect(mergeTextPreservingPlaceholders(previous, actual, scope)).toBe(
+            ' RUN  lint\n{{any}}\nfound: a diagnostic the new file does not hold\n✗ failed',
+        );
+    });
+
     test('structural — update-mode merges — each previous placeholder line is spent once — twins do not collapse', () => {
         // Given - one token line in the golden and two lines it could cover
         const scope = new CaptureScope();
