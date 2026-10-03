@@ -33,6 +33,7 @@ type Chain = { end: number; handle: string; root: AstNode; settings: Setting[]; 
 function handlesOf(program: AstNode): Set<string> {
     const handles = new Set<string>();
     for (const statement of childList(program, 'body')) {
+        // Stryker disable next-line StringLiteral: a statement with no source fails the pattern as an empty one does
         const source = stringValue(child(statement, 'source')) ?? '';
         if (
             statement.type !== 'ImportDeclaration' ||
@@ -42,6 +43,7 @@ function handlesOf(program: AstNode): Set<string> {
         }
         for (const specifier of childList(statement, 'specifiers')) {
             const name = identifierName(child(specifier, 'local'));
+            // Stryker disable next-line ConditionalExpression,LogicalOperator: an import's local name is always read, and a handle no facet sets is allowed no setting below
             if (name !== undefined && name in SETTINGS) {
                 handles.add(name);
             }
@@ -52,13 +54,16 @@ function handlesOf(program: AstNode): Set<string> {
 
 /** Setup calls outermost last. */
 function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | undefined {
+    // Stryker disable next-line ArrayDeclaration: an entry that is no setting is no allowed one
     const settings: Setting[] = [];
     let current: AstNode | undefined = call;
     while (current?.type === 'CallExpression') {
         const callee = child(current, 'callee');
         const object = child(callee, 'object');
+        // Stryker disable next-line ConditionalExpression,OptionalChaining: a call always has a callee, and memberPropertyName reads none from a non-member
         const name = callee?.type === 'MemberExpression' ? memberPropertyName(callee) : undefined;
         const [argument] = childList(current, 'arguments');
+        // Stryker disable next-line ConditionalExpression: a setting with no name is no setting a facet allows
         if (name !== undefined && argument !== undefined) {
             settings.unshift({
                 argument: text.slice(nodeStart(argument), nodeEnd(argument)),
@@ -70,6 +75,7 @@ function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | und
         current = object;
     }
     const handle = identifierName(current);
+    // Stryker disable next-line ConditionalExpression,LogicalOperator,BlockStatement: the three are one check, that the chain starts at an imported runner, spelled for the type checker
     if (current === undefined || handle === undefined || !handles.has(handle)) {
         return undefined;
     }
@@ -83,8 +89,8 @@ function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | und
     };
 }
 
-/** A call inside another chain's span is part of it. */
 function chainsOf(program: AstNode, handles: Set<string>, text: string): Chain[] {
+    // Stryker disable next-line ArrayDeclaration: an entry that is no chain belongs to no handle
     const chains: Chain[] = [];
     walk(program, (node) => {
         if (node.type !== 'CallExpression') {
@@ -94,10 +100,8 @@ function chainsOf(program: AstNode, handles: Set<string>, text: string): Chain[]
         if (chain === undefined) {
             return;
         }
-        const outer = chains.findIndex(
-            (known) => known.start === chain.start && known.end >= chain.end,
-        );
-        if (outer === -1) {
+        // invariant: the walk meets a chain's outermost call first, so a later call starting where it starts is one of its links.
+        if (!chains.some((known) => known.start === chain.start)) {
             chains.push(chain);
         }
     });
@@ -106,6 +110,7 @@ function chainsOf(program: AstNode, handles: Set<string>, text: string): Chain[]
 
 function sharedSettings(chains: Chain[]): Setting[] {
     const [first, ...rest] = chains;
+    // Stryker disable next-line ConditionalExpression: no chain leaves no rest either
     if (first === undefined || rest.length === 0) {
         return [];
     }
@@ -135,41 +140,50 @@ function subjectWord(subject: Subject): string | undefined {
     if (subject.facet === 'cli') {
         return subject.command[0];
     }
+    // Stryker disable next-line ArrayDeclaration: a word holding a space is no name, and leaves the view named for the file
     const folder = subjectFolder(subject)?.split('/') ?? [];
     return folder.findLast((segment) => !ACTIONS.has(segment));
 }
 
-/** Every file of one folder names its view alike: `<subject>View` when the file already holds that name, `<handle>InFile` when no named subject is reached. */
+/** Every file of one folder names its view alike: `<subject>View` when the file already holds that name, `<handle>InFile` when no subject a name can be made of is reached. */
 function viewName(handle: string, text: string, program: AstNode): string {
     const taken = new Set<string>();
     walk(program, (node) => {
         const name = identifierName(node);
+        // Stryker disable next-line ConditionalExpression: undefined is no name a view could take
         if (name !== undefined) {
             taken.add(name);
         }
     });
-    const free = (name: string): boolean =>
-        /^[a-z][A-Za-z0-9]*$/u.test(name) && name !== handle && !taken.has(name);
     const reached = subjectsOf(text).find(({ subject }) => subject.facet === handle)?.subject;
     const word = reached === undefined ? undefined : subjectWord(reached);
-    if (word === undefined) {
+    // Stryker disable next-line StringLiteral: no word fails the pattern below as any non-name does
+    const name = word === undefined ? '' : camelOf(word);
+    // Stryker disable next-line Regex: camelOf leaves letters and digits, so a name starting with a letter holds nothing else
+    if (!/^[a-z][A-Za-z0-9]*$/u.test(name)) {
         return `${handle}InFile`;
     }
-    const name = camelOf(word);
-    return free(name) ? name : `${name}View`;
+    return taken.has(name) ? `${name}View` : name;
 }
 
 function declareOnce(
     fixer: Fixer,
     {
         chains,
+        handle,
         program,
         shared,
         text,
         view,
-    }: { chains: Chain[]; program: AstNode; shared: Setting[]; text: string; view: string },
+    }: {
+        chains: Chain[];
+        handle: string;
+        program: AstNode;
+        shared: Setting[];
+        text: string;
+        view: string;
+    },
 ): Fix[] {
-    const handle = chains[0]?.handle ?? '';
     const imports = childList(program, 'body').filter(
         (statement) => statement.type === 'ImportDeclaration',
     );
@@ -183,6 +197,7 @@ function declareOnce(
     ];
     for (const chain of chains) {
         const dropped = chain.settings.filter((setting) =>
+            // Stryker disable next-line ConditionalExpression: a chain states each setting once, so a shared name's argument is the shared one
             shared.some((own) => own.name === setting.name && own.argument === setting.argument),
         );
         let rest = text.slice(nodeEnd(chain.root), chain.end);
@@ -238,8 +253,9 @@ export const noRepeatedChainSetting = defineRule(
                                 view,
                             },
                             fix: (fixer) =>
-                                declareOnce(fixer, { chains, program, shared, text, view }),
+                                declareOnce(fixer, { chains, handle, program, shared, text, view }),
                             messageId: 'repeated',
+                            // Stryker disable next-line OptionalChaining: a shared setting means two chains at least
                             node: chains[0]?.root ?? program,
                         });
                     }
