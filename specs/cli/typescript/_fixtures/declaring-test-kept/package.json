@@ -1,0 +1,10 @@
+{
+    "name": "consumer-declaring-test-kept",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@jterrazz/test": "*",
+        "@jterrazz/typescript": "*",
+        "vitest": "*"
+    }
+}

@@ -385,7 +385,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.response`     | 25  | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.status`       | 1   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.table()`      | 7   | 4   | 1   | —    | 2           | —       | —      | —         | —      |
-| `.file()`       | 1   | —   | 13  | 7    | 3           | —       | —      | —         | —      |
+| `.file()`       | 1   | —   | 14  | 7    | 3           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
 | `.stdout`       | —   | —   | 35  | —    | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —   | 14  | —    | —           | —       | —      | —         | —      |
@@ -424,7 +424,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
-| `.json body`           | 3   | —   | 9   | —    | 3           | 0       | —      | —         | 8      |
+| `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 8      |
 | `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 6      |
 | `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 2      |
 
