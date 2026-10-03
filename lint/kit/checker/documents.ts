@@ -15,7 +15,7 @@ import { DOCUMENT_KEYS, RUN_KEYS } from '../project/spec-grammar.js';
 import type { SpecFile } from '../project/spec-grammar.js';
 import { readText } from '../project/tree.js';
 import { renderYamlSource, Scalar } from '../project/yaml-document.js';
-import type { YAMLMap } from '../project/yaml-document.js';
+import type { Node, Pair, YAMLMap } from '../project/yaml-document.js';
 import type { GroundPasses, Spotted } from './registry.js';
 
 export function runDocument(
@@ -39,15 +39,10 @@ export function runDocument(
     }));
 }
 
+/** The grammar refuses any key outside `order`, so every pair has its rank. */
 function reorder(map: YAMLMap, order: readonly string[]): void {
-    const known = pairsOf(map).filter((pair) => order.includes(keyName(pair) ?? ''));
-    const sorted = [...known].toSorted(
-        (a, b) => order.indexOf(keyName(a) ?? '') - order.indexOf(keyName(b) ?? ''),
-    );
-    let cursor = 0;
-    map.items = pairsOf(map).map(
-        (pair) => (order.includes(keyName(pair) ?? '') ? sorted[cursor++] : pair) ?? pair,
-    );
+    const rank = (pair: Pair<Node, Node>): number => order.indexOf(String(keyName(pair)));
+    map.items = pairsOf(map).toSorted((a, b) => rank(a) - rank(b));
 }
 
 /** `null` when nothing moved: the caller writes only what changed, so a clean tree keeps its mtimes. */
@@ -59,6 +54,7 @@ export function fixSpecDocument(text: string, rel: string): null | string {
         return null;
     }
     const map = documentMap(file);
+    // Stryker disable next-line ConditionalExpression: readSpecFile refused a document that is no mapping
     if (map === null) {
         return null;
     }

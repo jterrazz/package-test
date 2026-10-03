@@ -45,9 +45,9 @@ describe('documents', () => {
     });
 
     test('documents — fixSpecDocument — key order and block scalars — a document already holding both conventions is left untouched', () => {
-        // Given - a canonical document
+        // Given - a canonical document, its empty stream quoted as nothing else can write it
         const source =
-            'description: builds the widget\nruns:\n    - command: b\n      exit: 0\n      stdout: |\n          Built.\n';
+            'description: builds the widget\nruns:\n    - command: b\n      exit: 0\n      stdout: |\n          Built.\n      stderr: ""\n';
 
         // Then - `null` says nothing moved, so the file keeps its mtime
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
