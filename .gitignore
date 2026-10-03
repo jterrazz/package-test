@@ -1,16 +1,9 @@
 node_modules/
-.idea
 .DS_Store
 .artifacts/
-# The setup files Stryker's vitest runner writes at the root, and leaves behind when a run stops early.
 stryker-setup-*.js
 dist
-# Turborepo's per-task log, at a path it offers no key to move.
 *.tgz
 
-# The oxlint a checker spec's project runs: the repository's own, behind a stub.
-!specs/lint/checker/_fixtures/lint-violations/checker-own-fixes/node_modules/
-# The oxlint of a checker spec's JSON-configured project, which lays its configs down.
-!specs/lint/checker/_fixtures/lint-violations/checker-own-fixes-json/node_modules/
 # The Appium a spawned-server mobile run starts: a stub serving the protocol double.
 !specs/mobile/appium/_fixtures/mobile-spawned-session/app/node_modules/
