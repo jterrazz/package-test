@@ -8,6 +8,8 @@ const UUID_A = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 
 const UUID_B = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 
+const WORKDIR = '/tmp/spec-run-abcdef';
+
 describe('update-merge', () => {
     test('structural — update-mode merges — mergeTextPreservingPlaceholders follows the actual line count (pinned)', () => {
         // Given - a previous snapshot with placeholders and a different shape
@@ -102,5 +104,66 @@ describe('update-merge', () => {
         // Then - the merged output matches the same actual on a normal run
         expect(structuralEquals(mergedJson, actualJson, new CaptureScope())).toBe(true);
         expect(textEquals(mergedText, `id ${UUID_B}\nfresh`, new CaptureScope())).toBe(true);
+    });
+
+    test('workdir substitution — mergePreservingPlaceholders substitutes the known cwd in JSON string leaves', () => {
+        // Given - a fresh JSON fixture (no previous) whose values embed the cwd
+        const actual = { cwd: WORKDIR, nested: { path: `${WORKDIR}/out.txt` }, other: 7 };
+
+        // Then - the workdir is written back as its {{workdir}} token, not the run-specific temp path — parity with the text path
+        expect(mergePreservingPlaceholders(null, actual, WORKDIR)).toStrictEqual({
+            cwd: '{{workdir}}',
+            nested: { path: '{{workdir}}/out.txt' },
+            other: 7,
+        });
+    });
+
+    test('workdir substitution — mergePreservingPlaceholders preserves a still-matching {{workdir}} placeholder', () => {
+        // Given - a previous fixture that already tokenised the cwd
+        const previous = { cwd: '{{workdir}}', id: '{{uuid}}', name: 'STALE' };
+        const actual = { cwd: WORKDIR, id: UUID_A, name: 'Alice' };
+
+        // Then - {{workdir}} and {{uuid}} survive, the stale literal refreshes
+        expect(mergePreservingPlaceholders(previous, actual, WORKDIR)).toStrictEqual({
+            cwd: '{{workdir}}',
+            id: '{{uuid}}',
+            name: 'Alice',
+        });
+    });
+
+    test('workdir substitution — no workdir given: string leaves are left untouched (no-op parity)', () => {
+        // Given - the same shape but no framework-known cwd (api/job mode)
+        const actual = { cwd: WORKDIR };
+
+        // Then - nothing is substituted
+        expect(mergePreservingPlaceholders(null, actual)).toStrictEqual({ cwd: WORKDIR });
+    });
+
+    test('workdir substitution — meta: a workdir-substituted JSON fixture passes the next run (with {{workdir}} inside)', () => {
+        // Given - a golden freshly written by update mode from cwd-bearing output
+        const actual = { cwd: WORKDIR, log: `wrote ${WORKDIR}/out.txt`, name: 'Alice' };
+        const merged = mergePreservingPlaceholders(null, actual, WORKDIR);
+
+        // Then - the token is stored, and the merged golden matches the same actual on a normal (workdir-aware) comparison run
+        expect(merged).toStrictEqual({
+            cwd: '{{workdir}}',
+            log: 'wrote {{workdir}}/out.txt',
+            name: 'Alice',
+        });
+        expect(structuralEquals(merged, actual, new CaptureScope(WORKDIR))).toBe(true);
+    });
+
+    test('workdir substitution — parity: text and JSON paths emit the same {{workdir}} token from the same cwd', () => {
+        // Given - the same cwd surfacing in a text stream and a JSON value
+        const mergedText = mergeTextPreservingPlaceholders(
+            null,
+            `cwd ${WORKDIR}`,
+            new CaptureScope(WORKDIR),
+        );
+        const mergedJson = mergePreservingPlaceholders(null, { cwd: WORKDIR }, WORKDIR);
+
+        // Then - both channels tokenise it identically (no literal temp path leaks)
+        expect(mergedText).toBe('cwd {{workdir}}');
+        expect(mergedJson).toStrictEqual({ cwd: '{{workdir}}' });
     });
 });

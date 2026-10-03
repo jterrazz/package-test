@@ -1,10 +1,6 @@
 import { CaptureScope } from './capture-scope.js';
-import {
-    hasPlaceholders,
-    isPlainObject,
-    placeholderStringMatches,
-    textEquals,
-} from './structural.js';
+import { hasPlaceholders, placeholderStringMatches } from './placeholders.js';
+import { isPlainObject, textEquals } from './structural.js';
 
 /** So a golden written under `TEST_UPDATE=1` stores the token, not a temp path (`no-volatile-literal`). */
 function substituteWorkdirDeep(value: unknown, workdir: string): unknown {

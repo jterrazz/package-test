@@ -2,8 +2,8 @@ import { CaptureScope } from '../../expectations/tokens/capture-scope.js';
 import {
     hasPlaceholders,
     placeholderPatternSource,
-    textEquals,
-} from '../../expectations/tokens/structural.js';
+} from '../../expectations/tokens/placeholders.js';
+import { textEquals } from '../../expectations/tokens/structural.js';
 import type { StubRequest } from '../exchange.js';
 
 const RELATIVE_BASE = 'http://stub.invalid';
