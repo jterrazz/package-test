@@ -3,102 +3,107 @@ import { dirname, join, sep } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { EVIDENCE_DIR } from '../../../../lint/kit/project/artifacts.js';
+import { stubChromium } from './playwright.adapter.fixtures.js';
 import { PlaywrightAdapter } from './playwright.adapter.js';
 
-/** A stub launcher: no chromium starts. */
-
-type Browser = Awaited<
-    ReturnType<
-        NonNullable<NonNullable<ConstructorParameters<typeof PlaywrightAdapter>[0]>['launch']>
-    >
->;
-function isBrowser(value: object): value is Browser {
-    return 'newContext' in value && 'on' in value;
-}
-/** `hold` makes a visit that never finishes loading; `shots` records every screenshot path asked for. */
-type StubContext = { closed: boolean };
-function stubChromium(hold = false): {
-    browser: { closed: boolean; contexts: StubContext[] };
-    launch: () => Promise<Browser>;
-    launches: () => number;
-    loading: (count: number) => Promise<void>;
-    shots: string[];
-} {
-    const contexts: StubContext[] = [];
-    const state = { closed: false, contexts };
-    const never = Promise.withResolvers<never>().promise;
-    const waiters: { count: number; resolve: () => void }[] = [];
-    const shots: string[] = [];
-    let launches = 0;
-    let loads = 0;
-    const goto = async (): Promise<null> => {
-        if (!hold) {
-            return null;
-        }
-        loads += 1;
-        for (const waiter of waiters.filter((entry) => entry.count <= loads)) {
-            waiter.resolve();
-        }
-        return await never;
-    };
-    const page = {
-        evaluate: async () => ({
-            html: '<html></html>',
-            jsonLdBlocks: [],
-            links: [],
-            metas: [],
-            text: '',
-            title: '',
-        }),
-        goto,
-        locator: () => ({ ariaSnapshot: async () => '' }),
-        on: () => {},
-        screenshot: async ({ path }: { path: string }) => {
-            shots.push(path);
-        },
-        url: () => 'http://site.test/',
-    };
-    const browser = {
-        close: async () => {
-            state.closed = true;
-        },
-        newContext: async () => {
-            const context = { closed: false };
-            contexts.push(context);
-            return {
-                close: async () => {
-                    context.closed = true;
-                },
-                newPage: async () => page,
-            };
-        },
-        on: () => {},
-    };
-    const launch = async (): Promise<Browser> => {
-        launches += 1;
-        if (!isBrowser(browser)) {
-            throw new Error('the stub browser opens no context');
-        }
-        return browser;
-    };
-    const loading = async (count: number): Promise<void> => {
-        const waiter = Promise.withResolvers<true>();
-        const resolve = (): void => {
-            waiter.resolve(true);
-        };
-        waiters.push({ count, resolve });
-        if (loads >= count) {
-            resolve();
-        }
-        await waiter.promise;
-    };
-    return { browser: state, launch, launches: () => launches, loading, shots };
-}
 const VISIT = { baseUrl: 'http://site.test', external: 'allow' } as const;
+
+const REQUESTS = ['http://site.test/app.js', 'http://127.0.0.1:4100/api', 'https://cdn.test/x.js'];
+
+async function messageOf(work: Promise<unknown>): Promise<string> {
+    try {
+        await work;
+        return '';
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+    }
+}
+
 async function failingScenario(): Promise<void> {
     await Promise.reject(new Error('the button is gone'));
 }
+
 describe('PlaywrightAdapter', () => {
+    test('the PlaywrightAdapter — a visit — opens a context with the chain’s headers, pins the clock before loading, and answers what the page holds', async () => {
+        // Given - a page answering 201, a visit carrying headers and a clock, and one carrying neither
+        const chromium = stubChromium({ status: 201 });
+        const adapter = new PlaywrightAdapter({ launch: chromium.launch });
+
+        // When - each visits
+        const page = await adapter.open('http://site.test/home', {
+            ...VISIT,
+            clock: '2026-01-01T00:00:00.000Z',
+            headers: { 'x-a': '1' },
+        });
+        await adapter.open('http://site.test/home', VISIT);
+
+        // Then - the page as captured, and each call in its order
+        expect([page, chromium.log]).toStrictEqual([
+            {
+                consoleMessages: [
+                    { text: 'hello', type: 'warning' },
+                    { text: 'Uncaught TypeError: boom', type: 'error' },
+                ],
+                html: '<html></html>',
+                jsonLdBlocks: [],
+                links: [],
+                metas: [],
+                status: 201,
+                text: 'Welcome',
+                title: 'Home',
+                tree: '- snapshot of body',
+                url: 'http://site.test/home',
+            },
+            [
+                'newContext {"extraHTTPHeaders":{"x-a":"1"}}',
+                'clock 2026-01-01T00:00:00.000Z',
+                'goto http://site.test/home {"waitUntil":"load"}',
+                'newContext {"extraHTTPHeaders":{}}',
+                'goto http://site.test/home {"waitUntil":"load"}',
+            ],
+        ]);
+    });
+
+    test('the PlaywrightAdapter — a visit — a navigation answering no response is status 0', async () => {
+        // Given - a page whose navigation answers none
+        const chromium = stubChromium();
+
+        // Then - the status is 0
+        await expect(
+            new PlaywrightAdapter({ launch: chromium.launch }).open('http://site.test/', VISIT),
+        ).resolves.toHaveProperty('status', 0);
+    });
+
+    test('the PlaywrightAdapter — a visit — blocking external requests lets through the site and the allowed origins alone, and allowing them routes nothing', async () => {
+        // Given - a page requesting the site, the backend and a CDN
+        const chromium = stubChromium({ requests: REQUESTS });
+        const adapter = new PlaywrightAdapter({ launch: chromium.launch });
+
+        // When - one visit blocks with the backend allowed, one blocks with none allowed, one allows
+        await adapter.open('http://site.test/', {
+            ...VISIT,
+            allowedOrigins: ['http://127.0.0.1:4100'],
+            external: 'block',
+        });
+        await adapter.open('http://site.test/', { ...VISIT, external: 'block' });
+        await adapter.open('http://site.test/', VISIT);
+
+        // Then - each request continued or aborted by its origin, and nothing routed when allowed
+        expect(chromium.log.filter((line) => !line.startsWith('newContext'))).toStrictEqual([
+            'route **/*',
+            'goto http://site.test/ {"waitUntil":"load"}',
+            'continue http://site.test/app.js',
+            'continue http://127.0.0.1:4100/api',
+            'abort https://cdn.test/x.js',
+            'route **/*',
+            'goto http://site.test/ {"waitUntil":"load"}',
+            'continue http://site.test/app.js',
+            'abort http://127.0.0.1:4100/api',
+            'abort https://cdn.test/x.js',
+            'goto http://site.test/ {"waitUntil":"load"}',
+        ]);
+    });
+
     test('the PlaywrightAdapter — the runners of a worker share its browser — two runners visiting pages launch the one browser once', async () => {
         // Given - two runners of one worker, over the same launcher
         const chromium = stubChromium();
@@ -112,34 +117,28 @@ describe('PlaywrightAdapter', () => {
             ),
         );
 
-        // Then - one launch, one fresh context per visit, each closed when its visit ended
-        expect(chromium.launches()).toBe(1);
-        expect(chromium.browser.contexts.map((context) => context.closed)).toStrictEqual([
-            true,
-            true,
-            true,
-            true,
-        ]);
+        // Then - one launch, one fresh context per visit, each closed once when its visit ended
+        expect([chromium.launches(), chromium.closes]).toStrictEqual([1, [1, 1, 1, 1]]);
     });
 
-    test("the PlaywrightAdapter — the runners of a worker share its browser — close() ends the runner's open visits only, and leaves the browser to the worker", async () => {
+    test("the PlaywrightAdapter — the runners of a worker share its browser — close() ends the runner's open visits once, and leaves the browser to the worker", async () => {
         // Given - two runners, each with a visit still loading
-        const chromium = stubChromium(true);
+        const chromium = stubChromium({ hold: true });
         const closing = new PlaywrightAdapter({ launch: chromium.launch });
         const other = new PlaywrightAdapter({ launch: chromium.launch });
         void closing.open('http://site.test/', VISIT);
         void other.open('http://site.test/', VISIT);
         await chromium.loading(2);
 
-        // When - the first runner closes
+        // When - the first runner closes, twice
+        await closing.close();
         await closing.close();
 
-        // Then - its context is closed, the other runner's is not, and the browser lives on
-        expect(chromium.browser.contexts.map((context) => context.closed)).toStrictEqual([
-            true,
+        // Then - its context is closed once, the other runner's is not, and the browser lives on
+        expect([chromium.closes, chromium.log.includes('browser close')]).toStrictEqual([
+            [1, 0],
             false,
         ]);
-        expect(chromium.browser.closed).toBe(false);
     });
 
     test('the PlaywrightAdapter — the runners of a worker share its browser — close() does not close again a visit that already ended', async () => {
@@ -147,20 +146,15 @@ describe('PlaywrightAdapter', () => {
         const chromium = stubChromium();
         const adapter = new PlaywrightAdapter({ launch: chromium.launch });
         await adapter.open('http://site.test/', VISIT);
-        const [context] = chromium.browser.contexts;
-        if (context === undefined) {
-            throw new Error('the visit opened no context');
-        }
-        context.closed = false;
 
         // When - the runner closes
         await adapter.close();
 
-        // Then - the ended visit's context was no longer held
-        expect(context.closed).toBe(false);
+        // Then - the ended visit's context was closed once, by the visit
+        expect(chromium.closes).toStrictEqual([1]);
     });
 
-    test("the PlaywrightAdapter — a failed scenario leaves its evidence — screenshots into the project's evidence folder, which outlives the run's temp root", async () => {
+    test("the PlaywrightAdapter — a failed scenario leaves its evidence — a full-page screenshot into the project's evidence folder, which outlives the run's temp root", async () => {
         // Given - a runner whose scenario fails, and the evidence folder removed after the test
         const chromium = stubChromium();
         const adapter = new PlaywrightAdapter({ launch: chromium.launch });
@@ -171,12 +165,28 @@ describe('PlaywrightAdapter', () => {
         });
 
         // When - the visit runs it
-        const visit = adapter.open('http://site.test/', { ...VISIT, scenario: failingScenario });
+        const failure = await messageOf(
+            adapter.open('http://site.test/', { ...VISIT, scenario: failingScenario }),
+        );
 
-        // Then - the error names the one screenshot, taken under the evidence folder
-        await expect(visit).rejects.toThrow(/the button is gone\nEvidence: .*failure\.png\n/u);
+        // Then - the visit's refusal names the one screenshot, taken whole under the evidence folder
+        const [shot = ''] = chromium.shots;
         const evidence = join(process.cwd(), EVIDENCE_DIR);
-        expect(chromium.shots).toHaveLength(1);
-        expect(chromium.shots[0]?.startsWith(`${evidence}${sep}website-`)).toBe(true);
+        expect([
+            failure.replace(shot, '<shot>'),
+            shot.startsWith(`${evidence}${sep}website-`) && shot.endsWith(`${sep}failure.png`),
+            chromium.log.at(-1),
+        ]).toStrictEqual([
+            [
+                'found: the visit scenario failed:',
+                '  the button is gone',
+                'Evidence: <shot>',
+                'why: A visit scenario drives the page step by step, and the first step that fails ends it.',
+                'fix: correct the step that failed, or the page it drives',
+                'read: docs/10-website.md#visit-scenarios--the-when',
+            ].join('\n'),
+            true,
+            'screenshot fullPage=true',
+        ]);
     });
 });

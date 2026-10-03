@@ -75,7 +75,9 @@ async function blockExternal(context: BrowserContext, options: BrowserOpenOption
     if (options.external !== 'block') {
         return;
     }
-    const allowed = new Set([new URL(options.baseUrl).origin, ...(options.allowedOrigins ?? [])]);
+    const allowed = new Set(
+        [options.baseUrl, ...(options.allowedOrigins ?? [])].map((at) => new URL(at).origin),
+    );
     await context.route('**/*', (route) => {
         if (allowed.has(new URL(route.request().url()).origin)) {
             void route.continue();
