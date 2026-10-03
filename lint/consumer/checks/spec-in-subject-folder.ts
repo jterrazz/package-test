@@ -9,13 +9,18 @@ import {
 } from '../../kit/project/spec-subjects.js';
 import type { SpecRead } from '../../kit/project/spec-subjects.js';
 import { ambiguousSegment } from '../../kit/project/subject.js';
+import type { Subject } from '../../kit/project/subject.js';
 import type { Spotted } from './checker.js';
 
 /** No folder is derived from a word that may be a value: the author writes the template that says which it is. */
-function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Spotted | undefined {
-    const at = spec.subjects.get(name);
-    const segment = at === undefined ? undefined : ambiguousSegment(at.subject, spec.reading);
-    if (at === undefined || segment === undefined || at.subject.facet !== 'api') {
+function ambiguityOf(
+    specsRoot: string,
+    spec: SpecRead,
+    at: { index: number; subject: Subject },
+): Spotted | undefined {
+    const segment = ambiguousSegment(at.subject, spec.reading);
+    // Stryker disable next-line ConditionalExpression: ambiguousSegment names a segment of an api route alone; the facet check narrows the subject
+    if (segment === undefined || at.subject.facet !== 'api') {
         return undefined;
     }
     const { method, path } = at.subject;
@@ -34,18 +39,20 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Spotted |
 
 export function checkSpecInSubjectFolder(specsRoot: string): Spotted[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
-        const [only] = [...spec.subjects.keys()];
-        if (
-            spec.subjects.size !== 1 ||
-            only === undefined ||
-            silenced(spec, 'spec-in-subject-folder')
-        ) {
+        if (spec.subjects.size !== 1 || silenced(spec, 'spec-in-subject-folder')) {
             return [];
         }
-        const ambiguity = ambiguityOf(specsRoot, spec, only);
+        const [entry] = [...spec.subjects];
+        // Stryker disable next-line ConditionalExpression,BlockStatement,ArrayDeclaration: a spec of one subject has its entry
+        if (entry === undefined) {
+            return [];
+        }
+        const [only, at] = entry;
+        const ambiguity = ambiguityOf(specsRoot, spec, at);
         if (ambiguity !== undefined) {
             return [ambiguity];
         }
+        // Stryker disable next-line BooleanLiteral: a spec of no subject folder stays in its folder under either name
         const target = targetOf(specsRoot, spec, only, true);
         if (dirname(target) === dirname(spec.file)) {
             return [];

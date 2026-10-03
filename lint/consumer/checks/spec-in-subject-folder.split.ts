@@ -19,6 +19,7 @@ import {
     declarationsOf,
     importsOf,
     isRead,
+    isReadIn,
     pruned,
     rebased,
     without,
@@ -27,17 +28,23 @@ import type { Declaration } from './spec-in-subject-folder.prune.js';
 
 const DESCRIBE_CALL = /^describe(?:\.\w+(?:\([^()]*\))?)*\s*\(/gmu;
 
-function describesOf(text: string): (Span & { holdsTests: boolean; open: number })[] {
+const TOP_DESCRIBE_TITLE = /^describe\(\s*(?<quote>['"`])(?:[^\\]|\\.)*?\k<quote>/mu;
+
+/** `open` is the line after the callback's `{`, `close` the line of its `}`: a wrapped call closes on lines of its own. */
+function describesOf(
+    text: string,
+): (Span & { close: number; holdsTests: boolean; open: number })[] {
     const blank = blankComments(text);
     return [...blank.matchAll(DESCRIBE_CALL)].map((found) => {
         const open = found.index + found[0].length - 1;
         const close = closingOf(blank, open);
-        const body = blank.slice(open, close);
+        const brace = blank.indexOf('{', open);
         TEST_CALL.lastIndex = 0;
         return {
+            close: lineStart(text, closingOf(blank, brace)),
             end: lineEnd(text, close),
-            holdsTests: TEST_CALL.test(body),
-            open: lineEnd(text, blank.indexOf('{', open)),
+            holdsTests: TEST_CALL.test(blank.slice(open, close)),
+            open: lineEnd(text, brace),
             start: withLeadingComments(text, found.index),
         };
     });
@@ -53,37 +60,26 @@ function oneDescribe(text: string, aspect: string): string {
     }
     const describes = describesOf(current);
     const [first] = describes;
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a file with no describe has none to merge or rename
     if (first === undefined) {
         return current;
     }
     for (const later of describes.slice(1).toReversed()) {
-        const closing = lineStart(current, later.end - 1);
         current =
             current.slice(0, later.start) +
-            current.slice(later.open, closing) +
+            current.slice(later.open, later.close) +
             current.slice(later.end);
     }
     if (describes.length > 1) {
-        const firstClosing = lineStart(current, first.end - 1);
-        const closing = current.slice(firstClosing, first.end);
-        current = `${current.slice(0, firstClosing)}${current.slice(first.end).trimEnd()}\n${closing.trimEnd()}\n`;
+        const closing = current.slice(first.close, first.end);
+        current = `${current.slice(0, first.close)}${current.slice(first.end).trimEnd()}\n${closing.trimEnd()}\n`;
     }
-    return current.replace(
-        /^describe\((?<quote>['"`])(?:[^\\]|\\.)*?\k<quote>/mu,
-        `describe('${aspect}'`,
-    );
+    return current.replace(TOP_DESCRIBE_TITLE, `describe('${aspect}'`);
 }
 
 export type Draft = { target: string; text: string };
 
 const BUILDS_DISK = /(?<![\w$])(?<!(?<!\.\.)\.)(?:file|directory)\s*\(/u;
-
-function reads(code: string, name: string): boolean {
-    return new RegExp(
-        String.raw`(?<![\w$])(?<!(?<!\.\.)\.)${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
-        'u',
-    ).test(codeOnly(code));
-}
 
 /** A declaration building a `file()` or `directory()` (`paths-named-in-the-test`), or reading one, stays copied where it is read; a type only tests read stays in each file. */
 function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaration[] {
@@ -104,12 +100,10 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
     for (let changed = true; changed;) {
         changed = false;
         for (const name of moved) {
-            const body = (code.get(name) ?? '').replace(
-                new RegExp(String.raw`^[\s\S]*?\b${name.replaceAll('$', String.raw`\$`)}\b`, 'u'),
-                '',
-            );
+            // Stryker disable next-line StringLiteral: a moved name always has its code
+            const body = code.get(name) ?? '';
             for (const other of declarations) {
-                if (other.name === name || !reads(body, other.name)) {
+                if (!isReadIn(body, other.name)) {
                     continue;
                 }
                 if (excluded.has(other.name)) {
@@ -120,6 +114,7 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
                 }
                 if (!moved.has(other.name)) {
                     moved.add(other.name);
+                    // Stryker disable next-line BooleanLiteral: a name added mid-pass is still visited in that pass
                     changed = true;
                 }
             }
@@ -129,12 +124,15 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
 }
 
 function exported(code: string): string {
+    // Stryker disable next-line Regex: a declaration's code opens on its keyword, its comments blanked
     const head = /^(?:const|let|async\s|function|type\s|interface\s)/mu.exec(blankComments(code));
+    // Stryker disable next-line ConditionalExpression: a declaration always opens on its keyword
     return head === null ? code : `${code.slice(0, head.index)}export ${code.slice(head.index)}`;
 }
 
 function withImportLine(text: string, line: string): string {
     const last = importsOf(text).at(-1);
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: a split spec imports its runner, so each file it writes keeps an import clause
     return last === undefined
         ? `${line}\n${text}`
         : `${text.slice(0, last.end)}${line}\n${text.slice(last.end)}`;
@@ -180,12 +178,14 @@ function withSharedHelpers(
     const setup = {
         target: module,
         text: pruned(rebased(`${imports}\n${body}`, dirname(spec.file), dirname(module))).replace(
+            // Stryker disable next-line Regex: a setup body opens on one blank line at most
             /^\n+/u,
             '',
         ),
     };
     return {
         drafts: drafts.map((draft) => {
+            // Stryker disable next-line ConditionalExpression,BlockStatement: a file holding no moved name reads none, and the empty import it would get is pruned
             if (!holds(draft)) {
                 return draft;
             }
@@ -193,7 +193,8 @@ function withSharedHelpers(
                 draft.text,
                 declarationsOf(draft.text).filter((d) => names.has(d.name)),
             );
-            const read = [...names].filter((name) => reads(kept, name)).toSorted();
+            const read = [...names].filter((name) => isReadIn(kept, name)).toSorted();
+            // Stryker disable next-line Regex: a setup module is named <aspect>.ts, with no .ts before its end
             const specifier = pathFrom(dirname(draft.target), module).replace(/\.ts$/u, '.js');
             return {
                 target: draft.target,
@@ -242,6 +243,7 @@ function namesRead(code: string): Set<string> {
 function withoutIdleHooks(text: string): string {
     const blank = blankComments(text);
     const hooks = [...blank.matchAll(HOOK_CALL)].map((found) => {
+        // Stryker disable next-line ArithmeticOperator: read from the arrow's own parentheses, the scan still closes on the hook's body
         const open = found.index + found[0].length - 1;
         return {
             end: lineEnd(text, closingOf(blank, open)),

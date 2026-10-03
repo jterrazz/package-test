@@ -67,7 +67,7 @@ export function codeOnly(text: string): string {
         );
 }
 
-function isReadIn(text: string, name: string): boolean {
+export function isReadIn(text: string, name: string): boolean {
     const written = String.raw`(?<![\w$])(?<!(?<!\.\.)\.)${name.replaceAll('$', String.raw`\$`)}(?![\w$])`;
     // Stryker disable next-line StringLiteral: a name is plain ASCII, read alike with the unicode flag or without
     return new RegExp(written, 'u').test(codeOnly(text));

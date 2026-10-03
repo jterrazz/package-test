@@ -2,7 +2,13 @@ import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { CHARTS, migrating, RUNNER, specsTree } from '../../kit/testing/subject.fixtures.js';
+import {
+    CHARTS,
+    migrating,
+    RUNNER,
+    specsTree,
+    TWO_ROUTES,
+} from '../../kit/testing/subject.fixtures.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
 
@@ -88,5 +94,16 @@ describe('checkSpecInSubjectFolder', () => {
         // Then - nothing
         expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
         expect(fixSpecInSubjectFolder(root)).toStrictEqual([]);
+    });
+
+    test("a spec of two subjects is one-subject-per-spec's, never this pass's", () => {
+        // Given - the two-route spec, filed under neither route's folder
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': TWO_ROUTES,
+        });
+
+        // Then - this pass says nothing of it
+        expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
     });
 });

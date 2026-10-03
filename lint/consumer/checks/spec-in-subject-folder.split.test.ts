@@ -3,6 +3,12 @@ import { describe, expect, test } from 'vitest';
 
 import { splitPlan, subjectSpecs } from '../../kit/project/spec-subjects.js';
 import { RUNNER, specsTree } from '../../kit/testing/subject.fixtures.js';
+import {
+    RICH_ORDERS,
+    RICH_SPLIT,
+    SHARED_HELPER_ORDERS,
+    TYPED_ORDERS,
+} from './spec-in-subject-folder.split.fixtures.js';
 import { splitFiles } from './spec-in-subject-folder.split.js';
 
 /** What the split of the one spec under `root` would write, by path; nothing is written. */
@@ -13,73 +19,15 @@ function filesOf(root: string): (path: string) => string {
     return (path) => files.find(({ target }) => target === join(root, path))?.text ?? '';
 }
 
-const TYPED_ORDERS = [
-    "import { expect, test } from 'vitest';",
-    '',
-    "import { api } from '../api.specification.js';",
-    '',
-    'type Status = number;',
-    '',
-    '/** What an answer carries. */',
-    'interface Answer {',
-    '    status: Status;',
-    '}',
-    '',
-    'type Order = { item: string };',
-    '',
-    'function answered(result: Answer) {',
-    '    expect(result.status).toBe(200);',
-    '}',
-    '',
-    "test('lists', async () => {",
-    "    const answer: Answer = await api.get('/orders');",
-    '    const none: Order[] = [];',
-    '    answered(answer);',
-    '    expect(none).toStrictEqual([]);',
-    '});',
-    '',
-    "test('creates', async () => {",
-    "    const order: Order = { item: 'book' };",
-    "    answered(await api.post('/orders', order));",
-    '});',
-    '',
-    "test('deletes', async () => {",
-    "    const answer: Answer = await api.delete('/orders/1');",
-    '    expect(answer.status).toBe(204);',
-    '});',
-    '',
-].join('\n');
-
-const SHARED_HELPER_ORDERS = [
-    "import { file } from '@jterrazz/test';",
-    "import { expect, test } from 'vitest';",
-    '',
-    "import { api } from '../api.specification.js';",
-    '',
-    'const OK = 200;',
-    '',
-    '/** The status every answer carries. */',
-    'function answered(result) {',
-    '    expect(result.status).toBe(OK);',
-    '}',
-    '',
-    'function listed(result) {',
-    "    expect(result.response).toMatch(file('./_expected/listed.http'));",
-    '}',
-    '',
-    "test('lists', async () => {",
-    "    const result = await api.get('/orders');",
-    '    answered(result);',
-    '    listed(result);',
-    '});',
-    '',
-    "test('creates', async () => {",
-    "    const result = await api.post('/orders', {});",
-    '    answered(result);',
-    '    listed(result);',
-    '});',
-    '',
-].join('\n');
+/** Every file the split of the one spec under `root` writes, by its path under `root`. */
+function splitByPath(root: string): Record<string, string> {
+    const files = subjectSpecs(root).flatMap((spec) =>
+        splitFiles(root, spec, splitPlan(root, spec)),
+    );
+    return Object.fromEntries(
+        files.map(({ target, text }) => [target.slice(root.length + 1), text]),
+    );
+}
 
 describe('splitFiles', () => {
     test('the split copies a hook only into the files whose tests read what it sets', () => {
@@ -240,5 +188,66 @@ describe('splitFiles', () => {
             ),
             rewritten: read('api/orders/_setup/orders.ts') !== '',
         }).toStrictEqual({ copies: [true, true], rewritten: false });
+    });
+
+    test('the split files each test with what it reads: neutral tests, hooks, disk-building copies and shared helpers alike', () => {
+        // Given - a spec of three subjects with every kind of shared code
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': RICH_ORDERS,
+        });
+
+        // Then - each file the split writes, whole
+        expect(splitByPath(root)).toStrictEqual(RICH_SPLIT);
+    });
+
+    test('a helper shared from a spec filed elsewhere moves to the folder its holders share, and a file holding none is left as cut', () => {
+        // Given - a spec filed under api/misc, whose list and create tests share a constant
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/misc/orders.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                'const OK = 200;',
+                '',
+                "test('lists', async () => { expect((await api.get('/orders')).status).toBe(OK); });",
+                "test('creates', async () => { expect((await api.post('/orders', {})).status).toBe(OK); });",
+                "test('deletes', async () => { await api.delete('/orders/c'); });",
+                "test('lists users', async () => { await api.get('/users'); });",
+                '',
+            ].join('\n'),
+        });
+
+        // Then - the constant moves under api/orders, imported where it is read
+        const runner = "import { api } from '../../api.specification.js';\n";
+        const ok = "import { OK } from '../_setup/orders.js';\n";
+        expect(splitByPath(root)).toStrictEqual({
+            'api/orders/_setup/orders.ts': 'export const OK = 200;\n',
+            'api/orders/c/orders.spec.ts': `${runner}\ntest('deletes', async () => { await api.delete('/orders/c'); });\n`,
+            'api/orders/create/orders.spec.ts': `${runner}${ok}\ntest('creates', async () => { expect((await api.post('/orders', {})).status).toBe(OK); });\n`,
+            'api/orders/list/orders.spec.ts': `${runner}${ok}\ntest('lists', async () => { expect((await api.get('/orders')).status).toBe(OK); });\n`,
+            'api/users/list/orders.spec.ts': `${runner}\ntest('lists users', async () => { await api.get('/users'); });\n`,
+        });
+    });
+
+    test('a helper reading one that reads a disk-building constant is copied with it, whichever is declared first', () => {
+        // Given - two routes sharing a helper that reaches a file through another declared after it
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': [
+                "import { api } from '../api.specification.js';",
+                "const PATH = file('./_requests/one.http');",
+                'function answered() { return requested(); }',
+                'function requested() { return PATH; }',
+                "test('lists', async () => { await api.get('/orders'); answered(); });",
+                "test('creates', async () => { await api.post('/orders', {}); answered(); });",
+                '',
+            ].join('\n'),
+        });
+
+        // Then - no setup module: each file keeps its own copies
+        expect(Object.keys(splitByPath(root))).toStrictEqual([
+            'api/orders/list/orders.spec.ts',
+            'api/orders/create/orders.spec.ts',
+        ]);
     });
 });
