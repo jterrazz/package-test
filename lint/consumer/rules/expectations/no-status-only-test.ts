@@ -15,14 +15,17 @@ const MAX_STATUS = 599;
 const EQUALITY_MATCHERS = new Set(['toBe', 'toEqual']);
 
 function isExpectCall(node: AstNode | undefined): boolean {
+    // Stryker disable next-line ConditionalExpression,OptionalChaining,BlockStatement: a node that is no call has no callee below
     if (node?.type !== 'CallExpression') {
         return false;
     }
     const callee = child(node, 'callee');
+    // Stryker disable next-line OptionalChaining,ConditionalExpression: a call always has a callee, and only an identifier has a name
     return callee?.type === 'Identifier' && callee.name === 'expect';
 }
 
 function isStatusLiteral(node: AstNode | undefined): boolean {
+    // Stryker disable next-line ConditionalExpression: a value that is no number is no integer either
     if (node?.type !== 'Literal' || typeof node.value !== 'number') {
         return false;
     }
@@ -32,14 +35,17 @@ function isStatusLiteral(node: AstNode | undefined): boolean {
 
 /** The numeric gate keeps container-status strings (`expect(neo.status).toBe('running')`) out. */
 function isStatusProbe(node: AstNode): boolean {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no call has no callee below
     if (node.type !== 'CallExpression') {
         return false;
     }
     const callee = child(node, 'callee');
+    // Stryker disable next-line ConditionalExpression,OptionalChaining,BlockStatement: memberPropertyName reads no name from a non-member
     if (callee?.type !== 'MemberExpression') {
         return false;
     }
     const matcher = memberPropertyName(callee);
+    // Stryker disable next-line ConditionalExpression: no name is in the set
     if (matcher === undefined || !EQUALITY_MATCHERS.has(matcher)) {
         return false;
     }
@@ -48,6 +54,7 @@ function isStatusProbe(node: AstNode): boolean {
         return false;
     }
     const subject = childList(expectCall, 'arguments')[0];
+    // Stryker disable next-line ConditionalExpression: memberPropertyName reads no name from a non-member
     if (subject?.type !== 'MemberExpression' || memberPropertyName(subject) !== 'status') {
         return false;
     }

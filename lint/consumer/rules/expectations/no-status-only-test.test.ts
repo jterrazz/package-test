@@ -23,8 +23,43 @@ ruleTester().run('no-status-only-test', noStatusOnlyTest, {
             errors: [{ column: 0, line: 1, messageId: 'statusOnlyProbe' }],
             filename: SPEC,
         },
+        {
+            name: 'The first and the last status, and a probe beside an assertion of another runner, are status probes.',
+            code: `test('edges', async () => {
+                expect(result.status).toBe(100);
+                expect(result.status).toEqual(599);
+                assert(result.status).toBe(200);
+            });`,
+            errors: [{ column: 0, line: 1, messageId: 'statusOnlyProbe' }],
+            filename: SPEC,
+        },
     ],
     valid: [
+        {
+            name: 'What is no status — out of range, a fraction, a string, a name, nothing — or no equality, or no `.status`, is no probe.',
+            code: [
+                "test('t', () => { check(result.status).toBe(200); });",
+                "test('t', () => { expect().toBe(200); });",
+                "test('t', () => { expect(result.status).toBe(99); });",
+                "test('t', () => { expect(result.status).toBe(600); });",
+                "test('t', () => { expect(result.status).toBe(200.5); });",
+                "test('t', () => { expect(result.status).toBe('200'); });",
+                "test('t', () => { expect(result.status).toBe(code); });",
+                "test('t', () => { expect(result.status).toBe(); });",
+                "test('t', () => { expect(result.status).toBeGreaterThan(200); });",
+                "test('t', () => { expect(result.status)['toBe'](200); });",
+                "test('t', () => { expect(status).toBe(200); });",
+                "test('t', () => { expect(result.code).toBe(200); });",
+                "test('t', () => { expect.soft(result.status).toBe(200); expect(x).toBeDefined(); });",
+                "test('t', () => { expect(result.status).toBe(200); check(result.status).toEqual(201); expect(y).toBeDefined(); });",
+            ].join('\n'),
+            filename: SPEC,
+        },
+        {
+            name: 'A test with no assertion, one with no callback, and a call that is no test say nothing.',
+            code: "test('t', () => { run(); });\ntest('t');\nrun(() => { expect(result.status).toBe(200); });",
+            filename: SPEC,
+        },
         {
             name: 'A status probe NEXT TO a golden — the scalpel allowance, silent.',
             code: `test('created', async () => {
