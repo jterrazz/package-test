@@ -29,7 +29,13 @@ export type RouteOptionsAny = undefined | { params?: Record<string, number | str
 
 export type RouteRequest = { path: string; template?: string | undefined };
 
-const PARAMETER = /^:(?<name>[A-Za-z_$][\w$]*)$/u;
+const IDENTIFIER = /^[A-Za-z_$][\w$]*$/u;
+
+/** The name a `:name` segment states, none for any other segment. */
+function parameterOf(segment: string): string | undefined {
+    const name = segment.slice(1);
+    return segment.startsWith(':') && IDENTIFIER.test(name) ? name : undefined;
+}
 
 function callWith(method: string, template: string, names: readonly string[]): string {
     const values =
@@ -47,7 +53,7 @@ export function routeRequest(
     const [route = '', ...query] = template.split('?');
     const names = route
         .split('/')
-        .map((segment) => PARAMETER.exec(segment)?.groups?.name)
+        .map(parameterOf)
         .filter((name) => name !== undefined);
     if (values === undefined) {
         if (names.length > 0) {
@@ -77,7 +83,7 @@ export function routeRequest(
     const filled = route
         .split('/')
         .map((segment) => {
-            const name = PARAMETER.exec(segment)?.groups?.name;
+            const name = parameterOf(segment);
             return name === undefined ? segment : encodeURIComponent(String(values[name]));
         })
         .join('/');
