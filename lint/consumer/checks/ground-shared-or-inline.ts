@@ -6,12 +6,13 @@ import {
     treeKind,
 } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, relative, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 
 import { withoutEntryImport } from '../../kit/checker/entry-import.js';
 import { isRelativePath } from '../../kit/project/relative-path.js';
+import { closingOf } from '../../kit/project/source-scan.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
-import { findSpecsRoots, listFiles } from '../../kit/project/tree.js';
+import { findSpecsRoots, isWithin, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 import {
     INLINE_CAPS,
@@ -42,7 +43,7 @@ type Reference = {
     column: number;
     end: number;
     file: string;
-    kind: 'directory' | 'file';
+    namesAFile: boolean;
     line: number;
     start: number;
     target: string;
@@ -50,36 +51,9 @@ type Reference = {
     test: string | undefined;
 };
 
-function stringEnd(text: string, start: number): number {
-    const quote = text[start];
-    let index = start + 1;
-    while (index < text.length && text[index] !== quote) {
-        index += text[index] === '\\' ? 2 : 1;
-    }
-    return index + 1;
-}
-
-function closingParen(text: string, open: number): number {
-    let depth = 0;
-    let index = open;
-    while (index < text.length) {
-        const character = text[index] ?? '';
-        if (character === '"' || character === "'" || character === '`') {
-            index = stringEnd(text, index);
-            continue;
-        }
-        depth += character === '(' ? 1 : character === ')' ? -1 : 0;
-        index += 1;
-        if (depth === 0) {
-            return index;
-        }
-    }
-    return text.length;
-}
-
 function testSpans(text: string): { end: number; start: number }[] {
     return [...text.matchAll(TEST_CALL)].map((match) => ({
-        end: closingParen(text, match.index + match[0].length - 1),
+        end: closingOf(text, match.index + match[0].length - 1),
         start: match.index,
     }));
 }
@@ -97,22 +71,27 @@ function roleOf(path: string): string | undefined {
 function referencesIn(file: string): Reference[] {
     const text = blankComments(readFileSync(file, 'utf8'));
     // invariant: a module that is no test is read by every test importing it: what it names is shared.
-    const spans = TEST_FILE.test(file) ? testSpans(text) : [];
+    const isTest = TEST_FILE.test(file);
+    const spans = testSpans(text);
     const references: Reference[] = [];
     for (const match of text.matchAll(DISK_LITERAL)) {
+        // Stryker disable next-line OptionalChaining: a match always carries its named groups
         const path = match.groups?.path ?? '';
-        if (!isRelativePath(path) || path.includes('${') || roleOf(path) === undefined) {
+        if (!isRelativePath(path) || path.includes('${')) {
             continue;
         }
+        // Stryker disable next-line EqualityOperator: a disk call starts neither where its test call does nor at its closing parenthesis
         const inside = spans.findLast((span) => span.start < match.index && match.index < span.end);
+        // Stryker disable next-line OptionalChaining: a match always carries its named groups
+        const namesAFile = match.groups?.kind === 'file';
         references.push({
             ...positionOf(text, match.index),
             end: match.index + match[0].length,
             file,
-            kind: match.groups?.kind === 'directory' ? 'directory' : 'file',
+            namesAFile,
             start: match.index,
             target: resolve(dirname(file), path),
-            test: inside === undefined ? undefined : `${file}:${inside.start}`,
+            test: inside === undefined || !isTest ? undefined : `${file}:${inside.start}`,
         });
     }
     return references;
@@ -138,22 +117,19 @@ type SingleUse = { reference: Reference; references: number; target: string };
 function oneTestReads(named: readonly Reference[]): Reference | undefined {
     const [only] = named;
     const tests = new Set(named.map((reference) => reference.test));
+    // Stryker disable next-line OptionalChaining: a target is grouped from at least one reference
     return only?.test !== undefined && tests.size === 1 ? only : undefined;
 }
 
 function inlinable(reference: Reference, target: string): boolean {
+    // Stryker disable next-line StringLiteral: no role is named by any text a role-less path stands for
     const cap = INLINE_CAPS[roleOf(written(reference.file, target)) ?? ''];
     return (
         cap !== undefined &&
-        reference.kind === 'file' &&
+        reference.namesAFile &&
         treeKind(target) === 'file' &&
         !staysAFile(target, cap)
     );
-}
-
-function within(directory: string, path: string): boolean {
-    const rest = relative(directory, path);
-    return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
 }
 
 function singleUseFiles(rootDir: string): SingleUse[] {
@@ -164,7 +140,7 @@ function singleUseFiles(rootDir: string): SingleUse[] {
         ),
     );
     const namedOutside = roots.flatMap((root) =>
-        pathsModuleTestsName(dirname(root)).filter((path) => within(root, path)),
+        pathsModuleTestsName(dirname(root)).filter((path) => isWithin(root, path)),
     );
     const byTarget = new Map<string, Reference[]>();
     for (const reference of references) {
@@ -173,7 +149,7 @@ function singleUseFiles(rootDir: string): SingleUse[] {
     const single: SingleUse[] = [];
     for (const [target, named] of byTarget) {
         const only = oneTestReads(named);
-        const shared = namedOutside.some((path) => path === target || within(path, target));
+        const shared = namedOutside.some((path) => path === target || isWithin(path, target));
         if (only !== undefined && !shared && inlinable(only, target)) {
             single.push({ reference: only, references: named.length, target });
         }
@@ -213,6 +189,7 @@ export function checkGroundSharedOrInline(rootDir: string): Spotted[] {
 const QUOTED = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/gu;
 
 function importsOf(text: string): string {
+    // Stryker disable next-line StringLiteral: a literal blanked to nothing hides a call as well as one blanked to ''
     const code = blankComments(text).replaceAll(QUOTED, "''");
     return /(?<![.\w])file\(/u.test(code) ? text : withoutEntryImport(text, 'file');
 }
@@ -241,12 +218,11 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
     }
     for (const [file, uses] of byFile) {
         let text = readFileSync(file, 'utf8');
-        let inlined = false;
         for (const { reference, target } of uses.toSorted(
             (a, b) => b.reference.start - a.reference.start,
         )) {
-            const lineStart = text.lastIndexOf('\n', reference.start - 1) + 1;
-            const indent = /^[\t ]*/u.exec(text.slice(lineStart))?.[0] ?? '';
+            const line = text.slice(text.lastIndexOf('\n', reference.start) + 1);
+            const indent = line.slice(0, line.length - line.trimStart().length);
             const replacement = replacementOf(
                 text.slice(0, reference.start),
                 readFileSync(target, 'utf8'),
@@ -259,16 +235,14 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
             text = text.slice(0, reference.start) + replacement + text.slice(reference.end);
             rmSync(target);
             emptied.add(dirname(target));
-            inlined = true;
             done.push(
                 `inlined ${relative(rootDir, target)} → ${relative(rootDir, file)}:${reference.line}`,
             );
         }
-        if (inlined) {
-            writeFileSync(file, importsOf(text));
-        }
+        writeFileSync(file, importsOf(text));
     }
     removeEmptied(emptied);
+    // Stryker disable next-line BlockStatement,CallExpression: the placement below reads no file this pass deleted; the passes after it read the tree afresh
     forgetTree();
     done.push(...fixGroundPlacement(rootDir).map((move) => `moved ${move}`));
     return done;
