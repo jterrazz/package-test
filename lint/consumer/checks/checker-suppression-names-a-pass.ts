@@ -1,7 +1,7 @@
 import { relative } from 'node:path';
 
-import { directivesIn, holdsDirectives } from '../../engine/project/suppression.js';
-import { listFiles, readText } from '../../engine/project/tree.js';
+import { directivesIn, holdsDirectives } from '../../kit/project/suppression.js';
+import { listFiles, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 const EVERY_PASS = '*';

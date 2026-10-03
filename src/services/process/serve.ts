@@ -3,8 +3,8 @@ import type { ChildProcess } from 'node:child_process';
 import { createServer, Socket } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
-import { invariant, refusal } from '../../../lint/refusal.js';
 import { pause } from '../../chain/pause.js';
+import { invariant, refusal } from '../../chain/refusals/refusal.js';
 import { groupEnded, KILL_GRACE_MS, WATCHDOG } from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
 

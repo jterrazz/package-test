@@ -10,8 +10,8 @@ import {
     readersOf,
     refusedReservedAbove,
     setupFolderOf,
-} from '../../engine/project/specs-modules.js';
-import { findSpecsRoots, reservedFolderOf } from '../../engine/project/tree.js';
+} from '../../kit/project/specs-modules.js';
+import { findSpecsRoots, reservedFolderOf } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 const FIXTURES_MODULE = /\.fixtures\.[cm]?[jt]sx?$/u;

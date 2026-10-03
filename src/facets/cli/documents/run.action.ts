@@ -1,6 +1,6 @@
 import { relative } from 'node:path';
 
-import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
+import { safeRealpath } from '../../../../lint/kit/project/resolve.js';
 import { defineAction } from '../../../chain/action.js';
 import type { ChainSignature } from '../../../chain/capability.js';
 import { scratchDirectory } from '../../../chain/paths/scratch.js';

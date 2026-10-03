@@ -1,5 +1,5 @@
 import { countsOf, labelOf } from '@jterrazz/typescript/rules';
-import type { EngineCommand } from '@jterrazz/typescript/rules';
+import type { KitCommand } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 
 import { writeBaseline } from '../baseline/test-baseline.js';
@@ -8,7 +8,7 @@ import { directoryRefusal, projectSpotted } from './conventions.js';
 import type { CheckerRegistry } from './registry.js';
 import { teacherOf } from './teacher.js';
 
-export function recordBaseline(registry: CheckerRegistry): EngineCommand {
+export function recordBaseline(registry: CheckerRegistry): KitCommand {
     const teach = teacherOf(registry);
 
     return (args) => {

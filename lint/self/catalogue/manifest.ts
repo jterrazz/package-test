@@ -1,7 +1,7 @@
 import { byName } from '@jterrazz/typescript/rules';
 
 import { consumerRows } from '../../consumer/catalogue/manifest.js';
-import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
+import type { Row as CatalogueRow } from '../../kit/catalogue/row.js';
 import {
     ARCHITECTURE_META_ROWS,
     ARCHITECTURE_PASSES,

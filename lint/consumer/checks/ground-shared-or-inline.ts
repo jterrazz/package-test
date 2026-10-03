@@ -10,14 +10,14 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
-import { withEntryImport, withoutEntryImport } from '../../engine/checker/entry-import.js';
-import { dedent } from '../../engine/project/dedent.js';
-import { isRelativePath } from '../../engine/project/relative-path.js';
-import { isInside, literalSpans, nameAround } from '../../engine/project/spec-values.js';
-import type { Span } from '../../engine/project/spec-values.js';
-import { closingOf, literalEnd } from '../../engine/project/subject.js';
-import { suppressedLines } from '../../engine/project/suppression.js';
-import { findSpecsRoots, listFiles } from '../../engine/project/tree.js';
+import { withEntryImport, withoutEntryImport } from '../../kit/checker/entry-import.js';
+import { dedent } from '../../kit/project/dedent.js';
+import { isRelativePath } from '../../kit/project/relative-path.js';
+import { isInside, literalSpans, nameAround } from '../../kit/project/spec-values.js';
+import type { Span } from '../../kit/project/spec-values.js';
+import { closingOf, literalEnd } from '../../kit/project/subject.js';
+import { suppressedLines } from '../../kit/project/suppression.js';
+import { findSpecsRoots, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 import {
     checkGroundPlacement,

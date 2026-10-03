@@ -1,7 +1,7 @@
-import { invariant } from '../../../../lint/refusal.js';
 import { defineAction } from '../../../chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../chain/capability.js';
 import { headers } from '../../../chain/context/headers.capability.js';
+import { invariant } from '../../../chain/refusals/refusal.js';
 import { clock } from '../../../clock/clock.capability.js';
 import {
     BROWSER_STATES,

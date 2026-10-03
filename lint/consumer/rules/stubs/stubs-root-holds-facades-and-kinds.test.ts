@@ -1,7 +1,7 @@
 import { ruleTester } from '@jterrazz/test';
 import { resolve } from 'node:path';
 
-import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { checkoutUnder } from '../../../kit/testing/package-tree.fixtures.js';
 import { stubsRootHoldsFacadesAndKinds } from './stubs-root-holds-facades-and-kinds.js';
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');

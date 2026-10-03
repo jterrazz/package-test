@@ -11,7 +11,7 @@ export type LayerOptions = {
     seams?: Record<string, string[]>;
 };
 
-const CHAIN_AND_REFUSALS = ['chain/', 'lint/engine/', 'lint/refusal'];
+const CHAIN_AND_REFUSALS = ['chain/', 'lint/kit/'];
 
 /** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
@@ -115,7 +115,7 @@ export const FRAMEWORK_LAYERS = {
             'chain/',
             // Update mode's global setup, which every project carries.
             'expectations/in-place/in-place-setup',
-            'lint/engine/',
+            'lint/kit/',
         ],
         // The ground folders every project skips are the toolchain's rules kit.
         packages: ['vitest', '@jterrazz/typescript/rules'],
@@ -130,6 +130,9 @@ export const FRAMEWORK_LAYERS = {
             'vitest',
             ...librariesOwnedIn('lint/'),
         ],
-        seams: { 'lint/self/corpus/compositions.ts': ['facets/', 'chain/define-facet'] },
+        seams: {
+            'lint/self/corpus/compositions.ts': ['facets/', 'chain/define-facet'],
+            'lint/self/self-cli.ts': ['chain/refusals/rows'],
+        },
     },
 } satisfies Record<string, LayerOptions>;

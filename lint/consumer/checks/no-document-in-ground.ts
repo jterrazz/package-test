@@ -1,6 +1,6 @@
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 
-import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
 import type { Spotted } from './checker.js';
 
 const GROUND_NAMES = new Set<string>(GROUND_FOLDERS);

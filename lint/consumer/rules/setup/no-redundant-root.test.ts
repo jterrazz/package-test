@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { checkoutUnder } from '../../../kit/testing/package-tree.fixtures.js';
 import { noRedundantRoot } from './no-redundant-root.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees (the

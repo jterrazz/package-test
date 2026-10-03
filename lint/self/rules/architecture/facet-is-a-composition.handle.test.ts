@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { isNode } from '../../../engine/project/ast.js';
-import { parseProgram } from '../../../engine/project/module-parser.js';
+import { isNode } from '../../../kit/project/ast.js';
+import { parseProgram } from '../../../kit/project/module-parser.js';
 import { handleFileFindings } from './facet-is-a-composition.handle.js';
 
 function findingsOf(body: string): string[] {

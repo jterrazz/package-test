@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { installRootOf } from '../../lint/engine/project/resolve.js';
-import { refusal } from '../../lint/refusal.js';
+import { installRootOf } from '../../lint/kit/project/resolve.js';
+import { refusal } from '../chain/refusals/refusal.js';
 
 /** The lockfile each package manager leaves, and the install command its user types. */
 const INSTALLERS = [

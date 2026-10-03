@@ -2,10 +2,10 @@ import { defineRule, isFile, readAt, rowNamed } from '@jterrazz/typescript/rules
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
-import { isStubKind } from '../../../engine/project/stub-kinds.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf, segmentsOf } from '../../../kit/project/linted-file.js';
+import { isStubKind } from '../../../kit/project/stub-kinds.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const REQUEST_DATA = /\.request\.[cm]?ts$/u;

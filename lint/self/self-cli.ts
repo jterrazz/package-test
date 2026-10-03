@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 import { projected, runChecker, writeProjections } from '@jterrazz/typescript/rules';
-import type { Projection } from '@jterrazz/typescript/rules';
+import type { Contribution, Projection } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 
-import { CATALOGUE_CHAPTER, CATALOGUE_MARKERS } from '../consumer/catalogue/chapter.js';
+import { RUNTIME_RULES } from '../../src/chain/refusals/rows.js';
+import { CATALOGUE_MARKERS } from '../consumer/catalogue/chapter.js';
 import { FAMILIES } from '../consumer/catalogue/families.js';
 import { FORK_CHAPTER, FORK_MARKERS, forkTable } from '../consumer/catalogue/fork.js';
 import { consumerRows } from '../consumer/catalogue/manifest.js';
-import { catalogueBody } from '../engine/catalogue/chapter.js';
-import { atZeroPass } from '../engine/checker/at-zero-pass.js';
-import { coverageFloor } from '../engine/checker/coverage-run.js';
+import { CATALOGUE_CHAPTER, catalogueBody } from '../kit/catalogue/chapter.js';
+import { atZeroPass } from '../kit/checker/at-zero-pass.js';
+import { coverageFloor } from '../kit/checker/coverage-run.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './catalogue/chapter.js';
 import { SELF_CHAPTER } from './catalogue/manifest.js';
 import { SELF_CHECKER } from './checks/checker.js';
@@ -31,7 +32,7 @@ export function projectionsAt(root: string): Projection[] {
         {
             markers: CATALOGUE_MARKERS,
             page: at(CATALOGUE_CHAPTER),
-            render: () => catalogueBody(consumerRows, FAMILIES),
+            render: () => catalogueBody([...consumerRows, ...RUNTIME_RULES], FAMILIES),
         },
         { markers: MATRIX_MARKERS, page: at(SELF_CHAPTER), render: () => renderMatrixBody(root) },
         {
@@ -68,12 +69,16 @@ function regenerate(cliArguments: readonly string[]): number {
     return 0;
 }
 
+const selfChecks: Contribution = {
+    commands: {
+        chapters: async () => await Promise.resolve(regenerate),
+        coverage: async () => await Promise.resolve(coverageFloor(checkCoverageFloor)),
+    },
+    passes: { check: async () => await Promise.resolve(atZeroPass(SELF_CHECKER)) },
+};
+
+export default selfChecks;
+
 if (import.meta.main) {
-    await runChecker({
-        commands: {
-            chapters: async () => await Promise.resolve(regenerate),
-            coverage: async () => await Promise.resolve(coverageFloor(checkCoverageFloor)),
-        },
-        passes: { check: async () => await Promise.resolve(atZeroPass(SELF_CHECKER)) },
-    });
+    await runChecker(selfChecks);
 }

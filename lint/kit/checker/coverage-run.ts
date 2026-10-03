@@ -1,5 +1,5 @@
 import { labelOf, readCommandLine, refusal } from '@jterrazz/typescript/rules';
-import type { Counts, EngineCommand } from '@jterrazz/typescript/rules';
+import type { Counts, KitCommand } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 
 import {
@@ -20,7 +20,7 @@ const say = (line: string): void => {
 };
 
 // Neither gesture runs the suite: each reads the last `--coverage` report, so a second run cannot disagree with the first.
-export function coverageFloor(judge: CoverageJudge): EngineCommand {
+export function coverageFloor(judge: CoverageJudge): KitCommand {
     return (args) => {
         const commandLine = readCommandLine(args, ['--scope']);
         const scope = commandLine.value('--scope', 'all');

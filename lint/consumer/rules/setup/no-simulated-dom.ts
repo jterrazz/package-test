@@ -1,10 +1,10 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import type { FileRole } from '../../../engine/project/role.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import type { FileRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const PRAGMA = /@vitest-environment\s+(?<environment>[\w-]+)/u;

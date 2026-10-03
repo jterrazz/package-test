@@ -9,10 +9,10 @@ import {
 import type { Context } from '@oxlint/plugins';
 import { dirname, extname, join } from 'node:path';
 
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { isTestRole } from '../../../engine/project/role.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'request-file-extension-known');

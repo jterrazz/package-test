@@ -1,9 +1,9 @@
 import { treeNames } from '@jterrazz/typescript/rules';
 import { dirname, join } from 'node:path';
 
-import { finding } from '../../engine/project/document-model.js';
-import type { SpecDocument } from '../../engine/project/spec-document.js';
-import { readText } from '../../engine/project/tree.js';
+import { finding } from '../../kit/project/document-model.js';
+import type { SpecDocument } from '../../kit/project/spec-document.js';
+import { readText } from '../../kit/project/tree.js';
 import type { DocumentFinding } from './checker.js';
 
 /** Read by depth, not by parsing. */

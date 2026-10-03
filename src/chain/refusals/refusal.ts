@@ -1,12 +1,10 @@
 import { defineInvariant, refusalBlock } from '@jterrazz/typescript/rules';
 import type { Lesson } from '@jterrazz/typescript/rules';
 
-import { CATALOGUE_CHAPTER } from './consumer/catalogue/chapter.js';
-import { REFUSAL_WHY } from './consumer/catalogue/refusals.js';
-import type { RefusalRow } from './consumer/catalogue/refusals.js';
+import { CATALOGUE_CHAPTER } from '../../../lint/kit/catalogue/chapter.js';
+import { REFUSAL_WHY } from './rows.js';
+import type { RefusalRow } from './rows.js';
 
-export { REFUSAL_WHY } from './consumer/catalogue/refusals.js';
-export type { RefusalRow } from './consumer/catalogue/refusals.js';
 export type { Lesson } from '@jterrazz/typescript/rules';
 
 export const invariant: (broken: string) => Error = defineInvariant({

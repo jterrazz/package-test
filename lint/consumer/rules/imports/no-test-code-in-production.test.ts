@@ -1,7 +1,7 @@
 import { ruleTester } from '@jterrazz/test';
 import { join } from 'node:path';
 
-import { packageWith } from '../../../engine/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
 import { noTestCodeInProduction } from './no-test-code-in-production.js';
 
 // One package on disk: the aliases, the stubs folders and the modules a

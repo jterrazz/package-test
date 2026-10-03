@@ -1,8 +1,8 @@
-import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
-import { refusal } from '../../../../lint/refusal.js';
+import { safeRealpath } from '../../../../lint/kit/project/resolve.js';
 import { defineAction } from '../../../chain/action.js';
 import type { ChainSignature } from '../../../chain/capability.js';
 import { scratchDirectory } from '../../../chain/paths/scratch.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { CLI_RESULT_ROWS, CliResult } from '../../../expectations/command/cli.result.js';
 import type { CliConfig } from '../cli.handle.js';
 import type { CliOutput, CliPort, ExecOptions } from './cli.port.js';

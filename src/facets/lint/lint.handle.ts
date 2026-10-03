@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 
-import { resolveRoot } from '../../../lint/engine/project/resolve.js';
-import { refusal } from '../../../lint/refusal.js';
+import { resolveRoot } from '../../../lint/kit/project/resolve.js';
 import type { ChainConfig, Started } from '../../chain/config.js';
 import { getCallerDir } from '../../chain/paths/caller.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { LintSpecification } from './lint.facet.js';
 import { lintFacet } from './lint.facet.js';

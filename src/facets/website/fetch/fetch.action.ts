@@ -1,7 +1,7 @@
-import { invariant, refusal } from '../../../../lint/refusal.js';
 import { defineAction } from '../../../chain/action.js';
 import type { ChainSignature } from '../../../chain/capability.js';
 import { headers } from '../../../chain/context/headers.capability.js';
+import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { clock } from '../../../clock/clock.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';

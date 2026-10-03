@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { runMember } from '../../engine/checker/member-run.js';
-import { teacherOf } from '../../engine/checker/teacher.js';
+import { runMember } from '../../kit/checker/member-run.js';
+import { teacherOf } from '../../kit/checker/teacher.js';
 import { CHECKER } from './checker.js';
 import { CARRIED, CARRIED_IN_DEV } from './no-redundant-test-dependency.js';
 

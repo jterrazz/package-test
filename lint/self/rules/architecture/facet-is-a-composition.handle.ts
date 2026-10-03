@@ -7,8 +7,8 @@ import {
     propertyKeyName,
     stringValue,
     walk,
-} from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
 import { importsOf, layerOf } from './facet-is-a-composition.file.js';
 
 export type HandleFinding =

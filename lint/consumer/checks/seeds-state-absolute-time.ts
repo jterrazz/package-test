@@ -1,4 +1,4 @@
-import { decodeText } from '../../engine/project/tree.js';
+import { decodeText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 /** Only spellings decidable on sight: the bare word `now` is a column name as often as a clock read. */

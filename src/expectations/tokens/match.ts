@@ -1,4 +1,4 @@
-import type { TokenKind } from '../../../lint/engine/project/tokens.js';
+import type { TokenKind } from '../../../lint/kit/project/tokens.js';
 
 /** The frozen token vocabulary (rule `no-unknown-token`) plus the code-only kinds. */
 export type MatcherKind =

@@ -1,4 +1,4 @@
-import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
+import type { Row as CatalogueRow } from '../../kit/catalogue/row.js';
 import type { SelfFamily } from './families.js';
 
 type Row = CatalogueRow<SelfFamily>;

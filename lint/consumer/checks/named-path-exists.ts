@@ -3,8 +3,8 @@ import type { Teaching } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
-import { suppressedLines } from '../../engine/project/suppression.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
+import { suppressedLines } from '../../kit/project/suppression.js';
 import {
     anchoredPaths,
     collectFixtureReferences,
@@ -12,7 +12,7 @@ import {
     findSpecsRoots,
     listReaders,
     readText,
-} from '../../engine/project/tree.js';
+} from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 /** Inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout. */

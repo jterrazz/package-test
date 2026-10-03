@@ -1,6 +1,6 @@
 import type { attach, remote } from 'webdriverio';
 
-import { refusal } from '../../../../lint/refusal.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import type { MobileDevice } from '../device/device.port.js';
 import { SERVER_CALL_TIMEOUT_MS } from './session-ledger.js';
 import type { SessionLedger } from './session-ledger.js';

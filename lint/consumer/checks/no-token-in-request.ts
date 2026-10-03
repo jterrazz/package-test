@@ -1,4 +1,4 @@
-import { findKnownTokens } from '../../engine/project/tokens.js';
+import { findKnownTokens } from '../../kit/project/tokens.js';
 import type { Spotted } from './checker.js';
 
 export function noTokenInRequestFindings(file: string, text: string): Spotted[] {

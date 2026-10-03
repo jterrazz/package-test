@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { isNode } from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
-import { parseProgram } from '../../../engine/project/module-parser.js';
+import { isNode } from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
+import { parseProgram } from '../../../kit/project/module-parser.js';
 import { facetFileFindings, importsOf } from './facet-is-a-composition.file.js';
 
 function programOf(source: string): AstNode {

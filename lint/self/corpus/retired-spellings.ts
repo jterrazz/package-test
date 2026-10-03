@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 export const RETIRED_SPELLINGS = ['toMatchRows', 'runFile', '$FIXTURES/'];
 
 export const NEGATIVE_INPUTS = [
-    'lint/engine/project/spec-document.test.ts',
+    'lint/kit/project/spec-document.test.ts',
     'lint/self/corpus/retired-spellings.test.ts',
     'lint/self/corpus/retired-spellings.ts',
 ];

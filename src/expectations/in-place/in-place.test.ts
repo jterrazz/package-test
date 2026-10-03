@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { dedent } from '../../../lint/engine/project/dedent.js';
+import { dedent } from '../../../lint/kit/project/dedent.js';
 import {
     callSiteOf,
     locateArgument,

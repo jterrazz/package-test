@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { resolveSpecPath } from '../../disk/resolved-spec-path.js';
 import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';

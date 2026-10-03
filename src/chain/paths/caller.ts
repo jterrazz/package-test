@@ -1,7 +1,7 @@
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { safeRealpath } from '../../../lint/engine/project/resolve.js';
+import { safeRealpath } from '../../../lint/kit/project/resolve.js';
 
 /** Sibling module tests are callers, not internals (rule `test-beside-its-module`). */
 const TEST_FILE = /\.test\.[cm]?[jt]s$/u;

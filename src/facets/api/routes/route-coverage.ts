@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
-import { refusal } from '../../../../lint/refusal.js';
 import { setupEntry } from '../../../chain/paths/setup-entry.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { clearLedgers, markPartial, ROUTES_DIR, shardLedgersDir } from './ledger.js';
 import type { Shard } from './ledger.js';

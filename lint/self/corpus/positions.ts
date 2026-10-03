@@ -2,7 +2,7 @@ import { filesUnder } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { Row } from '../../engine/catalogue/row.js';
+import type { Row } from '../../kit/catalogue/row.js';
 
 const STATIC_CHANNELS: ReadonlySet<string> = new Set(['checker', 'static']);
 

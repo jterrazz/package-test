@@ -2,10 +2,10 @@ import { SHARED_FOLDER } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
-import type { Spotted } from '../../engine/checker/registry.js';
-import { specimenOf } from '../../engine/project/specimen.js';
-import { suppressedLines } from '../../engine/project/suppression.js';
-import { listFiles } from '../../engine/project/tree.js';
+import type { Spotted } from '../../kit/checker/registry.js';
+import { specimenOf } from '../../kit/project/specimen.js';
+import { suppressedLines } from '../../kit/project/suppression.js';
+import { listFiles } from '../../kit/project/tree.js';
 import { FACET_MATRIX_COLUMNS } from '../corpus/facet-matrix.js';
 import { matrixCapabilityFolders } from '../corpus/matrix.js';
 import type { SelfPassId } from './checker.js';

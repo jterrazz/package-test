@@ -1,6 +1,6 @@
 import { relative } from 'node:path';
 
-import { isNodeTestFileName } from '../../engine/project/role.js';
+import { isNodeTestFileName } from '../../kit/project/role.js';
 import {
     balancedParens,
     CONSTRUCTORS,
@@ -8,10 +8,10 @@ import {
     namedImports,
     NON_RUNNER_BINDINGS,
     resolveRelativeImport,
-} from '../../engine/project/spec-model.js';
-import type { SpecModel } from '../../engine/project/spec-model.js';
-import { suppressedLines } from '../../engine/project/suppression.js';
-import { lineAt, listFiles, readSource, readText } from '../../engine/project/tree.js';
+} from '../../kit/project/spec-model.js';
+import type { SpecModel } from '../../kit/project/spec-model.js';
+import { suppressedLines } from '../../kit/project/suppression.js';
+import { lineAt, listFiles, readSource, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 function localRunnerBindings(text: string): Set<string> {

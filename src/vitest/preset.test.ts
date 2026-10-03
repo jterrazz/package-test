@@ -5,7 +5,7 @@ import {
     COVERAGE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
-} from '../../lint/engine/project/artifacts.js';
+} from '../../lint/kit/project/artifacts.js';
 import { presetConfig, reporterOutputFiles } from './preset.js';
 import { unit } from './unit.project.js';
 

@@ -2,17 +2,17 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, relative } from 'node:path';
 
-import type { Visitor } from '../../../engine/project/ast.js';
-import { isProductionFile } from '../../../engine/project/linted-file.js';
-import { mergeVisitors, pathReferenceVisitor } from '../../../engine/project/path-references.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import type { Visitor } from '../../../kit/project/ast.js';
+import { isProductionFile } from '../../../kit/project/linted-file.js';
+import { mergeVisitors, pathReferenceVisitor } from '../../../kit/project/path-references.js';
 import {
     allowedTestPackagesAt,
     lintBegins,
     materialNamed,
     moduleReferenceVisitor,
     reachOf,
-} from '../../../engine/project/production.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+} from '../../../kit/project/production.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'no-test-code-in-production');

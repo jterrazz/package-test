@@ -13,8 +13,8 @@ import {
     repointed,
     repointModuleTests,
     repointSource,
-} from '../../engine/checker/repoint.js';
-import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
+} from '../../kit/checker/repoint.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
 import {
     findSpecsRoots,
     isConventionalSubdir,
@@ -26,7 +26,7 @@ import {
     lowestCommonFolder,
     readText,
     reservedFolderOf,
-} from '../../engine/project/tree.js';
+} from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 /** A tree compares by the listing git keeps, so an ignored file is no difference. */

@@ -1,5 +1,5 @@
-import { isRelativePath } from '../../lint/engine/project/relative-path.js';
-import { refusal } from '../../lint/refusal.js';
+import { isRelativePath } from '../../lint/kit/project/relative-path.js';
+import { refusal } from '../chain/refusals/refusal.js';
 
 /** A path relative to the spec file; `Extension` narrows its tail. */
 export type RelativePath<Extension extends string = string> =

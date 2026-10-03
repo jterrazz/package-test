@@ -10,7 +10,7 @@ import {
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
-import { repointModuleTests } from '../../engine/checker/repoint.js';
+import { repointModuleTests } from '../../kit/checker/repoint.js';
 import {
     aspectOf,
     lineEnd,
@@ -22,10 +22,10 @@ import {
     subjectSpecs,
     TEST_CALL,
     withLeadingComments,
-} from '../../engine/project/spec-subjects.js';
-import type { Span, SpecRead } from '../../engine/project/spec-subjects.js';
-import { closingOf, literalEnd } from '../../engine/project/subject.js';
-import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../engine/project/tree.js';
+} from '../../kit/project/spec-subjects.js';
+import type { Span, SpecRead } from '../../kit/project/spec-subjects.js';
+import { closingOf, literalEnd } from '../../kit/project/subject.js';
+import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../kit/project/tree.js';
 
 type ImportClause = Span & {
     defaultName: string | undefined;

@@ -3,7 +3,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { renderSchema } from '../../../../lint/engine/project/spec-document.js';
+import { renderSchema } from '../../../../lint/kit/project/spec-document.js';
 
 const schemaPath = resolve(process.argv[2] ?? '.', 'schema/spec.schema.json');
 mkdirSync(dirname(schemaPath), { recursive: true });

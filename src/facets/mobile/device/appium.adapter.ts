@@ -1,8 +1,8 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
-import { refusal } from '../../../../lint/refusal.js';
+import { evidenceDirectory } from '../../../../lint/kit/project/artifacts.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../visitor/matching/candidates.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';

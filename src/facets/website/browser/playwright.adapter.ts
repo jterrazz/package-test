@@ -3,8 +3,8 @@ import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
-import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
-import { refusal } from '../../../../lint/refusal.js';
+import { evidenceDirectory } from '../../../../lint/kit/project/artifacts.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import { ambiguousTargetError } from '../../../visitor/matching/ambiguous.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../visitor/matching/candidates.js';

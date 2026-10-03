@@ -1,4 +1,4 @@
-import type { LintPlugin } from '../../engine/project/rule.js';
+import type { LintPlugin } from '../../kit/project/rule.js';
 import { cliRunsTheProductBinary } from './chain/cli-runs-the-product-binary.js';
 import { givenAndThenMarkersPresent } from './chain/given-and-then-markers-present.js';
 import { givenInTheTest } from './chain/given-in-the-test.js';

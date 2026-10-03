@@ -1,14 +1,14 @@
-import { fixSpecFiles } from '../../engine/checker/documents.js';
-import { walkGround } from '../../engine/checker/ground-walk.js';
+import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
+import { fixSpecFiles } from '../../kit/checker/documents.js';
+import { walkGround } from '../../kit/checker/ground-walk.js';
 import type {
     CheckerRegistry,
     Spotted as CheckerSpotted,
     GroundPasses,
     MemberRead,
-} from '../../engine/checker/registry.js';
-import type { DocumentFinding as CheckerDocumentFinding } from '../../engine/project/document-model.js';
-import { moduleTestsOf } from '../../engine/project/module-tests.js';
-import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
+} from '../../kit/checker/registry.js';
+import type { DocumentFinding as CheckerDocumentFinding } from '../../kit/project/document-model.js';
+import { moduleTestsOf } from '../../kit/project/module-tests.js';
 import { consumerRows } from '../catalogue/manifest.js';
 import { checkAdapterNamedForItsPort } from './adapter-named-for-its-port.js';
 import { checkCheckerSuppressionNamesAPass } from './checker-suppression-names-a-pass.js';

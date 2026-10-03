@@ -8,12 +8,12 @@ import {
     nodeStart,
     stringValue,
     walk,
-} from '../../engine/project/ast.js';
-import type { AstNode } from '../../engine/project/ast.js';
-import { parseProgram } from '../../engine/project/module-parser.js';
-import { resolveSpecifier } from '../../engine/project/production.js';
-import { modulesUnder, setupFolderOf } from '../../engine/project/specs-modules.js';
-import { findSpecsRoots, isWithin, lineAt, readText } from '../../engine/project/tree.js';
+} from '../../kit/project/ast.js';
+import type { AstNode } from '../../kit/project/ast.js';
+import { parseProgram } from '../../kit/project/module-parser.js';
+import { resolveSpecifier } from '../../kit/project/production.js';
+import { modulesUnder, setupFolderOf } from '../../kit/project/specs-modules.js';
+import { findSpecsRoots, isWithin, lineAt, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 const ADAPTER_SUFFIX = '.adapter.ts';

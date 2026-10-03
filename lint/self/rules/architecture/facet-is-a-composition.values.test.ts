@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { child, childList, isNode } from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
-import { parseProgram } from '../../../engine/project/module-parser.js';
+import { child, childList, isNode } from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
+import { parseProgram } from '../../../kit/project/module-parser.js';
 import { isAdapter, isRow } from './facet-is-a-composition.values.js';
 
 function expressionOf(expression: string): AstNode | undefined {

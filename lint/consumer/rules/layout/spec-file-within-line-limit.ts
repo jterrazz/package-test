@@ -1,11 +1,11 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { child, isTestCallee, testName, walk } from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { MAX_SPEC_LINES } from '../../../engine/project/specs-modules.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { child, isTestCallee, testName, walk } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { MAX_SPEC_LINES } from '../../../kit/project/specs-modules.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const GROUPS_SHOWN = 5;

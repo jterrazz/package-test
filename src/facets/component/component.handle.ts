@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import type { ComponentChain } from './component.facet.js';
 
 function refuse(): never {

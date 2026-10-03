@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from './refusal.js';
 import { scenarioFailure } from './scenario-failure.js';
 
 const AMBIGUOUS = refusal({

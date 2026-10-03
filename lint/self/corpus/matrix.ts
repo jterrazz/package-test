@@ -3,9 +3,9 @@ import type { Markers } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import type { AstNode } from '../../engine/project/ast.js';
-import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
-import { TOKEN_KINDS } from '../../engine/project/tokens.js';
+import type { AstNode } from '../../kit/project/ast.js';
+import { callShapeOf, callsOf, isCallOf } from '../../kit/project/call-shapes.js';
+import { TOKEN_KINDS } from '../../kit/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import {
     FACET_MATRIX_CAPABILITIES,

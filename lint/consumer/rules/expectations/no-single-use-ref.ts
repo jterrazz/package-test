@@ -10,12 +10,12 @@ import {
 import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
-import { goldenOf, memberPropertyName, stringValue, walk } from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { isRelativePath } from '../../../engine/project/relative-path.js';
-import { isTestRole } from '../../../engine/project/role.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { goldenOf, memberPropertyName, stringValue, walk } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { isRelativePath } from '../../../kit/project/relative-path.js';
+import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function goldenPathOf(node: AstNode): string | undefined {

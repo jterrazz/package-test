@@ -1,4 +1,4 @@
-import { TOKEN_KINDS } from '../../../lint/engine/project/tokens.js';
+import { TOKEN_KINDS } from '../../../lint/kit/project/tokens.js';
 import { CaptureScope, Matcher } from './match.js';
 import type { MatcherKind } from './match.js';
 

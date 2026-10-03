@@ -9,7 +9,7 @@ import type { Manifest } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-import { PRUNED_WITH_OUTPUTS } from '../../engine/project/module-tests.js';
+import { PRUNED_WITH_OUTPUTS } from '../../kit/project/module-tests.js';
 import type { Spotted } from './checker.js';
 
 /** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */

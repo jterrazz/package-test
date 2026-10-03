@@ -1,11 +1,11 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { child, identifierName, memberPropertyName } from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { isTestRole } from '../../../engine/project/role.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { child, identifierName, memberPropertyName } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const LOOPS: ReadonlySet<string> = new Set([

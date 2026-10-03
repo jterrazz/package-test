@@ -18,7 +18,7 @@ import { suppressedLines } from './suppression.js';
 import { testSettingsAtSync } from './test-section.js';
 import { listFiles } from './tree.js';
 
-/** A spec of a specimen (`lint/engine/project/specimen.ts`) is out of reach: it is filed by the capability it specifies. Every move keeps each path the code names pointing where it pointed. */
+/** A spec of a specimen (`lint/kit/project/specimen.ts`) is out of reach: it is filed by the capability it specifies. Every move keeps each path the code names pointing where it pointed. */
 
 export type Span = { end: number; start: number };
 

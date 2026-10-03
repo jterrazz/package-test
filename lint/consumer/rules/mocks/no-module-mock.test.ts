@@ -1,6 +1,6 @@
 import { ruleTester } from '@jterrazz/test';
 
-import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { checkoutUnder } from '../../../kit/testing/package-tree.fixtures.js';
 import { noModuleMock } from './no-module-mock.js';
 
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';

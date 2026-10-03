@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { CaptureScope } from '../tokens/match.js';
 import { stripAnsiCodes } from './ansi.js';
 

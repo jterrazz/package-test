@@ -2,8 +2,8 @@ import { treeEntries, treeKind } from '@jterrazz/typescript/rules';
 import type { Manifest } from '@jterrazz/typescript/rules';
 import { join } from 'node:path';
 
-import { PRUNED_WITH_OUTPUTS } from '../../engine/project/module-tests.js';
-import { isTestFileName } from '../../engine/project/role.js';
+import { PRUNED_WITH_OUTPUTS } from '../../kit/project/module-tests.js';
+import { isTestFileName } from '../../kit/project/role.js';
 import type { Spotted } from './checker.js';
 
 /** A directory carrying its own `package.json` is another package's tree, and its tests are its own to configure. */

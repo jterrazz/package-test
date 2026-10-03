@@ -1,6 +1,6 @@
 import { relative } from 'node:path';
 
-import { facetFoldersOf, specificationsIn, textOf } from '../../engine/project/facet-folders.js';
+import { facetFoldersOf, specificationsIn, textOf } from '../../kit/project/facet-folders.js';
 import type { Spotted } from './checker.js';
 
 export function checkFacetFolderHasSpecification(specsRoot: string): Spotted[] {

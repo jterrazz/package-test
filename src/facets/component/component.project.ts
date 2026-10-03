@@ -4,9 +4,9 @@ import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/engine/project/artifacts.js';
-import { refusal } from '../../../lint/refusal.js';
+import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/kit/project/artifacts.js';
 import { callerFrames } from '../../chain/paths/caller.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { mswWorkerScript } from '../../stubs/delivery/browser-page/worker-script.js';
 import type { FacetProjectOptions } from '../../vitest/project.js';

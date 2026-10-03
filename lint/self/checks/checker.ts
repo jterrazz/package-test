@@ -1,4 +1,4 @@
-import type { SelfRegistry } from '../../engine/checker/registry.js';
+import type { SelfRegistry } from '../../kit/checker/registry.js';
 import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 import { checkErrorIsARefusalOrAnInvariant } from './error-is-a-refusal-or-an-invariant.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';

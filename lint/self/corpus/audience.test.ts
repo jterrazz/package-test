@@ -6,9 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
-import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
-import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
+import { REFUSAL_WHY, RUNTIME_RULES } from '../../../src/chain/refusals/rows.js';
+import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
 import { allRows, SELF_CHECKER_PASSES, selfRows } from '../catalogue/manifest.js';
 import {
     danglingImports,
@@ -22,8 +21,10 @@ import {
 /** `rule-declares-its-audience` (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first. */
 const ROOT = resolve(import.meta.dirname, '../../..');
 
+const TOOLCHAIN_CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');
+
 type Manifest = {
-    bin?: Record<string, string>;
+    imports?: Record<string, string>;
     exports: Record<string, unknown>;
 };
 
@@ -148,39 +149,41 @@ describe('audience', () => {
         expect(exposures.flat()).toStrictEqual([]);
     });
 
-    test('no bin the tarball publishes runs a self pass, over the trees that trip each one', () => {
-        // Given - every bin of the extracted package, run over every fixture a self pass's documents stand on
-        const bins = Object.entries(manifestOf(installed).bin ?? {});
+    test('no checks the tarball declares run a self pass, over the trees that trip each one', () => {
+        // Given - every private entry of the extracted package, run as the toolchain runs a preset's checks, over every fixture a self pass's documents stand on
+        const entries = Object.entries(manifestOf(installed).imports ?? {});
         const codes = SELF_CHECKER_PASSES.map(({ name }) => `jterrazz-check(${name})`);
         const trees = SELF_CHECKER_PASSES.flatMap(({ name }) => {
             const fixtures = resolve(ROOT, 'specs/lint', name, '_fixtures');
             return readdirSync(fixtures).map((tree) => resolve(fixtures, tree));
         });
-        const printed = bins.flatMap(([bin, target]) =>
+        const printed = entries.flatMap(([entry, target]) =>
             trees.flatMap((tree) => {
-                const run = spawnSync('node', [join(installed, target), tree], {
-                    encoding: 'utf8',
-                });
+                const run = spawnSync(
+                    'node',
+                    [TOOLCHAIN_CHECKER, '--preset', join(installed, target), tree],
+                    { encoding: 'utf8' },
+                );
                 const output = `${run.stdout}${run.stderr}`;
                 return [
                     ...codes.filter((code) => output.includes(code)),
                     ...selfMentions(output, rows),
-                ].map((token) => `${bin} on ${tree}: ${token}`);
+                ].map((token) => `${entry} on ${tree}: ${token}`);
             }),
         );
 
-        // Then - every bin is in the tarball, and none prints a self pass's finding or names a self rule
-        expect(bins.length).toBeGreaterThan(0);
+        // Then - every entry is in the tarball, and none prints a self pass's finding or names a self rule
+        expect(entries.length).toBeGreaterThan(0);
         expect(trees.length).toBeGreaterThan(0);
         expect(
-            bins.filter(([, target]) => !packed.has(target.replace(/^\.\//u, ''))),
+            entries.filter(([, target]) => !packed.has(target.replace(/^\.\//u, ''))),
         ).toStrictEqual([]);
         expect(printed).toStrictEqual([]);
     });
 
     test('a runtime, type or upstream row is a consumer row: the published surface holds it', () => {
         // Given - the channels a consumer meets through what the package publishes: its runtime's refusals, its types, its fragment's options
-        const selfOnPublished = allRows
+        const selfOnPublished = [...allRows, ...RUNTIME_RULES]
             .filter((row) => PUBLISHED_CHANNELS.has(row.channel) && row.audience === 'self')
             .map((row) => row.name);
 

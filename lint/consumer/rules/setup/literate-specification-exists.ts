@@ -2,10 +2,10 @@ import { defineRule, isFile, readAt, rowNamed } from '@jterrazz/typescript/rules
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { literateSpecifications } from '../../../engine/project/config-shape.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { literateSpecifications } from '../../../kit/project/config-shape.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'literate-specification-exists');

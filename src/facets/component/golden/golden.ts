@@ -1,7 +1,7 @@
 import { chai, expect, inject } from 'vitest';
 
-import { dedent } from '../../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../../lint/refusal.js';
+import { dedent } from '../../../../lint/kit/project/dedent.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { isDiskFile } from '../../../disk/spec-path.js';
 import type { MatchFixtureOptions } from '../../../expectations/goldens/match-options.js';
 import {

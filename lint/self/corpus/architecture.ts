@@ -2,9 +2,9 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { child, childList, isNode, stringValue, walk } from '../../engine/project/ast.js';
-import type { AstNode } from '../../engine/project/ast.js';
-import { parseProgram } from '../../engine/project/module-parser.js';
+import { child, childList, isNode, stringValue, walk } from '../../kit/project/ast.js';
+import type { AstNode } from '../../kit/project/ast.js';
+import { parseProgram } from '../../kit/project/module-parser.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 
 export function modulesOf(root: string, tree: string, suffix: string): string[] {

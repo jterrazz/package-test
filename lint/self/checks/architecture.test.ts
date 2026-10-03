@@ -3,7 +3,7 @@ import { copyFileSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'nod
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
+import { ROOT, treeOf } from '../../kit/testing/source.fixtures.js';
 import { ARCHITECTURE } from './architecture.js';
 
 const CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');

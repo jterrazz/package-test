@@ -13,12 +13,8 @@ build: node_modules/.install
 lint: node_modules/.install
 	npm run lint
 
-# Every fixer runs whatever the one before said; the toolchain's formatter runs last, so what the checker wrote is formatted.
 fix: build
-	@status=0; \
-	node dist/checker.js --fix || status=1; \
-	npx typescript fix || status=1; \
-	exit $$status
+	npx typescript fix
 
 # With coverage, since `coverage:check` reads the last `--coverage` report. `SHARD=<index>/<count>` runs one shard; the floor and the route ratchet are judged once, by `test-merge`.
 test: node_modules/.install

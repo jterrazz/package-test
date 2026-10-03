@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
+import { located, ROOT, treeOf } from '../../kit/testing/source.fixtures.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 
 describe('checkFolderNamedForAConcept', () => {

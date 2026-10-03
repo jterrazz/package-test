@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { A_FILE_IS_READ_WHERE_IT_EXISTS } from '../result.js';
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';

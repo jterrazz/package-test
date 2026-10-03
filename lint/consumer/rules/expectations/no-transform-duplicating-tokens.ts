@@ -1,15 +1,15 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     findProperty,
     memberPropertyName,
     specificationMember,
     stringValue,
-} from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { TOKEN_KINDS } from '../../../engine/project/tokens.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { TOKEN_KINDS } from '../../../kit/project/tokens.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KNOWN_TOKEN_LITERAL = new RegExp(

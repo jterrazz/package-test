@@ -5,7 +5,7 @@ export const OWNERS_OF_LIBRARIES: Readonly<Record<string, readonly string[]>> = 
     'better-sqlite3': ['src/services/sqlite/'],
     hono: ['src/facets/api/'],
     msw: ['src/stubs/delivery/'],
-    'oxc-parser': ['lint/engine/project/module-parser.ts'],
+    'oxc-parser': ['lint/kit/project/module-parser.ts'],
     oxlint: ['src/facets/lint/rule-tester.ts'],
     pg: ['src/services/postgres/'],
     playwright: ['src/facets/website/'],
@@ -18,7 +18,7 @@ export const OWNERS_OF_LIBRARIES: Readonly<Record<string, readonly string[]>> = 
     'vitest-mock-extended': ['src/mocks/'],
     'vitest/browser': ['src/facets/component/'],
     webdriverio: ['src/facets/mobile/'],
-    yaml: ['lint/engine/project/yaml-document.ts'],
+    yaml: ['lint/kit/project/yaml-document.ts'],
 };
 
 export function librariesOwnedIn(tree: string): string[] {

@@ -3,8 +3,8 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { dedent } from '../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../lint/refusal.js';
+import { dedent } from '../../../lint/kit/project/dedent.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { resolveSpecPath } from '../../disk/resolved-spec-path.js';
 import { isDiskDirectory, isDiskFile } from '../../disk/spec-path.js';
 import { ContainerAccessor } from '../command/container.js';

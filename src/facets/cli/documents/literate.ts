@@ -1,19 +1,19 @@
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
-import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
+import { safeRealpath } from '../../../../lint/kit/project/resolve.js';
 import {
     readSpecFile,
     SpecSyntaxError,
     updateSpecFile,
-} from '../../../../lint/engine/project/spec-document.js';
+} from '../../../../lint/kit/project/spec-document.js';
 import type {
     SpecDocument,
     SpecFile,
     SpecFileAssertion,
     SpecRun,
-} from '../../../../lint/engine/project/spec-document.js';
-import { invariant, refusal } from '../../../../lint/refusal.js';
+} from '../../../../lint/kit/project/spec-document.js';
+import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { fsFixtures } from '../../../disk/fs-fixtures.adapter.js';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';

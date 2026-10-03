@@ -3,14 +3,13 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
+import { RUNTIME_RULES } from '../../../src/chain/refusals/rows.js';
 import { FAMILIES } from '../../consumer/catalogue/families.js';
 import { FORK_CHAPTER, FORK_MARKERS, forkTable } from '../../consumer/catalogue/fork.js';
 import {
     CHECKER_PASSES,
     consumerRows,
     PROCESS_RULES,
-    RUNTIME_RULES,
     STATIC_RULES,
     TOOLCHAIN_RULES,
     TYPE_ROWS,
@@ -18,8 +17,9 @@ import {
 } from '../../consumer/catalogue/manifest.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
 import { testPreset } from '../../consumer/rulebook/preset.js';
-import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import plugin from '../../index.oxlint.js';
+import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
+import { TOKEN_KINDS } from '../../kit/project/tokens.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
 import selfPlugin from '../rules/plugin.js';
@@ -36,6 +36,8 @@ import {
     SELF_TOOLCHAIN_RULES,
     selfRows,
 } from './manifest.js';
+
+const everyRow = [...allRows, ...RUNTIME_RULES];
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8');
@@ -195,7 +197,7 @@ const knownNames = (): Set<string> =>
         ...pluginRules,
         ...CHECKER_PASS_IDS,
         ...SELF_PASSES,
-        ...allRows.map((entry) => entry.name),
+        ...everyRow.map((entry) => entry.name),
     ]);
 
 const NAME = String.raw`[a-z][a-z0-9]*(?:-[a-z0-9]+)*`;
@@ -314,7 +316,7 @@ describe('manifest', () => {
         const own = read(SELF_CHAPTER);
 
         // Then - a consumer row is anchored in docs/24 alone, a self row in docs/03 alone: a consumer never reads a rule that holds only this package
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             const [home, away] = entry.audience === 'self' ? [own, published] : [published, own];
             expect(home, `${entry.name} is missing from its chapter`).toContain(anchor(entry.name));
             expect(away, `${entry.name} is listed outside its chapter`).not.toContain(
@@ -399,7 +401,7 @@ describe('manifest', () => {
         ];
 
         // Then - every sentence and channel name the catalogue publishes is English
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             const sentences = `${entry.channel} ${entry.sentence} ${entry.rationale} ${entry.fix}`;
             for (const token of FRENCH) {
                 expect(
@@ -434,7 +436,7 @@ describe('manifest', () => {
 
     test('conventions catalogue — completeness (meta-test) — every catalogue row states its reach and its fix', () => {
         // Given - the assembled catalogue
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             // Then - a reader deciding whether a rule applies to the file in front of them never has to read its implementation
             expect(entry.reach.length, `${entry.name} reach`).toBeGreaterThan(0);
             expect(entry.fix.length, `${entry.name} fix`).toBeGreaterThan(0);
@@ -455,7 +457,7 @@ describe('manifest', () => {
         ]);
 
         // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and `test-id-states-what-is-missing` was one — any file with a `.visit/.render/.open` scenario was judged
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             if (entry.channel !== 'static' || !ROLE_REACH.has(entry.reach)) {
                 continue;
             }
@@ -481,7 +483,7 @@ describe('manifest', () => {
         ]);
 
         // Then - each row says which pass a reader should expect its finding from
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             expect(CHANNELS.has(entry.channel), `${entry.name} channel`).toBe(true);
         }
     });
@@ -491,7 +493,7 @@ describe('manifest', () => {
         const AUDIENCES = new Set(['consumer', 'self']);
 
         // Then - each row says whether a project using the package meets it, or only this package's own suite does
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             expect(AUDIENCES.has(entry.audience), `${entry.name} audience`).toBe(true);
         }
     });
@@ -508,7 +510,7 @@ describe('manifest', () => {
         // Given - the assembled catalogue
         // Then - no two entries share a name (each maps to a distinct implementation)
         const names = new Set<string>();
-        for (const entry of allRows) {
+        for (const entry of everyRow) {
             expect(names.has(entry.name), `duplicate catalogue entry ${entry.name}`).toBe(false);
             names.add(entry.name);
         }
@@ -636,7 +638,7 @@ describe('manifest', () => {
 
         // Then - no row of any channel is a sentence with nothing behind it
         for (const [channel, proven] of proofs) {
-            const rows = allRows.filter((entry) => entry.channel === channel);
+            const rows = everyRow.filter((entry) => entry.channel === channel);
             expect(rows.length, `${channel} has no rows`).toBeGreaterThan(0);
             for (const row of rows) {
                 expect(proven(row), `${row.name} (${channel}) has no proof`).toBe(true);

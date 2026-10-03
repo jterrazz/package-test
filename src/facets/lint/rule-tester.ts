@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import type { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
 
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 
 type Tester = typeof RuleTester;
 

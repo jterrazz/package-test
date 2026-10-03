@@ -1,4 +1,4 @@
-import { findUnknownTokens, TOKEN_KINDS } from '../../engine/project/tokens.js';
+import { findUnknownTokens, TOKEN_KINDS } from '../../kit/project/tokens.js';
 import type { Spotted } from './checker.js';
 
 export function noUnknownTokenFindings(text: string, file: string, firstLine = 1): Spotted[] {

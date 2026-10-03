@@ -198,12 +198,12 @@
             "count": 3
         }
     },
-    "lint/engine/catalogue/chapter.ts": {
+    "lint/kit/catalogue/chapter.ts": {
         "unicorn/no-array-sort": {
             "count": 1
         }
     },
-    "lint/engine/checker/documents.ts": {
+    "lint/kit/checker/documents.ts": {
         "typescript/no-non-null-assertion": {
             "count": 2
         },
@@ -211,12 +211,12 @@
             "count": 1
         }
     },
-    "lint/engine/checker/ground-walk.ts": {
+    "lint/kit/checker/ground-walk.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
-    "lint/engine/project/ast.ts": {
+    "lint/kit/project/ast.ts": {
         "max-lines": {
             "count": 1
         },
@@ -224,7 +224,7 @@
             "count": 21
         }
     },
-    "lint/engine/project/document-model.ts": {
+    "lint/kit/project/document-model.ts": {
         "complexity": {
             "count": 1
         },
@@ -235,22 +235,22 @@
             "count": 2
         }
     },
-    "lint/engine/project/production.ts": {
+    "lint/kit/project/production.ts": {
         "max-lines": {
             "count": 1
         }
     },
-    "lint/engine/project/resolve.test.ts": {
+    "lint/kit/project/resolve.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
         }
     },
-    "lint/engine/project/resolve.ts": {
+    "lint/kit/project/resolve.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 1
         }
     },
-    "lint/engine/project/spec-document.test.ts": {
+    "lint/kit/project/spec-document.test.ts": {
         "max-lines": {
             "count": 1
         },
@@ -261,7 +261,7 @@
             "count": 4
         }
     },
-    "lint/engine/project/spec-document.ts": {
+    "lint/kit/project/spec-document.ts": {
         "max-lines": {
             "count": 1
         },
@@ -275,22 +275,22 @@
             "count": 10
         }
     },
-    "lint/engine/project/subject.test.ts": {
+    "lint/kit/project/subject.test.ts": {
         "max-lines": {
             "count": 1
         }
     },
-    "lint/engine/project/subject.ts": {
+    "lint/kit/project/subject.ts": {
         "max-lines": {
             "count": 1
         }
     },
-    "lint/engine/project/tokens.ts": {
+    "lint/kit/project/tokens.ts": {
         "complexity": {
             "count": 1
         }
     },
-    "lint/engine/project/tree.ts": {
+    "lint/kit/project/tree.ts": {
         "complexity": {
             "count": 1
         },
@@ -298,12 +298,12 @@
             "count": 1
         }
     },
-    "lint/engine/project/yaml-document.test.ts": {
+    "lint/kit/project/yaml-document.test.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
-    "lint/engine/project/yaml-document.ts": {
+    "lint/kit/project/yaml-document.ts": {
         "typescript/consistent-return": {
             "count": 1
         },

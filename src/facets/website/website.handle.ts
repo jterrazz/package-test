@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
-import { resolveRoot } from '../../../lint/engine/project/resolve.js';
-import { refusal } from '../../../lint/refusal.js';
+import { resolveRoot } from '../../../lint/kit/project/resolve.js';
 import type { Started } from '../../chain/config.js';
 import { getCallerDir } from '../../chain/paths/caller.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import { ProcessHandle } from '../../services/process/process.adapter.js';

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
+import { located, ROOT, treeOf } from '../../kit/testing/source.fixtures.js';
 import { checkOneWordForAnAdapter } from './one-word-for-an-adapter.js';
 
 describe('checkOneWordForAnAdapter', () => {

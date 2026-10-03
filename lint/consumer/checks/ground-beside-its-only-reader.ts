@@ -6,8 +6,8 @@ import {
     PRUNED_WITH_FIXTURES,
     textOf,
     walkFiles,
-} from '../../engine/project/facet-folders.js';
-import { isNodeTestFileName } from '../../engine/project/role.js';
+} from '../../kit/project/facet-folders.js';
+import { isNodeTestFileName } from '../../kit/project/role.js';
 import type { Spotted } from './checker.js';
 
 function* walkDirectories(dir: string): Generator<string> {

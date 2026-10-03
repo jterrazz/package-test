@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 
-import { dedent } from '../../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../../lint/refusal.js';
+import { dedent } from '../../../../lint/kit/project/dedent.js';
 import { defineAction } from '../../../chain/action.js';
 import type { SliceReader } from '../../../chain/action.js';
 import type { ChainSignature, MatrixRow, Run } from '../../../chain/capability.js';
 import { headers } from '../../../chain/context/headers.capability.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { resolveSpecPath } from '../../../disk/resolved-spec-path.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../disk/spec-path.js';
 import type { DiskFile } from '../../../disk/spec-path.js';

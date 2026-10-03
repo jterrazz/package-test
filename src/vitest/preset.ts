@@ -2,11 +2,7 @@ import { GROUND_GLOB } from '@jterrazz/typescript/rules';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectConfiguration, ViteUserConfig } from 'vitest/config';
 
-import {
-    BLOB_DIR,
-    COVERAGE_DIR,
-    REPORTER_OUTPUT_FILES,
-} from '../../lint/engine/project/artifacts.js';
+import { BLOB_DIR, COVERAGE_DIR, REPORTER_OUTPUT_FILES } from '../../lint/kit/project/artifacts.js';
 import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project.js';
 
 /** `json-summary` is what the coverage ratchet reads; the v8 provider is an optional peer. */

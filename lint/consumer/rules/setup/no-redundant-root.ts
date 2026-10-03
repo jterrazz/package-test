@@ -8,9 +8,9 @@ import {
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { findProperty, specificationMember, stringValue } from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { findProperty, specificationMember, stringValue } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function derivedRoot(startDir: string): string | undefined {

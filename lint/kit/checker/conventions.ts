@@ -34,7 +34,7 @@ function unformattedRefusals(root: string, specsRoots: readonly string[]): strin
     return specsRoots.flatMap((specsRoot) =>
         unformattedSpecFiles(specsRoot).map((rel) =>
             refusal({
-                fix: "run 'jterrazz-test-check --fix' (make fix), which orders its keys and writes its streams as block scalars",
+                fix: "run 'typescript fix', which orders its keys and writes its streams as block scalars",
                 found: `\`${relative(root, join(specsRoot, rel)) || rel}\`, a spec document out of its format`,
                 read: 'docs/15-documents.md#the-schema-and-the-format',
                 why: 'one key order and block-scalar streams make every document read and diff alike, and the formatter writes them',
@@ -50,7 +50,7 @@ function pluginKeysLeft(root: string): string[] {
         .map(
             (key) =>
                 `baseline-ratchet  ${labelOf(TEST_SECTION)}  ${refusal({
-                    fix: "run 'typescript baseline', then 'jterrazz-test-check baseline'",
+                    fix: "run 'typescript baseline'",
                     found: `\`${key}\` is held in the ${TEST_SECTION} section`,
                     read: 'docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
                     why: "the plugin's rules are oxlint's own, held file by file in oxlint-suppressions.json — one finding, one judge",

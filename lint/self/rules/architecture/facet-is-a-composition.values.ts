@@ -6,8 +6,8 @@ import {
     isReference,
     stringValue,
     unwrapped,
-} from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
 
 /** `config.jobs ?? []` counts. */
 function isPlainValue(node: AstNode | undefined): boolean {

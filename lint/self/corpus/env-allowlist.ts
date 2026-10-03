@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { isTestFileName } from '../../engine/project/role.js';
+import { isTestFileName } from '../../kit/project/role.js';
 
 export const ENV_ALLOWLIST = new Set(['TEST_UPDATE', 'VITEST_POOL_ID']);
 

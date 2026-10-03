@@ -1,13 +1,13 @@
 import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { specsAnchor } from '../../engine/project/ast.js';
+import { specsAnchor } from '../../kit/project/ast.js';
 import {
     documentPaths,
     parseSpecDocument,
     SPEC_EXTENSION,
-} from '../../engine/project/spec-document.js';
-import { isModuleName } from '../../engine/project/specs-modules.js';
+} from '../../kit/project/spec-document.js';
+import { isModuleName } from '../../kit/project/specs-modules.js';
 import {
     collectFixtureReferences,
     DISK_CALL,
@@ -22,7 +22,7 @@ import {
     readSource,
     readText,
     specsRootOfPool,
-} from '../../engine/project/tree.js';
+} from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 /** Read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`document-follows-its-grammar` reports it). */

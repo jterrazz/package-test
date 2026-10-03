@@ -8,11 +8,11 @@ import {
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { relativeLiterals } from '../../engine/checker/repoint.js';
-import { moduleTestsOf } from '../../engine/project/module-tests.js';
-import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
-import { literalSpans } from '../../engine/project/spec-values.js';
-import { placeOf } from '../../engine/project/specs-modules.js';
+import { relativeLiterals } from '../../kit/checker/repoint.js';
+import { moduleTestsOf } from '../../kit/project/module-tests.js';
+import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
+import { literalSpans } from '../../kit/project/spec-values.js';
+import { placeOf } from '../../kit/project/specs-modules.js';
 import {
     anchoredPaths,
     collectFixtureReferences,
@@ -24,7 +24,7 @@ import {
     lowestCommonFolder,
     readText,
     removeIfEmpty,
-} from '../../engine/project/tree.js';
+} from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 type Entry = { entry: string; ground: string };

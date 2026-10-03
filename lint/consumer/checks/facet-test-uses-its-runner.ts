@@ -6,9 +6,9 @@ import {
     specificationsIn,
     textOf,
     walkFiles,
-} from '../../engine/project/facet-folders.js';
-import { reachesRunner } from '../../engine/project/facets.js';
-import { isTestFileName } from '../../engine/project/role.js';
+} from '../../kit/project/facet-folders.js';
+import { reachesRunner } from '../../kit/project/facets.js';
+import { isTestFileName } from '../../kit/project/role.js';
 import type { Spotted } from './checker.js';
 
 function isUnderGround(relativePath: string): boolean {

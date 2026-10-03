@@ -2,10 +2,10 @@ import type { Context } from '@oxlint/plugins';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { child, childList, identifierName, isNode, walk } from '../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../engine/project/ast.js';
-import { parsedModule } from '../../engine/project/module-parser.js';
-import type { PluginRule } from '../../engine/project/rule.js';
+import { child, childList, identifierName, isNode, walk } from '../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../kit/project/ast.js';
+import { parsedModule } from '../../kit/project/module-parser.js';
+import type { PluginRule } from '../../kit/project/rule.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 

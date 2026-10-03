@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { CHARTS, migrating, RUNNER, specsTree } from '../../engine/testing/subject.fixtures.js';
+import { CHARTS, migrating, RUNNER, specsTree } from '../../kit/testing/subject.fixtures.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 
 describe('checkSpecInSubjectFolder', () => {

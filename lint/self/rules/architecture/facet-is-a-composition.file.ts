@@ -9,8 +9,8 @@ import {
     rootOf,
     stringValue,
     unwrapped,
-} from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
 import { isAdapter, isRow } from './facet-is-a-composition.values.js';
 
 export type FacetFinding = {

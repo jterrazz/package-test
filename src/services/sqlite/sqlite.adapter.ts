@@ -17,10 +17,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-import { SQLITE_TEMPLATE_DIR } from '../../../lint/engine/project/artifacts.js';
-import { discoverRoot } from '../../../lint/engine/project/resolve.js';
-import { invariant } from '../../../lint/refusal.js';
+import { SQLITE_TEMPLATE_DIR } from '../../../lint/kit/project/artifacts.js';
+import { discoverRoot } from '../../../lint/kit/project/resolve.js';
 import { pause } from '../../chain/pause.js';
+import { invariant } from '../../chain/refusals/refusal.js';
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';

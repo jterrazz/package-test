@@ -1,4 +1,4 @@
-import { resolveRoot } from '../../../lint/engine/project/resolve.js';
+import { resolveRoot } from '../../../lint/kit/project/resolve.js';
 import { getCallerDir } from '../../chain/paths/caller.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { declaredDatabaseKeys } from '../../services/services.js';

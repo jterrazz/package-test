@@ -1,8 +1,8 @@
 import { dirname, resolve } from 'node:path';
 
-import type { Spotted } from '../../engine/checker/registry.js';
-import { byPosition, facetOf, finding, inGround, listed } from '../../engine/project/source.js';
-import type { Listed } from '../../engine/project/source.js';
+import type { Spotted } from '../../kit/checker/registry.js';
+import { byPosition, facetOf, finding, inGround, listed } from '../../kit/project/source.js';
+import type { Listed } from '../../kit/project/source.js';
 import type { SelfPassId } from './checker.js';
 
 /** A role rides on the file suffix, never on a folder name. */

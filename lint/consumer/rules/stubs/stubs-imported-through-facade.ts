@@ -1,11 +1,11 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { importSourceVisitor } from '../../../engine/project/ast.js';
-import type { Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { STUB_KINDS } from '../../../engine/project/stub-kinds.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { importSourceVisitor } from '../../../kit/project/ast.js';
+import type { Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { STUB_KINDS } from '../../../kit/project/stub-kinds.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const INTERNAL_UNIT = new RegExp(`(?:^|/)stubs/(?:${STUB_KINDS.join('|')})/`, 'u');

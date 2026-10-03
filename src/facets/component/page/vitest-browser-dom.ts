@@ -2,7 +2,7 @@ import { expect, TestRunner } from 'vitest';
 import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
-import { refusal } from '../../../../lint/refusal.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { ambiguousTargetError } from '../../../visitor/matching/ambiguous.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../visitor/matching/candidates.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';

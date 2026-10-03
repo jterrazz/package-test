@@ -6,8 +6,8 @@ import {
     nodeEnd,
     nodeStart,
     walk,
-} from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
 
 /** `result-compared-whole` exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison. */
 

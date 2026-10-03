@@ -8,12 +8,11 @@ import {
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
-import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
-import type { RefusalRow } from '../../consumer/catalogue/refusals.js';
+import { refusal } from '../../../src/chain/refusals/refusal.js';
+import { REFUSAL_WHY, RUNTIME_RULES } from '../../../src/chain/refusals/rows.js';
+import type { RefusalRow } from '../../../src/chain/refusals/rows.js';
 import { CHECKER_PASS_IDS } from '../../consumer/checks/checker.js';
 import plugin from '../../consumer/rules/plugin.js';
-import { refusal } from '../../refusal.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import selfPlugin from '../rules/plugin.js';
 import { chapterOf, goldenCheckerLines, ROOT, rowNamed, sourcesUnder } from './messages.js';

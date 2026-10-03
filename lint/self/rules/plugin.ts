@@ -1,4 +1,4 @@
-import type { LintPlugin } from '../../engine/project/rule.js';
+import type { LintPlugin } from '../../kit/project/rule.js';
 import { facetIsAComposition } from './architecture/facet-is-a-composition.js';
 
 /** A plugin of its own name, since oxlint keys a rule by the plugin registering it: nothing a consumer composes can name `jterrazz-self/<rule>`. Left out of the tarball. */

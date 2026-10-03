@@ -1,7 +1,8 @@
 import { lessonParts } from '@jterrazz/typescript/rules';
 import { describe, expect, test } from 'vitest';
 
-import { invariant, refusal, REFUSAL_WHY } from './refusal.js';
+import { invariant, refusal } from './refusal.js';
+import { REFUSAL_WHY } from './rows.js';
 
 describe('refusal', () => {
     test('refusal — a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {

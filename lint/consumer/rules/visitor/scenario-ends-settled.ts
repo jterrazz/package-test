@@ -1,6 +1,7 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     chainRootName,
     child,
@@ -9,10 +10,9 @@ import {
     memberPropertyName,
     scenarioCallbackOf,
     walk,
-} from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);

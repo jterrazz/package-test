@@ -4,8 +4,8 @@ import {
     silenced,
     splitPlan,
     subjectSpecs,
-} from '../../engine/project/spec-subjects.js';
-import type { SpecRead, TestOf } from '../../engine/project/spec-subjects.js';
+} from '../../kit/project/spec-subjects.js';
+import type { SpecRead, TestOf } from '../../kit/project/spec-subjects.js';
 import type { Spotted } from './checker.js';
 
 function journeyOf(spec: SpecRead): TestOf | undefined {

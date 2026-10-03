@@ -2,10 +2,10 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
-import { dedent } from '../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../lint/refusal.js';
+import { dedent } from '../../../lint/kit/project/dedent.js';
 import { isFrameworkFrame, stackFrames } from '../../chain/paths/caller.js';
 import type { StackFrame } from '../../chain/paths/caller.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 
 /** Every rewrite of a file is laid on the source the run loaded. The file is written when the run ends: vitest frames a failure by reading the file on disk. */
 

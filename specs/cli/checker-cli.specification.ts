@@ -4,8 +4,10 @@ import { afterAll } from 'vitest';
 
 const REPOSITORY = resolve(import.meta.dirname, '../..');
 
-/** The conventions checker's own command line: `npm run build` first. A fixture's stub oxlint runs this repository's, named by `JTERRAZZ_TEST_REPO`. */
-export const { cleanup, cli } = await specification.cli(`node ${REPOSITORY}/dist/checker.js`, {
+const CONVENTIONS = `node ${REPOSITORY}/node_modules/@jterrazz/typescript/dist/checker.js --preset ${REPOSITORY}/dist/checker.js`;
+
+/** The conventions checks as the toolchain runs them, through its checker program: `npm run build` first. A fixture's stub oxlint runs this repository's, named by `JTERRAZZ_TEST_REPO`. */
+export const { cleanup, cli } = await specification.cli(CONVENTIONS, {
     commands: ['baseline'],
     defaults: { JTERRAZZ_TEST_REPO: REPOSITORY },
 });

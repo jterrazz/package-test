@@ -1,6 +1,6 @@
-import { finding, fixedData } from '../../engine/project/document-model.js';
-import { assertedStreams } from '../../engine/project/spec-document.js';
-import type { SpecDocument } from '../../engine/project/spec-document.js';
+import { finding, fixedData } from '../../kit/project/document-model.js';
+import { assertedStreams } from '../../kit/project/spec-document.js';
+import type { SpecDocument } from '../../kit/project/spec-document.js';
 import type { DocumentFinding, Spotted } from './checker.js';
 
 const VOLATILE = [

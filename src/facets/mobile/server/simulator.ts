@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-import { refusal } from '../../../../lint/refusal.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 
 /** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
 

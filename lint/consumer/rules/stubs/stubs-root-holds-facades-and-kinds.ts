@@ -1,6 +1,7 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     child,
     childList,
@@ -8,11 +9,10 @@ import {
     memberPropertyName,
     stringValue,
     walk,
-} from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
-import { isStubKind, STUB_KINDS } from '../../../engine/project/stub-kinds.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf, segmentsOf } from '../../../kit/project/linted-file.js';
+import { isStubKind, STUB_KINDS } from '../../../kit/project/stub-kinds.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');

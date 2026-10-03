@@ -2,7 +2,7 @@ import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { STUB_KINDS } from '../../lint/engine/project/stub-kinds.js';
+import { STUB_KINDS } from '../../lint/kit/project/stub-kinds.js';
 import {
     anthropic as publishedAnthropic,
     http as publishedHttp,

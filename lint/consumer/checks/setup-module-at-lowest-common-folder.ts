@@ -2,7 +2,7 @@ import { moveKeepingHistory, SETUP_FOLDER } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { repointSource } from '../../engine/checker/repoint.js';
+import { repointSource } from '../../kit/checker/repoint.js';
 import {
     importsThroughAlias,
     isTestOrSpecName,
@@ -12,13 +12,13 @@ import {
     ownerOfSetup,
     readersOf,
     setupFolderOf,
-} from '../../engine/project/specs-modules.js';
+} from '../../kit/project/specs-modules.js';
 import {
     findSpecsRoots,
     readText,
     removeIfEmpty,
     reservedFolderOf,
-} from '../../engine/project/tree.js';
+} from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 const STUBS_FOLDER = 'stubs';

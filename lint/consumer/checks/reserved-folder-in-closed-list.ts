@@ -14,8 +14,8 @@ import {
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { isModuleName, isUnmarkedReserved } from '../../engine/project/specs-modules.js';
-import { findSpecsRoots, isDir } from '../../engine/project/tree.js';
+import { isModuleName, isUnmarkedReserved } from '../../kit/project/specs-modules.js';
+import { findSpecsRoots, isDir } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 const CLOSED_LIST = RESERVED_FOLDERS.map((name) => `\`${name}/\``).join(', ');

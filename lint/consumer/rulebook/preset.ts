@@ -9,9 +9,10 @@ import {
     SHARED_FOLDER,
     whyOf,
 } from '@jterrazz/typescript/rules';
+import { createRequire } from 'node:module';
 
-import { TEST_DEFAULTS, TEST_SECTION } from '../../engine/project/test-section.js';
-import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
+import { TEST_DEFAULTS, TEST_SECTION } from '../../kit/project/test-section.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
 import { vitestOnTests } from './vitest.js';
@@ -220,6 +221,10 @@ export function testPreset(): Preset {
             jsPlugins: ['@jterrazz/test/oxlint'],
             overrides: [importRulesForSpecifications, vitestOnTests],
             rules: recommendedRules,
+        },
+        checker: {
+            label: 'Test Conventions (@jterrazz/test)',
+            module: createRequire(import.meta.url).resolve('#checker'),
         },
         package: '@jterrazz/test',
         settings: TEST_DEFAULTS,

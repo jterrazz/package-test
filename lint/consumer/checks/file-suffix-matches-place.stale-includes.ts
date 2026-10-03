@@ -2,7 +2,7 @@ import { blankComments } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
-import { packageRootOf } from '../../engine/project/role.js';
+import { packageRootOf } from '../../kit/project/role.js';
 
 export type Rename = { from: string; to: string };
 

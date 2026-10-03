@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { VITEST_ARTIFACTS_DIR } from '../../../../lint/engine/project/artifacts.js';
+import { VITEST_ARTIFACTS_DIR } from '../../../../lint/kit/project/artifacts.js';
 import type { Route, SentRequest } from './routes.js';
 
 export type Ledger = { declared?: Route[] | undefined; reached: SentRequest[] };

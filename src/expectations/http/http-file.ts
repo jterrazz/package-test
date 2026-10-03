@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 
 /** Responses hold the status, a subset of headers and the body; each supports `{{placeholder}}` forms. */
 

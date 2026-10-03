@@ -1,5 +1,5 @@
-import { refusal } from '../../../lint/refusal.js';
 import { pause } from '../../chain/pause.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 
 /** How long to wait, and how often to look. */
 export type WaitUntilOptions = {

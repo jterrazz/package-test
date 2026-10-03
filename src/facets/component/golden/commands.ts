@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
-import { invariant, refusal } from '../../../../lint/refusal.js';
+import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { resolveSpecPath } from '../../../disk/resolved-spec-path.js';
 import { renderText, writeInPlace } from '../../../expectations/in-place/in-place.js';
 

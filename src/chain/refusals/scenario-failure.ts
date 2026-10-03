@@ -1,7 +1,7 @@
 import { lessonParts, refusalBlock } from '@jterrazz/typescript/rules';
 import type { ChapterAnchor, Lesson } from '@jterrazz/typescript/rules';
 
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from './refusal.js';
 
 export type ScenarioVerb = 'open' | 'visit';
 

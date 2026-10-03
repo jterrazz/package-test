@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { refusal } from '../../../lint/refusal.js';
 import { setupEntry } from '../../chain/paths/setup-entry.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
 import { field, RunContainers, serveContainers } from './run-containers.js';

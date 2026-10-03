@@ -5,8 +5,8 @@ import {
     SHARED_FOLDER,
 } from '@jterrazz/typescript/rules';
 
-import { FACETS } from '../../../engine/project/facets.js';
-import { declaresTests } from '../../../engine/project/specs-modules.js';
+import { FACETS } from '../../../kit/project/facets.js';
+import { declaresTests } from '../../../kit/project/specs-modules.js';
 
 function holdsATest(folder: string): boolean {
     return (listDirectory(folder) ?? []).some((name) => {

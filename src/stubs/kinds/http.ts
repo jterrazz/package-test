@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { CaptureScope } from '../../expectations/tokens/match.js';
 import { structuralSubset } from '../../expectations/tokens/structural.js';
 import { STREAM_BODY } from '../exchange.js';

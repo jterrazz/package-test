@@ -10,17 +10,17 @@ import {
 } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     child,
     childList,
     diskCallOf,
     identifierName,
     memberPropertyName,
-} from '../../../engine/project/ast.js';
-import type { AstNode, DiskCall, Visitor } from '../../../engine/project/ast.js';
-import { identityOf } from '../../../engine/project/linted-file.js';
-import { isTestRole } from '../../../engine/project/role.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode, DiskCall, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `_fixtures/`. */

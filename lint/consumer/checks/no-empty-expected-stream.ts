@@ -1,6 +1,6 @@
-import { finding } from '../../engine/project/document-model.js';
-import { assertedStreams } from '../../engine/project/spec-document.js';
-import type { SpecDocument } from '../../engine/project/spec-document.js';
+import { finding } from '../../kit/project/document-model.js';
+import { assertedStreams } from '../../kit/project/spec-document.js';
+import type { SpecDocument } from '../../kit/project/spec-document.js';
 import type { DocumentFinding } from './checker.js';
 
 export function checkNoEmptyExpectedStream(document: SpecDocument): DocumentFinding[] {

@@ -9,10 +9,10 @@ import {
 } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { specsAnchorOf } from '../../../engine/project/linted-file.js';
-import { declaresTests } from '../../../engine/project/specs-modules.js';
-import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
+import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { specsAnchorOf } from '../../../kit/project/linted-file.js';
+import { declaresTests } from '../../../kit/project/specs-modules.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { isStrayFolder } from './specs-at-declared-depth.first-level.js';
 

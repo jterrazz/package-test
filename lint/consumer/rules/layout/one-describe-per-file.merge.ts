@@ -14,8 +14,8 @@ import {
     nodeEnd,
     nodeStart,
     stringValue,
-} from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
+} from '../../../kit/project/ast.js';
+import type { AstNode } from '../../../kit/project/ast.js';
 
 /** `undefined` when the group holds anything but tests. */
 export function flattenedGroup(source: string, group: AstNode, named: string): string | undefined {

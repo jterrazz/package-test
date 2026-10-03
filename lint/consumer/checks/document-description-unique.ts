@@ -1,8 +1,8 @@
 import { dirname, relative } from 'node:path';
 
-import { listSpecFiles } from '../../engine/project/document-model.js';
-import { readSpecFile } from '../../engine/project/spec-document.js';
-import { readText } from '../../engine/project/tree.js';
+import { listSpecFiles } from '../../kit/project/document-model.js';
+import { readSpecFile } from '../../kit/project/spec-document.js';
+import { readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 export function checkDocumentDescriptionUnique(rootDir: string): Spotted[] {

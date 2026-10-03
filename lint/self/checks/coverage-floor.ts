@@ -1,7 +1,7 @@
 import { labelOf, refusal } from '@jterrazz/typescript/rules';
 import type { Counts } from '@jterrazz/typescript/rules';
 
-import { COVERAGE_SECTION, drops } from '../../engine/baseline/coverage.js';
+import { COVERAGE_SECTION, drops } from '../../kit/baseline/coverage.js';
 
 export function checkCoverageFloor(
     floor: Counts | undefined,

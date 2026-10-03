@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { safeRealpath } from '../../lint/engine/project/resolve.js';
-import { refusal } from '../../lint/refusal.js';
+import { safeRealpath } from '../../lint/kit/project/resolve.js';
 import type { ChainConfig } from '../chain/config.js';
+import { refusal } from '../chain/refusals/refusal.js';
 import { validateDatabaseOption } from '../services/database-option.js';
 import { DirectoryAccessor } from './disk/directory.js';
 import { TableAccessor } from './table/table.js';

@@ -2,7 +2,7 @@ import { anchorsOf } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { Spotted } from '../../engine/checker/registry.js';
+import type { Spotted } from '../../kit/checker/registry.js';
 import {
     child,
     childList,
@@ -13,11 +13,11 @@ import {
     propertyKeyName,
     stringValue,
     walk,
-} from '../../engine/project/ast.js';
-import type { AstNode } from '../../engine/project/ast.js';
-import { parseProgram } from '../../engine/project/module-parser.js';
-import { byPosition, finding, isProduction, listed } from '../../engine/project/source.js';
-import { positionOf } from '../../engine/project/spec-subjects.js';
+} from '../../kit/project/ast.js';
+import type { AstNode } from '../../kit/project/ast.js';
+import { parseProgram } from '../../kit/project/module-parser.js';
+import { byPosition, finding, isProduction, listed } from '../../kit/project/source.js';
+import { positionOf } from '../../kit/project/spec-subjects.js';
 import type { SelfPassId } from './checker.js';
 
 const BUILT_IN_ERRORS: ReadonlySet<string> = new Set([

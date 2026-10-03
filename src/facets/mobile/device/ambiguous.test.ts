@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../../../../lint/refusal.js';
+import { REFUSAL_WHY } from '../../../chain/refusals/rows.js';
 import { within } from '../../../visitor/targets/landmarks.js';
 import { button, content, testId } from '../../../visitor/targets/roles.js';
 import { ambiguousScreenElementError } from './ambiguous.js';

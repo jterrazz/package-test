@@ -2,7 +2,7 @@ import type { ArchitectureRule } from '@jterrazz/typescript/config';
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import type { ChapterAnchor } from '@jterrazz/typescript/rules';
 
-import { TEST_SUFFIX } from '../../engine/project/source.js';
+import { TEST_SUFFIX } from '../../kit/project/source.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 import type { LayerOptions } from './layers.js';
 import { OWNERS_OF_LIBRARIES } from './libraries.js';

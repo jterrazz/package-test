@@ -13,5 +13,5 @@ export type {
     SpecRun,
     SpecServeEntry,
     SpecStream,
-} from '../../../lint/engine/project/spec-document.js';
+} from '../../../lint/kit/project/spec-document.js';
 export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './process/cli.port.js';

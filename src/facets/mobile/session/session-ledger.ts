@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { VITEST_ARTIFACTS_DIR } from '../../../../lint/engine/project/artifacts.js';
+import { VITEST_ARTIFACTS_DIR } from '../../../../lint/kit/project/artifacts.js';
 
 type RecordedSession = {
     /** The capabilities the server answered with — what a runner attaching to it hands the driver. */

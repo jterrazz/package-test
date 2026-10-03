@@ -1,4 +1,4 @@
-import { findMalformedRefs } from '../../engine/project/tokens.js';
+import { findMalformedRefs } from '../../kit/project/tokens.js';
 import type { Spotted } from './checker.js';
 
 const KIND = /^\{\{(?<kind>[A-Za-z][A-Za-z0-9]*)/u;

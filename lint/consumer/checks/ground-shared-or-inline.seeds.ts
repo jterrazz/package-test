@@ -7,17 +7,12 @@ import {
     importsFromEntry,
     withEntryImport,
     withoutEntryImport,
-} from '../../engine/checker/entry-import.js';
-import { dedent } from '../../engine/project/dedent.js';
-import {
-    isInside,
-    kebabName,
-    literalSpans,
-    titleAround,
-} from '../../engine/project/spec-values.js';
-import { skipString } from '../../engine/project/subject.js';
-import { suppressedLines } from '../../engine/project/suppression.js';
-import { findSpecsRoots, listFiles } from '../../engine/project/tree.js';
+} from '../../kit/checker/entry-import.js';
+import { dedent } from '../../kit/project/dedent.js';
+import { isInside, kebabName, literalSpans, titleAround } from '../../kit/project/spec-values.js';
+import { skipString } from '../../kit/project/subject.js';
+import { suppressedLines } from '../../kit/project/suppression.js';
+import { findSpecsRoots, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 /** The seed name is the first `--` comment of the SQL, else the first four meaningful words of the test's title, else `seed`; a name taken by other bytes gains `-2`, `-3`, … */

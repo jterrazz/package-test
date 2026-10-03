@@ -1,6 +1,6 @@
-import { refusal } from '../../lint/refusal.js';
 import { defineCapability } from '../chain/capability.js';
 import type { ChainSignature } from '../chain/capability.js';
+import { refusal } from '../chain/refusals/refusal.js';
 import type { LinkPort } from './link.port.js';
 import { isDiskDirectory, isDiskFile } from './spec-path.js';
 import type { DiskDirectory } from './spec-path.js';

@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { toKebabCase } from '../../../lint/engine/project/record-key.js';
+import { toKebabCase } from '../../../lint/kit/project/record-key.js';
 import type { ContainerPort } from '../containers/container.port.js';
 import type { DatabasePort } from '../database.port.js';
 import type { ServiceHandle } from '../service.port.js';

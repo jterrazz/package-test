@@ -1,4 +1,4 @@
-import { invariant, refusal } from '../../../lint/refusal.js';
+import { invariant, refusal } from '../../chain/refusals/refusal.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { field } from './run-containers.js';
 import type { RunAddress } from './run-containers.js';

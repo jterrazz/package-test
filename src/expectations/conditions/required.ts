@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 
 /** The value, or a failure naming what was missing and why it mattered. */
 export function required<T>(value: null | T | undefined, why: string): T {

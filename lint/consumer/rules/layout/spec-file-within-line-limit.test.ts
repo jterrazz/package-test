@@ -1,7 +1,7 @@
 import { ruleTester } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { MAX_SPEC_LINES } from '../../../engine/project/specs-modules.js';
+import { MAX_SPEC_LINES } from '../../../kit/project/specs-modules.js';
 import { groupsOf, specFileWithinLineLimit } from './spec-file-within-line-limit.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { Row } from '../../engine/catalogue/row.js';
+import type { Row } from '../../kit/catalogue/row.js';
 import { allRows } from '../catalogue/manifest.js';
 import { unpositionedRules } from './positions.js';
 

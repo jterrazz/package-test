@@ -5,7 +5,7 @@
         "src/index.vitest.ts",
         "lint/index.oxlint.ts",
         "lint/self/rules/plugin.ts",
-        "lint/jterrazz-test-check.bin.ts",
+        "lint/index.checker.ts",
         "lint/index.config.ts",
         "lint/self/self-cli.ts",
         "src/facets/cli/documents/schema-cli.ts"

@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { basename, isAbsolute, resolve } from 'node:path';
 
-import { readSpecFile, SpecSyntaxError } from '../../../../lint/engine/project/spec-document.js';
-import type { SpecFile } from '../../../../lint/engine/project/spec-document.js';
-import { refusal } from '../../../../lint/refusal.js';
+import { readSpecFile, SpecSyntaxError } from '../../../../lint/kit/project/spec-document.js';
+import type { SpecFile } from '../../../../lint/kit/project/spec-document.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { DISK_KEY } from '../../../disk/spec-path.js';
 
 /** Makes a `<case>.spec.yaml` a test file: the runner shows the document's path and its `description:`. */

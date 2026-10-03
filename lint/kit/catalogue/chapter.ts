@@ -2,6 +2,8 @@ import { anchor, cell, markdownTable } from '@jterrazz/typescript/rules';
 
 import type { Row } from './row.js';
 
+export const CATALOGUE_CHAPTER = 'docs/24-linting.md';
+
 const CHANNEL_ORDER: Record<Row['channel'], number> = {
     static: 0,
     upstream: 1,

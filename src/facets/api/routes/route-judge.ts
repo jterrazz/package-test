@@ -2,8 +2,8 @@ import {
     heldUnreached,
     recordUnreached,
     ROUTES_KEY,
-} from '../../../../lint/engine/baseline/test-baseline.js';
-import type { Lesson } from '../../../../lint/refusal.js';
+} from '../../../../lint/kit/baseline/test-baseline.js';
+import type { Lesson } from '../../../chain/refusals/refusal.js';
 import { measure, readLedgers } from './ledger.js';
 import type { Ledger } from './ledger.js';
 import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js';

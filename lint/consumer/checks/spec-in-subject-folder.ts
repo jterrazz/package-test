@@ -6,9 +6,9 @@ import {
     silenced,
     subjectSpecs,
     targetOf,
-} from '../../engine/project/spec-subjects.js';
-import type { SpecRead } from '../../engine/project/spec-subjects.js';
-import { ambiguousSegment } from '../../engine/project/subject.js';
+} from '../../kit/project/spec-subjects.js';
+import type { SpecRead } from '../../kit/project/spec-subjects.js';
+import { ambiguousSegment } from '../../kit/project/subject.js';
 import type { Spotted } from './checker.js';
 
 /** No folder is derived from a word that may be a value: the author writes the template that says which it is. */

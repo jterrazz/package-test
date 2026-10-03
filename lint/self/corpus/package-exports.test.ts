@@ -1,7 +1,7 @@
 import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { materialAt } from '../../engine/project/production.js';
+import { materialAt } from '../../kit/project/production.js';
 import {
     augmentedPackages,
     compiledSources,

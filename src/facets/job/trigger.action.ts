@@ -1,6 +1,6 @@
-import { refusal } from '../../../lint/refusal.js';
 import { defineAction } from '../../chain/action.js';
 import type { ChainSignature } from '../../chain/capability.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { BaseResult } from '../../expectations/result.js';
 import type { Job } from './job.handle.js';
 import type { JobResult } from './job.result.js';

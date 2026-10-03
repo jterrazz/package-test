@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 82    |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 83    |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 54    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 188   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 115   |
@@ -118,7 +118,8 @@ Artefacts live under `.artifacts/`](06-setting-up.md#where-a-run-writes)):
 `json-summary`, which is the one a machine reads.
 
 The count includes the child processes the suite spawns: a document that runs
-`checker .` runs `dist/checker.js` in a child, and this repository's
+`checker .` runs the toolchain's checker program in a child, which loads
+`dist/checker.js`, and this repository's
 `vitest.config.ts` turns on `autoAttachSubprocess`, so v8 merges what every
 child executed. The build writes source maps, which take each bundle back to
 the `lint/` and `src/` modules it was built from; `dist/` itself is judged
@@ -218,8 +219,8 @@ When the module tests that restated a spec went, in October 2026, 698 mutants th
 | `src/facets/website/visit/visit.action.ts:68`             | 2       | equivalent: a page opened with an empty set of headers and one opened with none send the same request                                                                 |
 | `src/facets/mobile/session/mobile-session.ts:22`          | 1       | a global setup, run in Vitest's main process, and only beside a simulator                                                                                             |
 | `src/expectations/command/cli.result.ts:89`               | 1       | equivalent: a text accessor's stream name is read only by the component facet's golden message, which a cli result never reaches                                      |
-| `lint/engine/project/source.ts:61`                        | 1       | equivalent: `.tsx?` unanchored differs only for a file carrying `.ts` in the middle of its name, which no judged tree holds                                           |
-| `lint/engine/project/tree.ts:83`                          | 1       | equivalent: a specs root that is not on disk holds no file, so a stray root changes no finding                                                                        |
+| `lint/kit/project/source.ts:61`                           | 1       | equivalent: `.tsx?` unanchored differs only for a file carrying `.ts` in the middle of its name, which no judged tree holds                                           |
+| `lint/kit/project/tree.ts:83`                             | 1       | equivalent: a specs root that is not on disk holds no file, so a stray root changes no finding                                                                        |
 | `src/visitor/targets/roles.ts:17`                         | 1       | equivalent: every reader of a target asks whether its `name` is undefined, so an absent name and an undefined one read the same                                       |
 | `src/disk/resolved-spec-path.ts:6`                        | 1       | equivalent through the surface: every path it resolves comes from a `file()` or `directory()` that refused a path not relative already                                |
 | `src/stubs/kinds/openai.ts:186`                           | 1       | equivalent: no module reads a stub request's `adapter`                                                                                                                |
@@ -417,14 +418,14 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
 | `.json body`           | 3   | —   | 9   | —    | 3           | 0       | —      | —         | 7      |
-| `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 5      |
+| `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 6      |
 | `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
 | Capability    | api | job | cli | lint | integration | website | mobile | component | module |
 | ------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 5      |
+| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 6      |
 | `intercept()` | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |
@@ -483,7 +484,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/docs-typecheck.test.ts`    | docs-typecheck     | 6     |
 | `lint/self/corpus/env-allowlist.test.ts`     | env-allowlist      | 4     |
 | `lint/self/corpus/facet-matrix.test.ts`      | facet-matrix       | 5     |
-| `lint/self/corpus/makefile.test.ts`          | makefile           | 5     |
+| `lint/self/corpus/makefile.test.ts`          | makefile           | 4     |
 | `lint/self/corpus/matrix.test.ts`            | matrix             | 12    |
 | `lint/self/corpus/messages.test.ts`          | messages           | 4     |
 | `lint/self/corpus/meta-tests.test.ts`        | metaTests          | 3     |
@@ -516,7 +517,7 @@ The freshness meta-test is the reason a documentation change can turn the suite 
 
 ## The package's own rules
 
-Every row of the rule manifest declares its audience (`RowDocs.audience`, `lint/engine/catalogue/row.ts`). A `consumer` rule is what a project using the package meets, and [24 — Linting § The rule catalogue](24-linting.md#the-rule-catalogue) lists it. A `self` rule holds this package's own suite — its catalogue, its capability matrix, its specimens, its skill, its meta-tests — and is listed here, where the `read:` part of its message routes.
+Every row of the rule manifest declares its audience (`RowDocs.audience`, `lint/kit/catalogue/row.ts`). A `consumer` rule is what a project using the package meets, and [24 — Linting § The rule catalogue](24-linting.md#the-rule-catalogue) lists it. A `self` rule holds this package's own suite — its catalogue, its capability matrix, its specimens, its skill, its meta-tests — and is listed here, where the `read:` part of its message routes.
 
 A self rule is wired only where this repository judges itself, never in what the tarball carries. Its row lives in `lint/self/catalogue/manifest.ts`, which no published entry imports: the published code reads the consumer rows of `lint/consumer/catalogue/manifest.ts` alone, so no bundle the tarball carries holds a self row. A self static rule is a rule of the `jterrazz-self` plugin (`lint/self/rules/plugin.ts`, bundled as `dist/self-oxlint.js`), which the `self()` preset hands this repository's `oxlint.config.ts`, and the lint specs load beside the published plugin; its findings read `jterrazz-self(<rule>)`. A self checker pass runs in `dist/self.js check` (listed by `lint/self/checks/checker.ts`, composed by `lint/self/self-cli.ts`) — over every specs tree, and over the project's own `src/` and `lint/` — which `npm run lint` calls after the published checker and `files` leaves out; `dist/checker.js` imports nothing of it. A self meta row is a meta-test of this suite, and a self process row is this repository's review. `rule-declares-its-audience` packs the tarball, extracts it, and holds that none of this reaches it: no byte of it names a self row, no entry it publishes registers one, no bin it publishes runs one.
 
@@ -641,7 +642,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 - **Hand-editing a report golden.** A lint spec's report and the checker's streams under `specs/cli/checker/` are the real output. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the linter's output.
 - **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `job` and `integration` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `specs-at-declared-depth` in this repository's default depth — the runner lives at the root, the tests live one level down.
-- **Writing a facet spec with the unit’s suffix.** `file-suffix-matches-place` refuses it and `jterrazz-test-check specs --fix` renames it with `git mv` — and names every `include`/`exclude` entry of the member the rename broke — the globs whose prefix covers a file it moved and the literals naming one — since an entry the rename leaves behind collects nothing and the run stays green with fewer files. The reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
+- **Writing a facet spec with the unit’s suffix.** `file-suffix-matches-place` refuses it and `typescript fix` renames it with `git mv` — and names every `include`/`exclude` entry of the member the rename broke — the globs whose prefix covers a file it moved and the literals naming one — since an entry the rename leaves behind collects nothing and the run stays green with fewer files. The reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
 
 ## Related
 

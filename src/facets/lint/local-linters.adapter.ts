@@ -4,8 +4,8 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { refusal } from '../../../lint/refusal.js';
 import { scratchDirectory } from '../../chain/paths/scratch.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { diagnosticsOf, presetDiagnostic } from './lint-report.js';
 import type { Diagnostic } from './lint-report.js';
 import type { LintPort, LintRules, LintRun } from './lint.port.js';
