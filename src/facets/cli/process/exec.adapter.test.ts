@@ -10,14 +10,14 @@ class FakeChild implements ObservableProcess {
     private readonly stderrListeners: ((data: Buffer | string) => void)[] = [];
     private readonly stdoutListeners: ((data: Buffer | string) => void)[] = [];
 
-    stderr = {
-        on: (_event: 'data', listener: (data: Buffer | string) => void) =>
-            this.stderrListeners.push(listener),
+    stderr: ObservableProcess['stderr'] = {
+        on: (event: 'data', listener: (data: Buffer | string) => void) =>
+            event === 'data' && this.stderrListeners.push(listener),
     };
 
-    stdout = {
-        on: (_event: 'data', listener: (data: Buffer | string) => void) =>
-            this.stdoutListeners.push(listener),
+    stdout: ObservableProcess['stdout'] = {
+        on: (event: 'data', listener: (data: Buffer | string) => void) =>
+            event === 'data' && this.stdoutListeners.push(listener),
     };
 
     emitExit(code: null | number): void {
@@ -43,8 +43,8 @@ class FakeChild implements ObservableProcess {
         return true;
     }
 
-    on(_event: 'exit', listener: (code: null | number) => void): unknown {
-        return this.exitListeners.push(listener);
+    on(event: 'exit', listener: (code: null | number) => void): unknown {
+        return event === 'exit' && this.exitListeners.push(listener);
     }
 }
 
@@ -169,6 +169,53 @@ describe('ExecAdapter', () => {
 
         // Then - the resolution stands and no extra kills happened
         expect(result.exitCode).toBe(0);
+        expect(child.killed).toStrictEqual(['SIGTERM']);
+    });
+
+    test('exec adapter — observeProcess — the exit code a run gives, with and without a pattern, and a run that ends with no code', async () => {
+        // Given - runs ending each way, one printing the word undefined, one with no streams at all
+        const runs: [string | undefined, null | number, string][] = [
+            [undefined, 0, 'undefined\n'],
+            ['never', 5, ''],
+            [undefined, null, ''],
+        ];
+        const children = runs.map(() => givenChild());
+        const silent = givenChild();
+        silent.stdout = null;
+        silent.stderr = null;
+        const promises = runs.map(
+            async ([waitFor], at) =>
+                await observeProcess(children[at] ?? silent, { timeout: 5000, waitFor }),
+        );
+        const quiet = observeProcess(silent, { timeout: 5000 });
+
+        // When - each prints what it prints, then exits
+        for (const [at, [, code, printed]] of runs.entries()) {
+            children[at]?.emitStdout(printed);
+            children[at]?.emitExit(code);
+        }
+        silent.emitExit(3);
+
+        // Then - each code, a pattern missed failing only a clean exit, and no exited child terminated
+        const results = await Promise.all([...promises, quiet]);
+        expect([
+            results.map(({ exitCode }) => exitCode),
+            [...children, silent].map(({ killed }) => killed),
+        ]).toStrictEqual([
+            [0, 5, 1, 3],
+            [[], [], [], []],
+        ]);
+    });
+
+    test('exec adapter — observeProcess — a pattern seen twice resolves and terminates once', async () => {
+        const child = givenChild();
+        // Given - a pattern printed twice
+        const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
+        child.emitStdout('ready\n');
+        child.emitStdout('ready again\n');
+
+        // Then - one resolution, one SIGTERM
+        await expect(promise).resolves.toMatchObject({ exitCode: 0 });
         expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 });

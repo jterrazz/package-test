@@ -28,14 +28,11 @@ export type ObservableProcess = {
     stdout: null | { on: (event: 'data', listener: (data: Buffer | string) => void) => unknown };
 };
 
-/** SIGTERM, then SIGKILL once the grace has passed and the child still runs. */
-function terminate(child: ObservableProcess, hasExited: () => boolean): NodeJS.Timeout {
+/** SIGTERM, then SIGKILL once the grace has passed: the child's exit clears the timer before then. */
+function terminate(child: ObservableProcess): NodeJS.Timeout {
     child.kill('SIGTERM');
-    // hazard: escalate if the child ignores SIGTERM. Cleared on exit.
     return setTimeout(() => {
-        if (!hasExited()) {
-            child.kill('SIGKILL');
-        }
+        child.kill('SIGKILL');
     }, KILL_GRACE_MS);
 }
 
@@ -62,16 +59,18 @@ export async function observeProcess(
         const timeoutTimer = setTimeout(() => {
             finish(124);
         }, options.timeout ?? DEFAULT_WATCH_TIMEOUT);
-        timeoutTimer.unref?.();
+        // Stryker disable next-line CallExpression: hazard: unref'd, the timer never holds the run open, which no test inside it can see
+        timeoutTimer.unref();
 
         function finish(exitCode: number): void {
             if (resolved) {
                 return;
             }
             resolved = true;
+            // Stryker disable next-line CallExpression: a timer left running fires into a resolved observation, which ignores it
             clearTimeout(timeoutTimer);
             if (!exited) {
-                killTimer = terminate(child, () => exited);
+                killTimer = terminate(child);
             }
             resolve({ exitCode, ...output });
         }
