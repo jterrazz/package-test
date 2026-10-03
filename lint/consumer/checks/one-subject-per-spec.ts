@@ -15,15 +15,18 @@ function journeyOf(spec: SpecRead): TestOf | undefined {
 function splitAdvice(specsRoot: string, spec: SpecRead): string {
     const journey = journeyOf(spec);
     const targets = [...splitPlan(specsRoot, spec).values()].map((path) => shown(specsRoot, path));
-    const seed =
-        journey === undefined
-            ? ''
-            : `the test "${journey.title}" reaches ${journey.subjects.join(' and ')} — state what it stands on with a seed, and keep one subject per test`;
-    if (targets.length < 2) {
-        return seed;
+    const advice: string[] = [];
+    if (targets.length >= 2) {
+        advice.push(
+            `split it, one file per subject — ${targets.join(', ')} — \`typescript fix\` splits it`,
+        );
     }
-    const split = `split it, one file per subject — ${targets.join(', ')} — \`typescript fix\` splits it`;
-    return journey === undefined ? split : `${split}; ${seed}`;
+    if (journey !== undefined) {
+        advice.push(
+            `the test "${journey.title}" reaches ${journey.subjects.join(' and ')} — state what it stands on with a seed, and keep one subject per test`,
+        );
+    }
+    return advice.join('; ');
 }
 
 export function checkOneSubjectPerSpec(specsRoot: string): Spotted[] {
