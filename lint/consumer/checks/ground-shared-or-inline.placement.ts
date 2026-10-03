@@ -10,6 +10,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { relativeLiterals } from '../../kit/checker/repoint.js';
 import { moduleTestsOf } from '../../kit/project/module-tests.js';
+import { SETTINGS_FILE } from '../../kit/project/settings-file.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-document.js';
 import { literalSpans } from '../../kit/project/spec-values.js';
 import { placeOf } from '../../kit/project/specs-modules.js';
@@ -121,15 +122,13 @@ export function pathsModuleTestsName(member: string): string[] {
 
 const MAKEFILE_PATH = /(?<![\w./-])(?:\.\/)?specs\/[\w./@-]+/gu;
 
-const VITEST_CONFIGS = ['vitest.config.ts', 'vitest.config.mts', 'vitest.config.js'];
-
 function pathsMemberConfigsName(member: string): string[] {
     const makefile = join(member, 'Makefile');
     const fromMakefile =
         treeKind(makefile) === 'file'
             ? [...readText(makefile).matchAll(MAKEFILE_PATH)].map(([path]) => resolve(member, path))
             : [];
-    const fromVitest = VITEST_CONFIGS.map((name) => join(member, name))
+    const fromVitest = [join(member, SETTINGS_FILE)]
         .filter((file) => treeKind(file) === 'file')
         .flatMap((file) => memberAnchoredLiterals(member, file, WORD_IN_LITERAL));
     return fromMakefile.concat(fromVitest);

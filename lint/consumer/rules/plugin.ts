@@ -36,7 +36,6 @@ import { testBodyWithinLineLimit } from './layout/test-body-within-line-limit.js
 import { verbReadsItsGroundFolder } from './layout/verb-reads-its-ground-folder.js';
 import { noModuleMock } from './mocks/no-module-mock.js';
 import { seedsAreSql } from './services/seeds-are-sql.js';
-import { browserProjectFromComponent } from './setup/browser-project-from-component.js';
 import { cleanupPassedToAfterAll } from './setup/cleanup-passed-to-after-all.js';
 import { includePointsAtAFolder } from './setup/include-points-at-a-folder.js';
 import { literateSpecificationExists } from './setup/literate-specification-exists.js';
@@ -46,9 +45,7 @@ import { noRedundantRoot } from './setup/no-redundant-root.js';
 import { noRunnerAlias } from './setup/no-runner-alias.js';
 import { noSimulatedDom } from './setup/no-simulated-dom.js';
 import { noUnknownConstructor } from './setup/no-unknown-constructor.js';
-import { projectNamedForItsFacet } from './setup/project-named-for-its-facet.js';
 import { runnerInSpecificationFile } from './setup/runner-in-specification-file.js';
-import { vitestConfigFromDefineSpecConfig } from './setup/vitest-config-from-define-spec-config.js';
 import { stubDataHasABuilder } from './stubs/stub-data-has-a-builder.js';
 import { stubsImportedThroughFacade } from './stubs/stubs-imported-through-facade.js';
 import { stubsRootHoldsFacadesAndKinds } from './stubs/stubs-root-holds-facades-and-kinds.js';
@@ -100,10 +97,7 @@ const plugin: LintPlugin = {
         'no-single-use-ref': noSingleUseRef,
         'negative-golden-frozen': negativeGoldenFrozen,
         'no-status-only-test': noStatusOnlyTest,
-        'vitest-config-from-define-spec-config': vitestConfigFromDefineSpecConfig,
-        'project-named-for-its-facet': projectNamedForItsFacet,
         'no-simulated-dom': noSimulatedDom,
-        'browser-project-from-component': browserProjectFromComponent,
         'include-points-at-a-folder': includePointsAtAFolder,
         'literate-specification-exists': literateSpecificationExists,
         'no-raw-env-write': noRawEnvWrite,

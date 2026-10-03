@@ -17,13 +17,13 @@ import { META_TESTS_LAYER_ROOTS } from './meta-tests.js';
 
 /** A cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more. */
 
-/** `files` serves the one column with no constructor: component's options are the project's, stated in this repository's `vitest.config.ts`. */
+/** `files` serves the one column with no constructor: component's options are the project's, stated in this repository's `jterrazz.config.ts`. */
 const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roots: string[] }> = {
     api: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/api'] },
     cli: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/cli'] },
     component: {
         extensions: ['.test.tsx', '.specification.ts'],
-        files: ['vitest.config.ts'],
+        files: ['jterrazz.config.ts'],
         roots: ['specs/component'],
     },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },

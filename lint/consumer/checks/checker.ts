@@ -30,7 +30,6 @@ import {
 import { checkGroundBesideItsOnlyReader } from './ground-beside-its-only-reader.js';
 import { checkGroundSharedOrInline, fixGroundSharedOrInline } from './ground-shared-or-inline.js';
 import { checkHttpFirstLineFollowsItsGrammar } from './http-first-line-follows-its-grammar.js';
-import { checkMemberHasVitestConfig } from './member-has-vitest-config.js';
 import { checkNamedPathExists, checkNamedPathExistsIn } from './named-path-exists.js';
 import { noDocumentInGroundFindings } from './no-document-in-ground.js';
 import { checkNoDuplicateGround, fixNoDuplicateGround } from './no-duplicate-ground.js';
@@ -101,7 +100,6 @@ export const MEMBER_PASS_IDS = [
     'file-suffix-matches-place',
     'named-path-exists',
     'no-snapshot-folder',
-    'member-has-vitest-config',
     'no-simulated-dom-in-config',
     'no-redundant-test-dependency',
 ] as const;
@@ -161,7 +159,6 @@ function memberFindings({
     subject,
 }: MemberRead): CheckerSpotted[] {
     return [
-        ...(config === null ? checkMemberHasVitestConfig(manifest, memberDir, label, subject) : []),
         ...(config === null ? [] : checkNoSimulatedDomInConfig(config, rootDir)),
         ...checkNoRedundantTestDependency({ label, manifest, memberDir, subject }),
         // Only a walk of the member sees a `.spec.ts` that never reached a `specs/` tree.

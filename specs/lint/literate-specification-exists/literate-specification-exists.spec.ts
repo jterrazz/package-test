@@ -18,7 +18,7 @@ describe('literate-specification-exists', () => {
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
-            vitest.config.ts:5:38  jterrazz(literate-specification-exists)
+            jterrazz.config.ts:5:48  jterrazz(literate-specification-exists)
                 found: \`literate.specification\` names \`./specs/cli/cli.specification.ts\`, which resolves to no file
                 why: \`literate.specification\`, resolved from the config directory, names a file that exists.
                 fix: point it at the \`*.specification.ts\` exporting the runner the documents run on — \`./specs/cli/cli.specification.ts\` by convention

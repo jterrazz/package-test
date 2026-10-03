@@ -2,4 +2,4 @@
 import type {} from './kit/project/settings.js';
 
 export { testPreset as test } from './consumer/rulebook/preset.js';
-export type { TestSettings } from './kit/project/settings.js';
+export type { TestFacet, TestProject, TestSettings } from './kit/project/settings.js';

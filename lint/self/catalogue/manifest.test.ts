@@ -364,7 +364,7 @@ describe('manifest', () => {
 
     test('conventions catalogue — completeness (meta-test) — every checker-channel manifest entry maps to a pass of the checker its audience runs', () => {
         // Given - the checker channel of the manifest, split by audience
-        // Then - a consumer row names a pass dist/checker.js runs, a self row one `dist/self.js check` runs, and neither checker runs a pass of the other audience
+        // Then - a consumer row names a pass dist/checker.js runs, a self row one `.artifacts/dev/self.js check` runs, and neither checker runs a pass of the other audience
         expect(checkerRowsOf('consumer')).toStrictEqual([...CHECKER_PASS_IDS].toSorted());
         expect(checkerRowsOf('self')).toStrictEqual([...SELF_PASSES].toSorted());
     });
@@ -685,7 +685,7 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — E2E inventory (meta-test) — every checker pass has a specs/lint E2E spec that runs the built checker', () => {
-        // Given - each pass dist/checker.js runs, tree and member alike, and each `dist/self.js check` runs
+        // Given - each pass dist/checker.js runs, tree and member alike, and each `.artifacts/dev/self.js check` runs
         for (const id of [...CHECKER_PASS_IDS, ...SELF_PASSES]) {
             // Then - its specs in specs/lint/<id>/: a pass the registry names and no spec runs is a sentence with nothing behind it
             expect(withSpecs.has(id), `${id} has no E2E spec`).toBe(true);

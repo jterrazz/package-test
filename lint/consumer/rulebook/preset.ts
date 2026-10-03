@@ -226,6 +226,12 @@ export function testPreset(): Preset {
             label: 'Test Conventions (@jterrazz/test)',
             module: createRequire(import.meta.url).resolve('#checker'),
         },
+        files: {
+            'vitest.config.ts': {
+                scope: 'unit',
+                text: "import { vitestConfig } from '@jterrazz/test/vitest/config';\n\nexport default vitestConfig();\n",
+            },
+        },
         package: '@jterrazz/test',
         settings: TEST_DEFAULTS,
     };

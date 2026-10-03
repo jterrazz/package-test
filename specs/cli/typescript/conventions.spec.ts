@@ -28,8 +28,7 @@ describe('conventions', () => {
                 LABEL,
                 '',
                 'specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a `.test.ts` under `specs/api/`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it `api/users/creation.spec.ts` — `make fix` does it with `git mv` · read: docs/24-linting.md#file-suffix-matches-place',
-                "package.json:1:1: error jterrazz-check(member-has-vitest-config): found: consumer-declaring-test has no vitest.config.ts — vitest's 5 s budget and an unexcluded `_fixtures/` are running its tests · why: Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). · fix: write vitest.config.ts: `export default defineSpecConfig()`, from `@jterrazz/test/vitest` · read: docs/24-linting.md#member-has-vitest-config",
-                "found: every finding above, and jterrazz.baseline.json records no `jterrazz-check/` entry in its `test` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
+                "found: every finding above, and .jterrazz/baseline.json records no `jterrazz-check/` entry in its `test` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
                 '✗ Failed with exit code 1',
             ].join('\n'),
         );
@@ -43,7 +42,7 @@ describe('conventions', () => {
 
         // Then - the conventions pass, and say what the ratchet holds
         expect(conventionsOf(result.stdout.text)).toBe(
-            [LABEL, '', 'jterrazz.baseline.json › test: nothing held', '✓ Passed'].join('\n'),
+            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed'].join('\n'),
         );
     });
 });

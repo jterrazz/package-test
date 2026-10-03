@@ -235,14 +235,19 @@ export async function assertedSubjectMatcherRows(): Promise<void> {
 // test-settings-section — `jterrazz.config.ts` takes a `test` section, holding what `@jterrazz/test` reads and nothing else; its type is published beside the preset, at `/config`.
 const section: TestSettings = { routes: './openapi.yaml' };
 
+const library = { kind: 'library', platform: 'node' } as const;
+
 export const testSettingsRows = [
-    defineConfig({ test: section }),
-    defineConfig({ test: {} }),
-    defineConfig({ test: { routes: './openapi.yaml' } }),
-    defineConfig({ test: { collections: ['data', 'people'] } }),
-    defineConfig({ test: { methodless: ['/mcp'] } }),
+    defineConfig({ ...library, test: section }),
+    defineConfig({ ...library, test: {} }),
+    defineConfig({ ...library, test: { routes: './openapi.yaml' } }),
+    defineConfig({ ...library, test: { collections: ['data', 'people'] } }),
+    defineConfig({ ...library, test: { methodless: ['/mcp'] } }),
+    defineConfig({ ...library, test: { projects: [{ facet: 'unit', include: ['src/**/*.test.ts'] }] } }),
     // @ts-expect-error test-settings-section — the collections are a list, never one word [`Type 'string' is not assignable to type 'readonly string[]'`]
-    defineConfig({ test: { collections: 'data' } }),
+    defineConfig({ ...library, test: { collections: 'data' } }),
     // @ts-expect-error test-settings-section — the section reads what it declares, and nothing else [`'coverage' does not exist in type 'TestSettings'`]
-    defineConfig({ test: { coverage: 80 } }),
+    defineConfig({ ...library, test: { coverage: 80 } }),
+    // @ts-expect-error test-settings-section — a project is built by the helper of a facet the package ships [`Type '"browser"' is not assignable to type 'TestFacet'`]
+    defineConfig({ ...library, test: { projects: [{ facet: 'browser' }] } }),
 ];

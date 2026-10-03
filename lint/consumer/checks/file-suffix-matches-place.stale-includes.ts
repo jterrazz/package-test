@@ -3,17 +3,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { packageRootOf } from '../../kit/project/role.js';
+import { SETTINGS_FILE } from '../../kit/project/settings-file.js';
 
 export type Rename = { from: string; to: string };
 
-const CONFIG_NAMES = [
-    'vitest.config.ts',
-    'vitest.config.mts',
-    'vitest.config.cts',
-    'vitest.config.js',
-    'vitest.config.mjs',
-    'vitest.config.cjs',
-];
+const CONFIG_NAMES = [SETTINGS_FILE];
 
 const COLLECTION = /\b(?:include|exclude)\s*:\s*\[(?<entries>[^\]]*)\]/gu;
 

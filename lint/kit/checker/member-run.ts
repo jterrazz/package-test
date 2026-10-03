@@ -2,25 +2,13 @@ import { readManifest, treeKind } from '@jterrazz/typescript/rules';
 import { basename, join, relative } from 'node:path';
 
 import { discoverMembers } from '../project/members.js';
+import { SETTINGS_FILE } from '../project/settings-file.js';
 import type { CheckerRegistry, Spotted } from './registry.js';
 
-const CONFIG_NAMES = [
-    'vitest.config.ts',
-    'vitest.config.mts',
-    'vitest.config.cts',
-    'vitest.config.js',
-    'vitest.config.mjs',
-    'vitest.config.cjs',
-];
-
 function configOf(dir: string): null | string {
-    for (const name of CONFIG_NAMES) {
-        const path = join(dir, name);
-        if (treeKind(path) === 'file') {
-            return path;
-        }
-    }
-    return null;
+    const path = join(dir, SETTINGS_FILE);
+
+    return treeKind(path) === 'file' ? path : null;
 }
 
 function anchoredTo(label: string): (findings: Spotted[]) => Spotted[] {

@@ -1,7 +1,3 @@
-import { defineSpecConfig, literate } from '@jterrazz/test/vitest';
+import { vitestConfig } from '@jterrazz/test/vitest/config';
 
-// A published subpath: the runner-config surface `no-unpublished-subpath` exempts because the
-// package's own `exports` map declares it.
-export default defineSpecConfig({
-    plugins: [literate({ specification: './specs/app/app.specification.ts' })],
-});
+export default vitestConfig();

@@ -20,6 +20,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/index.ts',
             'src/index.browser.ts',
             'src/index.vitest.ts',
+            'src/index.vitest.config.ts',
             'lint/index.oxlint.ts',
             'src/facets/api/api.face.ts',
             'src/facets/cli/cli.face.ts',
@@ -77,6 +78,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/chain/context/with.capability.ts',
             'lint/kit/project/artifacts.ts',
+            'lint/kit/project/settings-file.ts',
             'src/visitor/matching/landmark-of-tag.ts',
             'src/visitor/matrix.ts',
             'src/services/containers/service-images.ts',

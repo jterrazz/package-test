@@ -531,32 +531,6 @@ export const STATIC_RULES: Row[] = [
         audience: 'consumer',
         channel: 'static',
         sentence:
-            'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator, through a `satisfies`/`as` annotation, and through one `mergeConfig(defineSpecConfig(…), …)` — vitest’s own way of layering over the preset.',
-        facet: 'model',
-        family: 'setup',
-        fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the ground exclusion are the preset's.",
-        name: 'vitest-config-from-define-spec-config',
-        rationale:
-            "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `_fixtures/` as specs — none of it visible in the file that caused it.",
-        reach: 'config',
-    },
-    {
-        audience: 'consumer',
-        channel: 'static',
-        sentence:
-            'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. What an include collects is read from the GLOB and the config’s own place in its package, never from the absolute path. Any other name is out of reach — a repository suite names its projects as it likes.',
-        facet: 'model',
-        family: 'setup',
-        fix: 'Name the project after the facet it collects; `{ include, exclude }` stay yours.',
-        name: 'project-named-for-its-facet',
-        rationale:
-            '`--project component` has to mean the same thing in every repository: it is the one word a CI job, a Makefile target and an agent all type.',
-        reach: 'config',
-    },
-    {
-        audience: 'consumer',
-        channel: 'static',
-        sentence:
             'A test file declares no simulated DOM: the `@vitest-environment happy-dom|jsdom` pragma is an error. Reach: the roles that RUN a test (`module`, `component`, `specification`) — a project config is `no-simulated-dom-in-config`’s.',
         facet: 'component',
         family: 'setup',
@@ -565,19 +539,6 @@ export const STATIC_RULES: Row[] = [
         rationale:
             'A simulated DOM behaves ALMOST like a browser, and what ships is judged by a real one: the component facet renders in the Chromium the website facet already drives.',
         reach: 'tests',
-    },
-    {
-        audience: 'consumer',
-        channel: 'static',
-        sentence:
-            'A browser project comes from `component()`: in a vitest config, a `browser` key under `test` that is not inside a `component(...)` call is an error. A `browser` key elsewhere (a `define`, an env registration) is not a project block and stays out of reach.',
-        facet: 'component',
-        family: 'setup',
-        fix: 'Replace the block with `component({ vite })` and keep only what belongs to the project.',
-        name: 'browser-project-from-component',
-        rationale:
-            "The provider pinned to the runner's exact version, the service worker served from the framework's own install, the JSX transform the current Vite uses, a cold cache's pre-bundling and the artefact directories are all runs that pass here and fail on the next machine.",
-        reach: 'config',
     },
     {
         audience: 'consumer',
@@ -977,20 +938,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         sentence:
-            'Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). The MEMBER pass judges the member itself, with or without a `specs/` root; a root that only delegates owes nothing.',
-        facet: 'model',
-        family: 'setup',
-        fix: 'Write `export default defineSpecConfig()` in the member — the preset carries the budgets, the artefact directory and the ground exclusion.',
-        name: 'member-has-vitest-config',
-        rationale:
-            "Without a config, vitest's 5 s budget and unexcluded ground folders are running the member's tests: the default is not chosen, it is inherited.",
-        reach: 'member',
-    },
-    {
-        audience: 'consumer',
-        channel: 'checker',
-        sentence:
-            "`environment: 'happy-dom'|'jsdom'` in a `vitest.config.*` is an error. The MEMBER pass is the one channel that holds it: a config is not always a file the repository's oxlint configuration collects, while the member pass starts from the root manifest and reaches every declared member — and one finding is one line in one report.",
+            "`environment: 'happy-dom'|'jsdom'` in a test project of `jterrazz.config.ts` is an error. The MEMBER pass is the one channel that holds it: a settings file is not always a file the repository's oxlint configuration collects, while the member pass starts from the root manifest and reaches every declared member — and one finding is one line in one report.",
         facet: 'component',
         family: 'setup',
         fix: 'Remove `environment` and collect the rendered tests with `component()`.',
@@ -1429,7 +1377,7 @@ export const TYPE_ROWS: Row[] = [
         audience: 'consumer',
         channel: 'type',
         sentence:
-            '`jterrazz.config.ts` takes a `test` section, typed by `@jterrazz/test`: `routes`, a path to an OpenAPI document; `collections` and `methodless`, lists of route segments and paths; `production.allow`. A key the package does not read is refused, and so is a list written as one word.',
+            '`jterrazz.config.ts` takes a `test` section, typed by `@jterrazz/test`: `projects`, the vitest projects the derived `vitest.config.ts` runs, each named by its facet; `routes`, a path to an OpenAPI document; `collections` and `methodless`, lists of route segments and paths; `production.allow`. A key the package does not read is refused, and so is a list written as one word, and a facet the package does not ship.',
         facet: 'model',
         family: 'setup',
         fix: "Write only the keys `@jterrazz/test` reads, lists as lists: `test: { collections: ['data'] }`.",

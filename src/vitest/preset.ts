@@ -20,6 +20,8 @@ const COVERAGE = {
         '**/*.config.ts',
         '**/*.config.mts',
     ],
+    autoAttachSubprocess: true,
+    excludeAfterRemap: true,
     provider: 'v8' as const,
     reporter: ['text', 'html', 'json-summary'],
     reportsDirectory: COVERAGE_DIR,

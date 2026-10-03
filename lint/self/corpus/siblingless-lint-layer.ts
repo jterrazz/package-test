@@ -22,7 +22,6 @@ export const SIBLINGLESS_LINT_LAYER = [
     'lint/kit/project/tree.ts',
     'lint/consumer/checks/document-follows-its-grammar.ts',
     'lint/consumer/checks/http-first-line-follows-its-grammar.ts',
-    'lint/consumer/checks/member-has-vitest-config.ts',
     'lint/consumer/checks/no-document-in-ground.ts',
     'lint/consumer/checks/no-simulated-dom-in-config.ts',
     'lint/consumer/checks/no-snapshot-folder.ts',

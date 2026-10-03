@@ -37,11 +37,11 @@ describe('role', () => {
         expect(roleOf('/repo/specs/api/api.specification.ts').role).toBe('specification');
     });
 
-    test('roleOf — the kind a path states — names the config a project helper is called from', () => {
-        // Given - the file vitest reads
-        // Then - the config role is what the E-family rules reach
-        expect(roleOf('/repo/vitest.config.ts').role).toBe('config');
-        expect(roleOf('/repo/vitest.config.mts').role).toBe('config');
+    test('roleOf — the kind a path states — names the settings file the test projects are declared in', () => {
+        // Given - the file the derived vitest config reads
+        // Then - the config role is what the setup rules reach, and the derived vitest config is not
+        expect(roleOf('/repo/jterrazz.config.ts').role).toBe('config');
+        expect(roleOf('/repo/vitest.config.ts').role).toBe('other');
     });
 
     test('roleOf — the kind a path states — ground is what a spec stands on, and it swallows what sits inside it', () => {

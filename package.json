@@ -51,6 +51,10 @@
             "types": "./dist/vitest.d.ts",
             "import": "./dist/vitest.js"
         },
+        "./vitest/config": {
+            "types": "./dist/vitest.config.d.ts",
+            "import": "./dist/vitest.config.js"
+        },
         "./config": {
             "types": "./dist/config.d.ts",
             "import": "./dist/config.js"

@@ -8,6 +8,7 @@ import {
 import { basename, dirname, relative } from 'node:path';
 
 import { isUnderSpecs, segments } from './ast.js';
+import { SETTINGS_FILE } from './settings-file.js';
 
 /** The suffix decides the kind, and folders are read below the project root: a checkout under `_fixtures/` or `__tests__/` is the machine's business. */
 
@@ -31,8 +32,6 @@ export type FileIdentity = {
 };
 
 const GROUND = new Set<string>(GROUND_FOLDERS);
-
-const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 
 /** `__tests__/` anywhere; `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name. */
 function strayTestRootOf(filename: string): StrayTestRoot {
@@ -68,7 +67,7 @@ export function roleOf(filename: string): FileIdentity {
     if (base.endsWith('.test.ts')) {
         return { ...identity, role: 'module' };
     }
-    if (CONFIG.test(base)) {
+    if (base === SETTINGS_FILE) {
         return { ...identity, role: 'config' };
     }
     if (parts.slice(0, -1).some((segment) => GROUND.has(segment))) {

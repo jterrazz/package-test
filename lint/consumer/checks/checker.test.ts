@@ -174,10 +174,9 @@ describe('checker', () => {
         // Given - the whole fixture workspace
         const found = runMembers(WORKSPACE, CHECKER).map((violation) => violation.rule);
 
-        // Then - one `member-has-vitest-config`, one `no-simulated-dom-in-config`, three `no-redundant-test-dependency` and one `file-suffix-matches-place`, whatever the order they walk in
+        // Then - one `no-simulated-dom-in-config`, three `no-redundant-test-dependency` and one `file-suffix-matches-place`, whatever the order they walk in
         expect(found.toSorted()).toStrictEqual([
             'file-suffix-matches-place',
-            'member-has-vitest-config',
             'no-redundant-test-dependency',
             'no-redundant-test-dependency',
             'no-redundant-test-dependency',

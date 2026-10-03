@@ -55,12 +55,11 @@ describe('every-reach-proven', () => {
         expect(suite).not.toContain('no-dom-in-module-test');
     });
 
-    test('a config inside the tree, the ground beside a spec and a stub are each judged where they sit', async () => {
+    test('the ground beside a spec and a stub are each judged where they sit', async () => {
         // Given - the same run, read at the three paths the role-gated rows name
         const output = await reachRun();
 
-        // Then - the config INSIDE `specs/` is still a config (spwn's shape), the stub answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
-        expect(about(output, 'specs/vitest.config.ts')).toContain('project-named-for-its-facet');
+        // Then - the stub answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
         expect(about(output, 'specs/api/orders/_setup/stubs/rates.ts')).toContain(
             'stubs-root-holds-facades-and-kinds',
         );
@@ -70,17 +69,15 @@ describe('every-reach-proven', () => {
         expect(about(output, 'specs/api/orders/_setup/stubs/rates.ts')).not.toContain('no-sleep');
     });
 
-    test('the specification and the config are judged by their own rules alone', async () => {
+    test('the specification and the settings file are judged by their own rules alone', async () => {
         // Given - the same run, read at the two files that declare rather than test
         const output = await reachRun();
 
         // Then - each carries the rule whose reach names its role, and neither carries a rule that reaches tests
         expect(about(output, 'specs/api/api.specification.ts')).toContain('no-runner-alias');
-        expect(about(output, 'vitest.config.ts')).toContain(
-            'vitest-config-from-define-spec-config',
-        );
-        expect(about(output, 'vitest.config.ts')).not.toContain('no-sleep');
-        expect(about(output, 'vitest.config.ts')).not.toContain('no-raw-env-write');
+        expect(about(output, 'jterrazz.config.ts')).toContain('include-points-at-a-folder');
+        expect(about(output, 'jterrazz.config.ts')).not.toContain('no-sleep');
+        expect(about(output, 'jterrazz.config.ts')).not.toContain('no-raw-env-write');
     });
 
     test('a specification that registers no cleanup is judged by `cleanup-passed-to-after-all`, and a spec beside it is not', async () => {

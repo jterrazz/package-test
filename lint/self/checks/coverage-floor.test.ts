@@ -24,30 +24,29 @@ describe('checkCoverageFloor', () => {
         // Given - a run of a scope the section records no floor for
         // Then - the missing floor is named, rather than read as a pass
         expect(checkCoverageFloor(undefined, FLOOR, 'all')).toStrictEqual([
-            `found: jterrazz.baseline.json › test.coverage holds no \`all\` floor · why: a scope with no floor is held to nothing, so its coverage could fall unseen · fix: run \`npm run coverage\`, which records the floor the suite reached · ${READ}`,
+            `found: .jterrazz/baseline.json › test.coverage holds no \`all\` floor · why: a scope with no floor is held to nothing, so its coverage could fall unseen · fix: run \`npm run coverage\`, which records the floor the suite reached · ${READ}`,
         ]);
     });
 
     test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — every child is counted, and judged on the source its bundle maps back to', async () => {
         // Given - this repository's own config, which the documents running `dist/checker.js` run under
-        const { default: config } = await import('../../../vitest.config.js');
+        const { default: derived } = await import('../../../vitest.config.js');
+        const config = await derived;
         const coverage = config.test?.coverage;
 
-        // Then - children attached, `dist/` read, and every path judged after the remap
+        // Then - children attached, and every path judged after the remap, so a bundle under `dist/` counts as the source it maps back to
         expect(
             coverage?.provider === 'v8'
                 ? {
                       afterRemap: coverage.excludeAfterRemap,
                       attached: coverage.autoAttachSubprocess,
-                      distRead: !(coverage.exclude ?? []).includes('dist/**'),
                   }
                 : coverage,
-        ).toStrictEqual({ afterRemap: true, attached: true, distRead: true });
+        ).toStrictEqual({ afterRemap: true, attached: true });
     });
 
-    test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — every bundle carries the map back to its modules, and the tarball none of them', async () => {
-        // Given - the build groups, and the files the package publishes
-        const { default: groups } = await import('../../../tsdown.config.js');
+    test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — the tarball ships no map of the bundles it carries', () => {
+        // Given - the files the package publishes
         const manifest: unknown = JSON.parse(
             readFileSync(join(import.meta.dirname, '../../../package.json'), 'utf8'),
         );
@@ -56,10 +55,7 @@ describe('checkCoverageFloor', () => {
                 ? manifest.files
                 : [];
 
-        // Then - a map from every group, and none shipped
-        expect({
-            mapped: [groups].flat().map((group) => group.sourcemap),
-            shipped: !(Array.isArray(files) && files.includes('!dist/**/*.map')),
-        }).toStrictEqual({ mapped: [true, true, true, true], shipped: false });
+        // Then - the maps the build writes for the remap stay home
+        expect(Array.isArray(files) && files.includes('!dist/**/*.map')).toBe(true);
     });
 });

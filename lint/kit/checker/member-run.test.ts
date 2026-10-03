@@ -41,14 +41,14 @@ function recording(): { registry: CheckerRegistry; seen: Seen[] } {
 
 describe('member-run', () => {
     test('hands the member pass the member as the root sees it: its label, its config, and findings anchored under it', () => {
-        // Given - a member carrying a vitest config, read from the workspace root
+        // Given - a member carrying its settings file, read from the workspace root
         const { registry, seen } = recording();
         runMember(memberAt('simulated-dom'), WORKSPACE, registry);
 
         // Then - the member is named by its path from the root, and so is every finding it makes
         expect(seen).toStrictEqual([
             {
-                config: 'vitest.config.ts',
+                config: 'jterrazz.config.ts',
                 findingAt: 'packages/simulated-dom/package.json',
                 label: 'packages/simulated-dom',
                 subject: 'packages/simulated-dom',
@@ -57,7 +57,7 @@ describe('member-run', () => {
     });
 
     test('names the root run by its package, and hands no config where none is written', () => {
-        // Given - a member read from itself, with no vitest config
+        // Given - a member read from itself, with no settings file
         const { registry, seen } = recording();
         runMember(memberAt('tested-no-config'), memberAt('tested-no-config'), registry);
 

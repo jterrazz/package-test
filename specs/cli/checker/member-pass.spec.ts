@@ -8,12 +8,12 @@ const member = (name: string): string => `${WORKSPACE}/packages/${name}`;
 
 describe('member-pass', () => {
     test('checker CLI — the member pass — judges a member that has no specs/ root at all', async () => {
-        // Given - a member with a test script, no config, and no spec tree
-        const result = await cli.exec(`--member ${member('tested-no-config')} ${WORKSPACE}`);
+        // Given - a member declaring a dependency the framework carries, and no spec tree
+        const result = await cli.exec(`--member ${member('seam-dependency')} ${WORKSPACE}`);
 
-        // Then - `member-has-vitest-config` fired: the pass is about a member, never about a tree
+        // Then - `no-redundant-test-dependency` fired: the pass is about a member, never about a tree
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.text).toContain('no vitest.config.ts');
+        expect(result.stdout.text).toContain('no-redundant-test-dependency');
     });
 
     test('checker CLI — the member pass — says nothing about a member that owes nothing', async () => {
@@ -22,7 +22,7 @@ describe('member-pass', () => {
 
         // Then - one line: the project keeps no section, so nothing is held
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
     });
 
     test('checker CLI — the member pass — `--verbose` names the member it judged and the passes that ran', async () => {
@@ -33,7 +33,7 @@ describe('member-pass', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('packages/clean');
         expect(result.stdout.text).toContain(
-            'file-suffix-matches-place, named-path-exists, no-snapshot-folder, member-has-vitest-config, no-simulated-dom-in-config, no-redundant-test-dependency',
+            'file-suffix-matches-place, named-path-exists, no-snapshot-folder, no-simulated-dom-in-config, no-redundant-test-dependency',
         );
         expect(result.stdout.text).not.toContain('no-unused-ground');
     });
