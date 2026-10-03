@@ -19,6 +19,11 @@ ruleTester().run('stub-data-has-a-builder', stubDataHasABuilder, {
     ],
     valid: [
         {
+            name: 'Request data outside a stubs folder is no unit’s.',
+            code: "export const path = '/articles';",
+            filename: `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/violation/specs/app/widget/_setup/mocks/http/articles.request.ts`,
+        },
+        {
             code: "export const prompt = 'Classify: hats';",
             filename: `${COMPLIANT}/openai/classify.request.ts`,
         },

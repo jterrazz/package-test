@@ -47,6 +47,7 @@ export const noRedundantRoot = defineRule(
                     for (const argument of childList(node, 'arguments')) {
                         const root = findProperty(argument, 'root');
                         const literal = stringValue(child(root, 'value'));
+                        // Stryker disable next-line ConditionalExpression: no root holds no literal
                         if (root === undefined || literal === undefined) {
                             continue;
                         }

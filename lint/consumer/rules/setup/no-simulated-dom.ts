@@ -34,7 +34,9 @@ export const noSimulatedDom = defineRule(
                 before: () => REACHED.has(identityOf(context).role),
                 Program(node: AstNode) {
                     for (const comment of context.sourceCode.getAllComments()) {
+                        // Stryker disable next-line OptionalChaining: a match of a pattern holding a named group always carries its groups
                         const environment = PRAGMA.exec(comment.value)?.groups?.environment;
+                        // Stryker disable next-line ConditionalExpression: no environment is in the set
                         if (environment !== undefined && SIMULATED.has(environment)) {
                             context.report({ data: { environment }, messageId: 'pragma', node });
                         }

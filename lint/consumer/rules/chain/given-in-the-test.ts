@@ -30,6 +30,7 @@ export const givenInTheTest = defineRule(
                 before: () => isTestRole(identityOf(context).role),
                 CallExpression(node: AstNode) {
                     const name = identifierName(child(node, 'callee'));
+                    // Stryker disable next-line ConditionalExpression: no name is in the set
                     if (name !== undefined && BUILDERS.has(name)) {
                         context.report({ data: { hook: name }, messageId: 'givenInAHook', node });
                     }

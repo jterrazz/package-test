@@ -20,6 +20,14 @@ ruleTester().run('spec-named-for-its-aspect', specNamedForItsAspect, {
             ],
             filename: '/repo/specs/api/events/get/notFound.spec.ts',
         },
+        {
+            name: 'Runs of marks become one hyphen, and none at either end.',
+            code: '',
+            errors: [
+                { column: 0, line: 1, message: /fix: rename the file `not-found\.spec\.ts`/u },
+            ],
+            filename: '/repo/specs/api/events/get/_not__Found_.spec.ts',
+        },
     ],
     valid: [
         { code: '', filename: '/repo/specs/api/events/list/pagination.spec.ts' },

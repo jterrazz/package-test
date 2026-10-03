@@ -27,6 +27,15 @@ ruleTester().run('stubs-imported-through-facade', stubsImportedThroughFacade, {
     ],
     valid: [
         {
+            name: 'Outside specs/, and inside a stubs folder, the units are no facade’s to hide.',
+            code: `import events from './stubs/http/events.js';`,
+            filename: '/repo/src/home.ts',
+        },
+        {
+            code: `import events from '../stubs/http/events.js';`,
+            filename: '/repo/specs/api/feature/_setup/stubs/news.stubs.ts',
+        },
+        {
             name: 'The facade is the public surface.',
             code: `import world from './stubs/newsroom.stubs.js';`,
             filename: TEST_FILE,

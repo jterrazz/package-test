@@ -56,6 +56,12 @@ ruleTester().run('seeds-are-sql', seedsAreSql, {
     ],
     valid: [
         {
+            name: 'A test outside specs/, and a module of specs/ that is no test, read no seed.',
+            code: 'test("x", () => {});',
+            filename: `${TWO_STRAYS}/src/widget.test.ts`,
+        },
+        { code: 'export {};', filename: `${TWO_STRAYS}/specs/app/widget/helper.ts` },
+        {
             name: 'Only .sql fragments in the compliant twin.',
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/compliant/specs/app/widget/widget.test.ts`,

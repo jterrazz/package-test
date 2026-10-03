@@ -35,10 +35,12 @@ export const noUnknownConstructor = defineRule(
             return {
                 MemberExpression(node: AstNode) {
                     const object = child(node, 'object');
+                    // Stryker disable next-line ConditionalExpression,OptionalChaining: a member always has an object, and only an identifier has a name
                     if (object?.type !== 'Identifier' || object.name !== 'specification') {
                         return;
                     }
                     const member = memberPropertyName(node);
+                    // Stryker disable next-line ConditionalExpression: a computed member is no name to judge
                     if (member !== undefined && !KNOWN_CONSTRUCTORS.has(member)) {
                         context.report({ data: { member }, messageId: 'unknownConstructor', node });
                     }

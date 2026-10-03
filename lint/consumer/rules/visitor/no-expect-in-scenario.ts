@@ -31,6 +31,7 @@ export const noExpectInScenario = defineRule(
                     }
                     walk(scenario, (inner: AstNode) => {
                         if (
+                            // Stryker disable next-line ConditionalExpression: only a call has a callee
                             inner.type === 'CallExpression' &&
                             identifierName(child(inner, 'callee')) === 'expect'
                         ) {

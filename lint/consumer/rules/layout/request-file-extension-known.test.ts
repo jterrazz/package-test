@@ -38,6 +38,12 @@ ruleTester().run('request-file-extension-known', requestFileExtensionKnown, {
     ],
     valid: [
         {
+            name: 'A test outside specs/, and a module of specs/ that is no test, read no request.',
+            code: 'test("x", () => {});',
+            filename: `${TWO_BARE}/src/widget.test.ts`,
+        },
+        { code: 'export {};', filename: `${TWO_BARE}/specs/app/widget/helper.ts` },
+        {
             name: 'A whole request and a body, side by side, in the compliant twin.',
             code: 'test("x", () => {});',
             filename: `${SPECS_LINT}/request-file-extension-known/_fixtures/compliant/specs/app/widget/widget.test.ts`,

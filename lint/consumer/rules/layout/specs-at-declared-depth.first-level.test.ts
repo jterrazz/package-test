@@ -51,6 +51,14 @@ describe('isStrayFolder', () => {
         ]).toStrictEqual([false, false, false, false]);
     });
 
+    test('a test under node_modules makes no suite', () => {
+        // Given - a folder whose only test is an installed package's
+        const root = specsTree(['support/node_modules/pkg/pkg.test.ts', 'support/helper.ts']);
+
+        // Then - the folder holds no test of its own
+        expect(isStrayFolder(root, ['support', 'helper.ts'])).toBe(true);
+    });
+
     test('a test under a ground folder makes no suite', () => {
         // Given - a folder whose only test is a fixture tree's
         const root = specsTree(['support/_fixtures/tree/tree.test.ts', 'support/helper.ts']);

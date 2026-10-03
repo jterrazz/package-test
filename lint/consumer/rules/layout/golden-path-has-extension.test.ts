@@ -21,6 +21,11 @@ ruleTester().run('golden-path-has-extension', goldenPathHasExtension, {
     ],
     valid: [
         {
+            name: 'An empty path names no file.',
+            code: 'expect(result.stdout).toMatch(file(""));',
+            filename: VIOLATION,
+        },
+        {
             name: 'Extension present.',
             code: 'expect(result.stdout).toMatch(file("./_expected/help.txt"));',
             filename: VIOLATION,

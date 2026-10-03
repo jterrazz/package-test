@@ -33,6 +33,7 @@ export const goldenPathHasExtension = defineRule(
                 CallExpression(node: AstNode) {
                     const golden = goldenOf(node);
                     const name = golden?.kind === 'file' ? golden.path : undefined;
+                    // Stryker disable next-line ConditionalExpression: no golden names no path
                     if (golden === undefined || name === undefined || name.length === 0) {
                         return;
                     }

@@ -41,6 +41,11 @@ ruleTester().run('no-redundant-root', noRedundantRoot, {
     ],
     valid: [
         {
+            name: 'A runner of no specification is none of this rule’s.',
+            code: 'await other.cli("./bin", { root: "../.." });',
+            filename: SPEC_FILE,
+        },
+        {
             name: 'An ignored marker is no root to either walk: naming it is an override.',
             code: 'await specification.cli("./bin", { root: ".." });',
             filename: IGNORED_SPEC,
