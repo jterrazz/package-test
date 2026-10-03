@@ -1,19 +1,17 @@
 import { child, childList, identifierName, memberPropertyName, stringValue } from './ast.js';
 import type { AstNode } from './ast.js';
+import { findTestCallback } from './test-calls.js';
 
 /** A facet that gains a scenario adds its word here, once: three rules judge inside the callback and a fourth judges how it ends. */
 export const SCENARIO_ACTIONS = new Set(['open', 'render', 'visit']);
 
+/** The scenario is the last argument, when it is a function. */
 export function scenarioCallbackOf(node: AstNode): AstNode | undefined {
-    const callee = child(node, 'callee');
-    const member = callee === undefined ? undefined : memberPropertyName(callee);
-    if (member === undefined || !SCENARIO_ACTIONS.has(member)) {
+    const action = memberPropertyName(child(node, 'callee'));
+    if (!(SCENARIO_ACTIONS as ReadonlySet<unknown>).has(action)) {
         return undefined;
     }
-    const scenario = childList(node, 'arguments').at(-1);
-    return scenario?.type === 'ArrowFunctionExpression' || scenario?.type === 'FunctionExpression'
-        ? scenario
-        : undefined;
+    return findTestCallback(childList(node, 'arguments').slice(-1));
 }
 
 export type DiskCall = {
@@ -36,9 +34,7 @@ export function diskCallOf(node: AstNode | undefined): DiskCall | undefined {
 }
 
 export function goldenOf(node: AstNode): DiskCall | undefined {
-    const callee = child(node, 'callee');
-    if (callee === undefined || memberPropertyName(callee) !== 'toMatch') {
-        return undefined;
-    }
-    return diskCallOf(childList(node, 'arguments')[0]);
+    return memberPropertyName(child(node, 'callee')) === 'toMatch'
+        ? diskCallOf(childList(node, 'arguments')[0])
+        : undefined;
 }
