@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { FOLDERS } from './subject.fixtures.js';
 import {
     ambiguousSegment,
     NO_READING,
@@ -12,86 +13,14 @@ import type { Subject } from './subject.js';
 
 const HOLE = '\u0000';
 describe('subject', () => {
-    test.each<[string, Subject, string | undefined]>([
-        [
-            'GET /events — a collection is listed',
-            { facet: 'api', method: 'GET', path: '/events' },
-            'events/list',
-        ],
-        [
-            'GET /events/:id — an item is got',
-            { facet: 'api', method: 'GET', path: '/events/:id' },
-            'events/get',
-        ],
-        [
-            'POST /events — created',
-            { facet: 'api', method: 'POST', path: '/events' },
-            'events/create',
-        ],
-        [
-            'PUT /events/:id — updated',
-            { facet: 'api', method: 'PUT', path: '/events/:id' },
-            'events/update',
-        ],
-        [
-            'PATCH /events/:id — updated',
-            { facet: 'api', method: 'PATCH', path: '/events/:id' },
-            'events/update',
-        ],
-        [
-            'DELETE /events/:id — deleted',
-            { facet: 'api', method: 'DELETE', path: '/events/:id' },
-            'events/delete',
-        ],
-        [
-            'GET /events/:id/timeline — its literal segments',
-            { facet: 'api', method: 'GET', path: '/events/:id/timeline' },
-            'events/timeline',
-        ],
-        [
-            'GET /health — a singleton is got',
-            { facet: 'api', method: 'GET', path: '/health' },
-            'health/get',
-        ],
-        [
-            'GET /market/:symbol/chart — its literal segments',
-            { facet: 'api', method: 'GET', path: '/market/:symbol/chart' },
-            'market/chart',
-        ],
-        [
-            'ALL /mcp — a method-less route is its segments',
-            { facet: 'api', method: 'ALL', path: '/mcp' },
-            'mcp',
-        ],
-        [
-            'GET /status — a word ending in s is no collection',
-            { facet: 'api', method: 'GET', path: '/status' },
-            'status/get',
-        ],
-        [
-            'GET /events/42 — a concrete path is read as its template',
-            { facet: 'api', method: 'GET', path: '/events/42?lang=fr' },
-            'events/get',
-        ],
-        [
-            'GET / — the root names no resource',
-            { facet: 'api', method: 'GET', path: '/' },
-            undefined,
-        ],
-        ['a job is its name', { facet: 'job', job: 'digest' }, 'digest'],
-        ['a cli command is its words', { command: ['db', 'migrate'], facet: 'cli' }, 'db/migrate'],
-        ['a cli run with no command word has no name', { command: [], facet: 'cli' }, undefined],
-        ['a page has no standard name', { facet: 'website', page: '/pricing' }, undefined],
-        [
-            'a journey has no standard name',
-            { facet: 'mobile', journey: 'news://events' },
-            undefined,
-        ],
-    ])('subjectFolder — the standard name, derived from the subject — %s', (_, subject, folder) => {
-        // Given - a subject a spec reaches
-        // Then - the folder it is filed under, relative to its facet folder
-        expect(subjectFolder(subject)).toBe(folder);
-    });
+    test.each(FOLDERS)(
+        'subjectFolder — the standard name, derived from the subject — %s',
+        (_, subject, folder) => {
+            // Given - a subject a spec reaches
+            // Then - the folder it is filed under, relative to its facet folder
+            expect(subjectFolder(subject)).toBe(folder);
+        },
+    );
 
     test.each([
         ['/users/1', '/users/:id'],
@@ -155,6 +84,8 @@ describe('subject', () => {
         ['/market/btc/chart', undefined],
         ['/events/42/timeline', undefined],
         ['/data/series/points', 'series'],
+        ['/indicators/btc/', undefined],
+        ['/events/today', undefined],
     ])(
         'the subject a spec reaches, read statically — a word after a collection, with more path after it, reads two ways: %s → %s',
         (path, segment) => {
@@ -246,6 +177,7 @@ describe('subject', () => {
         ['/people', ['people'], 'people/list'],
         ['/data/:id', ['data'], 'data/get'],
         ['/events', ['data'], 'events/list'],
+        ['/:org/:team/events', [], 'events/list'],
     ])(
         'what a repository declares — its runner commands, its irregular collections — a GET on %s with the collections %j is filed under %s',
         (path, collections, folder) => {
@@ -275,5 +207,83 @@ describe('subject', () => {
             ['ALL /mcp', 'mcp'],
             ['GET /events', 'events/list'],
         ]);
+    });
+
+    test('the subject a spec reaches, read statically — a chain whose route, page, job or command is no literal reaches nothing', () => {
+        // Given - every terminal fed a name, a relative path, or a request it cannot read
+        const source = [
+            "import { api, cli, job, website } from '../x.specification.js';",
+            'await api.get(route);',
+            "await api.get('relative');",
+            'await api.request(body);',
+            "await api.request(file('./_requests/head.http'));",
+            "await api.request(file('./_requests/unread.http'));",
+            'await website.visit(page);',
+            "await website.visit('home');",
+            'await job.trigger(name);',
+            'await cli.exec(line);',
+        ].join('\n');
+
+        // Then - none of them has a subject
+        expect(
+            subjectsOf(source, (path) =>
+                path === './_requests/head.http' ? 'HEAD /events' : undefined,
+            ),
+        ).toStrictEqual([]);
+    });
+
+    test('the subject a spec reaches, read statically — names each facet, a request file is its own route, and params mark a template where its verb reads them', () => {
+        // Given - a request file on a word that reads two ways, a fetched page, a bare command, and params in each position
+        const source = [
+            "import { api, cli, website } from '../x.specification.js';",
+            "await api.request(file('./_requests/chart.http'));",
+            "await website.fetch('/feed');",
+            "await cli.exec('');",
+            "await api.get('/users/me/settings', { params: {} });",
+            "await api.post('/users/me/settings', { params: 1 });",
+            "await api.patch('/users/me/settings', {}, { params: {} });",
+            "await api.get('/users/:1/settings');",
+            "await api.get('/users/me/:1');",
+            "await api.put('/users/me/settings', {}, { params: {} });",
+            'await cli.exec();',
+        ].join('\n');
+        const subjects = subjectsOf(source, () => 'GET /indicators/btc/chart').map(
+            ({ subject }) => subject,
+        );
+
+        // Then - each named, and filed where it reads one way
+        expect(
+            subjects.map((subject) => [subjectName(subject), subjectFolder(subject)]),
+        ).toStrictEqual([
+            ['GET /indicators/btc/chart', 'indicators/btc/chart'],
+            ['visit /feed', undefined],
+            ['exec (no command)', undefined],
+            ['GET /users/me/settings', 'users/me/settings'],
+            ['POST /users/me/settings', undefined],
+            ['PATCH /users/me/settings', undefined],
+            ['GET /users/:id/settings', 'users/settings'],
+            ['GET /users/me/:id', undefined],
+            ['PUT /users/me/settings', 'users/me/settings'],
+        ]);
+    });
+
+    test('what a repository declares — a method-less route is any of the routes listed, and a command is never one', () => {
+        // Given - two method-less routes, a command spelled like one, and a command of two declared words
+        const source = [
+            "import { api } from '../api.specification.js';",
+            "import { cli } from '../cli.specification.js';",
+            "await api.post('/mcp/:session', {});",
+            "await cli.exec('mcp');",
+            "await cli.exec('db migrate');",
+        ].join('\n');
+
+        // Then - the route reaches ALL, the commands stay commands, named by their words
+        expect(
+            subjectsOf(source, undefined, {
+                ...NO_READING,
+                commands: { cli: ['db', 'mcp', 'migrate'] },
+                methodless: ['/other', '/mcp/:id'],
+            }).map(({ subject }) => subjectName(subject)),
+        ).toStrictEqual(['ALL /mcp/:id', 'exec mcp', 'exec db migrate']);
     });
 });

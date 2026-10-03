@@ -33,15 +33,19 @@ export type SubjectAt = { index: number; subject: Subject };
 
 const LITERAL_SEGMENT = /^[a-z][a-z._-]*$/u;
 
+function segmentsOf(path: string): string[] {
+    // Stryker disable next-line StringLiteral: a split always has a first piece
+    const bare = path.split(/[?#]/u)[0] ?? '';
+    return bare.split('/').filter((segment) => segment !== '');
+}
+
+function isLiteral(segment: string): boolean {
+    return LITERAL_SEGMENT.test(segment) && !segment.includes(HOLE);
+}
+
 /** Every segment that is a value (a hole, a number, an id, a symbol) is written `:id`. */
 export function pathTemplate(path: string): string {
-    const bare = path.split(/[?#]/u)[0] ?? '';
-    const segments = bare
-        .split('/')
-        .filter((segment) => segment !== '')
-        .map((segment) =>
-            LITERAL_SEGMENT.test(segment) && !segment.includes(HOLE) ? segment : ':id',
-        );
+    const segments = segmentsOf(path).map((segment) => (isLiteral(segment) ? segment : ':id'));
     return `/${segments.join('/')}`;
 }
 
@@ -68,6 +72,15 @@ function actionOf(
     return method.toLowerCase();
 }
 
+function followsACollection(
+    segments: string[],
+    index: number,
+    collections: readonly string[],
+): boolean {
+    // Stryker disable next-line StringLiteral: the first segment follows nothing, and no text standing for nothing is a collection
+    return isCollection(segments[index - 1] ?? '', collections);
+}
+
 /** `btc` in `/indicators/btc/chart`. The last segment is read as the route's: after a collection it names a sub-route far more often than an item. */
 export function ambiguousSegment(
     subject: Subject,
@@ -76,17 +89,13 @@ export function ambiguousSegment(
     if (subject.facet !== 'api' || subject.template === true) {
         return undefined;
     }
-    const segments = (subject.path.split(/[?#]/u)[0] ?? '')
-        .split('/')
-        .filter((segment) => segment !== '');
+    const segments = segmentsOf(subject.path);
     const { collections } = reading;
     return segments.find(
         (segment, index) =>
-            index > 0 &&
             index < segments.length - 1 &&
-            LITERAL_SEGMENT.test(segment) &&
-            !segment.includes(HOLE) &&
-            isCollection(segments[index - 1] ?? '', collections),
+            isLiteral(segment) &&
+            followsACollection(segments, index, collections),
     );
 }
 
@@ -95,8 +104,8 @@ function routeFolder(
     path: string,
     collections: readonly string[],
 ): string | undefined {
-    const segments = pathTemplate(path).split('/').slice(1);
-    const literals = segments.filter((segment) => segment !== '' && segment !== ':id');
+    const segments = segmentsOf(pathTemplate(path));
+    const literals = segments.filter((segment) => segment !== ':id');
     if (literals.length === 0) {
         return undefined;
     }
@@ -120,6 +129,7 @@ export function subjectFolder(
     if (subject.facet === 'cli') {
         return subject.command.length === 0 ? undefined : subject.command.join('/');
     }
+    // Stryker disable next-line ConditionalExpression: a page or a journey has no job to read either
     return subject.facet === 'job' ? subject.job : undefined;
 }
 
@@ -152,6 +162,7 @@ const REQUEST_LINE = /^\s*(?<method>DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT)\s+(?
 const REQUEST_FILE = /^file\(\s*(?<quote>['"])(?<path>[^'"]*)\k<quote>\s*\)$/u;
 
 function requestLineOf(text: string): Subject[] {
+    // Stryker disable next-line StringLiteral: an unmatched line has no method, so no verb, whatever path stands for it
     const { method = '', path = '/' } = REQUEST_LINE.exec(text)?.groups ?? {};
     const verb = HTTP_VERBS[method.toLowerCase()];
     // invariant: a request file's line is the route: there is no template to write beside it.
@@ -177,15 +188,17 @@ const TERMINALS: Record<string, TerminalReader> = {
     exec: (first, _readRequest, commands) => {
         // invariant: a sequence is one session of the binary, opened by its first command.
         const line =
-            first?.trim().startsWith('[') === true
-                ? literalOf(argumentsOf(first.trim().slice(1, -1))[0])
+            first?.startsWith('[') === true
+                ? literalOf(argumentsOf(first.slice(1, -1))[0])
                 : literalOf(first);
         return line === undefined ? [] : [{ command: commandWords(line, commands), facet: 'cli' }];
     },
     fetch: pageOf,
     open: (first) => [{ facet: 'mobile', journey: literalOf(first) ?? '(launch)' }],
     request: (first, readRequest) => {
+        // Stryker disable next-line OptionalChaining: a match always carries its named groups
         const path = REQUEST_FILE.exec(first ?? '')?.groups?.path;
+        // Stryker disable next-line ConditionalExpression,StringLiteral: a reader finds no request where no path is named, and no text it stands in for is a request line
         return path === undefined ? [] : requestLineOf(readRequest(path) ?? '');
     },
     trigger: (first) => {
@@ -201,23 +214,26 @@ function routeOf(method: Method, args: readonly string[]): Subject[] {
     if (path?.startsWith('/') !== true) {
         return [];
     }
-    const options = args[method === 'POST' || method === 'PUT' ? 2 : 1] ?? '';
+    const at = method === 'POST' || method === 'PUT' ? 2 : 1;
+    // Stryker disable next-line StringLiteral: no text standing for absent options names params
+    const options = args[at] ?? '';
     const template = /\/:[A-Za-z_$]/u.test(path) || /(?<![\w$])params(?![\w$])/u.test(options);
     return [{ facet: 'api', method, path, template }];
 }
 
 function declaredMethod(subject: Subject, methodless: readonly string[]): Subject {
-    if (subject.facet !== 'api' || methodless.length === 0) {
+    if (subject.facet !== 'api') {
         return subject;
     }
     const template = pathTemplate(subject.path);
-    return methodless.some((path) => pathTemplate(path.replaceAll(/:[^/]+/gu, HOLE)) === template)
+    return methodless.some((path) => pathTemplate(path) === template)
         ? { ...subject, method: 'ALL' }
         : subject;
 }
 
 export function subjectsOfChain(
     chain: Chain,
+    // Stryker disable next-line ArrowFunction: no reader reads no request, as one reading nothing
     readRequest: RequestReader = () => '',
     reading: SubjectReading = NO_READING,
 ): Subject[] {
