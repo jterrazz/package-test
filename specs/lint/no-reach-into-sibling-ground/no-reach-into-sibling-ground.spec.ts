@@ -63,12 +63,12 @@ describe('no-reach-into-sibling-ground', () => {
             specs/_fixtures:1:1  jterrazz-check(no-reach-into-sibling-ground)
                 found: _fixtures/ at the specs root, shared ground outside _shared/
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
-                fix: move it to _shared/_fixtures/ — \`make fix\` moves it and rewrites every whole relative path that names it
+                fix: move it to _shared/_fixtures/ — \`typescript fix\` moves it and rewrites every whole relative path that names it
                 read: docs/24-linting.md#no-reach-into-sibling-ground
             specs/_seeds:1:1  jterrazz-check(no-reach-into-sibling-ground)
                 found: _seeds/ at the specs root, shared ground outside _shared/
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
-                fix: move it to _shared/_seeds/ — \`make fix\` moves it and rewrites every whole relative path that names it
+                fix: move it to _shared/_seeds/ — \`typescript fix\` moves it and rewrites every whole relative path that names it
                 read: docs/24-linting.md#no-reach-into-sibling-ground
             specs/api/orders/listed-over-the-catalog.spec.ts:10:20  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../../_seeds/catalog.sql" leaves api/orders

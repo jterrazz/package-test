@@ -21,7 +21,7 @@ describe('no-repeated-chain-setting', () => {
             specs/api/events/list/pagination.spec.ts:8:30  jterrazz(no-repeated-chain-setting)
                 found: all 2 chains of this file state \`.clock('2026-03-04T09:30:00Z')\` alike
                 why: A setting every chain of a spec file states alike — the same \`.clock(…)\`, the same \`.headers(…)\`, the same \`.env(…)\`, per runner handle — is the file’s, stated once on a view of the facet: \`const events = api.with({ clock: '…' })\` → error at the first chain.
-                fix: state it once for the file — \`const events = api.with({ clock: '2026-03-04T09:30:00Z' })\` — and start every chain from \`events\`; \`make fix\` writes it
+                fix: state it once for the file — \`const events = api.with({ clock: '2026-03-04T09:30:00Z' })\` — and start every chain from \`events\`; \`typescript fix\` writes it
                 read: docs/24-linting.md#no-repeated-chain-setting
         `);
     });

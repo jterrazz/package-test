@@ -381,7 +381,7 @@ function capFix(oversized: Oversized, target: string): string {
     }
     return oversized.text === undefined
         ? `move it to a file under ./${oversized.role}/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only`
-        : `move it to ${target} and name it with file('${target}') — \`make fix\` moves it`;
+        : `move it to ${target} and name it with file('${target}') — \`typescript fix\` moves it`;
 }
 
 function capFinding(rootDir: string, oversized: Oversized): Spotted {
@@ -402,7 +402,7 @@ export function checkGroundSharedOrInline(rootDir: string): Spotted[] {
         column: reference.column,
         path: relative(rootDir, reference.file),
         line: reference.line,
-        fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`make fix\` inlines it`,
+        fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`typescript fix\` inlines it`,
         found: `${relative(rootDir, target)}, read by this test alone`,
         rule: 'ground-shared-or-inline' as const,
     }));

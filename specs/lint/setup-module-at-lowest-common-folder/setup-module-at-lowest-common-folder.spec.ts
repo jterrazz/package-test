@@ -28,7 +28,7 @@ describe('setup-module-at-lowest-common-folder', () => {
             specs/cli/_setup/labels.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
                 found: \`specs/cli/_setup/labels.ts\`, whose readers share \`specs/cli/orders/\`, not \`specs/cli/\`
                 why: A \`_setup/\` module sits in the \`_setup/\` of the LOWEST folder every module importing it shares — the law ground follows (\`ground-shared-or-inline\`), read on imports: a reader is any module of the tree importing it by a relative path or a \`package.json\` \`imports\` alias, and a reader inside a \`_setup/\` counts as the folder that \`_setup/\` belongs to.
-                fix: move it to \`specs/cli/orders/_setup/labels.ts\` — the \`_setup/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`make fix\` moves no module an alias reaches
+                fix: move it to \`specs/cli/orders/_setup/labels.ts\` — the \`_setup/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`typescript fix\` moves no module an alias reaches
                 read: docs/24-linting.md#setup-module-at-lowest-common-folder
         `);
         await expect(result.directory()).toMatch(directory('./_expected/misplaced/'));
@@ -48,22 +48,22 @@ describe('setup-module-at-lowest-common-folder', () => {
             specs/cli/_setup/labels.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
                 found: \`specs/cli/_setup/labels.ts\`, whose readers share \`specs/cli/orders/\`, not \`specs/cli/\`
                 why: A \`_setup/\` module sits in the \`_setup/\` of the LOWEST folder every module importing it shares — the law ground follows (\`ground-shared-or-inline\`), read on imports: a reader is any module of the tree importing it by a relative path or a \`package.json\` \`imports\` alias, and a reader inside a \`_setup/\` counts as the folder that \`_setup/\` belongs to.
-                fix: move it to \`specs/cli/orders/_setup/labels.ts\` — the \`_setup/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`make fix\` moves no module an alias reaches
+                fix: move it to \`specs/cli/orders/_setup/labels.ts\` — the \`_setup/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`typescript fix\` moves no module an alias reaches
                 read: docs/24-linting.md#setup-module-at-lowest-common-folder
             specs/cli/_setup/rows.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
                 found: \`specs/cli/_setup/rows.ts\`, whose readers share \`specs/cli/orders/\`, not \`specs/cli/\`
                 why: A \`_setup/\` module sits in the \`_setup/\` of the LOWEST folder every module importing it shares — the law ground follows (\`ground-shared-or-inline\`), read on imports: a reader is any module of the tree importing it by a relative path or a \`package.json\` \`imports\` alias, and a reader inside a \`_setup/\` counts as the folder that \`_setup/\` belongs to.
-                fix: move it to \`specs/cli/orders/_setup/rows.ts\` — the \`_setup/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both
+                fix: move it to \`specs/cli/orders/_setup/rows.ts\` — the \`_setup/\` of the lowest folder its readers share — and the paths that import it; \`typescript fix\` does both
                 read: docs/24-linting.md#setup-module-at-lowest-common-folder
             specs/cli/_setup/tenant.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
                 found: \`specs/cli/_setup/tenant.ts\`, whose readers share \`specs/\`, not \`specs/cli/\`
                 why: A \`_setup/\` module sits in the \`_setup/\` of the LOWEST folder every module importing it shares — the law ground follows (\`ground-shared-or-inline\`), read on imports: a reader is any module of the tree importing it by a relative path or a \`package.json\` \`imports\` alias, and a reader inside a \`_setup/\` counts as the folder that \`_setup/\` belongs to.
-                fix: move it to \`specs/_shared/_setup/tenant.ts\` — the \`_setup/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both
+                fix: move it to \`specs/_shared/_setup/tenant.ts\` — the \`_setup/\` of the lowest folder its readers share — and the paths that import it; \`typescript fix\` does both
                 read: docs/24-linting.md#setup-module-at-lowest-common-folder
             specs/cli/orders/_setup/clock.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
                 found: \`specs/cli/orders/_setup/clock.ts\`, whose readers share \`specs/cli/\`, not \`specs/cli/orders/\`
                 why: A \`_setup/\` module sits in the \`_setup/\` of the LOWEST folder every module importing it shares — the law ground follows (\`ground-shared-or-inline\`), read on imports: a reader is any module of the tree importing it by a relative path or a \`package.json\` \`imports\` alias, and a reader inside a \`_setup/\` counts as the folder that \`_setup/\` belongs to.
-                fix: move it to \`specs/cli/_setup/clock.ts\` — the \`_setup/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both
+                fix: move it to \`specs/cli/_setup/clock.ts\` — the \`_setup/\` of the lowest folder its readers share — and the paths that import it; \`typescript fix\` does both
                 read: docs/24-linting.md#setup-module-at-lowest-common-folder
         `);
     });

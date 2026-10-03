@@ -79,7 +79,7 @@ export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
         return {
             path: rel,
             line: 1,
-            fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`make fix\` does it with \`git mv\``,
+            fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`typescript fix\` does it with \`git mv\``,
             found: `a \`.test.ts\` under \`${where}\`, where a file specifies the assembled product`,
             rule: 'file-suffix-matches-place',
         };

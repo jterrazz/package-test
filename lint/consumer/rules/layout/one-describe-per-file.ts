@@ -80,23 +80,23 @@ export const oneDescribePerFile = defineRule(
         messages: {
             noDescribe: {
                 found: 'the tests of this file stand in no `describe`',
-                fix: "wrap them in `describe('{{named}}', () => { … })` — `make fix` does it",
+                fix: "wrap them in `describe('{{named}}', () => { … })` — `typescript fix` does it",
             },
             severalDescribes: {
                 found: 'a second top-level `describe` in a file about one {{what}}',
-                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` — `make fix` does it when every group holds tests alone — or move this one to a file of its own {{what}}",
+                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` — `typescript fix` does it when every group holds tests alone — or move this one to a file of its own {{what}}",
             },
             tableTitle: {
                 found: 'the file’s `describe.each` is titled "{{title}}"',
-                fix: "start its title with the file's {{what}}, '{{named}} — …', keeping what names its rows — `make fix` prefixes it",
+                fix: "start its title with the file's {{what}}, '{{named}} — …', keeping what names its rows — `typescript fix` prefixes it",
             },
             testOutside: {
                 found: 'a test beside the `describe` of the file',
-                fix: "move it inside `describe('{{named}}', …)` — `make fix` does it when the group holds tests alone",
+                fix: "move it inside `describe('{{named}}', …)` — `typescript fix` does it when the group holds tests alone",
             },
             wrongTitle: {
                 found: 'the file’s `describe` is titled "{{title}}"',
-                fix: "title it '{{named}}', the file's {{what}} — `make fix` renames it, keeping the title it said on each of its tests when it holds tests alone",
+                fix: "title it '{{named}}', the file's {{what}} — `typescript fix` renames it, keeping the title it said on each of its tests when it holds tests alone",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

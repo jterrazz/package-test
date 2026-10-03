@@ -46,7 +46,7 @@ describe('file-suffix-matches-place', () => {
             specs/api/users/creation.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
-                fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\`
+                fix: rename it \`api/users/creation.spec.ts\` — \`typescript fix\` does it with \`git mv\`
                 read: docs/24-linting.md#file-suffix-matches-place
         `);
     });
@@ -62,7 +62,7 @@ describe('file-suffix-matches-place', () => {
             specs/operator/manifest/manifest.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
-                fix: rename it \`operator/manifest/manifest.spec.ts\` — \`make fix\` does it with \`git mv\`
+                fix: rename it \`operator/manifest/manifest.spec.ts\` — \`typescript fix\` does it with \`git mv\`
                 read: docs/24-linting.md#file-suffix-matches-place
         `);
     });

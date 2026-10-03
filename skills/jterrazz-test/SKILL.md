@@ -26,7 +26,7 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 9. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
 10. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
 
-A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect; a colocated `.test.ts(x)` holds one `describe` titled with the export it covers. `make fix` splits, moves and retitles ([docs/23 § One file, one subject](../../docs/23-conventions.md#one-file-one-subject)).
+A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect; a colocated `.test.ts(x)` holds one `describe` titled with the export it covers. `typescript fix` splits, moves and retitles ([docs/23 § One file, one subject](../../docs/23-conventions.md#one-file-one-subject)).
 
 ## The shape every spec has
 

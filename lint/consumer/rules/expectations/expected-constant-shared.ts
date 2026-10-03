@@ -108,7 +108,7 @@ export const expectedConstantShared = defineRule(
         messages: {
             singleReader: {
                 found: 'the expectation `{{name}}`, declared for the file and read by one test',
-                fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',
+                fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `typescript fix` inlines it',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

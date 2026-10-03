@@ -186,7 +186,7 @@ export default defineConfig(fromPresets(settings));
 
 ## Two rough edges of the toolchain's flow
 
-- **An `include` that names `.test.ts`** stops collecting the moment `--fix` renames a spec. The fix lists every glob or literal it broke, so update them in the same commit; `include-points-at-a-folder` holds the class afterwards.
+- **An `include` that names `.test.ts`** stops collecting the moment `typescript fix` renames a spec. The fix lists every glob or literal it broke, so update them in the same commit; `include-points-at-a-folder` holds the class afterwards.
 - **`typescript baseline` in an npm-hoisted workspace member** cannot resolve oxlint today; run it from a directory where `node_modules/.bin/oxlint` resolves.
 
 ## Pitfalls

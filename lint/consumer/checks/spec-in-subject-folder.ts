@@ -53,7 +53,7 @@ export function checkSpecInSubjectFolder(specsRoot: string): Spotted[] {
         return [
             {
                 path: shown(specsRoot, spec.file),
-                fix: `move it to ${shown(specsRoot, target)} — \`make fix\` moves it, and the ground it stands on`,
+                fix: `move it to ${shown(specsRoot, target)} — \`typescript fix\` moves it, and the ground it stands on`,
                 found: `a spec of ${only}, filed under ${shown(specsRoot, dirname(spec.file))}/`,
                 line: 1,
                 rule: 'spec-in-subject-folder' as const,

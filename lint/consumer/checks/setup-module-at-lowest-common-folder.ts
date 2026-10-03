@@ -115,8 +115,8 @@ function findingOf(rootDir: string, misplaced: Misplaced): Spotted {
         path: relative(rootDir, module),
         line: 1,
         fix: misplaced.aliased
-            ? `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`make fix\` moves no module an alias reaches`
-            : `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both`,
+            ? `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`typescript fix\` moves no module an alias reaches`
+            : `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it; \`typescript fix\` does both`,
         found: `\`specs/${rel}\`, whose readers share \`${shown(specsRoot, misplaced.lowest)}\`, not \`${shown(specsRoot, ownerOfSetup(specsRoot, misplaced.setup))}\``,
         rule: 'setup-module-at-lowest-common-folder',
     };

@@ -126,7 +126,7 @@ export function checkInlineSeeds(rootDir: string): Spotted[] {
     return inlineSeeds(rootDir).map((seed) => ({
         column: seed.column,
         path: relative(rootDir, seed.file),
-        fix: `write the statements to ./${GROUND_SEEDS}/${seed.name}.sql and seed it with file('./${GROUND_SEEDS}/${seed.name}.sql') — \`make fix\` writes the file`,
+        fix: `write the statements to ./${GROUND_SEEDS}/${seed.name}.sql and seed it with file('./${GROUND_SEEDS}/${seed.name}.sql') — \`typescript fix\` writes the file`,
         found: 'SQL written in the test, tagged `sql`',
         line: seed.line,
         rule: 'ground-shared-or-inline' as const,

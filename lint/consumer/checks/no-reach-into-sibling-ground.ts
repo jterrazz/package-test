@@ -58,7 +58,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Spotted[] {
             violations.push({
                 path: relative(rootDir, folder),
                 line: 1,
-                fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_FOLDER, role))}/ — \`make fix\` moves it and rewrites every whole relative path that names it`,
+                fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_FOLDER, role))}/ — \`typescript fix\` moves it and rewrites every whole relative path that names it`,
                 found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/`,
                 rule: 'no-reach-into-sibling-ground',
             });

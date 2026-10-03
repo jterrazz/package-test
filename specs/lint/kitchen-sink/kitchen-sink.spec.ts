@@ -13,7 +13,7 @@ describe('kitchen-sink', () => {
             specs/db/_seeds/x.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as grammar/_seeds/used.sql
                 why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
-                fix: give the copies the one name the entry should keep — they go by several, so \`make fix\` moves none
+                fix: give the copies the one name the entry should keep — they go by several, so \`typescript fix\` moves none
                 read: docs/24-linting.md#no-duplicate-ground
             specs/db/db.test.ts:9:1  jterrazz-check(database-named-only-when-several)
                 found: \`.seed()\` with no \`{ database }\`, while 2 SQL databases are declared
@@ -53,7 +53,7 @@ describe('kitchen-sink', () => {
             specs/grammar/_seeds/used.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as db/_seeds/x.sql
                 why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
-                fix: give the copies the one name the entry should keep — they go by several, so \`make fix\` moves none
+                fix: give the copies the one name the entry should keep — they go by several, so \`typescript fix\` moves none
                 read: docs/24-linting.md#no-duplicate-ground
         `);
     });

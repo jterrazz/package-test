@@ -181,8 +181,8 @@ export function checkGroundPlacement(rootDir: string): Spotted[] {
             path: relative(rootDir, join(ground, entry)),
             line: 1,
             fix: spread
-                ? `move it to ${home}, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both`
-                : `move it to ${home} and name it ${named} — \`make fix\` does both`,
+                ? `move it to ${home}, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both`
+                : `move it to ${home} and name it ${named} — \`typescript fix\` does both`,
             found: spread
                 ? `ground only the leaves under ${relative(rootDir, lowest)} reach for, kept above them`
                 : `ground only ${relative(rootDir, lowest)} reaches for, kept above it`,

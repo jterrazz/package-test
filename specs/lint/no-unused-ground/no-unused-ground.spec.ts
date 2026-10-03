@@ -76,7 +76,7 @@ describe('no-unused-ground', () => {
             specs/_shared/_fixtures/used-app:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only widget reaches for, kept above it
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to widget/_fixtures/used-app and name it directory('./_fixtures/used-app/') — \`make fix\` does both
+                fix: move it to widget/_fixtures/used-app and name it directory('./_fixtures/used-app/') — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -97,7 +97,7 @@ describe('no-unused-ground', () => {
             specs/_shared/_seeds/two-users.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/_seeds/two-users.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both
+                fix: move it to api/_seeds/two-users.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -113,7 +113,7 @@ describe('no-unused-ground', () => {
             specs/_shared/_seeds/one-user.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/_seeds/one-user.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both
+                fix: move it to api/_seeds/one-user.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/_shared/_seeds/two-users.sql:1:1  jterrazz-check(no-unused-ground)
                 found: the pool entry two-users.sql, which no spec under specs names

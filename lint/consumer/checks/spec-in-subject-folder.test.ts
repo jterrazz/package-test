@@ -22,7 +22,7 @@ describe('checkSpecInSubjectFolder', () => {
             },
             {
                 path: 'api/charts/templated.spec.ts',
-                fix: 'move it to api/indicators/chart/templated.spec.ts — `make fix` moves it, and the ground it stands on',
+                fix: 'move it to api/indicators/chart/templated.spec.ts — `typescript fix` moves it, and the ground it stands on',
                 found: 'a spec of GET /indicators/:id/chart, filed under api/charts/',
                 line: 1,
                 rule: 'spec-in-subject-folder',
@@ -43,8 +43,8 @@ describe('checkSpecInSubjectFolder', () => {
 
         // Then - the first word files the one, the declared words the other
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
-            'move it to cli/db/runs.spec.ts — `make fix` moves it, and the ground it stands on',
-            'move it to cli/db/migrate/runs.spec.ts — `make fix` moves it, and the ground it stands on',
+            'move it to cli/db/runs.spec.ts — `typescript fix` moves it, and the ground it stands on',
+            'move it to cli/db/migrate/runs.spec.ts — `typescript fix` moves it, and the ground it stands on',
         ]);
     });
 
@@ -68,7 +68,7 @@ describe('checkSpecInSubjectFolder', () => {
         // Then - no finding before the declaration, and the list folder after it
         expect(plain).toStrictEqual([]);
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
-            'move it to api/data/list/listing.spec.ts — `make fix` moves it, and the ground it stands on',
+            'move it to api/data/list/listing.spec.ts — `typescript fix` moves it, and the ground it stands on',
         ]);
     });
 });

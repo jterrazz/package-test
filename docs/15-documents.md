@@ -117,7 +117,7 @@ The document's JSON Schema ships with the package at `schema/spec.schema.json`, 
 # yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
 ```
 
-A schema says which keys exist, not which ORDER they come in, nor how a stream is written. Both are the document's format, and a formatter owns it, as oxfmt owns a source file's: the canonical order — `description, fixture, env, serve, runs` at the top, then `command, stdin, timeout, waitFor, exit, stdout, stderr, files` in a run — and every stream (`stdout`, `stderr`, `stdin`, `files.*.equals`) as a block scalar, `|` keeping the trailing newline and `|-` dropping it. `typescript fix` (`make fix`) writes it; a check run names each document out of it and fails, and no baseline holds one — it is never debt, since the formatter always settles it. The document family of rules is in [24 — Linting](24-linting.md).
+A schema says which keys exist, not which ORDER they come in, nor how a stream is written. Both are the document's format, and a formatter owns it, as oxfmt owns a source file's: the canonical order — `description, fixture, env, serve, runs` at the top, then `command, stdin, timeout, waitFor, exit, stdout, stderr, files` in a run — and every stream (`stdout`, `stderr`, `stdin`, `files.*.equals`) as a block scalar, `|` keeping the trailing newline and `|-` dropping it. `typescript fix` (`typescript fix`) writes it; a check run names each document out of it and fails, and no baseline holds one — it is never debt, since the formatter always settles it. The document family of rules is in [24 — Linting](24-linting.md).
 
 The whole [token vocabulary](22-tokens.md) works in what a document ASSERTS — a run's streams and `files:` texts — and **never** in `description`, `command` or `stdin`, which are prose and inputs.
 
@@ -179,7 +179,7 @@ A document that starts wanting a conditional is a chain wearing a header. Write 
 
 - **Putting a `<case>.spec.yaml` under `_expected/`.** A document is the CASE, not a golden — it lives beside the spec it belongs to (`no-document-in-ground`).
 - **Writing a token in a `description:`, a `command:` or a `stdin:`.** Those are prose and inputs; placeholders work in what is asserted.
-- **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — it is out of [the format](#the-schema-and-the-format), and `make fix` rewrites it.
+- **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — it is out of [the format](#the-schema-and-the-format), and `typescript fix` rewrites it.
 - **A `fixture:` naming a golden's folder.** It reads `_fixtures/`; `./_expected/shop/` is refused on its line.
 - **Listing cases in one file, or inheriting a given.** One file is one test, and the given is visible: a list of paths layers, `extends:` does not exist.
 - **Writing an api or a job case as a document.** The format is a cli session's; an api or job case is a spec, its whole result in place — `kind:` is an unknown key.

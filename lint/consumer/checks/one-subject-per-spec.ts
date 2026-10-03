@@ -22,7 +22,7 @@ function splitAdvice(specsRoot: string, spec: SpecRead): string {
     if (targets.length < 2) {
         return seed;
     }
-    const split = `split it, one file per subject — ${targets.join(', ')} — \`make fix\` splits it`;
+    const split = `split it, one file per subject — ${targets.join(', ')} — \`typescript fix\` splits it`;
     return journey === undefined ? split : `${split}; ${seed}`;
 }
 

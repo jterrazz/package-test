@@ -13,7 +13,7 @@ describe('refusals', () => {
             specs/widget/widget.test.ts:6:36  jterrazz-check(ground-shared-or-inline)
                 found: widget/_expected/blank.txt, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the value \`toMatch\` compares, and delete the file — \`make fix\` inlines it
+                fix: write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -27,7 +27,7 @@ describe('refusals', () => {
             specs/_shared/_seeds/one-user.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only api/users reaches for, kept above it
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/users/_seeds/one-user.sql and name it file('./_seeds/one-user.sql') — \`make fix\` does both
+                fix: move it to api/users/_seeds/one-user.sql and name it file('./_seeds/one-user.sql') — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -41,7 +41,7 @@ describe('refusals', () => {
             specs/_shared/_seeds/single-base.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api/map/pois reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/map/pois/_seeds/single-base.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both
+                fix: move it to api/map/pois/_seeds/single-base.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -55,7 +55,7 @@ describe('refusals', () => {
             specs/_shared/_seeds/two-pois.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api/map reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/map/_seeds/two-pois.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both
+                fix: move it to api/map/_seeds/two-pois.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -69,7 +69,7 @@ describe('refusals', () => {
             specs/_shared/_fixtures/shop:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only cli reaches for, kept above it
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to cli/_fixtures/shop and name it directory('./_fixtures/shop/') — \`make fix\` does both
+                fix: move it to cli/_fixtures/shop and name it directory('./_fixtures/shop/') — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -83,27 +83,27 @@ describe('refusals', () => {
             specs/api/users/created.spec.ts:9:76  jterrazz-check(ground-shared-or-inline)
                 found: api/users/_requests/grace.json, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the request or its body, and delete the file — \`make fix\` inlines it
+                fix: write it here, the request or its body, and delete the file — \`typescript fix\` inlines it
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/created.spec.ts:12:37  jterrazz-check(ground-shared-or-inline)
                 found: api/users/_expected/created.http, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the value \`toMatch\` compares, and delete the file — \`make fix\` inlines it
+                fix: write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/created.spec.ts:17:38  jterrazz-check(ground-shared-or-inline)
                 found: api/users/_requests/linus.http, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the request or its body, and delete the file — \`make fix\` inlines it
+                fix: write it here, the request or its body, and delete the file — \`typescript fix\` inlines it
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/created.spec.ts:28:38  jterrazz-check(ground-shared-or-inline)
                 found: api/users/_expected/line.txt, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the value \`toMatch\` compares, and delete the file — \`make fix\` inlines it
+                fix: write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/created.spec.ts:29:37  jterrazz-check(ground-shared-or-inline)
                 found: api/users/_expected/twice.http, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the value \`toMatch\` compares, and delete the file — \`make fix\` inlines it
+                fix: write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -155,12 +155,12 @@ describe('refusals', () => {
             specs/api/users/created.spec.ts:8:45  jterrazz-check(ground-shared-or-inline)
                 found: a request of 31 lines written in the test, past the _requests/ cap of 30
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to ./_requests/creates-a-crowd.json and name it with file('./_requests/creates-a-crowd.json') — \`make fix\` moves it
+                fix: move it to ./_requests/creates-a-crowd.json and name it with file('./_requests/creates-a-crowd.json') — \`typescript fix\` moves it
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/created.spec.ts:86:37  jterrazz-check(ground-shared-or-inline)
                 found: an expectation of 151 lines written in the test, past the _expected/ cap of 150
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to ./_expected/lists-everyone.http and name it with file('./_expected/lists-everyone.http') — \`make fix\` moves it
+                fix: move it to ./_expected/lists-everyone.http and name it with file('./_expected/lists-everyone.http') — \`typescript fix\` moves it
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -174,12 +174,12 @@ describe('refusals', () => {
             specs/api/users/listed.spec.ts:10:15  jterrazz-check(ground-shared-or-inline)
                 found: SQL written in the test, tagged \`sql\`
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write the statements to ./_seeds/two-users-one-admin.sql and seed it with file('./_seeds/two-users-one-admin.sql') — \`make fix\` writes the file
+                fix: write the statements to ./_seeds/two-users-one-admin.sql and seed it with file('./_seeds/two-users-one-admin.sql') — \`typescript fix\` writes the file
                 read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/listed.spec.ts:14:15  jterrazz-check(ground-shared-or-inline)
                 found: SQL written in the test, tagged \`sql\`
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write the statements to ./_seeds/lists-users.sql and seed it with file('./_seeds/lists-users.sql') — \`make fix\` writes the file
+                fix: write the statements to ./_seeds/lists-users.sql and seed it with file('./_seeds/lists-users.sql') — \`typescript fix\` writes the file
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });
@@ -193,7 +193,7 @@ describe('refusals', () => {
             specs/_shared/_fixtures/lonely-stub:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only widget reaches for, kept above it
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to widget/_fixtures/lonely-stub and name it directory('./_fixtures/lonely-stub/') — \`make fix\` does both
+                fix: move it to widget/_fixtures/lonely-stub and name it directory('./_fixtures/lonely-stub/') — \`typescript fix\` does both
                 read: docs/24-linting.md#ground-shared-or-inline
         `);
     });

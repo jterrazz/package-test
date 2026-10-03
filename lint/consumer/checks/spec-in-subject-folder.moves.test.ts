@@ -126,7 +126,7 @@ describe('fixSpecInSubjectFolder', () => {
 
         // Then - `spec-in-subject-folder` names the folder, and the fix moves it there
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
-            'move it to api/orders/list/listing.spec.ts — `make fix` moves it, and the ground it stands on',
+            'move it to api/orders/list/listing.spec.ts — `typescript fix` moves it, and the ground it stands on',
         ]);
         fixSpecInSubjectFolder(root);
         expect(readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8')).toContain(

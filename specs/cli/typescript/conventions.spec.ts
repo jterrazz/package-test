@@ -27,7 +27,7 @@ describe('conventions', () => {
             [
                 LABEL,
                 '',
-                'specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a `.test.ts` under `specs/api/`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it `api/users/creation.spec.ts` — `make fix` does it with `git mv` · read: docs/24-linting.md#file-suffix-matches-place',
+                'specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a `.test.ts` under `specs/api/`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it `api/users/creation.spec.ts` — `typescript fix` does it with `git mv` · read: docs/24-linting.md#file-suffix-matches-place',
                 "found: every finding above, and .jterrazz/baseline.json records no `jterrazz-check/` entry in its `test` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
                 '✗ Failed with exit code 1',
             ].join('\n'),
