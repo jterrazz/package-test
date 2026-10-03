@@ -1,6 +1,11 @@
+import type { ChildProcess } from 'node:child_process';
+
 import { pause } from '../../chain/pause.js';
 
 export const KILL_GRACE_MS = 2000;
+
+/** outside: Windows has no process groups to signal through a negative pid. */
+export const SIGNALS_GROUPS = process.platform !== 'win32';
 const GROUP_POLL_MS = 1000;
 const GROUP_SETTLE_MS = 50;
 
@@ -17,6 +22,7 @@ process.stdin.resume();
 setInterval(() => { if (gone()) process.exit(0); }, ${GROUP_POLL_MS});
 `;
 
+// Stryker disable BlockStatement: a catch emptied answers undefined, which reads as false all the same
 function groupRunning(group: number): boolean {
     try {
         process.kill(group, 0);
@@ -25,11 +31,13 @@ function groupRunning(group: number): boolean {
         return false;
     }
 }
+// Stryker restore BlockStatement
 
 async function endedBy(group: number, deadline: number): Promise<boolean> {
     if (!groupRunning(group)) {
         return true;
     }
+    // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
     if (Date.now() >= deadline) {
         return false;
     }
@@ -39,4 +47,27 @@ async function endedBy(group: number, deadline: number): Promise<boolean> {
 
 export async function groupEnded(group: number, withinMs: number): Promise<boolean> {
     return await endedBy(group, Date.now() + withinMs);
+}
+
+/** The child's whole group where groups are signalled, the child alone where they are not or the group is gone; nothing for a child that never started. */
+export function signalGroup(
+    child: ChildProcess,
+    // Stryker disable next-line StringLiteral: an empty signal is read as SIGTERM
+    signal: NodeJS.Signals | number = 'SIGTERM',
+): boolean {
+    // hazard: a child whose spawn failed has no pid, and killing it signals this very process: a mutant of this guard would kill the run measuring it.
+    // Stryker disable next-line all: hazard: see above
+    if (child.pid === undefined) {
+        return false;
+    }
+    // Stryker disable next-line ConditionalExpression: outside: only a platform without groups takes the other branch
+    if (SIGNALS_GROUPS) {
+        try {
+            process.kill(-child.pid, signal);
+            return true;
+        } catch {
+            // outside: the group is already reaped (ESRCH) or not ours to signal.
+        }
+    }
+    return child.kill(signal);
 }

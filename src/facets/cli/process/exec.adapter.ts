@@ -1,5 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 
+import { signalGroup, SIGNALS_GROUPS } from '../../../services/process/process-group.js';
 import type { CliEnv, CliInput, CliOutput, CliPort, WatchOptions } from './cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
@@ -135,23 +136,12 @@ export class ExecAdapter implements CliPort {
         // hazard: `detached` gives the child its own process group, so a `tsdown --watch` grandchild dies with it.
         const child = spawn(`${this.command} ${args}`, [], {
             cwd,
-            detached: process.platform !== 'win32',
+            detached: SIGNALS_GROUPS,
             env,
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
         });
-        // outside: signal the process group (negative pid); fall back to the child where groups are unsupported.
-        const kill = (signal?: NodeJS.Signals | number): boolean => {
-            if (child.pid !== undefined && process.platform !== 'win32') {
-                try {
-                    process.kill(-child.pid, signal ?? 'SIGTERM');
-                    return true;
-                } catch {
-                    // outside: group already reaped (ESRCH) or not killable — fall through.
-                }
-            }
-            return child.kill(signal);
-        };
+        const kill = (signal?: NodeJS.Signals | number): boolean => signalGroup(child, signal);
         return await observeProcess(
             { kill, on: child.on.bind(child), stderr: child.stderr, stdout: child.stdout },
             options,

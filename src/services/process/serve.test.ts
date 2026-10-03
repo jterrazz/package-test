@@ -1,44 +1,24 @@
 import { once } from 'node:events';
 import { existsSync, mkdtempSync } from 'node:fs';
 import { createServer } from 'node:http';
-import type { Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
+import {
+    alive,
+    CALLS_HANDED,
+    held,
+    PRINTS_HANDED,
+    READY,
+    REFUSALS,
+    refused,
+    SERVER,
+    SILENT,
+} from './serve.fixtures.js';
 import { runToCompletion, ServedProcess } from './serve.js';
 
-/** Binds the port the OS hands it and answers its own pid: no spec picks a port. */
-const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(String(process.pid)));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
-const READY = /listening on port (?<port>\d+)/u;
-
-/** Never binds what it is handed: reports the port it got and stays up. */
-const CALLS_HANDED = `node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/handed').catch(()=>{});setInterval(()=>{},1000)"`;
-const PRINTS_HANDED = `node -e "console.log('handed '+process.env.PORT);setInterval(()=>{},1000)"`;
-
-async function held(): Promise<{ paths: string[]; port: number; server: Server }> {
-    const paths: string[] = [];
-    const server = createServer((request, response) => {
-        paths.push(request.url ?? '');
-        response.end();
-    });
-    server.listen(0, '127.0.0.1');
-    await once(server, 'listening');
-    const address = server.address();
-    if (address === null || typeof address === 'string') {
-        throw new Error('the held server has no port');
-    }
-    return { paths, port: address.port, server };
-}
-
-function alive(pid: number): boolean {
-    try {
-        process.kill(pid, 0);
-        return true;
-    } catch {
-        return false;
-    }
-}
+const SOURCE_FOLDER = join(process.cwd(), 'src');
 
 let adapter: null | ServedProcess = null;
 
@@ -155,6 +135,130 @@ describe('serve', () => {
             server.close();
         }
     });
+
+    test.each(REFUSALS)('a served process — %s is refused whole', async (_, options, message) => {
+        // Given - a process of that shape
+        adapter = new ServedProcess(options, process.cwd(), 'api');
+
+        // Then - the refusal in its four parts
+        await expect(adapter.start()).rejects.toThrow(message);
+    });
+
+    test('a served process — runs in its folder, past a before step that passes, with the env, port and arguments it is handed', async () => {
+        // Given - servers that report what they were handed on stderr, then exit, each with its own options
+        const reports = `node -e "console.error(JSON.stringify([process.cwd(), process.env.SERVED_MODE, process.env.EXTRA, process.env.PORT, process.argv.length]))"`;
+        const outputs: Record<string, string>[] = [];
+        for (const [options, extra] of [
+            [
+                {
+                    before: 'true',
+                    command: reports,
+                    cwd: 'src',
+                    env: { SERVED_MODE: 'set' },
+                    ready: /never (?<port>\d+)/u,
+                },
+                { EXTRA: 'added' },
+            ],
+            [
+                {
+                    command: reports,
+                    env: () => ({ SERVED_MODE: 'later' }),
+                    ready: /never (?<port>\d+)/u,
+                },
+                {},
+            ],
+        ] as const) {
+            adapter = new ServedProcess(options, process.cwd(), undefined, extra);
+            const failure = await adapter.start().then(() => '', String);
+            outputs.push({
+                .../found: (?<facet>specification\.\w+\(\)):[\s\S]*Output:\n(?<output>.*)\n/mu.exec(
+                    failure,
+                )?.groups,
+            });
+        }
+
+        // Then - each child saw what its options state, on the default facet's refusal
+        expect(outputs).toStrictEqual([
+            {
+                facet: 'specification.website()',
+                output: JSON.stringify([SOURCE_FOLDER, 'set', 'added', null, 1]),
+            },
+            {
+                facet: 'specification.website()',
+                output: JSON.stringify([process.cwd(), null, null, null, 1]),
+            },
+        ]);
+    });
+
+    test('a served process — a command that cannot start in its folder is refused as one that exited, and leaves this process alive', async () => {
+        // Given - a folder that is not there
+        adapter = new ServedProcess(
+            { command: 'true', cwd: 'no-such-folder', ready: READY, timeout: 5000 },
+            process.cwd(),
+            'api',
+        );
+
+        // Then - the refusal names the failed spawn
+        await expect(adapter.start()).rejects.toThrow(
+            refused(
+                'the server command exited before it was ready.\nCommand: true\nOutput:\nError: spawn /bin/sh ENOENT\n',
+                'A process is handed to the chain once it is ready, and one that exits never is.',
+                'run the command by hand and correct what its output names',
+            ),
+        );
+    });
+
+    test('a served process — a redirect is an answer, never followed', async () => {
+        // Given - a port that answers with a redirect to nowhere
+        const server = createServer((_, response) => {
+            response.writeHead(302, { location: 'http://127.0.0.1:9/' }).end();
+        });
+        server.listen(0, '127.0.0.1');
+        await once(server, 'listening');
+        const address = server.address();
+        const port = address === null || typeof address === 'string' ? 0 : address.port;
+        adapter = new ServedProcess({ command: SILENT, port, timeout: 2000 }, process.cwd());
+
+        // Then - ready on the redirect itself
+        try {
+            await expect(adapter.start()).resolves.toBe(`http://127.0.0.1:${port}`);
+        } finally {
+            server.close();
+        }
+    });
+
+    test('a served process — the PORT form with no ready path polls the root', async () => {
+        // Given - a port this test holds, and no ready path stated
+        const { paths, port, server } = await held();
+        adapter = new ServedProcess({ command: SILENT, port }, process.cwd());
+
+        // Then - ready once the root answers
+        try {
+            await expect(adapter.start()).resolves.toBe(`http://127.0.0.1:${port}`);
+            expect(paths).toStrictEqual(['/']);
+        } finally {
+            server.close();
+        }
+    });
+
+    test('a served process — stop ends a server deaf to SIGTERM, and a group its shell left deaf to it, with SIGKILL after the grace', async () => {
+        // Given - a server that ignores SIGTERM, and a shell that backgrounds one and exits
+        const deaf = `node -e "process.on('SIGTERM',()=>{});const s=require('node:http').createServer((q,r)=>r.end(String(process.pid)));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
+        const pids: number[] = [];
+        for (const command of [deaf, `${deaf} &`]) {
+            adapter = new ServedProcess({ command, ready: READY, timeout: 5000 }, process.cwd());
+            const answer = await fetch(await adapter.start());
+            pids.push(Number(await answer.text()));
+
+            // When - it is stopped
+            await adapter.stop();
+        }
+
+        // Then - neither server outlived the stop, once the system reaped it
+        await expect
+            .poll(() => pids.map((pid) => alive(pid)), { timeout: 3000 })
+            .toStrictEqual([false, false]);
+    }, 15_000);
 
     test('runToCompletion — a build step a service runs before it serves — the command sees the environment it is handed, and a failure throws naming it', () => {
         // Given - a step that succeeds only when it is handed the database it builds

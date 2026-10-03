@@ -5,11 +5,19 @@ import { resolve as resolvePath } from 'node:path';
 
 import { pause } from '../../chain/pause.js';
 import { invariant, refusal } from '../../chain/refusals/refusal.js';
-import { groupEnded, KILL_GRACE_MS, WATCHDOG } from './process-group.js';
+import {
+    groupEnded,
+    KILL_GRACE_MS,
+    signalGroup,
+    SIGNALS_GROUPS,
+    WATCHDOG,
+} from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
 
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
+
+// Stryker disable all: hazard: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
 function watchGroup(groupId: number): ChildProcess {
     const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(groupId)], {
         detached: true,
@@ -25,11 +33,14 @@ function watchGroup(groupId: number): ChildProcess {
     }
     return watchdog;
 }
+// Stryker restore all
 
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
+    // Stryker disable next-line StringLiteral: an empty stdio reads as the default, piped
     execSync(command, { env, stdio: 'pipe' });
 }
 
+// Stryker disable all: outside: a server listening on port 0 always answers the port it got, and never errors
 async function findFreePort(): Promise<number> {
     return await new Promise((resolve, reject) => {
         const server = createServer();
@@ -48,6 +59,7 @@ async function findFreePort(): Promise<number> {
         server.on('error', reject);
     });
 }
+// Stryker restore all
 
 /** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`. */
 export class ServedProcess {
@@ -56,6 +68,7 @@ export class ServedProcess {
     private readonly extraEnv: Record<string, string>;
     private readonly facet: string;
     private readonly options: ProcessOptions;
+    // Stryker disable next-line BooleanLiteral: spawnServer sets it before any read
     private exited = false;
     private output = '';
     private readonly root: string;
@@ -79,7 +92,7 @@ export class ServedProcess {
         // invariant: banner mode: the server picks and announces the port, nothing is injected as `PORT`.
         const port = banner ? null : (this.options.port ?? (await findFreePort()));
         this.spawnServer(port);
-        const deadline = Date.now() + (this.options.timeout ?? DEFAULT_READY_TIMEOUT);
+        const deadline = Date.now() + this.timeout();
         const url = banner
             ? await this.awaitBanner(banner, deadline)
             : await this.awaitAnswer(port ?? 0, deadline);
@@ -97,28 +110,37 @@ export class ServedProcess {
     private spawnServer(port: null | number): void {
         const child = spawn(this.options.command, [], {
             cwd: this.workingDirectory(),
-            detached: process.platform !== 'win32',
+            detached: SIGNALS_GROUPS,
             env: {
                 ...process.env,
+                // Stryker disable next-line ConditionalExpression,EqualityOperator,StringLiteral: an env written as a function, which the facet reads into extraEnv, spreads to nothing either way
                 ...(typeof this.options.env === 'function' ? {} : this.options.env),
                 ...this.extraEnv,
                 ...(port === null ? {} : { PORT: String(port) }),
             },
             shell: true,
+            // Stryker disable next-line ArrayDeclaration: no server reads its input, ignored or piped
             stdio: ['ignore', 'pipe', 'pipe'],
         });
         this.child = child;
         this.exited = false;
-        if (child.pid !== undefined && process.platform !== 'win32') {
+        // Stryker disable next-line ConditionalExpression,LogicalOperator,BlockStatement,EqualityOperator: hazard: see watchGroup
+        if (child.pid !== undefined && SIGNALS_GROUPS) {
             this.watchdog = watchGroup(child.pid);
         }
         const collect = (data: unknown): void => {
             this.output += String(data);
         };
+        // Stryker disable next-line OptionalChaining: piped, the stream is always there
         child.stdout?.on('data', collect);
+        // Stryker disable next-line OptionalChaining: piped, the stream is always there
         child.stderr?.on('data', collect);
         child.on('close', () => {
             this.exited = true;
+        });
+        // invariant: a spawn that fails, its folder missing, says why before it closes.
+        child.on('error', (error) => {
+            collect(`${String(error)}\n`);
         });
     }
 
@@ -130,6 +152,7 @@ export class ServedProcess {
             if (found) {
                 return await this.bannerPort(banner, found[1]);
             }
+            // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
             if (Date.now() >= deadline) {
                 return await this.refuse({
                     fix: 'correct the pattern to what the server prints, or raise `timeout`',
@@ -157,12 +180,14 @@ export class ServedProcess {
 
     private async awaitAnswer(port: number, deadline: number): Promise<null | string> {
         const baseUrl = `http://127.0.0.1:${port}`;
+        // Stryker disable next-line StringLiteral: a URL with no path asks for the root all the same
         const readyUrl = `${baseUrl}${typeof this.options.ready === 'string' ? this.options.ready : '/'}`;
         while (!this.exited) {
             if (await answers(readyUrl)) {
                 this.port = port;
                 return baseUrl;
             }
+            // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
             if (Date.now() >= deadline) {
                 return await this.refuse({
                     fix: 'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
@@ -192,9 +217,8 @@ export class ServedProcess {
     }
 
     private workingDirectory(): string {
-        return this.options.cwd === undefined
-            ? this.root
-            : resolvePath(this.root, this.options.cwd);
+        // Stryker disable next-line StringLiteral: an empty path resolves to the root as `.` does
+        return resolvePath(this.root, this.options.cwd ?? '.');
     }
 
     /** Must exit 0: a failed build is reported as such, not as a later missing file. */
@@ -205,6 +229,7 @@ export class ServedProcess {
         }
         const outcome = spawnSync(before, [], {
             cwd: this.workingDirectory(),
+            // Stryker disable next-line StringLiteral: output read as a Buffer joins into the same text
             encoding: 'utf8',
             shell: true,
         });
@@ -212,7 +237,7 @@ export class ServedProcess {
             throw new Error(
                 refusal({
                     fix: 'run the command by hand and correct what its output names',
-                    found: `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${(outcome.stdout ?? '') + (outcome.stderr ?? '')}`,
+                    found: `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${outcome.stdout + outcome.stderr}`,
                     read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
                     why: 'A process’s `before` must exit 0 before the process starts.',
                 }),
@@ -226,44 +251,15 @@ export class ServedProcess {
             return;
         }
         this.child = null;
+        // Stryker disable next-line OptionalChaining: hazard: see watchGroup
         this.watchdog?.kill('SIGKILL');
         this.watchdog = null;
 
-        await new Promise<void>((resolve) => {
-            let exited = false;
-            child.on('exit', () => {
-                exited = true;
-                resolve();
-            });
-            if (child.exitCode !== null || child.signalCode !== null) {
-                void endLeaderlessGroup(child).then(resolve);
-                return;
-            }
-            killGroup(child, 'SIGTERM');
-            const killTimer = setTimeout(() => {
-                if (!exited) {
-                    killGroup(child, 'SIGKILL');
-                    resolve();
-                }
-            }, KILL_GRACE_MS);
-            killTimer.unref?.();
-        });
+        await endGroup(child);
     }
 }
 
-function killGroup(child: ChildProcess, signal: NodeJS.Signals): void {
-    if (child.pid !== undefined && process.platform !== 'win32') {
-        try {
-            process.kill(-child.pid, signal);
-            return;
-        } catch {
-            child.kill(signal);
-            return;
-        }
-    }
-    child.kill(signal);
-}
-
+// Stryker disable BlockStatement: a catch emptied answers undefined, which reads as no answer all the same
 async function answers(url: string): Promise<boolean> {
     try {
         await fetch(url, { redirect: 'manual' });
@@ -272,13 +268,16 @@ async function answers(url: string): Promise<boolean> {
         return false;
     }
 }
+// Stryker restore BlockStatement
 
-async function endLeaderlessGroup(child: ChildProcess): Promise<void> {
-    if (child.pid === undefined || process.platform === 'win32') {
+/** The group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it. */
+async function endGroup(child: ChildProcess): Promise<void> {
+    // Stryker disable next-line all: hazard: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
+    if (child.pid === undefined) {
         return;
     }
-    killGroup(child, 'SIGTERM');
+    signalGroup(child, 'SIGTERM');
     if (!(await groupEnded(-child.pid, KILL_GRACE_MS))) {
-        killGroup(child, 'SIGKILL');
+        signalGroup(child, 'SIGKILL');
     }
 }
