@@ -77,8 +77,9 @@ const JSONC_READER = [
 /** An extended rulebook is carried, so a plugin armed through `extends` keeps its rules; an extended config's relative `jsPlugins` resolve from its own folder. */
 export function ownFixesConfig(config: string): string {
     const off = Object.fromEntries(CATEGORIES.map((category) => [category, 'off']));
+    // Stryker disable next-line Regex: a config's name ends on its extension
     const json = /\.jsonc?$/u.test(config);
-    return [
+    const lines = [
         "import { readFileSync } from 'node:fs';",
         "import { dirname, resolve } from 'node:path';",
         ...(json ? [] : ['', `import base from ${JSON.stringify(config)};`]),
@@ -124,7 +125,9 @@ export function ownFixesConfig(config: string): string {
             ? [`export default armed(parseJsonc(readFileSync(${JSON.stringify(config)}, 'utf8')));`]
             : ['export default armed(base);']),
         '',
-    ].join('\n');
+    ];
+    // Stryker disable next-line StringLiteral: each statement of the wrapper ends on a semicolon or carries on across the join
+    return lines.join('\n');
 }
 
 function configIn(directory: string, names: readonly string[]): string | undefined {
@@ -152,10 +155,15 @@ export function nestedConfigDirectories(root: string): string[] {
     return found.toSorted();
 }
 
+function withoutReportPrefix(line: string): string {
+    // Stryker disable next-line Regex: the report prefix opens the line, so the first match is there anyway
+    return line.replace(/^[\s|x]*/u, '');
+}
+
 function failedToLoad(stdout: string): boolean {
     return stdout
         .split('\n')
-        .map((line) => line.replace(/^[\s|x]*/u, ''))
+        .map((line) => withoutReportPrefix(line))
         .some((line) => CONFIG_FAILURES.some((failure) => line.startsWith(failure)));
 }
 
@@ -172,6 +180,7 @@ function fixUnder(oxlint: string, directory: string, config: string, nested: str
                 OWN_FIXES_WRAPPER,
                 ...ignored.flatMap((pattern) => ['--ignore-pattern', pattern]),
             ],
+            // Stryker disable next-line ArithmeticOperator: a ceiling no report here reaches
             { cwd: directory, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 },
         );
         if (run.status === null || run.status > 1) {
@@ -185,7 +194,7 @@ function fixUnder(oxlint: string, directory: string, config: string, nested: str
             );
         }
     } finally {
-        rmSync(wrapper, { force: true });
+        rmSync(wrapper);
     }
 }
 
@@ -198,6 +207,7 @@ export function applyOwnFixes(root: string): void {
     }
     // invariant: oxlint rewrites its suppressions file on every `--fix`, dropping each rule the run did not arm, so it is put back as it was.
     const suppressions = join(root, OXLINT_SUPPRESSIONS);
+    // Stryker disable next-line StringLiteral: the bytes are written back as read, decoded or not
     const held = existsSync(suppressions) ? readFileSync(suppressions, 'utf8') : undefined;
     try {
         const pending = [{ config, directory: root }];
@@ -208,6 +218,7 @@ export function applyOwnFixes(root: string): void {
             for (const dir of nested) {
                 const inner = join(directory, dir);
                 const own = configIn(inner, NESTED_CONFIG_NAMES);
+                // Stryker disable next-line ConditionalExpression: a nested folder is one because it holds such a config
                 if (own !== undefined) {
                     pending.push({ config: own, directory: inner });
                 }

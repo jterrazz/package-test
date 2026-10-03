@@ -1,55 +1,16 @@
 import { OXLINT_CONFIG_NAMES } from '@jterrazz/typescript/rules';
-import {
-    chmodSync,
-    existsSync,
-    mkdirSync,
-    mkdtempSync,
-    readFileSync,
-    realpathSync,
-    writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
+import { disarmed, off, projectWith, stubOxlint } from './own-fixes.fixtures.js';
 import {
     applyOwnFixes,
     nestedConfigDirectories,
     OWN_FIXES_WRAPPER,
     ownFixesConfig,
 } from './own-fixes.js';
-
-const off = {
-    correctness: 'off',
-    nursery: 'off',
-    pedantic: 'off',
-    perf: 'off',
-    restriction: 'off',
-    style: 'off',
-    suspicious: 'off',
-};
-
-const disarmed = { reportUnusedDisableDirectives: 'off', typeAware: false };
-
-function projectWith(files: Record<string, string>): string {
-    const root = mkdtempSync(join(tmpdir(), 'own-fixes-'));
-    for (const [path, content] of Object.entries(files)) {
-        mkdirSync(join(root, path, '..'), { recursive: true });
-        writeFileSync(join(root, path), content);
-    }
-    return root;
-}
-
-function stubOxlint(root: string, status: number, script = ''): void {
-    mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });
-    const bin = join(root, 'node_modules', '.bin', 'oxlint');
-    writeFileSync(
-        bin,
-        `#!/bin/sh\necho "$@" >> "${root}/args.txt"\npwd -P >> "${root}/cwds.txt"\ncp ${OWN_FIXES_WRAPPER} wrapper.mjs\necho "cannot run" >&2\n${script}\nexit ${status}\n`,
-    );
-    chmodSync(bin, 0o755);
-}
 
 describe('own-fixes', () => {
     test("own-fixes — the wrapper arms the plugin's rules alone, in the base and in every override", async () => {
@@ -211,6 +172,7 @@ describe('own-fixes', () => {
             'node_modules/pkg/oxlint.config.ts': 'export default {};\n',
             'oxlint.config.ts': 'export default {};\n',
             'plain/index.ts': 'export {};\n',
+            'plain/inner/oxlint.config.ts': 'export default {};\n',
             'specs/cli/_fixtures/project/.oxlintrc.json': '{}\n',
             'sub/deeper/.oxlintrc.json': '{}\n',
             'sub/oxlint.config.ts': 'export default {};\n',
@@ -222,13 +184,20 @@ describe('own-fixes', () => {
 
         // Then - the root's run ignores sub/, whose own run ignores deeper/, whose own run ignores nothing
         const real = realpathSync(root);
-        expect(nestedConfigDirectories(root)).toStrictEqual(['sub']);
+        expect(nestedConfigDirectories(root)).toStrictEqual(['plain/inner', 'sub']);
         expect(readFileSync(join(root, 'cwds.txt'), 'utf8')).toBe(
-            [real, join(real, 'sub'), join(real, 'sub', 'deeper'), ''].join('\n'),
+            [
+                real,
+                join(real, 'plain', 'inner'),
+                join(real, 'sub'),
+                join(real, 'sub', 'deeper'),
+                '',
+            ].join('\n'),
         );
         expect(readFileSync(join(root, 'args.txt'), 'utf8')).toBe(
             [
-                `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern sub/**`,
+                `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern plain/inner/** --ignore-pattern sub/**`,
+                `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER}`,
                 `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern deeper/**`,
                 `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER}`,
                 '',
@@ -246,18 +215,23 @@ describe('own-fixes', () => {
         // Given - an oxlint exiting past 1
         const root = projectWith({ '.oxlintrc.json': '{}\n' });
         stubOxlint(root, 2);
+        const killed = projectWith({ '.oxlintrc.json': '{}\n' });
+        stubOxlint(killed, 0, 'kill -9 $$');
 
-        // Then - the pass throws with its stderr, and the wrapper is deleted
+        // Then - the pass throws with its stderr, and the wrapper is deleted; a killed oxlint fails alike
         expect(() => {
             applyOwnFixes(root);
         }).toThrow(`the checker ran ${join(root, 'node_modules', '.bin', 'oxlint')} --fix`);
+        expect(() => {
+            applyOwnFixes(killed);
+        }).toThrow('and it failed');
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
     });
 
     test('own-fixes — a config oxlint could not load is a failure naming it, though oxlint exits 1', () => {
-        // Given - an oxlint that prints its load failure on stdout and exits 1, as it does
+        // Given - an oxlint that prints its load failure on stdout, under a report prefix, and exits 1, as it does
         const root = projectWith({ '.oxlintrc.json': '{}\n' });
-        stubOxlint(root, 1, "echo 'Failed to parse oxlint configuration file.'");
+        stubOxlint(root, 1, "echo '  x Failed to parse oxlint configuration file.'");
 
         // Then - the pass throws naming the config, and the wrapper is deleted
         expect(() => {
@@ -295,5 +269,28 @@ describe('own-fixes', () => {
         applyOwnFixes(bare);
         applyOwnFixes(unconfigured);
         expect(existsSync(join(unconfigured, 'args.txt'))).toBe(false);
+    });
+
+    test('own-fixes — the suppressions oxlint rewrites are put back as they were, or left absent, and a long report is read whole', () => {
+        // Given - an oxlint rewriting the suppressions file and printing a long report, under a project that held one and one that held none
+        const script =
+            "echo '{\"rewritten\":true}' > oxlint-suppressions.json\nprintf '%2000s\\n' report";
+        const held = projectWith({
+            '.oxlintrc.json': '{}\n',
+            'oxlint-suppressions.json': '{"held":true}\n',
+        });
+        stubOxlint(held, 1, script);
+        const none = projectWith({ '.oxlintrc.json': '{}\n' });
+        stubOxlint(none, 1, script);
+
+        // When - the pass runs on both
+        applyOwnFixes(held);
+        applyOwnFixes(none);
+
+        // Then - the held file back, and none left where none was
+        expect([
+            readFileSync(join(held, 'oxlint-suppressions.json'), 'utf8'),
+            existsSync(join(none, 'oxlint-suppressions.json')),
+        ]).toStrictEqual(['{"held":true}\n', false]);
     });
 });
