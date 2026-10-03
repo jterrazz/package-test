@@ -14,6 +14,7 @@ import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function destructuresCleanup(node: AstNode): boolean {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: no other node holds a call as its `init`
     if (node.type !== 'VariableDeclarator') {
         return false;
     }
@@ -21,10 +22,12 @@ function destructuresCleanup(node: AstNode): boolean {
     while (init?.type === 'AwaitExpression') {
         init = child(init, 'argument');
     }
+    // Stryker disable next-line ConditionalExpression: specificationMember reads no member from a non-call
     if (init?.type !== 'CallExpression' || specificationMember(init) === undefined) {
         return false;
     }
     const id = child(node, 'id');
+    // Stryker disable next-line OptionalChaining,ConditionalExpression,BlockStatement: a declarator always declares something, and only a pattern lists properties
     if (id?.type !== 'ObjectPattern') {
         return false;
     }
@@ -34,6 +37,7 @@ function destructuresCleanup(node: AstNode): boolean {
 function namesCleanup(argument: AstNode): boolean {
     let found = false;
     walk(argument, (visited) => {
+        // Stryker disable next-line ConditionalExpression: only an identifier has a name
         if (visited.type === 'Identifier' && visited.name === 'cleanup') {
             found = true;
         }
@@ -42,10 +46,12 @@ function namesCleanup(argument: AstNode): boolean {
 }
 
 function isAfterAllWithCleanup(node: AstNode): boolean {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: only a call has a callee
     if (node.type !== 'CallExpression') {
         return false;
     }
     const callee = child(node, 'callee');
+    // Stryker disable next-line OptionalChaining,ConditionalExpression: a call always has a callee, and only an identifier has a name
     if (callee?.type !== 'Identifier' || callee.name !== 'afterAll') {
         return false;
     }

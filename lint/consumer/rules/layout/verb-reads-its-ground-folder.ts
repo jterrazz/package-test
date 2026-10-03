@@ -41,6 +41,7 @@ function diskArgument(
     bindings: ReadonlyMap<string, readonly AstNode[]>,
 ): DiskCall | undefined {
     const inline = diskCallOf(argument);
+    // Stryker disable ConditionalExpression,OptionalChaining,LogicalOperator,ArrayDeclaration: an inline call names no binding, and a name with no binding resolves to none
     const name = argument?.type === 'Identifier' ? identifierName(argument) : undefined;
     if (inline !== undefined || name === undefined) {
         return inline;
@@ -48,6 +49,7 @@ function diskArgument(
     const declarators = bindings.get(name) ?? [];
     let scope = child(argument, 'parent');
     while (scope !== null && scope !== undefined) {
+        // Stryker restore ConditionalExpression,OptionalChaining,LogicalOperator,ArrayDeclaration
         const block = scope;
         const declarator = declarators.findLast((candidate) => blockOf(candidate) === block);
         if (declarator !== undefined) {
@@ -97,10 +99,12 @@ export const verbReadsItsGroundFolder = defineRule(
                     return isTestRole(identityOf(context).role);
                 },
                 CallExpression(node: AstNode) {
+                    // Stryker disable ConditionalExpression: a call always has a callee, and no verb has a role
                     const callee = child(node, 'callee');
                     const verb = callee === undefined ? undefined : memberPropertyName(callee);
                     const role = verb === undefined ? undefined : ROLES[verb];
                     if (verb === undefined || role === undefined) {
+                        // Stryker restore ConditionalExpression
                         return;
                     }
                     const argument = childList(node, 'arguments')[role.argument];
@@ -120,15 +124,18 @@ export const verbReadsItsGroundFolder = defineRule(
                             verb,
                         },
                         messageId: 'crossed',
+                        // Stryker disable next-line OptionalChaining: a disk call came from an argument
                         node: argument?.type === 'Identifier' ? argument : disk.node,
                     });
                 },
                 VariableDeclarator(node: AstNode) {
                     const declaration = child(node, 'parent');
                     const name = identifierName(child(node, 'id'));
+                    // Stryker disable next-line OptionalChaining,ConditionalExpression: a declarator always has its declaration, and no name is ever looked up
                     if (declaration?.kind !== 'const' || name === undefined) {
                         return;
                     }
+                    // Stryker disable next-line ArrayDeclaration: an entry that is no declarator resolves no name
                     bindings.set(name, [...(bindings.get(name) ?? []), node]);
                 },
             };

@@ -8,6 +8,32 @@ const MODULE_TEST = '/repo/src/report/report.test.ts';
 ruleTester().run('verb-reads-its-ground-folder', verbReadsItsGroundFolder, {
     invalid: [
         {
+            name: 'A binding resolves through the blocks that enclose the call, never a sibling test’s; the message names a path with no ground folder.',
+            code: "const rows = file('./rows.sql');\ntest('a', () => { const rows = file('./_seeds/rows.sql'); api.seed(rows); });\ntest('b', () => { api.seed(rows); });",
+            errors: [
+                {
+                    column: 27,
+                    line: 3,
+                    message:
+                        /^found: `seed\(\)` reads _seeds\/, and `file\('\.\/rows\.sql'\)` names no ground folder · why: .* · fix: move the file to \.\/_seeds\/ beside the test, or in the _seeds\/ of the lowest folder/u,
+                },
+            ],
+            filename: SPEC,
+        },
+        {
+            name: 'A verb that reads a document beside the test names that in its message.',
+            code: "cli.run(file('./_expected/case.spec.yaml'));",
+            errors: [
+                {
+                    column: 13,
+                    line: 1,
+                    message:
+                        /^found: `run\(\)` reads a document beside the test, and `file\('\.\/_expected\/case\.spec\.yaml'\)` names _expected\/ · why: .* · fix: move the file to the folder its verb reads, and name it from there/u,
+                },
+            ],
+            filename: SPEC,
+        },
+        {
             code: "api.seed(file('./_fixtures/rows.sql'));",
             errors: [{ column: 14, line: 1, messageId: 'crossed' }],
             filename: SPEC,
