@@ -1,35 +1,28 @@
 import { RUN_KEYS } from './spec-grammar.js';
 import type { SpecFile, SpecRunUpdate } from './spec-grammar.js';
-import { scalarString } from './spec-node.js';
-import { blockScalar, isMap, isSeq, nodePairs, renderYamlSource } from './yaml-document.js';
-import type { YAMLMap } from './yaml-document.js';
+import { blockScalar, isMap, isScalar, isSeq, renderYamlSource } from './yaml-document.js';
+import type { Pair, YAMLMap } from './yaml-document.js';
+
+function keyOf(pair: Pair): string {
+    return String(isScalar(pair.key) ? pair.key.value : pair.key);
+}
 
 function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly string[]): void {
-    const items = nodePairs(map);
-    const existing = items.findIndex((pair) => scalarString(pair.key) === key);
-    if (existing !== -1) {
-        map.set(key, value);
-        return;
-    }
-    const rank = order.indexOf(key);
-    const at = items.findIndex((pair) => {
-        const seen = scalarString(pair.key);
-        return seen !== null && order.indexOf(seen) > rank;
-    });
+    const later = new Set(order.slice(order.indexOf(key) + 1));
+    const at = map.items.findIndex((pair) => later.has(keyOf(pair)));
+    const isNew = !map.has(key);
     map.set(key, value);
-    if (at !== -1) {
-        // invariant: `set` appended: move the new pair to its canonical place.
-        const added = map.items.pop();
-        if (added !== undefined) {
-            map.items.splice(at, 0, added);
-        }
+    if (isNew && at !== -1) {
+        map.items.splice(at, 0, ...map.items.splice(-1));
     }
 }
 
 /** The YAML document is edited, not re-emitted, so everything but exit codes and streams comes back byte-identical. */
 export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string {
     const root = file.source.document.contents;
+    // Stryker disable next-line all: readSpecFile refused any document whose runs is not a list
     const runs = isMap(root) ? root.get('runs', true) : undefined;
+    // Stryker disable next-line all: readSpecFile refused any document whose runs is not a list
     if (!isSeq(runs)) {
         return renderYamlSource(file.source);
     }

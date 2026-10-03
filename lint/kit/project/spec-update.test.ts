@@ -93,6 +93,62 @@ describe('updateSpecFile', () => {
         expect(written.indexOf('stdout')).toBeLessThan(written.indexOf('files'));
     });
 
+    test('each run takes its own update in canonical key order; a key it already has stays where it was written', () => {
+        // Given - runs written out of order, one without a stream, and fewer runs than updates
+        const file = readSpecFile(
+            [
+                'description: d',
+                'runs:',
+                '  - stdout: |',
+                '      old',
+                '    command: a',
+                '    exit: 3',
+                '  - command: b',
+                '    exit: 0',
+                '    files:',
+                '      x.txt: absent',
+                '  - command: c',
+                '    exit: 0',
+                '    stdout: keep',
+                '',
+            ].join('\n'),
+            'case.spec.yaml',
+        );
+
+        // When - one update per run, and one past the last
+        const written = updateSpecFile(file, [
+            { exitCode: 1, stderr: '', stdout: 'new\n' },
+            { exitCode: 0, stderr: 'warn\n', stdout: 'out\n' },
+            { exitCode: 0, stderr: 'e\n', stdout: '' },
+            { exitCode: 2, stderr: '', stdout: 'past\n' },
+        ]);
+
+        // Then - existing keys moved nowhere, new ones landed before files: in RUN_KEYS order, and an emptied stream left
+        expect(written).toBe(
+            [
+                'description: d',
+                'runs:',
+                '  - stdout: |',
+                '      new',
+                '    command: a',
+                '    exit: 1',
+                '  - command: b',
+                '    exit: 0',
+                '    stdout: |',
+                '      out',
+                '    stderr: |',
+                '      warn',
+                '    files:',
+                '      x.txt: absent',
+                '  - command: c',
+                '    exit: 0',
+                '    stderr: |',
+                '      e',
+                '',
+            ].join('\n'),
+        );
+    });
+
     test('at the document’s own indentation, a stdout opening on a space reads back byte for byte in a four-space document', () => {
         // Given - a document formatted at four spaces, the step oxfmt writes YAML at
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
