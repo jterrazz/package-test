@@ -1,4 +1,4 @@
-import { astro, bun, expo, next, node, react } from '@jterrazz/typescript/oxlint';
+import derived from '@jterrazz/typescript/oxlint';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -39,9 +39,9 @@ function linted(rule: string, body: readonly string[]): { findings: unknown; sou
 }
 
 describe('typeAwareFindings', () => {
-    test('the type-aware rules a missed or a needless `await` is judged by (meta-test) — every profile of the toolchain runs no-floating-promises and await-thenable type-aware, as errors', () => {
-        // Given - the six profiles a consumer composes
-        const profiles = { astro, bun, expo, next, node, react };
+    test('the type-aware rules a missed or a needless `await` is judged by (meta-test) — the config this repository derives runs no-floating-promises and await-thenable type-aware, as errors', () => {
+        // Given - the config the toolchain derives for this repository, on node
+        const profiles = { node: derived };
 
         // Then - each lints type-aware and holds both rules at error, so no rule of this plugin judges an `await` on a matcher
         const held = Object.fromEntries(
@@ -114,9 +114,9 @@ describe('typeAwareFindings', () => {
         );
     });
 
-    test('the upstream rules `no-existence-only-assertion` hands two of its shapes to (meta-test) — every profile refuses `toBeTruthy` and a bare `toThrow` in a test file, wherever they stand', () => {
-        // Given - the six profiles, and a test holding each shape beside the forms that state the value
-        const profiles = { astro, bun, expo, next, node, react };
+    test('the upstream rules `no-existence-only-assertion` hands two of its shapes to (meta-test) — the config this repository derives refuses `toBeTruthy` and a bare `toThrow` in a test file, wherever they stand', () => {
+        // Given - the derived config, and a test holding each shape beside the forms that state the value
+        const profiles = { node: derived };
         const { findings, source } = linted('vitest/prefer-strict-boolean-matchers', [
             'export function forms(ready: boolean, build: () => void): void {',
             '    expect(ready).toBeTruthy(); // refused',
@@ -132,7 +132,7 @@ describe('typeAwareFindings', () => {
             '}',
         ]);
 
-        // Then - each profile arms both rules on test files, and each fires on its shape alone
+        // Then - the derived config arms both rules on test files, and each fires on its shape alone
         const armed = Object.fromEntries(
             Object.entries(profiles).map(([name, profile]) => {
                 const rules = (profile.overrides ?? []).find((layer) =>

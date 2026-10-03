@@ -6,9 +6,8 @@ node_modules/.install: package-lock.json
 
 install: node_modules/.install
 
-# Through Turborepo's content-hash cache: an unchanged tree restores `dist/` instead of bundling again.
 build: node_modules/.install
-	npm run build:cached
+	npm run build
 
 lint: node_modules/.install
 	npm run lint
@@ -32,7 +31,7 @@ endif
 test-merge: node_modules/.install
 	npx vitest --merge-reports .artifacts/vitest/blob --coverage
 	npm run coverage:check
-	node dist/route-split.js
+	node .artifacts/dev/route-split.js
 
 # The local loop, never a verdict.
 test-changed: node_modules/.install
@@ -55,9 +54,9 @@ check-links:
 
 # Rewrites the sources in place for its whole run, so nothing else runs beside it; a measure, never a verdict: `check` never calls it.
 mutation: build
-	npx stryker run
+	npx typescript mutation
 
 # The whole suite, the specs and the processes they spawn included: one mutant at a time runs every node project, so it is pointed at ranges, `MUTATE=<file>:<from>-<to>,…`.
 mutation-specs: build
 	@if [ -z "$(MUTATE)" ]; then echo "mutation-specs: name the ranges to measure — make mutation-specs MUTATE=src/stubs/kinds/openai.ts:186-186"; exit 1; fi
-	npx stryker run stryker.specs.config.json --mutate "$(MUTATE)"
+	npx typescript mutation --specs --mutate "$(MUTATE)"

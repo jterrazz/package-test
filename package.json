@@ -27,10 +27,6 @@
     },
     "files": [
         "dist",
-        "!dist/route-split.*",
-        "!dist/schema.*",
-        "!dist/self.*",
-        "!dist/self-*",
         "!dist/**/*.map",
         "docs",
         "!docs/03-testing.md",
@@ -75,13 +71,12 @@
         "registry": "https://registry.npmjs.org/"
     },
     "scripts": {
-        "build": "tsdown --config tsdown.config.ts",
-        "build:cached": "rm -rf dist && TURBO_TELEMETRY_DISABLED=1 turbo run build --output-logs=new-only",
-        "docs": "npm run build:cached && node dist/self.js chapters && node dist/schema.js",
+        "build": "typescript build",
+        "docs": "npm run build && node .artifacts/dev/self.js chapters && node .artifacts/dev/schema.js",
         "lint": "typescript check",
         "test": "vitest --run",
-        "coverage": "npm run build:cached && vitest --run --coverage && node dist/self.js coverage --write",
-        "coverage:check": "node dist/self.js coverage",
+        "coverage": "npm run build && vitest --run --coverage && node .artifacts/dev/self.js coverage --write",
+        "coverage:check": "node .artifacts/dev/self.js coverage",
         "test:repeat": "vitest --run --repeats 10"
     },
     "dependencies": {
@@ -94,8 +89,6 @@
     "devDependencies": {
         "@hono/node-server": "^2.1.1",
         "@jterrazz/typescript": "file:../package-typescript",
-        "@stryker-mutator/core": "^10.0.0",
-        "@stryker-mutator/vitest-runner": "^10.0.0",
         "@types/better-sqlite3": "^9.6.0",
         "@types/node": "^26.6.2",
         "@types/pg": "^8.23.1",
@@ -114,8 +107,6 @@
         "react-router": "^8.4.0",
         "redis": "^6.2.1",
         "testcontainers": "^12.1.0",
-        "tsdown": "^0.23.0",
-        "turbo": "^2.11.3",
         "vite": "^8.3.0",
         "vitest": "5.0.1",
         "vitest-browser-react": "^2.3.0",

@@ -6,7 +6,6 @@ node_modules/
 stryker-setup-*.js
 dist
 # Turborepo's per-task log, at a path it offers no key to move.
-.turbo
 *.tgz
 
 # The oxlint a checker spec's project runs: the repository's own, behind a stub.

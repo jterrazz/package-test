@@ -6,7 +6,7 @@ const REPOSITORY = resolve(import.meta.dirname, '../..');
 
 /** The passes only this package runs on itself: `npm run build` first. */
 export const { cleanup, lint } = await specification.lint({
-    checkers: [`node ${REPOSITORY}/dist/self.js check`],
+    checkers: [`node ${REPOSITORY}/.artifacts/dev/self.js check`],
 });
 
 afterAll(cleanup);
