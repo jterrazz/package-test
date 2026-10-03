@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { match } from '../../expectations/tokens/match.js';
 import type { MatchableRequest } from '../exchange.js';
-import { buildMatch } from './http-filter.js';
+import { absentHeadersOf, buildMatch } from './http-filter.js';
 import type { HttpStubFilter } from './http-filter.js';
 
 const URL = 'https://api.example.com/things';
@@ -154,5 +154,37 @@ describe('http-filter', () => {
         // Given - a request filter, and a request the subject sent
         // Then - the stub serves it exactly when the filter holds
         expect(buildMatch(filter)?.(observed)).toBe(expected);
+    });
+
+    test('http-filter — a string or a RegExp reads the raw text of a body, a value as its JSON, and an absent header never matches', () => {
+        // Given - text bodies a JSON reading would quote, a value, and a header pattern that matches any text
+        const verdicts = [
+            buildMatch({ body: '"hi"' })?.(request({ body: 'say "hi"' })),
+            buildMatch({ body: /^say/u })?.(request({ body: 'say it' })),
+            buildMatch({ body: '"a":1' })?.(request({ body: { a: 1 } })),
+            buildMatch({ headers: { 'x-tag': /.*/u } })?.(request({ headers: {} })),
+            buildMatch({ query: { tag: /.*/u } })?.(request({ url: URL })),
+        ];
+
+        // Then - each verdict
+        expect(verdicts).toStrictEqual([true, true, true, false, false]);
+    });
+
+    test('http-filter — absentHeadersOf — none for a filter forbidding nothing, and every contradicted header named', () => {
+        // Given - filters without the forbidden list, with an empty one, and contradicting two headers
+        const contradicting = {
+            headers: { 'X-A': 'a', 'X-B': 'b' },
+            without: { headers: ['x-a', 'X-B'] },
+        };
+
+        // Then - nothing forbidden, and the refusal naming both
+        expect([
+            absentHeadersOf(),
+            absentHeadersOf({ without: {} }),
+            absentHeadersOf({ without: { headers: [] } }),
+        ]).toStrictEqual([undefined, undefined, undefined]);
+        expect(() => absentHeadersOf(contradicting)).toThrow(
+            'found: an http stub filter that both requires and forbids the header(s) x-a, x-b',
+        );
     });
 });

@@ -15,14 +15,17 @@ export type HttpStubFilter = {
     without?: { headers?: readonly string[] };
 };
 
+/** The raw body a string or RegExp filter reads: a text as it is, any other value as its JSON. */
+function rawOf(body: unknown): string {
+    return typeof body === 'string' ? body : JSON.stringify(body ?? '');
+}
+
 function matchesBody(body: unknown, expected: NonNullable<HttpStubFilter['body']>): boolean {
     if (typeof expected === 'string') {
-        const text = typeof body === 'string' ? body : JSON.stringify(body ?? '');
-        return text.includes(expected);
+        return rawOf(body).includes(expected);
     }
     if (expected instanceof RegExp) {
-        const text = typeof body === 'string' ? body : JSON.stringify(body ?? '');
-        return expected.test(text);
+        return expected.test(rawOf(body));
     }
     return structuralSubset(expected, body, new CaptureScope());
 }
@@ -69,12 +72,12 @@ export function buildMatch(filter?: HttpStubFilter): StubRequest['match'] {
     };
 }
 
-export function absentHeadersOf(filter?: HttpStubFilter): string[] | undefined {
-    const absent = filter?.without?.headers?.map((name) => name.toLowerCase()) ?? [];
+export function absentHeadersOf(filter: HttpStubFilter = {}): string[] | undefined {
+    const absent = filter.without?.headers?.map((name) => name.toLowerCase()) ?? [];
     if (absent.length === 0) {
         return undefined;
     }
-    const required = new Set(Object.keys(filter?.headers ?? {}).map((name) => name.toLowerCase()));
+    const required = new Set(Object.keys(filter.headers ?? {}).map((name) => name.toLowerCase()));
     const contradicted = absent.filter((name) => required.has(name));
     if (contradicted.length > 0) {
         const names = contradicted.join(', ');

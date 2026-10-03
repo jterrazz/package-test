@@ -178,4 +178,50 @@ describe('http', () => {
             chunks: ['data: first\ndata: second\n\n'],
         });
     });
+
+    test('http — streamed responses — a stream and a text reply take their status, type, delay and headers from init, or their defaults', () => {
+        // Given - a stream and a text with no init and with a full one, and an event stating its retry
+        const init = { contentType: 'text/x', delay: 9, headers: { 'x-a': '1' }, status: 206 };
+
+        // Then - each reply
+        expect([
+            http.stream(['a']),
+            http.stream(['a'], init),
+            http.text('t', { status: 201 }),
+            http.sse([{ data: 'x', retry: 3000 }]).body,
+        ]).toStrictEqual([
+            {
+                body: {
+                    chunks: ['a'],
+                    contentType: 'application/octet-stream',
+                    delayBetweenChunks: 0,
+                    kind: STREAM_BODY,
+                },
+                headers: undefined,
+                status: 200,
+            },
+            {
+                body: {
+                    chunks: ['a'],
+                    contentType: 'text/x',
+                    delayBetweenChunks: 9,
+                    kind: STREAM_BODY,
+                },
+                headers: { 'x-a': '1' },
+                status: 206,
+            },
+            {
+                body: 't',
+                delay: undefined,
+                headers: { 'content-type': 'text/plain; charset=utf-8' },
+                status: 201,
+            },
+            {
+                chunks: ['retry: 3000\ndata: x\n\n'],
+                contentType: 'text/event-stream',
+                delayBetweenChunks: 0,
+                kind: STREAM_BODY,
+            },
+        ]);
+    });
 });

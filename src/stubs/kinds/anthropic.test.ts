@@ -21,6 +21,19 @@ function shapeOf(request: StubRequest): object {
     return { ...request, match: typeof request.match, wrap: typeof request.wrap };
 }
 
+const envelope = (text: string): object => ({
+    body: {
+        content: [{ text, type: 'text' }],
+        id: 'msg-test',
+        model: 'claude-sonnet-4-20250514',
+        role: 'assistant',
+        stop_reason: 'end_turn',
+        type: 'message',
+        usage: { input_tokens: 10, output_tokens: 10 },
+    },
+    status: 200,
+});
+
 describe('anthropic', () => {
     test('intercept — anthropic — anthropic.messages() filter matches system prompt', () => {
         // Given - a system-prompt filter, and two requests
@@ -76,6 +89,10 @@ describe('anthropic', () => {
         };
 
         // Then - the object is the reply, untouched; the string becomes a whole message
+        expect([trigger.wrap([1, 2]), trigger.wrap(null)]).toStrictEqual([
+            envelope('[1,2]'),
+            envelope('null'),
+        ]);
         expect([trigger.wrap(fixture), trigger.wrap('plain text reply')]).toStrictEqual([
             { body: fixture, status: 200 },
             {
@@ -115,8 +132,8 @@ describe('anthropic', () => {
     test('intercept — anthropic — anthropic.messages() tools filter matches a subset of declared tool names', () => {
         // Given - a filter requiring one tool by name
         const trigger = anthropic.messages({ tools: ['get_weather'] });
-        const asked = (names: string[]): boolean =>
-            matcherOf(trigger)({
+        const asked = (names: string[], filtered = trigger): boolean =>
+            matcherOf(filtered)({
                 body: {
                     messages: [{ content: 'hi', role: 'user' }],
                     tools: names.map((name) => ({ name })),
@@ -131,7 +148,11 @@ describe('anthropic', () => {
             absent: asked(['get_time']),
             among: asked(['get_weather', 'get_time']),
             none: asked([]),
-        }).toStrictEqual({ absent: false, among: true, none: false });
+            oneOfTwo: asked(
+                ['get_weather'],
+                anthropic.messages({ tools: ['get_weather', 'get_time'] }),
+            ),
+        }).toStrictEqual({ absent: false, among: true, none: false, oneOfTwo: false });
     });
 
     test('intercept — anthropic — anthropic.messages() string-form system/user filters match by EXACT equality', () => {
@@ -260,5 +281,13 @@ describe('anthropic', () => {
             },
             times: 0,
         });
+    });
+
+    test('intercept — anthropic streamed replies — stream() with no init serves every event at once', () => {
+        // Given - a stream declared with no delay
+        const { body } = anthropic.stream(['a']);
+
+        // Then - no pause between two events
+        expect(isStreamBody(body) ? body.delayBetweenChunks : undefined).toBe(0);
     });
 });

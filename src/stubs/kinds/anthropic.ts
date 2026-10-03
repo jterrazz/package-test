@@ -1,3 +1,4 @@
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import type { StubRequest, StubResponse } from '../exchange.js';
 import type { Stub } from '../stub.js';
 import { http } from './http.js';
@@ -91,7 +92,7 @@ export const anthropic = {
             match: filter ? ({ body }) => matchesFilter(body, filter) : undefined,
             // outside: fixture files are already in the messages.create shape: passed through verbatim.
             wrap(data: unknown): StubResponse {
-                if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
+                if (isRecord(data)) {
                     return { status: 200, body: data };
                 }
                 return buildReply(data);

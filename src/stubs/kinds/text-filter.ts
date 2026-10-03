@@ -1,3 +1,4 @@
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { CaptureScope } from '../../expectations/tokens/capture-scope.js';
 import type { Matcher } from '../../expectations/tokens/match.js';
 import { structuralEquals } from '../../expectations/tokens/structural.js';
@@ -21,11 +22,10 @@ export function matchesText(filter: TextFilter | undefined, actual: string): boo
 
 /** A field of a request body read as JSON: absent wherever the body is not an object holding it. */
 export function fieldOf(value: unknown, key: string): unknown {
-    return typeof value === 'object' && value !== null && key in value
-        ? Reflect.get(value, key)
-        : undefined;
+    return isRecord(value) ? value[key] : undefined;
 }
 
+// Stryker disable next-line ArrayDeclaration: no request holds a message or a tool of the text a mutant writes
 export const listOf = (value: unknown): readonly unknown[] => (Array.isArray(value) ? value : []);
 
 export const textOf = (value: unknown): string => (typeof value === 'string' ? value : '');
