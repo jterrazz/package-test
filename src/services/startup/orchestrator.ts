@@ -8,11 +8,6 @@ import { getContainerIntegrations } from './registry.js';
 import { formatStartupReport } from './startup-report.js';
 import type { AppInfo, ServiceReport } from './startup-report.js';
 
-type RunningService = {
-    handle: ServiceHandle;
-    container: ContainerPort | null;
-};
-
 export type OrchestratorOptions = {
     /** Defaults to the api shape; a subject that is no app says `{ type: 'none' }` and gets no line. */
     subject?: AppInfo | undefined;
@@ -70,7 +65,7 @@ export class Orchestrator {
     private readonly services: Record<string, ServiceHandle>;
     private readonly root: string;
     private readonly subject: AppInfo;
-    private running: RunningService[] = [];
+    private containers: ContainerPort[] = [];
     private started = false;
 
     constructor(options: OrchestratorOptions) {
@@ -102,7 +97,6 @@ export class Orchestrator {
             ...embedded.map(async (handle) => {
                 await handle.initialize(dockerDir, this.root);
                 handle.started = true;
-                this.running.push({ handle, container: null });
             }),
         ]);
 
@@ -139,7 +133,7 @@ export class Orchestrator {
         await handle.healthcheck();
         await handle.initialize(dockerDir, this.root);
         handle.started = true;
-        this.running.push({ handle, container });
+        this.containers.push(container);
         return {
             name: handle.serviceName ?? handle.type,
             type: handle.type,
@@ -149,12 +143,10 @@ export class Orchestrator {
     }
 
     async stop(): Promise<void> {
-        for (const { container } of this.running) {
-            if (container) {
-                await container.stop();
-            }
+        for (const container of this.containers) {
+            await container.stop();
         }
-        this.running = [];
+        this.containers = [];
         this.started = false;
     }
 
