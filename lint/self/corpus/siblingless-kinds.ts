@@ -143,7 +143,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/integration/call.action.ts',
             'src/facets/mobile/screen/open.action.ts',
             'src/facets/specification.ts',
-            'src/facets/website/fetch/fetch.action.ts',
         ),
         name: 'a facet module',
         why: 'the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible',
