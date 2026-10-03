@@ -8,6 +8,8 @@ import { ensureBooted, resolveSimulatorUdid, sameRuntime } from './simulator.js'
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
 
+const APPIUM_STATUS = '/status';
+
 export type RunServer = { device: MobileDevice; udid: string; url: string };
 
 export type AppiumServer = {
@@ -29,7 +31,11 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
 
     const serve = new ServedProcess(
         // outside: the served process injects `PORT`; appium reads only a flag.
-        { command: `"${bin}" --port "$PORT"`, ready: '/status', timeout: APPIUM_READY_TIMEOUT_MS },
+        {
+            command: `"${bin}" --port "$PORT"`,
+            ready: APPIUM_STATUS,
+            timeout: APPIUM_READY_TIMEOUT_MS,
+        },
         root,
         'mobile',
     );
@@ -52,7 +58,9 @@ export async function serveAppium(
     return { server: await startAppiumServer(root), udid };
 }
 
-async function mobileServer(): Promise<RunServer | undefined> {
+/** The run's Appium server, provided by a `mobile({ device })` project's setup. */
+// Stryker disable all: outside: only a mobile project's setup provides it, which no module test runs, so every read answers undefined; the mobile specs judge it
+export async function mobileServer(): Promise<RunServer | undefined> {
     try {
         const { inject } = await import('vitest');
         return inject('mobileServer');
@@ -60,6 +68,7 @@ async function mobileServer(): Promise<RunServer | undefined> {
         return undefined;
     }
 }
+// Stryker restore all
 
 function notOurs(url: string): AppiumServer {
     return {
@@ -105,6 +114,7 @@ export function runDevice(device: MobileDevice | undefined, run: RunServer): Mob
 export async function reachAppium(
     { appium: declared, device }: { appium?: { url: string }; device?: MobileDevice },
     root: string,
+    run?: RunServer,
 ): Promise<{ appium: AppiumServer; device: MobileDevice; outlivesFile: boolean }> {
     if (declared !== undefined) {
         if (device === undefined) {
@@ -119,7 +129,6 @@ export async function reachAppium(
         }
         return { appium: notOurs(declared.url), device, outlivesFile: true };
     }
-    const run = await mobileServer();
     if (run !== undefined) {
         return { appium: notOurs(run.url), device: runDevice(device, run), outlivesFile: true };
     }

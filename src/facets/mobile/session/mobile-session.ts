@@ -12,6 +12,7 @@ type SessionProject = Pick<TestProject, 'provide'> & {
 };
 
 export function mobileSessionSetup(): string {
+    // Stryker disable next-line StringLiteral: the bundled name is read only from dist, which no module test runs
     return setupEntry(import.meta.dirname, 'mobile-session.ts', 'mobile-session.js');
 }
 
@@ -20,19 +21,18 @@ export default async function setup(project: SessionProject): Promise<() => Prom
     const directory = join(project.config.root, MOBILE_SESSIONS_DIR, randomUUID());
     project.provide('mobileSessions', directory);
     const declared = project.config.provide?.mobileAppium;
-    const served =
-        declared === undefined
-            ? undefined
-            : await serveAppium(declared.device, resolve(project.config.root, declared.root));
-    if (declared !== undefined && served !== undefined) {
-        project.provide('mobileServer', {
-            device: declared.device,
-            udid: served.udid,
-            url: served.server.url,
-        });
+    if (declared === undefined) {
+        return async () => {
+            await endSessions(directory);
+        };
     }
+    const { server, udid } = await serveAppium(
+        declared.device,
+        resolve(project.config.root, declared.root),
+    );
+    project.provide('mobileServer', { device: declared.device, udid, url: server.url });
     return async () => {
         await endSessions(directory);
-        await served?.server.stop();
+        await server.stop();
     };
 }

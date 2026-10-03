@@ -5,6 +5,7 @@ import { refusal } from '../../../chain/refusals/refusal.js';
 
 /** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
 
+// Stryker disable all: outside: simctl answers only on a Mac with Xcode; the mobile specs judge what it is asked and how its answer reads
 async function run(
     command: string,
     args: readonly string[],
@@ -21,6 +22,8 @@ async function run(
         });
     });
 }
+// Stryker restore all
+
 const BOOT_TIMEOUT_MS = 120_000;
 
 export type SimulatorDevice = {
@@ -138,10 +141,12 @@ export async function resolveSimulatorUdid(criteria: {
 /** Idempotent: an already-booted device is tolerated. */
 export async function ensureBooted(udid: string): Promise<void> {
     try {
+        // Stryker disable next-line all: outside: see run
         await run('xcrun', ['simctl', 'boot', udid]);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         // outside: "Unable to boot device in current state: Booted" — already up.
+        // Stryker disable next-line all: outside: only a Mac with a booted simulator answers it; see run
         if (!message.includes('current state: Booted')) {
             throw new Error(
                 refusal({
