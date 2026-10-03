@@ -85,13 +85,11 @@ export function specificationMember(callNode: AstNode): string | undefined {
     return memberPropertyName(callee);
 }
 
-export function findProperty(objectNode: AstNode, name: string): AstNode | undefined {
-    // Stryker disable next-line ConditionalExpression,BlockStatement: only an object lists properties
-    if (objectNode.type !== 'ObjectExpression') {
-        return undefined;
-    }
-    const properties = childList(objectNode, 'properties');
-    return properties.find((property) => propertyKeyName(property) === name);
+/** Only an object, among the nodes read here, lists properties. */
+export function findProperty(objectNode: AstNode | undefined, name: string): AstNode | undefined {
+    return childList(objectNode, 'properties').find(
+        (property) => propertyKeyName(property) === name,
+    );
 }
 
 export function propertyKeyName(property: AstNode): string | undefined {

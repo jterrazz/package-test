@@ -6,75 +6,37 @@ import type { AstNode } from './ast.js';
 import { FACETS } from './facets.js';
 import { specsAnchor } from './specs-anchor.js';
 
-/** Only the literal form is read: a project a helper builds carries the framework's canonical name and include, with nothing to disagree with. */
+/** Only the literal form is read: a project a helper builds carries the framework's canonical include, with nothing to disagree with. */
 
 export type LiteralString = { node: AstNode; value: string };
 
-export type ProjectLiteral = {
-    include: LiteralString[];
-    name?: LiteralString;
-    node: AstNode;
-};
-
 function literalOf(property: AstNode | undefined): LiteralString | undefined {
     const value = stringValue(child(property, 'value'));
+    // Stryker disable next-line ConditionalExpression: a property that is absent has no value either
     return property === undefined || value === undefined ? undefined : { node: property, value };
 }
 
-function literalsOf(property: AstNode | undefined): LiteralString[] {
-    const value = child(property, 'value');
-    if (value?.type !== 'ArrayExpression') {
-        return [];
-    }
-    const found: LiteralString[] = [];
-    for (const element of childList(value, 'elements')) {
-        const text = stringValue(element);
-        if (text !== undefined) {
-            found.push({ node: element, value: text });
-        }
-    }
-    return found;
-}
-
-function projectOf(node: AstNode | undefined): ProjectLiteral | undefined {
-    if (node?.type !== 'ObjectExpression') {
-        return undefined;
-    }
-    const includeProperty = findProperty(node, 'include');
-    if (includeProperty === undefined) {
-        return undefined;
-    }
-    const name = literalOf(findProperty(node, 'name'));
-    return {
-        include: literalsOf(includeProperty),
-        node,
-        ...(name === undefined ? {} : { name }),
-    };
-}
-
 /** Only under `test` or in `projects`: `optimizeDeps.include` and its kin list package specifiers, not globs over a tree. */
-export function projectLiterals(program: AstNode): ProjectLiteral[] {
-    const projects: ProjectLiteral[] = [];
+export function includedGlobs(program: AstNode): LiteralString[] {
+    const globs: LiteralString[] = [];
     walk(program, (node) => {
-        if (node.type !== 'Property') {
+        const key = propertyKeyName(node);
+        if (key !== 'projects' && key !== 'test') {
             return;
         }
-        const key = propertyKeyName(node);
         const value = child(node, 'value');
-        const candidates =
-            key === 'projects'
-                ? childList(value, 'elements')
-                : key === 'test'
-                  ? [value]
-                  : ([] as (AstNode | undefined)[]);
-        for (const candidate of candidates) {
-            const project = projectOf(candidate);
-            if (project !== undefined) {
-                projects.push(project);
+        const projects = key === 'test' ? [value] : childList(value, 'elements');
+        for (const project of projects) {
+            const include = child(findProperty(project, 'include'), 'value');
+            for (const element of childList(include, 'elements')) {
+                const text = stringValue(element);
+                if (text !== undefined) {
+                    globs.push({ node: element, value: text });
+                }
             }
         }
     });
-    return projects;
+    return globs;
 }
 
 const WILDCARD = /[*?{[(!]/u;
@@ -86,8 +48,13 @@ const GLOB_DEPTH = 12;
 /** `specs/api/**\/*.spec.ts` → `specs/api`. */
 export function staticPrefix(glob: string): string {
     const parts = glob.split('/');
-    const wildcard = parts.findIndex((part) => WILDCARD.test(part));
-    return (wildcard === -1 ? parts.slice(0, -1) : parts.slice(0, wildcard)).join('/');
+    // invariant: a glob with no wildcard finds -1, which drops its file name
+    return parts
+        .slice(
+            0,
+            parts.findIndex((part) => WILDCARD.test(part)),
+        )
+        .join('/');
 }
 
 /** The glob is read relative to the config, whose own position comes from the package-bounded `specsAnchor`: a config inside a tree (`specs/vitest.config.ts`) collects with the root already behind it. */
@@ -136,47 +103,37 @@ export function collectsAFile(directory: string, glob: string): boolean {
     return search(directory, 0);
 }
 
+const GLOB_SYNTAX: Readonly<Record<string, string>> = {
+    '*': '[^/]*',
+    '**': '.*',
+    ',': '|',
+    '?': '[^/]',
+    '{': '(',
+    '}': ')',
+};
+
 /** `**` crosses separators, `*` and `?` do not, `{a,b}` alternates. */
 function globMatcher(glob: string): RegExp {
-    let source = '';
-    for (let index = 0; index < glob.length; index += 1) {
-        const character = glob[index] ?? '';
-        if (character === '*') {
-            const double = glob[index + 1] === '*';
-            source += double ? '.*' : '[^/]*';
-            index += double ? 1 : 0;
-            continue;
-        }
-        source +=
-            character === '?'
-                ? '[^/]'
-                : character === '{'
-                  ? '('
-                  : character === '}'
-                    ? ')'
-                    : character === ','
-                      ? '|'
-                      : character.replaceAll(/[.+^$()|[\]\\]/gu, String.raw`\$&`);
-    }
+    const source = glob.replaceAll(
+        /\*\*|[*?{},]|[.+^$()|[\]\\]/gu,
+        (token) => GLOB_SYNTAX[token] ?? `\\${token}`,
+    );
+    // Stryker disable next-line StringLiteral: a glob's syntax is ASCII, which reads alike with or without the unicode flag
     return new RegExp(`(?:^|/)${source}$`, 'u');
 }
 
 export function facetOfSegments(segments: string[] | undefined): string | undefined {
     const first = segments?.[0];
-    return first !== undefined && FACETS.has(first) ? first : undefined;
+    return (FACETS as ReadonlySet<unknown>).has(first) ? first : undefined;
 }
 
 export function literateSpecifications(program: AstNode): LiteralString[] {
     const found: LiteralString[] = [];
     walk(program, (node) => {
-        if (node.type !== 'Property' || propertyKeyName(node) !== 'literate') {
+        if (propertyKeyName(node) !== 'literate') {
             return;
         }
-        const value = child(node, 'value');
-        if (value === undefined) {
-            return;
-        }
-        const specification = literalOf(findProperty(value, 'specification'));
+        const specification = literalOf(findProperty(child(node, 'value'), 'specification'));
         if (specification !== undefined) {
             found.push(specification);
         }

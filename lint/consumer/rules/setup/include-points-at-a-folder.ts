@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
-import { collectsAFile, projectLiterals, staticPrefix } from '../../../kit/project/config-shape.js';
+import { collectsAFile, includedGlobs, staticPrefix } from '../../../kit/project/config-shape.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -33,28 +33,26 @@ export const includePointsAtAFolder = defineRule(
                 before: () => identityOf(context).role === 'config',
                 Program(program: AstNode) {
                     const configDirectory = dirname(context.physicalFilename);
-                    for (const project of projectLiterals(program)) {
-                        for (const glob of project.include) {
-                            const prefix = staticPrefix(glob.value);
-                            const directory = resolve(configDirectory, prefix);
-                            // Stryker disable next-line ConditionalExpression,StringLiteral: no prefix resolves to the config's own folder, which is there
-                            if (prefix !== '' && !isDirectory(directory)) {
-                                context.report({
-                                    data: { glob: glob.value, prefix },
-                                    messageId: 'missingPrefix',
-                                    node: glob.node,
-                                });
-                                continue;
-                            }
-                            if (collectsAFile(directory, glob.value)) {
-                                continue;
-                            }
+                    for (const glob of includedGlobs(program)) {
+                        const prefix = staticPrefix(glob.value);
+                        const directory = resolve(configDirectory, prefix);
+                        // Stryker disable next-line ConditionalExpression,StringLiteral: no prefix resolves to the config's own folder, which is there
+                        if (prefix !== '' && !isDirectory(directory)) {
                             context.report({
-                                data: { glob: glob.value },
-                                messageId: 'collectsNothing',
+                                data: { glob: glob.value, prefix },
+                                messageId: 'missingPrefix',
                                 node: glob.node,
                             });
+                            continue;
                         }
+                        if (collectsAFile(directory, glob.value)) {
+                            continue;
+                        }
+                        context.report({
+                            data: { glob: glob.value },
+                            messageId: 'collectsNothing',
+                            node: glob.node,
+                        });
                     }
                 },
             };
