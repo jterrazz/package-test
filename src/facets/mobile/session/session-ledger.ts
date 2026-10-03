@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { VITEST_ARTIFACTS_DIR } from '../../../../lint/kit/project/artifacts.js';
+import { isRecord } from '../../../../lint/kit/project/json-shape.js';
 
 type RecordedSession = {
     /** The capabilities the server answered with — what a runner attaching to it hands the driver. */
@@ -27,32 +28,34 @@ export const MOBILE_SESSIONS_DIR = `${VITEST_ARTIFACTS_DIR}/mobile-sessions`;
 type LedgerEntry = RecordedSession & { key: string };
 
 function keyOf(serverUrl: string, requested: Record<string, unknown>): string {
-    const sorted = Object.entries(requested).toSorted(([a], [b]) => (a < b ? -1 : 1));
+    const sorted = Object.entries(requested).toSorted(([a], [b]) => a.localeCompare(b));
     return JSON.stringify([serverUrl, sorted]);
 }
 
 function isEntry(value: unknown): value is LedgerEntry {
     return (
-        typeof value === 'object' &&
-        value !== null &&
-        'key' in value &&
-        typeof value.key === 'string' &&
-        'serverUrl' in value &&
-        typeof value.serverUrl === 'string' &&
-        'sessionId' in value &&
-        typeof value.sessionId === 'string' &&
-        'capabilities' in value &&
-        typeof value.capabilities === 'object'
+        isRecord(value) &&
+        [value.key, value.serverUrl, value.sessionId].every((field) => typeof field === 'string') &&
+        isRecord(value.capabilities)
     );
 }
 
-function entries(directory: string): LedgerEntry[] {
-    if (!existsSync(directory)) {
+/** A run that recorded nothing has no folder. */
+function entryFiles(directory: string): string[] {
+    try {
+        return readdirSync(directory).filter((name) => name.endsWith('.json'));
+    } catch {
         return [];
     }
-    return readdirSync(directory)
-        .filter((name) => name.endsWith('.json'))
-        .map((name): unknown => JSON.parse(readFileSync(join(directory, name), 'utf8')))
+}
+
+function entries(directory: string): LedgerEntry[] {
+    // Stryker disable StringLiteral: a file read as a Buffer parses as the same text
+    const parsed = (name: string): unknown =>
+        JSON.parse(readFileSync(join(directory, name), 'utf8'));
+    // Stryker restore StringLiteral
+    return entryFiles(directory)
+        .map((name) => parsed(name))
         .filter((entry) => isEntry(entry));
 }
 
@@ -91,6 +94,7 @@ export async function endSessions(directory: string): Promise<void> {
                     method: 'DELETE',
                     signal: AbortSignal.timeout(SERVER_CALL_TIMEOUT_MS),
                 });
+                // Stryker disable next-line OptionalChaining: a response with no body throws here, and the catch takes it as it takes a server gone
                 await response.body?.cancel();
             } catch {
                 // invariant: the server is gone, and its sessions with it.

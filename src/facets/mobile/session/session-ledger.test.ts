@@ -1,5 +1,5 @@
 import { once } from 'node:events';
-import { existsSync, mkdtempSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -59,10 +59,40 @@ describe('sessionLedger', () => {
         );
     });
 
-    test('the session ledger — one driver session per run — a run that opened nothing has nothing to find', () => {
+    test('the session ledger — one driver session per run — a run that opened nothing has nothing to find, to forget or to end', async () => {
         // Given - the folder the setup handed out, never written to
-        // Then - no session
-        expect(sessionLedger(ledgerFolder()).lookup('http://a', IPHONE)).toStrictEqual([]);
+        const folder = ledgerFolder();
+        const ledger = sessionLedger(folder);
+
+        // Then - no session, and forgetting one or ending the run is no error
+        expect(ledger.lookup('http://a', IPHONE)).toStrictEqual([]);
+        expect(() => {
+            ledger.forget('s-1');
+        }).not.toThrow();
+        await expect(endSessions(folder)).resolves.toBeUndefined();
+    });
+
+    test('the session ledger — one driver session per run — a file in the folder that is no whole entry is skipped', () => {
+        // Given - a recorded session beside a text file, a null, and copies of it each missing a field or holding one of another kind
+        const folder = ledgerFolder();
+        const ledger = sessionLedger(folder);
+        ledger.record(IPHONE, { capabilities: {}, serverUrl: 'http://a', sessionId: 's-1' });
+        const entry = readFileSync(join(folder, 's-1.json'), 'utf8');
+        const variants = {
+            'capabilities.json': entry.replace('"capabilities":{}', '"capabilities":"iOS"'),
+            'missing.json': entry.replace('"sessionId":"s-1",', ''),
+            'null.json': 'null',
+            'number.json': entry.replace('"sessionId":"s-1"', '"sessionId":1'),
+        };
+        for (const [name, text] of Object.entries(variants)) {
+            writeFileSync(join(folder, name), text);
+        }
+        writeFileSync(join(folder, 'notes.txt'), 'not json');
+
+        // Then - only the whole entry is found
+        expect(ledger.lookup('http://a', IPHONE)).toStrictEqual([
+            { capabilities: {}, serverUrl: 'http://a', sessionId: 's-1' },
+        ]);
     });
 
     test('the session ledger — one driver session per run — a forgotten session is found no more, and its replacement is', () => {
