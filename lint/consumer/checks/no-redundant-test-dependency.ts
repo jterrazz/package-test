@@ -23,7 +23,7 @@ const FRAMEWORK = '@jterrazz/test';
 
 const REPLACED_SEAMS = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
 
-const REPLACED_SCOPES = ['@testing-library/'];
+const REPLACED_SCOPE = '@testing-library/';
 
 /** React Native renders under jest until the react-native-web answer lands, and `@testing-library/react-native` is the only vocabulary there; the allowance lapses the day jest stops running the member's tests. */
 const JEST_ONLY_SEAM = '@testing-library/react-native';
@@ -35,6 +35,7 @@ function declaresJest(manifest: Manifest): boolean {
         declares('jest') ||
         declares('jest-expo') ||
         manifest.jest !== undefined ||
+        // Stryker disable next-line StringLiteral: no script at all names no jest, whatever text stands for it
         /(?:^|[\s/])jest(?:\s|$)/u.test(manifest.scripts?.test ?? '')
     );
 }
@@ -71,58 +72,49 @@ function workspaceRootOf(memberDir: string): string {
     }
 }
 
-const jestConfigs = new Map<string, string[]>();
+type JestConfig = { from: string; text: string };
 
-function findJestConfigs(rootDir: string): string[] {
-    const cached = jestConfigs.get(rootDir);
-    if (cached !== undefined) {
-        return cached;
+function jestConfigsUnder(dir: string, depth = 0): JestConfig[] {
+    if (depth > MEMBER_DEPTH) {
+        return [];
     }
-    const found: string[] = [];
-    const walk = (dir: string, depth: number): void => {
-        if (depth > MEMBER_DEPTH) {
-            return;
+    let entries;
+    try {
+        entries = treeEntries(dir);
+    } catch {
+        return [];
+    }
+    return entries.flatMap((entry): JestConfig[] => {
+        const path = join(dir, entry.name);
+        if (entry.isDirectory()) {
+            return entry.name.startsWith('.') || PRUNED_WITH_OUTPUTS.has(entry.name)
+                ? []
+                : jestConfigsUnder(path, depth + 1);
         }
-        let entries;
+        if (!JEST_CONFIG.test(entry.name)) {
+            return [];
+        }
         try {
-            entries = treeEntries(dir);
+            return [{ from: dir, text: readFileSync(path, 'utf8') }];
         } catch {
-            return;
+            return [];
         }
-        for (const entry of entries) {
-            const path = join(dir, entry.name);
-            if (entry.isDirectory()) {
-                if (!entry.name.startsWith('.') && !PRUNED_WITH_OUTPUTS.has(entry.name)) {
-                    walk(path, depth + 1);
-                }
-            } else if (JEST_CONFIG.test(entry.name)) {
-                found.push(path);
-            }
-        }
-    };
-    walk(rootDir, 0);
-    jestConfigs.set(rootDir, found);
-    return found;
+    });
 }
 
 /** `<rootDir>` is jest's token for its config's directory: a path resolves against it, and the member is reached when the result lands inside it. */
 function jestReachesMember(memberDir: string, rootDir: string): boolean {
-    return findJestConfigs(rootDir).some((config) => {
-        const from = dirname(config);
-        let text;
-        try {
-            text = readFileSync(config, 'utf8');
-        } catch {
-            return false;
-        }
-        return [...text.matchAll(JEST_REACH)].some((list) =>
+    return jestConfigsUnder(rootDir).some(({ from, text }) =>
+        [...text.matchAll(JEST_REACH)].some((list) =>
+            // Stryker disable next-line OptionalChaining,StringLiteral: a match always carries its named group
             [...(list.groups?.paths ?? '').matchAll(JEST_PATH)].some((entry) => {
-                const stated = (entry.groups?.path ?? '').replace('<rootDir>', from);
-                const absolute = resolve(from, stated);
+                // Stryker disable next-line OptionalChaining,StringLiteral: a match always carries its named group
+                const stated = entry.groups?.path ?? '';
+                const absolute = resolve(from, stated.replace('<rootDir>', from));
                 return absolute === memberDir || absolute.startsWith(`${memberDir}/`);
             }),
-        );
-    });
+        ),
+    );
 }
 
 type Seam = { kind: 'carried' | 'replaced'; name: string };
@@ -135,7 +127,7 @@ function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
         if (name === JEST_ONLY_SEAM && jestRuns) {
             return false;
         }
-        return REPLACED_SEAMS.has(name) || REPLACED_SCOPES.some((scope) => name.startsWith(scope));
+        return REPLACED_SEAMS.has(name) || name.startsWith(REPLACED_SCOPE);
     };
     const declared = new Set([
         ...Object.keys(manifest.dependencies ?? {}).filter(
@@ -156,6 +148,7 @@ function lineOfKey(dir: string, key: string): number {
     try {
         const lines = readFileSync(join(dir, 'package.json'), 'utf8').split('\n');
         const found = lines.findIndex((line) => line.includes(`"${key}"`));
+        // Stryker disable next-line ConditionalExpression,UnaryOperator: the manifest read is this file, so its key is always found
         return found === -1 ? 1 : found + 1;
     } catch {
         return 1;
