@@ -8,15 +8,15 @@ describe('ratchet', () => {
         // Given - one dead fixture, held by an entry of three, and an entry whose rule is at zero
         const result = await cli
             .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
-            .fixture(file('./_fixtures/fallen-baseline/jterrazz.baseline.json'))
+            .fixture(directory('./_fixtures/fallen-baseline/'))
             .exec('.');
 
         // Then - both falls, each naming its gesture; the run's own key is never the checker's
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/24-linting.md#no-unused-ground
-            baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz-check/no-unused-ground\` is at 1, below its baseline of 3 · why: each count is held exactly, so a debt that fell is recorded the day it falls and cannot grow back unseen · fix: run 'typescript fix', which re-records the fall · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
-            baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz-check/no-reach-into-sibling-ground\` is at zero, and its entry is still recorded · why: an entry with nothing left to hold would let the debt grow back to its old count unseen · fix: run 'typescript fix', which deletes the entry · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
+            baseline-ratchet  .jterrazz/baseline.json › test  found: \`jterrazz-check/no-unused-ground\` is at 1, below its baseline of 3 · why: each count is held exactly, so a debt that fell is recorded the day it falls and cannot grow back unseen · fix: run 'typescript fix', which re-records the fall · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
+            baseline-ratchet  .jterrazz/baseline.json › test  found: \`jterrazz-check/no-reach-into-sibling-ground\` is at zero, and its entry is still recorded · why: an entry with nothing left to hold would let the debt grow back to its old count unseen · fix: run 'typescript fix', which deletes the entry · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -24,20 +24,20 @@ describe('ratchet', () => {
         // Given - the same fallen ratchet, fixed
         const result = await cli
             .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
-            .fixture(file('./_fixtures/fallen-baseline/jterrazz.baseline.json'))
+            .fixture(directory('./_fixtures/fallen-baseline/'))
             .exec('. --fix');
 
         // Then - each entry at its count, the paid one gone, the run's key and the other section kept
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toBe(
             [
-                're-recorded jterrazz.baseline.json › test › jterrazz-check/no-reach-into-sibling-ground 2 → 0',
-                're-recorded jterrazz.baseline.json › test › jterrazz-check/no-unused-ground 3 → 1',
-                'jterrazz.baseline.json › test: 3 held across 2 rules',
+                're-recorded .jterrazz/baseline.json › test › jterrazz-check/no-reach-into-sibling-ground 2 → 0',
+                're-recorded .jterrazz/baseline.json › test › jterrazz-check/no-unused-ground 3 → 1',
+                '.jterrazz/baseline.json › test: 3 held across 2 rules',
                 '',
             ].join('\n'),
         );
-        expect(result.file('jterrazz.baseline.json').content).toBe(
+        expect(result.file('.jterrazz/baseline.json').content).toBe(
             '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {\n        "jterrazz-check/no-unused-ground": 1,\n        "routes/unreached": 2\n    }\n}\n',
         );
     });
@@ -51,13 +51,13 @@ describe('ratchet', () => {
         // Then - the paid entry goes, the new debt still fails the run and is not written
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            re-recorded jterrazz.baseline.json › test › jterrazz-check/ground-shared-or-inline 1 → 0
+            re-recorded .jterrazz/baseline.json › test › jterrazz-check/ground-shared-or-inline 1 → 0
             specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/24-linting.md#no-unused-ground
-            baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz-check/no-unused-ground\` has 1 finding(s) and no entry records them · why: the section holds the debt the project recorded, and a finding no entry holds is new debt · fix: fix the findings, or run 'typescript baseline' to record where the project stands · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
+            baseline-ratchet  .jterrazz/baseline.json › test  found: \`jterrazz-check/no-unused-ground\` has 1 finding(s) and no entry records them · why: the section holds the debt the project recorded, and a finding no entry holds is new debt · fix: fix the findings, or run 'typescript baseline' to record where the project stands · read: docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
         expect(result.stderr.text).toBe('');
-        expect(result.file('jterrazz.baseline.json').content).toBe(
-            '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {}\n}\n',
+        expect(result.file('.jterrazz/baseline.json').content).toBe(
+            '{\n    "typescript": { "eslint/complexity": 3 }\n}\n',
         );
     });
 
@@ -69,7 +69,7 @@ describe('ratchet', () => {
 
         // Then - the view written and held, the other fixer left to the toolchain, no wrapper behind
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
         expect(result.file('specs/api/events/list/pagination.spec.ts').content).toBe(
             [
                 "import { describe, expect, test } from 'vitest';",
@@ -113,7 +113,7 @@ describe('ratchet', () => {
 
         // Then - the view written and held, the other fixer still left to the toolchain
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
         expect(result.file('specs/api/events/list/pagination.spec.ts').content).toContain(
             "const events = api.with({ clock: '2026-03-04T09:30:00Z' });",
         );
@@ -128,7 +128,7 @@ describe('ratchet', () => {
             .exec('. --fix');
 
         // Then - oxlint's own rewrite of the file under a run arming the plugin alone is undone: the entry stands
-        expect(result.file('oxlint-suppressions.json').content).toBe(
+        expect(result.file('.jterrazz/oxlint-suppressions.json').content).toBe(
             '{\n    "specs/api/events/list/pagination.spec.ts": {\n        "eslint/no-console": {\n            "count": 2\n        }\n    }\n}\n',
         );
     });
@@ -142,7 +142,7 @@ describe('ratchet', () => {
 
         // Then - the renamed and moved spec carries its view, and the check after the fix holds nothing
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
         expect(result.file('specs/api/events/archive/archive.test.ts').exists).toBe(false);
         expect(result.file('specs/api/archive/get/archive.spec.ts').content).toBe(
             [
@@ -178,11 +178,11 @@ describe('ratchet', () => {
         // Given - a clean project whose section holds the api run's key alone
         const result = await cli
             .fixture(directory('../../_shared/_fixtures/no-unused-ground-ok/'))
-            .fixture(file('./_fixtures/routes-only-baseline/jterrazz.baseline.json'))
+            .fixture(directory('./_fixtures/routes-only-baseline/'))
             .exec('.');
 
         // Then - the key the checker never counts is still held, never `nothing held`
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 2 held across 1 rule\n');
+        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: 2 held across 1 rule\n');
     });
 });

@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -7,7 +7,8 @@ import { drops, readFloor, recordFloor, report } from './coverage.js';
 
 function rootWith(text: string): string {
     const root = mkdtempSync(join(tmpdir(), 'coverage-baseline-'));
-    writeFileSync(join(root, 'jterrazz.baseline.json'), text);
+    mkdirSync(join(root, '.jterrazz'), { recursive: true });
+    writeFileSync(join(root, '.jterrazz/baseline.json'), text);
     return root;
 }
 
@@ -62,7 +63,7 @@ describe('coverage', () => {
         recordFloor(root, {}, FLOOR);
 
         // Then - the whole file holds the checker's section and the floor beside it
-        expect(readFileSync(join(root, 'jterrazz.baseline.json'), 'utf8')).toBe(
+        expect(readFileSync(join(root, '.jterrazz/baseline.json'), 'utf8')).toBe(
             '{\n    "test.coverage": {\n        "all/branches": 70,\n        "all/functions": 80,\n        "all/lines": 76,\n        "all/statements": 76\n    },\n    "test": {}\n}\n',
         );
     });
@@ -79,17 +80,17 @@ describe('coverage', () => {
         [
             'a floor missing a metric',
             '{ "test.coverage": { "all/branches": 69.89 } }',
-            `found: jterrazz.baseline.json › test.coverage: the \`all\` floor has no statements, functions, lines · why: the floor is what the suite reached, and a floor read wrong forbids nothing · fix: run \`npm run coverage\` to record the whole floor · ${READ}`,
+            `found: .jterrazz/baseline.json › test.coverage: the \`all\` floor has no statements, functions, lines · why: the floor is what the suite reached, and a floor read wrong forbids nothing · fix: run \`npm run coverage\` to record the whole floor · ${READ}`,
         ],
         [
             'a key naming no scope',
             '{ "test.coverage": { "branches": 69.89 } }',
-            `found: jterrazz.baseline.json › test.coverage keys \`branches\` to no scope · why: the floor is what the suite reached, and a floor read wrong forbids nothing · fix: write each key as \`<scope>/<metric>\`, or run \`npm run coverage\` to record the floor again · ${READ}`,
+            `found: .jterrazz/baseline.json › test.coverage keys \`branches\` to no scope · why: the floor is what the suite reached, and a floor read wrong forbids nothing · fix: write each key as \`<scope>/<metric>\`, or run \`npm run coverage\` to record the floor again · ${READ}`,
         ],
         [
             'a file whose floor is not a count',
             '{ "test.coverage": { "all/branches": "high" } }',
-            `found: jterrazz.baseline.json keys \`test.coverage\` to something that is not a section of counts · why: the floor is what the suite reached, and a floor read wrong forbids nothing · fix: correct jterrazz.baseline.json until it is one JSON object of sections, then run again · ${READ}`,
+            `found: .jterrazz/baseline.json keys \`test.coverage\` to something that is not a section of counts · why: the floor is what the suite reached, and a floor read wrong forbids nothing · fix: correct .jterrazz/baseline.json until it is one JSON object of sections, then run again · ${READ}`,
         ],
     ])('the coverage ratchet — refuses %s in four parts, naming it', (_, text, refusal) => {
         // Given - a family file holding it

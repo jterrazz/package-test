@@ -1,17 +1,24 @@
 import { sectionOf } from '@jterrazz/typescript/rules';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { heldUnreached, recordUnreached, writeBaseline } from './test-baseline.js';
 
-const FILE = 'jterrazz.baseline.json';
+const FILE = '.jterrazz/baseline.json';
+
+function ledgerRoot(): string {
+    const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+    mkdirSync(join(root, '.jterrazz'));
+
+    return root;
+}
 
 describe('test-baseline', () => {
     test("the test ratchet — a recording keeps the routes the run holds, which are the run's", () => {
         // Given - a test section holding a checker key and the run's route key
-        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        const root = ledgerRoot();
         writeFileSync(
             join(root, FILE),
             '{\n    "test": { "jterrazz-check/old": 1, "routes/unreached": 2 }\n}\n',
@@ -28,7 +35,7 @@ describe('test-baseline', () => {
 
     test('the test ratchet — the run records its routes beside the checker keys, and drops its key at zero', () => {
         // Given - a test section the checker wrote
-        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        const root = ledgerRoot();
         writeFileSync(join(root, FILE), '{\n    "test": { "jterrazz-check/old": 1 }\n}\n');
 
         // When - the run records three unreached routes, then none
@@ -43,7 +50,7 @@ describe('test-baseline', () => {
 
     test('the test ratchet — a file that is not JSON refuses a recording, which would lose what it holds', () => {
         // Given - a family file that is not JSON
-        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
+        const root = ledgerRoot();
         writeFileSync(join(root, FILE), 'not json');
 
         // Then - the recording is refused

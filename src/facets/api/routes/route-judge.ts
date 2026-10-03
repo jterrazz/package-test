@@ -1,7 +1,7 @@
 import {
     heldUnreached,
     recordUnreached,
-    ROUTES_KEY,
+    ROUTES_LEDGER,
 } from '../../../../lint/kit/baseline/test-baseline.js';
 import type { Lesson } from '../../../chain/refusals/refusal.js';
 import { measure, readLedgers } from './ledger.js';
@@ -149,7 +149,7 @@ export async function judgeLedgers(
     if (update) {
         recordUnreached(root, missing.length);
         return {
-            line: `api routes: ${missing.length} unreached recorded under jterrazz.baseline.json › test › ${ROUTES_KEY}`,
+            line: `api routes: ${missing.length} unreached recorded under ${ROUTES_LEDGER}`,
         };
     }
     const held = heldUnreached(root);
@@ -160,6 +160,6 @@ export async function judgeLedgers(
         line:
             missing.length === 0
                 ? `api routes: all ${declared.length} declared routes reached`
-                : `api routes: ${missing.length} unreached, held by jterrazz.baseline.json › test › ${ROUTES_KEY}:\n${named}`,
+                : `api routes: ${missing.length} unreached, held by ${ROUTES_LEDGER}:\n${named}`,
     };
 }

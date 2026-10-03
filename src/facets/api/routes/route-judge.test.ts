@@ -63,7 +63,7 @@ describe('route-judge', () => {
         // Then - two held, and the judged run passes naming them
         expect(heldUnreached(root)).toBe(2);
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: 2 unreached, held by jterrazz.baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
+            line: 'api routes: 2 unreached, held by .jterrazz/baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
         });
     });
 

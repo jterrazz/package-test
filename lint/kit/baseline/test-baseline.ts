@@ -1,10 +1,12 @@
-import { sectionOf, writeSection } from '@jterrazz/typescript/rules';
+import { labelOf, sectionOf, writeSection } from '@jterrazz/typescript/rules';
 import type { Counts } from '@jterrazz/typescript/rules';
 
 import { TEST_SECTION } from '../project/test-section.js';
 
 // The run judges the routes it measured and records them here; the checker never counts them.
 export const ROUTES_KEY = 'routes/unreached';
+
+export const ROUTES_LEDGER = `${labelOf(TEST_SECTION)} › ${ROUTES_KEY}`;
 
 const heldOf = (root: string): Counts => sectionOf(root, TEST_SECTION) ?? {};
 
