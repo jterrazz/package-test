@@ -21,14 +21,17 @@ import {
     JSON_SUBJECT,
     TEST_FILE,
     valueLines,
+    written,
 } from './ground-shared-or-inline.forms.js';
+
+type FileForm = { extension: string; text: string };
 
 type Oversized = {
     column: number;
     end: number;
-    /** `undefined` when no file form holds it. */
-    extension: string | undefined;
     file: string;
+    /** `undefined` when no file form holds it. */
+    form: FileForm | undefined;
     line: number;
     lines: number;
     name: string;
@@ -36,7 +39,6 @@ type Oversized = {
     start: number;
     /** A string has no golden, so the value stays in place. */
     subject: string | undefined;
-    text: string | undefined;
 };
 
 const VALUE_CALL = /\.(?<verb>post|put|request|toMatch)\s*\(/gu;
@@ -46,40 +48,34 @@ const VALUE_START = /^[`'"{[]/u;
 const STRING_SUBJECT = /\.(?:text|raw)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
 /** vitest's own `toMatch` takes no file: its long value is reported, never written to one. */
+const RESPONSE_SUBJECT = /\.response\)\s*\.(?:not\.)?toMatch\($/u;
+
 const PLAIN_SUBJECT =
     /expect\s*\(\s*(?<subject>[A-Za-z_$][\w$]*|'[^'\n]*'|"[^"\n]*")\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
+// Stryker disable BlockStatement: a catch emptied returns undefined all the same
 function literalValue(source: string): unknown {
-    if (/\$\{/u.test(source)) {
-        return undefined;
-    }
     try {
+        // Stryker disable next-line ObjectLiteral: hazard: the bound only matters for a value that never finishes evaluating
         return runInNewContext(`(${source})`, {}, { timeout: 1000 });
     } catch {
         return undefined;
     }
 }
+// Stryker restore BlockStatement
 
-function fileForm(
-    verb: string,
-    before: string,
-    stated: unknown,
-): { extension: string | undefined; text: string | undefined } {
+function fileForm(verb: string, before: string, stated: unknown): FileForm | undefined {
     if (typeof stated === 'string') {
         if (verb === 'post' || verb === 'put') {
             return { extension: '.txt', text: stated };
         }
-        const http =
-            verb === 'request' || /\.response\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u.test(before);
+        const http = verb === 'request' || RESPONSE_SUBJECT.test(before);
         return { extension: http ? '.http' : '.txt', text: dedent(stated) };
     }
-    if (stated === undefined || typeof stated !== 'object') {
-        return { extension: undefined, text: undefined };
+    if (typeof stated !== 'object' || (verb === 'toMatch' && !JSON_SUBJECT.test(before))) {
+        return undefined;
     }
-    const json = `${JSON.stringify(stated, null, 4)}\n`;
-    return verb === 'toMatch' && !JSON_SUBJECT.test(before)
-        ? { extension: undefined, text: undefined }
-        : { extension: '.json', text: json };
+    return { extension: '.json', text: `${JSON.stringify(stated, null, 4)}\n` };
 }
 
 type Candidate = Span & { before: string; role: string; source: string; verb: string };
@@ -89,17 +85,21 @@ function candidateAt(
     call: RegExpExecArray,
     literals: readonly Span[],
 ): Candidate | undefined {
-    const verb = call.groups?.verb ?? '';
+    // Stryker disable next-line StringLiteral: a call match always carries its verb
+    const { verb = '' } = call.groups ?? {};
     const open = call.index + call[0].length - 1;
     const before = text.slice(0, open + 1);
-    if (isInside(literals, call.index) || (verb === 'toMatch' && STRING_SUBJECT.test(before))) {
+    if (isInside(literals, call.index) || STRING_SUBJECT.test(before)) {
         return undefined;
     }
     const argument = argumentSpans(text, open + 1, closingOf(text, open))[
         verb === 'post' || verb === 'put' ? 1 : 0
     ];
-    const source = argument === undefined ? '' : text.slice(argument.start, argument.end);
-    if (argument === undefined || !VALUE_START.test(source)) {
+    if (argument === undefined) {
+        return undefined;
+    }
+    const source = text.slice(argument.start, argument.end);
+    if (!VALUE_START.test(source)) {
         return undefined;
     }
     const role = verb === 'toMatch' ? GROUND_EXPECTED : GROUND_REQUESTS;
@@ -116,15 +116,12 @@ function oversizedIn(file: string): Oversized[] {
         if (candidate === undefined) {
             return [];
         }
-        const subject =
-            candidate.verb === 'toMatch'
-                ? PLAIN_SUBJECT.exec(candidate.before)?.groups?.subject
-                : undefined;
+        const { subject } = PLAIN_SUBJECT.exec(candidate.before)?.groups ?? {};
         const form =
             subject === undefined
                 ? fileForm(candidate.verb, candidate.before, literalValue(candidate.source))
-                : { extension: undefined, text: undefined };
-        const lines = valueLines(form.text ?? candidate.source);
+                : undefined;
+        const lines = valueLines(form?.text ?? candidate.source);
         const position = text.slice(0, candidate.start);
         const line = position.split('\n').length;
         if (lines <= (INLINE_CAPS[candidate.role] ?? lines) || suppressed.has(line)) {
@@ -134,15 +131,14 @@ function oversizedIn(file: string): Oversized[] {
             {
                 column: candidate.start - position.lastIndexOf('\n'),
                 end: candidate.end,
-                extension: form.extension,
                 file,
+                form,
                 line,
                 lines,
                 name: nameAround(text, candidate.start, candidate.role),
                 role: candidate.role,
                 start: candidate.start,
                 subject,
-                text: form.extension === undefined ? undefined : form.text,
             },
         ];
     });
@@ -155,35 +151,33 @@ export function oversizedValues(rootDir: string): Oversized[] {
 }
 
 /** Its own bytes are reused; another's are skipped past with a suffix. */
-function freePath(file: string, oversized: Oversized): string {
-    const folder = join(dirname(file), oversized.role);
+function freePath(file: string, role: string, name: string, form: FileForm): string {
+    const folder = join(dirname(file), role);
     for (let suffix = 1; ; suffix += 1) {
-        const path = join(
-            folder,
-            `${oversized.name}${suffix === 1 ? '' : `-${suffix}`}${oversized.extension ?? ''}`,
-        );
-        if (!existsSync(path) || readFileSync(path, 'utf8') === oversized.text) {
+        const path = join(folder, `${name}${suffix === 1 ? '' : `-${suffix}`}${form.extension}`);
+        if (!existsSync(path) || readFileSync(path, 'utf8') === form.text) {
             return path;
         }
     }
 }
 
-function capFix(oversized: Oversized, target: string): string {
+function capFix(oversized: Oversized): string {
     if (oversized.subject !== undefined) {
         return `a string has no golden: wrap it — \`expect(text(${oversized.subject})).toMatch(file('./${oversized.role}/${oversized.name}.txt'))\` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file`;
     }
-    return oversized.text === undefined
-        ? `move it to a file under ./${oversized.role}/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only`
-        : `move it to ${target} and name it with file('${target}') — \`typescript fix\` moves it`;
+    if (oversized.form === undefined) {
+        return `move it to a file under ./${oversized.role}/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only`;
+    }
+    const target = `./${oversized.role}/${oversized.name}${oversized.form.extension}`;
+    return `move it to ${target} and name it with file('${target}') — \`typescript fix\` moves it`;
 }
 
 export function capFinding(rootDir: string, oversized: Oversized): Spotted {
     const kind = oversized.role === GROUND_EXPECTED ? 'an expectation' : 'a request';
-    const target = `./${oversized.role}/${oversized.name}${oversized.extension ?? ''}`;
     return {
         column: oversized.column,
         path: relative(rootDir, oversized.file),
-        fix: capFix(oversized, target),
+        fix: capFix(oversized),
         found: `${kind} of ${oversized.lines} lines written in the test, past the ${oversized.role}/ cap of ${INLINE_CAPS[oversized.role] ?? 0}`,
         line: oversized.line,
         rule: 'ground-shared-or-inline',
@@ -192,22 +186,25 @@ export function capFinding(rootDir: string, oversized: Oversized): Spotted {
 
 export function fixOversizedValues(rootDir: string): string[] {
     const done: string[] = [];
-    const byFile = Map.groupBy(
-        oversizedValues(rootDir).filter((oversized) => oversized.text !== undefined),
-        (oversized) => oversized.file,
+    const movable = oversizedValues(rootDir).flatMap(({ form, ...oversized }) =>
+        form === undefined ? [] : [{ form, oversized }],
     );
+    const byFile = Map.groupBy(movable, ({ oversized }) => oversized.file);
     for (const [file, values] of byFile) {
+        // Stryker disable next-line StringLiteral: a Buffer spliced into a template reads as the same UTF-8 text
         let text = readFileSync(file, 'utf8');
-        for (const oversized of values.toSorted((a, b) => b.start - a.start)) {
-            const path = freePath(file, oversized);
+        for (const { form, oversized } of values.toSorted(
+            (a, b) => b.oversized.start - a.oversized.start,
+        )) {
+            const path = freePath(file, oversized.role, oversized.name, form);
             mkdirSync(dirname(path), { recursive: true });
-            writeFileSync(path, oversized.text ?? '');
-            const named = `./${relative(dirname(file), path).split('\\').join('/')}`;
-            text = `${text.slice(0, oversized.start)}file('${named}')${text.slice(oversized.end)}`;
+            writeFileSync(path, form.text);
+            text = `${text.slice(0, oversized.start)}file('./${written(file, path)}')${text.slice(oversized.end)}`;
             done.push(`${relative(rootDir, file)}:${oversized.line} → ${relative(rootDir, path)}`);
         }
         writeFileSync(file, withEntryImport(text, file, 'file'));
     }
+    // Stryker disable next-line CallExpression: outside a git work tree the walk reads the disk afresh
     forgetTree();
     return done;
 }
