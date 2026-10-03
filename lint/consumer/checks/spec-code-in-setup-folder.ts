@@ -19,6 +19,7 @@ const FIXTURES_MODULE = /\.fixtures\.[cm]?[jt]sx?$/u;
 const RENDERED_BY = '.test.tsx';
 
 function isRenderedUnit(file: string): boolean {
+    // Stryker disable next-line Regex: a module's name ends on its extension
     return treeKind(`${file.replace(/\.[cm]?[jt]sx?$/u, '')}${RENDERED_BY}`) === 'file';
 }
 

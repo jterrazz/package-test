@@ -38,4 +38,38 @@ describe('checkSpecCodeInSetupFolder', () => {
             ],
         ]);
     });
+
+    test('names each loose helper and each fixtures module, from the subject it serves, and leaves what is no such code', () => {
+        // Given - helpers no spec imports, deep under a leaf and under a facet with no spec, a fixtures module loose and one in a _setup, and code that is no loose helper
+        const found = checkSpecCodeInSetupFolder(
+            treeOf({
+                'specs/api/_setup/data.fixtures.ts': 'export {};\n',
+                'specs/data.fixtures.ts': 'export {};\n',
+                'specs/api/_setup/runner.ts': 'export {};\n',
+                'specs/api/api.specification.ts': 'export {};\n',
+                'specs/api/fixtures/x.ts': 'export {};\n',
+                'specs/api/orders/data.fixtures.ts': 'export {};\n',
+                'specs/api/orders/deep/helper.ts': 'export {};\n',
+                'specs/api/orders/list.spec.ts': 'test();\n',
+                'specs/api/orders/util.mjs': 'export {};\n',
+                'specs/api/orders/util.test.tsx': 'test();\n',
+                'specs/api/orders/widget.tsx': 'export {};\n',
+                'specs/api/orders/widget.test.tsx': 'test();\n',
+                'specs/helper.ts': 'export {};\n',
+                'specs/web/a/b/helper.ts': 'export {};\n',
+            }),
+        ).map(
+            ({ fix, found: what, line, path, rule }) =>
+                `${path}:${line} ${what} — ${fix} (${rule})`,
+        );
+
+        // Then - each one, with its home
+        expect(found).toStrictEqual([
+            'specs/api/_setup/data.fixtures.ts:1 `data.fixtures.ts` under specs/: a fixture is input data, a file in `_fixtures/`, never a module — name the module for what it holds and move it into the `_setup/` of the lowest folder its readers share — `specs/api/_setup/<meaning>.ts` — and the paths that import it (spec-code-in-setup-folder)',
+            'specs/api/orders/data.fixtures.ts:1 `data.fixtures.ts` under specs/: a fixture is input data, a file in `_fixtures/`, never a module — name the module for what it holds and move it into the `_setup/` of the lowest folder its readers share — `specs/api/orders/_setup/<meaning>.ts` — and the paths that import it (spec-code-in-setup-folder)',
+            'specs/api/orders/deep/helper.ts:1 `helper.ts`, code that prepares specs outside every `_setup/` — move it to `specs/api/orders/_setup/deep/helper.ts` — the `_setup/` of the lowest folder its readers share — and the paths that import it (spec-code-in-setup-folder)',
+            'specs/data.fixtures.ts:1 `data.fixtures.ts` under specs/: a fixture is input data, a file in `_fixtures/`, never a module — name the module for what it holds and move it into the `_setup/` of the lowest folder its readers share — `specs/_shared/_setup/<meaning>.ts` — and the paths that import it (spec-code-in-setup-folder)',
+            'specs/web/a/b/helper.ts:1 `helper.ts`, code that prepares specs outside every `_setup/` — move it to `specs/web/_setup/a/b/helper.ts` — the `_setup/` of the lowest folder its readers share — and the paths that import it (spec-code-in-setup-folder)',
+        ]);
+    });
 });
