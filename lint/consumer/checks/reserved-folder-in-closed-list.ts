@@ -49,7 +49,11 @@ function judged(
         return undefined;
     }
     const marked = UNMARKED_RESERVED[name];
-    if (marked !== undefined && isUnmarkedReserved(specsRoot, folder)) {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: isUnmarkedReserved asks the same of the name first
+    if (marked === undefined) {
+        return undefined;
+    }
+    if (isUnmarkedReserved(specsRoot, folder)) {
         return finding(
             rootDir,
             folder,
@@ -131,10 +135,11 @@ function refusedInsideSetup(place: Place, setup: string): Spotted[] {
             }
             const path = join(dir, entry.name);
             const refused = refusedInSetup(place, setup, path, entry.isDirectory());
-            if (refused !== undefined) {
-                found.push(refused);
-            } else if (entry.isDirectory()) {
+            // invariant: a file is walked as a folder of nothing.
+            if (refused === undefined) {
                 visit(path);
+            } else {
+                found.push(refused);
             }
         }
     };
@@ -167,7 +172,8 @@ function refusedUnder(rootDir: string, specsRoot: string): Spotted[] {
             } else if (entry.name === SETUP_FOLDER) {
                 found.push(...refusedInsideSetup({ rootDir, specsRoot }, path));
             } else {
-                visit(path, dir === specsRoot && entry.name === SHARED_FOLDER);
+                // invariant: a pool below the root is refused above, so only the root's is walked as one.
+                visit(path, entry.name === SHARED_FOLDER);
             }
         }
     };
