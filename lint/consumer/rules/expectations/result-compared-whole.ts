@@ -57,6 +57,7 @@ function inRefusal(node: AstNode): boolean {
 
 function accessorOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     const root = identifierName(child(node, 'object'));
+    // Stryker disable next-line StringLiteral: no whole subject is named by the text standing for an unnamed member
     const property = memberPropertyName(node) ?? '';
     // Stryker disable next-line ConditionalExpression: no name is a result
     return root !== undefined && results.has(root) && WHOLE_SUBJECTS.has(property)

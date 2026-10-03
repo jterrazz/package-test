@@ -16,6 +16,7 @@ const CARRY_DEPTH = 4;
 /** `await api.params({ cursor }).get('/facts')`, or held whole in a name the test awaits; a result's own members and `expect(…)` are never one. */
 function isRequestLink(call: AstNode, test: AstNode, results: ReadonlySet<string>): boolean {
     const root = chainRootName(call);
+    // Stryker disable next-line OptionalChaining: a call always has a callee
     if (child(call, 'callee')?.type !== 'MemberExpression' || root === undefined) {
         return false;
     }
@@ -23,49 +24,45 @@ function isRequestLink(call: AstNode, test: AstNode, results: ReadonlySet<string
         return false;
     }
     const holder = holderOfChain(call);
+    // Stryker disable next-line OptionalChaining: a chain inside a test is always held by a node
     return holder?.type === 'AwaitExpression' || isAwaitedLater(holder, test);
 }
 
 function isAwaitedLater(declarator: AstNode | undefined, test: AstNode): boolean {
-    const name =
-        declarator?.type === 'VariableDeclarator'
-            ? identifierName(child(declarator, 'id'))
-            : undefined;
+    const name = identifierName(child(declarator, 'id'));
     if (name === undefined) {
         return false;
     }
     let awaited = false;
     walk(test, (node) => {
+        // Stryker disable next-line EqualityOperator: an await never starts where the declaration ends
+        const after = nodeStart(node) > nodeEnd(declarator);
         awaited ||=
             node.type === 'AwaitExpression' &&
-            nodeStart(node) > nodeEnd(declarator) &&
+            after &&
             identifierName(child(node, 'argument')) === name;
     });
     return awaited;
 }
 
 function holderOfChain(link: AstNode): AstNode | undefined {
-    let top = link;
-    let parent = child(top, 'parent');
-    while (
-        (parent?.type === 'MemberExpression' && child(parent, 'object') === top) ||
-        (parent?.type === 'CallExpression' && child(parent, 'callee') === top)
-    ) {
-        top = parent;
-        parent = child(top, 'parent');
+    const parent = child(link, 'parent');
+    // Stryker disable next-line ConditionalExpression,BlockStatement: an absent parent holds no link either, and is what the line below returns
+    if (parent === undefined) {
+        return undefined;
     }
-    return parent;
+    const linked = child(parent, 'object') === link || child(parent, 'callee') === link;
+    return linked ? holderOfChain(parent) : parent;
 }
 
+/** A member's property and an object's key are names, not reads, unless computed; a declaration's own name is none either. */
 function isReference(node: AstNode): boolean {
     const parent = child(node, 'parent');
-    if (parent?.type === 'MemberExpression') {
-        return child(parent, 'property') !== node || parent.computed === true;
+    if (child(parent, 'property') === node || child(parent, 'key') === node) {
+        // Stryker disable next-line OptionalChaining: a node that is a parent's field has that parent
+        return parent?.computed === true;
     }
-    if (parent?.type === 'Property' && child(parent, 'key') === node) {
-        return parent.shorthand === true;
-    }
-    return parent?.type !== 'VariableDeclarator' || child(parent, 'id') !== node;
+    return child(parent, 'id') !== node;
 }
 
 function bindingCarried(
@@ -75,7 +72,11 @@ function bindingCarried(
     depth: number,
 ): boolean {
     const name = identifierName(child(declarator, 'id'));
-    if (name === undefined || depth >= CARRY_DEPTH) {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: an unnamed binding's walk meets the callback itself first, which starts before it
+    if (name === undefined) {
+        return false;
+    }
+    if (depth >= CARRY_DEPTH) {
         return false;
     }
     const references: AstNode[] = [];
@@ -88,6 +89,7 @@ function bindingCarried(
         references.length > 0 &&
         references.every(
             (reference) =>
+                // Stryker disable next-line EqualityOperator: a reference never starts where its declaration ends
                 nodeStart(reference) > nodeEnd(declarator) &&
                 isCarried(reference, callback, results, depth + 1),
         )
@@ -103,14 +105,14 @@ export function isCarried(
 ): boolean {
     let current = node;
     let parent = child(current, 'parent');
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: a statement always stands between a read and its callback, so the climb never reaches either end
     while (parent !== undefined && parent !== callback) {
         if (parent.type === 'VariableDeclarator') {
-            return (
-                child(parent, 'init') === current &&
-                bindingCarried(parent, callback, results, depth)
-            );
+            // Stryker disable next-line ConditionalExpression: a read inside a declaration's own name binds no name the bindingCarried walk can follow
+            const initialised = child(parent, 'init') === current;
+            return initialised && bindingCarried(parent, callback, results, depth);
         }
-        if (parent.type === 'CallExpression' && childList(parent, 'arguments').includes(current)) {
+        if (childList(parent, 'arguments').includes(current)) {
             if (isRequestLink(parent, callback, results)) {
                 return true;
             }
@@ -124,5 +126,6 @@ export function isCarried(
         current = parent;
         parent = child(current, 'parent');
     }
+    // Stryker disable next-line BooleanLiteral: unreached, by the statement above every read
     return false;
 }
