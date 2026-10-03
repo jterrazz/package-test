@@ -242,7 +242,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/expectations/text/ansi.ts',
             'src/services/seed/seed.capability.ts',
             'src/services/services.ts',
-            'src/stubs/intercept/declared.ts',
             'src/stubs/intercept/intercept.capability.ts',
             'src/visitor/targets/landmarks.ts',
             'src/visitor/targets/modifiers.ts',

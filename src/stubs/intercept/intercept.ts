@@ -1,3 +1,4 @@
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import type { Stub, StubInput } from '../stub.js';
@@ -31,12 +32,10 @@ export type Intercept = ((
     ) => Promise<InterceptScope>);
 
 function isOptions(value: unknown): value is InterceptOptions {
-    return (
-        typeof value === 'object' && value !== null && !Array.isArray(value) && 'origin' in value
-    );
+    return isRecord(value) && 'origin' in value;
 }
 
-/** Validated before anything starts, installed only once the network double listens: it sits on top of the double's `fetch` and comes off first. */
+/** Every string request resolves against the origin, as a page resolves it; an absolute one is left where it points. Validated before anything starts, installed only once the network double listens: it sits on top of the double's `fetch` and comes off first. */
 function resolveRelativeAgainst(origin: string): () => () => void {
     let base: URL;
     try {
@@ -57,7 +56,7 @@ function resolveRelativeAgainst(origin: string): () => () => void {
             input: RequestInfo | URL,
             init?: RequestInit,
         ): Promise<Response> =>
-            typeof input === 'string' && input.startsWith('/')
+            typeof input === 'string'
                 ? await underlying(new URL(input, base).toString(), init)
                 : await underlying(input, init);
         return () => {

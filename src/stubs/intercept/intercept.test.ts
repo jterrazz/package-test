@@ -1,4 +1,6 @@
-import { afterAll, describe, expect, test } from 'vitest';
+import { once } from 'node:events';
+import { createServer } from 'node:http';
+import { afterAll, describe, expect, onTestFinished, test } from 'vitest';
 
 import { intercept } from '../delivery/same-process/intercept.js';
 import { stopStubServer } from '../delivery/same-process/stub-server.js';
@@ -8,6 +10,12 @@ import { defineStub } from '../stub.js';
 afterAll(async () => {
     await stopStubServer();
 });
+
+async function answerOf(input: Request | string): Promise<unknown> {
+    const response = await fetch(input);
+    const body: unknown = await response.json();
+    return body;
+}
 
 async function interceptOnABareHost(): Promise<void> {
     await using _ = await intercept(http.get('/api/posts'), http.json({}), {
@@ -23,12 +31,20 @@ async function reachAnUndeclaredHost(): Promise<void> {
     await fetch('https://analytics.test/collect');
 }
 
-async function reachTheEndedBlocksRoute(): Promise<void> {
-    await using _ = await intercept(
-        http.get('https://weather.test/tomorrow'),
-        http.json({ celsius: 19 }),
-    );
-    await fetch('https://weather.test/today');
+/** A server on port 0 answering every request itself, closed with the test. */
+async function realServer(): Promise<string> {
+    const server = createServer((_, response) => {
+        response.end('the real forecast');
+    });
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    onTestFinished(() => {
+        server.close();
+    });
+    const address = server.address();
+    return typeof address === 'object' && address !== null
+        ? `http://127.0.0.1:${address.port}`
+        : '';
 }
 
 describe('interceptThrough', () => {
@@ -57,15 +73,36 @@ describe('interceptThrough', () => {
         await expect(response.json()).resolves.toStrictEqual({ celsius: 19 });
     });
 
-    test('intercept — the network double in module scope — resolves a relative request against the origin the scope states', async () => {
-        // Given - a subject that fetches a path, the way browser code does, and a scope that says where that path lives
-        await using _ = await intercept(http.get('/api/posts'), http.json({ posts: [] }), {
-            origin: 'http://console.test',
-        });
+    test('intercept — the network double in module scope — resolves a relative request against the origin the scope states, and leaves an absolute one where it points', async () => {
+        // Given - a subject that fetches a path and a path relative to the page, the way browser code does, and a scope that says where they live
+        await using _ = await intercept(
+            [
+                defineStub({ request: http.get('/api/posts'), response: http.json({ posts: [] }) }),
+                defineStub({
+                    request: http.get('https://weather.test/today'),
+                    response: http.json({ celsius: 21 }),
+                }),
+            ],
+            { origin: 'http://console.test' },
+        );
 
-        // Then - the stub answers it: under node a relative URL has no base until the scope gives it one
-        const response = await fetch('/api/posts');
-        await expect(response.json()).resolves.toStrictEqual({ posts: [] });
+        // When - it fetches each, and the absolute call as a string and as a Request
+        const answers = await Promise.all(
+            [
+                '/api/posts',
+                'api/posts',
+                'https://weather.test/today',
+                new Request('https://weather.test/today'),
+            ].map(answerOf),
+        );
+
+        // Then - the stubs answer them: under node a relative URL has no base until the scope gives it one
+        expect(answers).toStrictEqual([
+            { posts: [] },
+            { posts: [] },
+            { celsius: 21 },
+            { celsius: 21 },
+        ]);
     });
 
     test('intercept — the network double in module scope — gives `fetch` back when the scope ends', async () => {
@@ -148,20 +185,40 @@ describe('interceptThrough', () => {
     });
 
     test('intercept — the network double in module scope — lets the handlers of a block go when the block ends', async () => {
-        // Given - a block that declared one call and ended, then a second block declaring a different one
+        // Given - a real server, and a block that stubbed its one route and ended
+        const real = await realServer();
         {
-            await using _ = await intercept(
-                http.get('https://weather.test/today'),
-                http.json({ celsius: 21 }),
-            );
+            await using _ = await intercept(http.get(`${real}/today`), http.json({ celsius: 21 }));
         }
-        // Then - the first block's stub answers nothing any more
-        await expect(reachTheEndedBlocksRoute()).rejects.toThrow('/today');
+
+        // When - the subject calls the route again
+        const response = await fetch(`${real}/today`);
+
+        // Then - the real server answers: the block's stub is gone
+        await expect(response.text()).resolves.toBe('the real forecast');
     });
 
     test('intercept — the network double in module scope — refuses an empty declaration', async () => {
         // Given - nothing declared
         // Then - the refusal says an empty list guards nothing
-        await expect(intercept([])).rejects.toThrow('at least one stub');
+        await expect(intercept([])).rejects.toThrow(
+            new Error(
+                [
+                    'found: intercept(), and the list of stubs is empty',
+                    'why: An empty list guards nothing.',
+                    'fix: declare at least one stub, or drop the intercept: a subject with no network needs none',
+                    'read: docs/17-stubs.md#intercept--the-same-double-with-no-chain',
+                ].join('\n'),
+            ),
+        );
+    });
+
+    test('intercept — the network double in module scope — refuses a request with no response in its own words', async () => {
+        // Given - a caller the types do not reach, declaring a request alone
+        // Then - the refusal names intercept()
+        // @ts-expect-error -- a bare request: the overloads refuse it at every typed site
+        await expect(intercept(http.get('https://news.test/latest'))).rejects.toThrow(
+            'found: intercept(request), a bare request with no response',
+        );
     });
 });
