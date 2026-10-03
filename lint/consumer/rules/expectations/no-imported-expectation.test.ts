@@ -7,6 +7,15 @@ const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 ruleTester().run('no-imported-expectation', noImportedExpectation, {
     invalid: [
         {
+            name: 'A module beside the test, and a specification file of data, are expectations written elsewhere.',
+            code: "import { PAGE } from './pages.js';\nimport { ROWS } from '../rows.specification.json';\ntest('a', () => { expect(a).toBe(PAGE); expect(b).toBe(ROWS); });",
+            errors: [
+                { column: 33, line: 3, messageId: 'imported' },
+                { column: 55, line: 3, messageId: 'imported' },
+            ],
+            filename: SPEC,
+        },
+        {
             name: 'An expectation written in another module.',
             code: "import { FIRST_PAGE } from '../_setup/pages.js';\ntest('a', () => { expect(result.response).toMatch(FIRST_PAGE); });",
             errors: [{ column: 50, line: 2, messageId: 'imported' }],
@@ -20,6 +29,21 @@ ruleTester().run('no-imported-expectation', noImportedExpectation, {
         },
     ],
     valid: [
+        {
+            name: 'A runner named without its extension, and an imported name handed to a call that asserts nothing.',
+            code: "import { api } from '../../api.specification';\nimport { PAGE } from './pages.js';\ntest('a', () => { expect(a).toBe(api); render(PAGE); });",
+            filename: SPEC,
+        },
+        {
+            name: 'A helper of the specs tree is no spec.',
+            code: "import { PAGE } from './pages.js';\nexpect(a).toBe(PAGE);",
+            filename: '/repo/specs/api/_setup/check.ts',
+        },
+        {
+            name: 'A spec in no specs tree is out of reach.',
+            code: "import { PAGE } from './pages.js';\ntest('a', () => { expect(a).toBe(PAGE); });",
+            filename: '/repo/lib/pagination.spec.ts',
+        },
         {
             name: "A helper is called: what it builds is the test's own.",
             code: "import { page } from '../_setup/pages.js';\ntest('a', () => { expect(result.json).toMatch(page(1)); });",

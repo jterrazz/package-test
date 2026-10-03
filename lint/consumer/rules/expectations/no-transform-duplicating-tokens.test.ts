@@ -30,6 +30,17 @@ ruleTester().run('no-transform-duplicating-tokens', noTransformDuplicatingTokens
     ],
     valid: [
         {
+            name: 'A block that returns nothing, or more than its return, another method, no replace at all, a member receiver, and no specification are none of this rule’s.',
+            code: `await specification.cli("./bin", { transform: (text) => {} });
+                await specification.cli("./bin", { transform: (text) => { text.replace(/x/g, "{{uuid}}"); } });
+                await specification.cli("./bin", { transform: (text) => { throw text.replace(/x/g, "{{uuid}}"); } });
+                await specification.cli("./bin", { transform: (text) => { return text.replace(/x/g, "{{uuid}}"); other(); } });
+                await specification.cli("./bin", { transform: (text) => text.replaceAll("x", "{{uuid}}") });
+                await specification.cli("./bin", { transform: (text) => text });
+                await specification.cli("./bin", { transform: (text) => this.text.replace(/x/g, "{{uuid}}") });
+                await other.cli("./bin", { transform: (text) => text.replace(/x/g, "{{uuid}}") });`,
+        },
+        {
             name: 'Real applicative noise — not expressible as tokens.',
             code: `await specification.cli("./bin", {
                     transform: (text) => text.replace(/^\\[worker-\\d+\\] /gm, ""),

@@ -22,11 +22,13 @@ const KNOWN_TOKEN_LITERAL = new RegExp(
 /** The expression a function returns: its concise body, or the one `return` of a block. */
 function returned(fn: AstNode): AstNode | undefined {
     const body = child(fn, 'body');
+    // Stryker disable next-line OptionalChaining: a function always has a body
     if (body?.type !== 'BlockStatement') {
         return body;
     }
     const statements = childList(body, 'body');
     const [only] = statements;
+    // Stryker disable next-line OptionalChaining: one statement is always there
     return statements.length === 1 && only?.type === 'ReturnStatement'
         ? child(only, 'argument')
         : undefined;
@@ -35,10 +37,12 @@ function returned(fn: AstNode): AstNode | undefined {
 /** The receiver of a `.replace(…, '{{token}}')` call, or undefined when the call is anything else. */
 function tokenReplaceReceiver(call: AstNode): AstNode | undefined {
     const callee = child(call, 'callee');
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: a call always has a callee
     if (callee === undefined || memberPropertyName(callee) !== 'replace') {
         return undefined;
     }
     const replacement = stringValue(childList(call, 'arguments')[1]);
+    // Stryker disable next-line ConditionalExpression: no literal is no token
     return replacement !== undefined && KNOWN_TOKEN_LITERAL.test(replacement)
         ? child(callee, 'object')
         : undefined;
@@ -46,6 +50,7 @@ function tokenReplaceReceiver(call: AstNode): AstNode | undefined {
 
 /** Every replacement must be a string literal that is exactly a known `{{token}}`. */
 function isTokenEquivalentTransform(fn: AstNode): boolean {
+    // Stryker disable next-line ConditionalExpression: a value that is no function returns nothing to read
     if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') {
         return false;
     }
@@ -53,11 +58,13 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
     let replaces = 0;
     while (expression?.type === 'CallExpression') {
         expression = tokenReplaceReceiver(expression);
+        // Stryker disable next-line ConditionalExpression,BlockStatement: no receiver ends the loop on no identifier
         if (expression === undefined) {
             return false;
         }
         replaces += 1;
     }
+    // Stryker disable next-line OptionalChaining: nothing returned is no replace either
     return replaces > 0 && expression?.type === 'Identifier';
 }
 
