@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 88    |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 92    |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 51    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 188   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
@@ -419,14 +419,14 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability             | api | job | cli | lint | integration | website | mobile | component | module |
 | ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 1      |
-| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 1      |
+| `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 3      |
+| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 2      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
-| `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 4      |
+| `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 6      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
-| `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 8      |
-| `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 6      |
-| `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 2      |
+| `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 9      |
+| `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 8      |
+| `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 6      |
 
 ### Time & doubles
 

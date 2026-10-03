@@ -162,18 +162,7 @@
             "count": 1
         }
     },
-    "src/expectations/goldens/matchers.test.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "src/expectations/goldens/matchers.ts": {
-        "max-lines": {
-            "count": 1
-        },
-        "max-params": {
-            "count": 1
-        },
         "typescript/require-await": {
             "count": 1
         }

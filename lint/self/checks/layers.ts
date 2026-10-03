@@ -35,7 +35,9 @@ export const FRAMEWORK_LAYERS = {
             'expectations/result.ts': ['services/database-option'],
             // invariant: a golden is a file the spec names on disk, with the `file()`/`directory()` every verb takes.
             'expectations/goldens/match-options.ts': ['disk/spec-path'],
-            'expectations/goldens/matchers.ts': ['disk/spec-path', 'disk/resolved-spec-path'],
+            'expectations/goldens/file-goldens.ts': ['disk/resolved-spec-path'],
+            'expectations/goldens/matchers.ts': ['disk/spec-path'],
+            'expectations/goldens/response-goldens.ts': ['disk/resolved-spec-path'],
             'expectations/goldens/text-assertions.ts': ['disk/spec-path'],
         },
     },
