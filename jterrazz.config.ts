@@ -30,7 +30,7 @@ async function builtPresets(): Promise<Preset[]> {
 
 const presets: Preset[] = building && !built ? [] : await builtPresets();
 
-const UNTESTED_IN_PRODUCTION = [
+const PRODUCTION_REACHING_TEST_MATERIAL = [
     'src/index.vitest.ts',
     'src/index.vitest.config.ts',
     'src/vitest/**',
@@ -168,7 +168,7 @@ export default defineConfig({
                     rules: { 'jterrazz/runner-in-specification-file': 'off' },
                 },
                 {
-                    files: UNTESTED_IN_PRODUCTION,
+                    files: PRODUCTION_REACHING_TEST_MATERIAL,
                     reason: 'the framework’s own runtime is test code by nature, and ships',
                     rules: { 'jterrazz/no-test-code-in-production': 'off' },
                 },
