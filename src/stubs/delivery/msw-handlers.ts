@@ -92,9 +92,7 @@ export function buildStubHandlers(
                         typeof stub.response === 'function'
                             ? stub.response(observed)
                             : stub.response;
-                    if (response.delay !== undefined && response.delay > 0) {
-                        await pause(response.delay);
-                    }
+                    await pause(response.delay ?? 0);
                     return toMswResponse(msw, response);
                 }),
             );
@@ -124,8 +122,10 @@ async function observe(request: Request): Promise<MatchableRequest> {
             body = rawText;
         }
     }
-    const headers: Record<string, string> = Object.fromEntries(
-        [...request.headers].map(([key, value]) => [key.toLowerCase(), value]),
-    );
-    return { body, headers, method: request.method.toUpperCase(), url: request.url };
+    return {
+        body,
+        headers: Object.fromEntries(request.headers),
+        method: request.method.toUpperCase(),
+        url: request.url,
+    };
 }
