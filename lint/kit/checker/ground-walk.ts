@@ -4,7 +4,7 @@ import {
     GROUND_SEEDS,
     treeEntries,
 } from '@jterrazz/typescript/rules';
-import { join, relative } from 'node:path';
+import { basename, join, relative } from 'node:path';
 
 import { PRUNED_WITH_FIXTURES } from '../project/facet-folders.js';
 import { SPEC_EXTENSION } from '../project/spec-grammar.js';
@@ -20,6 +20,7 @@ function documentFindings(entry: GroundEntry, passes: GroundPasses): Spotted[] {
     const text = decodeText(entry.path);
     return [
         ...passes.document({ name: entry.name, rel: entry.rel, text }),
+        // Stryker disable next-line ConditionalExpression: an unreadable document fails its parse, which reads as no finding too
         ...(text === null ? [] : runDocument(text, entry.rel, entry.path, passes.read)),
     ];
 }
@@ -66,7 +67,7 @@ export function walkGround(rootDir: string, passes: GroundPasses): Spotted[] {
             } else if (entry.name.endsWith(SPEC_EXTENSION)) {
                 findings.push(...documentFindings(found, passes));
             } else if (inside !== null) {
-                const atTop = dir.endsWith(`/${inside}`) || dir.endsWith(`\\${inside}`);
+                const atTop = basename(dir) === inside;
                 findings.push(...groundFindings(found, inside, atTop, passes));
             }
         }

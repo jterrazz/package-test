@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runMember, runMembers } from '../../kit/checker/member-run.js';
-import { checkoutUnder } from '../../kit/testing/package-tree.fixtures.js';
+import { checkoutUnder, packageWith } from '../../kit/testing/package-tree.fixtures.js';
 import { CHECKER } from './checker.js';
 
 const REPEATED_NAME = [
@@ -46,6 +46,34 @@ function codes(dir: string, root = WORKSPACE): string[] {
 }
 
 describe('checker', () => {
+    test('the ground passes — an HTTP first line is judged at the top of its folder only, and a document in ground is read when it is text', () => {
+        // Given - malformed HTTP files at the top of each folder, below it, and spelled .txt, and two documents in ground, one of them binary
+        const root = packageWith({
+            'specs/widget/_expected/bad.http': 'nope\n',
+            'specs/widget/_expected/bad.txt': 'nope\n',
+            'specs/widget/_expected/case.spec.yaml': 'runs: nope\n',
+            'specs/widget/_expected/shot.spec.yaml': 'x\u0000y',
+            'specs/widget/_expected/sub/bad.http': 'nope\n',
+            'specs/widget/_requests/bad.http': 'nope\n',
+            'specs/widget/_requests/bad.txt': 'nope\n',
+            'specs/widget/_requests/sub/bad.http': 'nope\n',
+        });
+
+        // Then - the top HTTP files and both documents are found, the grammar read of the text one alone, and the ground no test reads
+        expect(
+            CHECKER.tree
+                .flatMap((pass) => pass(join(root, 'specs')))
+                .map(({ line, path, rule }) => `${rule} ${path}:${line}`),
+        ).toStrictEqual([
+            'http-first-line-follows-its-grammar widget/_expected/bad.http:1',
+            'no-document-in-ground widget/_expected/case.spec.yaml:1',
+            'document-follows-its-grammar widget/_expected/case.spec.yaml:1',
+            'no-document-in-ground widget/_expected/shot.spec.yaml:1',
+            'http-first-line-follows-its-grammar widget/_requests/bad.http:1',
+            'no-unused-ground widget:1',
+        ]);
+    });
+
     test('the tree the checker judges — what git does not ignore — judges an untracked document, and never an ignored one', () => {
         // Given - three documents repeating their directory: tracked, new, and ignored
         const root = repository(
