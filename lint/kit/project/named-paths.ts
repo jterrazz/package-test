@@ -31,10 +31,6 @@ function documentReferences(file: string): FixtureReference[] {
     }
 }
 
-function isNamedPath(path: string | undefined): path is string {
-    return path !== undefined && path.length > 0 && isRelativePath(path) && !path.includes('${');
-}
-
 export function collectFixtureReferences(
     file: string,
     pattern = FIXTURE_CALL,
@@ -44,16 +40,23 @@ export function collectFixtureReferences(
         return documentReferences(file);
     }
     const text = readSource(file);
-    const quoted = codeOnly ? quotedMask(text) : [];
+    const quoted = codeOnly ? quotedMask(text) : undefined;
     return [...text.matchAll(pattern)].flatMap((match) => {
-        const path = match.groups?.path;
-        if (quoted[match.index] === true || !isNamedPath(path)) {
+        // Stryker disable next-line StringLiteral: a match of a fixture call always carries its kind, quote and path
+        const { kind = '', path = '', quote = '' } = match.groups ?? {};
+        if (quoted?.[match.index] === true || !isRelativePath(path) || path.includes('${')) {
             return [];
         }
-        const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
-        const kind: FixtureReference['kind'] =
-            match.groups?.kind === 'directory' ? 'directory' : 'file';
-        return [{ column: columnAt(text, at), file, kind, line: lineAt(text, at), path }];
+        const at = match.index + match[0].lastIndexOf(`${quote}${path}`);
+        return [
+            {
+                column: columnAt(text, at),
+                file,
+                kind: kind === 'directory' ? ('directory' as const) : ('file' as const),
+                line: lineAt(text, at),
+                path,
+            },
+        ];
     });
 }
 
@@ -71,6 +74,7 @@ export function anchoredPaths(
         program,
         literalPathVisitor(({ node, pieces }) => {
             const [only] = pieces;
+            // Stryker disable next-line LogicalOperator,StringLiteral: a visited path holds at least one piece
             const lone = pieces.length === 1 && !isRelativePath(only ?? '');
             if (lone || pieces.some((piece) => isAbsolute(piece))) {
                 return;
