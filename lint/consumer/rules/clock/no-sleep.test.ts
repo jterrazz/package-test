@@ -7,6 +7,15 @@ const SPEC_FILE = '/repo/specs/cli/exec/exec.test.ts';
 ruleTester().run('no-sleep', noSleep, {
     invalid: [
         {
+            name: 'The bare timers/promises import, and a timer under a call that is no double.',
+            code: 'import { setTimeout as sleep } from "timers/promises";\nmake(() => setTimeout(r, 5));',
+            errors: [
+                { column: 36, line: 1, messageId: 'timersImport' },
+                { column: 11, line: 2, messageId: 'sleep' },
+            ],
+            filename: SPEC_FILE,
+        },
+        {
             name: 'The classic promisified sleep.',
             code: 'await new Promise((resolve) => setTimeout(resolve, 500));',
             errors: [{ column: 31, line: 1, messageId: 'sleep' }],
@@ -56,6 +65,19 @@ ruleTester().run('no-sleep', noSleep, {
         },
     ],
     valid: [
+        {
+            name: 'A timer inside each kind of double, and calls that only look like a sleep, wait for nothing.',
+            code: [
+                'const a = mockOf(() => setTimeout(r, 5));',
+                'stub.mockImplementation(() => setTimeout(r, 5));',
+                'stub.mockImplementationOnce(() => setInterval(r, 5));',
+                'Atomics.load(view, 0);',
+                'other.wait(1);',
+                'wait(1);',
+                'import { thing } from "node:timers";',
+            ].join('\n'),
+            filename: SPEC_FILE,
+        },
         {
             name: 'Framework-level synchronisation.',
             code: 'await cli.exec("serve", { waitFor: /listening/ });',

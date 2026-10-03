@@ -27,6 +27,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 function goldenPathOf(node: AstNode): string | undefined {
     const name = goldenOf(node)?.path;
+    // Stryker disable next-line ConditionalExpression: a path no file holds yields no ref
     return name !== undefined && isRelativePath(name) ? name : undefined;
 }
 
@@ -34,10 +35,12 @@ const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
 
 function isMatchRef(node: AstNode): boolean {
     const callee = child(node, 'callee');
+    // Stryker disable next-line ConditionalExpression,OptionalChaining: memberPropertyName reads no name from a non-member
     if (callee?.type !== 'MemberExpression' || memberPropertyName(callee) !== 'ref') {
         return false;
     }
     const object = child(callee, 'object');
+    // Stryker disable next-line OptionalChaining,ConditionalExpression: a member always has an object, and only an identifier has a name
     return object?.type === 'Identifier' && object.name === 'match';
 }
 
@@ -45,16 +48,19 @@ function refsInFixture(target: string): string[] {
     const refs: string[] = [];
     const collect = (text: string): void => {
         for (const match of text.matchAll(REF_TOKEN)) {
+            // Stryker disable next-line OptionalChaining: a match of a pattern holding a named group always carries its groups
             refs.push(match.groups?.ref ?? '');
         }
     };
     if (isFile(target)) {
         const text = readFileCached(target);
+        // Stryker disable next-line ConditionalExpression: a file read as a file always reads
         if (text !== null) {
             collect(text);
         }
         return refs;
     }
+    // Stryker disable next-line ConditionalExpression: a path that holds nothing lists nothing
     if (isDirectory(target)) {
         for (const entry of listDirectory(target) ?? []) {
             refs.push(...refsInFixture(join(target, entry)));
@@ -96,6 +102,7 @@ export const noSingleUseRef = defineRule(
                     };
 
                     walk(program, (node) => {
+                        // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no call is no matcher either
                         if (node.type !== 'CallExpression') {
                             return;
                         }
@@ -103,6 +110,7 @@ export const noSingleUseRef = defineRule(
                             const ref = stringValue(childList(node, 'arguments')[0]);
                             if (ref !== undefined) {
                                 bump(ref);
+                                // Stryker disable next-line ConditionalExpression: a node is reported only for a ref read once
                                 if (!codeNodes.has(ref)) {
                                     codeNodes.set(ref, node);
                                 }
@@ -111,9 +119,10 @@ export const noSingleUseRef = defineRule(
                         }
                         const name = goldenPathOf(node);
                         if (name !== undefined) {
-                            const target = resolve(featureDir, name.replace(/\/+$/u, ''));
+                            const target = resolve(featureDir, name);
                             for (const ref of refsInFixture(target)) {
                                 bump(ref);
+                                // Stryker disable next-line ConditionalExpression: a node is reported only for a ref read once
                                 if (!fixtureNodes.has(ref)) {
                                     fixtureNodes.set(ref, node);
                                 }
@@ -123,6 +132,7 @@ export const noSingleUseRef = defineRule(
 
                     for (const [ref, count] of counts) {
                         const node = codeNodes.get(ref) ?? fixtureNodes.get(ref);
+                        // Stryker disable next-line ConditionalExpression: a counted ref always has a site
                         if (count === 1 && node !== undefined) {
                             context.report({ data: { ref }, messageId: 'singleUse', node });
                         }
