@@ -1,18 +1,20 @@
 import { isFile, readFileCached } from '@jterrazz/typescript/rules';
 import { basename, dirname, join } from 'node:path';
 
-import { childList, isNode } from './ast.js';
+import { child, childList, identifierName, isNode } from './ast.js';
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import type { FileRole } from './role.js';
 
 /** `pagination.spec.ts` → `pagination`. */
 export function aspectOf(filename: string): string {
+    // Stryker disable next-line Regex: a spec's name ends on its suffix
     return basename(filename).replace(/\.spec\.ts$/u, '');
 }
 
 /** `route-judge.test.ts` → `route-judge`. */
 function testBaseOf(filename: string): string {
+    // Stryker disable next-line Regex: a test's name ends on its suffix
     return basename(filename).replace(/\.test\.tsx?$/u, '');
 }
 
@@ -31,39 +33,36 @@ function camelOf(base: string): string {
     );
 }
 
-function nameOf(node: unknown): string | undefined {
-    return isNode(node) && typeof node.name === 'string' ? node.name : undefined;
+function namesOf(node: AstNode | undefined): string[] {
+    const name = identifierName(node);
+    return name === undefined ? [] : [name];
 }
 
+/** A type, an interface and an ambient declaration are exported as types: no value a test calls. Any other statement names nothing it exports. */
 function valueExportsOf(statement: AstNode): string[] {
-    if (statement.type !== 'ExportNamedDeclaration' || statement.exportKind === 'type') {
+    if (statement.exportKind === 'type') {
         return [];
     }
-    const { declaration } = statement;
-    if (isNode(declaration)) {
-        if (declaration.type === 'VariableDeclaration' && Array.isArray(declaration.declarations)) {
-            return declaration.declarations
-                .map((declarator: AstNode) => nameOf(declarator.id))
-                .filter((name) => name !== undefined);
-        }
-        const typeOnly =
-            declaration.type === 'TSTypeAliasDeclaration' ||
-            declaration.type === 'TSInterfaceDeclaration' ||
-            declaration.declare === true;
-        const name = nameOf(declaration.id);
-        return typeOnly || name === undefined ? [] : [name];
+    const declaration = child(statement, 'declaration');
+    if (declaration === undefined) {
+        return childList(statement, 'specifiers')
+            .filter((specifier) => specifier.exportKind !== 'type')
+            .flatMap((specifier) => namesOf(child(specifier, 'exported')));
     }
-    const specifiers = Array.isArray(statement.specifiers) ? statement.specifiers : [];
-    return specifiers
-        .filter((specifier: AstNode) => specifier.exportKind !== 'type')
-        .map((specifier: AstNode) => nameOf(specifier.exported))
-        .filter((name) => name !== undefined);
+    if (declaration.type === 'VariableDeclaration') {
+        return childList(declaration, 'declarations').flatMap((declarator) =>
+            namesOf(child(declarator, 'id')),
+        );
+    }
+    return namesOf(child(declaration, 'id'));
 }
 
 function defaultNameOf(statements: AstNode[]): string | undefined {
-    const statement = statements.find((node) => node.type === 'ExportDefaultDeclaration');
-    const declaration = statement?.declaration;
-    return nameOf(declaration) ?? (isNode(declaration) ? nameOf(declaration.id) : undefined);
+    const declaration = child(
+        statements.find((node) => node.type === 'ExportDefaultDeclaration'),
+        'declaration',
+    );
+    return identifierName(declaration) ?? identifierName(child(declaration, 'id'));
 }
 
 /** The first that answers: the default export's name; the one value export; the value export spelling the base in camelCase or PascalCase, or the base less a role suffix (`request.action` → `request`); else the base — an `index` module's being its folder's name, the package entry's aside. A type is no value export: a test calls what runs. */

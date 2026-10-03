@@ -76,4 +76,63 @@ describe('testTitle', () => {
         );
         expect(testTitle(join(root, 'src/index.test.ts'), 'module').named).toBe('index');
     });
+
+    test.each([
+        ['a variable', 'export const run = 1;\nexport const [skipped] = [];', 'run'],
+        [
+            'a specifier, type ones aside',
+            'const a = 1;\nexport { a as run };\nexport type { T };\nexport { type U };',
+            'run',
+        ],
+        [
+            'a class or an enum beside declared and type-only ones',
+            'export enum Run {}\nexport declare function shim(): void;\nexport type T = 1;\nexport interface I {}',
+            'Run',
+        ],
+        [
+            'an expression default export is no name',
+            'export default 1;\nexport function run() {}',
+            'run',
+        ],
+        [
+            'a default export bound to a name',
+            'const run = 1;\nexport default run;\nexport const other = 2;',
+            'run',
+        ],
+        [
+            'an anonymous default class is no name',
+            'export default class {}\nexport const run = 1;',
+            'run',
+        ],
+        ['a statement that exports nothing', 'const a = 1;\nexport const run = a;', 'run'],
+    ])('names the one value export: %s', (_, source, named) => {
+        // Given - a module whose one value export is written that way
+        // Then - its name
+        expect(subjectOfSource('base', source, 'base.ts')).toBe(named);
+    });
+
+    test('names a spec by its aspect, and a module test by the module of its own extension, deep in a folder', () => {
+        // Given - a spec, tests beside modules written as .ts, .tsx or both, under a folder no manifest sits above
+        const root = packageWith({
+            'src/deep/both.ts': 'export const fromTs = 1;\n',
+            'src/deep/both.tsx': 'export const fromTsx = 1;\n',
+            'src/deep/plain.ts': 'export const fromPlain = 1;\n',
+            'src/deep/rendered.tsx': 'export const fromRendered = 1;\n',
+        });
+
+        // Then - the aspect, the .ts for a .test.ts, the base of a test alone deep down, and the other extension where its own is missing
+        expect([
+            testTitle(join(root, 'specs/api/users/pagination.spec.ts'), 'spec'),
+            testTitle(join(root, 'src/deep/both.test.ts'), 'module'),
+            testTitle(join(root, 'src/deep/alone.test.ts'), 'module'),
+            testTitle(join(root, 'src/deep/plain.test.tsx'), 'component'),
+            testTitle(join(root, 'src/deep/rendered.test.ts'), 'module'),
+        ]).toStrictEqual([
+            { named: 'pagination', what: 'aspect' },
+            { named: 'fromTs', what: 'subject' },
+            { named: 'alone', what: 'subject' },
+            { named: 'fromPlain', what: 'subject' },
+            { named: 'fromRendered', what: 'subject' },
+        ]);
+    });
 });
