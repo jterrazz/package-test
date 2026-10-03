@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { existsSync, mkdtempSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -21,183 +21,125 @@ const writeSchema = (name: string, sql: string): string => {
     return path;
 };
 
-const guardDir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-guard-'));
-
-const lockDir = mkdtempSync(resolve(tmpdir(), 'sqlite-lock-'));
-
 describe('sqlite-template', () => {
-    test('sqliteTemplateName (regression guard) — two different schemas get two different template files', () => {
-        // Given - two projects sharing one machine-global tmpdir, each with its own schema (the real poisoning: one fixed filename meant the second project found a header-valid template full of the FIRST project's tables)
-        const posts = writeSchema('posts.sql', 'CREATE TABLE "post" (id INTEGER PRIMARY KEY);');
-        const users = writeSchema('users.sql', 'CREATE TABLE "user" (id INTEGER PRIMARY KEY);');
-
-        // Then - the two never meet
-        expect(sqliteTemplateName({ init: posts })).not.toBe(sqliteTemplateName({ init: users }));
-    });
-
-    test('sqliteTemplateName (regression guard) — the same schema gets the same template file — the cache still caches', () => {
-        // Given - the same declared schema, read twice
-        const schema = writeSchema('stable.sql', 'CREATE TABLE "t" (id INTEGER PRIMARY KEY);');
-
-        // Then - one key, so this project's workers share one build
-        expect(sqliteTemplateName({ init: schema })).toBe(sqliteTemplateName({ init: schema }));
-    });
-
-    test('sqliteTemplateName (regression guard) — editing the schema changes the key, so the stale template is not reused', () => {
-        // Given - a schema whose content changed between two runs at the same path
-        const schema = writeSchema('edited.sql', 'CREATE TABLE "a" (id INTEGER PRIMARY KEY);');
-        const before = sqliteTemplateName({ init: schema });
-        writeFileSync(schema, 'CREATE TABLE "a" (id INTEGER PRIMARY KEY, label TEXT);');
-
-        // Then - a new key: the content is part of the digest, not just the path
-        expect(sqliteTemplateName({ init: schema })).not.toBe(before);
-    });
-
-    test('sqliteTemplateName (regression guard) — two identical schemas at different paths stay separate', () => {
-        // Given - two projects with byte-identical schemas in different checkouts
+    test('sqliteTemplateName (regression guard) — the name keys on the kind of schema, its path and its bytes, a folder by every file in it', () => {
+        // Given - schemas differing by content, by path alone, by kind alone, edited in place, and a folder with a file edited
         const sql = 'CREATE TABLE "t" (id INTEGER PRIMARY KEY);';
+        const posts = writeSchema('posts.sql', 'CREATE TABLE "post" (id INTEGER PRIMARY KEY);');
         const left = writeSchema('left.sql', sql);
         const right = writeSchema('right.sql', sql);
+        const edited = writeSchema('edited.sql', sql);
+        const before = sqliteTemplateName({ init: edited });
+        writeFileSync(edited, 'CREATE TABLE "t" (id INTEGER PRIMARY KEY, label TEXT);');
+        const folder = resolve(workdir, 'prisma');
+        mkdirSync(folder);
+        writeFileSync(resolve(folder, 'a.prisma'), 'model A {}');
+        const folderBefore = sqliteTemplateName({ prismaSchema: folder });
+        writeFileSync(resolve(folder, 'a.prisma'), 'model A { id Int }');
 
-        // Then - the resolved path is in the digest too, so they never share a file
-        expect(sqliteTemplateName({ init: left })).not.toBe(sqliteTemplateName({ init: right }));
+        // Then - every one a name of its own, and the same schema read twice one name
+        const names = [
+            sqliteTemplateName({ init: posts }),
+            sqliteTemplateName({ init: left }),
+            sqliteTemplateName({ init: right }),
+            sqliteTemplateName({ prismaSchema: left }),
+            before,
+            sqliteTemplateName({ init: edited }),
+            folderBefore,
+            sqliteTemplateName({ prismaSchema: folder }),
+        ];
+        expect([new Set(names).size, sqliteTemplateName({ init: left })]).toStrictEqual([
+            names.length,
+            names[1],
+        ]);
     });
 
-    test('sqliteTemplateName (regression guard) — a prisma schema and an init SQL file never collide', () => {
-        // Given - the same path declared under each option
-        const path = writeSchema('both.sql', 'CREATE TABLE "t" (id INTEGER PRIMARY KEY);');
-
-        // Then - the kind of schema is part of the digest
-        expect(sqliteTemplateName({ prismaSchema: path })).not.toBe(
-            sqliteTemplateName({ init: path }),
-        );
+    test('sqliteTemplateName (regression guard) — an empty database and an unreadable schema have stable names, keyed on the path alone', () => {
+        // Given - no schema, and schemas declared at paths nothing is on
+        // Then - the names each always gets
+        expect([
+            sqliteTemplateName(),
+            sqliteTemplateName({}),
+            sqliteTemplateName({ init: '/no/such/schema.sql' }),
+            sqliteTemplateName({ prismaSchema: '/no/such/schema.sql' }),
+        ]).toStrictEqual([
+            'template-2e1cfa82.sqlite',
+            'template-2e1cfa82.sqlite',
+            'template-68ada90d.sqlite',
+            'template-dd35a52b.sqlite',
+        ]);
     });
 
-    test('sqliteTemplateName (regression guard) — an empty database has one stable, prefixed name', () => {
-        // Given - no schema at all (the consumer seeds it)
-        // Then - a stable key; the folder it lands in already says whose it is
-        expect(sqliteTemplateName()).toBe(sqliteTemplateName({}));
-        expect(sqliteTemplateName()).toMatch(/^template-[\da-f]{8}\.sqlite$/u);
-    });
-
-    test('sqliteTemplateName (regression guard) — an unreadable schema still keys on its path', () => {
-        // Given - a declared schema that is not on disk (yet)
-        const missing = resolve(workdir, 'absent.sql');
-
-        // Then - no throw, and two absent schemas at two paths remain distinct
-        expect(sqliteTemplateName({ init: missing })).not.toBe(
-            sqliteTemplateName({ init: resolve(workdir, 'absent-other.sql') }),
-        );
-    });
-
-    test('prismaPushCommand (regression guard) — carries --schema with the path resolved against the cwd', () => {
-        // Given - a prismaSchema declared relative to the project root, in a repo whose prisma config does NOT sit at the cwd (the exact shape that made the option a lie: db push discovered nothing and died with "Could not find Prisma Schema")
+    test('prismaPushCommand (regression guard) — carries --schema with the path resolved against the cwd and quoted, or the bare invocation Prisma discovers for itself', () => {
+        // Given - a schema relative to the project root, an absolute one under a folder with a space, and none
         const declared = 'apps/dashboard/prisma/schema.prisma';
-        const absolute = resolve(process.cwd(), declared);
-
-        // Then - the CLI is told the schema explicitly, as an absolute path
-        const command = prismaPushCommand(declared);
-        expect(command).toBe(`npx prisma db push --force-reset --schema "${absolute}"`);
-        expect(command).toContain('--schema');
-        expect(command).toContain(absolute);
-    });
-
-    test('prismaPushCommand (regression guard) — leaves an already absolute path untouched', () => {
-        // Given - a consumer that resolved the path itself
-        const absolute = resolve(tmpdir(), 'somewhere', 'schema.prisma');
-
-        // Then - resolve() is idempotent: the same absolute path reaches the CLI
-        expect(prismaPushCommand(absolute)).toBe(
-            `npx prisma db push --force-reset --schema "${absolute}"`,
-        );
-    });
-
-    test('prismaPushCommand (regression guard) — quotes a path containing spaces', () => {
-        // Given - a checkout under a directory with a space (execSync runs a shell)
         const spaced = resolve(tmpdir(), 'my apps', 'schema.prisma');
 
-        // Then - the argument survives as one token
-        expect(prismaPushCommand(spaced)).toContain(`--schema "${spaced}"`);
+        // Then - the CLI is told the schema explicitly, as one absolute token
+        expect([
+            prismaPushCommand(declared),
+            prismaPushCommand(spaced),
+            prismaPushCommand(null),
+        ]).toStrictEqual([
+            `npx prisma db push --force-reset --schema "${resolve(process.cwd(), declared)}"`,
+            `npx prisma db push --force-reset --schema "${spaced}"`,
+            'npx prisma db push --force-reset',
+        ]);
     });
 
-    test('prismaPushCommand (regression guard) — without the option, keeps the bare invocation Prisma discovers for itself', () => {
-        // Given - no prismaSchema declared
-        // Then - the command is unchanged, so discovery-based setups keep working
-        expect(prismaPushCommand(null)).toBe('npx prisma db push --force-reset');
-    });
-
-    test('isValidSqliteTemplate (regression guard) — rejects a path that does not exist', () => {
-        // Given - a path nothing was ever written to
-        const missing = resolve(guardDir, 'missing.sqlite');
-
-        // Then - it is not treated as a usable template
-        expect(existsSync(missing)).toBe(false);
-        expect(isValidSqliteTemplate(missing)).toBe(false);
-    });
-
-    test('isValidSqliteTemplate (regression guard) — rejects a 0-byte file — the exact shape a crashed run leaves behind', () => {
-        // Given - a stale, empty file (e.g. a worker crashed right after `touch`-ing the template but before better-sqlite3 ever wrote the format header)
-        const stale = resolve(guardDir, 'stale-empty.sqlite');
-        writeFileSync(stale, '');
-
-        // Then - the guard refuses to treat it as a real template
-        expect(isValidSqliteTemplate(stale)).toBe(false);
-    });
-
-    test('isValidSqliteTemplate (regression guard) — rejects a short file that is not a SQLite database at all', () => {
-        // Given - some unrelated, too-short content at the template path
-        const garbage = resolve(guardDir, 'garbage.sqlite');
-        writeFileSync(garbage, 'not a database');
-
-        // Then - the guard refuses it (fails the magic-header check)
-        expect(isValidSqliteTemplate(garbage)).toBe(false);
-    });
-
-    test('isValidSqliteTemplate (regression guard) — accepts a real SQLite database file', () => {
-        // Given - an actual SQLite file created by better-sqlite3, in a folder of this run's own
-        const real = resolve(mkdtempSync(resolve(guardDir, 'real-')), 'real.sqlite');
+    test('isValidSqliteTemplate (regression guard) — accepts a real SQLite database, and nothing a crash or a stranger leaves at the path', () => {
+        // Given - a real database, a missing path, a 0-byte file, an unrelated file, and the header text without its closing NUL
+        const guardDir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-guard-'));
+        const real = resolve(guardDir, 'real.sqlite');
         const db = new Database(real);
         db.exec('CREATE TABLE "t" (id INTEGER PRIMARY KEY)');
         db.close();
+        const files = { empty: '', garbage: 'not a database', truncated: 'SQLite format 3' };
+        for (const [name, content] of Object.entries(files)) {
+            writeFileSync(resolve(guardDir, name), content);
+        }
 
-        // Then - the header check passes
-        expect(isValidSqliteTemplate(real)).toBe(true);
+        // Then - only the real one is a template
+        expect(
+            [
+                real,
+                resolve(guardDir, 'missing'),
+                ...Object.keys(files).map((name) => resolve(guardDir, name)),
+            ].map((path) => isValidSqliteTemplate(path)),
+        ).toStrictEqual([true, false, false, false, false]);
     });
 
-    test('the template build lock (regression guard) — exactly one caller wins it — the loser is told, not let through', () => {
-        // Given - a free lock path. The defect: a check-then-write pair let two workers both believe they had won, and both ran `prisma db push` against the same file — "database is locked".
+    test('the template build lock (regression guard) — exactly one caller wins it, naming its pid, and a lock that cannot be created is no lost race', () => {
+        // Given - a free lock path, and one in a folder that does not exist. The defect: a check-then-write pair let two workers both believe they had won.
+        const lockDir = mkdtempSync(resolve(tmpdir(), 'sqlite-lock-'));
         const lockPath = resolve(lockDir, 'exclusive.lock');
 
-        // Then - the exclusive create hands the lock to one caller only
-        expect(acquireTemplateLock(lockPath)).toBe(true);
-        expect(acquireTemplateLock(lockPath)).toBe(false);
-
+        // Then - the exclusive create hands the lock to one caller only, until released
+        expect([
+            acquireTemplateLock(lockPath),
+            readFileSync(lockPath, 'utf8'),
+            acquireTemplateLock(lockPath),
+        ]).toStrictEqual([true, String(process.pid), false]);
+        releaseTemplateLock(lockPath);
         releaseTemplateLock(lockPath);
         expect(acquireTemplateLock(lockPath)).toBe(true);
-        releaseTemplateLock(lockPath);
+        expect(() => acquireTemplateLock(resolve(lockDir, 'missing/held.lock'))).toThrow('ENOENT');
     });
 
-    test('the template build lock (regression guard) — a lock nobody has touched for minutes is breakable, a fresh one is not', () => {
-        // Given - a lock just taken
+    test('the template build lock (regression guard) — a lock older than the build budget is breakable, one at the budget or fresh is not, and a lock that is gone is not stale', () => {
+        // Given - a lock just taken, and one never taken
+        const lockDir = mkdtempSync(resolve(tmpdir(), 'sqlite-lock-'));
         const lockPath = resolve(lockDir, 'stale.lock');
         acquireTemplateLock(lockPath);
+        const taken = statSync(lockPath).mtimeMs;
 
-        // Then - its holder is presumed alive, so a waiter waits
-        expect(isStaleTemplateLock(lockPath)).toBe(false);
-
-        // invariant: long past the build budget the holder is presumed dead: a crashed worker must not wedge the suite.
-        expect(isStaleTemplateLock(lockPath, statSync(lockPath).mtimeMs + 10 * 60 * 1000)).toBe(
-            true,
-        );
-        releaseTemplateLock(lockPath);
-    });
-
-    test('the template build lock (regression guard) — a lock that is gone is not stale — the waiter just retries', () => {
-        // Given - no lock at all
-        const lockPath = resolve(lockDir, 'absent.lock');
-
-        // Then - nothing to break
-        expect(isStaleTemplateLock(lockPath)).toBe(false);
-        expect(existsSync(lockPath)).toBe(false);
+        // Then - presumed alive within two minutes, dead past them; nothing to break when absent
+        expect([
+            isStaleTemplateLock(lockPath),
+            isStaleTemplateLock(lockPath, taken + 120_000),
+            isStaleTemplateLock(lockPath, taken + 120_001),
+            isStaleTemplateLock(resolve(lockDir, 'absent.lock')),
+            existsSync(resolve(lockDir, 'absent.lock')),
+        ]).toStrictEqual([false, false, true, false, false]);
     });
 });

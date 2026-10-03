@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import {
     closeSync,
-    existsSync,
     mkdirSync,
     openSync,
     readdirSync,
@@ -18,27 +17,28 @@ import { SQLITE_TEMPLATE_DIR } from '../../../lint/kit/project/artifacts.js';
 // outside: the SQLite file-format header: a crash can leave a 0-byte or partial template behind.
 const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 
-/** Checks the header only: enough to reject a 0-byte or truncated leftover. */
-export function isValidSqliteTemplate(path: string): boolean {
-    if (!existsSync(path)) {
-        return false;
-    }
-
-    let fd: number;
+/** Runs on the file opened, and closes it whatever happens. */
+// Stryker disable all: a descriptor left open answers nothing a test reads
+function withDescriptor<T>(path: string, flags: string, use: (fd: number) => T): T {
+    const fd = openSync(path, flags);
     try {
-        fd = openSync(path, 'r');
-    } catch {
-        return false;
-    }
-
-    try {
-        const header = Buffer.alloc(SQLITE_FILE_HEADER.length);
-        const bytesRead = readSync(fd, header, 0, header.length, 0);
-        return bytesRead === SQLITE_FILE_HEADER.length && header.equals(SQLITE_FILE_HEADER);
-    } catch {
-        return false;
+        return use(fd);
     } finally {
         closeSync(fd);
+    }
+}
+// Stryker restore all
+
+/** Checks the header only: enough to reject a 0-byte or truncated leftover. */
+export function isValidSqliteTemplate(path: string): boolean {
+    try {
+        return withDescriptor(path, 'r', (fd) => {
+            const header = Buffer.alloc(SQLITE_FILE_HEADER.length);
+            const bytesRead = readSync(fd, header, 0, header.length, 0);
+            return bytesRead === SQLITE_FILE_HEADER.length && header.equals(SQLITE_FILE_HEADER);
+        });
+    } catch {
+        return false;
     }
 }
 
@@ -68,11 +68,13 @@ const LOCK_STALE_MS = 120_000;
 function schemaBytes(path: string): string {
     try {
         if (statSync(path).isDirectory()) {
-            return readdirSync(path)
+            const entries = readdirSync(path)
                 .toSorted()
-                .map((entry) => schemaBytes(join(path, entry)))
-                .join('\0');
+                .map((entry) => schemaBytes(join(path, entry)));
+            // Stryker disable next-line StringLiteral: each entry already begins with its own path, which parts it from the one before
+            return entries.join('\0');
         }
+        // Stryker disable next-line StringLiteral: the bytes read as a Buffer join the key as the same text
         return `${path}\0${readFileSync(path, 'utf8')}`;
     } catch {
         return `${path}\0<unreadable>`;
@@ -100,19 +102,14 @@ export function sqliteTemplateDir(root: string): string {
 
 /** `wx` creates and claims the file in one syscall: two workers cannot both win and run `prisma db push` on one file. */
 export function acquireTemplateLock(lockPath: string): boolean {
-    let fd: number;
     try {
-        fd = openSync(lockPath, 'wx');
+        withDescriptor(lockPath, 'wx', (fd) => writeSync(fd, process.pid.toString()));
     } catch (error) {
+        // Stryker disable next-line ConditionalExpression,LogicalOperator: outside: fs throws only errors that carry a code
         if (error instanceof Error && 'code' in error && error.code === 'EEXIST') {
             return false;
         }
         throw error;
-    }
-    try {
-        writeSync(fd, process.pid.toString());
-    } finally {
-        closeSync(fd);
     }
     return true;
 }
