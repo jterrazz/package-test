@@ -29,10 +29,11 @@ describe('spec-values', () => {
 
         // Then - the one inside takes the title, the one outside the fallback
         expect(titleAround(text, text.indexOf('{ name'))).toBe('lists the users');
-        expect(nameAround(text, text.indexOf('{ name'), 'value')).toBe('lists-the-users');
-        expect(nameAround(text, text.indexOf("'x'"), 'value')).toBe('value');
-        expect(nameAround(text, text.indexOf("'y'"), 'value')).toBe('value');
-        expect(nameAround(text, text.indexOf('{ page'), 'value')).toBe('pages-s');
+        expect(
+            ['{ name', "'x'", "'y'", '{ page', '{ at'].map((value) =>
+                nameAround(text, text.indexOf(value), 'value'),
+            ),
+        ).toStrictEqual(['lists-the-users', 'value', 'value', 'pages-s', 'a-reads']);
     });
 
     test('spec values — what a fix names a value written in a test by — a call spelled in a string is text, never code', () => {
