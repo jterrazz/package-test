@@ -36,7 +36,6 @@ describe('redis', () => {
             const { createClient } = await import('redis');
             const probe = redis();
             probe.connectionString = cache.connectionString;
-            probe.started = true;
 
             const writer = createClient({ url: probe.connectionString });
             await writer.connect();
@@ -64,7 +63,6 @@ describe('redis', () => {
             const { createClient } = await import('redis');
             const probe = redis();
             probe.connectionString = cache.connectionString;
-            probe.started = true;
 
             const client = createClient({ url: probe.connectionString });
             await client.connect();
@@ -164,7 +162,6 @@ describe('redis', () => {
                 [first, second].map(async (handle, worker) => {
                     handle.serviceName = 'cache';
                     handle.connectionString = container.toString().replace(/\/$/u, '');
-                    handle.started = true;
                     await handle.isolation().acquire(String(worker + 40));
                 }),
             );
@@ -196,7 +193,6 @@ describe('redis', () => {
                     ] as const
                 ).map(async ([handle, worker]) => {
                     handle.connectionString = container.toString().replace(/\/$/u, '');
-                    handle.started = true;
                     await handle.isolation().acquire(worker);
                 }),
             );
@@ -232,7 +228,6 @@ describe('redis', () => {
             const [died, next] = [redis(), redis()];
 
             died.connectionString = bare;
-            died.started = true;
             await died.isolation().acquire('9');
             const writer = createClient({ url: died.connectionString });
             await writer.connect();
@@ -240,7 +235,6 @@ describe('redis', () => {
             await writer.quit();
 
             next.connectionString = bare;
-            next.started = true;
             await next.isolation().acquire('9');
             const reader = createClient({ url: next.connectionString });
             await reader.connect();
@@ -267,7 +261,6 @@ describe('redis', () => {
             await Promise.all(
                 [first, second].map(async (handle, index) => {
                     handle.connectionString = container.toString().replace(/\/$/u, '');
-                    handle.started = true;
                     await handle.isolation().acquire(String(7 + index));
                 }),
             );

@@ -96,7 +96,6 @@ export class Orchestrator {
             }),
             ...embedded.map(async (handle) => {
                 await handle.initialize(dockerDir, this.root);
-                handle.started = true;
             }),
         ]);
 
@@ -132,7 +131,6 @@ export class Orchestrator {
         );
         await handle.healthcheck();
         await handle.initialize(dockerDir, this.root);
-        handle.started = true;
         this.containers.push(container);
         return {
             name: handle.serviceName ?? handle.type,

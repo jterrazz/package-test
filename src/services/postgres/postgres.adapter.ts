@@ -50,7 +50,6 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     readonly containerOptions = DISPOSABLE;
 
     connectionString = '';
-    started = false;
 
     private client: Client | null = null;
     /** The container's own string, which a worker's clone replaces and is restored from. */

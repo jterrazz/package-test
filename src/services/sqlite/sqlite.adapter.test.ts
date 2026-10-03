@@ -52,7 +52,6 @@ describe('sqlite', () => {
         await db.initialize(root, root);
 
         // Then - the template was detected as invalid and rebuilt: the schema from init.sql is actually present (proving the file was NOT reused as-is) and the file now passes the validity guard.
-        expect(db.started).toBe(true);
         expect(isValidSqliteTemplate(templatePath)).toBe(true);
 
         const check = new Database(templatePath, { readonly: true });
@@ -120,8 +119,8 @@ describe('sqlite', () => {
             '.artifacts/vitest/sqlite',
             sqliteTemplateName({ init: initSqlPath }),
         );
-        expect(handles.map((db) => [db.started, db.connectionString])).toStrictEqual(
-            handles.map(() => [true, `file:${templatePath}`]),
+        expect(handles.map((db) => db.connectionString)).toStrictEqual(
+            handles.map(() => `file:${templatePath}`),
         );
 
         const check = new Database(templatePath, { readonly: true });
@@ -171,7 +170,6 @@ describe('sqlite', () => {
                 defaultPort: db.defaultPort,
                 environment: db.environment,
                 serviceName: db.serviceName,
-                started: db.started,
                 type: db.type,
             },
             db.buildConnectionString(),
@@ -183,7 +181,6 @@ describe('sqlite', () => {
                 defaultPort: 0,
                 environment: {},
                 serviceName: null,
-                started: false,
                 type: 'sqlite',
             },
             'file:',
@@ -281,7 +278,10 @@ describe('sqlite', () => {
         await db.initialize(root, root);
 
         // Then - it built its template, and no lock is left
-        expect([db.started, existsSync(lock)]).toStrictEqual([true, false]);
+        expect([db.connectionString.startsWith('file:'), existsSync(lock)]).toStrictEqual([
+            true,
+            false,
+        ]);
     });
 
     test('sqlite() — a reset of tables with no generated ids — empties them, with no sequence to restart', async () => {

@@ -208,7 +208,6 @@ describe('postgres', () => {
             const initDb = postgres();
             initDb.serviceName = 'probe';
             initDb.connectionString = db.connectionString;
-            initDb.started = true;
 
             await initDb.initialize(dockerDir);
             await initDb.isolation().acquire('1');
@@ -257,7 +256,6 @@ describe('postgres', () => {
             const initDb = postgres();
             initDb.serviceName = 'db';
             initDb.connectionString = db.connectionString;
-            initDb.started = true;
 
             await initDb.initialize(dockerDir);
         });
@@ -278,7 +276,6 @@ describe('postgres', () => {
                 [first, second].map(async (handle, index) => {
                     handle.serviceName = 'worker';
                     handle.connectionString = container.toString();
-                    handle.started = true;
                     await handle.initialize(SPECIMEN_DOCKER);
                     await handle.isolation().acquire(String(7 + index));
                 }),
@@ -318,7 +315,6 @@ describe('postgres', () => {
             const handle = postgres();
             handle.serviceName = 'released';
             handle.connectionString = container.toString();
-            handle.started = true;
             await handle.isolation().acquire('3');
             await handle.isolation().release();
 

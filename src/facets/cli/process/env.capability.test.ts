@@ -41,7 +41,6 @@ function fakeService(options: {
         }),
         reset: async () => {},
         serviceName: null,
-        started: true,
         type: options.type,
     };
 }

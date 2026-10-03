@@ -87,7 +87,6 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     readonly environment: Record<string, string> = {};
 
     connectionString = '';
-    started = false;
 
     private db: Database.Database | null = null;
     private templatePath = '';
@@ -148,7 +147,6 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         }
 
         this.connectionString = `file:${this.templatePath}`;
-        this.started = true;
     }
 
     /** Built on a private path, then renamed into place: `prisma db push` writes the header long before the tables exist. */

@@ -68,7 +68,6 @@ export class RedisHandle implements ServiceHandle {
     readonly containerOptions = PAIR_INDEXES;
 
     connectionString = '';
-    started = false;
 
     private dbIndex = 0;
 

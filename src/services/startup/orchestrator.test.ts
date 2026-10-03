@@ -61,14 +61,13 @@ describe('Orchestrator', () => {
         const lines = printed.mock.calls.map(([text]) => plain(text));
         printed.mockRestore();
 
-        // Then - each container built from its service, each call in its order, each service named, connected and started, one report
+        // Then - each container built from its service, each call in its order, each service named and connected, one report
         expect([
             requests,
             log,
-            Object.values(services).map(({ connectionString, serviceName, started }) => [
+            Object.values(services).map(({ connectionString, serviceName }) => [
                 serviceName,
                 connectionString,
-                started,
             ]),
             lines,
         ]).toStrictEqual([
@@ -91,9 +90,9 @@ describe('Orchestrator', () => {
                 'initialize redis:7 /docker',
             ],
             [
-                ['analytics-db', 'fake://host.test:15432', true],
-                ['cache', 'fake://host.test:16379', true],
-                ['files', '', true],
+                ['analytics-db', 'fake://host.test:15432'],
+                ['cache', 'fake://host.test:16379'],
+                ['files', ''],
             ],
             [STARTED],
         ]);

@@ -24,8 +24,6 @@ export type ServiceHandle = {
     /** Connection string — populated after start. */
     connectionString: string;
 
-    started: boolean;
-
     /** Build the connection string from host and port. */
     buildConnectionString: (host: string, port: number) => string;
 

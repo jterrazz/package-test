@@ -88,7 +88,6 @@ export function fakeService(
         isolation: () => ({ acquire: settled, release: settled, reset: settled }),
         reset: settled,
         serviceName: null,
-        started: false,
         type: image.split(':')[0] ?? image,
     };
     return handle;
