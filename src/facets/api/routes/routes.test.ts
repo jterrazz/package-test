@@ -1,6 +1,23 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { openApiRoutes, reachesRoute, unreachedRoutes } from './routes.js';
+import { declaredRoutes, openApiRoutes, reachesRoute, unreachedRoutes } from './routes.js';
+
+const project = (routes: string | undefined, documents: Record<string, string>): string => {
+    const root = mkdtempSync(join(tmpdir(), 'routes-'));
+    writeFileSync(join(root, 'package.json'), '{ "name": "routes", "type": "module" }\n');
+    const section = routes === undefined ? '{}' : `{ routes: '${routes}' }`;
+    writeFileSync(
+        join(root, 'jterrazz.config.ts'),
+        `export default { kind: 'library', platform: 'node', test: ${section} };\n`,
+    );
+    for (const [name, text] of Object.entries(documents)) {
+        writeFileSync(join(root, name), text);
+    }
+    return root;
+};
 
 describe('routes', () => {
     test('route coverage — what a request reaches — a parameter takes one segment, a wildcard the rest, and a query is no segment', () => {
@@ -71,6 +88,58 @@ describe('routes', () => {
         ]);
         expect(openApiRoutes('{"paths": {"/a": {"delete": {}}}}', true)).toStrictEqual([
             { method: 'DELETE', path: '/a' },
+        ]);
+    });
+
+    test('route coverage — what a request reaches — the edges of a match: ALL, a short path, an empty segment, a wildcard’s prefix, a braced name in part', () => {
+        // Given - routes and requests at each edge
+        const pairs: [string, string, string][] = [
+            ['ALL /health', 'DELETE', '/health'],
+            ['GET /a/:id/*', 'GET', '/a'],
+            ['GET /users/:id', 'GET', '/users/'],
+            ['GET /a/b/*', 'GET', '/a/x/c'],
+            ['GET /a/b/*', 'GET', '/a/b/c/d'],
+            ['GET /users/{id}x', 'GET', '/users/7'],
+            ['GET /users/x{id}', 'GET', '/users/7'],
+            ['GET /users/{id}x', 'GET', '/users/{id}x'],
+        ];
+
+        // Then - which each request reaches
+        expect(
+            pairs.map(([declared, method, path]) => {
+                const [routeMethod = '', routePath = ''] = declared.split(' ');
+                return reachesRoute({ method: routeMethod, path: routePath }, { method, path });
+            }),
+        ).toStrictEqual([true, false, false, false, true, false, false, true]);
+    });
+
+    test('route coverage — an OpenAPI document — with no paths, paths of another shape, or a path item of another shape declares nothing there', () => {
+        // Given - documents with no paths, with paths a list, of another shape, and with one path item null
+        // Then - nothing from each
+        expect([
+            openApiRoutes('{}', true),
+            openApiRoutes('{"paths": []}', true),
+            openApiRoutes('[]', true),
+            openApiRoutes('{"paths": {"/a": null, "/b": {"get": {}}}}', true),
+        ]).toStrictEqual([[], [], [], [{ method: 'GET', path: '/b' }]]);
+    });
+
+    test('route coverage — declaredRoutes — reads the document a project names, JSON by its extension and YAML otherwise, and none when it names none', async () => {
+        // Given - projects naming a JSON document, a YAML one, and none
+
+        // Then - each project's routes
+        expect([
+            await declaredRoutes(
+                project('openapi.json', { 'openapi.json': '{"paths": {"/a": {"get": {}}}}' }),
+            ),
+            await declaredRoutes(
+                project('openapi.yaml', { 'openapi.yaml': 'paths:\n    /b:\n        post: {}\n' }),
+            ),
+            await declaredRoutes(project(undefined, {})),
+        ]).toStrictEqual([
+            [{ method: 'GET', path: '/a' }],
+            [{ method: 'POST', path: '/b' }],
+            undefined,
         ]);
     });
 });

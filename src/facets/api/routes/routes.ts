@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { isRecord } from '../../../../lint/kit/project/json-shape.js';
 import { testSettingsAt } from '../../../../lint/kit/project/test-section.js';
 import { parseYamlSource } from '../../../../lint/kit/project/yaml-document.js';
 
@@ -10,14 +11,12 @@ export type Route = { method: string; path: string };
 
 export type SentRequest = Route & { template?: string };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
 const METHODS = new Set(['delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']);
 
+const BRACED_PARAMETER = /^\{[^}]+\}$/u;
+
 function isParameter(segment: string): boolean {
-    return segment.startsWith(':') || /^\{[^}]+\}$/u.test(segment);
+    return segment.startsWith(':') || BRACED_PARAMETER.test(segment);
 }
 
 /** A parameter takes any value and, from a template, only a parameter; a literal takes itself. */
@@ -85,6 +84,7 @@ export async function declaredRoutes(root: string): Promise<Route[] | undefined>
     if (routes === undefined) {
         return undefined;
     }
+    // Stryker disable next-line MethodExpression: a JSON document is YAML too, and reads the same either way: JSON is the faster read
     return openApiRoutes(readFileSync(join(root, routes), 'utf8'), routes.endsWith('.json'));
 }
 
