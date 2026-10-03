@@ -37,6 +37,15 @@ ruleTester().run('no-probe-cluster', noProbeCluster, {
     ],
     valid: [
         {
+            name: 'A call that is no test, a test with no callback, and production code hold no cluster.',
+            code: "run(async () => { expect(result.stdout).toContain('a'); expect(result.stdout).toContain('b'); expect(result.stdout).toContain('c'); });\ntest('t');",
+            filename: SPEC_FILE,
+        },
+        {
+            code: "test('t', async () => { expect(result.stdout).toContain('a'); expect(result.stdout).toContain('b'); expect(result.stdout).toContain('c'); });",
+            filename: '/repo/specs/cli/build/build.ts',
+        },
+        {
             name: 'Two probes are a scalpel, not a cluster.',
             code: `test('builds', async () => {
                 const result = await cli.exec('build');

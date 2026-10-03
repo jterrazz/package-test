@@ -17,10 +17,12 @@ const PINS = new Set(['clock.advance', 'clock.at']);
 function pinsTheClock(scope: AstNode): boolean {
     let pinned = false;
     walk(scope, (inner) => {
+        // Stryker disable next-line ConditionalExpression,BlockStatement: only a call has a callee
         if (inner.type !== 'CallExpression') {
             return;
         }
         const path = memberPath(child(inner, 'callee'));
+        // Stryker disable next-line ConditionalExpression: no path is in the set
         if (path !== undefined && PINS.has(path)) {
             pinned = true;
         }
@@ -29,6 +31,7 @@ function pinsTheClock(scope: AstNode): boolean {
 }
 
 function sampledUnder(node: AstNode | undefined): AstNode[] {
+    // Stryker disable next-line ConditionalExpression: an argument is always a node
     if (node === undefined) {
         return [];
     }

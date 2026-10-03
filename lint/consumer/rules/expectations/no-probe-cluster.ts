@@ -30,6 +30,7 @@ const PROBES = new Set(['toBe', 'toContain', 'toEqual', 'toMatch']);
 
 function goldenableSubject(subject: AstNode | undefined): string | undefined {
     const path = memberPath(subject);
+    // Stryker disable next-line ConditionalExpression: no path holds no goldenable tail
     if (path === undefined) {
         return undefined;
     }
@@ -38,11 +39,13 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
 }
 
 function thresholdOf(option: unknown): number {
+    // Stryker disable ConditionalExpression: the schema admits only an object whose threshold is an integer
     const stated =
         typeof option === 'object' && option !== null && 'threshold' in option
             ? option.threshold
             : undefined;
     return typeof stated === 'number' ? stated : DEFAULT_THRESHOLD;
+    // Stryker restore ConditionalExpression
 }
 
 const row = rowNamed(consumerRows, 'no-probe-cluster');

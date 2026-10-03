@@ -37,6 +37,7 @@ export const includePointsAtAFolder = defineRule(
                         for (const glob of project.include) {
                             const prefix = staticPrefix(glob.value);
                             const directory = resolve(configDirectory, prefix);
+                            // Stryker disable next-line ConditionalExpression,StringLiteral: no prefix resolves to the config's own folder, which is there
                             if (prefix !== '' && !isDirectory(directory)) {
                                 context.report({
                                     data: { glob: glob.value, prefix },
@@ -45,12 +46,7 @@ export const includePointsAtAFolder = defineRule(
                                 });
                                 continue;
                             }
-                            if (
-                                collectsAFile(
-                                    prefix === '' ? configDirectory : directory,
-                                    glob.value,
-                                )
-                            ) {
+                            if (collectsAFile(directory, glob.value)) {
                                 continue;
                             }
                             context.report({

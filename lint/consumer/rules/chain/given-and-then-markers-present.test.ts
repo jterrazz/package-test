@@ -9,14 +9,22 @@ ruleTester().run('given-and-then-markers-present', givenAndThenMarkersPresent, {
             code: `test("x", () => {
                 // Then - it works
             });`,
-            errors: [{ column: 0, line: 1, messageId: 'missing' }],
+            errors: [
+                {
+                    column: 0,
+                    line: 1,
+                    message: /^found: the test has no `\/\/ Given -` marker · /u,
+                },
+            ],
         },
         {
             name: 'Missing Then.',
             code: `test("x", () => {
                 // Given - a thing
             });`,
-            errors: [{ column: 0, line: 1, messageId: 'missing' }],
+            errors: [
+                { column: 0, line: 1, message: /^found: the test has no `\/\/ Then -` marker · /u },
+            ],
         },
         {
             name: 'Missing both.',

@@ -57,6 +57,7 @@ export const givenAndThenMarkersPresent = defineRule(
                     }
                     const givenOffset = firstMarkerAt(markers, 'Given');
                     const thenOffset = firstMarkerAt(markers, 'Then');
+                    // Stryker disable next-line ConditionalExpression,EqualityOperator: a missing marker is -1, and no two markers share an offset
                     if (givenOffset >= 0 && thenOffset >= 0 && givenOffset > thenOffset) {
                         context.report({ messageId: 'givenAfterThen', node });
                     }

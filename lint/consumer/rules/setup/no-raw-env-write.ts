@@ -13,6 +13,7 @@ function isEnvTarget(node: AstNode | undefined): boolean {
     if (memberPath(node) === 'process.env') {
         return true;
     }
+    // Stryker disable next-line ConditionalExpression,OptionalChaining,BlockStatement: what is written always exists, and only a member has an object
     if (node?.type !== 'MemberExpression') {
         return false;
     }

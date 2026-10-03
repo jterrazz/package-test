@@ -44,6 +44,11 @@ ruleTester().run('no-sampled-value-in-expectation', noSampledValueInExpectation,
     ],
     valid: [
         {
+            name: 'A call that is no test, and a test with no callback, hold no oracle.',
+            code: "run(() => { expect(x).toBe(Date.now()); });\ntest('t');",
+            filename: TEST_FILE,
+        },
+        {
             name: 'A pinned instant is not a sample.',
             code: `test('stamps', () => {
                 expect(stamp().at).toEqual(new Date('2026-03-04T09:30:00Z'));

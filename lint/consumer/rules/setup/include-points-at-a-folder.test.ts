@@ -24,6 +24,11 @@ ruleTester().run('include-points-at-a-folder', includePointsAtAFolder, {
     ],
     valid: [
         {
+            name: 'A file that is no config is not read.',
+            code: `export default defineSpecConfig({ test: { projects: [{ name: 'lint', include: ['specs/lint2/**/*.test.ts'] }] } });`,
+            filename: resolve(ROOT, 'src/config.ts'),
+        },
+        {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'api', include: ['specs/api/**/*.spec.ts'] }] } });`,
             filename: CONFIG,
         },

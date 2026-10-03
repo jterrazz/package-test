@@ -7,6 +7,14 @@ const TEST_FILE = '/repo/src/domain/order.test.ts';
 ruleTester().run('no-raw-env-write', noRawEnvWrite, {
     invalid: [
         {
+            name: 'Replacing the whole environment is a write too.',
+            code: `test('resets', () => {
+                process.env = {};
+            });`,
+            errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
+            filename: TEST_FILE,
+        },
+        {
             name: 'The assignment outlasts the test.',
             code: `test('reads the token', () => {
                 process.env.API_TOKEN = 'secret';
@@ -26,6 +34,17 @@ ruleTester().run('no-raw-env-write', noRawEnvWrite, {
         },
     ],
     valid: [
+        {
+            name: 'Another object written, a name assigned, another key deleted, and an env read are no write to the process.',
+            code: `test('writes elsewhere', () => {
+                config.env.TOKEN = 'x';
+                let token;
+                token = 'y';
+                delete config.env.TOKEN;
+                typeof process.env.TOKEN;
+            });`,
+            filename: TEST_FILE,
+        },
         {
             name: 'The self-restoring form.',
             code: `test('reads the token', () => {
