@@ -1,101 +1,23 @@
 import { describe, expect, test } from 'vitest';
 
 import { clock } from '../../clock/clock.js';
-import type { StubRequest } from '../exchange.js';
 import { isStreamBody } from '../exchange.js';
+import {
+    CHAT_URL,
+    chatBody,
+    chatChunk,
+    chatCompletion,
+    DONE,
+    ENVELOPE,
+    event,
+    framesOf,
+    lets,
+    PART,
+    RESPONSES_URL,
+    responsesBody,
+    toolsBody,
+} from './openai.fixtures.js';
 import { openai } from './openai.js';
-
-const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
-const RESPONSES_URL = 'https://api.openai.com/v1/responses';
-
-function lets(trigger: StubRequest, body: unknown, url = CHAT_URL): boolean | undefined {
-    return trigger.match?.({ body, headers: {}, method: 'POST', url });
-}
-
-function chatBody(model: string, system: string, user: string): unknown {
-    return {
-        messages: [
-            { content: system, role: 'system' },
-            { content: user, role: 'user' },
-        ],
-        model,
-    };
-}
-
-function toolsBody(names: string[], temperature: number): unknown {
-    return {
-        messages: [{ content: 'hi', role: 'user' }],
-        temperature,
-        tools: names.map((name) => ({ function: { name }, type: 'function' })),
-    };
-}
-
-function responsesBody(tool: unknown): unknown {
-    return {
-        input: [
-            { content: 'Run the', role: 'user' },
-            { content: 'Report Ingestion', role: 'user' },
-        ],
-        tools: [tool],
-    };
-}
-
-function chatCompletion(content: string): object {
-    return {
-        body: {
-            choices: [{ finish_reason: 'stop', index: 0, message: { content, role: 'assistant' } }],
-            created: 1_772_616_600,
-            id: 'chatcmpl-test',
-            model: 'gpt-4o-test',
-            object: 'chat.completion',
-            usage: { completion_tokens: 10, prompt_tokens: 10, total_tokens: 20 },
-        },
-        status: 200,
-    };
-}
-
-function framesOf(body: unknown): { data: unknown; event: string | undefined }[] {
-    if (!isStreamBody(body)) {
-        throw new Error('the reply is not a stream');
-    }
-    return body.chunks.map((chunk) => {
-        const lines = chunk.trimEnd().split('\n');
-        const field = (name: string): string =>
-            lines.find((line) => line.startsWith(`${name}: `))?.slice(name.length + 2) ?? '';
-        return { data: JSON.parse(field('data')) as unknown, event: field('event') };
-    });
-}
-
-function chatChunk(delta: object, finish: null | string): string {
-    return `data: ${JSON.stringify({
-        id: 'chatcmpl-test',
-        object: 'chat.completion.chunk',
-        created: 1_772_616_600,
-        model: 'gpt-4o-test',
-        choices: [{ index: 0, delta, logprobs: null, finish_reason: finish }],
-    })}\n\n`;
-}
-
-const PART = { content_index: 0, item_id: 'msg-test', output_index: 0 };
-
-const ENVELOPE = {
-    created_at: 1_772_616_600,
-    id: 'resp-test',
-    model: 'gpt-4o-test',
-    object: 'response',
-};
-
-const DONE = {
-    content: [{ annotations: [], text: 'Hello', type: 'output_text' }],
-    id: 'msg-test',
-    role: 'assistant',
-    status: 'completed',
-    type: 'message',
-};
-
-function event(type: string, sequence: number, fields: object): object {
-    return { data: { ...fields, sequence_number: sequence, type }, event: type };
-}
 
 describe('openai', () => {
     test('intercept — openai chat completions — string filters match by exact equality on the model and the first system and user messages', () => {
@@ -242,7 +164,11 @@ describe('openai', () => {
         ];
 
         // Then - the data is the assistant's content, serialised when it is not a string, carried as is when broken
-        expect([...replies, openai.responses().wrap({ ok: true })]).toStrictEqual([
+        expect([
+            ...replies,
+            openai.responses().wrap({ ok: true }),
+            openai.responses().wrap('plain'),
+        ]).toStrictEqual([
             chatCompletion('{"categories":["TECH"]}'),
             chatCompletion('plain text'),
             chatCompletion('{not json'),
@@ -257,6 +183,24 @@ describe('openai', () => {
                             content: [
                                 { annotations: [], text: '{"ok":true}', type: 'output_text' },
                             ],
+                            id: 'msg-test',
+                            role: 'assistant',
+                            type: 'message',
+                        },
+                    ],
+                    usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+                },
+                status: 200,
+            },
+            {
+                body: {
+                    created_at: 1_772_616_600,
+                    id: 'resp-test',
+                    model: 'gpt-4o-test',
+                    object: 'response',
+                    output: [
+                        {
+                            content: [{ annotations: [], text: 'plain', type: 'output_text' }],
                             id: 'msg-test',
                             role: 'assistant',
                             type: 'message',
@@ -290,6 +234,61 @@ describe('openai', () => {
                 status: 500,
             },
             { body: {}, delay: 30_000, status: 200 },
+        ]);
+    });
+
+    test('intercept — openai filters — every tool named must be offered, a filter left unset asks nothing, and the user text is the user inputs alone, a structured one as its JSON', () => {
+        // Given - filters on two tools, on a model, and on a user text, and requests to a proxy
+        const twoTools = openai.chat({ tools: ['a', 'b'] });
+        const responsesTools = openai.responses({ tools: ['a', 'b'] });
+        const model = openai.responses({ model: 'gpt-4o' });
+        const user = openai.responses({ user: 'only this' });
+        const structured = openai.responses({ user: /"text":"structured"/u });
+
+        // Then - each verdict, and each request's address
+        expect([
+            lets(twoTools, toolsBody(['a'], 0)),
+            lets(twoTools, toolsBody(['a', 'b'], 0.7)),
+            lets(responsesTools, responsesBody({ name: 'a' }), RESPONSES_URL),
+            lets(model, { input: [], model: 'gpt-4o' }, RESPONSES_URL),
+            lets(model, { input: [], model: 'gpt-4o-mini' }, RESPONSES_URL),
+            lets(
+                user,
+                {
+                    input: [
+                        { content: 'not this', role: 'system' },
+                        { content: 'only this', role: 'user' },
+                    ],
+                },
+                RESPONSES_URL,
+            ),
+            lets(
+                structured,
+                {
+                    input: [
+                        { content: [{ text: 'structured', type: 'input_text' }], role: 'user' },
+                    ],
+                },
+                RESPONSES_URL,
+            ),
+            [
+                openai.chat(),
+                openai.responses(),
+                openai.responses(undefined, 'https://proxy.test/v1/responses'),
+            ].map(({ adapter, method, url }) => [adapter, method, url]),
+        ]).toStrictEqual([
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            [
+                ['openai', 'POST', CHAT_URL],
+                ['openai', 'POST', RESPONSES_URL],
+                ['openai', 'POST', 'https://proxy.test/v1/responses'],
+            ],
         ]);
     });
 });
