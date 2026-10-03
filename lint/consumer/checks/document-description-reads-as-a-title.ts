@@ -34,7 +34,8 @@ export function checkDocumentDescriptionReadsAsATitle(document: SpecDocument): D
             ),
         );
     }
-    const first = text.split(/\s+/u)[0] ?? '';
+    // Stryker disable next-line StringLiteral: a split always has a first word
+    const first = text.split(/\s/u, 1)[0] ?? '';
     if (/^[A-Z]/u.test(text) && !SYMBOL_WORD.test(first)) {
         findings.push(
             at(
