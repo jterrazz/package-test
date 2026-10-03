@@ -15,7 +15,7 @@ import {
     isWithin,
     listDirs,
     listFiles,
-    listReferrers,
+    listReaders,
     readSource,
     readText,
     specsRootOfPool,
@@ -195,8 +195,8 @@ function checkPoolFixtures(rootDir: string): Spotted[] {
     const violations: Spotted[] = [];
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
-        // invariant: a reference made from inside the pool is left out: a dead entry cannot vouch for another.
-        const references = referencesOf(listReferrers(specsRoot, pool));
+        // invariant: a reference made from inside the pool is left out, as the walk never enters ground: a dead entry cannot vouch for another.
+        const references = referencesOf(listReaders(specsRoot));
         for (const entry of treeEntries(pool)) {
             if (!entryReferenced(join(pool, entry.name), references)) {
                 const relEntry = relative(rootDir, join(pool, entry.name));

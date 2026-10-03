@@ -15,7 +15,6 @@ import {
     isDir,
     isWithin,
     listReaders,
-    listReferrers,
     removeIfEmpty,
 } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
@@ -93,7 +92,7 @@ export function fixNoReachIntoSiblingGround(rootDir: string): string[] {
             if (moves.length === 0) {
                 continue;
             }
-            repointFiles(listReferrers(specsRoot, folder), moves);
+            repointFiles(listReaders(specsRoot), moves);
             repointModuleTests(specsRoot, moves);
             mkdirSync(shared, { recursive: true });
             for (const { copy, target } of moves) {

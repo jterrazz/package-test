@@ -149,22 +149,14 @@ export function columnAt(text: string, index: number): number {
 }
 
 export function lineAt(text: string, index: number): number {
-    let line = 1;
-    for (let i = 0; i < index && i < text.length; i += 1) {
-        if (text[i] === '\n') {
-            line += 1;
-        }
-    }
-    return line;
+    return text.slice(0, index).split('\n').length;
 }
 
 export const DISK_CALL =
     /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
+/** A path that is no folder holds no tests and lists no children: it is none. */
 export function isConventionalSubdir(path: string): boolean {
-    if (!isDir(path)) {
-        return false;
-    }
     // invariant: a real ground folder holds leaf fixtures, never a test nor a nested ground folder.
     const files = listFiles(path, isTestFileName);
     if (files.length > 0) {
@@ -181,12 +173,6 @@ export function isConventionalSubdir(path: string): boolean {
 
 export function listReaders(specsRoot: string): string[] {
     return listFiles(specsRoot, (path) => path.endsWith('.ts') || path.endsWith(SPEC_EXTENSION));
-}
-
-export function listReferrers(specsRoot: string, pool: string): string[] {
-    return listReaders(specsRoot).filter(
-        (file) => !file.startsWith(`${pool}/`) && !file.startsWith(`${pool}\\`),
-    );
 }
 
 export function removeIfEmpty(folder: string): void {
@@ -209,12 +195,14 @@ export function isWithin(directory: string, path: string): boolean {
 
 export function lowestCommonFolder(folders: readonly string[]): string | undefined {
     const [first, ...others] = folders;
+    // Stryker disable next-line ConditionalExpression,BlockStatement: none of an empty list fails the climb, which answers undefined too
     if (first === undefined) {
         return undefined;
     }
     let common = first;
     while (!others.every((folder) => folder === common || isWithin(common, folder))) {
         const parent = dirname(common);
+        // Stryker disable next-line ConditionalExpression: hazard: only folders on no common root climb to the filesystem's, which none of a tree's are
         if (parent === common) {
             return undefined;
         }
