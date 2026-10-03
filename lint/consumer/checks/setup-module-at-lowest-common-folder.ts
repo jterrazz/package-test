@@ -2,7 +2,7 @@ import { moveKeepingHistory, SETUP_FOLDER } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { repointSource } from '../../kit/checker/repoint.js';
+import { pathFrom, repointSource } from '../../kit/checker/repoint.js';
 import {
     importsThroughAlias,
     isTestOrSpecName,
@@ -29,14 +29,14 @@ type Misplaced =
     | {
           aliased: boolean;
           module: string;
-          kind: 'move';
+          inline: false;
           lowest: string;
           readers: string[];
           setup: string;
           specsRoot: string;
           target: string;
       }
-    | { module: string; only: string; specsRoot: string; kind: 'inline' };
+    | { inline: true; module: string; only: string; specsRoot: string };
 
 function shown(specsRoot: string, folder: string): string {
     return folder === specsRoot ? `specs/` : `specs/${relative(specsRoot, folder)}/`;
@@ -50,14 +50,11 @@ function isStubs(setup: string, module: string): boolean {
     return relative(setup, module).split(sep).includes(STUBS_FOLDER);
 }
 
-function belongsInItsReader(setup: string, module: string, read: readonly string[]): boolean {
-    const [only] = read;
+function belongsInItsReader(setup: string, module: string, reader: string): boolean {
     return (
-        read.length === 1 &&
-        only !== undefined &&
-        isTestOrSpecName(basename(only)) &&
+        isTestOrSpecName(basename(reader)) &&
         !isStubs(setup, module) &&
-        linesOf(only) + linesOf(module) <= MAX_SPEC_LINES
+        linesOf(reader) + linesOf(module) <= MAX_SPEC_LINES
     );
 }
 
@@ -67,16 +64,17 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
     const found: Misplaced[] = [];
     for (const module of modules) {
         const setup = setupFolderOf(specsRoot, module);
-        const read = readers.get(module) ?? [];
-        if (setup === undefined || read.length === 0) {
+        const read = readers.get(module);
+        if (setup === undefined || read === undefined) {
             continue;
         }
-        const [only] = read;
-        if (only !== undefined && belongsInItsReader(setup, module, read)) {
-            found.push({ kind: 'inline', module, only, specsRoot });
+        const only = String(read[0]);
+        if (read.length === 1 && belongsInItsReader(setup, module, only)) {
+            found.push({ inline: true, module, only, specsRoot });
             continue;
         }
         const lowest = lowestPlaceOf(specsRoot, read);
+        // Stryker disable next-line ConditionalExpression,BlockStatement: the readers of a module all sit in its specs tree, which they share
         if (lowest === undefined) {
             continue;
         }
@@ -86,7 +84,7 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
             const aliased = read.some((reader) => importsThroughAlias(reader, module));
             found.push({
                 aliased,
-                kind: 'move',
+                inline: false,
                 lowest,
                 module,
                 readers: read,
@@ -102,7 +100,7 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
 function findingOf(rootDir: string, misplaced: Misplaced): Spotted {
     const { module, specsRoot } = misplaced;
     const rel = relative(specsRoot, module);
-    if (misplaced.kind === 'inline') {
+    if (misplaced.inline) {
         return {
             path: relative(rootDir, module),
             line: 1,
@@ -126,11 +124,6 @@ export function checkSetupModuleAtLowestCommonFolder(rootDir: string): Spotted[]
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
         misplacedUnder(specsRoot).map((misplaced) => findingOf(rootDir, misplaced)),
     );
-}
-
-function pathFrom(from: string, to: string): string {
-    const rest = relative(from, to).split(sep).join('/');
-    return rest.startsWith('.') ? rest : `./${rest}`;
 }
 
 function withoutExtension(path: string): string {
@@ -157,6 +150,7 @@ function repointImporter(file: string, module: string, target: string): void {
             ? `${withoutExtension(pathFrom(dirname(file), target))}${extensionOf(path)}`
             : undefined;
     });
+    // Stryker disable next-line ConditionalExpression: hazard: rewriting a file with its own bytes changes nothing but its mtime
     if (next !== text) {
         writeFileSync(file, next);
     }
@@ -167,7 +161,7 @@ export function fixSetupModuleAtLowestCommonFolder(rootDir: string): string[] {
     const movedTo = new Map<string, string>();
     for (const specsRoot of findSpecsRoots(rootDir)) {
         for (const misplaced of misplacedUnder(specsRoot)) {
-            if (misplaced.kind === 'inline' || misplaced.aliased || existsSync(misplaced.target)) {
+            if (misplaced.inline || misplaced.aliased || existsSync(misplaced.target)) {
                 continue;
             }
             const { module, readers, setup, target } = misplaced;
