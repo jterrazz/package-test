@@ -48,6 +48,52 @@ describe('HonoAdapter', () => {
         ]);
     });
 
+    test('the hono adapter — the request it sends — JSON by default, a string as written, and a stated content-type in any case replacing the default', async () => {
+        // Given - an app answering what it was sent
+        const app = new Hono();
+        app.all('/echo', async (context) =>
+            context.json({
+                body: await context.req.text(),
+                key: context.req.header('x-key') ?? null,
+                method: context.req.method,
+                type: context.req.header('content-type') ?? null,
+            }),
+        );
+        const adapter = new HonoAdapter(app);
+
+        // When - it posts a value, puts a written body under a stated type, and gets nothing
+        const sent = await Promise.all([
+            adapter.request('POST', '/echo', { name: 'Ada' }),
+            adapter.request('PUT', '/echo', 'name=Ada', {
+                headers: { 'X-Key': 'k', 'content-type': 'application/x-www-form-urlencoded' },
+            }),
+            adapter.request('GET', '/echo'),
+        ]);
+
+        // Then - what the app read of each
+        expect(sent.map((response) => response.body)).toStrictEqual([
+            { body: '{"name":"Ada"}', key: null, method: 'POST', type: 'application/json' },
+            {
+                body: 'name=Ada',
+                key: 'k',
+                method: 'PUT',
+                type: 'application/x-www-form-urlencoded',
+            },
+            { body: '', key: null, method: 'GET', type: 'application/json' },
+        ]);
+    });
+
+    test('the hono adapter — the routes an app declares — an entry with no handler is a route', () => {
+        // Given - a table a hand-written app states, its entry naming no handler
+        const adapter = new HonoAdapter({
+            request: () => Response.json({}),
+            routes: [{ method: 'GET', path: '/health' }],
+        });
+
+        // Then - the route, for nothing marks it middleware
+        expect(adapter.declared()).toStrictEqual([{ method: 'GET', path: '/health' }]);
+    });
+
     test('the hono adapter — the body it read — a JSON body is its value, any other body its text, an empty body nothing', async () => {
         // Given - a route per kind of body an app answers with
         const app = new Hono();

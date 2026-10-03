@@ -46,15 +46,17 @@ export class HonoAdapter implements ServerPort {
         body?: unknown,
         { headers, template }: ServerRequestOptions = {},
     ): Promise<ServerResponse> {
-        const init: RequestInit = {
-            method,
-            headers: { 'Content-Type': 'application/json', ...headers },
-        };
-
-        if (body !== undefined) {
-            // invariant: strings are pre-serialized (a `_requests/*.http` body); everything else is JSON.
-            init.body = typeof body === 'string' ? body : JSON.stringify(body);
+        // invariant: set, never spread: a header name is case-blind, and a stated `content-type` replaces the JSON default rather than joining it.
+        const sent = new Headers({ 'content-type': 'application/json' });
+        for (const [name, value] of Object.entries(headers ?? {})) {
+            sent.set(name, value);
         }
+        const init: RequestInit = {
+            // invariant: strings are pre-serialized (a `_requests/*.http` body); everything else is JSON, and no body stringifies to none.
+            body: typeof body === 'string' ? body : JSON.stringify(body),
+            headers: sent,
+            method,
+        };
 
         this.reached.push(template === undefined ? { method, path } : { method, path, template });
         const response = await this.app.request(path, init);
