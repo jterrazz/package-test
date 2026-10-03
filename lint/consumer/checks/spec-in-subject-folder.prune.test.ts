@@ -47,4 +47,16 @@ describe('spec-in-subject-folder.prune', () => {
             ),
         );
     });
+
+    test('keeps an import a spread reads, as it keeps one a call reads', () => {
+        // Given - a cut file whose only read of a helper and a constant is a spread
+        const cut = lines(
+            "import { onlyPasses, FOLDERS } from '../setup.js';",
+            "test('runs', async () => { await cli.with({ env: { ...onlyPasses('names') } }).exec([...FOLDERS].join(' ')); });",
+            '',
+        );
+
+        // Then - nothing is pruned: a spread is no member access
+        expect(pruned(cut)).toBe(cut);
+    });
 });

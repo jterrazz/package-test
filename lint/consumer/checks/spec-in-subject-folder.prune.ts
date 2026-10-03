@@ -69,7 +69,7 @@ export function codeOnly(text: string): string {
 export function isRead(text: string, name: string, declared: Span): boolean {
     const body = codeOnly(`${text.slice(0, declared.start)}\n${text.slice(declared.end)}`);
     return new RegExp(
-        String.raw`(?<![\w$.])${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
+        String.raw`(?<![\w$])(?<!(?<!\.\.)\.)${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
         'u',
     ).test(body);
 }

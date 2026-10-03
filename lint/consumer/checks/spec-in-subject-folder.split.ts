@@ -76,11 +76,11 @@ function oneDescribe(text: string, aspect: string): string {
 
 export type Draft = { target: string; text: string };
 
-const BUILDS_DISK = /(?<![\w$.])(?:file|directory)\s*\(/u;
+const BUILDS_DISK = /(?<![\w$])(?<!(?<!\.\.)\.)(?:file|directory)\s*\(/u;
 
 function reads(code: string, name: string): boolean {
     return new RegExp(
-        String.raw`(?<![\w$.])${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
+        String.raw`(?<![\w$])(?<!(?<!\.\.)\.)${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
         'u',
     ).test(codeOnly(code));
 }
@@ -232,7 +232,7 @@ const AMBIENT = new Set([
 function namesRead(code: string): Set<string> {
     const bare = codeOnly(code);
     return new Set(
-        [...bare.matchAll(/(?<![\w$.])[A-Za-z_$][\w$]*/gu)]
+        [...bare.matchAll(/(?<![\w$])(?<!(?<!\.\.)\.)[A-Za-z_$][\w$]*/gu)]
             .map((found) => found[0])
             .filter((name) => !AMBIENT.has(name)),
     );
