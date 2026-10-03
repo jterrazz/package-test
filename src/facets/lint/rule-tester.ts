@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import type { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
 
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 
 type Tester = typeof RuleTester;
@@ -21,12 +22,7 @@ export type PositionedRuleTester = {
 };
 
 const isPositioned = (entry: unknown): boolean =>
-    typeof entry === 'object' &&
-    entry !== null &&
-    'line' in entry &&
-    typeof entry.line === 'number' &&
-    'column' in entry &&
-    typeof entry.column === 'number';
+    isRecord(entry) && typeof entry.line === 'number' && typeof entry.column === 'number';
 
 function unplacedOf(errors: unknown): null | string {
     if (!Array.isArray(errors)) {
