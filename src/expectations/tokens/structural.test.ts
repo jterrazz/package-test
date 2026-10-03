@@ -196,6 +196,18 @@ describe('structural', () => {
         );
     });
 
+    test('structural — update-mode merges — a lone {{any}} line takes back every line it covered, the rest of the stream rewritten around it', () => {
+        // Given - a golden whose {{any}} stands for a block, and a run that changed a line elsewhere and printed a block of three
+        const scope = new CaptureScope();
+        const previous = ' RUN  types\n\n{{any}}\n\n✗ failed\n\n RUN  lint\n\nold';
+        const actual = ' RUN  types\n\nfirst\nsecond\nthird\n\n✗ failed\n\n RUN  lint\n\nnew';
+
+        // Then - the token stays one line, and the changed line is the run's
+        expect(mergeTextPreservingPlaceholders(previous, actual, scope)).toBe(
+            ' RUN  types\n\n{{any}}\n\n✗ failed\n\n RUN  lint\n\nnew',
+        );
+    });
+
     test('structural — update-mode merges — each previous placeholder line is spent once — twins do not collapse', () => {
         // Given - one token line in the golden and two lines it could cover
         const scope = new CaptureScope();

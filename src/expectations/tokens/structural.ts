@@ -400,11 +400,84 @@ export function mergePreservingPlaceholders(
 }
 
 /** Paired by pattern, not line index: a mid-file insertion keeps the shifted token lines. Each previous line is used once. */
+const ANY_LINE = /^\s*\{\{any\}\}\s*$/u;
+
+type Anchor = { line: string; offset: number };
+
+function anchorOf(lines: readonly string[], from: number, step: -1 | 1): Anchor | undefined {
+    for (
+        let index = from + step, offset = step;
+        index >= 0 && index < lines.length;
+        index += step, offset += step
+    ) {
+        const line = lines[index] ?? '';
+        if (line.trim() !== '' && !hasPlaceholders(line)) {
+            return { line, offset };
+        }
+    }
+
+    return undefined;
+}
+
+function anyRuns(
+    prevLines: readonly string[],
+    actualLines: readonly string[],
+): Map<number, { end: number; line: string }> {
+    const runs = new Map<number, { end: number; line: string }>();
+    let cursor = 0;
+    for (const [index, line] of prevLines.entries()) {
+        if (!ANY_LINE.test(line)) {
+            continue;
+        }
+        const before = anchorOf(prevLines, index, -1);
+        const after = anchorOf(prevLines, index, 1);
+        const found = before === undefined ? -1 : actualLines.indexOf(before.line, cursor);
+        const start = before === undefined ? 0 : found === -1 ? -1 : found - before.offset;
+        const anchored =
+            after === undefined
+                ? actualLines.length
+                : actualLines.indexOf(after.line, Math.max(start, 0));
+        const end = after === undefined ? anchored : anchored - after.offset + 1;
+        if (start >= 0 && anchored !== -1 && end >= start) {
+            runs.set(start, { end, line });
+            cursor = end;
+        }
+    }
+
+    return runs;
+}
+
+function withAnyRuns(previous: string, actual: string, merged: string): string {
+    const runs = anyRuns(previous.split('\n'), actual.split('\n'));
+    if (runs.size === 0) {
+        return merged;
+    }
+    const lines = merged.split('\n');
+    const kept: string[] = [];
+    for (let index = 0; index < lines.length; index += 1) {
+        const run = runs.get(index);
+        if (run === undefined) {
+            kept.push(lines[index] ?? '');
+            continue;
+        }
+        kept.push(run.line);
+        index = run.end - 1;
+    }
+
+    return kept.join('\n');
+}
+
 export function mergeTextPreservingPlaceholders(
     previous: null | string,
     actual: string,
     scope: CaptureScope,
 ): string {
+    const merged = mergedLines(previous, actual, scope);
+
+    return previous === null ? merged : withAnyRuns(previous, actual, merged);
+}
+
+function mergedLines(previous: null | string, actual: string, scope: CaptureScope): string {
     const substituted =
         scope.workdir === undefined ? actual : actual.replaceAll(scope.workdir, '{{workdir}}');
 
