@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import { copyFileSync, existsSync, readFileSync, renameSync, unlinkSync } from 'node:fs';
+import { copyFileSync, readFileSync, renameSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
@@ -24,6 +24,7 @@ import type { SqliteOptions } from './sqlite-template.js';
 /** An optional peer, a native module to compile. */
 let databaseConstructor: null | typeof Database = null;
 
+// Stryker disable all: outside: the driver is installed and built here and loads once per process; the refusals of a missing or unbuilt peer are peer.ts's, tested there
 async function loadDatabase(): Promise<typeof Database> {
     if (databaseConstructor === null) {
         const constructor = await loadPeer('better-sqlite3', 'sqlite()', async () => {
@@ -47,19 +48,36 @@ function database(): typeof Database {
     }
     return databaseConstructor;
 }
+// Stryker restore all
+
+function openInWal(path: string): Database.Database {
+    const db = new (database())(path);
+    db.pragma('journal_mode = WAL');
+    return db;
+}
 
 const LOCK_POLL_MS = 50;
 
+const SIDECARS = ['', '-wal', '-shm'];
+
 /** Remove a file and the WAL sidecars SQLite may have left beside it. */
 function removeDatabaseFiles(path: string): void {
-    for (const suffix of ['', '-wal', '-shm']) {
-        try {
-            unlinkSync(`${path}${suffix}`);
-        } catch {
-            /* invariant: ignore — nothing to remove */
-        }
+    for (const suffix of SIDECARS) {
+        rmSync(`${path}${suffix}`, { force: true });
     }
 }
+
+/** Opens the database file for one use, and closes it whatever happens. */
+// Stryker disable all: a handle left open on a file nobody writes again answers nothing a test reads
+function withDatabase(path: string, use: (db: Database.Database) => void): void {
+    const db = new (database())(path);
+    try {
+        use(db);
+    } finally {
+        db.close();
+    }
+}
+// Stryker restore all
 
 export class SqliteHandle implements DatabasePort, ServiceHandle {
     readonly type = 'sqlite';
@@ -147,6 +165,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 
     private async writeTemplate(buildPath: string): Promise<void> {
+        // Stryker disable next-line ConditionalExpression: outside: prisma db push needs prisma in the project; the specs judge that path
         if (this.prismaSchema !== null) {
             const { runToCompletion } = await import('../process/serve.js');
             runToCompletion(prismaPushCommand(this.prismaSchema), {
@@ -155,32 +174,29 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
                 PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
             });
             // invariant: checkpoint WAL so the template is a single file, safe to copy.
-            const tmpDb = new (database())(buildPath);
-            tmpDb.pragma('wal_checkpoint(TRUNCATE)');
-            tmpDb.close();
+            withDatabase(buildPath, (db) => {
+                db.pragma('wal_checkpoint(TRUNCATE)');
+            });
             return;
         }
-        const templateDb = new (database())(buildPath);
-        if (this.initSql !== null) {
-            templateDb.exec(readFileSync(this.initSql, 'utf8'));
-        }
-        templateDb.close();
+        const { initSql } = this;
+        withDatabase(buildPath, (db) => {
+            if (initSql !== null) {
+                db.exec(readFileSync(initSql, 'utf8'));
+            }
+            // invariant: SQLite writes no header until a page is written: an empty database would be a 0-byte file, an invalid template rebuilt by every worker.
+            db.exec('VACUUM');
+        });
     }
 
     private getDb(): Database.Database {
-        const dbPath = this.workerDbPath || this.templatePath;
-        if (!this.db) {
-            this.db = new (database())(dbPath);
-            this.db.pragma('journal_mode = WAL');
-        }
+        this.db ??= openInWal(this.workerDbPath || this.templatePath);
         return this.db;
     }
 
     private closeDb(): void {
-        if (this.db) {
-            this.db.close();
-            this.db = null;
-        }
+        this.db?.close();
+        this.db = null;
     }
 
     async seed(sql: string): Promise<void> {
@@ -242,9 +258,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
 
             release: async () => {
                 this.closeDb();
-                if (this.workerDbPath && existsSync(this.workerDbPath)) {
-                    unlinkSync(this.workerDbPath);
-                }
+                removeDatabaseFiles(this.workerDbPath);
                 this.workerDbPath = '';
                 this.connectionString = `file:${this.templatePath}`;
             },
