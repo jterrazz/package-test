@@ -1,27 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseSpecDocument } from './spec-document.js';
-import { DOCUMENT_KEYS, RUN_KEYS, SpecSyntaxError } from './spec-grammar.js';
-
-const MINIMAL = [
-    'description: does the thing',
-    'runs:',
-    '  - command: help',
-    '    exit: 0',
-    '',
-].join('\n');
-
-function refusalOf(content: string): SpecSyntaxError {
-    try {
-        parseSpecDocument(content, 'case.spec.yaml');
-    } catch (error) {
-        if (error instanceof SpecSyntaxError) {
-            return error;
-        }
-        throw error;
-    }
-    throw new Error('expected the document to be refused, but it parsed');
-}
+import { MINIMAL, refusalOf, REFUSALS, SERVING } from './spec-document.fixtures.js';
+import { assertedStreams, documentPaths, parseSpecDocument } from './spec-document.js';
+import { DOCUMENT_KEYS, RUN_KEYS } from './spec-grammar.js';
 
 describe('spec-document', () => {
     test('spec document — reading — a minimal document asserts empty streams', () => {
@@ -276,5 +257,32 @@ describe('spec-document', () => {
         // Then - the refusal carries a line, not a stack
         expect(refusal.line).toBeGreaterThan(0);
         expect(refusal.name).toBe('SpecSyntaxError');
+    });
+
+    test.each(REFUSALS)('spec document — refusals — %s is refused whole', (_, content, message) => {
+        // Given - a document of that shape
+        // Then - the refusal, file and line first
+        expect(refusalOf(content).message).toBe(message);
+    });
+
+    test('spec document — reading — the last run may wait, a document names its description line, its fixtures and the streams it asserts', () => {
+        // Given - a two-run document, the last one waiting, with a fixture of each kind and streams of each kind
+        const document = parseSpecDocument(SERVING, 'case.spec.yaml');
+
+        // Then - what each reader of the document needs
+        expect([
+            document.descriptionLine,
+            documentPaths(document),
+            assertedStreams(document).map(({ text }) => text),
+            parseSpecDocument(MINIMAL, 'case.spec.yaml').fixtures,
+        ]).toStrictEqual([
+            2,
+            [
+                { key: 'fixture', kind: 'directory', line: 3, path: './_fixtures/tree/' },
+                { key: 'fixture', kind: 'file', line: 3, path: './_fixtures/one.sql' },
+            ],
+            ['out', 'needle', 'whole', 'other', 'err'],
+            [],
+        ]);
     });
 });
