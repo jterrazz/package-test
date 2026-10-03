@@ -16,6 +16,18 @@ const STORAGE = {
 ruleTester().run('no-module-mock', noModuleMock, {
     invalid: [
         {
+            name: 'A double of a module named by no literal is refused.',
+            code: 'vi.mock(target);',
+            errors: [{ column: 0, line: 1, messageId: 'viMock' }],
+            filename: SRC_TEST,
+        },
+        {
+            name: 'A data asset a banned folder holds is the folder’s finding alone: only a module test imports one wrongly.',
+            code: 'import data from "./payload.json";',
+            errors: [{ column: 0, line: 1, messageId: 'bannedDir' }],
+            filename: '/repo/src/specification/__fixtures__/data.ts',
+        },
+        {
             name: 'Module mocking is banned under src/.',
             code: 'vi.mock("../../../rules/mocks/match.js");',
             errors: [{ column: 0, line: 1, messageId: 'viMock' }],
@@ -91,6 +103,20 @@ ruleTester().run('no-module-mock', noModuleMock, {
         },
     ],
     valid: [
+        {
+            name: 'A computed `vi[…]`, another object, another method, a bare `mock()`, or production code, double nothing here.',
+            code: 'vi[mock]("./x.js");\nvi["mock"]("./x.js");\njest.mock("./x.js");\nvi.spyOn(a, "b");\nmock("./x.js");',
+            filename: SRC_TEST,
+        },
+        {
+            code: 'vi.mock("./x.js");',
+            filename: '/repo/src/specification/config.ts',
+        },
+        {
+            name: 'A file named like a banned folder is no folder.',
+            code: 'export {};',
+            filename: '/repo/src/specification/__mocks__',
+        },
         {
             name: "A `__mocks__` folder above the package is the machine's: the checkout's module is its own code.",
             code: 'export {};',

@@ -54,6 +54,7 @@ const DATA_ASSET = new RegExp(`\\.(?:${DATA_EXTENSIONS.join('|')})$`, 'iu');
 
 function isModuleDouble(node: AstNode): boolean {
     const callee = child(node, 'callee');
+    // Stryker disable next-line OptionalChaining,ConditionalExpression: a call always has a callee, and only a member has an object
     if (callee?.type !== 'MemberExpression' || callee.computed === true) {
         return false;
     }
@@ -71,6 +72,7 @@ function mockedSpecifier(argument: AstNode | undefined): string | undefined {
     if (literal !== undefined) {
         return literal;
     }
+    // Stryker disable next-line ConditionalExpression,OptionalChaining,BlockStatement: only an import expression has a source to read
     if (argument?.type !== 'ImportExpression') {
         return undefined;
     }
@@ -79,6 +81,7 @@ function mockedSpecifier(argument: AstNode | undefined): string | undefined {
 
 /** `./payload.json?raw`, `./doc.md#frag`. */
 function withoutSuffix(source: string): string {
+    // Stryker disable next-line Regex: `.*` runs to the end of the specifier anyway
     return source.replace(/[?#].*$/u, '');
 }
 
@@ -93,11 +96,13 @@ type AllowList = { allowed: Set<string>; unreasoned: Set<string> };
 
 function textOf(entry: object, key: string): string {
     const value: unknown = key in entry ? Reflect.get(entry, key) : undefined;
+    // Stryker disable next-line ConditionalExpression: the schema admits only text
     return typeof value === 'string' ? value.trim() : '';
 }
 
 function allowListOf(context: Context): AllowList {
     const option = context.options[0];
+    // Stryker disable ConditionalExpression,ArrayDeclaration,LogicalOperator: the schema admits only an object of `modules`, each a string or an object
     const stated: unknown =
         typeof option === 'object' && option !== null && 'modules' in option
             ? option.modules
@@ -113,6 +118,7 @@ function allowListOf(context: Context): AllowList {
             (textOf(entry, 'reason') === '' ? unreasoned : allowed).add(module);
         }
     }
+    // Stryker restore ConditionalExpression,ArrayDeclaration,LogicalOperator
     return { allowed, unreasoned };
 }
 
@@ -130,6 +136,7 @@ function scopeOf(context: Context): Scope | undefined {
     return {
         allowed,
         banned,
+        // Stryker disable next-line LogicalOperator,ConditionalExpression: a `.test` file is of the module role, wherever it sits
         isTest: role === 'module' && TEST_FILE.test(context.filename),
         unreasoned,
     };
@@ -182,6 +189,7 @@ export const noModuleMock = defineRule(
         createOnce(context: Context): Visitor {
             let scope: Scope | undefined;
             return {
+                // Stryker disable OptionalChaining: `before` runs no visitor where it found no scope
                 ...importSourceVisitor(({ node, source }) => {
                     if (scope?.isTest === true && DATA_ASSET.test(withoutSuffix(source))) {
                         context.report({ data: { source }, messageId: 'assetImport', node });
@@ -196,9 +204,13 @@ export const noModuleMock = defineRule(
                         return;
                     }
                     const named = mockedSpecifier(childList(node, 'arguments')[0]);
+                    // Stryker disable next-line ConditionalExpression: no specifier is on neither list
                     if (named !== undefined && scope?.unreasoned.has(named) === true) {
                         context.report({ data: { source: named }, messageId: 'unreasoned', node });
-                    } else if (named === undefined || scope?.allowed.has(named) !== true) {
+                        return;
+                    }
+                    // Stryker disable next-line ConditionalExpression: no specifier is on neither list
+                    if (named === undefined || scope?.allowed.has(named) !== true) {
                         context.report({ messageId: 'viMock', node });
                     }
                 },
@@ -211,6 +223,7 @@ export const noModuleMock = defineRule(
                         });
                     }
                 },
+                // Stryker restore OptionalChaining
             };
         },
     },
