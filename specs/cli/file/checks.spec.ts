@@ -30,9 +30,11 @@ describe('checks', () => {
         // Then - several read accessors on one result
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('Build completed');
-        expect(result.file('dist/index.js').exists).toBe(true);
-        expect(result.file('dist/manifest.json').exists).toBe(true);
-        expect(result.file('dist/index.cjs').exists).toBe(false);
+        expect(
+            ['dist/index.js', 'dist/manifest.json', 'dist/index.cjs'].map(
+                (path) => result.file(path).exists,
+            ),
+        ).toStrictEqual([true, true, false]);
         expect(result.file('dist/index.js').content).toContain('Hello from CLI app');
     });
 });

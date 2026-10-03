@@ -110,28 +110,25 @@ describe('files', () => {
         );
     });
 
-    test.runIf(process.env.TEST_MODE !== 'compose')(
-        'seed() without any declared SQL database fails with a clear error',
-        async () => {
-            // Given - an api runner whose services record declares no database
-            // oxlint-disable-next-line jterrazz/runner-in-specification-file, jterrazz/no-runner-alias -- negative-path runner: it exists only to fail .seed(), and aliasing avoids shadowing the module-level `api`
-            const { api: bareApi, cleanup: stop } = await specification.api({
-                server: () => new Hono(),
-            });
+    test('seed() without any declared SQL database fails with a clear error', async () => {
+        // Given - an api runner whose services record declares no database
+        // oxlint-disable-next-line jterrazz/runner-in-specification-file, jterrazz/no-runner-alias -- negative-path runner: it exists only to fail .seed(), and aliasing avoids shadowing the module-level `api`
+        const { api: bareApi, cleanup: stop } = await specification.api({
+            server: () => new Hono(),
+        });
 
-            try {
-                // Then - the chain fails because nothing can execute the SQL
-                await expect(bareApi.seed(file('../_seeds/one-user.sql')).get('/')).rejects.toThrow(
-                    [
-                        'found: seed(), and no database is declared',
-                        'why: A seed writes into a declared database.',
-                        'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
-                        'read: docs/18-services.md#the-database-rule',
-                    ].join('\n'),
-                );
-            } finally {
-                await stop();
-            }
-        },
-    );
+        try {
+            // Then - the chain fails because nothing can execute the SQL
+            await expect(bareApi.seed(file('../_seeds/one-user.sql')).get('/')).rejects.toThrow(
+                [
+                    'found: seed(), and no database is declared',
+                    'why: A seed writes into a declared database.',
+                    'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                    'read: docs/18-services.md#the-database-rule',
+                ].join('\n'),
+            );
+        } finally {
+            await stop();
+        }
+    });
 });

@@ -72,12 +72,16 @@ describe('initiation-errors', () => {
     test('postgres init script failure — error report shows the failed service, named after its record key', () => {
         // Given - the captured startup report
         // Then - formatted report includes failure markers AND the unique failing line (the SQL type error) so the report pinpoints the cause, not just that some init failed
-        expect(brokenInit.output).toContain('INFRA');
-        expect(brokenInit.output).toContain('Starting infrastructure...');
-        expect(brokenInit.output).toContain('postgres (db)');
-        expect(brokenInit.output).toContain('found: the postgres init script ');
+        expect(
+            [
+                'INFRA',
+                'Starting infrastructure...',
+                'postgres (db)',
+                'found: the postgres init script ',
+                'app: in-process (Hono)',
+            ].filter((line) => !brokenInit.output.includes(line)),
+        ).toStrictEqual([]);
         expect(brokenInit.output.toLowerCase()).toContain('textttt');
-        expect(brokenInit.output).toContain('app: in-process (Hono)');
     });
 
     test('postgres init script failure — error report includes postgres container logs', () => {

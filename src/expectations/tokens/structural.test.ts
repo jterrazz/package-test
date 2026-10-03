@@ -15,15 +15,19 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - a JSON number without decimals still matches float (JSON does not distinguish 42 from 42.0)
-        expect(structuralEquals(match.float(), 42, scope)).toBe(true);
-        expect(structuralEquals(match.float(), 4.2, scope)).toBe(true);
-        expect(structuralEquals(match.float(), Number.NaN, scope)).toBe(false);
+        expect(
+            [42, 4.2, Number.NaN].map((value) => structuralEquals(match.float(), value, scope)),
+        ).toStrictEqual([true, true, false]);
 
         // Then - a text value must carry the decimal part
-        expect(structuralEquals('{{float}}', '42', scope)).toBe(false);
-        expect(structuralEquals('{{float}}', '4.2', scope)).toBe(true);
-        expect(structuralEquals('pi={{float}}', 'pi=3.14', scope)).toBe(true);
-        expect(structuralEquals('pi={{float}}', 'pi=3', scope)).toBe(false);
+        expect(
+            [
+                ['{{float}}', '42'],
+                ['{{float}}', '4.2'],
+                ['pi={{float}}', 'pi=3.14'],
+                ['pi={{float}}', 'pi=3'],
+            ].map(([expected, actual]) => structuralEquals(expected, actual, scope)),
+        ).toStrictEqual([false, true, true, false]);
     });
 
     test('structural — duration token — accepts ms, s, m, and h units', () => {

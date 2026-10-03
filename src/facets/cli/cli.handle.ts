@@ -4,6 +4,7 @@ import { getCallerDir } from '../../chain/paths/caller.js';
 import type { DockerSpecConfig } from '../../expectations/command/cli.result.js';
 import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
+import { requireDockerDaemon } from '../../expectations/command/docker-cli.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
@@ -87,6 +88,9 @@ export async function startCli<Services extends ServiceRecord>(
     const services = declaredServices(options.services);
     const databaseKeys = declaredDatabaseKeys(services);
 
+    if (options.docker !== undefined) {
+        requireDockerDaemon();
+    }
     let started: null | StartedServices = null;
     if (Object.keys(services).length > 0) {
         started = await startServices(services, root, { type: 'none' });

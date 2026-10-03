@@ -1,8 +1,29 @@
 import { execSync } from 'node:child_process';
 
+import { refusal } from '../../chain/refusals/refusal.js';
 import type { CliOutput } from './cli.result.js';
 
 const DEFAULT_TIMEOUT = 10_000;
+
+/** Docker-aware mode reads what the daemon answers: a run where none answers is refused, never passed. */
+export function requireDockerDaemon(): void {
+    try {
+        execSync('docker version --format "{{.Server.Version}}"', {
+            stdio: 'ignore',
+            timeout: DEFAULT_TIMEOUT,
+        });
+    } catch (error) {
+        throw new Error(
+            refusal({
+                fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
+                found: 'specification.cli({ docker }) asked for Docker, and no Docker daemon answered',
+                read: 'docs/14-cli.md#docker-aware-mode',
+                why: 'Docker-aware mode reads the containers a run spawned, so it needs a Docker daemon.',
+            }),
+            { cause: error },
+        );
+    }
+}
 
 export function findContainersByLabel(key: string, value: string): string[] {
     try {

@@ -9,13 +9,22 @@ describe('http', () => {
     test('http — request builders — every verb builds an http request half, and any() wildcards the method', () => {
         // Given - the six request builders
         // Then - each carries its method, the adapter, and the declared url
-        expect(http.get(URL).method).toBe('GET');
-        expect(http.post(URL).method).toBe('POST');
-        expect(http.put(URL).method).toBe('PUT');
-        expect(http.patch(URL).method).toBe('PATCH');
-        expect(http.delete(URL).method).toBe('DELETE');
-        expect(http.any(URL).method).toBe('*');
-        expect(http.get(URL).adapter).toBe('http');
+        expect(
+            [
+                http.get(URL),
+                http.post(URL),
+                http.put(URL),
+                http.patch(URL),
+                http.delete(URL),
+                http.any(URL),
+            ].map(({ adapter, method, url }) => ({ adapter, method, url })),
+        ).toStrictEqual(
+            ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', '*'].map((method) => ({
+                adapter: 'http',
+                method,
+                url: URL,
+            })),
+        );
         expect(http.get('/articles/{{uuid}}').url).toBe('/articles/{{uuid}}');
     });
 

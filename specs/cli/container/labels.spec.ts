@@ -18,91 +18,80 @@ function containersLabelled(key: string, value: string): string[] {
     }
 }
 
-function dockerAvailable(): boolean {
-    try {
-        execSync('docker version --format "{{.Server.Version}}"', {
-            stdio: 'ignore',
-            timeout: 3000,
-        });
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-const HAS_DOCKER = dockerAvailable();
-
 /* invariant: a live container's log stream is cut at an arbitrary instant: targeted probes, `output-asserted-as-a-golden` scalpel. */
 
 describe('labels', () => {
-    test.skipIf(!HAS_DOCKER)(
-        'tracks labelled containers and cleans up on dispose',
-        async () => {
-            // Given - the runner's injected test-run id (the label scope the dispose path queries) so the teardown can be verified for real
-            await using idRun = await dockerCli.exec('label');
-            const runId = idRun.stdout.text.trim();
-            expect(runId).not.toBe('unset');
+    test('reads a spawned container: its state, its files and a command run inside it', async () => {
+        // Given - a run that spawned the container named test-a
+        await using result = await dockerCli.exec('spawn test-a');
+        const neo = result.container('test-a');
+        const file = neo.file('/workspace/out.txt');
+        const inside = await neo.exec('ls /workspace');
 
-            let trackedId: string | undefined;
+        // Then - the accessor reads the container as the daemon reports it
+        expect({
+            file: { content: file.content.trim(), exists: file.exists },
+            inside: {
+                exitCode: inside.exitCode,
+                listsOut: inside.stdout.text.split('\n').includes('out.txt'),
+            },
+            run: result.exitCode,
+            state: { exists: neo.exists, status: neo.status },
+        }).toMatchObject({
+            file: { content: 'hello-from-test-a', exists: true },
+            inside: { exitCode: 0, listsOut: true },
+            run: 0,
+            state: { exists: true, status: 'running' },
+        });
+        await expect(neo).toBeRunning();
+    }, 60_000);
 
-            {
-                await using result = await dockerCli.exec('spawn test-a');
+    test('names an unknown container absent, and refuses to call it running', async () => {
+        // Given - a run that spawned one container, and a name it never spawned
+        await using result = await dockerCli.exec('spawn test-a');
 
-                expect(result.exitCode).toBe(0);
+        // Then - the unknown name reads absent, and the matcher refuses it
+        expect(result.container('nope').exists).toBe(false);
+        await expect(expect(result.container('nope')).toBeRunning()).rejects.toThrow(
+            /does not exist/u,
+        );
+    }, 60_000);
 
-                // Then - the container accessor reads state and files
-                const neo = result.container('test-a');
-                expect(neo.exists).toBe(true);
-                expect(neo.status).toBe('running');
-                await expect(neo).toBeRunning();
+    test('tracks a spawned container under the run label, and removes it on dispose', async () => {
+        // Given - the runner's injected test-run id, the label scope the dispose path queries
+        await using idRun = await dockerCli.exec('label');
+        const runId = idRun.stdout.text.trim();
+        let trackedId: string | undefined;
 
-                const file = neo.file('/workspace/out.txt');
-                expect(file.exists).toBe(true);
-                expect(file.content.trim()).toBe('hello-from-test-a');
+        {
+            await using result = await dockerCli.exec('spawn test-a');
+            trackedId = result.containerIds[0];
 
-                const inside = await neo.exec('ls /workspace');
-                expect(inside.exitCode).toBe(0);
-                expect(inside.stdout.text).toContain('out.txt');
+            // Then - while the scope is live the id carries the run label, which makes the after-dispose assertion falsifiable
+            expect(trackedId).toMatch(/^[\da-f]{12}$/u);
+            expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);
+        }
 
-                expect(result.container('nope').exists).toBe(false);
-                await expect(expect(result.container('nope')).toBeRunning()).rejects.toThrow(
-                    /does not exist/u,
-                );
+        // Then - scope exit disposed the container: the same label query the runner uses comes back empty
+        expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
+    }, 60_000);
 
-                trackedId = result.containerIds[0];
-                expect(trackedId).toMatch(/^[\da-f]{12}$/u);
+    // RUNTIME containers-removed-with-the-run — the capture is docker-aware: every container a run spawned carries its run label, and the scope's exit removes them.
+    test('dispose removes containers even when the run was never asserted on', async () => {
+        // Given - the runner's test-run id, read from the injected child env
+        await using idRun = await dockerCli.exec('label');
+        const runId = idRun.stdout.text.trim();
+        expect(runId).not.toBe('unset');
 
-                // invariant: while the scope is live the id really carries the run label, which makes the after-dispose assertion falsifiable.
-                expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);
-            }
+        {
+            // Given - a spawn whose containers are never touched via .container()
+            await using result = await dockerCli.exec('spawn never-asserted');
+            expect(result.exitCode).toBe(0);
+        }
 
-            // Then - scope exit disposed the container: the same label query the runner uses now comes back empty, proving async-dispose removed it.
-            expect(containersLabelled('fake.test.run', runId)).not.toContain(trackedId);
-            expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
-        },
-        60_000,
-    );
-
-    test.skipIf(!HAS_DOCKER)(
-        // RUNTIME containers-removed-with-the-run — the capture is docker-aware: every container a run spawned carries its run label, and the scope's exit removes them.
-        'dispose removes containers even when the run was never asserted on',
-        async () => {
-            // Given - the runner's test-run id, read from the injected child env
-            await using idRun = await dockerCli.exec('label');
-            const runId = idRun.stdout.text.trim();
-            expect(runId).not.toBe('unset');
-
-            {
-                // Given - a spawn whose containers are never touched via .container()
-                await using result = await dockerCli.exec('spawn never-asserted');
-                expect(result.exitCode).toBe(0);
-            }
-
-            // Then - scope exit removed every container carrying the run label
-            expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
-        },
-        60_000,
-    );
+        // Then - scope exit removed every container carrying the run label
+        expect(containersLabelled('fake.test.run', runId)).toStrictEqual([]);
+    }, 60_000);
 
     test('a label no container carries queries clean, so the oracle is falsifiable', () => {
         // Given - a label value that no container carries

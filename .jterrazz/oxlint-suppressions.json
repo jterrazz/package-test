@@ -184,19 +184,6 @@
     "specs/api/services/initiation-errors.spec.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
-        },
-        "vitest/max-expects": {
-            "count": 1
-        }
-    },
-    "specs/cli/container/labels.spec.ts": {
-        "vitest/max-expects": {
-            "count": 8
-        }
-    },
-    "specs/cli/file/checks.spec.ts": {
-        "vitest/max-expects": {
-            "count": 1
         }
     },
     "specs/cli/stdout/comparison.spec.ts": {
@@ -308,22 +295,12 @@
             "count": 1
         }
     },
-    "src/expectations/tokens/match.test.ts": {
-        "vitest/max-expects": {
-            "count": 31
-        }
-    },
     "src/expectations/tokens/match.ts": {
         "max-classes-per-file": {
             "count": 1
         },
         "typescript/switch-exhaustiveness-check": {
             "count": 1
-        }
-    },
-    "src/expectations/tokens/structural.test.ts": {
-        "vitest/max-expects": {
-            "count": 2
         }
     },
     "src/expectations/tokens/structural.ts": {
@@ -530,11 +507,6 @@
     },
     "src/stubs/intercept/intercept.test.ts": {
         "unicorn/consistent-function-scoping": {
-            "count": 3
-        }
-    },
-    "src/stubs/kinds/http.test.ts": {
-        "vitest/max-expects": {
             "count": 3
         }
     }

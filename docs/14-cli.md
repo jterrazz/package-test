@@ -414,7 +414,7 @@ A `serve` entry is spawned with the document's extra `KEY: value` merged into it
 
 ### Docker-aware mode
 
-For CLIs that spawn Docker containers, declare the `docker` option (rule `containers-removed-with-the-run`):
+For CLIs that spawn Docker containers, declare the `docker` option (rule `containers-removed-with-the-run`). The specification refuses to start where no Docker daemon answers: a run that reads containers and could see none would pass on nothing.
 
 ```typescript
 export const {
