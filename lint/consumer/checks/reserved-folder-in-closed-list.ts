@@ -9,11 +9,11 @@ import {
     RESERVED_FOLDERS,
     SETUP_FOLDER,
     SHARED_FOLDER,
-    treeEntries,
     UNMARKED_RESERVED,
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative } from 'node:path';
 
+import { entriesOf } from '../../kit/project/facet-folders.js';
 import { isModuleName, isUnmarkedReserved } from '../../kit/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
@@ -81,14 +81,6 @@ function ownerShown(specsRoot: string, setup: string): string {
 }
 
 type Place = { rootDir: string; specsRoot: string };
-
-function entriesOf(dir: string): ReturnType<typeof treeEntries> {
-    try {
-        return treeEntries(dir);
-    } catch {
-        return [];
-    }
-}
 
 function refusedInSetup(
     { rootDir, specsRoot }: Place,

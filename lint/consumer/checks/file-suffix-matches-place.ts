@@ -1,28 +1,16 @@
 /** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
 
-import {
-    isGroundFolder,
-    moveKeepingHistory,
-    PRUNED,
-    treeEntries,
-} from '@jterrazz/typescript/rules';
+import { isGroundFolder, moveKeepingHistory, PRUNED } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { finding } from '../../kit/project/document-model.js';
+import { entriesOf } from '../../kit/project/facet-folders.js';
 import { FACETS, reachesRunner } from '../../kit/project/facets.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';
-
-function entriesOf(dir: string): ReturnType<typeof treeEntries> {
-    try {
-        return treeEntries(dir);
-    } catch {
-        return [];
-    }
-}
 
 function* walk(dir: string): Generator<string> {
     for (const entry of entriesOf(dir)) {
