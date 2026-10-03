@@ -30,11 +30,11 @@ function installed(checker: string, root: string): string {
     return [existsSync(local) ? local : command, ...rest].join(' ');
 }
 
-function unreported(linter: string, output: string): Error {
+function unreported(linter: string, lines: readonly string[]): Error {
     return new Error(
         refusal({
             fix: `run ${linter} on the fixture by hand and correct what stops it — a plugin that does not load, a config it refuses`,
-            found: `${linter} failed and reported no diagnostic: ${output.trim().split('\n').slice(0, 5).join(' / ')}`,
+            found: `${linter} failed and reported no diagnostic: ${lines.slice(0, 5).join(' / ')}`,
             read: 'docs/16-lint.md#what-run-runs',
             why: 'A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.',
         }),
@@ -47,6 +47,7 @@ function runOxlint(
     run: LintRun,
     fix: boolean,
 ): Diagnostic[] {
+    // Stryker disable next-line StringLiteral: the config's folder is the run's scratch, whatever its prefix
     const config = join(scratchDirectory('spec-lint-config-'), 'oxlint.json');
     writeFileSync(
         config,
@@ -56,15 +57,23 @@ function runOxlint(
             rules: { ...linters.config.rules, ...run.rules },
         }),
     );
-    const ran = spawnSync(
-        process.execPath,
-        [linters.oxlint, '--format=unix', '-c', config, ...(fix ? ['--fix'] : []), '.'],
-        { cwd: tree, encoding: 'utf8', env: environment() },
-    );
-    const output = `${ran.stdout ?? ''}${ran.stderr ?? ''}`;
+    // Stryker disable next-line StringLiteral: outside: oxlint picks its renderer off the environment, and one a module test runs in renders as unix
+    const args = [linters.oxlint, '--format=unix', '-c', config, '.'];
+    if (fix) {
+        args.push('--fix');
+    }
+    // Stryker disable StringLiteral: output read as a Buffer joins into the same text, and the streams joined by any text end their lines first
+    const ran = spawnSync(process.execPath, args, {
+        cwd: tree,
+        encoding: 'utf8',
+        env: environment(),
+    });
+    const output = [ran.stdout, ran.stderr].join('');
+    // Stryker restore StringLiteral
     const diagnostics = diagnosticsOf(output);
     if (ran.status !== 0 && diagnostics.length === 0) {
-        throw unreported('oxlint', output);
+        // Stryker disable next-line MethodExpression: outside: oxlint's failure opens on its message, no blank line before it
+        throw unreported('oxlint', output.trim().split('\n'));
     }
     return diagnostics;
 }
@@ -76,16 +85,18 @@ function runChecker(
     fix: boolean,
 ): Diagnostic[] {
     const command = [installed(checker, root), run.args, '.', fix ? '--fix' : ''];
+    // Stryker disable next-line MethodExpression: a shell reads the empty words a join leaves as nothing
     const ran = spawnSync(command.filter(Boolean).join(' '), {
         cwd: tree,
+        // Stryker disable next-line StringLiteral: output read as a Buffer joins into the same text
         encoding: 'utf8',
         env: environment(),
         shell: true,
     });
-    const output = `${ran.stdout ?? ''}${ran.stderr ?? ''}`;
+    const output = [ran.stdout, ran.stderr].join('');
     const diagnostics = diagnosticsOf(output);
     if (ran.status !== 0 && diagnostics.length === 0) {
-        throw unreported(checker, output);
+        throw unreported(checker, output.trim().split('\n'));
     }
     return diagnostics;
 }
@@ -110,7 +121,7 @@ async function presetDiagnostics(tree: string, linters: Linters): Promise<Diagno
         presets: linters.presets,
     });
     if (problems.length > 0) {
-        throw unreported('the presets’ checks', problems.join('\n'));
+        throw unreported('the presets’ checks', problems);
     }
     return findings.map((finding) => presetDiagnostic(finding));
 }
