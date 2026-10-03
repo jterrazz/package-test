@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 
 import { sourcesUnder } from '../../kit/project/tree.js';
 import { FACET_MATRIX_COLUMNS } from './facet-matrix.js';
-import { COLUMN_TREES } from './matrix-sources.js';
+import { MATRIX_SOURCES_TREES } from './matrix-sources.js';
 import { META_TESTS_LAYER_ROOTS } from './meta-tests.js';
 
 export const MATRIX_LAYERS_MARKERS: Markers = {
@@ -45,8 +45,8 @@ export function layers(root: string): Layer[] {
             total +
             countUnder(
                 root,
-                COLUMN_TREES[column].roots,
-                COLUMN_TREES[column].extensions.filter(
+                MATRIX_SOURCES_TREES[column].roots,
+                MATRIX_SOURCES_TREES[column].extensions.filter(
                     (extension) => extension !== '.specification.ts',
                 ),
             ),

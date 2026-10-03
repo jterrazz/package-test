@@ -8,7 +8,7 @@ import { sourcesUnder } from '../../kit/project/tree.js';
 import type { Column } from './facet-matrix.js';
 
 /** `files` serves the one column with no constructor: component's options are the project's, stated in this repository's `jterrazz.config.ts`. */
-export const COLUMN_TREES: Record<
+export const MATRIX_SOURCES_TREES: Record<
     Column,
     { extensions: string[]; files?: string[]; roots: string[] }
 > = {
@@ -35,7 +35,7 @@ export type Source = {
 
 export function matrixSources(root: string): Record<Column, Source[]> {
     const read = (column: Column): Source[] => {
-        const tree = COLUMN_TREES[column];
+        const tree = MATRIX_SOURCES_TREES[column];
         return [
             ...tree.roots.flatMap((relative) =>
                 sourcesUnder(resolve(root, relative), tree.extensions),
