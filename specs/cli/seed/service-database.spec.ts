@@ -54,8 +54,8 @@ describe('service-database', () => {
     test('a seed handed a directory, or a path as a plain string, is refused naming the one file it reads', () => {
         // Given - a caller the types do not reach, seeding a folder and then a bare path
         // Then - each is refused before anything runs, with the `file()` to write
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a directory is what the type refuses; this test IS the caller the type does not reach
-        expect(() => cli.seed(directory('./_seeds/') as never)).toThrow(
+        // @ts-expect-error -- a directory is what the type refuses
+        expect(() => cli.seed(directory('./_seeds/'))).toThrow(
             [
                 'found: seed(directory("./_seeds/")), a directory where one file is read',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
@@ -63,8 +63,8 @@ describe('service-database', () => {
                 'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a bare path is what the type refuses; this test IS the caller the type does not reach
-        expect(() => cli.seed('./_seeds/users.sql' as never)).toThrow(
+        // @ts-expect-error -- a bare path is what the type refuses
+        expect(() => cli.seed('./_seeds/users.sql')).toThrow(
             [
                 'found: seed("./_seeds/users.sql"), a value where a file is read',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
@@ -77,8 +77,9 @@ describe('service-database', () => {
     test('a seed handed a file that is not a .sql one is refused naming the file it reads', () => {
         // Given - a caller the types do not reach, seeding a csv where the seed reads SQL
         // Then - it is refused before anything runs, with the `.sql` file to write
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a csv is what the type refuses; this test IS the caller the type does not reach
-        expect(() => cli.seed(file('./_fixtures/users.csv') as never)).toThrow(
+        /* oxlint-disable jterrazz/verb-reads-its-ground-folder -- the run-time refusal of a csv seed is the subject */
+        // @ts-expect-error -- a csv is what the type refuses
+        expect(() => cli.seed(file('./_fixtures/users.csv'))).toThrow(
             [
                 'found: seed(file("./_fixtures/users.csv")), a file not ending in .sql',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
@@ -86,5 +87,6 @@ describe('service-database', () => {
                 'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
+        /* oxlint-enable jterrazz/verb-reads-its-ground-folder */
     });
 });

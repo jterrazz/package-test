@@ -1,5 +1,4 @@
 import { directory, file } from '@jterrazz/test';
-/* oxlint-disable typescript/no-unsafe-type-assertion -- each source here is one the types refuse: its refusal at run time, for a caller they do not reach, is the subject */
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -52,7 +51,8 @@ describe('refused', () => {
         // Given - the package's manifest named in place of its folder
         // Then - refused, with the call to write instead
         expect(() =>
-            cli.link('@acme/greeter', file('./_fixtures/greeter/package.json') as never),
+            // @ts-expect-error -- a source the types refuse, refused at run time too
+            cli.link('@acme/greeter', file('./_fixtures/greeter/package.json')),
         ).toThrow(
             [
                 "found: link('@acme/greeter', file(\"./_fixtures/greeter/package.json\")), a file where a package's directory is read",

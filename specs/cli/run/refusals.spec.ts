@@ -219,8 +219,8 @@ describe('refusals', () => {
         const answers = file('./_fixtures/workdir-answers/answers/dashboard/posts.json');
 
         // Then - the refusal names the extension a document carries
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a json is what the type refuses; this test IS the caller the type does not reach
-        await expect(cli.run(answers as never)).rejects.toThrow(
+        // @ts-expect-error -- a json is what the type refuses
+        await expect(cli.run(answers)).rejects.toThrow(
             [
                 'found: run(file("./_fixtures/workdir-answers/answers/dashboard/posts.json")), a file not ending in .spec.yaml',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',

@@ -25,8 +25,8 @@ describe('declared', () => {
     test('a request handed with no response is refused in the words of the call that wrote it', () => {
         // Given - a caller the types do not reach, declaring a request alone
         // Then - refused as it is stated, naming the two forms of a stub
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a bare request is what only an untyped caller can hand over: the overloads refuse it at every typed site
-        expect(() => app.intercept(http.get('https://news.test/latest') as never)).toThrow(
+        // @ts-expect-error -- a bare request: the overloads refuse it at every typed site
+        expect(() => app.intercept(http.get('https://news.test/latest'))).toThrow(
             [
                 'found: .intercept(request), a bare request with no response',
                 'why: A stub is a request and its response: a request alone answers nothing.',

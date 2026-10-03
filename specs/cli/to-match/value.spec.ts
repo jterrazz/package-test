@@ -1,5 +1,4 @@
 import { file } from '@jterrazz/test';
-/* oxlint-disable typescript/no-unsafe-type-assertion -- each golden here is one the types refuse: its refusal at run time, for a caller they do not reach, is the subject */
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -16,7 +15,8 @@ describe('value', () => {
 
         // Then - refused before any golden is read
         expect(() => {
-            expect(result.stdout.text).toMatch(file(GOLDEN) as never);
+            // @ts-expect-error -- a golden the types refuse on a value, refused at run time too
+            expect(result.stdout.text).toMatch(file(GOLDEN));
         }).toThrow(
             [
                 `found: toMatch(file("${GOLDEN}")) on a subject that holds no file of its kind`,
@@ -33,7 +33,8 @@ describe('value', () => {
         const firstLine = result.stdout.text.split('\n')[0] ?? '';
 
         // Then - no pattern is made of the path: the string is told how to golden it
-        expect(() => firstLine.match(file(GOLDEN) as never)).toThrow(
+        // @ts-expect-error -- a golden the types refuse on a value, refused at run time too
+        expect(() => firstLine.match(file(GOLDEN))).toThrow(
             [
                 `found: toMatch(file("${GOLDEN}")) on a string, a value with no golden`,
                 WHY,

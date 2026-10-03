@@ -1,5 +1,4 @@
 import { directory, file } from '@jterrazz/test';
-/* oxlint-disable typescript/no-unsafe-type-assertion -- every path here is one the types refuse: its refusal at run time, for a caller they do not reach, is the subject */
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
@@ -13,7 +12,9 @@ describe('refused', () => {
     test('a path that is not relative to the spec file is refused before the chain holds it, naming the form to write', () => {
         // Given - a bare name where the spec names its fixture
         // Then - refused where it is written, with the relative form of the same path
-        expect(() => cli.fixture(file('invalid.ts' as never))).toThrow(
+        /* oxlint-disable jterrazz/verb-reads-its-ground-folder -- the run-time refusal of this very path is the subject */
+        // @ts-expect-error -- a path the types refuse, refused at run time too
+        expect(() => cli.fixture(file('invalid.ts'))).toThrow(
             [
                 'found: file("invalid.ts"), a path that is not relative to the spec file',
                 WHY,
@@ -21,12 +22,14 @@ describe('refused', () => {
                 READ,
             ].join('\n'),
         );
+        /* oxlint-enable jterrazz/verb-reads-its-ground-folder */
     });
 
     test('a directory named without its slash, and a file named with one, are each refused naming the other', () => {
         // Given - each wrapper handed the other's path
         // Then - each names the call to write instead
-        expect(() => cli.fixture(directory('./_fixtures/chain-ground' as never))).toThrow(
+        // @ts-expect-error -- a path the types refuse, refused at run time too
+        expect(() => cli.fixture(directory('./_fixtures/chain-ground'))).toThrow(
             [
                 'found: directory("./_fixtures/chain-ground"), a path that does not end in /',
                 WHY,
@@ -35,7 +38,8 @@ describe('refused', () => {
             ].join('\n'),
         );
         // checker-disable-next-line named-path-exists -- the refusal under test: a file() naming a directory is refused before the disk is read
-        expect(() => cli.fixture(file('./_fixtures/chain-ground/' as never))).toThrow(
+        // @ts-expect-error -- a path the types refuse, refused at run time too
+        expect(() => cli.fixture(file('./_fixtures/chain-ground/'))).toThrow(
             [
                 'found: file("./_fixtures/chain-ground/"), a path ending in / — a directory\'s',
                 WHY,
@@ -48,7 +52,8 @@ describe('refused', () => {
     test('a path handed as a plain string is refused as a value, not read as the disk', () => {
         // Given - the fixture's path without the wrapper that says what it names
         // Then - the verb names the wrappers that read the disk
-        expect(() => cli.fixture('./_fixtures/chain-ground/' as never)).toThrow(
+        // @ts-expect-error -- a path the types refuse, refused at run time too
+        expect(() => cli.fixture('./_fixtures/chain-ground/')).toThrow(
             [
                 'found: fixture("./_fixtures/chain-ground/"), a value where the disk is read',
                 WHY,
