@@ -85,7 +85,17 @@ export function fakeService(
             log.push(`initialize ${image} ${dockerDir.slice(root.length)}`);
             await clock.advance(5);
         },
-        isolation: () => ({ acquire: settled, release: settled, reset: settled }),
+        isolation: () => ({
+            acquire: async (worker) => {
+                log.push(`acquire ${image} ${worker}`);
+                await settled();
+            },
+            release: async () => {
+                log.push(`release ${image}`);
+                await settled();
+            },
+            reset: settled,
+        }),
         reset: settled,
         serviceName: null,
         type: image.split(':')[0] ?? image,
