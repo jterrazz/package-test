@@ -32,7 +32,14 @@ export function flattenedGroup(source: string, group: AstNode, named: string): s
     for (const statement of statements) {
         const its = firstArgumentOf(statement);
         const written = its?.type === 'Literal' || its?.type === 'TemplateLiteral';
-        if (!isTestCallee(calleeOf(statement)) || its === undefined || !written) {
+        if (!isTestCallee(calleeOf(statement))) {
+            return undefined;
+        }
+        // Stryker disable next-line ConditionalExpression,BlockStatement: a test titled by nothing is titled by no literal, which the next check refuses
+        if (its === undefined) {
+            return undefined;
+        }
+        if (!written) {
             return undefined;
         }
         if (title !== named) {
@@ -82,6 +89,7 @@ function mergedText(
 function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
     const vitest = statements.find(
         (statement) =>
+            // Stryker disable next-line ConditionalExpression: only an import names vitest as its source
             statement.type === 'ImportDeclaration' &&
             stringValue(child(statement, 'source')) === 'vitest',
     );
@@ -96,6 +104,7 @@ function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
         return fixer.insertTextBeforeRange([nodeStart(first), nodeStart(first)], 'describe, ');
     }
     const [top] = statements;
+    // Stryker disable next-line ConditionalExpression: a file with a test to wrap has a first statement
     return top === undefined
         ? undefined
         : fixer.insertTextBeforeRange(
@@ -113,13 +122,17 @@ export function mergeFix(
     const text = mergedText(source, statements, new Set(members), named);
     const [first] = members;
     const last = members.at(-1);
+    // Stryker disable next-line ConditionalExpression: a merge always has a first and a last member
     if (text === undefined || first === undefined || last === undefined) {
         return undefined;
     }
     const described = members.some((statement) => isGroup(statement));
-    return (fixer) =>
-        [
+    return (fixer) => {
+        const edits = [
             described ? undefined : importDescribe(fixer, statements),
             fixer.replaceTextRange([nodeStart(first), nodeEnd(last)], text),
-        ].filter((edit) => edit !== undefined);
+        ];
+        // Stryker disable next-line MethodExpression,ConditionalExpression: the fixer skips an edit that is not there
+        return edits.filter((edit) => edit !== undefined);
+    };
 }

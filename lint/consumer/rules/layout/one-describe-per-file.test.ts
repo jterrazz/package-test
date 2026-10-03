@@ -131,6 +131,58 @@ ruleTester().run('one-describe-per-file', oneDescribePerFile, {
             filename: COMPONENT_TEST,
             output: "describe('LocaleNote', () => {\ntest('a', () => {});\ntest('labels — b', () => {});\n});",
         },
+        {
+            name: 'A group titled by a name, or holding a test titled by one or by nothing, cannot flatten.',
+            code: "describe('pagination', () => {});\ndescribe(name, () => {\n    test('a', () => {});\n});",
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
+            filename: SPEC,
+            output: null,
+        },
+        {
+            code: "describe('pagination', () => {});\ndescribe('filters', () => {\n    test(title, () => {});\n});",
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
+            filename: SPEC,
+            output: null,
+        },
+        {
+            code: "describe('pagination', () => {});\ndescribe('filters', () => {\n    log('a');\n    test('b', () => {});\n});",
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
+            filename: SPEC,
+            output: null,
+        },
+        {
+            code: "describe('pagination', () => {});\ndescribe('filters', () => {\n    test();\n});",
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
+            filename: SPEC,
+            output: null,
+        },
+        {
+            name: 'What follows the last group stays after the merged one, and a note above a hoisted statement goes with it.',
+            code: "describe('pagination', () => {\n    test('a', () => {});\n});\n// the page read\nconst page = 1;\ndescribe('filters', () => {\n    test('b', () => {});\n});\nconst after = 2;",
+            errors: [{ column: 0, line: 6, messageId: 'severalDescribes' }],
+            filename: SPEC,
+            output: "// the page read\nconst page = 1;\n\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('filters — b', () => {});\n});\nconst after = 2;",
+        },
+        {
+            name: 'describe joins the vitest import, not another one, and is not added twice.',
+            code: "import { expect } from 'other';\nimport { test } from 'vitest';\ntest('a', () => {});",
+            errors: [{ column: 0, line: 3, messageId: 'noDescribe' }],
+            filename: SPEC,
+            output: "import { expect } from 'other';\nimport { describe, test } from 'vitest';\ndescribe('pagination', () => {\ntest('a', () => {});\n});",
+        },
+        {
+            code: "import { describe, test } from 'vitest';\ntest('a', () => {});",
+            errors: [{ column: 0, line: 2, messageId: 'noDescribe' }],
+            filename: SPEC,
+            output: "import { describe, test } from 'vitest';\ndescribe('pagination', () => {\ntest('a', () => {});\n});",
+        },
+        {
+            name: 'A namespace import of vitest gets a named import of its own.',
+            code: "import * as vitest from 'vitest';\ntest('a', () => {});",
+            errors: [{ column: 0, line: 2, messageId: 'noDescribe' }],
+            filename: SPEC,
+            output: "import { describe } from 'vitest';\nimport * as vitest from 'vitest';\ndescribe('pagination', () => {\ntest('a', () => {});\n});",
+        },
     ],
     valid: [
         {
