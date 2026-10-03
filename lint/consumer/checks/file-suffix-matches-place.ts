@@ -1,13 +1,14 @@
 /** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
 
 import { isGroundFolder, moveKeepingHistory, PRUNED } from '@jterrazz/typescript/rules';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { finding } from '../../kit/project/document-model.js';
 import { entriesOf } from '../../kit/project/facet-folders.js';
 import { FACETS, reachesRunner } from '../../kit/project/facets.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
+import { readText } from '../../kit/project/tree.js';
 import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';
@@ -23,14 +24,6 @@ function* walk(dir: string): Generator<string> {
             continue;
         }
         yield path;
-    }
-}
-
-function textOf(path: string): string {
-    try {
-        return readFileSync(path, 'utf8');
-    } catch {
-        return '';
     }
 }
 
@@ -91,7 +84,7 @@ function movesUnderFacet(specsRoot: string): PlacementMove[] {
         if (parts.some((part) => isGroundFolder(part))) {
             continue;
         }
-        if (!reachesRunner(textOf(path))) {
+        if (!reachesRunner(readText(path))) {
             continue;
         }
         moves.push({

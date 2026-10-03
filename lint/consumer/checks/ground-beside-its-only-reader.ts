@@ -1,13 +1,9 @@
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
-import {
-    entriesOf,
-    PRUNED_WITH_FIXTURES,
-    textOf,
-    walkFiles,
-} from '../../kit/project/facet-folders.js';
+import { entriesOf, PRUNED_WITH_FIXTURES, walkFiles } from '../../kit/project/facet-folders.js';
 import { isNodeTestFileName } from '../../kit/project/role.js';
+import { readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 function* walkDirectories(dir: string): Generator<string> {
@@ -55,7 +51,7 @@ export function checkGroundBesideItsOnlyReader(specsRoot: string): Spotted[] {
                 continue;
             }
             const readers = tests.filter((test) => {
-                const text = textOf(test) ?? '';
+                const text = readText(test);
                 return (
                     names.some((name) => text.includes(name)) ||
                     text.includes(`${ground}/`) ||

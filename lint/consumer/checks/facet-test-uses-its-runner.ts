@@ -1,14 +1,10 @@
 import { isGroundFolder } from '@jterrazz/typescript/rules';
 import { basename, relative } from 'node:path';
 
-import {
-    facetFoldersOf,
-    specificationsIn,
-    textOf,
-    walkFiles,
-} from '../../kit/project/facet-folders.js';
+import { facetFoldersOf, specificationsIn, walkFiles } from '../../kit/project/facet-folders.js';
 import { reachesRunner } from '../../kit/project/facets.js';
 import { isTestFileName } from '../../kit/project/role.js';
+import { readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
 function isUnderGround(relativePath: string): boolean {
@@ -31,7 +27,7 @@ export function checkFacetTestUsesItsRunner(specsRoot: string): Spotted[] {
                 continue;
             }
             // Stryker disable next-line StringLiteral: a file the walk listed reads, and no stand-in for none reaches a runner
-            if (reachesRunner(textOf(file) ?? '')) {
+            if (reachesRunner(readText(file))) {
                 continue;
             }
             const rel = relative(specsRoot, file);
