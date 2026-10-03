@@ -405,7 +405,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
 | `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 9      |
 | `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 10     |
-| `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 6      |
+| `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 7      |
 
 ### Time & doubles
 

@@ -128,7 +128,8 @@ const FRAME_FILE =
     /at\s+(?:async\s+)?(?:.*?\s+)?\(?(?<file>(?:file:\/\/)?\/[^():]+|https?:\/\/.+?):\d+:\d+\)?\s*$/u;
 
 function frameDirectoryOf(line: string): string | undefined {
-    const file = FRAME_FILE.exec(line.trim())?.groups?.file;
+    // Stryker disable next-line OptionalChaining: a frame match always carries its file
+    const file = FRAME_FILE.exec(line)?.groups?.file;
     return file === undefined ? undefined : directoryOf(file);
 }
 
@@ -138,14 +139,6 @@ export function cutFramesUnder(stack: string, directory: string): string {
         .split('\n')
         .filter((line) => !FRAME_LINE.test(line) || frameDirectoryOf(line) !== directory)
         .join('\n');
-}
-
-function isThenable(value: unknown): value is Promise<unknown> {
-    return (
-        value !== null &&
-        typeof value === 'object' &&
-        typeof (value as { then?: unknown }).then === 'function'
-    );
 }
 
 function rethrowCut(error: unknown): never {
@@ -170,7 +163,7 @@ function routedThrough(route: () => unknown): unknown {
     } catch (error) {
         return rethrowCut(error);
     }
-    return isThenable(result) ? awaitedCut(result) : result;
+    return result instanceof Promise ? awaitedCut(result) : result;
 }
 
 /** `file()`/`directory()` go to the golden, a value handed to a framework subject to the whole comparison, everything else to vitest untouched. */
