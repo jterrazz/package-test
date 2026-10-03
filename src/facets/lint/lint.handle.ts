@@ -1,8 +1,9 @@
 import type { Preset } from '@jterrazz/typescript/config';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { resolveRoot } from '../../../lint/kit/project/resolve.js';
 import type { ChainConfig, Started } from '../../chain/config.js';
 import { getCallerDir } from '../../chain/paths/caller.js';
@@ -40,9 +41,6 @@ export type LintHandle = {
 };
 
 function pluginPath(plugin: string, callerDir: string, root: string): string {
-    if (isAbsolute(plugin)) {
-        return plugin;
-    }
     if (plugin.startsWith('.')) {
         return resolve(callerDir, plugin);
     }
@@ -60,30 +58,31 @@ function pluginPath(plugin: string, callerDir: string, root: string): string {
     }
 }
 
+/** The oxlint bin a manifest names, as its one bin or under its own name. */
 function binOf(manifest: string): null | string {
+    // Stryker disable next-line StringLiteral: a manifest read as a Buffer parses as the same text
     const parsed: unknown = JSON.parse(readFileSync(manifest, 'utf8'));
-    const bin =
-        typeof parsed === 'object' && parsed !== null && 'bin' in parsed ? parsed.bin : null;
-    if (typeof bin === 'string') {
-        return join(dirname(manifest), bin);
+    const bin = isRecord(parsed) ? parsed.bin : null;
+    const named = isRecord(bin) ? bin.oxlint : bin;
+    return typeof named === 'string' ? join(dirname(manifest), named) : null;
+}
+
+/** The oxlint bin an anchor resolves, or none when no oxlint resolves from it. */
+function binFrom(anchor: string): null | string {
+    let manifest: string;
+    try {
+        manifest = createRequire(anchor).resolve('oxlint/package.json');
+    } catch {
+        return null;
     }
-    return typeof bin === 'object' &&
-        bin !== null &&
-        'oxlint' in bin &&
-        typeof bin.oxlint === 'string'
-        ? join(dirname(manifest), bin.oxlint)
-        : null;
+    return binOf(manifest);
 }
 
 export function oxlintBinary(anchors: readonly string[]): string {
     for (const from of anchors) {
-        try {
-            const bin = binOf(createRequire(from).resolve('oxlint/package.json'));
-            if (bin !== null) {
-                return bin;
-            }
-        } catch {
-            continue;
+        const bin = binFrom(from);
+        if (bin !== null) {
+            return bin;
         }
     }
     throw new Error(
