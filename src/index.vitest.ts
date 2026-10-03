@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration, ViteUserConfig } from 'vitest/config';
 
+import { isRecord } from '../lint/kit/project/json-shape.js';
 import { TEST_SECTION } from '../lint/kit/project/test-section.js';
 import { refusal } from './chain/refusals/refusal.js';
 import { api } from './facets/api/api.project.js';
@@ -59,20 +60,17 @@ type Project = Promise<TestProjectInlineConfiguration> | TestProjectInlineConfig
 
 type Builder = (options: Readonly<Record<string, unknown>>) => Project;
 
-const BUILDERS: Readonly<Record<string, Builder>> = Object.freeze({
-    api,
-    cli,
-    component,
-    integration,
-    job,
-    lint,
-    mobile,
-    unit,
-    website,
-});
-
-const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
-    typeof value === 'object' && value !== null && !Array.isArray(value);
+const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
+    ['api', api],
+    ['cli', cli],
+    ['component', component],
+    ['integration', integration],
+    ['job', job],
+    ['lint', lint],
+    ['mobile', mobile],
+    ['unit', unit],
+    ['website', website],
+]);
 
 const anchored = (root: string, path: string): string =>
     isAbsolute(path) ? path : resolve(root, path);
@@ -93,32 +91,31 @@ function aliasesFrom(root: string, vite: unknown): unknown {
 
 async function projectOf(root: string, declared: unknown): Promise<TestProjectInlineConfiguration> {
     const { facet, setup, ...options } = isRecord(declared) ? declared : {};
-    const builder = typeof facet === 'string' ? BUILDERS[facet] : undefined;
+    const builder = BUILDERS.get(String(facet));
     if (builder === undefined) {
         throw new Error(
             refusal({
-                fix: `name one of ${Object.keys(BUILDERS).join(', ')} as its \`facet\``,
+                fix: `name one of ${[...BUILDERS.keys()].join(', ')} as its \`facet\``,
                 found: `a project of \`test.projects\` names the facet \`${String(facet)}\``,
                 read: 'docs/06-setting-up.md#the-vitest-config',
                 why: 'a project is built by the helper of its facet, which owns its include, its budget and its seam',
             }),
         );
     }
+    // Stryker disable next-line StringLiteral: the project root is a component's default root, spelled '.' or ''
+    const componentRoot = anchored(root, typeof options.root === 'string' ? options.root : '.');
     const project = await builder({
         ...options,
-        ...(facet === 'component'
-            ? { root: anchored(root, typeof options.root === 'string' ? options.root : '.') }
-            : {}),
-        ...(options.vite === undefined ? {} : { vite: aliasesFrom(root, options.vite) }),
+        // Stryker disable next-line ConditionalExpression: only a component reads its root as a path from here
+        ...(facet === 'component' ? { root: componentRoot } : {}),
+        vite: aliasesFrom(root, options.vite),
     });
     const setups = Array.isArray(setup) ? setup.filter((path) => typeof path === 'string') : [];
 
-    return setups.length === 0
-        ? project
-        : mergeConfig(
-              { test: { globalSetup: setups.map((path) => anchored(root, path)) } },
-              project,
-          );
+    return mergeConfig(
+        { test: { globalSetup: setups.map((path) => anchored(root, path)) } },
+        project,
+    );
 }
 
 async function derivedFrom(root: string): Promise<ViteUserConfig> {
