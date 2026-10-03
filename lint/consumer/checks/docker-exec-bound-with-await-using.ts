@@ -1,42 +1,10 @@
 import { relative } from 'node:path';
 
 import { isNodeTestFileName } from '../../kit/project/role.js';
-import {
-    modelSpecFile,
-    namedImports,
-    resolveRelativeImport,
-} from '../../kit/project/spec-model.js';
-import type { SpecModel } from '../../kit/project/spec-model.js';
+import { importedRunners, specificationModels } from '../../kit/project/spec-model.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
 import { lineAt, listFiles, readSource, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
-
-function dockerSpecifications(rootDir: string): Map<string, SpecModel> {
-    const dockerSpecs = new Map<string, SpecModel>();
-    for (const file of listFiles(rootDir, (path) => path.endsWith('.specification.ts'))) {
-        const model = modelSpecFile(file);
-        if (model.dockerAware && model.runnerExports.size > 0) {
-            dockerSpecs.set(file, model);
-        }
-    }
-    return dockerSpecs;
-}
-
-function importedRunners(
-    testFile: string,
-    text: string,
-    dockerSpecs: ReadonlyMap<string, SpecModel>,
-): Set<string> {
-    const runners = new Set<string>();
-    for (const binding of namedImports(text)) {
-        const target = resolveRelativeImport(testFile, binding.source);
-        const model = target === undefined ? undefined : dockerSpecs.get(target);
-        if (model?.runnerExports.has(binding.name) === true) {
-            runners.add(binding.local);
-        }
-    }
-    return runners;
-}
 
 /** invariant: the `await using` form is matched and exempt. */
 const RESULT_BINDING =
@@ -47,9 +15,10 @@ function checkTestFile(testFile: string, runners: ReadonlySet<string>, rootDir: 
     const suppressed = suppressedLines(readText(testFile), 'docker-exec-bound-with-await-using');
     const violations: Spotted[] = [];
     for (const match of text.matchAll(RESULT_BINDING)) {
-        const runner = match.groups?.runner ?? '';
+        // Stryker disable next-line StringLiteral: a binding match always carries its kind and runner
+        const { kind = '', runner = '' } = match.groups ?? {};
         const line = lineAt(text, match.index);
-        const unbound = !(match.groups?.kind ?? '').startsWith('await using');
+        const unbound = !kind.startsWith('await');
         if (unbound && runners.has(runner) && !suppressed.has(line)) {
             violations.push({
                 path: relative(rootDir, testFile),
@@ -65,12 +34,11 @@ function checkTestFile(testFile: string, runners: ReadonlySet<string>, rootDir: 
 
 /** The runners are inferred from the `docker:` option of the imported spec files, where the oxlint rule needs them spelled by hand. */
 export function checkDockerExecBoundWithAwaitUsing(rootDir: string): Spotted[] {
-    const dockerSpecs = dockerSpecifications(rootDir);
-    if (dockerSpecs.size === 0) {
-        return [];
-    }
+    const dockerSpecs = specificationModels(rootDir, ({ dockerAware }) => dockerAware);
     return listFiles(rootDir, isNodeTestFileName).flatMap((testFile) => {
-        const runners = importedRunners(testFile, readSource(testFile), dockerSpecs);
-        return runners.size === 0 ? [] : checkTestFile(testFile, runners, rootDir);
+        const runners = new Set(
+            importedRunners(testFile, readSource(testFile), dockerSpecs).map(({ local }) => local),
+        );
+        return checkTestFile(testFile, runners, rootDir);
     });
 }

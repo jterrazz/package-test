@@ -2,52 +2,20 @@ import { relative } from 'node:path';
 
 import { isNodeTestFileName } from '../../kit/project/role.js';
 import {
-    balancedParens,
-    CONSTRUCTORS,
-    modelSpecFile,
-    namedImports,
-    NON_RUNNER_BINDINGS,
-    resolveRelativeImport,
+    argumentsAt,
+    importedRunners,
+    runnerBindings,
+    specificationModels,
 } from '../../kit/project/spec-model.js';
 import type { SpecModel } from '../../kit/project/spec-model.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
 import { lineAt, listFiles, readSource, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-function localRunnerBindings(text: string): Set<string> {
-    const locals = new Set<string>();
-    const decl = new RegExp(
-        String.raw`\{(?<names>[^}]*)\}\s*=\s*await\s+specification\.(?:${CONSTRUCTORS})\s*\(`,
-        'gu',
-    );
-    for (const match of text.matchAll(decl)) {
-        for (const raw of (match.groups?.names ?? '').split(',')) {
-            const part = raw.trim();
-            const local = (part.includes(':') ? (part.split(':')[1] ?? '') : part).trim();
-            if (local.length > 0 && !NON_RUNNER_BINDINGS.has((part.split(':')[0] ?? '').trim())) {
-                locals.add(local);
-            }
-        }
-    }
-    return locals;
-}
+/** The object is read when the call hangs off a plain name: `local.seed(…)`, never `api.with({}).seed(…)`. */
+const SEED_OR_TABLE = /(?<object>[A-Za-z_$][\w$]*)?\s*\.(?<verb>seed|table)\s*\(/gu;
 
-function memberObjectIdentifier(text: string, dotIndex: number): null | string {
-    const before = text.slice(0, dotIndex);
-    const match = /(?<name>[A-Za-z_$][\w$]*)\s*$/u.exec(before);
-    return match === null ? match : (match.groups?.name ?? null);
-}
-
-function enforcedSpecifications(rootDir: string): Map<string, SpecModel> {
-    const enforced = new Map<string, SpecModel>();
-    for (const file of listFiles(rootDir, (path) => path.endsWith('.specification.ts'))) {
-        const model = modelSpecFile(file);
-        if ((model.sqlDatabaseCount ?? 0) >= 1 && model.runnerExports.size > 0) {
-            enforced.set(file, model);
-        }
-    }
-    return enforced;
-}
+const NAMES_A_DATABASE = /\bdatabase\s*:/u;
 
 /** invariant: enforced only when exactly one imported spec applies: mixed database configurations are ambiguous. */
 function onlyApplicable(
@@ -55,14 +23,7 @@ function onlyApplicable(
     text: string,
     enforced: ReadonlyMap<string, SpecModel>,
 ): SpecModel | undefined {
-    const applicable = new Set<SpecModel>();
-    for (const binding of namedImports(text)) {
-        const target = resolveRelativeImport(testFile, binding.source);
-        const model = target === undefined ? undefined : enforced.get(target);
-        if (model?.runnerExports.has(binding.name) === true) {
-            applicable.add(model);
-        }
-    }
+    const applicable = new Set(importedRunners(testFile, text, enforced).map(({ model }) => model));
     const [only] = applicable;
     return applicable.size === 1 ? only : undefined;
 }
@@ -90,15 +51,20 @@ function misnamed(
 function checkTestFile(testFile: string, model: SpecModel, rootDir: string): Spotted[] {
     const text = readSource(testFile);
     const count = model.sqlDatabaseCount ?? 0;
-    const locals = localRunnerBindings(text);
+    const locals = new Set(runnerBindings(text).map(({ local }) => local));
     const suppressed = suppressedLines(readText(testFile), 'database-named-only-when-several');
     const violations: Spotted[] = [];
-    for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
-        const object = memberObjectIdentifier(text, match.index);
+    for (const match of text.matchAll(SEED_OR_TABLE)) {
+        // Stryker disable next-line StringLiteral: a call match always carries its verb
+        const { object, verb = '' } = match.groups ?? {};
         const line = lineAt(text, match.index);
-        const args = balancedParens(text, text.indexOf('(', match.index));
-        const spotted = misnamed(match.groups?.verb ?? '', count, /\bdatabase\s*:/u.test(args));
-        if ((object === null || !locals.has(object)) && !suppressed.has(line) && spotted !== null) {
+        const args = argumentsAt(text, match.index + match[0].length - 1);
+        const spotted = misnamed(verb, count, NAMES_A_DATABASE.test(args));
+        if (
+            !(locals as ReadonlySet<unknown>).has(object) &&
+            !suppressed.has(line) &&
+            spotted !== null
+        ) {
             violations.push({
                 ...spotted,
                 line,
@@ -111,10 +77,10 @@ function checkTestFile(testFile: string, model: SpecModel, rootDir: string): Spo
 }
 
 export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Spotted[] {
-    const enforced = enforcedSpecifications(rootDir);
-    if (enforced.size === 0) {
-        return [];
-    }
+    const enforced = specificationModels(
+        rootDir,
+        ({ sqlDatabaseCount }) => (sqlDatabaseCount ?? 0) >= 1,
+    );
     return listFiles(rootDir, isNodeTestFileName).flatMap((testFile) => {
         const model = onlyApplicable(testFile, readSource(testFile), enforced);
         return model === undefined ? [] : checkTestFile(testFile, model, rootDir);
