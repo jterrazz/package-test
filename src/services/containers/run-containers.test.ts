@@ -5,9 +5,10 @@ import {
     POSTGRES,
     POSTGRES_REORDERED,
     REDIS,
+    servedRun,
     unreachable,
 } from './run-containers.fixtures.js';
-import { RunContainers } from './run-containers.js';
+import { field, RunContainers } from './run-containers.js';
 
 describe('RunContainers', () => {
     test('the run containers — answer two requests alike with one container, started once', async () => {
@@ -67,10 +68,72 @@ describe('RunContainers', () => {
         await run.acquire(POSTGRES);
         await run.acquire(REDIS);
 
-        // When - the run ends
+        // When - the run ends, then a worker asks again
         await run.stop();
+        const again = await run.acquire(POSTGRES);
 
-        // Then - both were stopped
-        expect(runtime.stopped.toSorted((a, b) => a - b)).toStrictEqual([40_001, 40_002]);
+        // Then - both were stopped, and the next request starts a container of its own
+        expect([runtime.stopped.toSorted((a, b) => a - b), again.port]).toStrictEqual([
+            [40_001, 40_002],
+            40_003,
+        ]);
+    });
+
+    test('the run containers, served — a worker asks for a container and reads its logs over HTTP; anything else is not found, a request of another shape refused', async () => {
+        // Given - the run's containers served to the workers
+        const url = await servedRun(fakeRuntime());
+        const answer = async (
+            path: string,
+            init?: RequestInit,
+        ): Promise<(null | number | string)[]> => {
+            const response = await fetch(`${url}${path}`, init);
+            return [response.status, response.headers.get('content-type'), await response.text()];
+        };
+        const post = async (
+            body: unknown,
+            path = '/containers',
+        ): Promise<(null | number | string)[]> =>
+            await answer(path, { body: JSON.stringify(body), method: 'POST' });
+        const get = async (path: string): Promise<(null | number | string)[]> => await answer(path);
+
+        // When - a worker acquires a container, then reads its logs, all of them and since a moment
+        const acquired = await post(REDIS);
+        const address: unknown = JSON.parse(String(acquired[2]));
+        const key = String(field(address, 'key'));
+
+        // Then - each answer
+        expect([
+            acquired,
+            await get(`/logs?key=${encodeURIComponent(key)}`),
+            await get(`/logs?key=${encodeURIComponent(key)}&since=0`),
+            await get('/logs?key=nope'),
+            await get('/logs'),
+            await get('/containers'),
+            await post(REDIS, '/logs'),
+            await post({ image: 'redis:7-alpine' }),
+            await post({ port: 6379 }),
+        ]).toStrictEqual([
+            [200, 'application/json', JSON.stringify({ host: '127.0.0.1', key, port: 40_001 })],
+            [200, 'text/plain', 'logs of 40001'],
+            [200, 'text/plain', 'logs of 40001 since 1970-01-01T00:00:00.000Z'],
+            [200, 'text/plain', ''],
+            [200, 'text/plain', ''],
+            [404, null, ''],
+            [404, null, ''],
+            [
+                500,
+                'application/json',
+                JSON.stringify({
+                    error: '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: a worker asked for {"image":"redis:7-alpine"}, no container request',
+                }),
+            ],
+            [
+                500,
+                'application/json',
+                JSON.stringify({
+                    error: '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: a worker asked for {"port":6379}, no container request',
+                }),
+            ],
+        ]);
     });
 });

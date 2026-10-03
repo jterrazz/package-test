@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { text } from 'node:stream/consumers';
 
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { invariant } from '../../chain/refusals/refusal.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
@@ -11,10 +12,11 @@ import type { ContainerPort, ContainerRequest } from './container.port.js';
 export type RunAddress = { host: string; key: string; port: number };
 
 function canonical(value: unknown): unknown {
-    return value !== null && typeof value === 'object' && !Array.isArray(value)
+    // Stryker disable next-line ConditionalExpression: a request holds no null, and an array read as a record keeps its order
+    return isRecord(value)
         ? Object.fromEntries(
               Object.entries(value)
-                  .toSorted(([a], [b]) => (a < b ? -1 : 1))
+                  .toSorted(([a], [b]) => a.localeCompare(b))
                   .map(([key, entry]) => [key, canonical(entry)]),
           )
         : value;
@@ -121,6 +123,7 @@ async function respond(
         }
         if (request.method === 'GET' && url.pathname === '/logs') {
             response.writeHead(200, { 'content-type': 'text/plain' });
+            // Stryker disable next-line StringLiteral: no container is started under the key a mutant writes either
             const key = url.searchParams.get('key') ?? '';
             const since = url.searchParams.get('since');
             const moment = since === null ? undefined : new Date(Number(since));
@@ -140,12 +143,15 @@ export async function serveContainers(containers: RunContainers): Promise<Served
     const server = createServer((request, response) => {
         void respond(containers, request, response);
     });
+    // Stryker disable next-line StringLiteral: hazard: bound to loopback alone, the run's containers are unreachable from the network, which no test on this machine sees
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
     const address = server.address();
+    // Stryker disable all: outside: a server listening on a TCP port always answers it
     if (address === null || typeof address === 'string') {
         throw invariant('the run containers are served on no port');
     }
+    // Stryker restore all
     const { port } = address;
     return {
         close: async () => {
