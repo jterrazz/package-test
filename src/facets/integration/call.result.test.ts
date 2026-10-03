@@ -58,6 +58,26 @@ describe('CallResult', () => {
         });
     });
 
+    test('callResult — the accessors — each named for what it reads, and every one binding captures in the result’s one scope', () => {
+        // Given - a call that returned text, and one that returned JSON
+        const text = new CallResult<string>({
+            config: {},
+            outcome: returned('hi'),
+            testDir: '/spec',
+        });
+        const json = new CallResult({ config: {}, outcome: returned({}), testDir: '/spec' });
+        const { error, value } = text;
+
+        // Then - the stream names a golden and a refusal read, and the shared scope
+        expect([
+            error.streamName,
+            value.streamName,
+            error.captures === text.captures,
+            value.captures === text.captures,
+            json.value.captures === json.captures,
+        ]).toStrictEqual(['error', 'value', true, true, true]);
+    });
+
     test('callResult — the accessor the value is read through — reads a call that threw as the empty value, its refusal on `error`', () => {
         // Given - a call that refused with an error, and one that threw a bare value
         // Then - there was no value to choose an accessor on, so it is the JSON reading of nothing; what the call produced is the refusal

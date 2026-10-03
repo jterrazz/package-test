@@ -39,14 +39,18 @@ export class CallResult<Returned = unknown> extends BaseResult {
     /** What the call returned; `null` as JSON when it threw. */
     get value(): CallValue<Returned> {
         const produced = this.outcome.threw ? null : this.outcome.value;
-        const accessor =
-            typeof produced === 'string'
-                ? new TextAccessor(produced, 'value', this.testDir, { captures: this.captures })
-                : new JsonAccessor(JSON.stringify(produced ?? null), 'value', this.testDir, {
-                      captures: this.captures,
-                  });
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the branch above IS the conditional type, chosen on the same runtime shape the type reads
-        return accessor as CallValue<Returned>;
+        const { captures, testDir } = this;
+        if (typeof produced === 'string') {
+            const text = new TextAccessor(produced, 'value', testDir, { captures });
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- this branch IS the conditional type, chosen on the same runtime shape the type reads
+            return text as CallValue<Returned>;
+        }
+        // Stryker disable next-line StringLiteral: a JSON accessor names its stream only when its text is no JSON, and a stringified value always is
+        const json = new JsonAccessor(JSON.stringify(produced ?? null), 'value', testDir, {
+            captures,
+        });
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- this branch IS the conditional type, chosen on the same runtime shape the type reads
+        return json as CallValue<Returned>;
     }
 }
 
