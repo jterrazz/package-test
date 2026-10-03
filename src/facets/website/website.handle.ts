@@ -164,12 +164,9 @@ export type WebsiteHandle = {
     website: WebsiteSpecification;
 };
 
-export async function startWebsite<Services extends ServiceRecord>(
+function refuseOptions<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
-): Promise<WebsiteHandle> {
-    const callerDir = getCallerDir();
-    await registerMatchers();
-
+): void {
     // invariant: the type already forbids it; this covers untyped callers.
     if (options.backend && options.server === undefined) {
         throw new Error(
@@ -192,6 +189,33 @@ export async function startWebsite<Services extends ServiceRecord>(
             }),
         );
     }
+}
+
+/** invariant: launched lazily on the first `.visit()`; playwright is an optional peer (the layer map). */
+function lazyBrowser(): { close: () => Promise<void>; get: () => Promise<BrowserPort> } {
+    let browser: BrowserPort | null = null;
+    return {
+        close: async () => {
+            await browser?.close();
+            browser = null;
+        },
+        get: async () => {
+            if (!browser) {
+                const { PlaywrightAdapter } = await import('./browser/playwright.adapter.js');
+                browser = new PlaywrightAdapter();
+            }
+            return browser;
+        },
+    };
+}
+
+export async function startWebsite<Services extends ServiceRecord>(
+    options: WebsiteSpecificationOptions<Services>,
+): Promise<WebsiteHandle> {
+    const callerDir = getCallerDir();
+    await registerMatchers();
+
+    refuseOptions(options);
 
     // invariant: started before the server, so the child finds its URL from the first request.
     let backend: null | StubBackend = null;
@@ -215,31 +239,20 @@ export async function startWebsite<Services extends ServiceRecord>(
         started,
     });
 
-    // invariant: launched lazily on the first `.visit()`; playwright is an optional peer (the layer map).
-    let browser: BrowserPort | null = null;
-    const getBrowser = async (): Promise<BrowserPort> => {
-        if (!browser) {
-            const { PlaywrightAdapter } = await import('./browser/playwright.adapter.js');
-            browser = new PlaywrightAdapter();
-        }
-        return browser;
-    };
+    const browser = lazyBrowser();
 
     const config: Started<WebsiteConfig, 'browser'> = {
         backend: backend ?? undefined,
         backendUrl,
         baseUrl,
-        browser: getBrowser,
+        browser: browser.get,
         external: options.external ?? (options.server ? 'block' : 'allow'),
         transform: options.transform,
     };
 
     return {
         cleanup: async () => {
-            if (browser) {
-                await browser.close();
-                browser = null;
-            }
+            await browser.close();
             if (serve) {
                 await serve.stop();
             }

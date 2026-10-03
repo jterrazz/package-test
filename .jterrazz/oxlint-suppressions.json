@@ -1,32 +1,6 @@
 {
-    "lint/consumer/checks/database-named-only-when-several.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
-    "lint/consumer/checks/docker-exec-bound-with-await-using.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
     "lint/consumer/checks/ground-shared-or-inline.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/consumer/checks/no-duplicate-ground.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
-    "lint/consumer/checks/no-unused-ground.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-lines-per-function": {
             "count": 1
         }
     },
@@ -43,46 +17,13 @@
             "count": 1
         }
     },
-    "lint/consumer/rules/expectations/no-transform-duplicating-tokens.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/layout/specs-at-declared-depth.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-lines-per-function": {
-            "count": 2
-        }
-    },
-    "lint/consumer/rules/layout/verb-reads-its-ground-folder.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/setup/no-runner-alias.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/stubs/stubs-root-holds-facades-and-kinds.ts": {
         "max-lines": {
             "count": 1
         }
     },
-    "lint/consumer/rules/visitor/test-id-states-what-is-missing.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
     "lint/kit/project/ast.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/document-model.ts": {
-        "complexity": {
             "count": 1
         }
     },
@@ -101,31 +42,8 @@
             "count": 1
         }
     },
-    "lint/kit/project/tokens.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/tree.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-lines": {
-            "count": 1
-        }
-    },
     "lint/self/corpus/matrix.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "specs/component/fill/filters.tsx": {
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
-    "specs/component/intercept/post-table.tsx": {
-        "max-lines-per-function": {
             "count": 1
         }
     },
@@ -155,9 +73,6 @@
         }
     },
     "src/facets/cli/process/exec.adapter.ts": {
-        "max-lines-per-function": {
-            "count": 2
-        },
         "typescript/require-await": {
             "count": 1
         }
@@ -167,23 +82,8 @@
             "count": 1
         }
     },
-    "src/facets/component/page/vitest-browser-dom.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
     "src/facets/mobile/device/appium.adapter.test.ts": {
         "typescript/require-await": {
-            "count": 1
-        }
-    },
-    "src/facets/mobile/mobile.handle.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
-    "src/facets/website/website.handle.ts": {
-        "max-lines-per-function": {
             "count": 1
         }
     },
@@ -198,19 +98,6 @@
         },
         "typescript/require-await": {
             "count": 5
-        }
-    },
-    "src/services/startup/orchestrator.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
-    "src/stubs/delivery/other-process/stub-backend.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-lines-per-function": {
-            "count": 1
         }
     },
     "src/stubs/delivery/same-process/stub-server.ts": {

@@ -27,6 +27,45 @@ const DOCKER_DIR = 'docker';
 /** How far before a start its failure report reads logs, for a runtime clock behind the host's. */
 const LOG_CLOCK_MARGIN_MS = 500;
 
+function containerFor(handle: ServiceHandle): ContainerPort {
+    return getContainerIntegrations().createContainer({
+        image: handle.defaultImage,
+        port: handle.defaultPort,
+        env: { ...handle.environment },
+        ...handle.containerOptions,
+    });
+}
+
+/** The report of a container that failed to come up, with its logs since this start; the container is stopped. */
+async function abandoned(failed: {
+    container: ContainerPort;
+    error: unknown;
+    handle: ServiceHandle;
+    logsSince: number;
+    since: number;
+}): Promise<ServiceReport> {
+    const { container, error, handle } = failed;
+    let logs = '';
+    try {
+        // invariant: a container of the project logs every file's work: the report reads from this start's.
+        logs = await container.getLogs(new Date(failed.logsSince - LOG_CLOCK_MARGIN_MS));
+    } catch {
+        /* invariant: ignore log fetch errors */
+    }
+    try {
+        await container.stop();
+    } catch {
+        /* invariant: ignore stop errors */
+    }
+    return {
+        name: handle.serviceName ?? handle.type,
+        type: handle.type,
+        durationMs: Date.now() - failed.since,
+        error: error instanceof Error ? error.message : String(error),
+        logs,
+    };
+}
+
 export class Orchestrator {
     private readonly services: Record<string, ServiceHandle>;
     private readonly root: string;
@@ -45,36 +84,22 @@ export class Orchestrator {
         if (this.started) {
             return;
         }
-
         const dockerDir = resolve(this.root, DOCKER_DIR);
         for (const [key, handle] of Object.entries(this.services)) {
             handle.serviceName = toKebabCase(key);
         }
-
-        const containerServices: { container: ContainerPort; handle: ServiceHandle }[] = [];
-        const embeddedServices: ServiceHandle[] = [];
-
-        for (const handle of Object.values(this.services)) {
-            if (handle.defaultPort === 0) {
-                embeddedServices.push(handle);
-                continue;
-            }
-
-            const container = getContainerIntegrations().createContainer({
-                image: handle.defaultImage,
-                port: handle.defaultPort,
-                env: { ...handle.environment },
-                ...handle.containerOptions,
-            });
-            containerServices.push({ container, handle });
-        }
+        const handles = Object.values(this.services);
+        const embedded = handles.filter((handle) => handle.defaultPort === 0);
+        const contained = handles
+            .filter((handle) => handle.defaultPort !== 0)
+            .map((handle) => ({ container: containerFor(handle), handle }));
 
         const startedAt = Date.now();
         await Promise.all([
-            ...containerServices.map(async ({ container }) => {
+            ...contained.map(async ({ container }) => {
                 await container.start();
             }),
-            ...embeddedServices.map(async (handle) => {
+            ...embedded.map(async (handle) => {
                 await handle.initialize(dockerDir, this.root);
                 handle.started = true;
                 this.running.push({ handle, container: null });
@@ -82,60 +107,45 @@ export class Orchestrator {
         ]);
 
         const reports: ServiceReport[] = [];
-
-        for (const { container, handle } of containerServices) {
-            const serviceStartTime = Date.now();
-
+        for (const { container, handle } of contained) {
+            const since = Date.now();
             try {
-                const host = container.getHost();
-                const port = container.getMappedPort(handle.defaultPort);
-                handle.connectionString = handle.buildConnectionString(host, port);
-
-                await handle.healthcheck();
-                await handle.initialize(dockerDir, this.root);
-                handle.started = true;
-
-                reports.push({
-                    name: handle.serviceName ?? handle.type,
-                    type: handle.type,
-                    connectionString: handle.connectionString,
-                    durationMs: Date.now() - serviceStartTime,
-                });
-                this.running.push({ handle, container });
+                reports.push(await this.connect(container, handle, dockerDir));
             } catch (error) {
-                let logs = '';
-                try {
-                    // invariant: a container of the project logs every file's work: the report reads from this start's.
-                    logs = await container.getLogs(new Date(startedAt - LOG_CLOCK_MARGIN_MS));
-                } catch {
-                    /* invariant: ignore log fetch errors */
-                }
-                try {
-                    await container.stop();
-                } catch {
-                    /* invariant: ignore stop errors */
-                }
-
-                reports.push({
-                    name: handle.serviceName ?? handle.type,
-                    type: handle.type,
-                    durationMs: Date.now() - serviceStartTime,
-                    error: error instanceof Error ? error.message : String(error),
-                    logs,
-                });
-
-                const output = formatStartupReport(reports, this.subject);
+                reports.push(
+                    await abandoned({ container, error, handle, logsSince: startedAt, since }),
+                );
                 // oxlint-disable-next-line eslint/no-console -- outside: vitest attributes console output to the file that printed it, which is where a failed start is read
-                console.error(output);
+                console.error(formatStartupReport(reports, this.subject));
                 throw error;
             }
         }
 
         this.started = true;
-
-        const output = formatStartupReport(reports, this.subject);
         // oxlint-disable-next-line eslint/no-console -- outside: vitest attributes console output to the file that printed it, which is where the started services are read
-        console.log(output);
+        console.log(formatStartupReport(reports, this.subject));
+    }
+
+    private async connect(
+        container: ContainerPort,
+        handle: ServiceHandle,
+        dockerDir: string,
+    ): Promise<ServiceReport> {
+        const since = Date.now();
+        handle.connectionString = handle.buildConnectionString(
+            container.getHost(),
+            container.getMappedPort(handle.defaultPort),
+        );
+        await handle.healthcheck();
+        await handle.initialize(dockerDir, this.root);
+        handle.started = true;
+        this.running.push({ handle, container });
+        return {
+            name: handle.serviceName ?? handle.type,
+            type: handle.type,
+            connectionString: handle.connectionString,
+            durationMs: Date.now() - since,
+        };
     }
 
     async stop(): Promise<void> {

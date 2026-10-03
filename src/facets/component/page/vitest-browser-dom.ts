@@ -157,6 +157,29 @@ function keystroke(key: string): string {
     return key.length > 1 ? `{${key}}` : key;
 }
 
+/** The one matcher a target's stated condition answers to; a bare target is seen once visible. */
+async function seen(locator: Locator, target: Target): Promise<void> {
+    if (target.focused === true) {
+        await expect.element(locator).toHaveFocus();
+    } else if (target.disabled === true) {
+        await expect.element(locator).toBeDisabled();
+    } else if (target.disabled === false) {
+        await expect.element(locator).toBeEnabled();
+    } else if (target.selected !== undefined) {
+        // invariant: no matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
+        await polling(
+            () => locator.query()?.matches(':checked') === true,
+            `${asWritten(target)} is not the selected one`,
+        ).toBe(target.selected);
+    } else if (target.value !== undefined) {
+        await expect.element(locator).toHaveValue(target.value);
+    } else if (byPresence(target)) {
+        await expect.element(locator).toBeInTheDocument();
+    } else {
+        await expect.element(locator).toBeVisible();
+    }
+}
+
 export function componentVerbs(surface: MountedSurface): ComponentVisitor {
     return {
         check: async (target) => {
@@ -197,35 +220,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
         rerender: surface.rerender,
         see: async (target) => {
             await act(target, async (locator) => {
-                if (target.focused === true) {
-                    await expect.element(locator).toHaveFocus();
-                    return;
-                }
-                if (target.disabled === true) {
-                    await expect.element(locator).toBeDisabled();
-                    return;
-                }
-                if (target.disabled === false) {
-                    await expect.element(locator).toBeEnabled();
-                    return;
-                }
-                if (target.selected !== undefined) {
-                    // invariant: no matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
-                    await polling(
-                        () => locator.query()?.matches(':checked') === true,
-                        `${asWritten(target)} is not the selected one`,
-                    ).toBe(target.selected);
-                    return;
-                }
-                if (target.value !== undefined) {
-                    await expect.element(locator).toHaveValue(target.value);
-                    return;
-                }
-                if (byPresence(target)) {
-                    await expect.element(locator).toBeInTheDocument();
-                    return;
-                }
-                await expect.element(locator).toBeVisible();
+                await seen(locator, target);
             });
         },
         select: async (target, option) => {

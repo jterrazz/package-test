@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 type Post = { id: number; title: string };
 
-export function PostTable() {
+function usePosts(): { failed: boolean; posts: null | Post[]; total: number } {
     const [posts, setPosts] = useState<null | Post[]>(null);
     const [total, setTotal] = useState(0);
     const [failed, setFailed] = useState(false);
@@ -35,6 +35,11 @@ export function PostTable() {
         };
     }, []);
 
+    return { failed, posts, total };
+}
+
+export function PostTable() {
+    const { failed, posts, total } = usePosts();
     if (failed) {
         return <p>Could not load posts</p>;
     }

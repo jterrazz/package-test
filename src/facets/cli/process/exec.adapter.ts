@@ -27,39 +27,41 @@ export type ObservableProcess = {
     stdout: null | { on: (event: 'data', listener: (data: Buffer | string) => void) => unknown };
 };
 
+/** SIGTERM, then SIGKILL once the grace has passed and the child still runs. */
+function terminate(child: ObservableProcess, hasExited: () => boolean): NodeJS.Timeout {
+    child.kill('SIGTERM');
+    // hazard: escalate if the child ignores SIGTERM. Cleared on exit.
+    return setTimeout(() => {
+        if (!hasExited()) {
+            child.kill('SIGKILL');
+        }
+    }, KILL_GRACE_MS);
+}
+
+/** invariant: with a pattern expected, even a clean exit is a failure; without one a clean exit is a success. */
+function exitCodeOf(code: null | number, waitFor: string | undefined): number {
+    if (waitFor !== undefined && code === 0) {
+        return 1;
+    }
+    return code ?? 1;
+}
+
 /** Resolves 0 when `waitFor` appears, the exit code when the process ends first, 124 at the timeout; the timeout timer is unref'd. */
 export async function observeProcess(
     child: ObservableProcess,
     options: ExecOptions,
 ): Promise<CliOutput> {
-    const timeout = options.timeout ?? DEFAULT_WATCH_TIMEOUT;
     const { waitFor } = options;
-
     return await new Promise((resolve) => {
-        let stdout = '';
-        let stderr = '';
+        const output = { stderr: '', stdout: '' };
         let resolved = false;
         let exited = false;
-        let patternMatched = false;
-        let killTimer: NodeJS.Timeout | null = null;
+        let killTimer: NodeJS.Timeout | undefined;
 
         const timeoutTimer = setTimeout(() => {
             finish(124);
-        }, timeout);
+        }, options.timeout ?? DEFAULT_WATCH_TIMEOUT);
         timeoutTimer.unref?.();
-
-        const terminate = () => {
-            if (exited) {
-                return;
-            }
-            child.kill('SIGTERM');
-            // hazard: escalate if the child ignores SIGTERM. Cleared on exit.
-            killTimer = setTimeout(() => {
-                if (!exited) {
-                    child.kill('SIGKILL');
-                }
-            }, KILL_GRACE_MS);
-        };
 
         function finish(exitCode: number): void {
             if (resolved) {
@@ -67,46 +69,28 @@ export async function observeProcess(
             }
             resolved = true;
             clearTimeout(timeoutTimer);
-            terminate();
-            resolve({ exitCode, stderr, stdout });
+            if (!exited) {
+                killTimer = terminate(child, () => exited);
+            }
+            resolve({ exitCode, ...output });
         }
 
-        const checkPattern = () => {
+        const collect = (stream: 'stderr' | 'stdout') => (data: Buffer | string) => {
+            output[stream] += data.toString();
             if (
                 waitFor !== undefined &&
-                !patternMatched &&
-                (stdout.includes(waitFor) || stderr.includes(waitFor))
+                (output.stdout.includes(waitFor) || output.stderr.includes(waitFor))
             ) {
-                patternMatched = true;
                 finish(0);
             }
         };
+        child.stdout?.on('data', collect('stdout'));
+        child.stderr?.on('data', collect('stderr'));
 
-        child.stdout?.on('data', (data) => {
-            stdout += data.toString();
-            checkPattern();
-        });
-
-        child.stderr?.on('data', (data) => {
-            stderr += data.toString();
-            checkPattern();
-        });
-
-        // invariant: exited before the pattern matched: without a pattern a clean exit is a success.
         child.on('exit', (code) => {
             exited = true;
-            if (killTimer) {
-                clearTimeout(killTimer);
-            }
-            if (patternMatched) {
-                return;
-            }
-            if (waitFor === undefined) {
-                finish(code ?? 1);
-                return;
-            }
-            // invariant: a pattern was expected: even a clean exit is a failure.
-            finish(code === 0 ? 1 : (code ?? 1));
+            clearTimeout(killTimer);
+            finish(exitCodeOf(code, waitFor));
         });
     });
 }

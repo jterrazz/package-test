@@ -1,5 +1,34 @@
 import { useState } from 'react';
 
+function SortSelect({ onSort, sort }: { onSort: (sort: string) => void; sort: string }) {
+    return (
+        <>
+            <label htmlFor="sort">Sort</label>
+            <select
+                id="sort"
+                onChange={(event) => {
+                    onSort(event.target.value);
+                }}
+                value={sort}
+            >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+            </select>
+        </>
+    );
+}
+
+function Applied({ onClear, summary }: { onClear: () => void; summary: string }) {
+    return (
+        <>
+            <p role="status">Showing {summary}</p>
+            <button onClick={onClear} type="button">
+                Clear
+            </button>
+        </>
+    );
+}
+
 export function Filters({ onApply }: { onApply: (summary: string) => void }) {
     const [query, setQuery] = useState('');
     const [drafts, setDrafts] = useState(false);
@@ -37,32 +66,19 @@ export function Filters({ onApply }: { onApply: (summary: string) => void }) {
                 type="checkbox"
             />
 
-            <label htmlFor="sort">Sort</label>
-            <select
-                id="sort"
-                onChange={(event) => {
-                    setSort(event.target.value);
-                }}
-                value={sort}
-            >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-            </select>
+            <SortSelect onSort={setSort} sort={sort} />
 
             <button title="Applies the filters above" type="submit">
                 Apply
             </button>
 
-            {applied === null ? null : <p role="status">Showing {applied}</p>}
             {applied === null ? null : (
-                <button
-                    onClick={() => {
+                <Applied
+                    onClear={() => {
                         setApplied(null);
                     }}
-                    type="button"
-                >
-                    Clear
-                </button>
+                    summary={applied}
+                />
             )}
         </form>
     );

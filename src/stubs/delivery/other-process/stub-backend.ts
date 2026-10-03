@@ -5,7 +5,7 @@ import type { ChainConfig } from '../../../chain/config.js';
 import { pause } from '../../../chain/pause.js';
 import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { isStreamBody } from '../../exchange.js';
-import type { MatchableRequest } from '../../exchange.js';
+import type { MatchableRequest, StubResponse } from '../../exchange.js';
 import { StubQueue } from '../../matching/stub-queue.js';
 import type { Stub } from '../../stub.js';
 import { toReadableStream } from '../stream-body.js';
@@ -128,21 +128,14 @@ export class StubBackend {
             return;
         }
 
-        const headers: Record<string, string> = {};
-        for (const [name, value] of Object.entries(request.headers)) {
-            if (typeof value === 'string') {
-                headers[name.toLowerCase()] = value;
-            }
-        }
         const url = request.url ?? '/';
         const observed: MatchableRequest = {
             body: await readBody(request),
-            headers,
+            headers: stringHeaders(request),
             method,
             url,
         };
         const stub = this.queue.take(observed);
-
         if (!stub) {
             this.record(method, url);
             response.writeHead(501, { ...cors, 'content-type': 'application/json' });
@@ -156,51 +149,14 @@ export class StubBackend {
         }
 
         const reply = typeof stub.response === 'function' ? stub.response(observed) : stub.response;
-
         if (reply.delay !== undefined && reply.delay > 0) {
             await pause(reply.delay);
         }
-
         if (reply.transport === 'network-error') {
             request.socket.destroy();
             return;
         }
-
-        const status = reply.status ?? 200;
-        const { body } = reply;
-        if (isStreamBody(body)) {
-            // invariant: a declared stream is written piece by piece with the connection held open: the order is what the client is specified against.
-            response.writeHead(status, {
-                ...cors,
-                'content-type': body.contentType,
-                ...reply.headers,
-            });
-            await toReadableStream(body).pipeTo(
-                new WritableStream<Uint8Array>({
-                    close() {
-                        response.end();
-                    },
-                    write(chunk) {
-                        response.write(chunk);
-                    },
-                }),
-            );
-            return;
-        }
-        if (body === null || body === undefined) {
-            response.writeHead(status, { ...cors, ...reply.headers });
-            response.end();
-            return;
-        }
-        const payload = typeof body === 'string' ? body : JSON.stringify(body);
-        const contentType =
-            typeof body === 'string' ? 'text/plain; charset=utf-8' : 'application/json';
-        response.writeHead(status, {
-            ...cors,
-            'content-type': contentType,
-            ...reply.headers,
-        });
-        response.end(payload);
+        await writeReply(response, reply, cors);
     }
 
     private record(method: string, path: string): void {
@@ -212,6 +168,48 @@ export class StubBackend {
             this.unmatchedRequests.set(key, { count: 1, method, path });
         }
     }
+}
+
+function stringHeaders(request: IncomingMessage): Record<string, string> {
+    const headers: Record<string, string> = {};
+    for (const [name, value] of Object.entries(request.headers)) {
+        if (typeof value === 'string') {
+            headers[name.toLowerCase()] = value;
+        }
+    }
+    return headers;
+}
+
+async function writeReply(
+    response: ServerResponse,
+    reply: StubResponse,
+    cors: Record<string, string>,
+): Promise<void> {
+    const status = reply.status ?? 200;
+    const { body } = reply;
+    if (isStreamBody(body)) {
+        // invariant: a declared stream is written piece by piece with the connection held open: the order is what the client is specified against.
+        response.writeHead(status, { ...cors, 'content-type': body.contentType, ...reply.headers });
+        await toReadableStream(body).pipeTo(
+            new WritableStream<Uint8Array>({
+                close() {
+                    response.end();
+                },
+                write(chunk) {
+                    response.write(chunk);
+                },
+            }),
+        );
+        return;
+    }
+    if (body === null || body === undefined) {
+        response.writeHead(status, { ...cors, ...reply.headers });
+        response.end();
+        return;
+    }
+    const contentType = typeof body === 'string' ? 'text/plain; charset=utf-8' : 'application/json';
+    response.writeHead(status, { ...cors, 'content-type': contentType, ...reply.headers });
+    response.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
 
 async function readBody(request: IncomingMessage): Promise<unknown> {

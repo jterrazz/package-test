@@ -64,6 +64,50 @@ async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefin
     return directory === undefined ? undefined : sessionLedger(directory);
 }
 
+/** invariant: one session per runner; per run under a server that outlives the file. A server this runner spawned stops with it. */
+function lazyDevice(session: {
+    driven: MobileDevice;
+    ledger: () => Promise<SessionLedger | undefined>;
+    serverUrl: string;
+    timeouts: DeviceTimeouts | undefined;
+}): { close: () => Promise<void>; get: () => Promise<DevicePort> } {
+    let device: DevicePort | null = null;
+    return {
+        close: async () => {
+            await device?.close();
+            device = null;
+        },
+        get: async () => {
+            if (!device) {
+                const { AppiumAdapter } = await import('./device/appium.adapter.js');
+                device = new AppiumAdapter({
+                    device: session.driven,
+                    ledger: await session.ledger(),
+                    serverUrl: session.serverUrl,
+                    timeouts: session.timeouts,
+                });
+            }
+            return device;
+        },
+    };
+}
+
+async function startBesideAppium(
+    services: ServiceRecord,
+    root: string,
+    appium: { stop: () => Promise<void> },
+): Promise<null | StartedServices> {
+    if (Object.keys(services).length === 0) {
+        return null;
+    }
+    try {
+        return await startServices(services, root, { type: 'none' });
+    } catch (error) {
+        await appium.stop();
+        throw error;
+    }
+}
+
 export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
 ): Promise<MobileHandle> {
@@ -75,15 +119,7 @@ export async function startMobile<Services extends ServiceRecord>(
 
     // invariant: services come up before the app launches: a dev build reaches its bundler on its first frame.
     const services = declaredServices(options.services);
-    let started: null | StartedServices = null;
-    if (Object.keys(services).length > 0) {
-        try {
-            started = await startServices(services, root, { type: 'none' });
-        } catch (error) {
-            await appium.stop();
-            throw error;
-        }
-    }
+    const started = await startBesideAppium(services, root, appium);
 
     // invariant: the stub starts last, so a constructor refusal never orphans a server.
     let backend: null | StubBackend = null;
@@ -93,35 +129,24 @@ export async function startMobile<Services extends ServiceRecord>(
         backendUrl = await backend.start();
     }
 
-    // invariant: one session per runner; per run under a server that outlives the file. A server this runner spawned stops with it.
-    let device: DevicePort | null = null;
-    const getDevice = async (): Promise<DevicePort> => {
-        if (!device) {
-            const { AppiumAdapter } = await import('./device/appium.adapter.js');
-            device = new AppiumAdapter({
-                device: driven,
-                serverUrl: appium.url,
-                ledger: await runLedger(outlivesFile),
-                timeouts: options.timeouts,
-            });
-        }
-        return device;
-    };
+    const device = lazyDevice({
+        driven,
+        ledger: async () => await runLedger(outlivesFile),
+        serverUrl: appium.url,
+        timeouts: options.timeouts,
+    });
 
     const config: Started<MobileConfig, 'bundleId' | 'device'> = {
         backend: backend ?? undefined,
         backendUrl,
         bundleId: options.app.bundleId,
-        device: getDevice,
+        device: device.get,
     };
 
     return {
         backendUrl,
         cleanup: async () => {
-            if (device) {
-                await device.close();
-                device = null;
-            }
+            await device.close();
             if (started) {
                 await started.stopProcesses();
                 await releaseIsolation(services);
