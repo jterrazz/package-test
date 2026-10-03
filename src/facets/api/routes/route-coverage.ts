@@ -39,6 +39,7 @@ async function scopeOf(project: RouteProject): Promise<RunScope> {
             .map((file) => file.filepath),
     );
     const { testFiles } = await project.globTestFiles();
+    // Stryker disable next-line StringLiteral: the judge reads a scope by its two unjudged names, so any other name judges the run
     return testFiles.every((file) => ran.has(file)) ? 'whole' : 'partial';
 }
 

@@ -1,16 +1,57 @@
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
 import type { Shard } from './ledger.js';
-import { setupRoutes } from './route-coverage.js';
+import { routeCoverageSetup, setupRoutes } from './route-coverage.js';
 import type { RouteProject } from './route-coverage.js';
 import { PARTIAL_UNJUDGED, SHARD_UNJUDGED } from './route-judge.js';
 import { judgeSplit, partialSplitUnjudged } from './route-split.js';
 
 describe('setup', () => {
+    test('route coverage — the global setup — is this module, from a checkout', () => {
+        // Given - the source tree
+        // Then - the setup a project registers is this very file
+        expect(routeCoverageSetup()).toBe(join(import.meta.dirname, 'route-coverage.ts'));
+    });
+
+    test('route coverage — the global setup reads the run — a whole run starts from no ledger, and says nothing when no specification reached the api', async () => {
+        // Given - a ledger a previous run left
+        const { project, root } = stubProject({ ran: ['a.spec.ts', 'b.spec.ts'] });
+        writeLedger(join(root, ROUTES_DIR), { declared: [], reached: [] });
+        const lines = recordedLines();
+
+        // When - the run starts, and ends with no specification writing a ledger
+        const teardown = setupRoutes(project);
+        await teardown();
+
+        // Then - the old ledger cleared, and no line printed
+        expect([existsSync(join(root, ROUTES_DIR)), lines]).toStrictEqual([false, []]);
+    });
+
+    test('route coverage — the global setup reads the run — the shards of an unfiltered split are judged once merged', async () => {
+        // Given - both shards of a split set up with no filter, each reaching one route of three
+        recordedLines();
+        let root = '';
+        for (const index of [1, 2]) {
+            const run = stubProject({ ran: ['a.spec.ts'], root, shard: { count: 2, index } });
+            ({ root } = run);
+            const teardown = setupRoutes(run.project);
+            writeOneOfThree(String(run.provided.get('routesLedger')));
+            await teardown();
+        }
+
+        // When - the split is merged
+        const verdict = await judgeSplit(root, { failed: 0, update: false });
+
+        // Then - judged: the ratchet fails it
+        expect(verdict.failure?.found).toMatch(
+            /^api routes: 2 declared route\(s\) no test reached/u,
+        );
+    });
+
     test("route coverage — the global setup reads the run — a shard's ledgers go to its own folder, a whole run's are left, and its teardown judges nothing", async () => {
         // Given - a whole run's ledger at the root of the run's folder, and the setup of shard 1/2 over every file
         const { project, provided, root } = stubProject({
@@ -58,11 +99,15 @@ describe('setup', () => {
 
         // When - its one specification reaches one route of three, and the run ends
         const lines = recordedLines();
-        writeOneOfThree(String(provided.get('routesLedger')));
+        const directory = String(provided.get('routesLedger'));
+        writeOneOfThree(directory);
 
-        // Then - no verdict
+        // Then - no verdict, and no partial mark: only a shard's is ever read
         await expect(teardown()).resolves.toBeUndefined();
-        expect(lines).toStrictEqual([`${PARTIAL_UNJUDGED}\n`]);
+        expect([lines, existsSync(join(directory, 'partial'))]).toStrictEqual([
+            [`${PARTIAL_UNJUDGED}\n`],
+            false,
+        ]);
     });
 
     test('route coverage — the global setup reads the run — a shard a test name filters leaves its merge unjudged, not judged as a whole run', async () => {
@@ -100,16 +145,19 @@ describe('setup', () => {
     });
 });
 
+/** A project over a fresh root, or the root an earlier shard of the same split used. */
 function stubProject({
     ran,
+    root: shared = '',
     shard,
     testNamePattern,
 }: {
     ran: readonly string[];
+    root?: string;
     shard?: Shard;
     testNamePattern?: RegExp;
 }): { project: RouteProject; provided: Map<string, unknown>; root: string } {
-    const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
+    const root = shared === '' ? mkdtempSync(join(tmpdir(), 'route-coverage-')) : shared;
     onTestFinished(() => {
         rmSync(root, { force: true, recursive: true });
     });
