@@ -85,7 +85,8 @@ async function projectOf(root: string, declared: unknown): Promise<TestProjectIn
           );
 }
 
-async function vitestConfigAt(root: string): Promise<ViteUserConfig> {
+// A promise rather than a top-level await: knip requires the config, and Node cannot require a module that awaits at its top.
+export async function vitestConfig(root: string = process.cwd()): Promise<ViteUserConfig> {
     const { resolved } = await readSettings(root);
     const section = resolved.sections[TEST_SECTION];
     const projects = isRecord(section) && Array.isArray(section.projects) ? section.projects : [];
@@ -102,7 +103,3 @@ async function vitestConfigAt(root: string): Promise<ViteUserConfig> {
               },
     );
 }
-
-// A promise rather than a top-level await: knip requires the config, and Node cannot require a module that awaits at its top.
-export const vitestConfig = async (): Promise<ViteUserConfig> =>
-    await vitestConfigAt(process.cwd());

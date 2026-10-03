@@ -20,7 +20,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/index.ts',
             'src/index.browser.ts',
             'src/index.vitest.ts',
-            'src/index.vitest.config.ts',
             'lint/index.oxlint.ts',
             'src/facets/api/api.face.ts',
             'src/facets/cli/cli.face.ts',
