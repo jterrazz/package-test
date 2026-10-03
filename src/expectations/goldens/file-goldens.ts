@@ -79,9 +79,8 @@ export function matchJsonFile(
     const actual = accessor.value;
 
     if (shouldUpdateSnapshots() && !frozen) {
-        const previous = recordedGolden(filePath);
         const merged = mergePreservingPlaceholders(
-            previous === null ? null : JSON.parse(previous),
+            JSON.parse(recordedGolden(filePath) ?? 'null'),
             actual,
             accessor.captures.workdir,
         );
@@ -96,6 +95,7 @@ export function matchJsonFile(
         );
     }
 
+    // Stryker disable next-line StringLiteral: a file read as a Buffer parses as the same text
     const expected: unknown = JSON.parse(readFileSync(filePath, 'utf8'));
     if (structuralEquals(expected, actual, accessor.captures)) {
         return passed(`expected JSON not to match ${name}`);
@@ -114,10 +114,8 @@ async function matchTreeFile(
 
     if (shouldUpdateSnapshots() && !frozen) {
         const previousContents = new Map<string, string>();
-        if (existsSync(fixtureDir)) {
-            for (const file of await walkDirectory(fixtureDir)) {
-                previousContents.set(file, readFileSync(resolve(fixtureDir, file), 'utf8'));
-            }
+        for (const file of await walkDirectory(fixtureDir)) {
+            previousContents.set(file, readFileSync(resolve(fixtureDir, file), 'utf8'));
         }
         rmSync(fixtureDir, { force: true, recursive: true });
         mkdirSync(fixtureDir, { recursive: true });
@@ -125,10 +123,10 @@ async function matchTreeFile(
         for (const file of await walkDirectory(fixtureDir)) {
             const previous = previousContents.get(file) ?? null;
             const actual = readFileSync(resolve(fixtureDir, file), 'utf8');
-            const merged = mergeTextPreservingPlaceholders(previous, actual, scope);
-            if (merged !== actual) {
-                writeFileSync(resolve(fixtureDir, file), merged);
-            }
+            writeFileSync(
+                resolve(fixtureDir, file),
+                mergeTextPreservingPlaceholders(previous, actual, scope),
+            );
         }
         return passed(`updated ${name}`);
     }

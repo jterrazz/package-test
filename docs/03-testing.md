@@ -398,10 +398,10 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability             | api | job | cli | lint | integration | website | mobile | component | module |
 | ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 3      |
-| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 2      |
+| `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 2      |
+| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
-| `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 6      |
+| `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 5      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
 | `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 11     |
 | `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 13     |
