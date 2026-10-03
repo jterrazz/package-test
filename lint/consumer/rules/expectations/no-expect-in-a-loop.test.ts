@@ -12,7 +12,7 @@ ruleTester().run('no-expect-in-a-loop', noExpectInALoop, {
         expect(order.total).toBeGreaterThan(0);
     }
 });`,
-            errors: [{ column: 8, line: 3, messageId: 'expectInALoop' }],
+            errors: [{ column: 8, line: 3, message: /^found: `expect\(\)` inside a for…of, /u }],
             filename: TEST_FILE,
         },
         {
@@ -23,7 +23,7 @@ ruleTester().run('no-expect-in-a-loop', noExpectInALoop, {
         index += 1;
     }
 });`,
-            errors: [{ column: 8, line: 4, messageId: 'expectInALoop' }],
+            errors: [{ column: 8, line: 4, message: /^found: `expect\(\)` inside a loop, /u }],
             filename: TEST_FILE,
         },
         {
@@ -46,7 +46,7 @@ ruleTester().run('no-expect-in-a-loop', noExpectInALoop, {
     rows.some((row) => expect(row.id).toBe('a'));
 });`,
             errors: [
-                { column: 22, line: 2, messageId: 'expectInALoop' },
+                { column: 22, line: 2, message: /^found: `expect\(\)` inside a `map` callback, /u },
                 { column: 27, line: 3, messageId: 'expectInALoop' },
                 { column: 8, line: 5, messageId: 'expectInALoop' },
                 { column: 23, line: 8, messageId: 'expectInALoop' },

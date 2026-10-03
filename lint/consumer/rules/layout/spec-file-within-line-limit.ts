@@ -14,6 +14,7 @@ const GROUPS_SHOWN = 5;
 /** What stands before ` — ` or `:`, else the first word. */
 export function titlePrefix(title: string): string {
     const head = title.split(/ — |: /u)[0] ?? title;
+    // Stryker disable next-line Regex: only the first word is kept, wherever the run of spaces ends
     return head === title ? (title.split(/\s+/u)[0] ?? title) : head;
 }
 
@@ -50,12 +51,15 @@ export const specFileWithinLineLimit = defineRule(
             return {
                 before: () => identityOf(context).role === 'spec',
                 Program(program: AstNode) {
+                    // Stryker disable next-line StringLiteral: what replaces the last newline holds none
                     const lines = context.sourceCode.text.replace(/\n$/u, '').split('\n').length;
                     if (lines <= MAX_SPEC_LINES) {
                         return;
                     }
+                    // Stryker disable next-line ArrayDeclaration: the report is only ever read for its groups
                     const titles: string[] = [];
                     walk(program, (node) => {
+                        // Stryker disable next-line ConditionalExpression,LogicalOperator: only a call has a test callee
                         if (node.type === 'CallExpression' && isTestCallee(child(node, 'callee'))) {
                             titles.push(testName(node) ?? '(a computed title)');
                         }

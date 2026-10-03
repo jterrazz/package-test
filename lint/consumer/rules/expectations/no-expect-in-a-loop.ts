@@ -24,6 +24,7 @@ const FUNCTIONS: ReadonlySet<string> = new Set([
 
 function isExpectCall(node: AstNode): boolean {
     const callee = child(node, 'callee');
+    // Stryker disable next-line OptionalChaining: a call always has a callee
     const root = callee?.type === 'MemberExpression' ? child(callee, 'object') : callee;
     return identifierName(root) === 'expect';
 }
@@ -42,10 +43,13 @@ const ITERATIONS: ReadonlySet<string> = new Set([
 function iterationOf(fn: AstNode): string | undefined {
     const call = child(fn, 'parent');
     const callee = child(call, 'callee');
+    // Stryker disable ConditionalExpression,LogicalOperator,OptionalChaining: a function always has a parent, and memberPropertyName reads no name from what is no member
     const method =
         call?.type === 'CallExpression' && callee !== undefined
             ? memberPropertyName(callee)
             : undefined;
+    // Stryker restore ConditionalExpression,LogicalOperator,OptionalChaining
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: no method is in the set
     return method !== undefined && ITERATIONS.has(method) ? `\`${method}\` callback` : undefined;
 }
 

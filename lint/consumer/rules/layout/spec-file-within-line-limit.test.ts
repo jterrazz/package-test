@@ -49,4 +49,16 @@ describe('specFileWithinLineLimit', () => {
         // Then - the largest group first, each with its count
         expect(groupsOf(titles)).toBe('"pagination" (2), "filters" (1), "rejects" (1)');
     });
+
+    test('spec-file-within-line-limit — groupsOf — names five groups, ties by name, and marks the rest it leaves out', () => {
+        // Given - six groups, the largest last, a title of words split by runs of spaces
+        const many = ['f', 'e', 'd', 'c', 'b  wide', 'a a', 'a b', 'a c'];
+        const five = ['e', 'd', 'c', 'b', 'a'];
+
+        // Then - the largest first, then by name, five at most, an ellipsis for the rest
+        expect([groupsOf(many), groupsOf(five)]).toStrictEqual([
+            '"a" (3), "b" (1), "c" (1), "d" (1), "e" (1), …',
+            '"a" (1), "b" (1), "c" (1), "d" (1), "e" (1)',
+        ]);
+    });
 });

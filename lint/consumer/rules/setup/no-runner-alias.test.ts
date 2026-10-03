@@ -5,6 +5,11 @@ import { noRunnerAlias } from './no-runner-alias.js';
 ruleTester().run('no-runner-alias', noRunnerAlias, {
     invalid: [
         {
+            name: 'A renamed handle with a default is renamed all the same.',
+            code: 'const { cli: myCli = fallback } = await specification.cli("./bin");',
+            errors: [{ column: 8, line: 1, messageId: 'aliased' }],
+        },
+        {
             name: 'Renamed facet.',
             code: 'const { cli: myCli, cleanup } = await specification.cli("./bin");',
             errors: [{ column: 8, line: 1, messageId: 'aliased' }],
@@ -19,6 +24,7 @@ ruleTester().run('no-runner-alias', noRunnerAlias, {
         },
     ],
     valid: [
+        { name: 'A name declared with no value is no record.', code: 'let handle;' },
         {
             name: 'Canonical names.',
             code: 'const { cli, cleanup, docker } = await specification.cli("./bin");',
