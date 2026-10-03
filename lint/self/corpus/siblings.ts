@@ -46,6 +46,14 @@ export function siblingless(root: string): string[] {
         .toSorted();
 }
 
+/** Modules with their sibling test that a kind still lists: the claim outlived its reason. */
+export function staleClaims(root: string): string[] {
+    const without = new Set(siblingless(root));
+    return sources(root)
+        .filter((path) => !without.has(path) && SIBLINGLESS_KINDS.some((kind) => kind.claims(path)))
+        .toSorted();
+}
+
 export function classified(root: string): { kind: SiblinglessKind | undefined; path: string }[] {
     return siblingless(root).map((path) => ({
         kind: SIBLINGLESS_KINDS.find((candidate) => candidate.claims(path)),

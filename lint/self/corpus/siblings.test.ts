@@ -6,7 +6,13 @@ import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
-import { classified, renderSiblings, siblingless, SIBLINGS_MARKERS } from './siblings.js';
+import {
+    classified,
+    renderSiblings,
+    siblingless,
+    SIBLINGS_MARKERS,
+    staleClaims,
+} from './siblings.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -36,6 +42,12 @@ describe('siblings', () => {
 
         // Then - each is claimed by a kind that says what proves it instead
         expect(unclaimed, 'a module with no sibling test and no declared reason').toStrictEqual([]);
+    });
+
+    test('modules with no sibling test (meta-test `siblingless-module-declared`) — a module that has its sibling test is claimed by no kind', () => {
+        // Given - the modules with a `<file>.test.ts` beside them
+        // Then - none is still listed as proven elsewhere
+        expect(staleClaims(ROOT), 'a module with its test, still claimed').toStrictEqual([]);
     });
 
     test('modules with no sibling test (meta-test `siblingless-module-declared`) — no declared kind is dead', () => {

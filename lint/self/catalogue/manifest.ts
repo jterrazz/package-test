@@ -135,10 +135,10 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'A source module with no `<file>.test.ts` beside it falls into one declared kind, and the kind states where its proof is instead.',
+            'A source module with no `<file>.test.ts` beside it falls into one declared kind, and the kind states where its proof is instead; a module that has its test is claimed by none.',
         facet: 'model',
         family: 'layout',
-        fix: 'Write the sibling test, or write the kind that claims it and the one line saying what covers it.',
+        fix: 'Write the sibling test, or write the kind that claims it and the one line saying what covers it; once the test is written, strike the module from its kind.',
         name: 'siblingless-module-declared',
         rationale:
             '`test-beside-its-module` says a module test lives beside its module; it never said every module has one. What was missing is the list of the ones that do not, and why.',
