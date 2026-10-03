@@ -137,7 +137,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/cli/documents/run.action.ts',
             'src/facets/job/trigger.action.ts',
             'src/facets/website/website.handle.ts',
-            'src/facets/api/request/request.action.ts',
             'src/facets/cli/process/exec.action.ts',
             'src/facets/component/render/wrap.capability.ts',
             'src/facets/component/viewport/viewport.capability.ts',

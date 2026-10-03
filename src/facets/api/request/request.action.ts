@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import { dedent } from '../../../../lint/kit/project/dedent.js';
 import { defineAction } from '../../../chain/action.js';
@@ -6,12 +7,12 @@ import type { SliceReader } from '../../../chain/action.js';
 import type { ChainSignature, MatrixRow, Run } from '../../../chain/capability.js';
 import { headers } from '../../../chain/context/headers.capability.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
-import { resolveSpecPath } from '../../../disk/resolved-spec-path.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../disk/spec-path.js';
 import type { DiskFile } from '../../../disk/spec-path.js';
 import type { ServerPort } from '../server/server.port.js';
 import { HttpResult } from './http.result.js';
 import { parseRequestFile } from './request-file.js';
+import type { ParsedRequestFile } from './request-file.js';
 import { params, routeRequest } from './route.js';
 import type { RouteArguments, RouteOptionsAny } from './route.js';
 
@@ -20,9 +21,10 @@ type Needs = { server: ServerPort };
 type Sent = {
     /** A value (objects JSON-serialised, strings raw), or a `file()` whose content is sent. */
     body?: unknown;
+    /** The headers the request was written with, under the chain's own. */
+    headers?: Record<string, string>;
     method: string;
     path: string;
-    request?: DiskFile | string | undefined;
     template?: string | undefined;
 };
 
@@ -36,14 +38,24 @@ const ACCESSORS: readonly MatrixRow[] = [
 
 const NO_WORKDIR = { workDir: null } as const;
 
+/** A `.json` file is sent as the value it holds, any other as its text. */
+function bodyOf(body: DiskFile, testDir: string): unknown {
+    const content = readFileSync(resolve(testDir, body.path), 'utf8');
+    return body.path.endsWith('.json') ? JSON.parse(content) : content;
+}
+
+function writtenRequest(source: DiskFile | string, testDir: string): ParsedRequestFile {
+    return typeof source === 'string'
+        ? parseRequestFile(dedent(source), 'the request in place')
+        : parseRequestFile(readFileSync(resolve(testDir, source.path), 'utf8'), source.path);
+}
+
 async function send(
-    sent: Sent,
+    { body, headers: written, method, path, template }: Sent,
     read: SliceReader,
     { server }: Needs,
     { config, testDir }: Run,
 ): Promise<HttpResult> {
-    let { body, method, path } = sent;
-    let written: Record<string, string> | undefined;
     if (isDiskDirectory(body)) {
         throw new TypeError(
             refusal('disk-named-by-relative-path-at-runtime', {
@@ -52,26 +64,13 @@ async function send(
             }),
         );
     }
-    if (isDiskFile(body)) {
-        const content = readFileSync(resolveSpecPath('body', body.path, testDir), 'utf8');
-        body = body.path.endsWith('.json') ? JSON.parse(content) : content;
-    }
-    if (sent.request !== undefined) {
-        const parsed =
-            typeof sent.request === 'string'
-                ? parseRequestFile(dedent(sent.request), 'the request in place')
-                : parseRequestFile(
-                      readFileSync(resolveSpecPath('request', sent.request.path, testDir), 'utf8'),
-                      sent.request.path,
-                  );
-        ({ body, method, path } = parsed);
-        written = parsed.headers;
-    }
     const carried = { ...written, ...read(headers) };
-    const response = await server.request(method, path, body, {
-        headers: Object.keys(carried).length > 0 ? carried : undefined,
-        template: sent.template,
-    });
+    const response = await server.request(
+        method,
+        path,
+        isDiskFile(body) ? bodyOf(body, testDir) : body,
+        { headers: Object.keys(carried).length > 0 ? carried : undefined, template },
+    );
     return new HttpResult({ config, response, testDir });
 }
 
@@ -115,19 +114,7 @@ export const request = defineAction<
     accessors: ACCESSORS,
     name: 'request',
     perform: async ([source], read, adapters, run) =>
-        await send(
-            {
-                method: '',
-                path: '',
-                request:
-                    typeof source === 'string'
-                        ? source
-                        : requireDiskFile('request', source, '.http'),
-            },
-            read,
-            adapters,
-            run,
-        ),
+        await send(writtenRequest(source, run.testDir), read, adapters, run),
     prepare: ([source]) => {
         if (typeof source !== 'string') {
             requireDiskFile('request', source, '.http');
