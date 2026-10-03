@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 
+import { isRecord } from '../../../../lint/kit/project/json-shape.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 
 /** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
@@ -36,28 +37,23 @@ type SimctlDevices = Record<
 >;
 
 const isSimctlDevices = (value: unknown): value is SimctlDevices =>
-    typeof value === 'object' &&
-    value !== null &&
-    Object.values(value).every((devices) => Array.isArray(devices));
+    isRecord(value) && Object.values(value).every((devices) => Array.isArray(devices));
 
+const RUNTIME_KEY = /^.*SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/u;
+
+const WORDS = /\s+/u;
+
+/** `com.apple.CoreSimulator.SimRuntime.iOS-26-5` reads `iOS 26.5`; a key of another shape reads as itself. */
 function runtimeLabel(runtime: string): string {
-    const match = /SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/u.exec(runtime);
-    const platform = match?.groups?.platform;
-    const version = match?.groups?.version;
-    return platform === undefined || version === undefined
-        ? runtime
-        : `${platform} ${version.replaceAll('-', '.')}`;
+    return runtime.replace(
+        RUNTIME_KEY,
+        (_key, platform: string, version: string) => `${platform} ${version.replaceAll('-', '.')}`,
+    );
 }
 
 export function listSimulators(listJson: string): SimulatorDevice[] {
     const parsed: unknown = JSON.parse(listJson);
-    const devices =
-        typeof parsed === 'object' &&
-        parsed !== null &&
-        'devices' in parsed &&
-        isSimctlDevices(parsed.devices)
-            ? parsed.devices
-            : {};
+    const devices = isRecord(parsed) && isSimctlDevices(parsed.devices) ? parsed.devices : {};
     return Object.entries(devices).flatMap(([runtime, listed]) =>
         listed
             .filter((device) => device.isAvailable !== false)
@@ -71,10 +67,10 @@ export function listSimulators(listJson: string): SimulatorDevice[] {
 }
 
 function runtimeOf(os: string): { platform: string | undefined; version: string } {
-    const [first = '', second] = os.trim().toLowerCase().split(/\s+/u);
-    return second === undefined
-        ? { platform: undefined, version: first }
-        : { platform: first, version: second };
+    const words = os.trim().split(WORDS);
+    // Stryker disable next-line MethodExpression: either case compares the same
+    const platform = String(words[0]).toLowerCase();
+    return { platform: words.length > 1 ? platform : undefined, version: String(words.at(-1)) };
 }
 
 /** `'iOS 26.5'` and `'26.5'` name one runtime; two naming platforms must name the same one. */

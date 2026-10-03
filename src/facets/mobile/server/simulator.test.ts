@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { listSimulators, selectSimulator } from './simulator.js';
+import { listSimulators, sameRuntime, selectSimulator } from './simulator.js';
 
 const LISTING = JSON.stringify({
     devices: {
@@ -9,66 +9,118 @@ const LISTING = JSON.stringify({
         ],
         'com.apple.CoreSimulator.SimRuntime.iOS-26-5': [
             { isAvailable: true, name: 'iPhone 16 Pro', state: 'Booted', udid: 'AAAA-26' },
-            { isAvailable: true, name: 'iPhone 17', state: 'Shutdown', udid: 'BBBB-26' },
+            { name: 'iPhone 17', state: 'Shutdown', udid: 'BBBB-26' },
             { isAvailable: false, name: 'iPhone 15', state: 'Shutdown', udid: 'CCCC-26' },
         ],
-        'com.apple.CoreSimulator.SimRuntime.watchOS-11-2': [
-            { isAvailable: true, name: 'Apple Watch Ultra 2', state: 'Shutdown', udid: 'DDDD-11' },
+        'com.apple.CoreSimulator.SimRuntime.xrOS': [
+            { isAvailable: true, name: 'Apple Vision Pro', state: 'Shutdown', udid: 'DDDD-XR' },
         ],
     },
 });
 
+const WHY = 'why: Resolution refuses rather than guesses: a device names exactly one simulator.';
+
+/** The udid a selection answers, or the message of its refusal. */
+function refusalOf(criteria: { name: string; os?: string }): string {
+    try {
+        return selectSimulator(LISTING, criteria).udid;
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+    }
+}
+
 describe('simulator', () => {
-    test('listSimulators — flattens the per-runtime record into readable os labels', () => {
-        // Given - the simctl listing
-        const devices = listSimulators(LISTING);
-
-        // Then - runtime keys become human labels
-        expect(devices).toContainEqual({
-            name: 'iPhone 17',
-            os: 'iOS 26.5',
-            state: 'Shutdown',
-            udid: 'BBBB-26',
-        });
+    test('listSimulators — flattens the per-runtime record into readable os labels, without the unavailable devices', () => {
+        // Given - the simctl listing, one runtime key of no known shape, one device whose runtime is gone
+        // Then - each available device, its runtime read as a label or as itself
+        expect(listSimulators(LISTING)).toStrictEqual([
+            { name: 'iPhone 16 Pro', os: 'iOS 18.2', state: 'Shutdown', udid: 'AAAA-18' },
+            { name: 'iPhone 16 Pro', os: 'iOS 26.5', state: 'Booted', udid: 'AAAA-26' },
+            { name: 'iPhone 17', os: 'iOS 26.5', state: 'Shutdown', udid: 'BBBB-26' },
+            {
+                name: 'Apple Vision Pro',
+                os: 'com.apple.CoreSimulator.SimRuntime.xrOS',
+                state: 'Shutdown',
+                udid: 'DDDD-XR',
+            },
+        ]);
     });
 
-    test('listSimulators — drops unavailable devices', () => {
-        // Given - a listing with a device whose runtime is gone
-        const devices = listSimulators(LISTING);
+    test('listSimulators — a listing of another shape lists nothing', () => {
+        // Given - listings that are no record, hold no devices record, or a runtime that is no list
+        const listings = [null, {}, { devices: null }, { devices: { a: [], b: 'x' } }];
 
-        // Then - it never becomes a candidate
-        expect(devices.map((device) => device.udid)).not.toContain('CCCC-26');
+        // Then - none lists a device
+        expect(listings.map((listing) => listSimulators(JSON.stringify(listing)))).toStrictEqual([
+            [],
+            [],
+            [],
+            [],
+        ]);
     });
 
-    test('selectSimulator — picks the single device matching name and os', () => {
-        // Given - a name carried by two runtimes, narrowed by os
-        const device = selectSimulator(LISTING, { name: 'iPhone 16 Pro', os: '26.5' });
+    test('sameRuntime — a bare version and a labelled one name one runtime, two labels must name the same platform', () => {
+        // Given - pairs spelled each way
+        const pairs: [string, string][] = [
+            ['26.5', 'iOS 26.5'],
+            [' iOS  26.5 ', 'ios 26.5'],
+            ['iOS 26.5', 'watchOS 26.5'],
+            ['26.5', '18.2'],
+        ];
 
-        // Then - the bare version narrows to one
-        expect(device.udid).toBe('AAAA-26');
+        // Then - the first two match, the others do not
+        expect(pairs.map(([one, other]) => sameRuntime(one, other))).toStrictEqual([
+            true,
+            true,
+            false,
+            false,
+        ]);
     });
 
-    test('selectSimulator — accepts the full os label case-insensitively', () => {
-        // Given - the label form
-        const device = selectSimulator(LISTING, { name: 'iPhone 16 Pro', os: 'ios 18.2' });
-
-        // Then - it resolves the same as the bare version
-        expect(device.udid).toBe('AAAA-18');
+    test('selectSimulator — picks the single device matching name and os, the os in any spelling', () => {
+        // Given - a name carried by two runtimes, narrowed by a bare version, then by a label
+        // Then - each narrows to one
+        expect([
+            selectSimulator(LISTING, { name: 'iPhone 16 Pro', os: '26.5' }).udid,
+            selectSimulator(LISTING, { name: 'iPhone 16 Pro', os: 'ios 18.2' }).udid,
+            selectSimulator(LISTING, { name: 'iPhone 17' }).udid,
+        ]).toStrictEqual(['AAAA-26', 'AAAA-18', 'BBBB-26']);
     });
 
-    test('selectSimulator — refuses an unknown name with the full device listing', () => {
-        // Given - a device that does not exist
-        // Then - the refusal lists what does, so the fix needs no Xcode round-trip
-        expect(() => selectSimulator(LISTING, { name: 'iPhone 3G' })).toThrow(
-            /no simulator matches "iPhone 3G"[\s\S]*iPhone 17 — iOS 26\.5/u,
-        );
-    });
+    test('selectSimulator — refuses a device no simulator matches with the full listing, and one several match with the matches', () => {
+        // Given - a name that does not exist, one on an os it is not on, and one on two runtimes
+        const listing = [
+            '  iPhone 16 Pro — iOS 18.2 (Shutdown) AAAA-18',
+            '  iPhone 16 Pro — iOS 26.5 (Booted) AAAA-26',
+            '  iPhone 17 — iOS 26.5 (Shutdown) BBBB-26',
+            '  Apple Vision Pro — com.apple.CoreSimulator.SimRuntime.xrOS (Shutdown) DDDD-XR',
+        ];
+        const missing = (wanted: string): string =>
+            [
+                `found: specification.mobile(): no simulator matches ${wanted}.`,
+                'available devices:',
+                ...listing,
+                WHY,
+                'fix: name one of the available devices, or create the simulator in Xcode',
+                'read: docs/11-mobile.md#options',
+            ].join('\n');
 
-    test('selectSimulator — refuses an ambiguous name and points at the os and udid options', () => {
-        // Given - a name present on two runtimes, no os given
-        // Then - the framework never guesses which one a spec meant
-        expect(() => selectSimulator(LISTING, { name: 'iPhone 16 Pro' })).toThrow(
-            /2 simulators match "iPhone 16 Pro"\.\n[\s\S]*\nfix: add `os:` or `udid:` to pick one\n/u,
-        );
+        // Then - each refusal, whole
+        expect([
+            refusalOf({ name: 'iPhone 3G' }),
+            refusalOf({ name: 'iPhone 17', os: 'iOS 18.2' }),
+            refusalOf({ name: 'iPhone 16 Pro' }),
+        ]).toStrictEqual([
+            missing('"iPhone 3G"'),
+            missing('"iPhone 17" on iOS 18.2'),
+            [
+                'found: specification.mobile(): 2 simulators match "iPhone 16 Pro".',
+                'matched:',
+                ...listing.slice(0, 2),
+                WHY,
+                'fix: add `os:` or `udid:` to pick one',
+                'read: docs/11-mobile.md#options',
+            ].join('\n'),
+        ]);
     });
 });
