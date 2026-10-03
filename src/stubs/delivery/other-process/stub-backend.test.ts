@@ -1,27 +1,8 @@
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { http } from '../../kinds/http.js';
-import type { Stub } from '../../stub.js';
+import { fetchJson, get, started, statusOf } from './stub-backend.fixtures.js';
 import { StubBackend } from './stub-backend.js';
-
-function get(path: string, body: unknown, extra: Partial<Stub> = {}): Stub {
-    return { request: http.get(path), response: http.json(body), ...extra };
-}
-
-async function started(stubs: Stub[]): Promise<{ backend: StubBackend; url: string }> {
-    const backend = new StubBackend();
-    onTestFinished(async () => {
-        await backend.stop();
-    });
-    const url = await backend.start();
-    backend.beginChain(stubs);
-    return { backend, url };
-}
-
-async function fetchJson(url: string): Promise<unknown> {
-    const response = await fetch(url);
-    return await response.json();
-}
 
 describe('StubBackend', () => {
     test('stub backend — streamed replies — writes the pieces in order and closes after the last one', async () => {
@@ -33,16 +14,12 @@ describe('StubBackend', () => {
             },
         ]);
 
-        // When - the app reads the reply as it lands
+        // When - the app reads the reply to its end
         const response = await fetch(`${url}/tokens`);
-        const decoder = new TextDecoder();
-        const seen = await Array.fromAsync(response.body ?? [], (piece: Uint8Array) =>
-            decoder.decode(piece),
-        );
 
         // Then - it read the declared order, under the declared content type
         expect(response.headers.get('content-type')).toBe('text/plain');
-        expect(seen.join('')).toBe('Hello, world');
+        await expect(response.text()).resolves.toBe('Hello, world');
     });
 
     test('stub backend — streamed replies — serves an event stream as text/event-stream', async () => {
@@ -62,20 +39,6 @@ describe('StubBackend', () => {
         );
     });
 
-    test('stub backend — serving declared stubs — serves a declared stub with its status, body, and cors headers', async () => {
-        // Given - one declared route
-        const { url } = await started([get('/events', { items: [] })]);
-
-        // When - the app fetches it
-        const response = await fetch(`${url}/events`);
-
-        // Then - the declared reply comes back, cors included
-        expect(response.status).toBe(200);
-        expect(response.headers.get('access-control-allow-origin')).toBe('*');
-        expect(response.headers.get('content-type')).toBe('application/json');
-        await expect(response.json()).resolves.toStrictEqual({ items: [] });
-    });
-
     test('stub backend — serving declared stubs — a stub without times keeps replying; times plays a sequence', async () => {
         // Given - a finite failure before an unlimited success on the same route
         const { url } = await started([
@@ -89,28 +52,21 @@ describe('StubBackend', () => {
         await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
     });
 
-    test('stub backend — serving declared stubs — declared query params subset-match — the app may add extras', async () => {
-        // Given - a route declared with one query param
-        const { url } = await started([get('/articles?event_id=e-1', { items: [1] })]);
+    test('stub backend — serving declared stubs — a declared query matches as a subset, and a token segment structurally', async () => {
+        // Given - a route declared with one query param, and one with a uuid segment
+        const { url } = await started([
+            get('/articles?event_id=e-1', { items: [1] }),
+            get('/articles/{{uuid}}', { title: 'one' }),
+        ]);
 
-        // When - the app adds a locale param
-        const response = await fetch(`${url}/articles?event_id=e-1&locale=fr`);
-
-        // Then - the declared subset matches
-        expect(response.status).toBe(200);
-        await expect(response.json()).resolves.toStrictEqual({ items: [1] });
-    });
-
-    test('stub backend — serving declared stubs — a token segment matches structurally, whatever the id', async () => {
-        // Given - a path-form route with a uuid segment
-        const { url } = await started([get('/articles/{{uuid}}', { title: 'one' })]);
-
-        // Then - any uuid matches, a non-uuid path does not
-        const found = await fetch(`${url}/articles/3f2504e0-4f89-41d3-9a0c-0305e82c3301`);
-        const missed = await fetch(`${url}/articles/not-a-uuid`);
-        expect(found.status).toBe(200);
-        await expect(found.json()).resolves.toStrictEqual({ title: 'one' });
-        expect(missed.status).toBe(501);
+        // Then - an extra param still matches, any uuid matches, a non-uuid does not
+        await expect(fetchJson(`${url}/articles?event_id=e-1&locale=fr`)).resolves.toStrictEqual({
+            items: [1],
+        });
+        await expect(
+            fetchJson(`${url}/articles/3f2504e0-4f89-41d3-9a0c-0305e82c3301`),
+        ).resolves.toStrictEqual({ title: 'one' });
+        await expect(statusOf(`${url}/articles/not-a-uuid`)).resolves.toBe(501);
     });
 
     test('stub backend — serving declared stubs — the request body reaches match predicates and body filters', async () => {
@@ -124,102 +80,18 @@ describe('StubBackend', () => {
         ]);
 
         // When - the app posts each body
-        const matched = await fetch(`${url}/search`, {
-            body: JSON.stringify({ term: 'bitcoin' }),
-            headers: { 'content-type': 'application/json' },
-            method: 'POST',
-        });
-        const fallback = await fetch(`${url}/search`, {
-            body: JSON.stringify({ term: 'other' }),
-            headers: { 'content-type': 'application/json' },
-            method: 'POST',
-        });
+        const search = async (term: string): Promise<unknown> =>
+            await fetchJson(`${url}/search`, {
+                body: JSON.stringify({ term }),
+                headers: { 'content-type': 'application/json' },
+                method: 'POST',
+            });
 
         // Then - the body-filtered stub answered the first, the bare one the second
-        await expect(matched.json()).resolves.toStrictEqual({ hits: 1 });
-        await expect(fallback.json()).resolves.toStrictEqual({ hits: 0 });
-    });
-
-    test('stub backend — serving declared stubs — a responder computes the reply from the observed request', async () => {
-        // Given - a stub whose response echoes the posted body
-        const { url } = await started([
-            {
-                request: http.post('/echo'),
-                response: (request) => http.json({ echoed: request.body }),
-            },
+        expect([await search('bitcoin'), await search('other')]).toStrictEqual([
+            { hits: 1 },
+            { hits: 0 },
         ]);
-
-        // When - the app posts a payload
-        const response = await fetch(`${url}/echo`, {
-            body: JSON.stringify({ a: 1 }),
-            headers: { 'content-type': 'application/json' },
-            method: 'POST',
-        });
-
-        // Then - the reply derives from it
-        await expect(response.json()).resolves.toStrictEqual({ echoed: { a: 1 } });
-    });
-
-    test('stub backend — serving declared stubs — answers the cors preflight for any route', async () => {
-        // Given - a stub backend with one declared route
-        const { url } = await started([get('/events', {})]);
-
-        // When - the browser preflights a cross-origin fetch
-        const response = await fetch(`${url}/events`, {
-            headers: { 'access-control-request-headers': 'x-custom' },
-            method: 'OPTIONS',
-        });
-
-        // Then - 204 with permissive allow headers, echoing the requested ones
-        expect(response.status).toBe(204);
-        expect(response.headers.get('access-control-allow-origin')).toBe('*');
-        expect(response.headers.get('access-control-allow-methods')).toContain('GET');
-        expect(response.headers.get('access-control-allow-headers')).toBe('x-custom');
-    });
-
-    test('stub backend — serving declared stubs — serves a body-less response and a text response as declared', async () => {
-        // Given - a declared 204 and a text block
-        const { url } = await started([
-            { request: http.delete('/events/1'), response: http.empty() },
-            { request: http.get('/block.txt'), response: http.text('anchored') },
-        ]);
-
-        // Then - the empty status carries no body; the text one is text/plain
-        const deleted = await fetch(`${url}/events/1`, { method: 'DELETE' });
-        expect(deleted.status).toBe(204);
-
-        const text = await fetch(`${url}/block.txt`);
-        expect(text.headers.get('content-type')).toContain('text/plain');
-        await expect(text.text()).resolves.toBe('anchored');
-    });
-
-    test('stub backend — strictness (the external-block analog) — an unmatched request gets a 501 naming the path and the declared routes', async () => {
-        // Given - a stub declaring only /events
-        const { url } = await started([get('/events', {})]);
-
-        // When - the app calls an undeclared route
-        const response = await fetch(`${url}/articles?x=1`);
-
-        // Then - 501, and the body says what exists
-        expect(response.status).toBe(501);
-        const body: unknown = await response.json();
-        expect(body).toMatchObject({ declared: ['GET /events'] });
-        expect(JSON.stringify(body)).toContain('no stub matches GET /articles?x=1');
-    });
-
-    test('stub backend — strictness (the external-block analog) — violation() enumerates unmatched requests with their counts', async () => {
-        // Given - a guarded chain and two hits on an undeclared route
-        const { backend, url } = await started([get('/events', {})]);
-        await fetch(`${url}/articles`);
-        await fetch(`${url}/articles`);
-        await fetch(`${url}/ghost`, { method: 'POST' });
-
-        // Then - the error lists every family, its count, and the declared routes
-        const violation = backend.violation();
-        expect(violation).toBeInstanceOf(Error);
-        expect(violation?.message).toContain('- GET /articles (2 times)');
-        expect(violation?.message).toContain('- POST /ghost');
-        expect(violation?.message).toContain('- GET /events');
     });
 
     test('stub backend — transport failures — an unreachable stub drops the connection instead of answering', async () => {
@@ -247,18 +119,6 @@ describe('StubBackend', () => {
         );
     });
 
-    test('stub backend — strictness (the external-block analog) — a chain with zero stubs leaves the backend unguarded', async () => {
-        // Given - a chain that declared nothing (the MSW boundary, mirrored)
-        const { backend, url } = await started([]);
-
-        // When - a request comes in anyway
-        const response = await fetch(`${url}/anything`);
-
-        // Then - it is answered 501 but never fails the action
-        expect(response.status).toBe(501);
-        expect(backend.violation()).toBeNull();
-    });
-
     test('stub backend — strictness (the external-block analog) — beginChain resets the queue and the unmatched log', async () => {
         // Given - a first chain that served its stub and recorded a miss
         const { backend, url } = await started([get('/events', { n: 1 })]);
@@ -272,5 +132,166 @@ describe('StubBackend', () => {
         // Then - the previous chain's state is gone
         expect(backend.violation()).toBeNull();
         await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
+    });
+
+    test('stub backend — serving declared stubs — a responder reads the body and headers as observed: nothing sent is null, text is text, a repeated header is no value', async () => {
+        // Given - a responder echoing what it observed
+        const { url } = await started([
+            {
+                request: http.post('/echo'),
+                response: (request) =>
+                    http.json({
+                        body: request.body,
+                        cookie: request.headers['set-cookie'] ?? null,
+                        token: request.headers['x-token'],
+                    }),
+            },
+        ]);
+        const echo = async (init: RequestInit): Promise<unknown> =>
+            await fetchJson(`${url}/echo`, { method: 'POST', ...init });
+
+        // Then - each body and header as the stub read it
+        expect([
+            await echo({ body: JSON.stringify({ a: 1 }), headers: { 'X-Token': 'a' } }),
+            await echo({ body: 'plain text', headers: { 'x-token': 'b' } }),
+            await echo({
+                headers: [
+                    ['set-cookie', 'a=1'],
+                    ['set-cookie', 'b=2'],
+                    ['x-token', 'c'],
+                ],
+            }),
+        ]).toStrictEqual([
+            { body: { a: 1 }, cookie: null, token: 'a' },
+            { body: 'plain text', cookie: null, token: 'b' },
+            { body: null, cookie: null, token: 'c' },
+        ]);
+    });
+
+    test('stub backend — serving declared stubs — a delayed reply lands after an immediate one sent later', async () => {
+        // Given - a slow route and a fast one
+        const { url } = await started([
+            { request: http.get('/slow'), response: http.json({ n: 'slow' }, { delay: 200 }) },
+            get('/fast', { n: 'fast' }),
+        ]);
+
+        // When - the slow one is asked first, then the fast one
+        const landed: string[] = [];
+        await Promise.all(
+            ['slow', 'fast'].map(async (path) => {
+                await fetch(`${url}/${path}`);
+                landed.push(path);
+            }),
+        );
+
+        // Then - the fast one landed first
+        expect(landed).toStrictEqual(['fast', 'slow']);
+    });
+
+    test('stub backend — serving declared stubs — each reply carries the cors headers and its content type: none without a body, text for text, JSON for a value or a miss', async () => {
+        // Given - an empty reply, a reply with no body at all, a text and a value
+        const { url } = await started([
+            { request: http.delete('/events/1'), response: http.empty() },
+            { request: http.get('/bare'), response: { body: undefined, status: 202 } },
+            { request: http.get('/block.txt'), response: { body: 'anchored' } },
+            get('/value', { a: 1 }),
+        ]);
+        const read = async (path: string, method = 'GET'): Promise<(null | number | string)[]> => {
+            const response = await fetch(`${url}${path}`, { method });
+            return [
+                response.status,
+                response.headers.get('access-control-allow-origin'),
+                response.headers.get('content-type'),
+                await response.text(),
+            ];
+        };
+
+        // Then - each response, and a preflight that asked for no headers
+        const preflight = await fetch(`${url}/events/1`, { method: 'OPTIONS' });
+        const asked = await fetch(`${url}/anything`, {
+            headers: { 'access-control-request-headers': 'x-custom' },
+            method: 'OPTIONS',
+        });
+        expect([
+            await read('/events/1', 'DELETE'),
+            await read('/bare'),
+            await read('/block.txt'),
+            await read('/value'),
+            await read('/missing?x=1'),
+            [
+                preflight.status,
+                preflight.headers.get('access-control-allow-headers'),
+                preflight.headers.get('access-control-max-age'),
+                asked.headers.get('access-control-allow-headers'),
+            ],
+        ]).toStrictEqual([
+            [204, '*', null, ''],
+            [202, '*', null, ''],
+            [200, '*', 'text/plain; charset=utf-8', 'anchored'],
+            [200, '*', 'application/json', '{"a":1}'],
+            [
+                501,
+                '*',
+                'application/json',
+                JSON.stringify({
+                    declared: ['DELETE /events/1', 'GET /bare', 'GET /block.txt', 'GET /value'],
+                    error: '@jterrazz/test declared backend: no stub matches GET /missing?x=1',
+                }),
+            ],
+            [204, '*', '600', 'x-custom'],
+        ]);
+    });
+
+    test('stub backend — strictness (the external-block analog) — before any chain and in a chain of no stub the backend is unguarded, and armed its violation names each miss and its count', async () => {
+        // Given - a backend no chain armed, then a chain declaring one route that sees two misses
+        const backend = new StubBackend();
+        onTestFinished(async () => {
+            await backend.stop();
+        });
+        const url = await backend.start();
+        const unarmed = [await statusOf(`${url}/early`), backend.violation()];
+        backend.beginChain([]);
+        await fetch(`${url}/early`);
+        unarmed.push(backend.violation());
+        backend.beginChain([get('/events', {}), get('/users', {})]);
+        await fetch(`${url}/a`);
+        await fetch(`${url}/a`);
+        await fetch(`${url}/b`, { method: 'PUT' });
+
+        // Then - unarmed it answers and stays quiet; armed, the whole refusal
+        expect([unarmed, backend.violation()?.message]).toStrictEqual([
+            [501, null, null],
+            [
+                'found: unmatched request(s) hit the declared backend during the chain:',
+                '  - GET /a (2 times)',
+                '  - PUT /b',
+                'declared stubs:',
+                '  - GET /events',
+                '  - GET /users',
+                'why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.',
+                "fix: add a stub for each to the chain's composite",
+                'read: docs/24-linting.md#network-strict-after-first-stub',
+            ].join('\n'),
+        ]);
+    });
+
+    test('stub backend — the server — a fixed port is the port it listens on, and a port taken refuses the start', async () => {
+        // Given - a backend on a port of its own
+        const first = new StubBackend();
+        onTestFinished(async () => {
+            await first.stop();
+        });
+        const url = await first.start();
+        const port = Number(new URL(url).port);
+        const second = new StubBackend({ port });
+        const third = new StubBackend({ port });
+        await first.stop();
+        onTestFinished(async () => {
+            await second.stop();
+        });
+
+        // Then - the second takes that port, the third finds it taken
+        await expect(second.start()).resolves.toBe(`http://127.0.0.1:${port}`);
+        await expect(third.start()).rejects.toThrow('EADDRINUSE');
     });
 });
