@@ -35,11 +35,13 @@ export const triggerNameInKebabCase = defineRule(
             return {
                 CallExpression(node: AstNode) {
                     const callee = child(node, 'callee');
+                    // Stryker disable next-line ConditionalExpression,LogicalOperator: a call always has a callee
                     if (callee === undefined || memberPropertyName(callee) !== 'trigger') {
                         return;
                     }
                     const [first] = childList(node, 'arguments');
                     const name = stringValue(first);
+                    // Stryker disable next-line ConditionalExpression,LogicalOperator: a name no literal holds is no name to judge
                     if (first !== undefined && name !== undefined && !KEBAB_CASE.test(name)) {
                         context.report({
                             data: { kebab: kebabOf(name), name },

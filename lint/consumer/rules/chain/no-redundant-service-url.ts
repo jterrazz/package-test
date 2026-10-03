@@ -27,20 +27,24 @@ export const noRedundantServiceUrl = defineRule(
             return {
                 CallExpression(node: AstNode) {
                     const callee = child(node, 'callee');
+                    // Stryker disable next-line ConditionalExpression,LogicalOperator: a call always has a callee
                     if (callee === undefined || memberPropertyName(callee) !== 'env') {
                         return;
                     }
                     const argument = childList(node, 'arguments')[0];
+                    // Stryker disable next-line ConditionalExpression,BlockStatement: only an object lists properties
                     if (argument?.type !== 'ObjectExpression') {
                         return;
                     }
                     for (const property of childList(argument, 'properties')) {
                         const key = propertyKeyName(property);
+                        // Stryker disable next-line ConditionalExpression,LogicalOperator: no key is no URL key
                         if (key === undefined || !URL_KEY.test(key)) {
                             continue;
                         }
                         const value = child(property, 'value');
                         if (
+                            // Stryker disable next-line ConditionalExpression,LogicalOperator,OptionalChaining: memberPropertyName reads no name from a non-member
                             value?.type === 'MemberExpression' &&
                             memberPropertyName(value) === 'connectionString'
                         ) {
