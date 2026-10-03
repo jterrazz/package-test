@@ -42,7 +42,6 @@ export class RunSetupContainer implements ContainerPort {
     async start(): Promise<void> {
         const response = await fetch(`${this.url}/containers`, {
             body: JSON.stringify(this.request),
-            headers: { 'content-type': 'application/json' },
             method: 'POST',
         });
         const answer = answered(await response.json());
