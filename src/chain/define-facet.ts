@@ -64,19 +64,18 @@ type FacetDefiner<Self, Config extends ChainConfig> = <const C extends Compositi
 
 type Wired = Composition & Pick<Wiring<Composition, ChainConfig>, 'locate'>;
 
+/** Each setup a shared setting names, applied as if called with it; a setting no setup names is ignored. */
 function withSharedSettings(
-    capabilities: Composition['capabilities'],
+    setups: readonly AnyCapability[],
     state: ChainState,
     context: Partial<Record<ContextKey, unknown>>,
     setup: SetupContext<object>,
 ): ChainState {
     let next = state;
-    for (const capability of capabilities) {
-        const value =
-            capability.kind === 'setup' && capability.context !== undefined
-                ? context[capability.context]
-                : undefined;
-        if (capability.kind === 'setup' && value !== undefined) {
+    for (const capability of setups) {
+        // Stryker disable next-line ConditionalExpression: no shared setting is keyed by the text of an absent context
+        const value = capability.context === undefined ? undefined : context[capability.context];
+        if (value !== undefined) {
             next = applied(next, capability, [value], setup);
         }
     }
@@ -98,11 +97,7 @@ function chainOf(
         chain[capability.name] =
             capability.kind === 'context'
                 ? (context: Partial<Record<ContextKey, unknown>>) =>
-                      chainOf(
-                          facet,
-                          setup,
-                          withSharedSettings(facet.capabilities, state, context, setup),
-                      )
+                      chainOf(facet, setup, withSharedSettings(setups, state, context, setup))
                 : (...args: unknown[]) =>
                       chainOf(facet, setup, {
                           ...applied(state, capability, args, setup),
