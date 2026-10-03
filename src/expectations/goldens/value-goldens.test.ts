@@ -1,45 +1,22 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { describe, expect, inject, onTestFinished, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { ResponseAccessor } from '../http/response.js';
-import { deferRewritesTo } from '../in-place/in-place.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { registerMatchers } from './matchers.js';
-import { WHOLE_MATCHER } from './text-assertions.js';
+import { scratchTest, UUID, wholeOf } from './response-goldens.fixtures.js';
+import {
+    matchJsonValue,
+    matchResponseValue,
+    UNRECORDED,
+    unrecorded,
+    writeAt,
+} from './value-goldens.js';
 
-const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
-
-type Whole = (expected: unknown, options: unknown, stack: string) => unknown;
-
-type Registered = (expected: unknown, call: { options: unknown; stack: string }) => unknown;
-
-function wholeOf(subject: unknown, negated = false): Whole {
-    // oxlint-disable-next-line vitest/valid-expect -- the assertion's matcher is the registered comparison, called below by the name no member access spells
-    const assertion = expect(subject);
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the matcher is registered under a name no member access spells; reaching it by that name is how a test hands it a stack of its own
-    const target = (negated ? assertion.not : assertion) as unknown as Record<string, Registered>;
-    return (expected, options, stack) => target[WHOLE_MATCHER]?.(expected, { options, stack });
-}
-
-function scratchTest(call: string): { file: string; read: () => string; stack: string } {
-    const scratch = mkdtempSync(join(tmpdir(), 'whole-in-place-'));
-    const testFile = join(scratch, 'scratch.test.ts');
-    writeFileSync(testFile, `test('records', async () => {\n    ${call}\n});\n`);
-    // invariant: a scratch test is read back by the test that wrote it: written at once.
-    deferRewritesTo(null);
-    onTestFinished(() => {
-        rmSync(scratch, { force: true, recursive: true });
-        deferRewritesTo(() => inject('inPlaceRewrites'));
-    });
-    return {
-        file: testFile,
-        read: () => readFileSync(testFile, 'utf8'),
-        stack: `Error: toMatch call site\n    at ${testFile}:2:5`,
-    };
-}
+const verdict = (result: { message: () => string; pass: boolean }): [boolean, string] => [
+    result.pass,
+    result.message(),
+];
 
 await registerMatchers();
 
@@ -195,5 +172,55 @@ describe('value-goldens', () => {
         expect(matching.read()).toContain(String.raw`toMatch('built\n');`);
         expect(frozen.read()).toContain("toMatch('other', { frozen: true });");
         expect(negated.read()).toContain(String.raw`not.toMatch('built\n');`);
+    });
+
+    test('valueGoldens — the verdicts in place — a blank value is not recorded yet, a match says so, and a value with no test frame to write into is refused', () => {
+        // Given - values and a json and a response subject, with no update mode
+        const context = { negated: false, options: undefined, stack: '' };
+        const json = new JsonAccessor('{ "a": 1 }', 'body', '/tmp');
+        const response = new ResponseAccessor(
+            { body: '42', headers: { 'content-type': 'text/plain' }, status: 200 },
+            '/tmp',
+        );
+
+        // Then - each verdict, and the refusal of a write with nowhere to go
+        expect([
+            [unrecorded('  \n '), unrecorded('x'), unrecorded(0)],
+            verdict(matchJsonValue(json, { a: 1 }, context)),
+            verdict(matchJsonValue(json, '  ', context)),
+            verdict(matchResponseValue(response, 'HTTP/1.1 200 OK\n\n42\n', context)),
+            verdict(matchResponseValue(response, ' ', context)),
+        ]).toStrictEqual([
+            [true, false, false],
+            [true, 'expected JSON not to match the value in place'],
+            [false, `JSON (the value in place): ${UNRECORDED}`],
+            [true, 'expected response not to match the value in place'],
+            [false, `Response (the value in place): ${UNRECORDED}`],
+        ]);
+        expect(() =>
+            writeAt({ ...context, stack: 'Error\n    at node:internal/x:1:1' }, () => ''),
+        ).toThrow(
+            new Error(
+                [
+                    'found: update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written',
+                    'why: A value written in place is rewritten in the test that states it.',
+                    'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
+                    'read: docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                ].join('\n'),
+            ),
+        );
+    });
+
+    test('valueGoldens — the verdicts in place — a write names where it wrote', () => {
+        // Given - a call in place in a scratch test
+        const site = scratchTest("expect(result.stdout).toMatch('');");
+
+        // Then - the line the value was written at
+        expect(
+            writeAt(
+                { negated: false, options: undefined, stack: site.stack },
+                () => "'x'",
+            ).message(),
+        ).toBe(`updated the value in place at ${site.file}:2`);
     });
 });

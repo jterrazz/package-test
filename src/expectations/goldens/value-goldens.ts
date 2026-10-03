@@ -60,9 +60,8 @@ export function matchStreamValue(
     if (comparison.pass || !recordsInPlace(context)) {
         return comparison;
     }
-    const previous = dedent(expected);
     const merged = mergeTextPreservingPlaceholders(
-        previous === '' ? null : previous,
+        dedent(expected),
         accessor.text,
         accessor.captures,
     );
