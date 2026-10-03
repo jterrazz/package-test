@@ -11,7 +11,8 @@ function stubMatches(stub: Stub, request: MatchableRequest): boolean {
     if (!urlMatches(url, request.url)) {
         return false;
     }
-    if (absentHeaders?.some((name) => request.headers[name.toLowerCase()] !== undefined) === true) {
+    // Stryker disable next-line ArrayDeclaration: no request carries a header named by the text a mutant writes
+    if ((absentHeaders ?? []).some((name) => request.headers[name.toLowerCase()] !== undefined)) {
         return false;
     }
     return match ? match(request) : true;
@@ -37,7 +38,7 @@ function stateOf({ stub, served }: StubEntry): string {
     if (isNever(stub)) {
         return served === 0 ? ' (never)' : ` (never, reached ${served} time(s))`;
     }
-    if (times !== undefined && served >= times) {
+    if (served >= (times ?? Number.POSITIVE_INFINITY)) {
         return ` (exhausted after ${times})`;
     }
     return served === 0 ? '' : ` (served ${served} time(s))`;
@@ -73,18 +74,12 @@ export class StubQueue {
     /** `null` when nothing unexhausted matches: the strict-violation signal. */
     take(request: MatchableRequest): null | Stub {
         for (const entry of this.entries) {
-            const { times } = entry.stub;
-            const never = isNever(entry.stub);
-            if (!never && times !== undefined && entry.served >= times) {
-                continue;
-            }
-            if (!stubMatches(entry.stub, request)) {
+            const spent = entry.served >= (entry.stub.times ?? Number.POSITIVE_INFINITY);
+            if ((spent && !isNever(entry.stub)) || !stubMatches(entry.stub, request)) {
                 continue;
             }
             entry.served += 1;
-            if (never) {
-                entry.reached.push(`${request.method} ${request.url}`);
-            }
+            entry.reached.push(`${request.method} ${request.url}`);
             return entry.stub;
         }
         return null;

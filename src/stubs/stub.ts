@@ -28,23 +28,12 @@ export function defineStub(stub: Stub): Stub {
     return stub;
 }
 
-function isStubs(value: unknown): value is Stubs {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        'stubs' in value &&
-        Array.isArray(value.stubs) &&
-        'with' in value &&
-        typeof value.with === 'function'
-    );
-}
-
 function flatten(items: readonly StubInput[]): Stub[] {
     const flat: Stub[] = [];
     for (const item of items) {
         if (Array.isArray(item)) {
             flat.push(...flatten(item));
-        } else if (isStubs(item)) {
+        } else if ('stubs' in item) {
             flat.push(...item.stubs);
         } else {
             flat.push(item);
