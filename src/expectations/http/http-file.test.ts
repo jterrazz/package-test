@@ -2,60 +2,96 @@ import { describe, expect, test } from 'vitest';
 
 import { bodyKind, parseResponseFile, readBody, serializeResponseFile } from './http-file.js';
 
+const parse = (content: string) => parseResponseFile(content, 'r.http');
+
+const refusalOf = (content: string): string => {
+    try {
+        parseResponseFile(content, 'r.http');
+        return '';
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+    }
+};
+const READ_LINK = 'read: docs/12-api.md#http-request-files--full-format';
+
+const write = (body: unknown, headers: Record<string, string>, contentType?: string): string =>
+    serializeResponseFile({ body, hasBody: true, headers, status: '200' }, contentType);
+
 describe('http-file', () => {
-    test('http-files — responses — parses status, header subset, and JSON body', () => {
-        // Given - a complete response file
-        const parsed = parseResponseFile(
-            'HTTP/1.1 201 Created\ncontent-type: application/json\n\n{ "id": 1 }\n',
-            'responses/created.http',
-        );
+    test('http-files — responses — parses each section as written: blank lines before the status, header names and values trimmed, the headers ended by a blank line, a body of many lines', () => {
+        // Given - files of each shape
 
-        // Then - every section is extracted
-        expect(parsed.status).toBe('201');
-        expect(parsed.headers).toStrictEqual({ 'content-type': 'application/json' });
-        expect(parsed.hasBody).toBe(true);
-        expect(parsed.body).toStrictEqual({ id: 1 });
+        // Then - each parsed whole
+        expect([
+            parse('HTTP/1.1 201 Created\ncontent-type: application/json\n\n{ "id": 1 }\n'),
+            parse('\n  \n  HTTP/1.1 204  \nx-a : 1\nx-b:  two  \n   \nline one\nline two\n'),
+            parse('HTTP/1.1 {{number}}\n'),
+        ]).toStrictEqual([
+            {
+                body: { id: 1 },
+                hasBody: true,
+                headers: { 'content-type': 'application/json' },
+                status: '201',
+            },
+            {
+                body: 'line one\nline two',
+                hasBody: true,
+                headers: { 'x-a': '1', 'x-b': 'two' },
+                status: '204',
+            },
+            { body: undefined, hasBody: false, headers: {}, status: '{{number}}' },
+        ]);
     });
 
-    test('http-files — responses — parses a body-less response', () => {
-        // Given - a status-only fixture
-        const parsed = parseResponseFile('HTTP/1.1 204 No Content\n', 'responses/gone.http');
+    test('http-files — responses — refuses a file that does not open on HTTP/1.1 <status>, and a header line with no colon', () => {
+        // Given - a malformed start line, an empty file, and a header with no colon
 
-        // Then - no body is asserted
-        expect(parsed.status).toBe('204');
-        expect(parsed.hasBody).toBe(false);
+        // Then - each refusal whole
+        expect([
+            refusalOf('200 OK\n'),
+            refusalOf(''),
+            refusalOf('HTTP/1.1 200\nbroken header\n'),
+        ]).toStrictEqual([
+            [
+                'found: r.http: the first line is "200 OK"',
+                'why: A response file opens on `HTTP/1.1 <status>`.',
+                'fix: start the response file with its status line: "HTTP/1.1 200 OK"',
+                READ_LINK,
+            ].join('\n'),
+            [
+                'found: r.http: the first line is ""',
+                'why: A response file opens on `HTTP/1.1 <status>`.',
+                'fix: start the response file with its status line: "HTTP/1.1 200 OK"',
+                READ_LINK,
+            ].join('\n'),
+            [
+                'found: r.http: the header line "broken header" has no colon',
+                'why: An `.http` file’s header is a `Name: value` line.',
+                'fix: write the header as `Name: value`',
+                READ_LINK,
+            ].join('\n'),
+        ]);
     });
 
-    test('http-files — responses — rejects a first line that is not HTTP/1.1 <status>', () => {
-        // Given - a malformed response file
-        // Then - the error names the file and the expected shape
-        expect(() => parseResponseFile('200 OK\n', 'responses/bad.http')).toThrow(
-            'found: responses/bad.http: the first line is "200 OK"',
-        );
-    });
+    test('http-files — responses — a body is written by the content-type the file states first, then the actual one: JSON for a JSON type even from text, text for a text type, a JSON-like text kept a string', () => {
+        // Given - responses with a body of each kind, and one with none
 
-    test('http-files — responses — rejects an empty response file', () => {
-        // Given - an empty response file
-        // Then - the first-line error fires (there is no status line)
-        expect(() => parseResponseFile('', 'responses/empty.http')).toThrow(
-            'found: responses/empty.http: the first line is ""',
-        );
-    });
-
-    test('http-files — responses — parses a status without reason text', () => {
-        // Given - a bare "HTTP/1.1 204" line
-        const parsed = parseResponseFile('HTTP/1.1 204\n', 'responses/bare.http');
-
-        // Then - the status token is extracted
-        expect(parsed.status).toBe('204');
-    });
-
-    test('http-files — responses — parses a {{number}} status placeholder', () => {
-        // Given - a tokenized status line (rule `no-unknown-token` applies to status too)
-        const parsed = parseResponseFile('HTTP/1.1 {{number}}\n', 'responses/token.http');
-
-        // Then - the placeholder is kept as-is for the matcher to interpret
-        expect(parsed.status).toBe('{{number}}');
+        // Then - each file written
+        expect([
+            write('plain', { 'Content-Type': 'application/json' }),
+            write('{"a":1}', {}),
+            write('plain', {}),
+            write('{"a":1}', { 'x-a': 'text/plain' }, 'text/plain'),
+            write('plain', { 'x-kind': 'text/plain' }, 'application/json'),
+            serializeResponseFile({ body: undefined, hasBody: false, headers: {}, status: '599' }),
+        ]).toStrictEqual([
+            'HTTP/1.1 200 OK\nContent-Type: application/json\n\n"plain"\n',
+            'HTTP/1.1 200 OK\n\n"{\\"a\\":1}"\n',
+            'HTTP/1.1 200 OK\n\nplain\n',
+            'HTTP/1.1 200 OK\nx-a: text/plain\n\n{"a":1}\n',
+            'HTTP/1.1 200 OK\nx-kind: text/plain\n\n"plain"\n',
+            'HTTP/1.1 599\n',
+        ]);
     });
 
     test('http-files — responses — falls back to the raw text for a non-JSON body', () => {
@@ -119,6 +155,8 @@ describe('http-file', () => {
             'IMAGE/PNG',
             'application/octet-stream',
             'application/x-unknown',
+            ' Text/Plain ; charset=utf-8',
+            'application/json; charset=utf-8',
         ];
 
         // Then - each is the kind its essence names, and an unknown one is sniffed
@@ -130,6 +168,8 @@ describe('http-file', () => {
             'binary',
             'binary',
             'sniffed',
+            'text',
+            'json',
         ]);
     });
 

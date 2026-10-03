@@ -62,6 +62,10 @@ export function parseHeaders(headerLines: string[], fileName: string): Record<st
 
 export type BodyKind = 'binary' | 'json' | 'sniffed' | 'text';
 
+const PARAMETERS = /;.*$/su;
+
+const START_LINE = /^HTTP\/1\.1\s+(?<status>\S+)(?:\s+.*)?$/u;
+
 const TEXT_MEDIA_TYPES = new Set([
     'application/javascript',
     'application/x-ndjson',
@@ -87,7 +91,8 @@ const BINARY_MEDIA_TYPES = new Set([
 ]);
 
 export function bodyKind(contentType: string | undefined): BodyKind {
-    const media = contentType?.split(';')[0]?.trim().toLowerCase() ?? '';
+    // Stryker disable next-line StringLiteral: no type is read from the text a mutant writes in place of none
+    const media = (contentType ?? '').replace(PARAMETERS, '').trim().toLowerCase();
     if (media === 'application/json' || media.endsWith('+json')) {
         return 'json';
     }
@@ -130,8 +135,7 @@ export function parseResponseFile(
 ): ParsedResponseFile {
     const { body, headerLines, startLine } = splitSections(content);
 
-    const start = /^HTTP\/1\.1\s+(?<status>\S+)(?:\s+.*)?$/u.exec(startLine.trim());
-    const status = start?.groups?.status;
+    const status = START_LINE.exec(startLine.trim())?.[1];
     if (status === undefined) {
         throw new Error(
             refusal({
@@ -212,6 +216,7 @@ function writtenAsText(body: unknown, kind: BodyKind): body is string {
     return kind === 'text' || !isJsonLike(body);
 }
 
+// Stryker disable BlockStatement: a catch emptied answers undefined, which reads as not JSON all the same
 function isJsonLike(text: string): boolean {
     try {
         JSON.parse(text);
@@ -220,3 +225,4 @@ function isJsonLike(text: string): boolean {
         return false;
     }
 }
+// Stryker restore BlockStatement
