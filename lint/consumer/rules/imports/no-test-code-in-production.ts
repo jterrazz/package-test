@@ -5,11 +5,11 @@ import { dirname, relative } from 'node:path';
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import type { Visitor } from '../../../kit/project/ast.js';
 import { isProductionFile } from '../../../kit/project/linted-file.js';
+import { materialNamed } from '../../../kit/project/material.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../../kit/project/path-references.js';
 import {
     allowedTestPackagesAt,
     lintBegins,
-    materialNamed,
     moduleReferenceVisitor,
     reachOf,
 } from '../../../kit/project/production.js';

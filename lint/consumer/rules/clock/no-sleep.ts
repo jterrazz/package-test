@@ -5,12 +5,12 @@ import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     child,
     identifierName,
-    importSourceVisitor,
     memberPropertyName,
     nodeEnd,
     nodeStart,
 } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { importSourceVisitor } from '../../../kit/project/import-sources.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';

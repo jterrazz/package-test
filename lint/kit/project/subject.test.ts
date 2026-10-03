@@ -2,9 +2,6 @@ import { describe, expect, test } from 'vitest';
 
 import {
     ambiguousSegment,
-    commandWords,
-    declaredCommands,
-    doorsOf,
     NO_READING,
     pathTemplate,
     subjectFolder,
@@ -207,38 +204,6 @@ describe('subject', () => {
         ]);
     });
 
-    test.each([
-        ['db migrate --dry-run', ['db']],
-        ['spawn shop', ['spawn']],
-        ['--help', []],
-        ['.', []],
-        ['check ./src', ['check']],
-    ])(
-        'the subject a spec reaches, read statically — with no declared list, the command line %j names the command %j',
-        (line, words) => {
-            // Given - a command line a chain runs, its runner declaring no command list
-            // Then - the first word alone names the command: a positional argument is no subcommand
-            expect(commandWords(line)).toStrictEqual(words);
-        },
-    );
-
-    test.each([
-        ['db migrate --dry-run', ['db', 'migrate']],
-        ['spawn shop', ['spawn']],
-        ['migrate db', ['migrate', 'db']],
-        ['shop', []],
-        ['--help', []],
-    ])(
-        'the subject a spec reaches, read statically — with the list db, migrate, spawn, the command line %j names %j',
-        (line, words) => {
-            // Given - a runner declaring the words its commands are spelled with
-            const commands = ['db', 'migrate', 'spawn'];
-
-            // Then - the leading words the list holds name the command, the first other word ends it
-            expect(commandWords(line, commands)).toStrictEqual(words);
-        },
-    );
-
     test("the subject a spec reaches, read statically — a spec's cli chain reads its runner's list, handed in", () => {
         // Given - a chain running a two-word command, and the list its runner declares
         const source = [
@@ -273,60 +238,6 @@ describe('subject', () => {
 
         // Then - the first word for the plain runner, the declared words for the other and its view
         expect(folders).toStrictEqual(['db', 'db/migrate', 'db/migrate']);
-    });
-
-    test('what a repository declares — its runner commands, its irregular collections — the list a specification module declares is read from its cli constructor', () => {
-        // Given - a door declaring its commands among other options, and one declaring none
-        const declaring = [
-            "import { specification } from '@jterrazz/test';",
-            "// commands: ['ignored'] in a comment",
-            "export const { cleanup, cli } = await specification.cli(BIN, { defaults: { TZ: 'UTC' }, commands: ['db', \"migrate\"] });",
-        ].join('\n');
-        const silent =
-            'export const { cleanup, cli } = await specification.cli(BIN, { commands });';
-
-        // Then - the literal words, and nothing where the list is bound to nothing or absent
-        expect(declaredCommands(declaring)).toStrictEqual(['db', 'migrate']);
-        expect(declaredCommands(silent)).toBeUndefined();
-        expect(
-            declaredCommands('export const { cli } = await specification.cli(BIN);'),
-        ).toBeUndefined();
-    });
-
-    test.each([
-        ['commands: COMMANDS', "const COMMANDS = ['db', 'migrate'] as const;"],
-        ['commands', "const commands: readonly string[] = ['db', 'migrate'];"],
-    ])(
-        'what a repository declares — its runner commands, its irregular collections — a list bound to a const of the runner file is followed (%s)',
-        (option, binding) => {
-            // Given - the runner naming its list by a const of its own file
-            const door = [
-                binding,
-                `export const { cleanup, cli } = await specification.cli(BIN, { ${option} });`,
-            ].join('\n');
-
-            // Then - the words the const binds
-            expect(declaredCommands(door)).toStrictEqual(['db', 'migrate']);
-        },
-    );
-
-    test('what a repository declares — its runner commands, its irregular collections — the door of a handle is the specification module it is imported from', () => {
-        // Given - a spec importing an api and two clis, one under another name and viewed
-        const source = [
-            "import { api } from '../api.specification.js';",
-            "import { cli } from '../cli.specification.js';",
-            "import { cli as run } from '../db-cli.specification.js';",
-            'const db = run.with({});',
-        ].join('\n');
-
-        // Then - each handle's door, a view under its runner's, for the facet asked about
-        expect(doorsOf(source, 'cli')).toStrictEqual({
-            cli: '../cli.specification.js',
-            db: '../db-cli.specification.js',
-            run: '../db-cli.specification.js',
-        });
-        expect(doorsOf(source, 'api')).toStrictEqual({ api: '../api.specification.js' });
-        expect(doorsOf(source, 'job')).toStrictEqual({});
     });
 
     test.each<[string, readonly string[], string | undefined]>([

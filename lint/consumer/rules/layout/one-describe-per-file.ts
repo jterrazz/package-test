@@ -2,21 +2,18 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context, FixFn } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { childList, nodeEnd, nodeStart, stringValue } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { identityOf } from '../../../kit/project/linted-file.js';
+import { isTestRole } from '../../../kit/project/role.js';
 import {
     calleeOf,
-    childList,
     escapedFor,
     firstArgumentOf,
     groupBodyOf,
     isGroup,
     isTest,
-    nodeEnd,
-    nodeStart,
-    stringValue,
-} from '../../../kit/project/ast.js';
-import type { AstNode, Visitor } from '../../../kit/project/ast.js';
-import { identityOf } from '../../../kit/project/linted-file.js';
-import { isTestRole } from '../../../kit/project/role.js';
+} from '../../../kit/project/test-calls.js';
 import { testTitle } from '../../../kit/project/test-title.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { flattenedGroup, mergeFix } from './one-describe-per-file.merge.js';

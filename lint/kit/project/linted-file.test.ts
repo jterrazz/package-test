@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { specsAnchor } from './ast.js';
 import { identityOf, isProductionFile, segmentsOf, specsAnchorOf } from './linted-file.js';
 import type { LintedFile } from './linted-file.js';
-import { isProductionModule } from './production.js';
+import { isProductionModule } from './material.js';
 import { projectSegments, roleOf } from './role.js';
 
 const linted = (physicalFilename: string, sourceCode: object = {}): LintedFile => ({

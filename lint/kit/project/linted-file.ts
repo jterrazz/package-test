@@ -2,7 +2,7 @@ import type { Context } from '@oxlint/plugins';
 
 import { specsAnchor } from './ast.js';
 import type { SpecsAnchor } from './ast.js';
-import { isProductionModule } from './production.js';
+import { isProductionModule } from './material.js';
 import { projectSegments, roleOf } from './role.js';
 import type { FileIdentity } from './role.js';
 

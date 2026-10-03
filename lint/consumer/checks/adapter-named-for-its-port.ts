@@ -11,7 +11,7 @@ import {
 } from '../../kit/project/ast.js';
 import type { AstNode } from '../../kit/project/ast.js';
 import { parseProgram } from '../../kit/project/module-parser.js';
-import { resolveSpecifier } from '../../kit/project/production.js';
+import { resolveSpecifier } from '../../kit/project/specifiers.js';
 import { modulesUnder, setupFolderOf } from '../../kit/project/specs-modules.js';
 import { findSpecsRoots, isWithin, lineAt, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';

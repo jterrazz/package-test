@@ -2,17 +2,12 @@ import { blankComments, treeKind } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
+import { declaredCommands } from './command-words.js';
 import { projectRootOf } from './role.js';
+import { closingOf } from './source-scan.js';
+import { doorsOf, SUBJECT_FACETS } from './spec-chains.js';
 import { specimenOf } from './specimen.js';
-import {
-    closingOf,
-    declaredCommands,
-    doorsOf,
-    SUBJECT_FACETS,
-    subjectFolder,
-    subjectName,
-    subjectsOf,
-} from './subject.js';
+import { subjectFolder, subjectName, subjectsOf } from './subject.js';
 import type { Subject, SubjectReading } from './subject.js';
 import { suppressedLines } from './suppression.js';
 import { testSettingsAtSync } from './test-section.js';

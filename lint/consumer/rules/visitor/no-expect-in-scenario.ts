@@ -2,8 +2,9 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { child, identifierName, scenarioCallbackOf, walk } from '../../../kit/project/ast.js';
+import { child, identifierName, walk } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { scenarioCallbackOf } from '../../../kit/project/framework-calls.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'no-expect-in-scenario');

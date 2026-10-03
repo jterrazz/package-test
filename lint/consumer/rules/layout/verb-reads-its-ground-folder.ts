@@ -11,14 +11,10 @@ import {
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import {
-    child,
-    childList,
-    diskCallOf,
-    identifierName,
-    memberPropertyName,
-} from '../../../kit/project/ast.js';
-import type { AstNode, DiskCall, Visitor } from '../../../kit/project/ast.js';
+import { child, childList, identifierName, memberPropertyName } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { diskCallOf } from '../../../kit/project/framework-calls.js';
+import type { DiskCall } from '../../../kit/project/framework-calls.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';

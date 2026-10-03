@@ -9,8 +9,8 @@ import {
     withoutEntryImport,
 } from '../../kit/checker/entry-import.js';
 import { dedent } from '../../kit/project/dedent.js';
+import { skipString } from '../../kit/project/source-scan.js';
 import { isInside, kebabName, literalSpans, titleAround } from '../../kit/project/spec-values.js';
-import { skipString } from '../../kit/project/subject.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
 import { findSpecsRoots, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';

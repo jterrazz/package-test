@@ -22,26 +22,6 @@
             "count": 1
         }
     },
-    "lint/kit/project/ast.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/production.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/subject.test.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/subject.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "lint/self/corpus/matrix.ts": {
         "max-lines": {
             "count": 1

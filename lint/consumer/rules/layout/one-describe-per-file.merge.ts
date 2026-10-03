@@ -1,21 +1,23 @@
 import type { Fix, Fixer, FixFn } from '@oxlint/plugins';
 
 import {
-    calleeOf,
     child,
     childList,
-    escapedFor,
-    firstArgumentOf,
-    groupBodyOf,
     identifierName,
-    isDescribeCallee,
-    isGroup,
-    isTestCallee,
     nodeEnd,
     nodeStart,
     stringValue,
 } from '../../../kit/project/ast.js';
 import type { AstNode } from '../../../kit/project/ast.js';
+import {
+    calleeOf,
+    escapedFor,
+    firstArgumentOf,
+    groupBodyOf,
+    isDescribeCallee,
+    isGroup,
+    isTestCallee,
+} from '../../../kit/project/test-calls.js';
 
 /** `undefined` when the group holds anything but tests. */
 export function flattenedGroup(source: string, group: AstNode, named: string): string | undefined {

@@ -9,12 +9,13 @@ import {
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, join } from 'node:path';
 
-import { importSourceVisitor, isNode } from './ast.js';
+import { isNode } from './ast.js';
+import { importSourceVisitor } from './import-sources.js';
 import { parseProgram } from './module-parser.js';
 import { visitProgram } from './path-references.js';
-import { resolveSpecifier } from './production.js';
 import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
+import { resolveSpecifier } from './specifiers.js';
 import { isWithin, lowestCommonFolder, readText } from './tree.js';
 
 export const COMPONENT_TREE = 'component';

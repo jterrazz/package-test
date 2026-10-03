@@ -3,14 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { packageWith } from '../testing/package-tree.fixtures.js';
-import {
-    isProductionModule,
-    lintBegins,
-    materialAt,
-    reachOf,
-    resolveSpecifier,
-    testPackageOf,
-} from './production.js';
+import { lintBegins, reachOf } from './production.js';
 
 const ROOT = packageWith({
     'package.json': JSON.stringify({ imports: { '#data/*': { default: './specs/_fixtures/*' } } }),
@@ -34,28 +27,6 @@ const ROOT = packageWith({
     'tsconfig.json': '{ "compilerOptions": { "baseUrl": "./src", "paths": { "@/*": ["*"] } } }',
 });
 
-const EXTENDED = packageWith({
-    'apps/web/package.json': '{}',
-    'apps/web/tsconfig.json': JSON.stringify({
-        extends: ['@org/config/tsconfig', './tsconfig.app.json'],
-    }),
-    'apps/web/tsconfig.app.json': [
-        '{',
-        '    // The app config, itself built on the repository base.',
-        '    "extends": "../../tsconfig.base",',
-        '    "compilerOptions": { "baseUrl": "." },',
-        '}',
-    ].join('\n'),
-    'node_modules/@org/config/tsconfig.json': JSON.stringify({
-        compilerOptions: { paths: { '@shared/*': ['./shared/*'] } },
-    }),
-    'package.json': '{}',
-    'tsconfig.base.json': JSON.stringify({
-        compilerOptions: { paths: { '@data/*': ['specs/_fixtures/*'] } },
-        extends: './tsconfig.json',
-    }),
-    'tsconfig.json': JSON.stringify({ extends: './tsconfig.base.json' }),
-});
 function helperPackage(): { from: (name: string) => string; later: () => void } {
     const root = packageWith({ 'tests/helper.ts': 'export const helper = 1;\n' });
     return {
@@ -69,112 +40,6 @@ function helperPackage(): { from: (name: string) => string; later: () => void } 
     };
 }
 describe('production', () => {
-    test.each([
-        { path: 'src/domain/order.ts', production: true },
-        { path: 'lint/rule.ts', production: true },
-        { path: 'src/domain/order.test.ts', production: false },
-        { path: 'src/domain/order.fixtures.ts', production: false },
-        { path: 'src/domain/_fixtures/app.ts', production: false },
-        { path: 'src/news/stubs/http/events.ts', production: false },
-        { path: 'scripts/seed.ts', production: true },
-        { path: 'bin/cli.js', production: true },
-        { path: 'index.ts', production: true },
-        { path: 'specs/_shared/_setup/seed.ts', production: false },
-        { path: 'vitest.config.ts', production: false },
-        { path: 'apps/web/vite.config.mts', production: false },
-        { path: 'tests/helpers.ts', production: false },
-        { path: 'src/__tests__/helpers.ts', production: false },
-        { path: 'src/domain/order.json', production: false },
-    ])('isProductionModule — `$path` is production: $production', ({ path, production }) => {
-        // Given - a module below the package root
-        // Then - every source module is production, unless it is test material, a tool's config or under a separate test root
-        expect(isProductionModule(join(ROOT, path))).toBe(production);
-    });
-
-    test.each([
-        { kind: 'a test file', path: 'src/a.spec.ts' },
-        { kind: 'a test file', path: 'src/a.test-d.ts' },
-        { kind: 'a test file', path: 'specs/api/api.specification.ts' },
-        { kind: 'the specs tree', path: 'specs/_shared/_setup/seed.ts' },
-        { kind: 'ground', path: 'src/_requests/create.http' },
-        { kind: 'a stub', path: 'src/news/stubs/http/events.ts' },
-        { kind: undefined, path: 'src/stubs/engine.ts' },
-    ])('materialAt — `$path` is $kind', ({ kind, path }) => {
-        // Given - a path of one kind
-        // Then - the kind a message names it by
-        expect(materialAt(join(ROOT, path))).toBe(kind);
-    });
-
-    test('materialAt — reads a folder as a folder', () => {
-        // Given - a path that ends on a ground folder
-        // Then - as a file it is a module named `seeds`, as a folder it is ground
-        expect(materialAt(join(ROOT, 'src/_seeds'))).toBeUndefined();
-        expect(materialAt(join(ROOT, 'src/_seeds'), true)).toBe('ground');
-    });
-
-    test.each([
-        { name: 'vitest', specifier: 'vitest/config' },
-        { name: '@vitest/browser-playwright', specifier: '@vitest/browser-playwright' },
-        { name: '@testing-library/react', specifier: '@testing-library/react' },
-        { name: 'vitest-browser-react', specifier: 'vitest-browser-react' },
-        { name: undefined, specifier: '@jterrazz/test/oxlint' },
-        { name: undefined, specifier: 'vitesse' },
-    ])('testPackageOf — `$specifier` names $name', ({ name, specifier }) => {
-        // Given - a specifier into a test package, or elsewhere
-        // Then - the package, whatever subpath is written, and never the lint entry
-        expect(testPackageOf(specifier)).toBe(name);
-    });
-
-    test('resolveSpecifier — follows `paths` through the `extends` chain, the last base winning, the baseUrl read where it is stated', () => {
-        // Given - a module of the app, whose aliases come from two levels up the chain
-        const from = join(EXTENDED, 'apps/web/src/page.ts');
-
-        // Then - the repository base's alias, read from the app's own baseUrl; a cycle ends; the earlier base is overridden
-        expect(resolveSpecifier(from, '@data/users.js')).toStrictEqual([
-            join(EXTENDED, 'apps/web/specs/_fixtures/users.js'),
-        ]);
-        expect(resolveSpecifier(from, '@shared/x.js')).toStrictEqual([]);
-    });
-
-    test('resolveSpecifier — reads a base config from a package when no relative one states the paths', () => {
-        // Given - a module of an app extending only the package config
-        const root = packageWith({
-            'node_modules/@org/config/tsconfig.json': JSON.stringify({
-                compilerOptions: { paths: { '@shared/*': ['./shared/*'] } },
-            }),
-            'package.json': '{}',
-            'tsconfig.json': JSON.stringify({ extends: '@org/config/tsconfig' }),
-        });
-
-        // Then - the alias resolves beside the config that states it
-        expect(resolveSpecifier(join(root, 'src/a.ts'), '@shared/x.js')).toStrictEqual([
-            join(root, 'node_modules/@org/config/shared/x.js'),
-        ]);
-    });
-
-    test('resolveSpecifier — follows a relative path, a `paths` alias and an `imports` entry', () => {
-        // Given - a module in the package
-        const from = join(ROOT, 'src/domain/order.ts');
-
-        // Then - the file on disk where there is one, else the path the specifier names
-        expect(resolveSpecifier(from, './order.js')).toStrictEqual([from]);
-        expect(resolveSpecifier(from, '@/domain/order')).toStrictEqual([from]);
-        expect(resolveSpecifier(from, '#data/users.js')).toStrictEqual([
-            join(ROOT, 'specs/_fixtures/users.js'),
-        ]);
-    });
-
-    test('resolveSpecifier — names no local file for a package or a builtin', () => {
-        // Given - a module in the package
-        const from = join(ROOT, 'src/domain/order.ts');
-
-        // Then - nothing: a package is judged by its name, never by a path
-        expect([
-            ...resolveSpecifier(from, 'node:fs'),
-            ...resolveSpecifier(from, 'zod'),
-        ]).toStrictEqual([]);
-    });
-
     test.each([
         { module: 'anchored', what: 'specs/_fixtures/rows.json' },
         { module: 'read', what: 'specs/_seeds/a.sql' },

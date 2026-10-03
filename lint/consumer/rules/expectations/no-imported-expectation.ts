@@ -3,14 +3,8 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, resolve, sep } from 'node:path';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import {
-    assertionOf,
-    child,
-    childList,
-    identifierName,
-    stringValue,
-    walk,
-} from '../../../kit/project/ast.js';
+import { assertionOf } from '../../../kit/project/assertions.js';
+import { child, childList, identifierName, stringValue, walk } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf, specsAnchorOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';

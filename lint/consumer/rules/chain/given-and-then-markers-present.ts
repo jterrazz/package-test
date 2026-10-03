@@ -2,17 +2,16 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { child, childList } from '../../../kit/project/ast.js';
+import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import {
-    child,
-    childList,
     findTestCallback,
     firstMarkerAt,
     hasMarker,
     isTestCallee,
     markerComments,
     testCalleeHasModifier,
-} from '../../../kit/project/ast.js';
-import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+} from '../../../kit/project/test-calls.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'given-and-then-markers-present');

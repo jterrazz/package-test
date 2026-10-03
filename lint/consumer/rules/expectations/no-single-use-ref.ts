@@ -14,12 +14,12 @@ import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     child,
     childList,
-    goldenOf,
     memberPropertyName,
     stringValue,
     walk,
 } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { goldenOf } from '../../../kit/project/framework-calls.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isRelativePath } from '../../../kit/project/relative-path.js';
 import { isTestRole } from '../../../kit/project/role.js';

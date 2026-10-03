@@ -8,10 +8,10 @@ import {
     childList,
     identifierName,
     memberPropertyName,
-    scenarioCallbackOf,
     walk,
 } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { scenarioCallbackOf } from '../../../kit/project/framework-calls.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 

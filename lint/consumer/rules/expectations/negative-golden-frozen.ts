@@ -6,13 +6,13 @@ import {
     child,
     childList,
     findProperty,
-    goldenOf,
     identifierName,
     memberPropertyName,
     stringField,
     walk,
 } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
+import { goldenOf } from '../../../kit/project/framework-calls.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';

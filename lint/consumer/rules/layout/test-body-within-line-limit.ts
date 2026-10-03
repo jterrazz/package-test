@@ -2,18 +2,12 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import {
-    assertionOf,
-    child,
-    childList,
-    isTestCallee,
-    nodeEnd,
-    nodeStart,
-    walk,
-} from '../../../kit/project/ast.js';
+import { assertionOf } from '../../../kit/project/assertions.js';
+import { child, childList, nodeEnd, nodeStart, walk } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
+import { isTestCallee } from '../../../kit/project/test-calls.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** First and last line included. */

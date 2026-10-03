@@ -2,7 +2,7 @@ import { blankComments, GROUND_FIXTURES, treeKind } from '@jterrazz/typescript/r
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { closingOf, literalEnd } from './subject.js';
+import { closingOf, literalEnd } from './source-scan.js';
 
 /** Read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground. */
 

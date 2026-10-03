@@ -1,4 +1,4 @@
-import { closingOf, literalEnd } from './subject.js';
+import { closingOf, literalEnd } from './source-scan.js';
 
 export type Span = { end: number; start: number };
 

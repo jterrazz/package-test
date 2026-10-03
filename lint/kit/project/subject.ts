@@ -2,6 +2,11 @@
 
 import { blankComments } from '@jterrazz/typescript/rules';
 
+import { commandWords } from './command-words.js';
+import { argumentsOf, HOLE, literalOf } from './source-scan.js';
+import { chainsOf, handlesOf } from './spec-chains.js';
+import type { Chain } from './spec-chains.js';
+
 export type SubjectReading = {
     collections: readonly string[];
     commands?: Readonly<Record<string, readonly string[]>> | undefined;
@@ -25,10 +30,6 @@ export type Subject =
     | { facet: 'website'; page: string };
 
 export type SubjectAt = { index: number; subject: Subject };
-
-export const SUBJECT_FACETS = ['api', 'cli', 'job', 'mobile', 'website'] as const;
-
-const HOLE = '\u0000';
 
 const LITERAL_SEGMENT = /^[a-z][a-z._-]*$/u;
 
@@ -138,201 +139,6 @@ export function subjectName(subject: Subject): string {
     return subject.facet === 'mobile' ? `open ${subject.journey}` : `visit ${subject.page}`;
 }
 
-export function skipString(text: string, start: number): number {
-    const quote = text[start];
-    let index = start + 1;
-    while (index < text.length) {
-        const character = text[index];
-        if (character === '\\') {
-            index += 2;
-            continue;
-        }
-        if (character === quote) {
-            return index + 1;
-        }
-        if (quote === '`' && character === '$' && text[index + 1] === '{') {
-            index = closingOf(text, index + 1) + 1;
-            continue;
-        }
-        index += 1;
-    }
-    return index;
-}
-
-const BEFORE_REGEX = /(?:^|[(,=:[!&|?{};+\-*%<>~^]|\breturn|\btypeof|\bcase)\s*$/u;
-
-function opensRegex(text: string, start: number): boolean {
-    return (
-        text[start] === '/' &&
-        text[start + 1] !== '/' &&
-        text[start + 1] !== '*' &&
-        BEFORE_REGEX.test(text.slice(Math.max(0, start - 16), start))
-    );
-}
-
-function pastFlags(text: string, close: number): number {
-    let end = close + 1;
-    while (/[a-z]/u.test(text[end] ?? '')) {
-        end += 1;
-    }
-    return end;
-}
-
-function regexEnd(text: string, start: number): number {
-    if (!opensRegex(text, start)) {
-        return start;
-    }
-    let inClass = false;
-    for (let index = start + 1; index < text.length; index += 1) {
-        const character = text[index];
-        if (character === '\\') {
-            index += 1;
-        } else if (character === '\n') {
-            return start;
-        } else if (character === '[' || character === ']') {
-            inClass = character === '[';
-        } else if (character === '/' && !inClass) {
-            return pastFlags(text, index);
-        }
-    }
-    return start;
-}
-
-export function literalEnd(text: string, start: number): number {
-    const character = text[start];
-    if (character === "'" || character === '"' || character === '`') {
-        return skipString(text, start);
-    }
-    return regexEnd(text, start);
-}
-
-export function closingOf(text: string, open: number): number {
-    const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
-    const stack: string[] = [];
-    let index = open;
-    while (index < text.length) {
-        const character = text[index] ?? '';
-        const past = index === open ? index : literalEnd(text, index);
-        if (past !== index) {
-            index = past;
-            continue;
-        }
-        if (character in pairs) {
-            stack.push(pairs[character] ?? '');
-        } else if (character === stack.at(-1)) {
-            stack.pop();
-            if (stack.length === 0) {
-                return index;
-            }
-        }
-        index += 1;
-    }
-    return text.length;
-}
-
-export function argumentsOf(text: string): string[] {
-    const parts: string[] = [];
-    let start = 0;
-    let index = 0;
-    while (index < text.length) {
-        const character = text[index] ?? '';
-        const past = literalEnd(text, index);
-        if (past !== index) {
-            index = past;
-            continue;
-        }
-        if (character === '(' || character === '[' || character === '{') {
-            index = closingOf(text, index) + 1;
-            continue;
-        }
-        if (character === ',') {
-            parts.push(text.slice(start, index).trim());
-            start = index + 1;
-        }
-        index += 1;
-    }
-    const last = text.slice(start).trim();
-    return last === '' ? parts : [...parts, last];
-}
-
-export function literalOf(argument: string | undefined): string | undefined {
-    const text = argument?.trim() ?? '';
-    const quote = text[0];
-    if ((quote !== "'" && quote !== '"' && quote !== '`') || skipString(text, 0) !== text.length) {
-        return undefined;
-    }
-    const body = text.slice(1, -1);
-    return quote === '`' ? body.replaceAll(/\$\{[^}]*\}/gu, HOLE) : body;
-}
-
-export type ChainCall = { args: string; name: string };
-
-export type Chain = { calls: ChainCall[]; end: number; handle: string; index: number };
-
-function chainAt(text: string, handle: string, start: number): Chain {
-    const calls: ChainCall[] = [];
-    let index = start + handle.length;
-    for (;;) {
-        const member = /^\s*\.\s*(?<name>[A-Za-z_$][\w$]*)\s*\(/u.exec(text.slice(index));
-        if (member?.groups?.name === undefined) {
-            return { calls, end: index, handle, index: start };
-        }
-        const open = index + member[0].length - 1;
-        const close = closingOf(text, open);
-        calls.push({ args: text.slice(open + 1, close), name: member.groups.name });
-        index = close + 1;
-    }
-}
-
-const SPECIFICATION_IMPORT =
-    /import\s*\{(?<names>[^}]*)\}\s*from\s*['"][^'"]*\.specification(?:\.[jt]s)?['"]/gu;
-
-const SPECIFICATION_DOOR =
-    /import\s*\{(?<names>[^}]*)\}\s*from\s*['"](?<from>[^'"]*\.specification(?:\.[jt]s)?)['"]/gu;
-
-/** `const events = api.with({ … })`. */
-const VIEW = /const\s+(?<view>[A-Za-z_$][\w$]*)\s*=\s*(?<from>[A-Za-z_$][\w$]*)\s*\.\s*with\s*\(/gu;
-
-function importedHandles(names: string, facet?: string): string[] {
-    return names.split(',').flatMap((name) => {
-        const [imported = '', local = imported] = name.trim().split(/\s+as\s+/u);
-        const wanted =
-            facet === undefined
-                ? (SUBJECT_FACETS as readonly string[]).includes(imported)
-                : imported === facet;
-        return wanted ? [local] : [];
-    });
-}
-
-export function handlesOf(text: string): string[] {
-    const handles = new Set<string>(
-        [...text.matchAll(SPECIFICATION_IMPORT)].flatMap((found) =>
-            importedHandles(found.groups?.names ?? ''),
-        ),
-    );
-    const views = [...text.matchAll(VIEW)].map((found) => ({
-        from: found.groups?.from ?? '',
-        view: found.groups?.view ?? '',
-    }));
-    for (let size = -1; size !== handles.size;) {
-        ({ size } = handles);
-        for (const { from, view } of views) {
-            if (handles.has(from)) {
-                handles.add(view);
-            }
-        }
-    }
-    return [...handles];
-}
-
-export function chainsOf(text: string, handles: readonly string[]): Chain[] {
-    if (handles.length === 0) {
-        return [];
-    }
-    const pattern = new RegExp(String.raw`(?<![.\w$])(?:${handles.join('|')})(?=\s*\.)`, 'gu');
-    return [...text.matchAll(pattern)].map((found) => chainAt(text, found[0], found.index));
-}
-
 const HTTP_VERBS: Record<string, Method> = {
     delete: 'DELETE',
     get: 'GET',
@@ -344,88 +150,6 @@ const HTTP_VERBS: Record<string, Method> = {
 const REQUEST_LINE = /^\s*(?<method>DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT)\s+(?<path>\S+)/u;
 
 const REQUEST_FILE = /^file\(\s*(?<quote>['"])(?<path>[^'"]*)\k<quote>\s*\)$/u;
-
-const COMMAND_WORD = /^[a-z][a-z0-9-]*$/u;
-
-/** Without the runner's declared list, the first word alone: a positional argument is never read as a subcommand. */
-export function commandWords(line: string, commands?: readonly string[]): string[] {
-    const words = line.trim().split(/\s+/u);
-    if (commands === undefined) {
-        const [first = ''] = words;
-        return COMMAND_WORD.test(first) ? [first] : [];
-    }
-    const named: string[] = [];
-    for (const word of words) {
-        if (!commands.includes(word)) {
-            break;
-        }
-        named.push(word);
-    }
-    return named;
-}
-
-const CLI_CONSTRUCTOR = /\bspecification\s*\.\s*cli\s*\(/u;
-
-function wordsOf(text: string, open: number): string[] {
-    return argumentsOf(text.slice(open + 1, closingOf(text, open))).flatMap((entry) => {
-        const word = literalOf(entry);
-        return word === undefined ? [] : [word];
-    });
-}
-
-function constantWords(text: string, name: string): string[] | undefined {
-    const escaped = name.replaceAll('$', String.raw`\$`);
-    const binding = new RegExp(String.raw`\bconst\s+${escaped}\s*(?::[^=]+)?=\s*\[`, 'u').exec(
-        text,
-    );
-    return binding === null ? undefined : wordsOf(text, binding.index + binding[0].length - 1);
-}
-
-/** Written as an array or bound to a `const` of the same file (`commands: COMMANDS`, `{ commands }`). */
-export function declaredCommands(door: string): string[] | undefined {
-    const text = blankComments(door);
-    const call = CLI_CONSTRUCTOR.exec(text);
-    if (call === null) {
-        return undefined;
-    }
-    const open = call.index + call[0].length - 1;
-    const [, options = ''] = argumentsOf(text.slice(open + 1, closingOf(text, open)));
-    const list = /(?:^|[{,\s])commands\s*:\s*\[/u.exec(options);
-    if (list !== null) {
-        return wordsOf(options, list.index + list[0].length - 1);
-    }
-    const named =
-        /(?:^|[{,\s])commands\s*:\s*(?<name>[A-Za-z_$][\w$]*)/u.exec(options)?.groups?.name ??
-        (/(?:^|[{,\s])commands\s*(?=[,}])/u.test(options) ? 'commands' : undefined);
-    return named === undefined ? undefined : constantWords(text, named);
-}
-
-/** A view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle. */
-export function doorsOf(
-    text: string,
-    facet: (typeof SUBJECT_FACETS)[number],
-): Record<string, string> {
-    const doors = new Map<string, string>();
-    for (const { groups } of text.matchAll(SPECIFICATION_DOOR)) {
-        for (const handle of importedHandles(groups?.names ?? '', facet)) {
-            doors.set(handle, groups?.from ?? '');
-        }
-    }
-    const views = [...text.matchAll(VIEW)].map(({ groups }) => ({
-        from: groups?.from ?? '',
-        view: groups?.view ?? '',
-    }));
-    for (let size = -1; size !== doors.size;) {
-        ({ size } = doors);
-        for (const { from, view } of views) {
-            const door = doors.get(from);
-            if (door !== undefined) {
-                doors.set(view, door);
-            }
-        }
-    }
-    return Object.fromEntries(doors);
-}
 
 function requestLineOf(text: string): Subject[] {
     const { method = '', path = '/' } = REQUEST_LINE.exec(text)?.groups ?? {};

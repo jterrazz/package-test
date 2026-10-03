@@ -2,19 +2,19 @@ import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
+import { assertionOf } from '../../../kit/project/assertions.js';
 import {
-    assertionOf,
     child,
     childList,
     identifierName,
     isNode,
-    isTestCallee,
     nodeEnd,
     nodeStart,
     walk,
 } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
+import { isTestCallee } from '../../../kit/project/test-calls.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 type Span = { end: number; start: number };
