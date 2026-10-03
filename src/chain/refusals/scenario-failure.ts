@@ -7,16 +7,20 @@ export type ScenarioVerb = 'open' | 'visit';
 
 const SURFACE_OF: Record<ScenarioVerb, string> = { open: 'screen', visit: 'page' };
 
-const isAnchor = (read: string): read is ChapterAnchor => /^docs\/[^#]+\.md#.+$/u.test(read);
+const CHAPTER_ANCHOR = /^docs\/[^#]+\.md#.+$/u;
+
+const isAnchor = (read: string): read is ChapterAnchor => CHAPTER_ANCHOR.test(read);
 
 function finishedLesson(error: unknown): Lesson | undefined {
     if (!(error instanceof Error)) {
         return undefined;
     }
-    const { fix = '', found = '', read = '', why = '' } = lessonParts(error.message) ?? {};
-    return [fix, found, why].includes('') || !isAnchor(read)
+    // Stryker disable next-line ObjectLiteral: outside: lessonParts answers parts for any text
+    const { fix = '', found = '', read, why = '' } = lessonParts(error.message) ?? {};
+    const anchor = String(read);
+    return [fix, found, why].includes('') || !isAnchor(anchor)
         ? undefined
-        : { fix, found, read, why };
+        : { fix, found, read: anchor, why };
 }
 
 export function scenarioFailure(

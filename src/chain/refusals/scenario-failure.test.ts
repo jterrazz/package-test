@@ -40,4 +40,53 @@ describe('scenarioFailure', () => {
             ].join('\n'),
         );
     });
+
+    test('scenarioFailure — a bare value thrown — is wrapped in the visit scenario’s lesson with its evidence, and kept as the cause', () => {
+        // Given - a step that threw a bare string, and a screenshot taken
+        const failure = scenarioFailure('boom', '/tmp/evidence/page.png', 'visit');
+
+        // Then - the visit scenario's lesson, the value as its text, the evidence closing the found
+        expect([failure.message, failure.cause]).toStrictEqual([
+            [
+                'found: the visit scenario failed:\n  boom\nEvidence: /tmp/evidence/page.png',
+                'why: A visit scenario drives the page step by step, and the first step that fails ends it.',
+                'fix: correct the step that failed, or the page it drives',
+                'read: docs/10-website.md#visit-scenarios--the-when',
+            ].join('\n'),
+            'boom',
+        ]);
+    });
+
+    test('scenarioFailure — a refusal missing a part, or read elsewhere than a chapter — is no finished lesson, and is wrapped', () => {
+        // Given - refusals lacking their why, their fix, their found, and one whose read is no chapter anchor
+        const parts = {
+            found: 'found: two matched',
+            why: 'why: one element',
+            fix: 'fix: designate one of them',
+            read: 'read: docs/10-website.md#a',
+        };
+        const without = (part: keyof typeof parts): string =>
+            Object.entries(parts)
+                .filter(([name]) => name !== part)
+                .map(([, line]) => line)
+                .join('\n');
+
+        // Then - each is wrapped, its message indented under the scenario's found
+        expect(
+            [
+                without('why'),
+                without('fix'),
+                without('found'),
+                `${without('read')}\nread: see docs/10-website.md#a`,
+            ].map(
+                (message) =>
+                    scenarioFailure(new Error(message), null, 'visit').message.split('\n')[0],
+            ),
+        ).toStrictEqual([
+            'found: the visit scenario failed:',
+            'found: the visit scenario failed:',
+            'found: the visit scenario failed:',
+            'found: the visit scenario failed:',
+        ]);
+    });
 });
