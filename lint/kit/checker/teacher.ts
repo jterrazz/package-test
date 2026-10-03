@@ -10,6 +10,7 @@ export type Teacher = (spotted: readonly Spotted[]) => Finding[];
 
 export function teacherOf({ chapter, rows }: Pick<CheckerRegistry, 'chapter' | 'rows'>): Teacher {
     const checks = new Map<string, DefinedCheck<Row>>();
+    // Stryker disable ConditionalExpression,BlockStatement,CallExpression: a cache: a check defined again from its row answers the same
     const checkOf = (rule: string): DefinedCheck<Row> => {
         const known = checks.get(rule);
         if (known !== undefined) {
@@ -25,6 +26,7 @@ export function teacherOf({ chapter, rows }: Pick<CheckerRegistry, 'chapter' | '
 
         return check;
     };
+    // Stryker restore ConditionalExpression,BlockStatement,CallExpression
 
     return (spotted) =>
         spotted.map(({ column, fix, found, line, path, rule }) =>

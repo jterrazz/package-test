@@ -97,7 +97,7 @@ function builtPath(
     const [first, ...rest] = argumentsOf(node);
     const tail = literalTail(rest);
     if (
-        !PATH_BUILDERS.has(calleeName(node) ?? '') ||
+        !(PATH_BUILDERS as ReadonlySet<unknown>).has(calleeName(node)) ||
         !isAnchor(first, anchors) ||
         tail.length === 0
     ) {
@@ -178,7 +178,7 @@ export type LiteralPath = { node: AstNode; pieces: string[] };
 export function literalPathVisitor(onPath: (entry: LiteralPath) => void): Visitor {
     return {
         CallExpression(node: AstNode) {
-            if (!PATH_BUILDERS.has(calleeName(node) ?? '')) {
+            if (!(PATH_BUILDERS as ReadonlySet<unknown>).has(calleeName(node))) {
                 return;
             }
             const [anchor, ...rest] = argumentsOf(node);

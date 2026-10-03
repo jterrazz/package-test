@@ -10,6 +10,7 @@ export function checkDocumentFollowsItsGrammar(text: string, rel: string): Spott
     try {
         ({ document } = readSpecFile(text, rel));
     } catch (error) {
+        // Stryker disable next-line ConditionalExpression,BlockStatement: only a bug of the reader throws anything else
         if (!(error instanceof SpecSyntaxError)) {
             throw error;
         }

@@ -103,9 +103,11 @@ export function checkDocumentEnvAndServeRegistered(
     document: SpecDocument,
     dir: string,
 ): DocumentFinding[] {
+    // Stryker disable ConditionalExpression,LogicalOperator,BlockStatement,ArrayDeclaration: a document naming nothing skips the walk, which would find nothing to judge
     if (document.env.length === 0 && document.serve.length === 0) {
         return [];
     }
+    // Stryker restore ConditionalExpression,LogicalOperator,BlockStatement,ArrayDeclaration
     const registered = registeredNames(dir);
     if (registered === null) {
         return [];
