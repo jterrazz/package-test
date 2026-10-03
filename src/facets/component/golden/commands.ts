@@ -14,11 +14,15 @@ type PlaywrightCommandContext = {
     }>;
 };
 
-function goldenPath(testPath: string | undefined, name: string): string {
+function testFile(testPath: string | undefined): string {
     if (testPath === undefined) {
         throw invariant('a golden command reached the server with no test path');
     }
-    return resolveSpecPath('toMatch', name, dirname(testPath));
+    return testPath;
+}
+
+function goldenPath(testPath: string | undefined, name: string): string {
+    return resolveSpecPath('toMatch', name, dirname(testFile(testPath)));
 }
 
 const ariaTree: BrowserCommand<[], string> = async (context) => {
@@ -35,17 +39,17 @@ const goldenRead: BrowserCommand<[string], null | string> = (context, name) => {
 const goldenWrite: BrowserCommand<[string, string], string> = (context, name, content) => {
     const path = goldenPath(context.testPath, name);
     mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, content, 'utf8');
+    writeFileSync(path, content);
     return path;
 };
 
 /** The browser server maps the page's stack back to the test's source. */
 const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, text) => {
-    const file = context.testPath;
+    const file = testFile(context.testPath);
     const frame = context.project.browser
         ?.parseStacktrace(stack)
         .find((candidate) => candidate.file === file);
-    if (file === undefined || frame === undefined) {
+    if (frame === undefined) {
         throw new Error(
             refusal({
                 fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { BrowserCommandContext } from 'vitest/node';
@@ -6,11 +6,17 @@ import type { BrowserCommandContext } from 'vitest/node';
 import { scratchDirectory } from '../../../chain/paths/scratch.js';
 import { COMPONENT_COMMANDS } from './commands.js';
 
-function contextOf(
-    testPath?: string,
-    frames: { column: number; file: string; line: number }[] = [],
-): BrowserCommandContext {
-    const context = { project: { browser: { parseStacktrace: () => frames } }, testPath };
+type Frame = { column: number; file: string; line: number };
+
+/** A command context over a test path, whose browser maps any stack to these frames; `null` frames, a project with no browser. */
+function contextOf(testPath?: string, frames: Frame[] | null = []): BrowserCommandContext {
+    const context = {
+        project: {
+            browser: frames === null ? undefined : { parseStacktrace: () => frames },
+            getProvidedContext: () => ({}),
+        },
+        testPath,
+    };
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a command context is vitest's to build; the test hands the two fields these commands read
     return context as unknown as BrowserCommandContext;
 }
@@ -30,19 +36,19 @@ describe('COMPONENT_COMMANDS', () => {
         expect(read).toBeNull();
     });
 
-    test('goldenWrite — a golden under a folder that does not exist — creates the folder beside the test and answers the path it wrote', async () => {
+    test('goldenWrite — a golden under folders that do not exist — creates them beside the test and answers the path it wrote', async () => {
         // Given - a test file with no _expected/ folder beside it
         const directory = scratchDirectory('golden-write-');
 
         // When - update mode writes the golden
         const written = await COMPONENT_COMMANDS.goldenWrite(
             contextOf(join(directory, 'card.test.tsx')),
-            './_expected/card.aria.yaml',
+            './_expected/cards/card.aria.yaml',
             '- button "Save"\n',
         );
 
         // Then - the file sits beside the test, holding what was written
-        const path = join(directory, '_expected', 'card.aria.yaml');
+        const path = join(directory, '_expected', 'cards', 'card.aria.yaml');
         expect(written).toBe(path);
         expect(readFileSync(path, 'utf8')).toBe('- button "Save"\n');
     });
@@ -57,9 +63,46 @@ describe('COMPONENT_COMMANDS', () => {
 
         // Then - the refusal names what is missing
         expect(read).toThrow('a golden command reached the server with no test path');
+        expect(() => COMPONENT_COMMANDS.inPlaceWrite(context, 'Error\n', 'Saved')).toThrow(
+            'a golden command reached the server with no test path',
+        );
     });
 
-    test('inPlaceWrite — a stack no frame of which is the test file — refuses, and writes nothing', () => {
+    test('goldenRead — a golden named by a path not relative to the test — is refused in the words of toMatch', () => {
+        // Given - a golden named from the root
+        const context = contextOf(join(scratchDirectory('golden-absolute-'), 'card.test.tsx'));
+
+        // Then - refused as toMatch's own path
+        expect(() => COMPONENT_COMMANDS.goldenRead(context, '/_expected/card.aria.yaml')).toThrow(
+            'found: toMatch("/_expected/card.aria.yaml"), a path that is not relative to the spec file',
+        );
+    });
+
+    test('inPlaceWrite — the frame of the test file among others — rewrites the value where that frame stands, and answers the site', () => {
+        // Given - a test file, and a stack whose first frame is a module outside it
+        const directory = scratchDirectory('in-place-write-');
+        const testPath = join(directory, 'card.test.tsx');
+        writeFileSync(testPath, 'expect(one).toMatch(``);\n');
+        const frames = [
+            { column: 3, file: join(directory, 'card.tsx'), line: 12 },
+            { column: 13, file: testPath, line: 1 },
+        ];
+
+        // When - update mode writes the value in place
+        const site = COMPONENT_COMMANDS.inPlaceWrite(
+            contextOf(testPath, frames),
+            'Error\n',
+            'Saved',
+        );
+
+        // Then - the test file holds it, at the site answered
+        expect([site, readFileSync(testPath, 'utf8')]).toStrictEqual([
+            `${testPath}:1`,
+            'expect(one).toMatch(`Saved`);\n',
+        ]);
+    });
+
+    test('inPlaceWrite — a stack no frame of which is the test file, or no stack at all — refuses, and writes nothing', () => {
         // Given - a stack that maps only to a module outside the test
         const directory = scratchDirectory('in-place-write-');
         const testPath = join(directory, 'card.test.tsx');
@@ -69,8 +112,8 @@ describe('COMPONENT_COMMANDS', () => {
         const write = (): unknown =>
             COMPONENT_COMMANDS.inPlaceWrite(contextOf(testPath, frames), 'Error\n', 'Saved');
 
-        // Then - the refusal says the value has nowhere to be written, and no file appears
-        expect(write).toThrow(
+        // Then - the refusal says the value has nowhere to be written, with a browser or without one, and no file appears
+        const refusal = new Error(
             [
                 'found: update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written',
                 'why: A value written in place is rewritten in the test that states it.',
@@ -78,6 +121,10 @@ describe('COMPONENT_COMMANDS', () => {
                 'read: docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
             ].join('\n'),
         );
+        expect(write).toThrow(refusal);
+        expect(() =>
+            COMPONENT_COMMANDS.inPlaceWrite(contextOf(testPath, null), 'Error\n', 'Saved'),
+        ).toThrow(refusal);
         expect(existsSync(testPath)).toBe(false);
     });
 });
