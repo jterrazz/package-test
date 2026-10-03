@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
-import { CHECKOUT } from './closure.ts';
+import { CHECKOUT, packedFilenames } from './closure.ts';
 
 export default function setup(project: TestProject): () => void {
     const into = mkdtempSync(join(tmpdir(), 'packed-'));
@@ -13,9 +13,7 @@ export default function setup(project: TestProject): () => void {
         ['pack', '--json', '--ignore-scripts', '--pack-destination', into],
         { cwd: CHECKOUT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     );
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: npm prints one report per package, keyed by name, each with the `filename` this reads
-    const packed = JSON.parse(report) as Record<string, { filename: string }>;
-    for (const { filename } of Object.values(packed)) {
+    for (const filename of packedFilenames(report)) {
         execFileSync('tar', ['-xzf', join(into, filename), '-C', into]);
     }
     project.provide('packedPackage', join(into, 'package'));

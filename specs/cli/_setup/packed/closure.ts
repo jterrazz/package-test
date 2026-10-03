@@ -15,9 +15,50 @@ type Manifest = {
     peerDependenciesMeta?: Record<string, { optional?: boolean }>;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function stringsOf(value: unknown): Record<string, string> {
+    return Object.fromEntries(
+        Object.entries(isRecord(value) ? value : {}).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string',
+        ),
+    );
+}
+
+/** `JSON.parse` answers `any`: each field an install reads is taken only in the shape it has. */
 export function readManifest(directory: string): Manifest {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: these are the fields an install reads
-    return JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')) as Manifest;
+    const parsed: unknown = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
+    const field = (key: string): unknown => (isRecord(parsed) ? parsed[key] : undefined);
+    const bin = field('bin');
+    const name = field('name');
+    const meta = field('peerDependenciesMeta');
+    return {
+        bin: typeof bin === 'string' ? bin : stringsOf(bin),
+        dependencies: stringsOf(field('dependencies')),
+        devDependencies: stringsOf(field('devDependencies')),
+        optionalDependencies: stringsOf(field('optionalDependencies')),
+        peerDependencies: stringsOf(field('peerDependencies')),
+        peerDependenciesMeta: Object.fromEntries(
+            Object.entries(isRecord(meta) ? meta : {}).map(([peer, entry]) => [
+                peer,
+                { optional: isRecord(entry) && entry.optional === true },
+            ]),
+        ),
+        ...(typeof name === 'string' ? { name } : {}),
+    };
+}
+
+/** `npm pack --json` prints one report per package, keyed by name (npm ≥ 11) or in an array (earlier). */
+export function packedFilenames(report: string): string[] {
+    const parsed: unknown = JSON.parse(report);
+    const reports: unknown[] =
+        typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : [];
+    return reports.flatMap((entry) => {
+        const filename = isRecord(entry) ? entry.filename : undefined;
+        return typeof filename === 'string' ? [filename] : [];
+    });
 }
 
 export function runtimeDependencies(manifest: Manifest): string[] {

@@ -8,6 +8,7 @@ import { describe, expect, test } from 'vitest';
 
 import { REFUSAL_WHY, RUNTIME_RULES } from '../../../src/chain/refusals/rows.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
+import { recordAt, stringsAt } from '../../kit/project/json-shape.js';
 import { allRows, SELF_CHECKER_PASSES, selfRows } from '../catalogue/manifest.js';
 import {
     danglingImports,
@@ -24,13 +25,13 @@ const ROOT = resolve(import.meta.dirname, '../../..');
 const TOOLCHAIN_CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');
 
 type Manifest = {
-    imports?: Record<string, string>;
+    imports: Record<string, string>;
     exports: Record<string, unknown>;
 };
 
 function manifestOf(dir: string): Manifest {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `bin` and `exports` are the fields this reads
-    return JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as Manifest;
+    const manifest: unknown = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+    return { exports: recordAt(manifest, 'exports'), imports: stringsAt(manifest, 'imports') };
 }
 
 type PublishedEntry = {
@@ -151,7 +152,7 @@ describe('audience', () => {
 
     test('no checks the tarball declares run a self pass, over the trees that trip each one', () => {
         // Given - every private entry of the extracted package, run as the toolchain runs a preset's checks, over every fixture a self pass's documents stand on
-        const entries = Object.entries(manifestOf(installed).imports ?? {});
+        const entries = Object.entries(manifestOf(installed).imports);
         const codes = SELF_CHECKER_PASSES.map(({ name }) => `jterrazz-check(${name})`);
         const trees = SELF_CHECKER_PASSES.flatMap(({ name }) => {
             const fixtures = resolve(ROOT, 'specs/lint', name, '_fixtures');

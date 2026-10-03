@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
+import { recordAt, stringListAt, stringsAt } from '../../kit/project/json-shape.js';
+
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
 /** Its subpath dropped. */
@@ -23,16 +25,12 @@ export function augmentedPackages(): string[] {
 }
 
 export function requiredOfAConsumer(): Set<string> {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: these are the three blocks this reads
-    const manifest = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
-        dependencies?: Record<string, string>;
-        peerDependencies?: Record<string, string>;
-        peerDependenciesMeta?: Record<string, { optional?: boolean }>;
-    };
-    const peers = Object.keys(manifest.peerDependencies ?? {}).filter(
-        (name) => manifest.peerDependenciesMeta?.[name]?.optional !== true,
+    const manifest: unknown = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8'));
+    const optional = recordAt(manifest, 'peerDependenciesMeta');
+    const peers = Object.keys(stringsAt(manifest, 'peerDependencies')).filter(
+        (name) => recordAt(optional, name).optional !== true,
     );
-    return new Set([...Object.keys(manifest.dependencies ?? {}), ...peers]);
+    return new Set([...Object.keys(stringsAt(manifest, 'dependencies')), ...peers]);
 }
 
 export function compiledSources(): string[] {
@@ -40,11 +38,7 @@ export function compiledSources(): string[] {
     for (const entry of readdirSync(resolve(ROOT, 'dist'), { recursive: true })) {
         const map = resolve(ROOT, 'dist', String(entry));
         if (map.endsWith('.map')) {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `sources` is the one field this reads
-            const { sources: listed } = JSON.parse(readFileSync(map, 'utf8')) as {
-                sources: string[];
-            };
-            for (const source of listed) {
+            for (const source of stringListAt(JSON.parse(readFileSync(map, 'utf8')), 'sources')) {
                 sources.add(resolve(dirname(map), source));
             }
         }

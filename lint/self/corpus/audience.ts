@@ -2,6 +2,8 @@ import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, symlinkSync } from 'node:fs';
 import { dirname, join, normalize, relative } from 'node:path';
 
+import { packedFilenames } from '../../kit/project/json-shape.js';
+
 /** A `node_modules` beside the extracted `package/` points at this repository's install, so an entry resolves its dependencies as in a consumer's. */
 export function extractTarball(root: string, into: string): string {
     const output = execFileSync(
@@ -9,9 +11,7 @@ export function extractTarball(root: string, into: string): string {
         ['pack', '--json', '--ignore-scripts', '--pack-destination', into],
         { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     );
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: npm prints one report per package, keyed by name (npm ≥ 11) or in an array (earlier), each with the `filename` this reads
-    const parsed = JSON.parse(output) as Record<string, { filename: string }>;
-    for (const { filename } of Object.values(parsed)) {
+    for (const filename of packedFilenames(output)) {
         execFileSync('tar', ['-xzf', join(into, filename), '-C', into]);
     }
     symlinkSync(join(root, 'node_modules'), join(into, 'node_modules'), 'dir');
