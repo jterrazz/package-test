@@ -1,42 +1,10 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { describe, expect, inject, onTestFinished, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import type { DatabasePort } from '../../services/database.port.js';
-import { deferRewritesTo } from '../in-place/in-place.js';
 import { TableAccessor } from '../table/table.js';
 import { registerMatchers } from './matchers.js';
-import { WHOLE_MATCHER } from './text-assertions.js';
-
-type Whole = (expected: unknown, options: unknown, stack: string) => unknown;
-
-type Registered = (expected: unknown, call: { options: unknown; stack: string }) => unknown;
-
-function wholeOf(subject: unknown, negated = false): Whole {
-    // oxlint-disable-next-line vitest/valid-expect -- the assertion's matcher is the registered comparison, called below by the name no member access spells
-    const assertion = expect(subject);
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the matcher is registered under a name no member access spells; reaching it by that name is how a test hands it a stack of its own
-    const target = (negated ? assertion.not : assertion) as unknown as Record<string, Registered>;
-    return (expected, options, stack) => target[WHOLE_MATCHER]?.(expected, { options, stack });
-}
-
-function scratchTest(call: string): { file: string; read: () => string; stack: string } {
-    const scratch = mkdtempSync(join(tmpdir(), 'whole-in-place-'));
-    const testFile = join(scratch, 'scratch.test.ts');
-    writeFileSync(testFile, `test('records', async () => {\n    ${call}\n});\n`);
-    // invariant: a scratch test is read back by the test that wrote it: written at once.
-    deferRewritesTo(null);
-    onTestFinished(() => {
-        rmSync(scratch, { force: true, recursive: true });
-        deferRewritesTo(() => inject('inPlaceRewrites'));
-    });
-    return {
-        file: testFile,
-        read: () => readFileSync(testFile, 'utf8'),
-        stack: `Error: toMatch call site\n    at ${testFile}:2:5`,
-    };
-}
+import { scratchTest, wholeOf } from './response-goldens.fixtures.js';
+import { matchTableValue, tableExpectation } from './table-goldens.js';
 
 /** A fixed sequence of uuids in an order no test predicts from their names. */
 function uuidDraw(): () => string {
@@ -187,5 +155,56 @@ describe('table-goldens', () => {
             'toMatch([\n        [1, "Ada", "2026-01-02T03:04:05.000Z"],\n    ]);',
         );
         expect(tokened.read()).toContain('toMatch([\n        [1, "Ada", "{{iso8601}}"],\n    ]);');
+    });
+
+    test('the rows in place — a value is rows, not yet recorded, or neither; a table matching says so, one not recorded names update mode', async () => {
+        // Given - values of each kind, and a table of one row
+        const table = new TableAccessor('users', usersTable([[1, 'Ada', '2026-01-02']]));
+        const context = { negated: false, options: undefined, stack: '' };
+        const verdict = async (expected: '' | unknown[][]): Promise<[boolean, string]> => {
+            const result = await matchTableValue(table, expected, context);
+            return [result.pass, result.message()];
+        };
+
+        // Then - each reading and each verdict
+        expect([
+            [
+                tableExpectation([[1]]),
+                tableExpectation(' \n'),
+                tableExpectation('x'),
+                tableExpectation([1]),
+            ],
+            await verdict([[1, 'Ada', '{{any}}']]),
+            await verdict(''),
+        ]).toStrictEqual([
+            [[[1]], '', undefined, undefined],
+            [true, 'expected table "users" not to match the rows in place'],
+            [
+                false,
+                'Table "users" (the value in place): nothing is written in place yet — run with TEST_UPDATE=1 (or vitest -u) and the actual value is written into the test.',
+            ],
+        ]);
+    });
+
+    test('the rows in place — update mode writes the rows the table holds, a row stated past them dropped', async () => {
+        // Given - update mode, rows in place one more than the table holds
+        vi.stubEnv('TEST_UPDATE', '1');
+        const table = new TableAccessor('users', usersTable([[1, 'Ada', '2026-01-02']]));
+        const site = scratchTest(
+            "await expect(result.table('users')).toMatch([[1, 'Ada', 'x'], [2, 'Bob', 'y']]);",
+        );
+
+        // When - compared
+        await wholeOf(table)(
+            [
+                [1, 'Ada', 'x'],
+                [2, 'Bob', 'y'],
+            ],
+            undefined,
+            site.stack,
+        );
+
+        // Then - the one row the table holds
+        expect(site.read()).toContain('toMatch([\n        [1, "Ada", "2026-01-02"],\n    ]);');
     });
 });

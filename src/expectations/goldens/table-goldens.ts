@@ -3,7 +3,6 @@ import { pairRows } from '../table/rows.js';
 import type { Rows } from '../table/rows.js';
 import type { TableAccessor } from '../table/table.js';
 import { CaptureScope } from '../tokens/capture-scope.js';
-import { hasPlaceholders } from '../tokens/placeholders.js';
 import { renderExpected, structuralEquals } from '../tokens/structural.js';
 import { formatTableDiff } from './diff.js';
 import { failed, passed } from './file-goldens.js';
@@ -47,11 +46,7 @@ function mergeRows(previous: null | Rows, actual: unknown[][], ordered: boolean)
             : [
                   row.map((cell, index) => {
                       const before = renderExpected(expected?.[index]);
-                      return typeof before === 'string' &&
-                          hasPlaceholders(before) &&
-                          structuralEquals(before, cell, new CaptureScope())
-                          ? before
-                          : cell;
+                      return structuralEquals(before, cell, new CaptureScope()) ? before : cell;
                   }),
               ],
     );
