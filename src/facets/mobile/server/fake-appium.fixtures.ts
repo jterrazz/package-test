@@ -42,14 +42,3 @@ export async function fakeAppium(source: string): Promise<{ calls: string[]; url
     const port = typeof address === 'object' && address !== null ? address.port : 0;
     return { calls, url: `http://127.0.0.1:${port}` };
 }
-
-/** A port nothing listens on, for a server declared on a fixed one. */
-export async function freePort(): Promise<number> {
-    const server = createServer();
-    server.listen(0, '127.0.0.1');
-    await once(server, 'listening');
-    const address = server.address();
-    server.close();
-    await once(server, 'close');
-    return typeof address === 'object' && address !== null ? address.port : 0;
-}

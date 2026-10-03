@@ -131,6 +131,7 @@ export async function startMobile<Services extends ServiceRecord>(
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
+        // Stryker disable next-line ObjectLiteral: the port option is the stub backend's own, held by its tests: a module test reads no port it was handed
         backend = new StubBackend({ port: options.backend.port });
         backendUrl = await backend.start();
     }

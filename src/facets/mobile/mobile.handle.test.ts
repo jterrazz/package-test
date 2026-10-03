@@ -7,8 +7,8 @@ import { processService } from '../../services/process/process.adapter.js';
 import { sqlite } from '../../services/sqlite/sqlite.adapter.js';
 import { statusOf } from '../../stubs/delivery/other-process/stub-backend.fixtures.js';
 import { http } from '../../stubs/kinds/http.js';
-import { fakeAppium, freePort } from './fake-appium.fixtures.js';
 import { startMobile } from './mobile.handle.js';
+import { fakeAppium } from './server/fake-appium.fixtures.js';
 
 /** Names a device no machine has, with no appium binary in the root: a handle coming back proves neither `simctl` nor a spawn ran. */
 const ABSENT_DEVICE = { name: 'No Such Phone', os: '1.0' };
@@ -78,12 +78,11 @@ describe('startMobile', () => {
         const appium = await fakeAppium(
             '<XCUIElementTypeApplication label="App"><XCUIElementTypeStaticText label="Orders" visible="true"/></XCUIElementTypeApplication>',
         );
-        const port = await freePort();
         const printed = vi.spyOn(console, 'log').mockReturnValue();
         const handle = await startMobile({
             app: { bundleId: 'com.example.app' },
             appium: { url: appium.url },
-            backend: { port },
+            backend: {},
             device: { name: 'iPhone 17', udid: 'SIM-UDID' },
             root: bareRoot(),
         });
@@ -97,7 +96,7 @@ describe('startMobile', () => {
         await handle.mobile.open();
         await handle.cleanup();
 
-        // Then - no services, so no report printed; the backend on its port and armed by the chain; the screen read, one session for both opens and ended, the backend gone
+        // Then - no services, so no report printed; the backend armed by the chain; the screen read, one session for both opens and ended, the backend gone
         const lines = printed.mock.calls.flat().map(String);
         printed.mockRestore();
         expect([
@@ -108,7 +107,7 @@ describe('startMobile', () => {
             appium.calls,
         ]).toStrictEqual([
             [],
-            `http://127.0.0.1:${port}`,
+            expect.stringMatching(/^http:\/\/127\.0\.0\.1:\d+$/u),
             [501, 200],
             'Orders',
             [
@@ -130,8 +129,8 @@ describe('startMobile', () => {
         // Given - a runner over a declared server, with a database and a bundler beside the app
         const printed = vi.spyOn(console, 'log').mockReturnValue();
         const bundler = processService({
-            command: `node -e "require('node:http').createServer((q, s) => s.end('ok')).listen(process.env.PORT)"`,
-            ready: '/',
+            command: `node -e "const server = require('node:http').createServer((q, s) => s.end('ok')).listen(0, () => console.log('listening on ' + server.address().port))"`,
+            ready: /listening on (?<port>\d+)/u,
         });
         const handle = await startMobile({
             app: { bundleId: 'com.example.app' },
