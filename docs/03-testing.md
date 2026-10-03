@@ -411,7 +411,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability    | api | job | cli | lint | integration | website | mobile | component | module |
 | ------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 6      |
+| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 7      |
 | `intercept()` | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |
