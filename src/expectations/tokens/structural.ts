@@ -1,5 +1,6 @@
 import { TOKEN_KINDS } from '../../../lint/kit/project/tokens.js';
-import { CaptureScope, Matcher } from './match.js';
+import { CaptureScope } from './capture-scope.js';
+import { Matcher } from './match.js';
 import type { MatcherKind } from './match.js';
 
 const UUID_SOURCE = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
@@ -107,52 +108,33 @@ function isPortValue(value: number): boolean {
     return Number.isInteger(value) && value >= 0 && value <= 65_535;
 }
 
+const NUMERIC_KINDS: Partial<Record<MatcherKind, (value: number) => boolean>> = {
+    float: Number.isFinite,
+    int: Number.isInteger,
+    number: Number.isFinite,
+    port: isPortValue,
+};
+
 function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureScope): boolean {
-    switch (kind) {
-        case 'any': {
-            return true;
-        }
-        case 'float': {
-            if (typeof actual === 'number') {
-                return Number.isFinite(actual);
-            }
-            return typeof actual === 'string' && wholeMatches('float', actual);
-        }
-        case 'int': {
-            if (typeof actual === 'number') {
-                return Number.isInteger(actual);
-            }
-            return typeof actual === 'string' && wholeMatches('int', actual);
-        }
-        case 'number': {
-            if (typeof actual === 'number') {
-                return Number.isFinite(actual);
-            }
-            return typeof actual === 'string' && wholeMatches('number', actual);
-        }
-        case 'port': {
-            if (typeof actual === 'number') {
-                return isPortValue(actual);
-            }
-            return (
-                typeof actual === 'string' &&
-                wholeMatches('port', actual) &&
-                isPortValue(Number(actual))
-            );
-        }
-        case 'string': {
-            return typeof actual === 'string';
-        }
-        case 'workdir': {
-            return typeof actual === 'string' && scope.workdir !== undefined
-                ? actual === scope.workdir
-                : false;
-        }
-        default: {
-            const re = WHOLE_RES[kind];
-            return re !== undefined && typeof actual === 'string' && re.test(actual);
-        }
+    if (kind === 'any') {
+        return true;
     }
+    if (kind === 'workdir') {
+        return (
+            typeof actual === 'string' && scope.workdir !== undefined && actual === scope.workdir
+        );
+    }
+    const numeric = NUMERIC_KINDS[kind];
+    if (numeric !== undefined && typeof actual === 'number') {
+        return numeric(actual);
+    }
+    if (typeof actual !== 'string') {
+        return false;
+    }
+    if (kind === 'string') {
+        return true;
+    }
+    return wholeMatches(kind, actual) && (kind !== 'port' || isPortValue(Number(actual)));
 }
 
 function matcherMatches(matcher: Matcher, actual: unknown, scope: CaptureScope): boolean {

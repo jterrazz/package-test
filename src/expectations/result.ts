@@ -9,7 +9,7 @@ import { DirectoryAccessor } from './disk/directory.js';
 import { TableAccessor } from './table/table.js';
 import type { TableSource } from './table/table.js';
 import { TextAccessor } from './text/text.js';
-import { CaptureScope } from './tokens/match.js';
+import { CaptureScope } from './tokens/capture-scope.js';
 
 /** Read-only handle to a single file produced by a spec action. */
 export const A_FILE_IS_READ_WHERE_IT_EXISTS = 'A file is read only where it exists.';
@@ -65,7 +65,7 @@ export class BaseResult {
     }
 
     /** Access a directory (relative to the working directory) for snapshot assertions. */
-    directory(path: string = '.'): DirectoryAccessor {
+    directory(path = '.'): DirectoryAccessor {
         const baseDir = this.workDir ?? this.testDir;
         return new DirectoryAccessor(resolve(baseDir, path), this.testDir, this.captures);
     }

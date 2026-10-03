@@ -109,6 +109,7 @@ describe('StubBackend', () => {
         const found = await fetch(`${url}/articles/3f2504e0-4f89-41d3-9a0c-0305e82c3301`);
         const missed = await fetch(`${url}/articles/not-a-uuid`);
         expect(found.status).toBe(200);
+        await expect(found.json()).resolves.toStrictEqual({ title: 'one' });
         expect(missed.status).toBe(501);
     });
 

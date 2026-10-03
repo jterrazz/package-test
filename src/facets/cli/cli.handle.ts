@@ -2,7 +2,7 @@ import { resolveRoot } from '../../../lint/kit/project/resolve.js';
 import type { Started } from '../../chain/config.js';
 import { getCallerDir } from '../../chain/paths/caller.js';
 import type { DockerSpecConfig } from '../../expectations/command/cli.result.js';
-import { createDockerReader } from '../../expectations/command/container.js';
+import { createDockerReader } from '../../expectations/command/cli.result.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
 import { requireDockerDaemon } from '../../expectations/command/docker-cli.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';

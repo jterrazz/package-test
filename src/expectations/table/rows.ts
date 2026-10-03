@@ -1,4 +1,4 @@
-import type { CaptureScope } from '../tokens/match.js';
+import type { CaptureScope } from '../tokens/capture-scope.js';
 import { structuralEquals } from '../tokens/structural.js';
 
 /** A table has no order: rows compare as a multiset unless `{ ordered: true }`. Captures bind only on the pairing the comparison settles on. */

@@ -7,7 +7,7 @@ import { noUnknownTokenFindings } from './no-unknown-token.js';
 export function checkDocumentFollowsItsGrammar(text: string, rel: string): Spotted[] {
     let document;
     try {
-        document = readSpecFile(text, rel).document;
+        ({ document } = readSpecFile(text, rel));
     } catch (error) {
         if (!(error instanceof SpecSyntaxError)) {
             throw error;

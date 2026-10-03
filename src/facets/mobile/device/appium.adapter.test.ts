@@ -57,21 +57,21 @@ async function openedAdapter(timeouts?: { action?: number; launch?: number }): P
 
 function tapTheAbsent(adapter: AppiumAdapter): { error?: Error; settled: Promise<void> } {
     const outcome: { error?: Error; settled: Promise<void> } = { settled: Promise.resolve() };
-    outcome.settled = adapter
-        .open({
-            bundleId: BUNDLE_ID,
-            scenario: async (visitor) => {
-                await visitor.tap(button('Absent'));
-            },
-        })
-        .then(
-            () => {
-                throw new Error('the tap resolved, though nothing was ever on screen');
-            },
-            (error: Error) => {
-                outcome.error = error;
-            },
-        );
+    const tap = async (): Promise<void> => {
+        try {
+            await adapter.open({
+                bundleId: BUNDLE_ID,
+                scenario: async (visitor) => {
+                    await visitor.tap(button('Absent'));
+                },
+            });
+        } catch (error) {
+            outcome.error = error instanceof Error ? error : new Error(String(error));
+            return;
+        }
+        throw new Error('the tap resolved, though nothing was ever on screen');
+    };
+    outcome.settled = tap();
     return outcome;
 }
 

@@ -50,7 +50,7 @@ describe('comparison', () => {
 
         // Then - toString/valueOf keep string coercion working
         expect(String(result.stdout)).toContain('Usage:');
-        expect(`${result.stdout}`).toContain('Usage:');
+        expect(result.stdout.text).toContain('Usage:');
     });
 
     test('the stdout mismatch diff is goldened in full (failure-message quality is the product)', async () => {

@@ -1,5 +1,5 @@
 import { refusal } from '../../chain/refusals/refusal.js';
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { stripAnsiCodes } from './ansi.js';
 
 /** Read-only accessor for a JSON payload; parsed lazily, so the raw text stays readable when it is not JSON. */

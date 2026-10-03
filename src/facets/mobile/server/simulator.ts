@@ -1,11 +1,25 @@
 import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 
 import { refusal } from '../../../chain/refusals/refusal.js';
 
 /** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
 
-const run = promisify(execFile);
+async function run(
+    command: string,
+    args: readonly string[],
+    options: { maxBuffer?: number; timeout?: number } = {},
+): Promise<{ stdout: string }> {
+    return await new Promise((resolve, reject) => {
+        execFile(command, args, { encoding: 'utf8', ...options }, (error, stdout) => {
+            if (error === null) {
+                resolve({ stdout });
+            } else {
+                const failure: Error = error;
+                reject(failure);
+            }
+        });
+    });
+}
 const BOOT_TIMEOUT_MS = 120_000;
 
 export type SimulatorDevice = {

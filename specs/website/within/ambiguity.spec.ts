@@ -1,4 +1,13 @@
-import { button, contentinfo, link, main, navigation, region, within } from '@jterrazz/test';
+import {
+    button,
+    contentinfo,
+    heading,
+    link,
+    main,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import type { VisitScenario } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
@@ -80,6 +89,7 @@ describe('ambiguity', () => {
         const result = await website.visit('/ambiguous', async (visitor) => {
             // When - the scope narrows it to exactly one
             await visitor.click(within(navigation(), link('Articles')));
+            await visitor.see(heading('All articles'));
         });
 
         // Then - the visit lands on the destination
@@ -90,6 +100,7 @@ describe('ambiguity', () => {
         // Given - the same name in a second landmark
         const result = await website.visit('/ambiguous', async (visitor) => {
             await visitor.click(within(contentinfo(), link('Articles')));
+            await visitor.see(heading('All articles'));
         });
 
         // Then - the target designates the footer link
@@ -122,6 +133,7 @@ describe('ambiguity', () => {
         const inSeries = within(region('Series'), link('Part 2'));
         const result = await website.visit('/ambiguous', async (visitor) => {
             await visitor.click(within(main(), inSeries));
+            await visitor.gone(inSeries);
         });
 
         // Then - the chain resolves to the one link in that region

@@ -17,9 +17,7 @@ export function formatTableDiff(
 ): string {
     const expectedCount = pairs.filter((pair) => pair.expected !== undefined).length;
     const actualCount = pairs.filter((pair) => pair.actual !== undefined).length;
-    const lines: string[] = [];
-
-    lines.push(
+    const lines: string[] = [
         `Table "${table}" mismatch`,
         `${DIM}  query: ${columns.join(', ')}${RESET}`,
         `${DIM}  expected: ${rowLabel(expectedCount)}${RESET}`,
@@ -28,7 +26,7 @@ export function formatTableDiff(
         `${GREEN}- Expected${RESET}`,
         `${RED}+ Received${RESET}`,
         '',
-    );
+    ];
 
     const header = columns.join('  |  ');
     lines.push(`${DIM}  ${header}${RESET}`);
@@ -64,15 +62,13 @@ function bodyLines(expected: unknown, actual: unknown): [string[], string[]] {
 }
 
 export function formatResponseDiff(file: string, expected: unknown, actual: unknown): string {
-    const lines: string[] = [];
-
-    lines.push(
+    const lines: string[] = [
         `Response mismatch (${file})`,
         '',
         `${GREEN}- Expected${RESET}`,
         `${RED}+ Received${RESET}`,
         '',
-    );
+    ];
 
     const [expectedLines, actualLines] = bodyLines(expected, actual);
     const maxLines = Math.max(expectedLines.length, actualLines.length);
@@ -137,15 +133,13 @@ export function formatStdoutDiff(
     actual: string,
     options?: { equals?: LineEquals },
 ): string {
-    const lines: string[] = [];
-
-    lines.push(
+    const lines: string[] = [
         `Output mismatch (${file})`,
         '',
         `${GREEN}- Expected${RESET}`,
         `${RED}+ Received${RESET}`,
         '',
-    );
+    ];
 
     const expectedLines = expected.split('\n');
     const actualLines = actual.split('\n');
@@ -239,6 +233,16 @@ function rowLabel(n: number): string {
     return n === 1 ? '1 row' : `${n} rows`;
 }
 
+function cellText(value: unknown): string {
+    if (value === null || value === undefined) {
+        return 'null';
+    }
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+    return typeof value === 'object' ? JSON.stringify(value) : String(value);
+}
+
 function formatRow(row: readonly unknown[]): string {
-    return row.map((v) => String(v ?? 'null')).join('  |  ');
+    return row.map((value) => cellText(value)).join('  |  ');
 }

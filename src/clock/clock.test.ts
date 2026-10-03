@@ -1,6 +1,6 @@
 // oxlint-disable-next-line jterrazz/no-sleep -- the subject IS the clock: proving `clock.run()` takes the scheduler needs a REAL delay to contrast with the frozen one, which no framework primitive can stand in for
 import { setTimeout as afterRealMs } from 'node:timers/promises';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { clock } from './clock.js';
 
@@ -20,8 +20,8 @@ describe('clock', () => {
             using _ = clock.at('2026-03-04T09:30:00Z');
         }
 
-        // Then - the reading is the real one again
-        expect(new Date().toISOString()).not.toBe('2026-03-04T09:30:00.000Z');
+        // Then - the calendar is no longer faked
+        expect(vi.isFakeTimers()).toBe(false);
     });
 
     test('clock — the one time primitive — leaves the scheduler alone so a subject keeps running', async () => {

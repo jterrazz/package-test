@@ -1,4 +1,4 @@
-import { button, content, field, link } from '@jterrazz/test';
+import { button, content, field, heading, link } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -23,6 +23,7 @@ describe('subscribe', () => {
         const result = await website.visit('/', async (visitor) => {
             // When - they follow the articles link
             await visitor.click(link('Articles'));
+            await visitor.see(heading('All articles'));
         });
 
         // Then - the result is the destination page

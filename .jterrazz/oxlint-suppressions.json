@@ -17,22 +17,12 @@
             "count": 1
         }
     },
-    "lint/consumer/checks/document-description-unique.ts": {
-        "prefer-destructuring": {
-            "count": 1
-        }
-    },
     "lint/consumer/checks/document-env-and-serve-registered.ts": {
         "complexity": {
             "count": 1
         },
         "max-depth": {
             "count": 4
-        }
-    },
-    "lint/consumer/checks/document-follows-its-grammar.ts": {
-        "prefer-destructuring": {
-            "count": 1
         }
     },
     "lint/consumer/checks/ground-shared-or-inline.ts": {
@@ -51,9 +41,6 @@
         },
         "max-lines-per-function": {
             "count": 1
-        },
-        "no-unused-vars": {
-            "count": 4
         }
     },
     "lint/consumer/checks/spec-in-subject-folder.moves.test.ts": {
@@ -87,11 +74,6 @@
             "count": 1
         }
     },
-    "lint/consumer/rules/setup/cleanup-passed-to-after-all.ts": {
-        "no-loop-func": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/setup/no-runner-alias.ts": {
         "complexity": {
             "count": 1
@@ -115,18 +97,10 @@
     "lint/kit/project/document-model.ts": {
         "complexity": {
             "count": 1
-        },
-        "typescript/no-unnecessary-type-conversion": {
-            "count": 1
         }
     },
     "lint/kit/project/production.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/kit/project/resolve.test.ts": {
-        "jterrazz/given-in-the-test": {
             "count": 1
         }
     },
@@ -137,9 +111,6 @@
     },
     "lint/kit/project/spec-document.ts": {
         "max-lines": {
-            "count": 1
-        },
-        "typescript/no-unnecessary-type-conversion": {
             "count": 1
         }
     },
@@ -166,33 +137,8 @@
             "count": 1
         }
     },
-    "lint/kit/project/yaml-document.ts": {
-        "typescript/consistent-return": {
-            "count": 1
-        }
-    },
-    "lint/self/corpus/docs-typecheck.ts": {
-        "unicorn/no-array-for-each": {
-            "count": 1
-        }
-    },
     "lint/self/corpus/matrix.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "specs/api/services/initiation-errors.spec.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
-    "specs/cli/stdout/comparison.spec.ts": {
-        "typescript/restrict-template-expressions": {
-            "count": 1
-        }
-    },
-    "specs/cli/transform-cli.specification.ts": {
-        "no-control-regex": {
             "count": 1
         }
     },
@@ -206,63 +152,23 @@
             "count": 1
         }
     },
-    "specs/website/visit/subscribe.spec.ts": {
-        "jterrazz/scenario-ends-settled": {
-            "count": 1
-        }
-    },
-    "specs/website/within/ambiguity.spec.ts": {
-        "jterrazz/scenario-ends-settled": {
-            "count": 3
-        }
-    },
-    "src/clock/clock.test.ts": {
-        "jterrazz/no-sampled-value-in-test": {
-            "count": 1
-        }
-    },
     "src/expectations/command/cli.result.ts": {
-        "import/no-cycle": {
-            "count": 1
-        },
         "typescript/require-await": {
             "count": 1
         }
     },
     "src/expectations/command/container.ts": {
-        "import/no-cycle": {
-            "count": 1
-        },
         "typescript/require-await": {
-            "count": 1
-        }
-    },
-    "src/expectations/disk/directory.ts": {
-        "jsdoc/empty-tags": {
-            "count": 1
-        }
-    },
-    "src/expectations/goldens/diff.test.ts": {
-        "no-control-regex": {
             "count": 1
         }
     },
     "src/expectations/goldens/diff.ts": {
         "typescript/no-base-to-string": {
             "count": 1
-        },
-        "unicorn/no-immediate-mutation": {
-            "count": 3
         }
     },
     "src/expectations/goldens/matchers.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
         "max-lines": {
-            "count": 1
-        },
-        "vitest/require-to-throw-message": {
             "count": 1
         }
     },
@@ -277,55 +183,13 @@
             "count": 1
         }
     },
-    "src/expectations/in-place/update.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
-        "jterrazz/no-raw-env-write": {
-            "count": 5
-        }
-    },
-    "src/expectations/result.ts": {
-        "typescript/no-inferrable-types": {
-            "count": 1
-        }
-    },
-    "src/expectations/text/text.ts": {
-        "jsdoc/empty-tags": {
-            "count": 1
-        }
-    },
-    "src/expectations/tokens/match.ts": {
-        "max-classes-per-file": {
-            "count": 1
-        },
-        "typescript/switch-exhaustiveness-check": {
-            "count": 1
-        }
-    },
     "src/expectations/tokens/structural.ts": {
-        "complexity": {
-            "count": 1
-        },
         "max-lines": {
-            "count": 1
-        },
-        "typescript/switch-exhaustiveness-check": {
             "count": 1
         }
     },
     "src/facets/api/routes/route-judge.test.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "src/facets/api/server/hono.adapter.ts": {
-        "unicorn/no-array-for-each": {
-            "count": 1
-        }
-    },
-    "src/facets/cli/documents/literate-plugin.ts": {
-        "prefer-destructuring": {
             "count": 1
         }
     },
@@ -343,23 +207,9 @@
             "count": 1
         }
     },
-    "src/facets/cli/process/exec.adapter.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
-        "jterrazz/no-raw-env-write": {
-            "count": 2
-        }
-    },
     "src/facets/cli/process/exec.adapter.ts": {
         "max-lines-per-function": {
             "count": 2
-        },
-        "no-use-before-define": {
-            "count": 1
-        },
-        "typescript/no-dynamic-delete": {
-            "count": 1
         },
         "typescript/require-await": {
             "count": 1
@@ -376,16 +226,7 @@
         }
     },
     "src/facets/mobile/device/appium.adapter.test.ts": {
-        "promise/prefer-await-to-callbacks": {
-            "count": 1
-        },
-        "promise/prefer-await-to-then": {
-            "count": 1
-        },
         "typescript/require-await": {
-            "count": 1
-        },
-        "typescript/use-unknown-in-catch-callback-variable": {
             "count": 1
         }
     },
@@ -394,15 +235,6 @@
             "count": 1
         },
         "max-lines": {
-            "count": 1
-        },
-        "no-promise-executor-return": {
-            "count": 1
-        },
-        "promise/param-names": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
             "count": 1
         }
     },
@@ -416,22 +248,12 @@
             "count": 1
         }
     },
-    "src/facets/mobile/server/simulator.ts": {
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "src/facets/website/browser/playwright.adapter.ts": {
         "max-lines": {
             "count": 1
         },
         "max-lines-per-function": {
             "count": 2
-        }
-    },
-    "src/facets/website/fetch/fetch.action.ts": {
-        "unicorn/no-array-for-each": {
-            "count": 1
         }
     },
     "src/facets/website/website.handle.ts": {
@@ -451,9 +273,6 @@
         }
     },
     "src/services/sqlite/sqlite.adapter.test.ts": {
-        "jterrazz/no-sampled-value-in-test": {
-            "count": 1
-        },
         "max-lines": {
             "count": 1
         }
@@ -469,30 +288,9 @@
     "src/services/startup/orchestrator.ts": {
         "max-lines-per-function": {
             "count": 1
-        },
-        "no-console": {
-            "count": 2
-        }
-    },
-    "src/services/startup/startup-report.ts": {
-        "unicorn/no-immediate-mutation": {
-            "count": 1
-        }
-    },
-    "src/stubs/delivery/msw-handlers.ts": {
-        "unicorn/no-array-for-each": {
-            "count": 1
-        }
-    },
-    "src/stubs/delivery/other-process/stub-backend.test.ts": {
-        "jterrazz/no-status-only-test": {
-            "count": 1
         }
     },
     "src/stubs/delivery/other-process/stub-backend.ts": {
-        "class-methods-use-this": {
-            "count": 1
-        },
         "complexity": {
             "count": 1
         },
@@ -503,11 +301,6 @@
     "src/stubs/delivery/same-process/stub-server.ts": {
         "typescript/require-await": {
             "count": 1
-        }
-    },
-    "src/stubs/intercept/intercept.test.ts": {
-        "unicorn/consistent-function-scoping": {
-            "count": 3
         }
     }
 }

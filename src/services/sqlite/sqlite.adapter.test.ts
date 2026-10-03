@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
@@ -263,7 +263,9 @@ describe('sqlite', () => {
         expect(isStaleTemplateLock(lockPath)).toBe(false);
 
         // invariant: long past the build budget the holder is presumed dead: a crashed worker must not wedge the suite.
-        expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBe(true);
+        expect(isStaleTemplateLock(lockPath, statSync(lockPath).mtimeMs + 10 * 60 * 1000)).toBe(
+            true,
+        );
         releaseTemplateLock(lockPath);
     });
 

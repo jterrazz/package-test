@@ -2,6 +2,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { evidenceDirectory } from '../../../../lint/kit/project/artifacts.js';
+import { pause } from '../../../chain/pause.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../visitor/matching/candidates.js';
@@ -35,10 +36,6 @@ const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
 /** WebDriverAgent builds once per simulator: the first session is the slow one. */
 const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
-
-const delay = async (ms: number): Promise<void> => {
-    await new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
-};
 
 function escapePredicate(value: string): string {
     return value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`);
@@ -217,7 +214,7 @@ export class AppiumAdapter implements DevicePort {
             if (Date.now() > deadline) {
                 throw await this.timeoutError(driver, target, verb);
             }
-            await delay(POLL_INTERVAL_MS);
+            await pause(POLL_INTERVAL_MS);
         }
     }
 

@@ -2,7 +2,7 @@ import { dedent } from '../../../lint/kit/project/dedent.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { isDiskTarget } from '../../disk/spec-path.js';
 import { TextAccessor } from '../text/text.js';
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { textEquals } from '../tokens/structural.js';
 import { formatStdoutDiff } from './diff.js';
 import type { TableMatchOptions } from './match-options.js';

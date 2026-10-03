@@ -106,7 +106,7 @@ export function streamScalars(run: YAMLMap): { key: string; scalar: Scalar }[] {
 }
 
 export function isBlock(scalar: Scalar): boolean {
-    return String(scalar.type ?? '').startsWith('BLOCK');
+    return (scalar.type ?? '').startsWith('BLOCK');
 }
 
 /** A sibling `_fixtures/` is the document's material whether or not a `fixture:` line names the exact file. */

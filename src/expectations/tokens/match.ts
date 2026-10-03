@@ -57,24 +57,18 @@ export class Matcher {
 
     /** Placeholder-style rendering used in failure diffs and serialization. */
     toString(): string {
-        switch (this.kind) {
-            case 'includes': {
-                return `{{includes:${this.includes}}}`;
-            }
-            case 'ref': {
-                return this.notRef === undefined
-                    ? `{{ref#${this.refName}}}`
-                    : `{{ref#${this.refName}!${this.notRef}}}`;
-            }
-            case 'regex': {
-                return `{{regex:${this.regex?.source}}}`;
-            }
-            default: {
-                return this.refName === undefined
-                    ? `{{${this.kind}}}`
-                    : `{{${this.kind}#${this.refName}}}`;
-            }
+        if (this.kind === 'includes') {
+            return `{{includes:${this.includes}}}`;
         }
+        if (this.kind === 'regex') {
+            return `{{regex:${this.regex?.source}}}`;
+        }
+        if (this.kind === 'ref') {
+            return this.notRef === undefined
+                ? `{{ref#${this.refName}}}`
+                : `{{ref#${this.refName}!${this.notRef}}}`;
+        }
+        return this.refName === undefined ? `{{${this.kind}}}` : `{{${this.kind}#${this.refName}}}`;
     }
 
     toJSON(): string {
@@ -138,42 +132,3 @@ export const match: MatchFactories = {
     /** Matches the exact working directory of the current spec. */
     workdir: typed('workdir'),
 };
-
-/** Named captures of `match.ref()` / `{{type#ref}}`, one scope per spec result. */
-export class CaptureScope {
-    private readonly values = new Map<string, unknown>();
-    /** The spec's working directory when known (cli mode), for `{{workdir}}`. */
-    workdir?: string | undefined;
-
-    constructor(workdir?: string) {
-        this.workdir = workdir;
-    }
-
-    get(name: string): unknown {
-        return this.values.get(name);
-    }
-
-    has(name: string): boolean {
-        return this.values.has(name);
-    }
-
-    set(name: string, value: unknown): void {
-        this.values.set(name, value);
-    }
-
-    /** A copy to try a comparison on: its captures stay there until adopted. */
-    fork(): CaptureScope {
-        const copy = new CaptureScope(this.workdir);
-        for (const [name, value] of this.values) {
-            copy.set(name, value);
-        }
-        return copy;
-    }
-
-    /** Take every capture a fork of this scope recorded. */
-    adopt(fork: CaptureScope): void {
-        for (const [name, value] of fork.values) {
-            this.values.set(name, value);
-        }
-    }
-}

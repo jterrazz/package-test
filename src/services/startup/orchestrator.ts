@@ -125,6 +125,7 @@ export class Orchestrator {
                 });
 
                 const output = formatStartupReport(reports, this.subject);
+                // oxlint-disable-next-line eslint/no-console -- outside: vitest attributes console output to the file that printed it, which is where a failed start is read
                 console.error(output);
                 throw error;
             }
@@ -133,6 +134,7 @@ export class Orchestrator {
         this.started = true;
 
         const output = formatStartupReport(reports, this.subject);
+        // oxlint-disable-next-line eslint/no-console -- outside: vitest attributes console output to the file that printed it, which is where the started services are read
         console.log(output);
     }
 

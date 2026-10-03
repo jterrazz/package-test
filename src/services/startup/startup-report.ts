@@ -37,9 +37,11 @@ function describeApp(app: AppInfo): string {
 
 /** One line per declared service, then the app the subject is. */
 export function formatStartupReport(services: ServiceReport[], app?: AppInfo): string {
-    const lines: string[] = [];
-
-    lines.push('', `${BG_CYAN}${BLACK}${BOLD} INFRA ${RESET} Starting infrastructure...`, '');
+    const lines: string[] = [
+        '',
+        `${BG_CYAN}${BLACK}${BOLD} INFRA ${RESET} Starting infrastructure...`,
+        '',
+    ];
 
     for (const service of services) {
         if (service.error !== undefined && service.error !== '') {

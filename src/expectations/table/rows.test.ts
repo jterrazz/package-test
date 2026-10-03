@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { CaptureScope, match } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
+import { match } from '../tokens/match.js';
 import { pairRows } from './rows.js';
 
 describe('pairRows', () => {

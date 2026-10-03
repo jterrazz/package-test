@@ -11,7 +11,7 @@ export function checkDocumentDescriptionUnique(rootDir: string): Spotted[] {
     for (const path of listSpecFiles(rootDir)) {
         let document;
         try {
-            document = readSpecFile(readText(path), path).document;
+            ({ document } = readSpecFile(readText(path), path));
         } catch {
             continue;
         }

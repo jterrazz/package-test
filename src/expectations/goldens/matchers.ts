@@ -27,7 +27,7 @@ import type { Rows } from '../table/rows.js';
 import { TableAccessor } from '../table/table.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { hasPlaceholders, renderExpected, structuralEquals } from '../tokens/structural.js';
 import {
     mergePreservingPlaceholders,

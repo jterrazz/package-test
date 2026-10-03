@@ -1,5 +1,5 @@
 import { refusal } from '../../chain/refusals/refusal.js';
-import { CaptureScope } from '../../expectations/tokens/match.js';
+import { CaptureScope } from '../../expectations/tokens/capture-scope.js';
 import { structuralSubset } from '../../expectations/tokens/structural.js';
 import type { MatchableRequest, StubRequest } from '../exchange.js';
 

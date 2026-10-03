@@ -1,4 +1,4 @@
-import { CaptureScope } from './match.js';
+import { CaptureScope } from './capture-scope.js';
 import {
     hasPlaceholders,
     isPlainObject,

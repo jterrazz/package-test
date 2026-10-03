@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 87    |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 88    |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 51    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 188   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
@@ -355,7 +355,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `field`         | —   | —   | —   | —    | —           | 6       | 1      | 7         | —      |
 | `content`       | —   | —   | —   | —    | —           | 7       | 6      | 17        | —      |
 | `testId`        | —   | —   | —   | —    | —           | 1       | 1      | 1         | —      |
-| `heading`       | —   | —   | —   | —    | —           | 3       | —      | 3         | —      |
+| `heading`       | —   | —   | —   | —    | —           | 5       | —      | 3         | —      |
 | `link`          | —   | —   | —   | —    | —           | 3       | —      | 3         | —      |
 | `dialog`        | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
 | `status`        | —   | —   | —   | —    | —           | 1       | —      | 3         | —      |
@@ -435,7 +435,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 6      |
 | `intercept()` | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
-| `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 9      |
+| `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 6      |
 
 ### Token
 

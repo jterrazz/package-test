@@ -117,9 +117,9 @@ export class CliResult extends BaseResult {
     container(name: string): ContainerAccessor {
         const captured = this.capturedContainers('container').get(name);
         if (!captured) {
-            return new ContainerAccessor(null, null, this.testDir, this.transform);
+            return containerAt(null, null, this.testDir, this.transform);
         }
-        return new ContainerAccessor(captured.id, captured.inspect, this.testDir, this.transform);
+        return containerAt(captured.id, captured.inspect, this.testDir, this.transform);
     }
 
     /** All captured container IDs. Triggers the same lazy query as `container()`. */
@@ -174,4 +174,31 @@ export class CliResult extends BaseResult {
 function labelsOf(inspect: unknown): Readonly<Record<string, unknown>> {
     const labels = fieldOf(fieldOf(inspect, 'Config', 'config'), 'Labels', 'labels');
     return typeof labels === 'object' && labels !== null ? { ...labels } : {};
+}
+
+function containerAt(
+    id: null | string,
+    inspect: unknown,
+    testDir: string,
+    transform?: (text: string) => string,
+): ContainerAccessor {
+    const resultOf = (commandOutput: CliOutput): CliResult =>
+        new CliResult({ commandOutput, config: {}, testDir, transform, workDir: testDir });
+    return new ContainerAccessor({
+        containerId: id,
+        inspectData: inspect,
+        resultOf,
+        testDir,
+        transform,
+    });
+}
+
+export function createDockerReader(testDir: string): (containerId: string) => ContainerAccessor {
+    return (containerId: string): ContainerAccessor => {
+        try {
+            return containerAt(containerId, inspectContainer(containerId), testDir);
+        } catch {
+            return containerAt(null, null, testDir);
+        }
+    };
 }

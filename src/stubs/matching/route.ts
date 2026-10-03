@@ -1,4 +1,4 @@
-import { CaptureScope } from '../../expectations/tokens/match.js';
+import { CaptureScope } from '../../expectations/tokens/capture-scope.js';
 import {
     hasPlaceholders,
     placeholderPatternSource,

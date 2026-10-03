@@ -2,27 +2,26 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { discoverRoot, resolveRoot } from './resolve.js';
 
-let base: string;
-
-describe('resolve', () => {
-    beforeAll(() => {
-        // Given - <base>/project with a manifest and a nested tests dir, and <base>/plain with only a package.json
-        base = mkdtempSync(resolve(tmpdir(), 'root-discovery-'));
-        mkdirSync(resolve(base, 'project/tests/feature'), { recursive: true });
-        writeFileSync(resolve(base, 'project/package.json'), '{"name":"project"}\n');
-        mkdirSync(resolve(base, 'plain/tests/deep'), { recursive: true });
-        writeFileSync(resolve(base, 'plain/package.json'), '{"name":"plain"}\n');
-    });
-
-    afterAll(() => {
+/** `<base>/project` with a manifest and a nested tests dir, and `<base>/plain` with only a package.json. */
+function givenTrees(): string {
+    const base = mkdtempSync(resolve(tmpdir(), 'root-discovery-'));
+    onTestFinished(() => {
         rmSync(base, { force: true, recursive: true });
     });
+    mkdirSync(resolve(base, 'project/tests/feature'), { recursive: true });
+    writeFileSync(resolve(base, 'project/package.json'), '{"name":"project"}\n');
+    mkdirSync(resolve(base, 'plain/tests/deep'), { recursive: true });
+    writeFileSync(resolve(base, 'plain/package.json'), '{"name":"plain"}\n');
+    return base;
+}
 
+describe('resolve', () => {
     test('root discovery (rule `no-redundant-root`) — walks up to the nearest directory carrying a root marker', () => {
+        const base = givenTrees();
         // Given - a specification file nested under the project
         const found = discoverRoot(resolve(base, 'project/tests/feature'));
 
@@ -31,6 +30,7 @@ describe('resolve', () => {
     });
 
     test('root discovery (rule `no-redundant-root`) — a directory carrying a package.json is a root', () => {
+        const base = givenTrees();
         // Given - a plain project
         const found = discoverRoot(resolve(base, 'plain/tests/deep'));
 
@@ -39,6 +39,7 @@ describe('resolve', () => {
     });
 
     test('root discovery (rule `no-redundant-root`) — resolveRoot treats an explicit root as an override', () => {
+        const base = givenTrees();
         // Given - an explicit relative root
         const found = resolveRoot('../..', resolve(base, 'project/tests/feature'));
 
@@ -47,6 +48,7 @@ describe('resolve', () => {
     });
 
     test('root discovery (rule `no-redundant-root`) — resolveRoot without a root auto-discovers from the caller directory', () => {
+        const base = givenTrees();
         // Given - no explicit root
         const found = resolveRoot(undefined, resolve(base, 'project/tests/feature'));
 
@@ -66,6 +68,7 @@ describe('resolve', () => {
     });
 
     test('root discovery (rule `no-redundant-root`) — a workspace package wins over the repository above it (monorepo)', () => {
+        const base = givenTrees();
         // Given - a manifest at the monorepo root and one in a nested package (the shape where walking past the first marker measures every path the runner resolves from the wrong unit)
         mkdirSync(resolve(base, 'mono'), { recursive: true });
         writeFileSync(resolve(base, 'mono/package.json'), '{"name":"mono"}\n');
@@ -79,12 +82,14 @@ describe('resolve', () => {
     });
 
     test('root discovery (rule `no-redundant-root`) — the marker in a directory resolves to that directory', () => {
+        const base = givenTrees();
         // Given - the ordinary single-package repo
         // Then - the nearest ancestor carrying the manifest is the root
         expect(discoverRoot(resolve(base, 'project/tests/feature'))).toBe(resolve(base, 'project'));
     });
 
     test('root discovery (rule `no-redundant-root`) — in a git checkout, a `.gitignore`d manifest marks no root and a new one does', () => {
+        const base = givenTrees();
         // Given - a repository whose `pkg/package.json` is ignored, and a `fresh/` package nobody added
         const repository = resolve(base, 'repository');
         mkdirSync(resolve(repository, 'pkg/src'), { recursive: true });
@@ -101,6 +106,7 @@ describe('resolve', () => {
     });
 
     test('root discovery (rule `no-redundant-root`) — an absolute root override is used verbatim', () => {
+        const base = givenTrees();
         // Given - an absolute root and an unrelated caller directory
         const found = resolveRoot(resolve(base, 'project'), resolve(base, 'plain/tests/deep'));
 

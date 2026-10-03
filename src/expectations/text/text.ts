@@ -1,4 +1,4 @@
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { stripAnsiCodes } from './ansi.js';
 import { grep as grepBlocks } from './grep.js';
 
@@ -12,7 +12,7 @@ export class TextAccessor {
     readonly streamName: string;
     /** @internal */
     readonly testDir: string;
-    /** @internal Normaliser applied before comparisons, never to fixtures. */
+    /** Normaliser applied before comparisons, never to fixtures. @internal */
     readonly transform?: ((text: string) => string) | undefined;
 
     constructor(

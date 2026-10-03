@@ -85,12 +85,8 @@ export { disabled, enabled, focused, selected, valued } from './visitor/targets/
 export type { ElementKind, LandmarkKind, Target, TargetOptions } from './visitor/targets/target.js';
 export type { ElementMatch } from './visitor/matching/candidates.js';
 
-export {
-    type CaptureScope,
-    match,
-    Matcher,
-    type MatcherKind,
-} from './expectations/tokens/match.js';
+export { match, Matcher, type MatcherKind } from './expectations/tokens/match.js';
+export type { CaptureScope } from './expectations/tokens/capture-scope.js';
 export type { BaseResult, FileAccessor } from './expectations/result.js';
 export type { CliResult, DockerSpecConfig } from './expectations/command/cli.result.js';
 export type { ContainerAccessor } from './expectations/command/container.js';

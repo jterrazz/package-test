@@ -2,7 +2,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { textEquals } from '../tokens/structural.js';
 
 const DEFAULT_IGNORES = ['.git', '.DS_Store', 'node_modules', '.next', 'dist', '.turbo', '.cache'];
@@ -80,7 +80,7 @@ export async function diffDirectories(
 export class DirectoryAccessor {
     /** @internal */
     readonly captures: CaptureScope;
-    /** @internal Absolute path of the directory under assertion. */
+    /** Absolute path of the directory under assertion. @internal */
     readonly root: string;
     /** @internal */
     readonly testDir: string;

@@ -1,5 +1,5 @@
 import { refusal } from '../../chain/refusals/refusal.js';
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 
 export type TableContent = { columns: string[]; rows: unknown[][] };
 

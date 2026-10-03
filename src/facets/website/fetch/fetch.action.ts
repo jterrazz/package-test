@@ -40,10 +40,7 @@ export const rawFetch = defineAction<
             redirect: 'manual',
         });
         const body = await response.text();
-        const received: Record<string, string> = {};
-        response.headers.forEach((value, key) => {
-            received[key] = value;
-        });
+        const received: Record<string, string> = Object.fromEntries(response.headers);
         return new FetchResult({
             config,
             exchange: { body, headers: received, status: response.status },

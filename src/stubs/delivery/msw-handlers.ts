@@ -124,9 +124,8 @@ async function observe(request: Request): Promise<MatchableRequest> {
             body = rawText;
         }
     }
-    const headers: Record<string, string> = {};
-    request.headers.forEach((value, key) => {
-        headers[key.toLowerCase()] = value;
-    });
+    const headers: Record<string, string> = Object.fromEntries(
+        [...request.headers].map(([key, value]) => [key.toLowerCase(), value]),
+    );
     return { body, headers, method: request.method.toUpperCase(), url: request.url };
 }

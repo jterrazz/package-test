@@ -1,4 +1,4 @@
-import { CaptureScope } from '../../expectations/tokens/match.js';
+import { CaptureScope } from '../../expectations/tokens/capture-scope.js';
 import type { Matcher } from '../../expectations/tokens/match.js';
 import { structuralEquals } from '../../expectations/tokens/structural.js';
 

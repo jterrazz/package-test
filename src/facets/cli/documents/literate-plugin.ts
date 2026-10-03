@@ -76,7 +76,7 @@ export function literate(options: LiterateOptions): LiteratePlugin {
     return {
         config: () => ({ test: { include } }),
         configResolved: (resolved) => {
-            root = resolved.root;
+            ({ root } = resolved);
         },
         enforce: 'pre',
         load: (id) => {

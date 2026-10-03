@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { beforeAll, describe, expect, inject, onTestFinished, test, vi } from 'vitest';
+import { describe, expect, inject, onTestFinished, test, vi } from 'vitest';
 
 import { directory, file } from '../../disk/spec-path.js';
 import type { DatabasePort } from '../../services/database.port.js';
@@ -14,7 +14,7 @@ import { deferRewritesTo } from '../in-place/in-place.js';
 import { TableAccessor } from '../table/table.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { buildUpdatedResponse, compareResponse, registerMatchers } from './matchers.js';
 import { WHOLE_MATCHER } from './text-assertions.js';
 
@@ -109,11 +109,9 @@ function usersTable(rows: unknown[][]): DatabasePort {
     };
 }
 
-describe('matchers', () => {
-    beforeAll(async () => {
-        await registerMatchers();
-    });
+await registerMatchers();
 
+describe('matchers', () => {
     test('toMatch — native string behavior preserved (`golden-read-from-its-path`) — a plain string still matches a regexp', () => {
         // Given - a plain string subject (not an accessor)
         // Then - native regexp semantics survive the override
@@ -282,7 +280,15 @@ describe('matchers', () => {
         {
             golden: 'toBeRunning()',
             name: 'a container',
-            subject: () => new ContainerAccessor(null, null, '/tmp'),
+            subject: () =>
+                new ContainerAccessor({
+                    containerId: null,
+                    inspectData: null,
+                    resultOf: () => {
+                        throw new Error('an absent container runs no command');
+                    },
+                    testDir: '/tmp',
+                }),
         },
     ])(
         "toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — $name takes no value: a value handed to it is refused, naming $golden",
@@ -424,7 +430,7 @@ describe('matchers', () => {
         expect(() => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./_expected/wrong.json'), { frozen: true });
-        }).toThrow();
+        }).toThrow('wrong.json');
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
     });
 

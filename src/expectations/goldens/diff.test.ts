@@ -1,10 +1,11 @@
+import { stripVTControlCharacters } from 'node:util';
 import { describe, expect, test } from 'vitest';
 
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { textEquals } from '../tokens/structural.js';
 import { formatResponseDiff, formatStdoutDiff } from './diff.js';
 
-const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
+const plain = (text: string): string[] => stripVTControlCharacters(text).split('\n');
 
 const tokenAware = (expected: string, actual: string): boolean =>
     textEquals(expected, actual, new CaptureScope());

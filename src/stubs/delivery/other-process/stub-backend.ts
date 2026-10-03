@@ -109,16 +109,6 @@ export class StubBackend {
         return this.queue.verdict(strict);
     }
 
-    private corsHeaders(request: IncomingMessage): Record<string, string> {
-        return {
-            'access-control-allow-headers':
-                request.headers['access-control-request-headers'] ?? '*',
-            'access-control-allow-methods': CORS_METHODS,
-            'access-control-allow-origin': '*',
-            'access-control-max-age': PREFLIGHT_MAX_AGE,
-        };
-    }
-
     private describeRoutes(): string {
         const routes = this.queue.declaredRoutes();
         if (routes.length === 0) {
@@ -129,7 +119,7 @@ export class StubBackend {
 
     private async handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
         const method = (request.method ?? 'GET').toUpperCase();
-        const cors = this.corsHeaders(request);
+        const cors = corsHeaders(request);
 
         // invariant: CORS preflight: always answered, whatever is declared.
         if (method === 'OPTIONS') {
@@ -238,4 +228,13 @@ async function readBody(request: IncomingMessage): Promise<unknown> {
     } catch {
         return raw;
     }
+}
+
+function corsHeaders(request: IncomingMessage): Record<string, string> {
+    return {
+        'access-control-allow-headers': request.headers['access-control-request-headers'] ?? '*',
+        'access-control-allow-methods': CORS_METHODS,
+        'access-control-allow-origin': '*',
+        'access-control-max-age': PREFLIGHT_MAX_AGE,
+    };
 }

@@ -137,13 +137,14 @@ function indentOf(text: string, offset: number): number {
 /** Outermost only: a nested one is restored with its parent, and descending would splice it twice. */
 function flowCollections(text: string): FlowCollection[] {
     const found: FlowCollection[] = [];
-    const take = (node: { flow?: boolean; range?: null | number[]; toJSON: () => unknown }) => {
-        if (node.flow !== true || !node.range) {
-            return;
-        }
-        const [start, end] = node.range;
+    const take = (node: {
+        flow?: boolean;
+        range?: null | number[];
+        toJSON: () => unknown;
+    }): symbol | undefined => {
+        const [start, end] = node.flow === true ? (node.range ?? []) : [];
         if (start === undefined || end === undefined) {
-            return;
+            return undefined;
         }
         const from = afterOwner(text, start);
         found.push({

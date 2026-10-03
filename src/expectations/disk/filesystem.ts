@@ -1,4 +1,4 @@
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 import { walkDirectory } from './directory.js';
 
 /** Read-only accessor for the working directory of a command spec. */

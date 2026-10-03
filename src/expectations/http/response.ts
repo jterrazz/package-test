@@ -1,4 +1,4 @@
-import { CaptureScope } from '../tokens/match.js';
+import { CaptureScope } from '../tokens/capture-scope.js';
 
 /** An HTTP response, its body read as a response `.http` reads one. */
 export type ServerResponse = {

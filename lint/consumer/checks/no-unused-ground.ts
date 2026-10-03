@@ -80,18 +80,6 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
     return found;
 }
 
-const DISK_ARG = /(?<![.\w])(?:file|directory)\s*\(\s*(?<arg>[^,)]*)/gu;
-
-const DISK_VERB_ARG = /\.(?:seed|request|fixture|run)\s*\(\s*(?<arg>[^,)]*)/gu;
-
-const PLAIN_STRING = /^(?:'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`$\\]|\\.)*`)$/u;
-
-function argumentsOf(text: string, pattern: RegExp): string[] {
-    return [...text.matchAll(pattern)]
-        .map((match) => (match.groups?.arg ?? '').trim())
-        .filter((arg) => arg.length > 0);
-}
-
 /** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
 type References = { paths: Set<string>; patterns: LiteralPattern[] };
 

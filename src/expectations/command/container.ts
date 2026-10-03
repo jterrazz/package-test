@@ -3,14 +3,8 @@ import { A_FILE_IS_READ_WHERE_IT_EXISTS } from '../result.js';
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
-import { CliResult } from './cli.result.js';
-import {
-    containerLogs,
-    execInContainer,
-    fieldOf,
-    inspectContainer,
-    readContainerFile,
-} from './docker-cli.js';
+import type { CliOutput, CliResult } from './cli.result.js';
+import { containerLogs, execInContainer, fieldOf, readContainerFile } from './docker-cli.js';
 
 function readInspectState(inspect: unknown): { running: boolean; status: string } {
     const state = fieldOf(inspect, 'State', 'state');
@@ -32,6 +26,7 @@ export class ContainerAccessor {
     private readonly inspectData: unknown;
     readonly running: boolean;
     readonly status: string;
+    private readonly resultOf: (output: CliOutput) => CliResult;
     private readonly testDir: string;
     private readonly transform?: ((text: string) => string) | undefined;
 
@@ -40,13 +35,21 @@ export class ContainerAccessor {
         return this.containerId;
     }
 
-    constructor(
-        containerId: null | string,
-        inspectData: unknown,
-        testDir: string,
-        transform?: (text: string) => string,
-    ) {
+    constructor({
+        containerId,
+        inspectData,
+        resultOf,
+        testDir,
+        transform,
+    }: {
+        containerId: null | string;
+        inspectData: unknown;
+        resultOf: (output: CliOutput) => CliResult;
+        testDir: string;
+        transform?: ((text: string) => string) | undefined;
+    }) {
         this.containerId = containerId;
+        this.resultOf = resultOf;
         this.inspectData = inspectData;
         this.testDir = testDir;
         this.transform = transform;
@@ -117,14 +120,7 @@ export class ContainerAccessor {
     /** Run a shell command inside the container. */
     async exec(cmd: string): Promise<CliResult> {
         const id = this.requireExists('exec');
-        const commandOutput = execInContainer(id, ['sh', '-c', cmd]);
-        return new CliResult({
-            commandOutput,
-            config: {},
-            testDir: this.testDir,
-            transform: this.transform,
-            workDir: this.testDir,
-        });
+        return this.resultOf(execInContainer(id, ['sh', '-c', cmd]));
     }
 
     /** The captured container's id — refused when none was captured. */
@@ -146,15 +142,4 @@ export class ContainerAccessor {
         this.cachedLogs ??= containerLogs(id);
         return this.cachedLogs;
     }
-}
-
-export function createDockerReader(testDir: string): (containerId: string) => ContainerAccessor {
-    return (containerId: string): ContainerAccessor => {
-        try {
-            const inspect = inspectContainer(containerId);
-            return new ContainerAccessor(containerId, inspect, testDir);
-        } catch {
-            return new ContainerAccessor(null, null, testDir);
-        }
-    };
 }

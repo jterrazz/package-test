@@ -235,10 +235,10 @@ export class ServedProcess {
                 void this.endLeaderlessGroup(child).then(resolve);
                 return;
             }
-            this.kill(child, 'SIGTERM');
+            killGroup(child, 'SIGTERM');
             const killTimer = setTimeout(() => {
                 if (!exited) {
-                    this.kill(child, 'SIGKILL');
+                    killGroup(child, 'SIGKILL');
                     resolve();
                 }
             }, KILL_GRACE_MS);
@@ -251,22 +251,22 @@ export class ServedProcess {
             return;
         }
         const group = -child.pid;
-        this.kill(child, 'SIGTERM');
+        killGroup(child, 'SIGTERM');
         if (!(await groupEnded(group, KILL_GRACE_MS))) {
-            this.kill(child, 'SIGKILL');
+            killGroup(child, 'SIGKILL');
         }
     }
+}
 
-    private kill(child: ChildProcess, signal: NodeJS.Signals): void {
-        if (child.pid !== undefined && process.platform !== 'win32') {
-            try {
-                process.kill(-child.pid, signal);
-                return;
-            } catch {
-                child.kill(signal);
-                return;
-            }
+function killGroup(child: ChildProcess, signal: NodeJS.Signals): void {
+    if (child.pid !== undefined && process.platform !== 'win32') {
+        try {
+            process.kill(-child.pid, signal);
+            return;
+        } catch {
+            child.kill(signal);
+            return;
         }
-        child.kill(signal);
     }
+    child.kill(signal);
 }

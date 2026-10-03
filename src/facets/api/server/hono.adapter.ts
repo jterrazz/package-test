@@ -64,10 +64,7 @@ export class HonoAdapter implements ServerPort {
                 ? null
                 : (readBody(await response.text(), contentType) ?? null);
 
-        const responseHeaders: Record<string, string> = {};
-        response.headers.forEach((value, key) => {
-            responseHeaders[key] = value;
-        });
+        const responseHeaders: Record<string, string> = Object.fromEntries(response.headers);
 
         return {
             status: response.status,

@@ -9,6 +9,28 @@ afterAll(async () => {
     await stopStubServer();
 });
 
+async function interceptOnABareHost(): Promise<void> {
+    await using _ = await intercept(http.get('/api/posts'), http.json({}), {
+        origin: 'console.test',
+    });
+}
+
+async function reachAnUndeclaredHost(): Promise<void> {
+    await using _ = await intercept(
+        http.get('https://weather.test/today'),
+        http.json({ celsius: 21 }),
+    );
+    await fetch('https://analytics.test/collect');
+}
+
+async function reachTheEndedBlocksRoute(): Promise<void> {
+    await using _ = await intercept(
+        http.get('https://weather.test/tomorrow'),
+        http.json({ celsius: 19 }),
+    );
+    await fetch('https://weather.test/today');
+}
+
 describe('interceptThrough', () => {
     test('intercept — the network double in module scope — answers the declared call and never reaches the wire', async () => {
         // Given - one stub declared for the block
@@ -106,14 +128,8 @@ describe('interceptThrough', () => {
 
     test('intercept — the network double in module scope — refuses an origin that is not one', async () => {
         // Given - a scope stating a bare host
-        const scope = async (): Promise<void> => {
-            await using _ = await intercept(http.get('/api/posts'), http.json({}), {
-                origin: 'console.test',
-            });
-        };
-
         // Then - the message says what an origin is
-        await expect(scope()).rejects.toThrow(
+        await expect(interceptOnABareHost()).rejects.toThrow(
             new Error(
                 [
                     'found: intercept(): `origin` is `console.test`, not an absolute URL',
@@ -127,16 +143,8 @@ describe('interceptThrough', () => {
 
     test('intercept — the network double in module scope — raises the undeclared call when the scope ends', async () => {
         // Given - a block that reaches a second host nothing declared
-        const escape = async (): Promise<void> => {
-            await using _ = await intercept(
-                http.get('https://weather.test/today'),
-                http.json({ celsius: 21 }),
-            );
-            await fetch('https://analytics.test/collect');
-        };
-
         // Then - the scope refuses it rather than letting it pass (`network-strict-after-first-stub`)
-        await expect(escape()).rejects.toThrow('analytics.test');
+        await expect(reachAnUndeclaredHost()).rejects.toThrow('analytics.test');
     });
 
     test('intercept — the network double in module scope — lets the handlers of a block go when the block ends', async () => {
@@ -147,16 +155,8 @@ describe('interceptThrough', () => {
                 http.json({ celsius: 21 }),
             );
         }
-        const stale = async (): Promise<void> => {
-            await using _ = await intercept(
-                http.get('https://weather.test/tomorrow'),
-                http.json({ celsius: 19 }),
-            );
-            await fetch('https://weather.test/today');
-        };
-
         // Then - the first block's stub answers nothing any more
-        await expect(stale()).rejects.toThrow('/today');
+        await expect(reachTheEndedBlocksRoute()).rejects.toThrow('/today');
     });
 
     test('intercept — the network double in module scope — refuses an empty declaration', async () => {

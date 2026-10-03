@@ -60,12 +60,12 @@ export function typecheckDocBlocks(options: {
     }
     const dir = mkdtempSync(join(cacheDir, 'docs-typecheck-'));
     try {
-        blocks.forEach((block, index) => {
+        for (const [index, block] of blocks.entries()) {
             writeFileSync(
                 join(dir, `block-${index}.${block.jsx ? 'tsx' : 'ts'}`),
                 rewriteFrameworkImports(block.code, indexModule),
             );
-        });
+        }
         writeFileSync(
             join(dir, 'tsconfig.json'),
             JSON.stringify({

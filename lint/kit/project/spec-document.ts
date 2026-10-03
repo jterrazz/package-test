@@ -213,7 +213,7 @@ function nodeRange(node: Node | Pair): [number, number, number] | undefined {
 
 function contentLine(context: Context, node: Node | null): number {
     const start = lineOf(context, node);
-    return isScalar(node) && String(node.type ?? '').startsWith('BLOCK') ? start + 1 : start;
+    return isScalar(node) && (node.type ?? '').startsWith('BLOCK') ? start + 1 : start;
 }
 
 function requireMap(context: Context, node: Node | null, what: string): YAMLMap {

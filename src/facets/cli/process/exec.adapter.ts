@@ -8,17 +8,16 @@ const KILL_GRACE_MS = 2000;
 
 /** `null` overrides delete keys (`INIT_CWD: null`). */
 export function buildEnv(extra?: CliEnv): NodeJS.ProcessEnv {
-    const env: NodeJS.ProcessEnv = { ...process.env, INIT_CWD: undefined };
-    if (extra) {
-        for (const [key, value] of Object.entries(extra)) {
-            if (value === null) {
-                delete env[key];
-            } else {
-                env[key] = value;
-            }
-        }
-    }
-    return env;
+    const unset = new Set(
+        Object.entries(extra ?? {})
+            .filter(([, value]) => value === null)
+            .map(([key]) => key),
+    );
+    return Object.fromEntries(
+        Object.entries({ ...process.env, INIT_CWD: undefined, ...extra }).filter(
+            ([key]) => !unset.has(key),
+        ),
+    );
 }
 
 export type ObservableProcess = {
@@ -62,7 +61,7 @@ export async function observeProcess(
             }, KILL_GRACE_MS);
         };
 
-        const finish = (exitCode: number) => {
+        function finish(exitCode: number): void {
             if (resolved) {
                 return;
             }
@@ -70,7 +69,7 @@ export async function observeProcess(
             clearTimeout(timeoutTimer);
             terminate();
             resolve({ exitCode, stderr, stdout });
-        };
+        }
 
         const checkPattern = () => {
             if (

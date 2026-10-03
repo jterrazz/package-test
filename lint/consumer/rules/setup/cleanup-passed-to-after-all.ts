@@ -31,6 +31,16 @@ function destructuresCleanup(node: AstNode): boolean {
     return childList(id, 'properties').some((property) => propertyKeyName(property) === 'cleanup');
 }
 
+function namesCleanup(argument: AstNode): boolean {
+    let found = false;
+    walk(argument, (visited) => {
+        if (visited.type === 'Identifier' && visited.name === 'cleanup') {
+            found = true;
+        }
+    });
+    return found;
+}
+
 function isAfterAllWithCleanup(node: AstNode): boolean {
     if (node.type !== 'CallExpression') {
         return false;
@@ -39,15 +49,7 @@ function isAfterAllWithCleanup(node: AstNode): boolean {
     if (callee?.type !== 'Identifier' || callee.name !== 'afterAll') {
         return false;
     }
-    let found = false;
-    for (const argument of childList(node, 'arguments')) {
-        walk(argument, (visited) => {
-            if (visited.type === 'Identifier' && visited.name === 'cleanup') {
-                found = true;
-            }
-        });
-    }
-    return found;
+    return childList(node, 'arguments').some((argument) => namesCleanup(argument));
 }
 
 const row = rowNamed(consumerRows, 'cleanup-passed-to-after-all');

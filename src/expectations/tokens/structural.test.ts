@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { CaptureScope, match } from './match.js';
+import { CaptureScope } from './capture-scope.js';
+import { match } from './match.js';
 import { structuralEquals, textEquals } from './structural.js';
 import { mergePreservingPlaceholders, mergeTextPreservingPlaceholders } from './update-merge.js';
 

@@ -1,5 +1,5 @@
 /* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { buildEnv, observeProcess } from './exec.adapter.js';
 import type { ObservableProcess } from './exec.adapter.js';
@@ -48,36 +48,31 @@ class FakeChild implements ObservableProcess {
     }
 }
 
-let child: FakeChild;
-
-describe('ExecAdapter', () => {
-    beforeEach(() => {
-        // Given - fake timers and a scripted child
-        vi.useFakeTimers();
-        child = new FakeChild();
-    });
-
-    afterEach(() => {
+function givenChild(): FakeChild {
+    vi.useFakeTimers();
+    onTestFinished(() => {
         vi.useRealTimers();
     });
+    return new FakeChild();
+}
 
+describe('ExecAdapter', () => {
     test('exec adapter — buildEnv — merges overrides on top of process.env; null unsets; INIT_CWD is cleared', () => {
         // Given - a known parent variable and a set of overrides
-        process.env.EXEC_ADAPTER_TEST_VAR = 'parent';
+        vi.stubEnv('EXEC_ADAPTER_TEST_VAR', 'parent');
+        vi.stubEnv('INIT_CWD', '/elsewhere');
+        const env = buildEnv({ ADDED: 'yes', EXEC_ADAPTER_TEST_VAR: null });
 
-        try {
-            const env = buildEnv({ ADDED: 'yes', EXEC_ADAPTER_TEST_VAR: null });
-
-            // Then - null deletes, additions land, INIT_CWD never leaks
-            expect(env.ADDED).toBe('yes');
-            expect('EXEC_ADAPTER_TEST_VAR' in env).toBe(false);
-            expect(env.INIT_CWD).toBeUndefined();
-        } finally {
-            delete process.env.EXEC_ADAPTER_TEST_VAR;
-        }
+        // Then - null deletes, additions land, INIT_CWD never leaks
+        expect({
+            added: env.ADDED,
+            initCwd: env.INIT_CWD,
+            unset: 'EXEC_ADAPTER_TEST_VAR' in env,
+        }).toStrictEqual({ added: 'yes', initCwd: undefined, unset: false });
     });
 
     test('exec adapter — observeProcess — resolves 0 when the waitFor pattern appears, then terminates the child', async () => {
+        const child = givenChild();
         // Given - a long-running observation
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
 
@@ -95,6 +90,7 @@ describe('ExecAdapter', () => {
     });
 
     test('exec adapter — observeProcess — escalates SIGTERM to SIGKILL after the 2s grace period', async () => {
+        const child = givenChild();
         // Given - a child that matches the pattern but ignores SIGTERM
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
         child.emitStderr('ready\n');
@@ -108,6 +104,7 @@ describe('ExecAdapter', () => {
     });
 
     test('exec adapter — observeProcess — does not SIGKILL a child that exits within the grace period', async () => {
+        const child = givenChild();
         // Given - a resolved observation with the child dying on SIGTERM
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
         child.emitStdout('ready\n');
@@ -122,6 +119,7 @@ describe('ExecAdapter', () => {
     });
 
     test('exec adapter — observeProcess — resolves 124 at the timeout when the pattern never appears', async () => {
+        const child = givenChild();
         // Given - a silent child
         const promise = observeProcess(child, { timeout: 3000, waitFor: 'never' });
 
@@ -134,6 +132,7 @@ describe('ExecAdapter', () => {
     });
 
     test('exec adapter — observeProcess — an exit before the pattern is a failure even with code 0', async () => {
+        const child = givenChild();
         // Given - a waitFor observation whose child exits cleanly first
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'never' });
 
@@ -145,6 +144,7 @@ describe('ExecAdapter', () => {
     });
 
     test('exec adapter — observeProcess — without waitFor, a clean exit within the timeout keeps its code', async () => {
+        const child = givenChild();
         // Given - no pattern, just a bounded run
         const promise = observeProcess(child, { timeout: 5000 });
 
@@ -157,6 +157,7 @@ describe('ExecAdapter', () => {
     });
 
     test('exec adapter — observeProcess — the timeout never fires after an early resolution', async () => {
+        const child = givenChild();
         // Given - a resolved observation
         const promise = observeProcess(child, { timeout: 3000, waitFor: 'ready' });
         child.emitStdout('ready\n');
