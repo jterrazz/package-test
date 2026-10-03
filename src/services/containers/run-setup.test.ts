@@ -1,8 +1,10 @@
 import { connect } from 'node:net';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import type { ContainerPort } from './container.port.js';
 import { RunSetupContainer } from './run-setup-container.adapter.js';
-import setup, { DOCKER_ABSENT } from './run-setup.js';
+import setup, { DOCKER_ABSENT, servicesSetup } from './run-setup.js';
 
 async function connection(url: string): Promise<string> {
     return await new Promise((resolve) => {
@@ -17,6 +19,19 @@ async function connection(url: string): Promise<string> {
     });
 }
 
+const listening: ContainerPort = {
+    getConnectionString: () => '127.0.0.1:40001',
+    getHost: () => '127.0.0.1',
+    getLogs: async () => await Promise.resolve(''),
+    getMappedPort: () => 40_001,
+    start: async () => {
+        await Promise.resolve();
+    },
+    stop: async () => {
+        await Promise.resolve();
+    },
+};
+
 async function absent(): Promise<void> {
     throw new Error(DOCKER_ABSENT);
 }
@@ -26,6 +41,51 @@ async function refuses(): Promise<never> {
 }
 
 describe('setup', () => {
+    test('the services setup — is this module, from a checkout', () => {
+        // Given - the source tree
+        // Then - the setup a project registers is this very file
+        expect(servicesSetup()).toBe(join(import.meta.dirname, 'run-setup.ts'));
+    });
+
+    test('the services setup — the run containers, served — starts a worker’s container once Docker is prepared, and answers where it listens', async () => {
+        // Given - a run whose preparation succeeds, over containers that answer one address
+        const provided: string[] = [];
+        const created: string[] = [];
+        const teardown = await setup(
+            {
+                provide: (_key: string, value: string) => {
+                    provided.push(value);
+                },
+            },
+            {
+                create: (request) => {
+                    created.push(request.image);
+                    return listening;
+                },
+                prepare: async () => {
+                    await Promise.resolve();
+                },
+            },
+        );
+
+        // When - a worker asks for a container
+        const container = new RunSetupContainer(String(provided[0]), {
+            image: 'redis:7-alpine',
+            port: 6379,
+        });
+        await container.start();
+
+        // Then - the run created it, and the worker reaches it
+        try {
+            expect([created, container.getConnectionString()]).toStrictEqual([
+                ['redis:7-alpine'],
+                '127.0.0.1:40001',
+            ]);
+        } finally {
+            await teardown();
+        }
+    });
+
     test('the services setup — the run containers, served — provides a loopback address, and answers a request with one clear refusal when Docker is absent', async () => {
         // Given - the setup run with a runtime that no daemon answers
         const provided = new Map<string, unknown>();
@@ -35,9 +95,7 @@ describe('setup', () => {
                     provided.set(key, value);
                 },
             },
-            async () => {
-                throw new Error(DOCKER_ABSENT);
-            },
+            { prepare: absent },
         );
 
         // When - a worker asks for a container
@@ -64,8 +122,8 @@ describe('setup', () => {
                 provided.push(value);
             },
         };
-        const first = await setup(project, absent);
-        const second = await setup(project, absent);
+        const first = await setup(project, { prepare: absent });
+        const second = await setup(project, { prepare: absent });
         const [url] = provided;
         const asked = async (): Promise<string> => {
             try {
@@ -107,7 +165,7 @@ describe('setup', () => {
                     provided.push(value);
                 },
             },
-            absent,
+            { prepare: absent },
         );
 
         // Then - this copy served its own, and the foreign registry was never entered
@@ -128,20 +186,18 @@ describe('setup', () => {
                 provided.push(value);
             },
         };
-        await expect(setup(project, absent, refuses)).rejects.toThrow(
+        await expect(setup(project, { prepare: absent, serve: refuses })).rejects.toThrow(
             'the loopback refused to listen',
         );
 
         // When - a later project's setup runs
-        const teardown = await setup(project, absent);
+        const teardown = await setup(project, { prepare: absent });
 
-        // Then - it serves a fresh address rather than the first failure
-        try {
-            expect(provided).toHaveLength(1);
-            await expect(connection(String(provided[0]))).resolves.toBe('open');
-        } finally {
-            await teardown();
-        }
+        // Then - it serves a fresh address rather than the first failure, and its one teardown closes it: the failure held nothing
+        expect(provided).toHaveLength(1);
+        await expect(connection(String(provided[0]))).resolves.toBe('open');
+        await teardown();
+        await expect(connection(String(provided[0]))).resolves.toBe('ECONNREFUSED');
     });
 
     test('the services setup — the run containers, served — a teardown called twice leaves the services to the project still holding them', async () => {
@@ -152,8 +208,8 @@ describe('setup', () => {
                 provided.push(value);
             },
         };
-        const first = await setup(project, absent);
-        const second = await setup(project, absent);
+        const first = await setup(project, { prepare: absent });
+        const second = await setup(project, { prepare: absent });
         const [url] = provided;
 
         // When - the first project's teardown runs twice

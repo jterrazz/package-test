@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { setupEntry } from '../../chain/paths/setup-entry.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { loadPeer } from '../peer.js';
+import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { sweepOrphans } from './orphans.js';
 import { field, RunContainers, serveContainers } from './run-containers.js';
 import { SERVICE_IMAGES } from './service-images.js';
@@ -104,14 +105,26 @@ function settled(prepare: () => Promise<void>): () => Promise<void> {
     };
 }
 
-async function open(
-    prepare: () => Promise<void>,
-): Promise<{ close: () => Promise<void>; url: string }> {
-    const containers = new RunContainers(
-        (request) => new TestcontainersAdapter(request),
-        settled(prepare),
-    );
-    const served = await serveContainers(containers);
+/** What the run is made of: Docker's, unless a test hands its own. */
+type RunSeams = {
+    create: (request: ContainerRequest) => ContainerPort;
+    prepare: () => Promise<void>;
+    serve: typeof serveContainers;
+};
+
+const DOCKER: RunSeams = {
+    create: (request) => new TestcontainersAdapter(request),
+    prepare: prepareDocker,
+    serve: serveContainers,
+};
+
+async function open({
+    create,
+    prepare,
+    serve,
+}: RunSeams): Promise<{ close: () => Promise<void>; url: string }> {
+    const containers = new RunContainers(create, settled(prepare));
+    const served = await serve(containers);
     return {
         close: async () => {
             await served.close();
@@ -121,9 +134,7 @@ async function open(
     };
 }
 
-type Open = typeof open;
-
-function runServices(prepare: () => Promise<void>, opening: Open): RunServices {
+function runServices(seams: RunSeams): RunServices {
     let holders = 0;
     let opened: null | ReturnType<typeof open> = null;
     const forget = (): void => {
@@ -132,17 +143,16 @@ function runServices(prepare: () => Promise<void>, opening: Open): RunServices {
     };
     return {
         enter: async () => {
-            holders += 1;
-            opened ??= opening(prepare);
+            opened ??= open(seams);
             const current = opened;
             let served: Awaited<typeof current>;
             try {
                 served = await current;
             } catch (error) {
-                holders -= 1;
                 forget();
                 throw error;
             }
+            holders += 1;
             let left = false;
             return {
                 leave: async () => {
@@ -167,22 +177,21 @@ function isRunServices(value: unknown): value is RunServices {
     return typeof field(value, 'enter') === 'function';
 }
 
-function theRun(prepare: () => Promise<void>, opening: Open): RunServices {
+function theRun(seams: RunSeams): RunServices {
     const found: unknown = Reflect.get(globalThis, RUN_SERVICES);
     if (isRunServices(found)) {
         return found;
     }
-    const created = runServices(prepare, opening);
+    const created = runServices(seams);
     Reflect.set(globalThis, RUN_SERVICES, created);
     return created;
 }
 
 export default async function setup(
     project: RunProject,
-    prepare: () => Promise<void> = prepareDocker,
-    opening: Open = open,
+    seams: Partial<RunSeams> = {},
 ): Promise<() => Promise<void>> {
-    const joined = await theRun(prepare, opening).enter();
+    const joined = await theRun({ ...DOCKER, ...seams }).enter();
     project.provide('serviceContainers', joined.url);
     return joined.leave;
 }
