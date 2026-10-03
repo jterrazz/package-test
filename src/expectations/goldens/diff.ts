@@ -4,6 +4,8 @@ const DIM = '\u001B[2m';
 const BOLD = '\u001B[1m';
 const RESET = '\u001B[0m';
 
+const SHOWN_LINES = 5;
+
 export type TableDiffPair = {
     actual?: undefined | unknown[];
     expected?: readonly unknown[] | undefined;
@@ -32,6 +34,7 @@ export function formatTableDiff(
     lines.push(`${DIM}  ${header}${RESET}`);
 
     for (const { actual, expected, matched } of pairs) {
+        // Stryker disable next-line ConditionalExpression: a matched pair always holds the row it matched
         if (matched && actual !== undefined) {
             lines.push(`  ${formatRow(actual)}`);
             continue;
@@ -61,6 +64,36 @@ function bodyLines(expected: unknown, actual: unknown): [string[], string[]] {
     ];
 }
 
+type LineEquals = (expected: string, actual: string) => boolean;
+
+const strictEquals: LineEquals = (expected, actual) => expected === actual;
+
+function renderLines(
+    expectedLines: string[],
+    actualLines: string[],
+    equals: LineEquals,
+): { marked: boolean; rendered: string[] } {
+    const rendered: string[] = [];
+    let marked = false;
+    for (let i = 0; i < Math.max(expectedLines.length, actualLines.length); i++) {
+        const exp = expectedLines[i];
+        const act = actualLines[i];
+        // Stryker disable next-line ConditionalExpression,LogicalOperator: the equalities callers pass, strict or token-aware, answer false for a line one side lacks; the guards keep them typed
+        if (exp !== undefined && act !== undefined && equals(exp, act)) {
+            // invariant: the line matched: render the expected form, the one carrying the token.
+            rendered.push(`  ${exp}`);
+            continue;
+        }
+        marked = true;
+        rendered.push(
+            ...(exp === undefined ? [] : [`${GREEN}- ${exp}${RESET}`]),
+            ...(act === undefined ? [] : [`${RED}+ ${act}${RESET}`]),
+        );
+    }
+
+    return { marked, rendered };
+}
+
 export function formatResponseDiff(file: string, expected: unknown, actual: unknown): string {
     const lines: string[] = [
         `Response mismatch (${file})`,
@@ -71,59 +104,7 @@ export function formatResponseDiff(file: string, expected: unknown, actual: unkn
     ];
 
     const [expectedLines, actualLines] = bodyLines(expected, actual);
-    const maxLines = Math.max(expectedLines.length, actualLines.length);
-
-    for (let i = 0; i < maxLines; i++) {
-        const exp = expectedLines[i];
-        const act = actualLines[i];
-
-        if (exp === act) {
-            lines.push(`  ${exp}`);
-        } else {
-            if (exp !== undefined) {
-                lines.push(`${GREEN}- ${exp}${RESET}`);
-            }
-            if (act !== undefined) {
-                lines.push(`${RED}+ ${act}${RESET}`);
-            }
-        }
-    }
-
-    return lines.join('\n');
-}
-
-type LineEquals = (expected: string, actual: string) => boolean;
-
-const strictEquals: LineEquals = (expected, actual) => expected === actual;
-
-function renderLines(
-    expectedLines: string[],
-    actualLines: string[],
-    equals: LineEquals,
-): { marked: number; rendered: string[] } {
-    const rendered: string[] = [];
-    let marked = 0;
-    const maxLines = Math.max(expectedLines.length, actualLines.length);
-
-    for (let i = 0; i < maxLines; i++) {
-        const exp = expectedLines[i];
-        const act = actualLines[i];
-
-        if (exp !== undefined && act !== undefined && equals(exp, act)) {
-            // invariant: the line matched: render the expected form, the one carrying the token.
-            rendered.push(`  ${exp}`);
-            continue;
-        }
-        marked++;
-        if (exp !== undefined) {
-            rendered.push(`${GREEN}- ${exp}${RESET}`);
-        }
-        if (act !== undefined) {
-            rendered.push(`${RED}+ ${act}${RESET}`);
-        }
-    }
-
-    return { marked, rendered };
+    return [...lines, ...renderLines(expectedLines, actualLines, strictEquals).rendered].join('\n');
 }
 
 /** `equals` is token-aware, so a matched `{{url}}` line shows as equal; if it marks nothing, the strict rendering is used. */
@@ -146,10 +127,9 @@ export function formatStdoutDiff(
     const equals = options?.equals ?? strictEquals;
 
     const first = renderLines(expectedLines, actualLines, equals);
-    const rendered =
-        first.marked === 0 && equals !== strictEquals
-            ? renderLines(expectedLines, actualLines, strictEquals).rendered
-            : first.rendered;
+    const rendered = first.marked
+        ? first.rendered
+        : renderLines(expectedLines, actualLines, strictEquals).rendered;
 
     return [...lines, ...rendered].join('\n');
 }
@@ -186,30 +166,24 @@ export function formatDirectoryDiff(
     for (const { path, expected, actual } of diff.changed) {
         const expectedLines = expected.split('\n');
         const actualLines = actual.split('\n');
-        const changedCount = countLineDifferences(expectedLines, actualLines);
+        const differing = Array.from(
+            { length: Math.max(expectedLines.length, actualLines.length) },
+            (_, index) => index,
+        ).filter((index) => expectedLines[index] !== actualLines[index]);
         lines.push(
-            `${BOLD}~ changed  ${path}${RESET}  ${DIM}(${changedCount} line${changedCount === 1 ? '' : 's'} differ)${RESET}`,
+            `${BOLD}~ changed  ${path}${RESET}  ${DIM}(${differing.length} line${differing.length === 1 ? '' : 's'} differ)${RESET}`,
         );
-
-        let shown = 0;
-        const maxShown = 5;
-        const maxLines = Math.max(expectedLines.length, actualLines.length);
-        for (let i = 0; i < maxLines && shown < maxShown; i++) {
-            const exp = expectedLines[i];
-            const act = actualLines[i];
-            if (exp !== act) {
-                lines.push(`${DIM}    line ${i + 1}:${RESET}`);
-                if (exp !== undefined) {
-                    lines.push(`    ${GREEN}- ${exp}${RESET}`);
-                }
-                if (act !== undefined) {
-                    lines.push(`    ${RED}+ ${act}${RESET}`);
-                }
-                shown++;
-            }
+        for (const index of differing.slice(0, SHOWN_LINES)) {
+            const exp = expectedLines[index];
+            const act = actualLines[index];
+            lines.push(
+                `${DIM}    line ${index + 1}:${RESET}`,
+                ...(exp === undefined ? [] : [`    ${GREEN}- ${exp}${RESET}`]),
+                ...(act === undefined ? [] : [`    ${RED}+ ${act}${RESET}`]),
+            );
         }
-        if (changedCount > maxShown) {
-            lines.push(`    ${DIM}... ${changedCount - maxShown} more line(s)${RESET}`);
+        if (differing.length > SHOWN_LINES) {
+            lines.push(`    ${DIM}... ${differing.length - SHOWN_LINES} more line(s)${RESET}`);
         }
     }
 
@@ -218,37 +192,19 @@ export function formatDirectoryDiff(
     return lines.join('\n');
 }
 
-function countLineDifferences(expected: string[], actual: string[]): number {
-    let count = 0;
-    const max = Math.max(expected.length, actual.length);
-    for (let i = 0; i < max; i++) {
-        if (expected[i] !== actual[i]) {
-            count++;
-        }
-    }
-    return count;
-}
-
 function rowLabel(n: number): string {
     return n === 1 ? '1 row' : `${n} rows`;
 }
 
+/** A cell as a reader reads it: text and big numbers bare, a date in ISO, anything else as JSON, and a cell with no JSON as null. */
 function cellText(value: unknown): string {
-    if (value === null || value === undefined) {
-        return 'null';
-    }
     if (value instanceof Date) {
         return value.toISOString();
     }
-    if (
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        typeof value === 'boolean' ||
-        typeof value === 'bigint'
-    ) {
+    if (typeof value === 'string' || typeof value === 'bigint') {
         return String(value);
     }
-    return JSON.stringify(value) ?? typeof value;
+    return JSON.stringify(value) ?? 'null';
 }
 
 function formatRow(row: readonly unknown[]): string {
