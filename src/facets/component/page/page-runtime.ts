@@ -10,9 +10,12 @@ export function afterThisTest(teardown: () => Promise<void> | void): void {
     onTestFinished(teardown);
 }
 
-/** `Date` only: faking the page's timers would stop React's scheduler. */
+/** `Date` only: faking the page's timers would stop React's scheduler. A chain's instant was judged before the page; the project's is judged here. */
 export function pinClock(iso: string): void {
-    vi.useFakeTimers({ now: instantOf('at', iso), toFake: ['Date'] });
+    vi.useFakeTimers({
+        now: instantOf(iso, (value) => `component({ clock: ${value} })`),
+        toFake: ['Date'],
+    });
 }
 
 export function releaseClock(): void {

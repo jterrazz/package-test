@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 113   |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 114   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 191   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
@@ -168,7 +168,7 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **178 modules** have no sibling test, and every one of them is claimed:
+Today **177 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -183,7 +183,7 @@ Today **178 modules** have no sibling test, and every one of them is claimed:
 | a bundled CLI entry (7)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                              |
 | a lint-layer module (15)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint facet                                                                                                                                                                                                                                                         |
 | a chain or runner internal (7)                            | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                  |
-| a module the specs reach through the published entry (14) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                      |
+| a module the specs reach through the published entry (13) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                      |
 
 <!-- /GENERATED:siblings -->
 
@@ -411,7 +411,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability    | api | job | cli | lint | integration | website | mobile | component | module |
 | ------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 7      |
+| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |
 | `intercept()` | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `mockOf()`    | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
 | `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |

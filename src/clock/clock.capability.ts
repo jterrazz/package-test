@@ -24,8 +24,9 @@ export const clock = defineCapability<
     'clock'
 >({
     arm: (instant, adapters) => {
+        // Stryker disable next-line ConditionalExpression: a null instant reads as the epoch, which is one, so judging it changes nothing
         if (instant !== null) {
-            instantOf('at', instant);
+            instantOf(instant, (value) => `.clock(${value})`);
         }
         return adapters.clock.pin(instant);
     },

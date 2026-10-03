@@ -4,6 +4,26 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { clock } from './clock.js';
 
+const CHAPTER = 'read: docs/19-time-and-doubles.md#the-clock';
+
+function notAnInstant(call: string): string {
+    return [
+        `found: ${call}("yesterday"), and "yesterday" is not an instant`,
+        'why: A clock is pinned at an instant, written as an ISO-8601 string.',
+        `fix: pass an ISO-8601 string: ${call}('2026-03-04T09:30:00Z')`,
+        CHAPTER,
+    ].join('\n');
+}
+
+function alreadyPinned(method: string): string {
+    return [
+        `found: clock.${method}(), and a clock is already pinned`,
+        'why: One clock per test: ending a nested scope would end the outer one too.',
+        'fix: end the first scope before taking another, or state the instant on the chain (`.clock(iso)`) rather than around it',
+        CHAPTER,
+    ].join('\n');
+}
+
 describe('clock', () => {
     test('clock — the one time primitive — pins the calendar at the stated instant', () => {
         // Given - the clock taken at a named instant
@@ -61,20 +81,31 @@ describe('clock', () => {
     test('clock — the one time primitive — refuses to advance a clock nobody took', async () => {
         // Given - no pinned clock
         // Then - advancing says which primitive to take first
-        await expect(clock.advance(1000)).rejects.toThrow('no clock is pinned');
+        await expect(clock.advance(1000)).rejects.toThrow(
+            new Error(
+                [
+                    'found: clock.advance(), and no clock is pinned',
+                    'why: Only a pinned clock moves: the real one holds no time of the test’s to advance.',
+                    "fix: take one first: `using _ = clock.at('<iso>')` (the calendar) or `using _ = clock.run()` (the scheduler)",
+                    CHAPTER,
+                ].join('\n'),
+            ),
+        );
     });
 
     test('clock — the one time primitive — refuses an instant that is not one', () => {
-        // Given - a string that names no instant
-        // Then - the refusal shows the shape it wanted
-        expect(() => clock.at('yesterday')).toThrow('is not an instant');
+        // Given - a string that names no instant, to each primitive
+        // Then - the refusal shows the shape it wanted, in the words of the call
+        expect(() => clock.at('yesterday')).toThrow(new TypeError(notAnInstant('clock.at')));
+        expect(() => clock.run('yesterday')).toThrow(new TypeError(notAnInstant('clock.run')));
     });
 
     test('clock — the one time primitive — a second clock taken inside the first is refused, not nested', () => {
         // Given - a scope that already holds the scheduler
         using _ = clock.run('2026-03-04T09:30:00Z');
 
-        // Then - the inner one says so: disposing it would give back the REAL clock, not the outer scope's, and end a pin the test still needs
-        expect(() => clock.at('2026-03-05T00:00:00Z')).toThrow('a clock is already pinned');
+        // Then - the inner one says so, by its name: disposing it would give back the REAL clock, not the outer scope's, and end a pin the test still needs
+        expect(() => clock.at('2026-03-05T00:00:00Z')).toThrow(new Error(alreadyPinned('at')));
+        expect(() => clock.run()).toThrow(new Error(alreadyPinned('run')));
     });
 });

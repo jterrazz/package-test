@@ -16,16 +16,16 @@ describe('ClockStamp', () => {
         expect(result.content.text).toContain('Rendered at 2026-03-04T09:30:00.000Z');
     });
 
-    test('refuses a clock that is not an instant, in the words a node chain uses', async () => {
+    test('refuses a clock that is not an instant, in the words the chain wrote', async () => {
         // Given - a chain stated with something that is not an instant
         const stated = component.clock('soon');
 
         // Then - the render is refused before anything mounts, naming what an instant looks like
         await expect(stated.render(<ClockStamp />)).rejects.toThrow(
             [
-                'found: clock.at("soon"), and "soon" is not an instant',
+                'found: .clock("soon"), and "soon" is not an instant',
                 'why: A clock is pinned at an instant, written as an ISO-8601 string.',
-                "fix: pass an ISO-8601 string: clock.at('2026-03-04T09:30:00Z')",
+                "fix: pass an ISO-8601 string: .clock('2026-03-04T09:30:00Z')",
                 'read: docs/19-time-and-doubles.md#the-clock',
             ].join('\n'),
         );

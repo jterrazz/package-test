@@ -45,11 +45,17 @@ export const clock = {
 
     /** Pin `Date` at `iso` for the current scope; the scheduler stays real. */
     at(iso: string): PinnedClock {
-        return take('at', { now: instantOf('at', iso), toFake: ['Date'] });
+        return take('at', {
+            now: instantOf(iso, (value) => `clock.at(${value})`),
+            toFake: ['Date'],
+        });
     },
 
     /** Take the scheduler as well as the calendar; `clock.advance` makes timers due. */
     run(iso?: string): PinnedClock {
-        return take('run', iso === undefined ? {} : { now: instantOf('run', iso) });
+        return take(
+            'run',
+            iso === undefined ? {} : { now: instantOf(iso, (value) => `clock.run(${value})`) },
+        );
     },
 };
