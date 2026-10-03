@@ -7,6 +7,22 @@ const SPEC = '/repo/specs/website/home/subscribe.spec.ts';
 ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
     invalid: [
         {
+            name: 'A scenario written as a function is walked too.',
+            code: `const result = await website.visit('/', async function (visitor) {
+                await visitor.click(testId('cta'));
+            });`,
+            errors: [{ column: 36, line: 2, messageId: 'unexplainedTestId' }],
+            filename: SPEC,
+        },
+        {
+            name: 'A string that reads like the statement states nothing, nor does a comment saying it about something else.',
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(testId('cta'), '// testId: in a string'); // see testId: elsewhere
+            });`,
+            errors: [{ column: 36, line: 2, messageId: 'unexplainedTestId' }],
+            filename: SPEC,
+        },
+        {
             name: 'The escape hatch with nothing stated about it.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(testId('subscribe-cta'));
@@ -55,6 +71,25 @@ ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
         },
     ],
     valid: [
+        {
+            name: 'A block comment states it too, and so does a function scenario.',
+            code: `const result = await website.visit('/', async function (visitor) {
+                /* testId: the widget renders no accessible name */
+                await visitor.click(testId('subscribe-cta'));
+            });`,
+            filename: SPEC,
+        },
+        {
+            name: 'Production code is not judged, and a scenario that is no function holds nothing to walk.',
+            code: `const result = await website.visit('/', wrap(() => visitor.click(testId('x'))));\nawait website.visit('/');`,
+            filename: SPEC,
+        },
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(testId('subscribe-cta'));
+            });`,
+            filename: '/repo/src/home.ts',
+        },
         {
             name: 'User-facing elements only.',
             code: `const result = await website.visit('/', async (visitor) => {
