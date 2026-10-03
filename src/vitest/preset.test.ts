@@ -178,12 +178,18 @@ describe('preset', () => {
         expect(config.test?.exclude).toStrictEqual(['heavy/**']);
     });
 
-    test('presetConfig() — every glob stated once — a project named by a glob keeps the root exclusions it depends on', () => {
-        // Given - a project this preset never merged into: its config is another file's
-        const config = presetConfig({ test: { projects: ['packages/*'] } });
+    test('presetConfig() — every glob stated once — a project named by a glob or a promise keeps the root exclusions it depends on, beside an inline one', () => {
+        // Given - projects this preset never merged into, each beside one it did: their config is another file's
+        const awaited = Promise.resolve({ test: { name: 'later' } });
+        const globbed = presetConfig({ test: { projects: [unit(), 'packages/*'] } });
+        const promised = presetConfig({ test: { projects: [unit(), awaited] } });
 
-        // Then - the root is the only place its exclusions can come from, so nothing is dropped
-        expect(config.test?.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
+        // Then - the root is the only place their exclusions can come from, so nothing is dropped, and the promise is handed back as it was
+        expect([
+            globbed.test?.exclude?.includes('**/{_expected,_fixtures,_requests,_seeds}/**'),
+            promised.test?.exclude?.includes('**/{_expected,_fixtures,_requests,_seeds}/**'),
+            promised.test?.projects?.[1] === awaited,
+        ]).toStrictEqual([true, true, true]);
     });
 
     test('presetConfig() — the hygiene a suite does not have to write — what a config states wins over all of it', () => {
