@@ -1,3 +1,5 @@
+import { basename } from 'node:path';
+
 export const FACETS: ReadonlySet<string> = new Set([
     'api',
     'cli',
@@ -16,11 +18,12 @@ const CONSTRUCTS = /\bspecification\.[a-z]+\s*\(/u;
 /** Constructing the runner in the file counts: a refusal spec proves the constructor that must fail to start, and has no specification module to import. */
 export function reachesRunner(text: string): boolean {
     for (const match of text.matchAll(IMPORT_SOURCE)) {
-        const source = match.groups?.source ?? '';
+        // Stryker disable next-line StringLiteral: an import match always carries its source
+        const { source = '' } = match.groups ?? {};
         if (source === '@jterrazz/test' || source.startsWith('@jterrazz/test/')) {
             return true;
         }
-        if (source.slice(source.lastIndexOf('/') + 1).includes('.specification')) {
+        if (basename(source).includes('.specification')) {
             return true;
         }
     }
