@@ -8,9 +8,6 @@ import { containerLogs, execInContainer, fieldOf, readContainerFile } from './do
 
 function readInspectState(inspect: unknown): { running: boolean; status: string } {
     const state = fieldOf(inspect, 'State', 'state');
-    if (state === undefined || state === null) {
-        return { running: false, status: 'unknown' };
-    }
     const status = fieldOf(state, 'Status', 'status');
     return {
         running: fieldOf(state, 'Running', 'running') === true,

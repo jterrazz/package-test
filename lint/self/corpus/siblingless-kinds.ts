@@ -153,7 +153,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/expectations/goldens/match-options.ts',
             'src/expectations/text/console.ts',
-            'src/expectations/command/container.ts',
             'src/facets/website/fetch/fetch.result.ts',
             'src/expectations/disk/filesystem.ts',
             'src/facets/api/request/http.result.ts',
