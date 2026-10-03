@@ -11,18 +11,17 @@ function chainAt(text: string, handle: string, start: number): Chain {
     let index = start + handle.length;
     for (;;) {
         const member = /^\s*\.\s*(?<name>[A-Za-z_$][\w$]*)\s*\(/u.exec(text.slice(index));
-        if (member?.groups?.name === undefined) {
+        if (member === null) {
             return { calls, end: index, handle, index: start };
         }
+        // Stryker disable next-line StringLiteral: a member match always carries its name
+        const { name = '' } = member.groups ?? {};
         const open = index + member[0].length - 1;
         const close = closingOf(text, open);
-        calls.push({ args: text.slice(open + 1, close), name: member.groups.name });
+        calls.push({ args: text.slice(open + 1, close), name });
         index = close + 1;
     }
 }
-
-const SPECIFICATION_IMPORT =
-    /import\s*\{(?<names>[^}]*)\}\s*from\s*['"][^'"]*\.specification(?:\.[jt]s)?['"]/gu;
 
 const SPECIFICATION_DOOR =
     /import\s*\{(?<names>[^}]*)\}\s*from\s*['"](?<from>[^'"]*\.specification(?:\.[jt]s)?)['"]/gu;
@@ -30,36 +29,45 @@ const SPECIFICATION_DOOR =
 /** `const events = api.with({ … })`. */
 const VIEW = /const\s+(?<view>[A-Za-z_$][\w$]*)\s*=\s*(?<from>[A-Za-z_$][\w$]*)\s*\.\s*with\s*\(/gu;
 
-function importedHandles(names: string, facet?: string): string[] {
-    return names.split(',').flatMap((name) => {
-        const [imported = '', local = imported] = name.trim().split(/\s+as\s+/u);
-        const wanted =
-            facet === undefined
-                ? (SUBJECT_FACETS as readonly string[]).includes(imported)
-                : imported === facet;
-        return wanted ? [local] : [];
-    });
-}
-
-export function handlesOf(text: string): string[] {
-    const handles = new Set<string>(
-        [...text.matchAll(SPECIFICATION_IMPORT)].flatMap((found) =>
-            importedHandles(found.groups?.names ?? ''),
-        ),
-    );
-    const views = [...text.matchAll(VIEW)].map((found) => ({
-        from: found.groups?.from ?? '',
-        view: found.groups?.view ?? '',
-    }));
-    for (let size = -1; size !== handles.size;) {
-        ({ size } = handles);
-        for (const { from, view } of views) {
-            if (handles.has(from)) {
-                handles.add(view);
+function importedDoors(text: string, wanted: (imported: string) => boolean): Map<string, string> {
+    const doors = new Map<string, string>();
+    for (const found of text.matchAll(SPECIFICATION_DOOR)) {
+        // Stryker disable next-line StringLiteral: a door match always carries its names and its module
+        const { from = '', names = '' } = found.groups ?? {};
+        for (const name of names.split(',')) {
+            const [imported = '', local = imported] = name.trim().split(/\s+as\s+/u);
+            if (wanted(imported)) {
+                doors.set(local, from);
             }
         }
     }
-    return [...handles];
+    return doors;
+}
+
+/** A view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle. */
+function doorsWanted(text: string, wanted: (imported: string) => boolean): Map<string, string> {
+    const doors = importedDoors(text, wanted);
+    const views = [...text.matchAll(VIEW)];
+    for (let size = -1; size !== doors.size;) {
+        ({ size } = doors);
+        for (const found of views) {
+            // Stryker disable next-line StringLiteral: a view match always carries its view and its handle
+            const { from = '', view = '' } = found.groups ?? {};
+            const door = doors.get(from);
+            if (door !== undefined) {
+                doors.set(view, door);
+            }
+        }
+    }
+    return doors;
+}
+
+export function handlesOf(text: string): string[] {
+    return [
+        ...doorsWanted(text, (imported) =>
+            (SUBJECT_FACETS as readonly string[]).includes(imported),
+        ).keys(),
+    ];
 }
 
 export function chainsOf(text: string, handles: readonly string[]): Chain[] {
@@ -70,29 +78,9 @@ export function chainsOf(text: string, handles: readonly string[]): Chain[] {
     return [...text.matchAll(pattern)].map((found) => chainAt(text, found[0], found.index));
 }
 
-/** A view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle. */
 export function doorsOf(
     text: string,
     facet: (typeof SUBJECT_FACETS)[number],
 ): Record<string, string> {
-    const doors = new Map<string, string>();
-    for (const { groups } of text.matchAll(SPECIFICATION_DOOR)) {
-        for (const handle of importedHandles(groups?.names ?? '', facet)) {
-            doors.set(handle, groups?.from ?? '');
-        }
-    }
-    const views = [...text.matchAll(VIEW)].map(({ groups }) => ({
-        from: groups?.from ?? '',
-        view: groups?.view ?? '',
-    }));
-    for (let size = -1; size !== doors.size;) {
-        ({ size } = doors);
-        for (const { from, view } of views) {
-            const door = doors.get(from);
-            if (door !== undefined) {
-                doors.set(view, door);
-            }
-        }
-    }
-    return Object.fromEntries(doors);
+    return Object.fromEntries(doorsWanted(text, (imported) => imported === facet));
 }
