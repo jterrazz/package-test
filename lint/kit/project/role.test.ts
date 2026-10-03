@@ -4,7 +4,15 @@ import { describe, expect, test } from 'vitest';
 
 import { checkoutUnder, repositoryUnder } from '../testing/package-tree.fixtures.js';
 import type { FileRole, StrayTestRoot } from './role.js';
-import { isTestFile, isTestRole, projectRootOf, projectSegments, roleOf } from './role.js';
+import {
+    isNodeTestFileName,
+    isTestFile,
+    isTestFileName,
+    isTestRole,
+    projectRootOf,
+    projectSegments,
+    roleOf,
+} from './role.js';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -184,5 +192,30 @@ describe('role', () => {
         // Given - a module of the app
         // Then - nothing about it is a test
         expect(isTestFile('/repo/src/matching/match.ts')).toBe(false);
+    });
+
+    test('the names a walk holds tell a test, a node test and a rendered one apart, and a test file is any test role, specification or document', () => {
+        // Given - names of each kind, and paths no project holds
+        const names = ['a.test.ts', 'a.test.tsx', 'a.spec.ts', 'a.ts', 'a.specification.tsx'];
+
+        // Then - each verdict
+        expect([
+            names.map((name) => isTestFileName(name)),
+            names.map((name) => isNodeTestFileName(name)),
+            ['/repo/x/a.specification.tsx', '/repo/x/a.spec.yaml', '/repo/x/a.ts'].map((path) => [
+                roleOf(path).role,
+                isTestFile(path),
+            ]),
+            roleOf('/tests/a.ts').strayTestRoot,
+        ]).toStrictEqual([
+            [true, true, true, false, false],
+            [true, false, true, false, false],
+            [
+                ['specification', true],
+                ['document', true],
+                ['other', false],
+            ],
+            null,
+        ]);
     });
 });
