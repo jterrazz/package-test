@@ -20,26 +20,14 @@ const ADAPTER_SUFFIX = '.adapter.ts';
 
 type Implementer = { at: number; name: string; port: string };
 
-function isUpper(char: string | undefined): boolean {
-    return char !== undefined && char !== char.toLowerCase();
-}
+/** `TickerSourcePort` → `ticker-source`, `HTTPClientPort` → `http-client`: a word opens on a capital after a lower case letter or a digit, or on the last capital of a run before a lower case letter. */
+const WORD_START = /(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/gu;
 
-function kebabOf(name: string): string {
-    let kebab = '';
-    for (let index = 0; index < name.length; index += 1) {
-        const char = name.charAt(index);
-        const after = name[index + 1];
-        const opensWord =
-            index > 0 &&
-            isUpper(char) &&
-            (!isUpper(name[index - 1]) || (after !== undefined && !isUpper(after)));
-        kebab += `${opensWord ? '-' : ''}${char.toLowerCase()}`;
-    }
-    return kebab;
-}
+const PORT_SUFFIX = /Port$/u;
 
 function adapterNameOf(port: string): string {
-    return `${kebabOf(port.replace(/Port$/u, '') || port)}${ADAPTER_SUFFIX}`;
+    const subject = port.replace(PORT_SUFFIX, '') || port;
+    return `${subject.replaceAll(WORD_START, '-').toLowerCase()}${ADAPTER_SUFFIX}`;
 }
 
 type PortsImported = { names: Map<string, string>; namespaces: Set<string> };
@@ -52,19 +40,16 @@ function importedName(specifier: AstNode): string | undefined {
 function portsImported(specsRoot: string, file: string, program: AstNode): PortsImported {
     const ports: PortsImported = { names: new Map(), namespaces: new Set() };
     for (const statement of childList(program, 'body')) {
-        const source = stringValue(child(statement, 'source'));
-        if (statement.type !== 'ImportDeclaration' || source === undefined) {
+        if (statement.type !== 'ImportDeclaration') {
             continue;
         }
+        const source = String(stringValue(child(statement, 'source')));
         const targets = resolveSpecifier(file, source);
         if (targets.length === 0 || targets.some((target) => isWithin(specsRoot, target))) {
             continue;
         }
         for (const specifier of childList(statement, 'specifiers')) {
-            const local = identifierName(child(specifier, 'local'));
-            if (local === undefined) {
-                continue;
-            }
+            const local = String(identifierName(child(specifier, 'local')));
             if (specifier.type === 'ImportNamespaceSpecifier') {
                 ports.namespaces.add(local);
             } else {
@@ -76,22 +61,17 @@ function portsImported(specsRoot: string, file: string, program: AstNode): Ports
 }
 
 function portOf(expression: AstNode | undefined, ports: PortsImported): string | undefined {
-    if (expression?.type === 'MemberExpression') {
-        const namespace = identifierName(child(expression, 'object'));
-        return namespace !== undefined && ports.namespaces.has(namespace)
-            ? identifierName(child(expression, 'property'))
-            : undefined;
+    if (
+        (ports.namespaces as ReadonlySet<unknown>).has(identifierName(child(expression, 'object')))
+    ) {
+        return identifierName(child(expression, 'property'));
     }
-    const local = identifierName(expression);
-    return local === undefined ? undefined : ports.names.get(local);
+    return (ports.names as ReadonlyMap<unknown, string>).get(identifierName(expression));
 }
 
 function implementersOf(program: AstNode, ports: PortsImported): Implementer[] {
     const found: Implementer[] = [];
     walk(program, (node) => {
-        if (node.type !== 'ClassDeclaration' && node.type !== 'ClassExpression') {
-            return;
-        }
         for (const clause of childList(node, 'implements')) {
             const port = portOf(child(clause, 'expression'), ports);
             if (port !== undefined) {
