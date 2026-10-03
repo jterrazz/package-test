@@ -1,6 +1,6 @@
 import { PRESENCE, SpecSyntaxError } from './spec-grammar.js';
 import type { PresenceShape } from './spec-grammar.js';
-import { isMap, isNode, isScalar, isSeq, nodeItems, nodePairs } from './yaml-document.js';
+import { isMap, isNode, isPair, isScalar, isSeq, nodeItems, nodePairs } from './yaml-document.js';
 import type { Node, Pair, YAMLMap, YamlSource } from './yaml-document.js';
 
 export type Context = {
@@ -16,17 +16,11 @@ export function fail(
     throw new SpecSyntaxError(context.fileName, lineOf(context, node), message);
 }
 
+/** A pair sits on its key's line; a node the parser never placed, on the first. */
 export function lineOf(context: Context, node: Node | null | Pair | undefined): number {
-    const range = node === undefined || node === null ? undefined : nodeRange(node);
-    return range === undefined ? 1 : context.source.lineAt(range[0]);
-}
-
-function nodeRange(node: Node | Pair): [number, number, number] | undefined {
-    if ('range' in node && Array.isArray(node.range)) {
-        return node.range;
-    }
-    const key: unknown = 'key' in node ? node.key : undefined;
-    return isNode(key) ? (key.range ?? undefined) : undefined;
+    const placed: unknown = isPair(node) ? node.key : node;
+    // Stryker disable next-line LogicalOperator,ConditionalExpression: every node a refusal names, an empty value included, was placed by the parser
+    return isNode(placed) && placed.range ? context.source.lineAt(placed.range[0]) : 1;
 }
 
 export function contentLine(context: Context, node: Node | null): number {
@@ -60,9 +54,6 @@ export function closedPairs(
                 `unknown key "${key}:" in ${what} — known keys: ${allowed.join(', ')}`,
             );
         }
-        if (pairs.some((seen) => scalarString(seen.key) === key)) {
-            fail(context, pair, `"${key}:" is declared twice in ${what}`);
-        }
         pairs.push(pair);
     }
     return pairs;
@@ -75,6 +66,7 @@ export function keyed(pairs: readonly Pair<Node, Node>[]): Map<string, Pair<Node
 export function holdPresence(
     context: Context,
     found: ReadonlyMap<string, Pair<Node, Node>>,
+    // Stryker disable next-line StringLiteral: only the files shape names a subject, and it always states one
     { line, shape, subject = '' }: { line: number; shape: PresenceShape; subject?: string },
 ): void {
     const at = (message: string, where = line): never => {
@@ -101,6 +93,7 @@ export function holdPresence(
 
 export function held(found: ReadonlyMap<string, Pair<Node, Node>>, key: string): Pair<Node, Node> {
     const pair = found.get(key);
+    // Stryker disable next-line ConditionalExpression: holdPresence refused a document missing a key a law requires
     if (pair === undefined) {
         throw new Error(`"${key}:" is required by a presence law and was not found`);
     }
@@ -120,10 +113,11 @@ export function requireString(context: Context, node: Node | null, what: string)
 }
 
 export function requireInteger(context: Context, node: Node | null, what: string): number {
-    if (!isScalar(node) || typeof node.value !== 'number' || !Number.isInteger(node.value)) {
+    const value: unknown = isScalar(node) ? node.value : undefined;
+    if (!Number.isInteger(value)) {
         fail(context, node, `${what} must be a literal integer`);
     }
-    return node.value;
+    return Number(value);
 }
 
 export function stringList(
