@@ -83,7 +83,7 @@ describe('ARCHITECTURE', () => {
             'src/vitest/reporter.ts':
                 "import '../../specs/_shared/helper.js';\nimport '../../dist/index.js';\n",
             'src/clock/clock.ts': "import '../visitor/targets/roles.js';\n",
-            'src/stubs/kinds/http.ts': "import '../../expectations/tokens/match.js';\n",
+            'src/stubs/kinds/http-filter.ts': "import '../../expectations/tokens/match.js';\n",
             'src/stubs/kinds/openai.ts': "import '../../expectations/tokens/match.js';\n",
         });
 

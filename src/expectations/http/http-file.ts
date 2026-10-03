@@ -184,7 +184,9 @@ export function serializeResponseFile(
 ): string {
     const statusNumber = Number(response.status);
     const statusText = STATUS_TEXT[statusNumber];
-    const lines = [`HTTP/1.1 ${response.status}${statusText ? ` ${statusText}` : ''}`];
+    const lines = [
+        `HTTP/1.1 ${response.status}${statusText === undefined ? '' : ` ${statusText}`}`,
+    ];
 
     for (const [name, value] of Object.entries(response.headers)) {
         lines.push(`${name}: ${value}`);

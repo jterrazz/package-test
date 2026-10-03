@@ -167,7 +167,7 @@ export class StubBackend {
 
         const reply = typeof stub.response === 'function' ? stub.response(observed) : stub.response;
 
-        if (reply.delay) {
+        if (reply.delay !== undefined && reply.delay > 0) {
             await pause(reply.delay);
         }
 

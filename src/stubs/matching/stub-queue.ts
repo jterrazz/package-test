@@ -131,7 +131,7 @@ export class StubQueue {
     private unmetError(): Error | null {
         const unmet: string[] = [];
         for (const { stub, served } of this.entries) {
-            if (!stub.required || isNever(stub)) {
+            if (stub.required !== true || isNever(stub)) {
                 continue;
             }
             const { times } = stub;

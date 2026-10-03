@@ -107,7 +107,7 @@ export class CliResult extends BaseResult {
 
     /** Accessor for the temporary working directory the command ran in. */
     get filesystem(): FilesystemAccessor {
-        if (!this.workDir) {
+        if (this.workDir === undefined) {
             throw invariant('a CLI result was built with no working directory');
         }
         return new FilesystemAccessor(this.workDir, this.testDir, this.captures);
@@ -115,9 +115,7 @@ export class CliResult extends BaseResult {
 
     /** A container the command spawned, by its name-label; `.exists` is `false` when none carries it. */
     container(name: string): ContainerAccessor {
-        this.ensureDockerAware('container');
-        this.loadContainers();
-        const captured = this.containersCache!.get(name);
+        const captured = this.capturedContainers('container').get(name);
         if (!captured) {
             return new ContainerAccessor(null, null, this.testDir, this.transform);
         }
@@ -126,13 +124,11 @@ export class CliResult extends BaseResult {
 
     /** All captured container IDs. Triggers the same lazy query as `container()`. */
     get containerIds(): string[] {
-        this.ensureDockerAware('containerIds');
-        this.loadContainers();
-        return [...this.containersCache!.values()].map((c) => c.id);
+        return [...this.capturedContainers('containerIds').values()].map((c) => c.id);
     }
 
     async [Symbol.asyncDispose](): Promise<void> {
-        if (!this.dockerConfig || !this.testRunId) {
+        if (!this.dockerConfig || this.testRunId === undefined) {
             return;
         }
         // invariant: re-query when the test never asked: containers it never asserted on are still removed.
@@ -143,8 +139,8 @@ export class CliResult extends BaseResult {
         removeContainers(ids);
     }
 
-    private ensureDockerAware(member: string): void {
-        if (!this.dockerConfig || !this.testRunId) {
+    private capturedContainers(member: string): ReadonlyMap<string, CapturedContainer> {
+        if (!this.dockerConfig || this.testRunId === undefined || this.testRunId === '') {
             throw new Error(
                 refusal({
                     fix: 'pass `docker: { envVar, nameLabel, testRunLabel }` in the specification.cli() options',
@@ -154,26 +150,24 @@ export class CliResult extends BaseResult {
                 }),
             );
         }
-    }
-
-    private loadContainers(): void {
         if (this.containersCache !== null) {
-            return;
+            return this.containersCache;
         }
-        const ids = findContainersByLabel(this.dockerConfig!.testRunLabel, this.testRunId!);
+        const { nameLabel, testRunLabel } = this.dockerConfig;
         const map = new Map<string, CapturedContainer>();
-        for (const id of ids) {
+        for (const id of findContainersByLabel(testRunLabel, this.testRunId)) {
             let inspect: unknown;
             try {
                 inspect = inspectContainer(id);
             } catch {
                 continue;
             }
-            const nameValue = labelsOf(inspect)[this.dockerConfig!.nameLabel];
+            const nameValue = labelsOf(inspect)[nameLabel];
             const key = typeof nameValue === 'string' && nameValue.length > 0 ? nameValue : id;
             map.set(key, { id, inspect });
         }
         this.containersCache = map;
+        return map;
     }
 }
 

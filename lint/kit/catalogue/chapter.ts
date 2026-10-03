@@ -53,7 +53,7 @@ function catalogueSections(published: Row[], families: Record<string, string>): 
     return Object.entries(families).flatMap(([family, title]) => {
         const rows = published
             .filter((entry) => entry.family === family)
-            .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
+            .toSorted((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
         return rows.length === 0
             ? []
             : [[`## ${family} — ${title}`, '', rowTable(rows)].join('\n')];

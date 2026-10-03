@@ -35,7 +35,7 @@ describe('tree', () => {
         expect(files).toContain('cli.sh');
         expect(files).toContain('out/main.go');
         expect(files).toContain('out/docs/README.md');
-        expect([...files].sort()).toStrictEqual(files);
+        expect([...files].toSorted()).toStrictEqual(files);
     });
 
     test('toMatch round-trips the entire working dir', async () => {

@@ -171,7 +171,7 @@ export async function startWebsite<Services extends ServiceRecord>(
     await registerMatchers();
 
     // invariant: the type already forbids it; this covers untyped callers.
-    if (options.backend && !options.server) {
+    if (options.backend && options.server === undefined) {
         throw new Error(
             refusal({
                 fix: 'start the site with `server`, or drop `backend`',

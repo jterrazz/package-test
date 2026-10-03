@@ -29,7 +29,7 @@ export class PageResult extends BaseResult {
     get alternates(): Record<string, string> {
         const alternates: Record<string, string> = {};
         for (const link of this.page.links) {
-            if (link.rel === 'alternate' && link.hreflang) {
+            if (link.rel === 'alternate' && link.hreflang !== undefined && link.hreflang !== '') {
                 alternates[link.hreflang] = link.href;
             }
         }
@@ -138,7 +138,7 @@ function namedMetas(metas: BrowserMetaElement[]): Record<string, string> {
     const named: Record<string, string> = {};
     for (const meta of metas) {
         const key = meta.name ?? meta.property;
-        if (key) {
+        if (key !== undefined && key !== '') {
             named[key] = meta.content;
         }
     }

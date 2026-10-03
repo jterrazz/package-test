@@ -720,7 +720,7 @@ describe('manifest', () => {
         );
 
         // Then - identical to the frozen vocabulary
-        expect([...documented].sort()).toStrictEqual([...TOKEN_KINDS].sort());
+        expect([...documented].toSorted()).toStrictEqual([...TOKEN_KINDS].toSorted());
     });
 
     test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every relative link lands on a file, and every anchor on a heading', () => {

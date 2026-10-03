@@ -150,11 +150,10 @@ describe('env', () => {
 
         // Then - the unambiguous alias points at the same database
         const lines = result.stdout.text.split('\n');
-        const dbUrl = lines.find((l) => l.startsWith('DB_URL='))!.slice('DB_URL='.length);
-        const databaseUrl = lines
-            .find((l) => l.startsWith('DATABASE_URL='))!
-            .slice('DATABASE_URL='.length);
-        expect(databaseUrl).toBe(dbUrl);
+        const valueOf = (name: string): string | undefined =>
+            lines.find((line) => line.startsWith(`${name}=`))?.slice(`${name}=`.length);
+        expect(valueOf('DB_URL')).toMatch(/^\S+$/u);
+        expect(valueOf('DATABASE_URL')).toBe(valueOf('DB_URL'));
     });
 
     test('does not inject REDIS_URL when no redis is declared', async () => {

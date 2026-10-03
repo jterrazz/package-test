@@ -60,7 +60,7 @@ export class BaseResult {
         this.workDir = options.workDir;
         // outside: the realpath form is what child processes print as `$PWD` (macOS resolves the tmpdir symlink).
         this.captures = new CaptureScope(
-            options.workDir ? safeRealpath(options.workDir) : undefined,
+            options.workDir === undefined ? undefined : safeRealpath(options.workDir),
         );
     }
 
@@ -102,18 +102,18 @@ export class BaseResult {
         if (!db) {
             throw new Error(
                 refusal(
-                    options?.database
+                    options?.database === undefined
                         ? {
-                              fix: `name a declared database: ${(this.config.databaseKeys ?? []).join(', ')}`,
-                              found: `table("${tableName}") reads the database "${options.database}", and none is declared under that key`,
-                              read: 'docs/18-services.md#the-database-rule',
-                              why: '`database:` names a key of the services record.',
-                          }
-                        : {
                               fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()`',
                               found: `table("${tableName}"), and no database is declared`,
                               read: 'docs/18-services.md#the-database-rule',
                               why: 'A table is read from a declared database.',
+                          }
+                        : {
+                              fix: `name a declared database: ${(this.config.databaseKeys ?? []).join(', ')}`,
+                              found: `table("${tableName}") reads the database "${options.database}", and none is declared under that key`,
+                              read: 'docs/18-services.md#the-database-rule',
+                              why: '`database:` names a key of the services record.',
                           },
                 ),
             );
@@ -122,7 +122,7 @@ export class BaseResult {
     }
 
     private resolveDatabase(databaseKey?: string): TableSource | undefined {
-        if (databaseKey && this.config.databases) {
+        if (databaseKey !== undefined && this.config.databases) {
             return this.config.databases.get(databaseKey);
         }
         return this.config.database;

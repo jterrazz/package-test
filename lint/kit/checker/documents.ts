@@ -40,8 +40,8 @@ export function runDocument(
 
 function reorder(map: YAMLMap, order: readonly string[]): void {
     const known = pairsOf(map).filter((pair) => order.includes(keyName(pair) ?? ''));
-    const sorted = [...known].sort(
-        (a, b) => order.indexOf(keyName(a)!) - order.indexOf(keyName(b)!),
+    const sorted = [...known].toSorted(
+        (a, b) => order.indexOf(keyName(a) ?? '') - order.indexOf(keyName(b) ?? ''),
     );
     let cursor = 0;
     map.items = pairsOf(map).map(

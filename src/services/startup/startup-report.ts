@@ -42,20 +42,21 @@ export function formatStartupReport(services: ServiceReport[], app?: AppInfo): s
     lines.push('', `${BG_CYAN}${BLACK}${BOLD} INFRA ${RESET} Starting infrastructure...`, '');
 
     for (const service of services) {
-        if (service.error) {
+        if (service.error !== undefined && service.error !== '') {
             lines.push(
                 `  ${RED}${CROSS}${RESET} ${service.type} (${service.name})  ${RED}${service.error}${RESET}  ${DIM}${service.durationMs}ms${RESET}`,
             );
-            if (service.logs) {
+            if (service.logs !== undefined && service.logs !== '') {
                 const logLines = service.logs.trim().split('\n').slice(-10);
                 for (const logLine of logLines) {
                     lines.push(`    ${DIM}${logLine}${RESET}`);
                 }
             }
         } else {
-            const conn = service.connectionString
-                ? `${DIM}${service.connectionString}${RESET}`
-                : '';
+            const conn =
+                service.connectionString === undefined || service.connectionString === ''
+                    ? ''
+                    : `${DIM}${service.connectionString}${RESET}`;
             lines.push(
                 `  ${GREEN}${CHECK}${RESET} ${service.type} (${service.name})  ${conn}  ${DIM}${service.durationMs}ms${RESET}`,
             );

@@ -152,13 +152,13 @@ export function buildUpdatedResponse(
             }
             headers[key] = structuralEquals(value, actualValue, scope) ? value : actualValue;
         }
-    } else if (actual.headers['content-type']) {
+    } else if (actual.headers['content-type'] !== undefined) {
         headers['content-type'] = actual.headers['content-type'];
     }
 
     const hasBody = actual.body !== null && actual.body !== undefined;
     const body =
-        previous?.hasBody && hasBody
+        previous?.hasBody === true && hasBody
             ? mergePreservingPlaceholders(previous.body, actual.body, workdir)
             : mergePreservingPlaceholders(null, actual.body, workdir);
 

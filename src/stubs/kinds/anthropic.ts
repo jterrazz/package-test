@@ -91,7 +91,7 @@ export const anthropic = {
             match: filter ? ({ body }) => matchesFilter(body, filter) : undefined,
             // outside: fixture files are already in the messages.create shape: passed through verbatim.
             wrap(data: unknown): StubResponse {
-                if (data && typeof data === 'object' && !Array.isArray(data)) {
+                if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
                     return { status: 200, body: data };
                 }
                 return buildReply(data);

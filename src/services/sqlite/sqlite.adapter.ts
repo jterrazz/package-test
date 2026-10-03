@@ -84,7 +84,7 @@ const PRISMA_PUSH = 'npx prisma db push --force-reset';
 
 /** `--schema` is required: without it Prisma's own discovery ignores the option, and only a machine without a cached template fails. */
 export function prismaPushCommand(prismaSchema: null | string): string {
-    if (!prismaSchema) {
+    if (prismaSchema === null) {
         return PRISMA_PUSH;
     }
     return `${PRISMA_PUSH} --schema ${JSON.stringify(resolve(prismaSchema))}`;
@@ -109,7 +109,7 @@ function schemaBytes(path: string): string {
     try {
         if (statSync(path).isDirectory()) {
             return readdirSync(path)
-                .sort()
+                .toSorted()
                 .map((entry) => schemaBytes(join(path, entry)))
                 .join('\0');
         }
@@ -121,16 +121,12 @@ function schemaBytes(path: string): string {
 
 /** Editing a schema builds a new template: the stale file is header-valid and would never be rebuilt. */
 export function sqliteTemplateName(options: SqliteOptions = {}): string {
-    let fingerprint: string;
-    if (options.prismaSchema) {
-        const path = resolve(options.prismaSchema);
-        fingerprint = `prisma\0${path}\0${schemaBytes(path)}`;
-    } else if (options.init) {
-        const path = resolve(options.init);
-        fingerprint = `init\0${path}\0${schemaBytes(path)}`;
-    } else {
-        fingerprint = 'empty';
-    }
+    const [source, path] =
+        options.prismaSchema === undefined
+            ? ['init', options.init]
+            : ['prisma', options.prismaSchema];
+    const fingerprint =
+        path === undefined ? 'empty' : `${source}\0${resolve(path)}\0${schemaBytes(resolve(path))}`;
     const key = createHash('sha256').update(fingerprint).digest('hex').slice(0, 8);
     return `${TEMPLATE_PREFIX}-${key}.sqlite`;
 }
@@ -267,32 +263,32 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         removeDatabaseFiles(buildPath);
 
         try {
-            if (this.prismaSchema) {
-                const { runToCompletion } = await import('../process/serve.js');
-                runToCompletion(prismaPushCommand(this.prismaSchema), {
-                    ...process.env,
-                    DATABASE_URL: `file:${buildPath}`,
-                    PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
-                });
-
-                // invariant: checkpoint WAL so the template is a single file, safe to copy.
-                const tmpDb = new (database())(buildPath);
-                tmpDb.pragma('wal_checkpoint(TRUNCATE)');
-                tmpDb.close();
-            } else if (this.initSql) {
-                const sql = readFileSync(this.initSql, 'utf8');
-                const templateDb = new (database())(buildPath);
-                templateDb.exec(sql);
-                templateDb.close();
-            } else {
-                const templateDb = new (database())(buildPath);
-                templateDb.close();
-            }
-
+            await this.writeTemplate(buildPath);
             renameSync(buildPath, this.templatePath);
         } finally {
             removeDatabaseFiles(buildPath);
         }
+    }
+
+    private async writeTemplate(buildPath: string): Promise<void> {
+        if (this.prismaSchema !== null) {
+            const { runToCompletion } = await import('../process/serve.js');
+            runToCompletion(prismaPushCommand(this.prismaSchema), {
+                ...process.env,
+                DATABASE_URL: `file:${buildPath}`,
+                PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
+            });
+            // invariant: checkpoint WAL so the template is a single file, safe to copy.
+            const tmpDb = new (database())(buildPath);
+            tmpDb.pragma('wal_checkpoint(TRUNCATE)');
+            tmpDb.close();
+            return;
+        }
+        const templateDb = new (database())(buildPath);
+        if (this.initSql !== null) {
+            templateDb.exec(readFileSync(this.initSql, 'utf8'));
+        }
+        templateDb.close();
     }
 
     private getDb(): Database.Database {

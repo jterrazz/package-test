@@ -92,7 +92,7 @@ export function buildStubHandlers(
                         typeof stub.response === 'function'
                             ? stub.response(observed)
                             : stub.response;
-                    if (response.delay) {
+                    if (response.delay !== undefined && response.delay > 0) {
                         await pause(response.delay);
                     }
                     return toMswResponse(msw, response);

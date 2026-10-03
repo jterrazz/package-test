@@ -10,7 +10,7 @@ export function discoverRoot(startDir: string): string {
 }
 
 export function resolveRoot(root: string | undefined, callerDir: string): string {
-    if (!root) {
+    if (root === undefined || root === '') {
         return discoverRoot(callerDir);
     }
     if (isAbsolute(root)) {

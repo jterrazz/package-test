@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from 'vitest';
+import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { http } from '../../kinds/http.js';
 import type { Stub } from '../../stub.js';
@@ -8,18 +8,14 @@ function get(path: string, body: unknown, extra: Partial<Stub> = {}): Stub {
     return { request: http.get(path), response: http.json(body), ...extra };
 }
 
-let backend: null | StubBackend = null;
-
-afterEach(async () => {
-    await backend?.stop();
-    backend = null;
-});
-
-async function started(stubs: Stub[]): Promise<string> {
-    backend = new StubBackend();
+async function started(stubs: Stub[]): Promise<{ backend: StubBackend; url: string }> {
+    const backend = new StubBackend();
+    onTestFinished(async () => {
+        await backend.stop();
+    });
     const url = await backend.start();
     backend.beginChain(stubs);
-    return url;
+    return { backend, url };
 }
 
 async function fetchJson(url: string): Promise<unknown> {
@@ -30,7 +26,7 @@ async function fetchJson(url: string): Promise<unknown> {
 describe('StubBackend', () => {
     test('stub backend — streamed replies — writes the pieces in order and closes after the last one', async () => {
         // Given - a route declared as three pieces of text
-        const url = await started([
+        const { url } = await started([
             {
                 request: http.get('/tokens'),
                 response: http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain' }),
@@ -51,7 +47,7 @@ describe('StubBackend', () => {
 
     test('stub backend — streamed replies — serves an event stream as text/event-stream', async () => {
         // Given - two server-sent events declared on one route
-        const url = await started([
+        const { url } = await started([
             {
                 request: http.get('/feed'),
                 response: http.sse([{ data: { token: 'a' } }, { data: { token: 'b' } }]),
@@ -68,7 +64,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — serves a declared stub with its status, body, and cors headers', async () => {
         // Given - one declared route
-        const url = await started([get('/events', { items: [] })]);
+        const { url } = await started([get('/events', { items: [] })]);
 
         // When - the app fetches it
         const response = await fetch(`${url}/events`);
@@ -82,7 +78,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — a stub without times keeps replying; times plays a sequence', async () => {
         // Given - a finite failure before an unlimited success on the same route
-        const url = await started([
+        const { url } = await started([
             { request: http.get('/events'), response: http.json({ n: 1 }), times: 1 },
             get('/events', { n: 2 }),
         ]);
@@ -95,7 +91,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — declared query params subset-match — the app may add extras', async () => {
         // Given - a route declared with one query param
-        const url = await started([get('/articles?event_id=e-1', { items: [1] })]);
+        const { url } = await started([get('/articles?event_id=e-1', { items: [1] })]);
 
         // When - the app adds a locale param
         const response = await fetch(`${url}/articles?event_id=e-1&locale=fr`);
@@ -107,7 +103,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — a token segment matches structurally, whatever the id', async () => {
         // Given - a path-form route with a uuid segment
-        const url = await started([get('/articles/{{uuid}}', { title: 'one' })]);
+        const { url } = await started([get('/articles/{{uuid}}', { title: 'one' })]);
 
         // Then - any uuid matches, a non-uuid path does not
         const found = await fetch(`${url}/articles/3f2504e0-4f89-41d3-9a0c-0305e82c3301`);
@@ -118,7 +114,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — the request body reaches match predicates and body filters', async () => {
         // Given - two stubs on one route, routed by the posted body
-        const url = await started([
+        const { url } = await started([
             {
                 request: http.post('/search', { body: { term: 'bitcoin' } }),
                 response: http.json({ hits: 1 }),
@@ -145,7 +141,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — a responder computes the reply from the observed request', async () => {
         // Given - a stub whose response echoes the posted body
-        const url = await started([
+        const { url } = await started([
             {
                 request: http.post('/echo'),
                 response: (request) => http.json({ echoed: request.body }),
@@ -165,7 +161,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — answers the cors preflight for any route', async () => {
         // Given - a stub backend with one declared route
-        const url = await started([get('/events', {})]);
+        const { url } = await started([get('/events', {})]);
 
         // When - the browser preflights a cross-origin fetch
         const response = await fetch(`${url}/events`, {
@@ -182,7 +178,7 @@ describe('StubBackend', () => {
 
     test('stub backend — serving declared stubs — serves a body-less response and a text response as declared', async () => {
         // Given - a declared 204 and a text block
-        const url = await started([
+        const { url } = await started([
             { request: http.delete('/events/1'), response: http.empty() },
             { request: http.get('/block.txt'), response: http.text('anchored') },
         ]);
@@ -198,7 +194,7 @@ describe('StubBackend', () => {
 
     test('stub backend — strictness (the external-block analog) — an unmatched request gets a 501 naming the path and the declared routes', async () => {
         // Given - a stub declaring only /events
-        const url = await started([get('/events', {})]);
+        const { url } = await started([get('/events', {})]);
 
         // When - the app calls an undeclared route
         const response = await fetch(`${url}/articles?x=1`);
@@ -212,22 +208,24 @@ describe('StubBackend', () => {
 
     test('stub backend — strictness (the external-block analog) — violation() enumerates unmatched requests with their counts', async () => {
         // Given - a guarded chain and two hits on an undeclared route
-        const url = await started([get('/events', {})]);
+        const { backend, url } = await started([get('/events', {})]);
         await fetch(`${url}/articles`);
         await fetch(`${url}/articles`);
         await fetch(`${url}/ghost`, { method: 'POST' });
 
         // Then - the error lists every family, its count, and the declared routes
-        const violation = backend!.violation();
+        const violation = backend.violation();
         expect(violation).toBeInstanceOf(Error);
-        expect(violation!.message).toContain('- GET /articles (2 times)');
-        expect(violation!.message).toContain('- POST /ghost');
-        expect(violation!.message).toContain('- GET /events');
+        expect(violation?.message).toContain('- GET /articles (2 times)');
+        expect(violation?.message).toContain('- POST /ghost');
+        expect(violation?.message).toContain('- GET /events');
     });
 
     test('stub backend — transport failures — an unreachable stub drops the connection instead of answering', async () => {
         // Given - a route declared unreachable
-        const url = await started([{ request: http.get('/down'), response: http.unreachable() }]);
+        const { url } = await started([
+            { request: http.get('/down'), response: http.unreachable() },
+        ]);
 
         // Then - the client's fetch fails in transport, with no status to read
         await expect(fetch(`${url}/down`)).rejects.toThrow(TypeError);
@@ -235,43 +233,43 @@ describe('StubBackend', () => {
 
     test('stub backend — strictness (the external-block analog) — violation() also reports a required stub that was never requested', async () => {
         // Given - a chain declaring a route it claims MUST be called
-        const url = await started([
+        const { backend, url } = await started([
             get('/events', {}),
             get('/indicators?range=1M', {}, { required: true }),
         ]);
         await fetch(`${url}/events`);
 
         // Then - the honest failure: the screen never asked for the range
-        const violation = backend!.violation();
-        expect(violation!.message).toContain(
+        const violation = backend.violation();
+        expect(violation?.message).toContain(
             '- GET /indicators?range=1M — declared and required but never requested',
         );
     });
 
     test('stub backend — strictness (the external-block analog) — a chain with zero stubs leaves the backend unguarded', async () => {
         // Given - a chain that declared nothing (the MSW boundary, mirrored)
-        const url = await started([]);
+        const { backend, url } = await started([]);
 
         // When - a request comes in anyway
         const response = await fetch(`${url}/anything`);
 
         // Then - it is answered 501 but never fails the action
         expect(response.status).toBe(501);
-        expect(backend!.violation()).toBeNull();
+        expect(backend.violation()).toBeNull();
     });
 
     test('stub backend — strictness (the external-block analog) — beginChain resets the queue and the unmatched log', async () => {
         // Given - a first chain that served its stub and recorded a miss
-        const url = await started([get('/events', { n: 1 })]);
+        const { backend, url } = await started([get('/events', { n: 1 })]);
         await fetch(`${url}/events`);
         await fetch(`${url}/miss`);
-        expect(backend!.violation()).toBeInstanceOf(Error);
+        expect(backend.violation()).toBeInstanceOf(Error);
 
         // When - the next chain arms the stub afresh
-        backend!.beginChain([get('/events', { n: 2 })]);
+        backend.beginChain([get('/events', { n: 2 })]);
 
         // Then - the previous chain's state is gone
-        expect(backend!.violation()).toBeNull();
+        expect(backend.violation()).toBeNull();
         await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
     });
 });

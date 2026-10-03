@@ -4,6 +4,14 @@ import { isStreamBody } from '../exchange.js';
 import type { StubRequest } from '../exchange.js';
 import { anthropic } from './anthropic.js';
 
+function matcherOf(declared: StubRequest): NonNullable<StubRequest['match']> {
+    const matcher = declared.match;
+    if (matcher === undefined) {
+        throw new Error('the builder declared no matcher');
+    }
+    return matcher;
+}
+
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
 function frame(data: { [field: string]: unknown; type: string }): string {
@@ -18,7 +26,7 @@ describe('anthropic', () => {
         // Given - a system-prompt filter, and two requests
         const trigger = anthropic.messages({ system: /journal/u });
         const asked = (system: string): boolean =>
-            trigger.match!({
+            matcherOf(trigger)({
                 body: {
                     messages: [{ content: 'hi', role: 'user' }],
                     model: 'claude-sonnet-4-20250514',
@@ -40,7 +48,7 @@ describe('anthropic', () => {
         // Given - a user-message filter, and two requests
         const trigger = anthropic.messages({ user: /classify/u });
         const asked = (content: string): boolean =>
-            trigger.match!({
+            matcherOf(trigger)({
                 body: { messages: [{ content, role: 'user' }] },
                 headers: {},
                 method: 'POST',
@@ -89,7 +97,7 @@ describe('anthropic', () => {
         // Given - a string model filter (not a RegExp)
         const trigger = anthropic.messages({ model: 'claude-sonnet-4-20250514' });
         const asked = (model: string): boolean =>
-            trigger.match!({
+            matcherOf(trigger)({
                 body: { messages: [{ content: 'hi', role: 'user' }], model },
                 headers: {},
                 method: 'POST',
@@ -108,7 +116,7 @@ describe('anthropic', () => {
         // Given - a filter requiring one tool by name
         const trigger = anthropic.messages({ tools: ['get_weather'] });
         const asked = (names: string[]): boolean =>
-            trigger.match!({
+            matcherOf(trigger)({
                 body: {
                     messages: [{ content: 'hi', role: 'user' }],
                     tools: names.map((name) => ({ name })),
@@ -133,7 +141,7 @@ describe('anthropic', () => {
             user: 'please classify this',
         });
         const asked = (system: string, user: string): boolean =>
-            trigger.match!({
+            matcherOf(trigger)({
                 body: { messages: [{ content: user, role: 'user' }], system },
                 headers: {},
                 method: 'POST',

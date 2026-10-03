@@ -105,7 +105,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     }
 
     async initialize(dockerDir: string): Promise<void> {
-        if (!this.serviceName) {
+        if (this.serviceName === undefined) {
             return;
         }
 

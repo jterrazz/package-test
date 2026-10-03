@@ -429,7 +429,11 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
     const found = keyed(closedPairs(context, map, RUN_KEYS, 'a run'));
     holdPresence(context, found, { line: lineOf(context, node), shape: 'run' });
 
-    const commandPair = found.get('command')!;
+    const commandPair = found.get('command');
+    const exitPair = found.get('exit');
+    if (commandPair === undefined || exitPair === undefined) {
+        fail(context, node, 'a run states its command: and its exit:');
+    }
     const command = requireString(context, commandPair.value, 'command:');
     const waitForPair = found.get('waitFor');
     if (waitForPair !== undefined && !isLast) {
@@ -448,7 +452,7 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
     return {
         command,
         commandLine: lineOf(context, commandPair),
-        exitCode: requireInteger(context, found.get('exit')!.value, 'exit:'),
+        exitCode: requireInteger(context, exitPair.value, 'exit:'),
         files: files === undefined ? [] : readFiles(context, files.value),
         stderr: stderr === undefined ? null : readStream(context, stderr.value, 'stderr:'),
         stdin: stdin === undefined ? null : requireString(context, stdin.value, 'stdin:'),

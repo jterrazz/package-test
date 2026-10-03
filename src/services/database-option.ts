@@ -10,7 +10,7 @@ export function validateDatabaseOption(
     if (!keys) {
         return;
     }
-    if (keys.length >= 2 && !database) {
+    if (keys.length >= 2 && database === undefined) {
         throw new Error(
             refusal('database-named-only-when-several-at-runtime', {
                 fix: `pass the database it reads: { database: '${keys[0]}' }, or another declared key`,
@@ -18,7 +18,7 @@ export function validateDatabaseOption(
             }),
         );
     }
-    if (keys.length === 1 && database) {
+    if (keys.length === 1 && database !== undefined) {
         throw new Error(
             refusal('database-named-only-when-several-at-runtime', {
                 fix: `delete { database: '${database}' }`,

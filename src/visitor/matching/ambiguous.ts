@@ -16,11 +16,13 @@ function landmarkOf(match: ElementMatch): string | undefined {
 }
 
 function formatMatch(match: ElementMatch, index: number): string {
-    const attribute = match.detail ? ` ${quoteDetail(match)}` : '';
-    const matchedOnLabel = match.accessibleName
-        ? `  named ${JSON.stringify(match.accessibleName)}`
-        : '';
-    const context = match.context ? `  in <${match.context}>` : '';
+    const attribute = match.detail === undefined ? '' : ` ${quoteDetail(match)}`;
+    const matchedOnLabel =
+        match.accessibleName === undefined || match.accessibleName === ''
+            ? ''
+            : `  named ${JSON.stringify(match.accessibleName)}`;
+    const context =
+        match.context === undefined || match.context === '' ? '' : `  in <${match.context}>`;
     return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${matchedOnLabel}${context}`;
 }
 

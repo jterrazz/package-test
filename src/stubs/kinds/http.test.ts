@@ -1,15 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { match } from '../../expectations/tokens/match.js';
 import { isStreamBody, STREAM_BODY } from '../exchange.js';
-import type { MatchableRequest } from '../exchange.js';
 import { http } from './http.js';
 
 const URL = 'https://api.example.com/things';
-
-function request(overrides: Partial<MatchableRequest> = {}): MatchableRequest {
-    return { body: null, headers: {}, method: 'POST', url: URL, ...overrides };
-}
 
 describe('http', () => {
     test('http — request builders — every verb builds an http request half, and any() wildcards the method', () => {
@@ -73,75 +67,6 @@ describe('http', () => {
         expect(http.empty(202).status).toBe(202);
     });
 
-    test('http — body filter — object body is a deep SUBSET match; extra keys are ignored', () => {
-        // Given - a filter on a nested subset of the body
-        const declared = http.post(URL, { body: { user: { role: 'admin' } } });
-
-        // Then - a superset body matches, a diverging one does not
-        expect(
-            declared.match!(request({ body: { extra: 1, user: { id: 7, role: 'admin' } } })),
-        ).toBe(true);
-        expect(declared.match!(request({ body: { user: { role: 'guest' } } }))).toBe(false);
-    });
-
-    test('http — body filter — object body accepts match.* matchers as leaf values', () => {
-        // Given - a subset filter whose leaf is a dynamic matcher
-        const declared = http.post(URL, { body: { id: match.uuid() } });
-
-        // Then - only a well-formed UUID leaf passes
-        expect(
-            declared.match!(request({ body: { id: '3f2504e0-4f89-41d3-9a0c-0305e82c3301' } })),
-        ).toBe(true);
-        expect(declared.match!(request({ body: { id: 'not-a-uuid' } }))).toBe(false);
-    });
-
-    test('http — body filter — string body is a containment test over the raw text body', () => {
-        // Given - a substring filter
-        const declared = http.post(URL, { body: 'needle' });
-
-        // Then - raw text containing the needle passes
-        expect(declared.match!(request({ body: 'a haystack with a needle inside' }))).toBe(true);
-        expect(declared.match!(request({ body: 'nothing here' }))).toBe(false);
-    });
-
-    test('http — body filter — string body containment also spans a stringified JSON body', () => {
-        // Given - a filter that looks for a value serialized in the body
-        const declared = http.post(URL, { body: 'alice' });
-
-        // Then - the JSON body is stringified before the containment test
-        expect(declared.match!(request({ body: { user: 'alice' } }))).toBe(true);
-    });
-
-    test('http — body filter — a RegExp body tests the raw text body', () => {
-        // Given - a pattern filter
-        const declared = http.post(URL, { body: /order-\d+/u });
-
-        // Then - only a matching body passes
-        expect(declared.match!(request({ body: 'order-42 placed' }))).toBe(true);
-        expect(declared.match!(request({ body: 'order-none' }))).toBe(false);
-    });
-
-    test('http — header filter — header names are case-insensitive; string is exact, RegExp tests', () => {
-        // Given - a header subset filter mixing string and RegExp
-        const declared = http.get(URL, {
-            headers: { Authorization: /^Bearer /u, 'X-Env': 'prod' },
-        });
-
-        // Then - a superset of headers with the right values matches
-        expect(
-            declared.match!(
-                request({
-                    headers: { authorization: 'Bearer abc', 'x-env': 'prod', 'x-extra': '1' },
-                }),
-            ),
-        ).toBe(true);
-
-        expect(
-            declared.match!(request({ headers: { authorization: 'Basic abc', 'x-env': 'prod' } })),
-        ).toBe(false);
-        expect(declared.match!(request({ headers: { 'x-env': 'prod' } }))).toBe(false);
-    });
-
     test('http — absent-header filter — without.headers names what the request must not carry, case-insensitively', () => {
         // Given - a filter forbidding a header, written in mixed case
         const declared = http.get(URL, { without: { headers: ['Set-Cookie', 'x-debug'] } });
@@ -167,56 +92,6 @@ describe('http', () => {
                 ].join('\n'),
             ),
         );
-    });
-
-    test('http — query filter — matches a subset of URL search params; string exact, RegExp tests', () => {
-        // Given - a query subset filter
-        const declared = http.get(URL, { query: { page: /^\d+$/u, tag: 'news' } });
-
-        // Then - a URL whose params satisfy the subset matches
-        expect(declared.match!(request({ url: `${URL}?tag=news&page=3&sort=desc` }))).toBe(true);
-
-        expect(declared.match!(request({ url: `${URL}?tag=sports&page=3` }))).toBe(false);
-        expect(declared.match!(request({ url: `${URL}?page=3` }))).toBe(false);
-    });
-
-    test('http — query filter — a relative observed url still exposes its query params', () => {
-        // Given - the stub backend's origin-relative url
-        const declared = http.get('/articles', { query: { locale: 'fr' } });
-
-        // Then - the filter reads the params off the path form
-        expect(declared.match!(request({ url: '/articles?locale=fr' }))).toBe(true);
-        expect(declared.match!(request({ url: '/articles?locale=en' }))).toBe(false);
-    });
-
-    test('http — combined filter — every provided facet must match', () => {
-        // Given - a filter across body, headers, and query
-        const declared = http.post(URL, {
-            body: { action: 'create' },
-            headers: { 'content-type': 'application/json' },
-            query: { v: '2' },
-        });
-
-        // Then - all three must hold
-        expect(
-            declared.match!(
-                request({
-                    body: { action: 'create', payload: {} },
-                    headers: { 'content-type': 'application/json' },
-                    url: `${URL}?v=2`,
-                }),
-            ),
-        ).toBe(true);
-
-        expect(
-            declared.match!(
-                request({
-                    body: { action: 'create' },
-                    headers: { 'content-type': 'application/json' },
-                    url: `${URL}?v=3`,
-                }),
-            ),
-        ).toBe(false);
     });
 
     test('http — never — never() is a stub required exactly zero times, its reply naming the route', () => {

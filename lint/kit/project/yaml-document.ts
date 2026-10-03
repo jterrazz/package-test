@@ -131,7 +131,7 @@ function afterOwner(text: string, offset: number): number {
 
 function indentOf(text: string, offset: number): number {
     const start = lineStart(text, offset);
-    return /^ */u.exec(text.slice(start))![0].length;
+    return text.slice(start).length - text.slice(start).trimStart().length;
 }
 
 /** Outermost only: a nested one is restored with its parent, and descending would splice it twice. */

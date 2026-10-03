@@ -62,15 +62,17 @@ export class Matcher {
                 return `{{includes:${this.includes}}}`;
             }
             case 'ref': {
-                return this.notRef
-                    ? `{{ref#${this.refName}!${this.notRef}}}`
-                    : `{{ref#${this.refName}}}`;
+                return this.notRef === undefined
+                    ? `{{ref#${this.refName}}}`
+                    : `{{ref#${this.refName}!${this.notRef}}}`;
             }
             case 'regex': {
                 return `{{regex:${this.regex?.source}}}`;
             }
             default: {
-                return this.refName ? `{{${this.kind}#${this.refName}}}` : `{{${this.kind}}}`;
+                return this.refName === undefined
+                    ? `{{${this.kind}}}`
+                    : `{{${this.kind}#${this.refName}}}`;
             }
         }
     }

@@ -268,7 +268,10 @@ async function startServers(
             await stop();
             throw error;
         }
-        env[registration.env] = registration.url(adapter.port!);
+        if (adapter.port === null) {
+            throw invariant('a served process answered its readiness without a port');
+        }
+        env[registration.env] = registration.url(adapter.port);
     }
 
     return { env, stop };
@@ -375,8 +378,12 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         writeFileSync(filePath, updateSpecFile(file, updates(outcomes, scope)));
     }
 
+    const lastOutcome = outcomes.at(-1);
+    if (lastOutcome === undefined) {
+        throw invariant('a document ran no command, though its runs: holds at least one');
+    }
     return new CliResult({
-        commandOutput: outcomes.at(-1)!.actual,
+        commandOutput: lastOutcome.actual,
         config,
         dockerConfig: config.dockerConfig,
         testDir,

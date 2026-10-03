@@ -44,7 +44,7 @@ export const FRAMEWORK_LAYERS = {
         packages: librariesOwnedIn('src/stubs/'),
         seams: {
             // invariant: a stub's request filter is an expectation on the outgoing request: one grammar, never a second.
-            'stubs/kinds/http.ts': ['expectations/tokens/'],
+            'stubs/kinds/http-filter.ts': ['expectations/tokens/'],
             'stubs/kinds/text-filter.ts': ['expectations/tokens/'],
             'stubs/matching/route.ts': ['expectations/tokens/'],
         },

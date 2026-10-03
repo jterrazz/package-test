@@ -82,7 +82,7 @@ function compilePredicate(target: Target, options?: { anyVisibility?: boolean })
                 ? `${attribute} CONTAINS '${name}'`
                 : `${attribute} == '${name}'`,
         name,
-        visible: options?.anyVisibility ? '1 == 1' : 'visible == 1',
+        visible: options?.anyVisibility === true ? '1 == 1' : 'visible == 1',
     });
 }
 
@@ -106,12 +106,12 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
         element.getAttribute('value'),
         element.getAttribute('name'),
     ]);
-    const shortLabel = label ? shortened(label) : undefined;
+    const shortLabel = label === null || label === '' ? undefined : shortened(label);
     return {
         type: (type ?? 'Unknown').replace(/^XCUIElementType/u, ''),
         ...(shortLabel === undefined ? {} : { label: shortLabel }),
-        ...(value && value !== label ? { value } : {}),
-        ...(identifier && identifier !== label ? { identifier } : {}),
+        ...(value === null || value === '' || value === label ? {} : { value }),
+        ...(identifier === null || identifier === '' || identifier === label ? {} : { identifier }),
     };
 }
 
@@ -234,7 +234,7 @@ export class AppiumAdapter implements DevicePort {
             const count = await matches.length;
             if (count === 0) {
                 /* invariant: actionability includes scroll-into-view: the next pass re-resolves the element as visible. */
-                if (options?.tryScroll) {
+                if (options?.tryScroll === true) {
                     const offscreen = await matching(scope, level, { anyVisibility: true });
                     const first = offscreen[0];
                     if (first !== undefined) {

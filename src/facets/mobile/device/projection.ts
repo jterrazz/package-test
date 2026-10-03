@@ -25,10 +25,10 @@ function decodeEntities(value: string): string {
     return value.replaceAll(
         /&(?:#x(?<hex>[\dA-Fa-f]+)|#(?<decimal>\d+)|(?<named>amp|apos|gt|lt|quot));/gu,
         (entity, hex: string | undefined, decimal: string | undefined) => {
-            if (hex) {
+            if (hex !== undefined) {
                 return String.fromCodePoint(Number.parseInt(hex, 16));
             }
-            if (decimal) {
+            if (decimal !== undefined) {
                 return String.fromCodePoint(Number(decimal));
             }
             return NAMED_ENTITIES[entity] ?? entity;
@@ -60,7 +60,7 @@ function parsePageSource(xml: string): RawNode {
         } else {
             parent.children.push(node);
         }
-        if (!selfClosing) {
+        if (selfClosing === undefined || selfClosing === '') {
             stack.push(node);
         }
     }
@@ -78,10 +78,13 @@ function parsePageSource(xml: string): RawNode {
     return root;
 }
 
+const present = (attribute: string | undefined): string | undefined =>
+    attribute === '' ? undefined : attribute;
+
 function substance(node: RawNode): Omit<ScreenNode, 'children'> {
-    const label = node.attributes.label || undefined;
-    const value = node.attributes.value || undefined;
-    const identifier = node.attributes.name || undefined;
+    const label = present(node.attributes.label);
+    const value = present(node.attributes.value);
+    const identifier = present(node.attributes.name);
     return {
         type: node.tag.replace(/^XCUIElementType/u, ''),
         ...(label === undefined ? {} : { label }),
@@ -119,7 +122,7 @@ function projectNode(node: RawNode): ScreenNode[] {
 
 function collectTexts(node: RawNode, texts: string[]): void {
     if (node.attributes.visible === 'true') {
-        const text = node.attributes.label || node.attributes.value || undefined;
+        const text = present(node.attributes.label) ?? present(node.attributes.value);
         if (text !== undefined && texts.at(-1) !== text) {
             texts.push(text);
         }

@@ -51,8 +51,11 @@ const WHOLE_RES: Partial<Record<MatcherKind, RegExp>> = Object.fromEntries(
     Object.entries(EMBEDDED_SOURCES).map(([kind, source]) => [kind, wholeRe(source)]),
 );
 
+const wholeMatches = (kind: MatcherKind, actual: string): boolean =>
+    WHOLE_RES[kind]?.test(actual) === true;
+
 const PLACEHOLDER_RE = new RegExp(
-    String.raw`\{\{(?<kind>${[...TOKEN_KINDS].sort((a, b) => b.length - a.length).join('|')})(?:#(?<ref>[\w.-]+))?\}\}`,
+    String.raw`\{\{(?<kind>${[...TOKEN_KINDS].toSorted((a, b) => b.length - a.length).join('|')})(?:#(?<ref>[\w.-]+))?\}\}`,
     'gu',
 );
 
@@ -67,7 +70,7 @@ function stableStringify(value: unknown): string {
     }
     if (value !== null && typeof value === 'object') {
         const entries = Object.entries(value)
-            .sort(([a], [b]) => (a < b ? -1 : 1))
+            .toSorted(([a], [b]) => (a < b ? -1 : 1))
             .map(([key, item]) => `${JSON.stringify(key)}:${stableStringify(item)}`);
         return `{${entries.join(',')}}`;
     }
@@ -113,19 +116,19 @@ function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureScope): b
             if (typeof actual === 'number') {
                 return Number.isFinite(actual);
             }
-            return typeof actual === 'string' && WHOLE_RES.float!.test(actual);
+            return typeof actual === 'string' && wholeMatches('float', actual);
         }
         case 'int': {
             if (typeof actual === 'number') {
                 return Number.isInteger(actual);
             }
-            return typeof actual === 'string' && WHOLE_RES.int!.test(actual);
+            return typeof actual === 'string' && wholeMatches('int', actual);
         }
         case 'number': {
             if (typeof actual === 'number') {
                 return Number.isFinite(actual);
             }
-            return typeof actual === 'string' && WHOLE_RES.number!.test(actual);
+            return typeof actual === 'string' && wholeMatches('number', actual);
         }
         case 'port': {
             if (typeof actual === 'number') {
@@ -133,7 +136,7 @@ function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureScope): b
             }
             return (
                 typeof actual === 'string' &&
-                WHOLE_RES.port!.test(actual) &&
+                wholeMatches('port', actual) &&
                 isPortValue(Number(actual))
             );
         }
@@ -154,20 +157,24 @@ function kindMatches(kind: MatcherKind, actual: unknown, scope: CaptureScope): b
 
 function matcherMatches(matcher: Matcher, actual: unknown, scope: CaptureScope): boolean {
     if (matcher.kind === 'includes') {
-        return typeof actual === 'string' && actual.includes(matcher.includes!);
+        return (
+            typeof actual === 'string' &&
+            matcher.includes !== undefined &&
+            actual.includes(matcher.includes)
+        );
     }
     if (matcher.kind === 'regex') {
-        return typeof actual === 'string' && matcher.regex!.test(actual);
+        return typeof actual === 'string' && matcher.regex?.test(actual) === true;
     }
     if (matcher.kind === 'ref') {
         if (
-            matcher.notRef &&
+            matcher.notRef !== undefined &&
             scope.has(matcher.notRef) &&
             capturedEquals(scope.get(matcher.notRef), actual)
         ) {
             return false;
         }
-        return recordRef(matcher.refName!, actual, scope);
+        return matcher.refName !== undefined && recordRef(matcher.refName, actual, scope);
     }
     return kindMatches(matcher.kind, actual, scope);
 }
@@ -184,7 +191,7 @@ function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
         return scope.workdir === undefined ? '(?!)' : escapeRegExp(scope.workdir);
     }
     const source = EMBEDDED_SOURCES[kind];
-    if (source) {
+    if (source !== undefined) {
         return source;
     }
     // invariant: string: stays on one line; any: crosses lines.
@@ -238,7 +245,7 @@ export function placeholderStringMatches(
         if (!kindMatches(parsed.single.kind, actual, scope)) {
             return false;
         }
-        if (parsed.single.ref) {
+        if (parsed.single.ref !== undefined) {
             return recordRef(parsed.single.ref, actual, scope);
         }
         return true;
@@ -253,7 +260,7 @@ export function placeholderStringMatches(
         return false;
     }
     for (const entry of parsed.refs) {
-        if (!entry.ref) {
+        if (entry.ref === undefined) {
             continue;
         }
         if (!recordRef(entry.ref, found[entry.index + 1], scope)) {
@@ -340,7 +347,7 @@ export function textContains(expected: string, actual: string, scope: CaptureSco
         return false;
     }
     return parsed.refs.every(
-        (entry) => !entry.ref || recordRef(entry.ref, found[entry.index + 1], scope),
+        (entry) => entry.ref === undefined || recordRef(entry.ref, found[entry.index + 1], scope),
     );
 }
 
