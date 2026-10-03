@@ -94,7 +94,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 51    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 188   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
-| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 25    |
+| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
 <!-- /GENERATED:layers -->
 
@@ -190,7 +190,7 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **238 modules** have no sibling test, and every one of them is claimed:
+Today **241 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -203,7 +203,7 @@ Today **238 modules** have no sibling test, and every one of them is claimed:
 | a result accessor (21)                                    | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result                                                                                                                                                                                                                                                                                                                                                                             |
 | an adapter (18)                                           | an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)                                                                                                                                                                                                                                                                            |
 | a bundled CLI entry (8)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                              |
-| a lint-layer module (62)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint facet                                                                                                                                                                                                                                                         |
+| a lint-layer module (65)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint facet                                                                                                                                                                                                                                                         |
 | a chain or runner internal (7)                            | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                  |
 | a module the specs reach through the published entry (16) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                      |
 
@@ -480,7 +480,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->
 
-**26 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**27 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                    | Holds              | Tests |
 | -------------------------------------------- | ------------------ | ----- |
@@ -495,7 +495,8 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/env-allowlist.test.ts`     | env-allowlist      | 4     |
 | `lint/self/corpus/facet-matrix.test.ts`      | facet-matrix       | 5     |
 | `lint/self/corpus/makefile.test.ts`          | makefile           | 4     |
-| `lint/self/corpus/matrix.test.ts`            | matrix             | 12    |
+| `lint/self/corpus/matrix-layers.test.ts`     | matrix-layers      | 3     |
+| `lint/self/corpus/matrix.test.ts`            | matrix             | 9     |
 | `lint/self/corpus/messages.test.ts`          | messages           | 4     |
 | `lint/self/corpus/meta-tests.test.ts`        | metaTests          | 3     |
 | `lint/self/corpus/oxlint-pin.test.ts`        | oxlint-pin         | 2     |

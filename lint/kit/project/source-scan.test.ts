@@ -1,6 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import { argumentsOf, closingOf, HOLE, literalEnd, literalOf } from './source-scan.js';
+import {
+    argumentsOf,
+    closingOf,
+    HOLE,
+    literalEnd,
+    literalOf,
+    stringsOf,
+    withoutComments,
+} from './source-scan.js';
 
 describe('source-scan', () => {
     test.each([
@@ -50,5 +58,33 @@ describe('source-scan', () => {
         // Given - an argument as written
         // Then - its value when it is one whole string literal, an interpolation read as a hole
         expect(literalOf(argument)).toBe(literal);
+    });
+
+    test('comments are dropped, and a string that spells one is kept whole', () => {
+        // Given - a glob that opens like a block comment, a line comment and a URL
+        const source =
+            "const glob = 'specs/lint/*' + '/*.yaml'; // a note\nconst url = 'http://x';";
+
+        // Then - only the comment goes
+        expect(withoutComments(source)).toBe(
+            "const glob = 'specs/lint/*' + '/*.yaml'; \nconst url = 'http://x';",
+        );
+    });
+
+    test('each character is marked inside a string or not, an escaped quote staying inside', () => {
+        // Given - code around a string holding an escaped quote
+        // Then - the quotes and everything between them are inside
+        expect(stringsOf(String.raw`a 'b\'c' d`)).toStrictEqual([
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+        ]);
     });
 });

@@ -1,5 +1,6 @@
 import {
     blankComments,
+    filesUnder,
     isGroundFolder,
     PRUNED,
     SHARED_FOLDER,
@@ -235,4 +236,11 @@ export function decodeText(path: string): null | string {
     }
     // invariant: a NUL or a U+FFFD replacement char: a binary snapshot carries no token grammar.
     return text.includes('\u0000') || text.includes('\uFFFD') ? null : text;
+}
+
+export function sourcesUnder(dir: string, extensions: string[]): string[] {
+    return filesUnder(dir)
+        .filter((path) => !path.split('/').some((segment) => isGroundFolder(segment)))
+        .filter((path) => extensions.some((extension) => path.endsWith(extension)))
+        .map((path) => join(dir, path));
 }

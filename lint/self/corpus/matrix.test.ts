@@ -7,15 +7,11 @@ import { describe, expect, test } from 'vitest';
 import { FACET_MATRIX_COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,
-    layers,
-    MATRIX_LAYERS_MARKERS,
     MATRIX_MARKERS,
     matrixCapabilityFolders,
     matrixRows,
     renderMatrixBody,
-    renderMatrixLayers,
 } from './matrix.js';
-import { metaTests } from './meta-tests.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -125,38 +121,6 @@ describe('matrix', () => {
                 'docs/03-testing.md',
             ),
         ).toBe(read('docs/03-testing.md'));
-    });
-
-    test('capability matrix (meta-test `every-capability-exercised`) — the layered reading is byte-identical to a fresh generation', () => {
-        // Given - the layers block chapter 03 carries
-        // Then - regenerating reproduces it exactly, counts included
-        expect(
-            spliceBetween(
-                read('docs/03-testing.md'),
-                MATRIX_LAYERS_MARKERS,
-                renderMatrixLayers(ROOT),
-                'docs/03-testing.md',
-            ),
-        ).toBe(read('docs/03-testing.md'));
-    });
-
-    test('capability matrix (meta-test `every-capability-exercised`) — every layer of the reading carries files', () => {
-        // Given - the four layers the chapter publishes
-        // Then - none of them is a claim with nothing behind it
-        const found = layers(ROOT);
-        expect(found).toHaveLength(5);
-        expect(
-            found.filter((layer) => layer.count === 0).map((layer) => layer.layer),
-        ).toStrictEqual([]);
-    });
-
-    test('capability matrix (meta-test `every-capability-exercised`) — the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {
-        // Given - the layer, and the channel's own rows outside the end-to-end suite
-        const layer = layers(ROOT).find((one) => one.layer === 'Meta-tests');
-        const listed = metaTests(ROOT).filter((row) => !row.file.startsWith('specs/'));
-
-        // Then - one count for one set of files, `lint/self/` included
-        expect(layer?.count).toBe(listed.length);
     });
 
     test.each([

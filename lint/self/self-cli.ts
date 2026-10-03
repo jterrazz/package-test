@@ -15,12 +15,8 @@ import { SELF_CHAPTER_MARKERS, selfChapterTable } from './catalogue/chapter.js';
 import { SELF_CHAPTER } from './catalogue/manifest.js';
 import { SELF_CHECKER } from './checks/checker.js';
 import { checkCoverageFloor } from './checks/coverage-floor.js';
-import {
-    MATRIX_LAYERS_MARKERS,
-    MATRIX_MARKERS,
-    renderMatrixBody,
-    renderMatrixLayers,
-} from './corpus/matrix.js';
+import { MATRIX_LAYERS_MARKERS, renderMatrixLayers } from './corpus/matrix-layers.js';
+import { MATRIX_MARKERS, renderMatrixBody } from './corpus/matrix.js';
 import { META_TESTS_MARKERS, renderMetaTests } from './corpus/meta-tests.js';
 import { renderSiblings, SIBLINGS_MARKERS } from './corpus/siblings.js';
 

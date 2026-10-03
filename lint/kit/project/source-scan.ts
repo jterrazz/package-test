@@ -126,3 +126,70 @@ export function literalOf(argument: string | undefined): string | undefined {
     const body = text.slice(1, -1);
     return quote === '`' ? body.replaceAll(/\$\{[^}]*\}/gu, HOLE) : body;
 }
+
+const QUOTES = new Set(['"', "'", '`']);
+
+function pastComment(source: string, index: number): number | undefined {
+    const pair = source.slice(index, index + 2);
+    if (pair === '//' && source[index - 1] !== ':') {
+        const end = source.indexOf('\n', index);
+        return end === -1 ? source.length : end;
+    }
+    if (pair === '/*') {
+        const end = source.indexOf('*/', index + 2);
+        return end === -1 ? source.length : end + 2;
+    }
+    return undefined;
+}
+
+function pastString(source: string, index: number): number {
+    const quote = source[index];
+    let at = index + 1;
+    while (at < source.length && source[at] !== quote) {
+        at += source[at] === '\\' ? 2 : 1;
+    }
+    return Math.min(at + 1, source.length);
+}
+
+/** Scanned character by character: a regex cannot tell a comment from a string that spells one (`'specs/lint/*' + '/*.spec.yaml'`). */
+export function withoutComments(source: string): string {
+    let out = '';
+    let index = 0;
+    while (index < source.length) {
+        const char = source[index] ?? '';
+        const skipped = pastComment(source, index);
+        if (skipped !== undefined) {
+            index = skipped;
+        } else if (QUOTES.has(char)) {
+            const end = pastString(source, index);
+            out += source.slice(index, end);
+            index = end;
+        } else {
+            out += char;
+            index += 1;
+        }
+    }
+    return out;
+}
+
+/** Per character: whether it sits inside a string literal. */
+export function stringsOf(source: string): boolean[] {
+    const inside: boolean[] = [];
+    let quote = '';
+    for (let index = 0; index < source.length; index += 1) {
+        const char = source[index] ?? '';
+        if (quote === '') {
+            quote = char === '"' || char === "'" || char === '`' ? char : '';
+            inside[index] = quote !== '';
+        } else {
+            inside[index] = true;
+            if (char === '\\') {
+                index += 1;
+                inside[index] = true;
+            } else if (char === quote) {
+                quote = '';
+            }
+        }
+    }
+    return inside;
+}

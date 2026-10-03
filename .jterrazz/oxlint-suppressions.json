@@ -1,32 +1,4 @@
 {
-    "lint/consumer/checks/ground-shared-or-inline.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/consumer/checks/spec-in-subject-folder.moves.test.ts": {
-        "jterrazz/test-body-within-line-limit": {
-            "count": 2
-        },
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/consumer/checks/spec-in-subject-folder.moves.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/stubs/stubs-root-holds-facades-and-kinds.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/self/corpus/matrix.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "src/expectations/command/cli.result.ts": {
         "typescript/require-await": {
             "count": 1
