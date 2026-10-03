@@ -6,94 +6,97 @@ import type { SpecDocument } from '../../kit/project/spec-grammar.js';
 import { readText } from '../../kit/project/tree.js';
 import type { DocumentFinding } from './checker.js';
 
+const QUOTES = new Set(["'", '"', '`']);
+const OPENERS = new Set(['{', '[', '(']);
+const CLOSERS = new Set(['}', ']', ')']);
+const KEY = /^(?<quote>['"]?)(?<name>[A-Za-z_$][\w$]*)\k<quote>\s*:/u;
+
+function quoteEnd(source: string, from: number): number {
+    const quote = source[from];
+    let index = from + 1;
+    while (index < source.length && !(source[index] === quote && source[index - 1] !== '\\')) {
+        index += 1;
+    }
+    return index;
+}
+
 /** Read by depth, not by parsing. */
 function objectKeys(source: string, from: number): { end: number; keys: string[] } {
     const keys: string[] = [];
     let depth = 0;
-    let quote = '';
     for (let index = from; index < source.length; index += 1) {
         const char = source[index] ?? '';
-        if (quote !== '') {
-            if (char === quote && source[index - 1] !== '\\') {
-                quote = '';
-            }
-            continue;
-        }
-        if (char === "'" || char === '"' || char === '`') {
-            quote = char;
-            continue;
-        }
-        if (char === '{' || char === '[' || char === '(') {
+        if (QUOTES.has(char)) {
+            index = quoteEnd(source, index);
+        } else if (OPENERS.has(char)) {
             depth += 1;
-            continue;
-        }
-        if (char === '}' || char === ']' || char === ')') {
+        } else if (CLOSERS.has(char)) {
             depth -= 1;
             if (depth === 0) {
                 return { end: index, keys };
             }
-            continue;
-        }
-        if (depth === 1 && /[A-Za-z_$'"]/u.test(char)) {
-            const rest = /^(?<quote>['"]?)(?<name>[A-Za-z_$][\w$]*)\k<quote>\s*:/u.exec(
-                source.slice(index),
-            );
-            const name = rest?.groups?.name;
-            if (rest !== null && name !== undefined) {
-                keys.push(name);
-                index += rest[0].length - 1;
+        } else if (depth === 1) {
+            const key = KEY.exec(source.slice(index));
+            if (key?.groups?.name !== undefined) {
+                keys.push(key.groups.name);
+                index += key[0].length - 1;
             }
         }
     }
     return { end: source.length, keys };
 }
 
-/** Nothing in a document says which neighbouring runner runs it, so their registries are read as a union. */
-function registeredNames(dir: string): null | { env: Set<string>; serve: Set<string> } {
-    let current = dir;
-    for (;;) {
-        let entries: string[];
-        try {
-            entries = treeNames(current).filter((name) => name.endsWith('.specification.ts'));
-        } catch {
-            entries = [];
-        }
-        if (entries.length > 0) {
-            const env = new Set<string>();
-            const serve = new Set<string>();
-            for (const entry of entries) {
-                const text = readText(join(current, entry));
-                for (const call of text.matchAll(/specification\.cli\s*\(/gu)) {
-                    const open = text.indexOf('{', call.index + call[0].length);
-                    if (open === -1) {
-                        continue;
-                    }
-                    const options = objectKeys(text, open);
-                    for (const [key, into] of [
-                        ['env', env],
-                        ['serve', serve],
-                    ] as const) {
-                        const marker = new RegExp(String.raw`\b${key}\s*:\s*\{`, 'u').exec(
-                            text.slice(open, options.end),
-                        );
-                        if (marker === null) {
-                            continue;
-                        }
-                        const at = open + marker.index + marker[0].length - 1;
-                        for (const name of objectKeys(text, at).keys) {
-                            into.add(name);
-                        }
-                    }
-                }
+type Registered = { env: Set<string>; serve: Set<string> };
+
+function specificationsIn(dir: string): string[] {
+    try {
+        return treeNames(dir).filter((name) => name.endsWith('.specification.ts'));
+    } catch {
+        return [];
+    }
+}
+
+function optionNames(text: string, options: { end: number; open: number }, key: string): string[] {
+    const marker = new RegExp(String.raw`\b${key}\s*:\s*\{`, 'u').exec(
+        text.slice(options.open, options.end),
+    );
+    return marker === null
+        ? []
+        : objectKeys(text, options.open + marker.index + marker[0].length - 1).keys;
+}
+
+function registerFrom(text: string, into: Registered): void {
+    for (const call of text.matchAll(/specification\.cli\s*\(/gu)) {
+        const open = text.indexOf('{', call.index + call[0].length);
+        if (open !== -1) {
+            const options = { end: objectKeys(text, open).end, open };
+            for (const name of optionNames(text, options, 'env')) {
+                into.env.add(name);
             }
-            return { env, serve };
+            for (const name of optionNames(text, options, 'serve')) {
+                into.serve.add(name);
+            }
         }
+    }
+}
+
+/** Nothing in a document says which neighbouring runner runs it, so their registries are read as a union. */
+function registeredNames(dir: string): null | Registered {
+    let current = dir;
+    let entries = specificationsIn(current);
+    while (entries.length === 0) {
         const parent = dirname(current);
         if (parent === current) {
             return null;
         }
         current = parent;
+        entries = specificationsIn(current);
     }
+    const registered: Registered = { env: new Set(), serve: new Set() };
+    for (const entry of entries) {
+        registerFrom(readText(join(current, entry)), registered);
+    }
+    return registered;
 }
 
 export function checkDocumentEnvAndServeRegistered(

@@ -36,6 +36,17 @@ function decodeEntities(value: string): string {
     );
 }
 
+function attributesOf(raw: string): Record<string, string> {
+    const attributes: Record<string, string> = {};
+    for (const attribute of raw.matchAll(ATTRIBUTE_PATTERN)) {
+        const { key, value } = attribute.groups ?? {};
+        if (key !== undefined && value !== undefined) {
+            attributes[key] = decodeEntities(value);
+        }
+    }
+    return attributes;
+}
+
 function parsePageSource(xml: string): RawNode {
     const stack: RawNode[] = [];
     let root: null | RawNode = null;
@@ -46,14 +57,11 @@ function parsePageSource(xml: string): RawNode {
             stack.pop();
             continue;
         }
-        const attributes: Record<string, string> = {};
-        for (const attribute of (rawAttributes ?? '').matchAll(ATTRIBUTE_PATTERN)) {
-            const { key, value } = attribute.groups ?? {};
-            if (key !== undefined && value !== undefined) {
-                attributes[key] = decodeEntities(value);
-            }
-        }
-        const node: RawNode = { attributes, children: [], tag: openTag };
+        const node: RawNode = {
+            attributes: attributesOf(rawAttributes ?? ''),
+            children: [],
+            tag: openTag,
+        };
         const parent = stack.at(-1);
         if (parent === undefined) {
             root = node;

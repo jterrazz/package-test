@@ -240,7 +240,15 @@ function cellText(value: unknown): string {
     if (value instanceof Date) {
         return value.toISOString();
     }
-    return typeof value === 'object' ? JSON.stringify(value) : String(value);
+    if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        typeof value === 'bigint'
+    ) {
+        return String(value);
+    }
+    return JSON.stringify(value) ?? typeof value;
 }
 
 function formatRow(row: readonly unknown[]): string {
