@@ -53,7 +53,7 @@ function requireSource(name: string, source: unknown): null | string {
     }
     throw new TypeError(
         refusal('disk-named-by-relative-path-at-runtime', {
-            fix: `name the package's directory: link('${name}', directory('./_fixtures/${name.replace(/^@[^/]+\//u, '')}/'))`,
+            fix: `name the package's directory: link('${name}', directory('./_fixtures/${name.split('/').at(-1)}/'))`,
             found: isDiskFile(source)
                 ? `link('${name}', file(${JSON.stringify(source.path)})), a file where a package's directory is read`
                 : `link('${name}', ${typeof source === 'string' ? JSON.stringify(source) : typeof source}), a value where a package's directory is read`,
