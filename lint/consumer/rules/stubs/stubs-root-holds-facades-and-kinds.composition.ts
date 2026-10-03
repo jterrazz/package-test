@@ -7,15 +7,13 @@ import {
 } from '../../../kit/project/ast.js';
 import type { AstNode } from '../../../kit/project/ast.js';
 
+function exportedName(specifier: AstNode): string | undefined {
+    const exported = child(specifier, 'exported');
+    return identifierName(exported) ?? stringValue(exported);
+}
+
 export function exportsDefault(node: AstNode): boolean {
-    const specifiers = childList(node, 'specifiers');
-    return specifiers.some((specifier) => {
-        const exported = child(specifier, 'exported');
-        return (
-            (exported?.type === 'Identifier' && exported.name === 'default') ||
-            stringValue(exported) === 'default'
-        );
-    });
+    return childList(node, 'specifiers').some((specifier) => exportedName(specifier) === 'default');
 }
 
 const FACADE_SOURCE = /\.stubs(?:\.[cm]?[jt]s)?$/u;
@@ -24,10 +22,7 @@ const COMPOSITION_TYPE = 'Stubs';
 
 function returnsComposition(fn: AstNode | undefined): boolean {
     const annotation = child(child(fn, 'returnType'), 'typeAnnotation');
-    return (
-        annotation?.type === 'TSTypeReference' &&
-        identifierName(child(annotation, 'typeName')) === COMPOSITION_TYPE
-    );
+    return identifierName(child(annotation, 'typeName')) === COMPOSITION_TYPE;
 }
 
 function facadeImports(node: AstNode): string[] {
@@ -39,16 +34,10 @@ function facadeImports(node: AstNode): string[] {
     );
 }
 
+/** `function world(): Stubs` and `const world = (): Stubs => …` alike. */
 function compositionBuilder(node: AstNode): string | undefined {
-    if (node.type === 'FunctionDeclaration') {
-        return returnsComposition(node) ? identifierName(child(node, 'id')) : undefined;
-    }
-    if (node.type === 'VariableDeclarator') {
-        return returnsComposition(child(node, 'init'))
-            ? identifierName(child(node, 'id'))
-            : undefined;
-    }
-    return undefined;
+    const fn = node.type === 'VariableDeclarator' ? child(node, 'init') : node;
+    return returnsComposition(fn) ? identifierName(child(node, 'id')) : undefined;
 }
 
 /** A sibling facade's named exports are scenarios, compositions by `stubs-root-holds-facades-and-kinds`. */
@@ -68,18 +57,19 @@ export function namesComposition(
 ): boolean {
     const value =
         declaration?.type === 'CallExpression' ? child(declaration, 'callee') : declaration;
-    const name = identifierName(value);
-    return name !== undefined && names.has(name);
+    return (names as ReadonlySet<unknown>).has(identifierName(value));
 }
 
+/** Called on an `export … from`, `export * from` or `export { … }`. */
 export function exportsByName(node: AstNode): boolean {
-    if (node.exportKind === 'type') {
-        return false;
-    }
-    if (node.type === 'ExportAllDeclaration') {
-        return true;
-    }
-    return child(node, 'declaration') !== undefined || !exportsDefault(node);
+    return (
+        node.exportKind !== 'type' &&
+        (node.type === 'ExportAllDeclaration' ||
+            child(node, 'declaration') !== undefined ||
+            childList(node, 'specifiers').some(
+                (specifier) => exportedName(specifier) !== 'default',
+            ))
+    );
 }
 
 export function composes(node: AstNode): boolean {
@@ -87,8 +77,5 @@ export function composes(node: AstNode): boolean {
         return false;
     }
     const callee = child(node, 'callee');
-    return (
-        (callee?.type === 'Identifier' && callee.name === 'defineStubs') ||
-        (callee !== undefined && memberPropertyName(callee) === 'with')
-    );
+    return identifierName(callee) === 'defineStubs' || memberPropertyName(callee) === 'with';
 }
