@@ -1,5 +1,5 @@
 import { isNode, LineCounter, parseDocument, Scalar, visit } from 'yaml';
-import type { CollectionTag, Document, Node, Pair, ScalarTag, YAMLMap, YAMLSeq } from 'yaml';
+import type { CollectionTag, Document, Node, Pair, Range, ScalarTag, YAMLMap, YAMLSeq } from 'yaml';
 
 export { isMap, isNode, isPair, isScalar, isSeq, Scalar } from 'yaml';
 export type { Document, Node, Pair, YAMLMap, YAMLSeq } from 'yaml';
@@ -28,15 +28,15 @@ const KEY_LINE = /^(?<indent> +)(?:(?:- )?[A-Za-z_$'"][^\n]*:|- [[{])/u;
 function detectIndent(text: string): number {
     let smallest = 0;
     for (const line of text.split('\n')) {
+        // Stryker disable next-line OptionalChaining: a match always carries its named group
         const indent = KEY_LINE.exec(line)?.groups?.indent;
+        // Stryker disable next-line EqualityOperator: an equal indent leaves the smallest as it is
         if (indent !== undefined && (smallest === 0 || indent.length < smallest)) {
             smallest = indent.length;
         }
     }
     return smallest === 0 ? 2 : smallest;
 }
-
-const STRING_TAG = 'tag:yaml.org,2002:str';
 
 /** An indentation indicator is ONE digit, so nine spaces is the deepest step statable. */
 const DEEPEST_STATABLE_STEP = 9;
@@ -48,7 +48,7 @@ function stateIndentation(written: string, ctx: StringifyContext): string {
     if (!/^[|>][1-9]/u.test(written)) {
         return written;
     }
-    const step = ctx.indent === '' ? 1 : ctx.indentStep.length;
+    const step = ctx.indentStep.length;
     if (step > DEEPEST_STATABLE_STEP) {
         throw new Error(
             `A block scalar indented by ${step} spaces cannot state its indentation: YAML writes that indicator as a single digit, so ${DEEPEST_STATABLE_STEP} spaces is the deepest step a document may be written with.`,
@@ -58,11 +58,13 @@ function stateIndentation(written: string, ctx: StringifyContext): string {
 }
 
 function isScalarTag(tag: CollectionTag | ScalarTag | string): tag is ScalarTag {
+    // Stryker disable next-line ConditionalExpression,LogicalOperator,StringLiteral: a name or a collection tag has no writer, which statingItsIndentation keeps as it is
     return typeof tag !== 'string' && tag.collection === undefined;
 }
 
 function statingItsIndentation(tag: ScalarTag): ScalarTag {
     const write = tag.stringify;
+    // Stryker disable next-line ConditionalExpression: every scalar tag the yaml schema lists writes its own scalars
     if (write === undefined) {
         return tag;
     }
@@ -82,10 +84,7 @@ export function parseYamlSource(text: string): YamlSource {
     const lineCounter = new LineCounter();
     const document = parseDocument(text, {
         customTags: (tags) =>
-            tags.map((tag) =>
-                isScalarTag(tag) && tag.tag === STRING_TAG ? statingItsIndentation(tag) : tag,
-            ),
-        keepSourceTokens: true,
+            tags.map((tag) => (isScalarTag(tag) ? statingItsIndentation(tag) : tag)),
         lineCounter,
     });
     return {
@@ -98,7 +97,7 @@ export function parseYamlSource(text: string): YamlSource {
 
 export function yamlSyntaxErrors(source: YamlSource): YamlSyntaxError[] {
     return source.document.errors.map((error) => ({
-        line: error.linePos?.[0]?.line ?? source.lineAt(error.pos[0]),
+        line: source.lineAt(error.pos[0]),
         message: error.message,
     }));
 }
@@ -122,16 +121,12 @@ function lineStart(text: string, offset: number): number {
 }
 
 function afterOwner(text: string, offset: number): number {
-    let at = offset;
-    while (at > 0 && /\s/u.test(text[at - 1] ?? '')) {
-        at -= 1;
-    }
-    return at;
+    return text.slice(0, offset).trimEnd().length;
 }
 
 function indentOf(text: string, offset: number): number {
-    const start = lineStart(text, offset);
-    return text.slice(start).length - text.slice(start).trimStart().length;
+    const line = text.slice(lineStart(text, offset));
+    return line.length - line.trimStart().length;
 }
 
 /** Outermost only: a nested one is restored with its parent, and descending would splice it twice. */
@@ -139,16 +134,21 @@ function flowCollections(text: string): FlowCollection[] {
     const found: FlowCollection[] = [];
     const take = (node: {
         flow?: boolean;
-        range?: null | number[];
+        range?: null | Range;
         toJSON: () => unknown;
     }): symbol | undefined => {
-        const [start, end] = node.flow === true ? (node.range ?? []) : [];
-        if (start === undefined || end === undefined) {
+        if (node.flow !== true) {
             return undefined;
         }
+        const { range } = node;
+        // Stryker disable next-line ConditionalExpression,LogicalOperator,BlockStatement: a parsed node always carries its range
+        if (range === null || range === undefined) {
+            return undefined;
+        }
+        const [start, end] = range;
         const from = afterOwner(text, start);
         found.push({
-            ownerIndent: indentOf(text, from === 0 ? 0 : from - 1),
+            ownerIndent: indentOf(text, from),
             range: [from, end],
             text: text.slice(from, end),
             value: JSON.stringify(node.toJSON()),
@@ -165,9 +165,6 @@ function flowCollections(text: string): FlowCollection[] {
 /** The `yaml` writer's flow style is not oxfmt's: re-emitting an untouched collection makes `check --fix` and `oxfmt` rewrite each other for ever. */
 function restoreUntouchedFlow(rendered: string, text: string): string {
     const sources = flowCollections(text);
-    if (sources.length === 0) {
-        return rendered;
-    }
     const taken = new Set<number>();
     const splices: { range: [number, number]; text: string }[] = [];
     for (const target of flowCollections(rendered)) {
@@ -177,9 +174,6 @@ function restoreUntouchedFlow(rendered: string, text: string): string {
                 candidate.value === target.value &&
                 candidate.ownerIndent === target.ownerIndent,
         );
-        if (at === -1) {
-            continue;
-        }
         const source = sources[at];
         if (source === undefined) {
             continue;

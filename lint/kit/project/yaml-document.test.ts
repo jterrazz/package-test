@@ -1,6 +1,15 @@
 import { describe, expect, test } from 'vitest';
+import { Pair, YAMLMap, YAMLSeq } from 'yaml';
 
-import { blockScalar, parseYamlSource, renderYamlSource } from './yaml-document.js';
+import {
+    blockScalar,
+    nodeItems,
+    nodePairs,
+    parseYamlSource,
+    renderYamlSource,
+    Scalar,
+    yamlSyntaxErrors,
+} from './yaml-document.js';
 
 function rewritten(step: number, text: string): string {
     const source = parseYamlSource(['runs:', `${' '.repeat(step)}- exit: 0`, ''].join('\n'));
@@ -141,5 +150,71 @@ describe('yaml-document', () => {
 
         // Then - the entries keep the four spaces they were written at
         expect(renderYamlSource(source)).toBe(`${text}request: GET /users\n`);
+    });
+
+    test.each([
+        ['a: 1\n', 2],
+        ['a:\n    bb: 1\n', 4],
+        ['a:\n    - bb: 1\n', 4],
+        ['a:\n    - [1, 2]\n', 4],
+        ['a:\n    b: 1\nc:\n  dd: 1\n', 2],
+        ["a: ' x y: z'\nb:\n    cc: 1\n", 4],
+        ['a: |\n  - text\nb:\n    cc: 1\n', 4],
+        ['a: |\n  1 text: x\nb:\n    cc: 1\n', 4],
+    ])('the document %j is written at the step of its shallowest key line, %i', (text, step) => {
+        // Given - key lines, list entries, quoted values and block text at mixed depths
+        // Then - the step read is the shallowest key or flow entry, two when none is indented
+        expect(parseYamlSource(text).indent).toBe(step);
+    });
+
+    test('a block scalar indicator is restated only at the head of a block scalar, up to the ninth space', () => {
+        // Given - plain values that spell an indicator, and a nine-space document
+        const source = parseYamlSource('a: x|2y\n');
+        source.document.set('b', 'q|2z');
+
+        // Then - the plain values are untouched, and nine spaces is still statable
+        expect([renderYamlSource(source), rewritten(9, ' lead\n')]).toStrictEqual([
+            'a: x|2y\nb: q|2z\n',
+            'runs:\n         - exit: 0\n           stdout: |9\n                     lead\n',
+        ]);
+    });
+
+    test('a syntax error names the line it was found on', () => {
+        // Given - a flow sequence that never closes
+        const source = parseYamlSource('a: 1\nb: [\nc: 1\n');
+
+        // Then - each error carries the line of its position
+        expect(yamlSyntaxErrors(source).map(({ line }) => line)).toStrictEqual(
+            source.document.errors.map(({ linePos }) => linePos?.[0].line),
+        );
+    });
+
+    test('the node readers keep only the pairs and items a parser could have written', () => {
+        // Given - a map and a list holding raw values beside nodes
+        const map = new YAMLMap();
+        map.items.push(
+            new Pair(new Scalar('kept'), new Scalar(1)),
+            new Pair(new Scalar('empty'), null),
+            new Pair(new Scalar('raw value'), 1),
+            new Pair('raw key', new Scalar(1)),
+        );
+        const seq = new YAMLSeq();
+        seq.items.push(new Scalar(1), 2);
+
+        // Then - the node pairs and items, nothing raw
+        expect([
+            nodePairs(map).map(({ key }) => String(key)),
+            nodeItems(seq).map(String),
+        ]).toStrictEqual([['kept', 'empty'], ['1']]);
+    });
+
+    test('a collection is restored from the source collection at its own depth, each source used once', () => {
+        // Given - equal collections spelled apart, one nested and two at the top, and the nested one removed
+        const kept = ['b: [1,  2]', 'e: [1, 2]', ''].join('\n');
+        const source = parseYamlSource(`c:\n    d: [ 1, 2 ]\n${kept}`);
+        source.document.delete('c');
+
+        // Then - each kept collection keeps its own spelling
+        expect(renderYamlSource(source)).toBe(kept);
     });
 });
