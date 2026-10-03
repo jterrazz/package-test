@@ -112,8 +112,8 @@ The checker's own command line — the ratchet, `baseline`, `--member`, `--verbo
 
 `npx vitest --run --coverage` turns on v8 — the runtime's own counter, so there
 is no instrumentation pass and the numbers do not move when the bundler does —
-and writes three reports where the preset sends them ([02 — Developing §
-Artefacts live under `.artifacts/`](06-setting-up.md#where-a-run-writes)):
+and writes three reports where the preset sends them ([06 — Setting up §
+Where a run writes](06-setting-up.md#where-a-run-writes)):
 `text` for the person who ran it, `html` for the one chasing a line, and
 `json-summary`, which is the one a machine reads.
 
