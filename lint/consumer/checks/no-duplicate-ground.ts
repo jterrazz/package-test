@@ -5,16 +5,10 @@ import {
     treeKind,
 } from '@jterrazz/typescript/rules';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import {
-    repointDocument,
-    repointed,
-    repointModuleTests,
-    repointSource,
-} from '../../kit/checker/repoint.js';
-import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
+import { repointFiles, repointModuleTests } from '../../kit/checker/repoint.js';
 import {
     findSpecsRoots,
     isConventionalSubdir,
@@ -146,21 +140,9 @@ export function checkNoDuplicateGround(rootDir: string): Spotted[] {
 }
 
 function repointReferrers(specsRoot: string, copies: readonly string[], target: string): void {
-    for (const file of listFiles(specsRoot, isReferrer)) {
-        const from = dirname(file);
-        const move = (path: string): string | undefined =>
-            copies
-                .map((copy) => repointed(from, path, { copy, target }))
-                .find((next) => next !== undefined);
-        writeFileSync(
-            file,
-            file.endsWith(SPEC_EXTENSION) ? repointDocument(file, move) : repointSource(file, move),
-        );
-    }
-    repointModuleTests(
-        specsRoot,
-        copies.map((copy) => ({ copy, target })),
-    );
+    const moves = copies.map((copy) => ({ copy, target }));
+    repointFiles(listFiles(specsRoot, isReferrer), moves);
+    repointModuleTests(specsRoot, moves);
 }
 
 function keepOne(copies: readonly string[], target: string, held: boolean): void {

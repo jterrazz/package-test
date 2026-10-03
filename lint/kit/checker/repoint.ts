@@ -5,6 +5,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { moduleTestsOf } from '../project/module-tests.js';
 import { isRelativePath } from '../project/relative-path.js';
 import { documentPaths, parseSpecDocument } from '../project/spec-document.js';
+import { SPEC_EXTENSION } from '../project/spec-grammar.js';
 import { literalSpans } from '../project/spec-values.js';
 import { isWithin, readText } from '../project/tree.js';
 
@@ -84,18 +85,25 @@ export function repointDocument(file: string, move: (path: string) => string | u
     return lines.join('\n');
 }
 
-export function repointModuleTests(specsRoot: string, moves: readonly Move[]): string[] {
+/** A file whose text no move changes is left untouched. */
+export function repointFiles(files: readonly string[], moves: readonly Move[]): string[] {
     const rewritten: string[] = [];
-    for (const file of moduleTestsOf(dirname(specsRoot))) {
+    for (const file of files) {
         const from = dirname(file);
+        const move = (path: string): string | undefined =>
+            moves.map((each) => repointed(from, path, each)).find((moved) => moved !== undefined);
         const text = readText(file);
-        const next = repointSource(file, (path) =>
-            moves.map((each) => repointed(from, path, each)).find((moved) => moved !== undefined),
-        );
+        const next = file.endsWith(SPEC_EXTENSION)
+            ? repointDocument(file, move)
+            : repointSource(file, move);
         if (next !== text) {
             writeFileSync(file, next);
             rewritten.push(file);
         }
     }
     return rewritten;
+}
+
+export function repointModuleTests(specsRoot: string, moves: readonly Move[]): string[] {
+    return repointFiles(moduleTestsOf(dirname(specsRoot)), moves);
 }

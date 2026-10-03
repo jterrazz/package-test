@@ -4,17 +4,11 @@ import {
     SHARED_FOLDER,
     treeEntries,
 } from '@jterrazz/typescript/rules';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import {
-    repointDocument,
-    repointed,
-    repointModuleTests,
-    repointSource,
-} from '../../kit/checker/repoint.js';
+import { repointFiles, repointModuleTests } from '../../kit/checker/repoint.js';
 import { collectFixtureReferences } from '../../kit/project/named-paths.js';
-import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import {
     DISK_CALL,
     findSpecsRoots,
@@ -22,7 +16,6 @@ import {
     isWithin,
     listReaders,
     listReferrers,
-    readText,
     removeIfEmpty,
 } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
@@ -32,17 +25,13 @@ export function poolsOf(specsRoot: string): string[] {
 }
 
 /** `map/pois/` holds the ground `map/pois/detail/` shares with it. */
-function enclosingGround(specsRoot: string, leaf: string): string[] {
-    const ground: string[] = [];
-    for (let folder = dirname(leaf); isWithin(specsRoot, folder) && folder !== specsRoot;) {
-        ground.push(...GROUND_FOLDERS.map((role) => join(folder, role)));
-        const parent = dirname(folder);
-        if (parent === folder) {
-            break;
+function inEnclosingGround(specsRoot: string, leaf: string, target: string): boolean {
+    for (let folder = dirname(leaf); isWithin(specsRoot, folder); folder = dirname(folder)) {
+        if (GROUND_FOLDERS.some((role) => isWithin(join(folder, role), target))) {
+            return true;
         }
-        folder = parent;
     }
-    return ground;
+    return false;
 }
 
 function rootGroundOf(specsRoot: string): string[] {
@@ -70,7 +59,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Spotted[] {
                 if (
                     isWithin(leaf, target) ||
                     pools.some((pool) => isWithin(pool, target)) ||
-                    enclosingGround(specsRoot, leaf).some((ground) => isWithin(ground, target))
+                    inEnclosingGround(specsRoot, leaf, target)
                 ) {
                     continue;
                 }
@@ -104,20 +93,7 @@ export function fixNoReachIntoSiblingGround(rootDir: string): string[] {
             if (moves.length === 0) {
                 continue;
             }
-            for (const file of listReferrers(specsRoot, folder)) {
-                const from = dirname(file);
-                const move = (path: string): string | undefined =>
-                    moves
-                        .map((each) => repointed(from, path, each))
-                        .find((next) => next !== undefined);
-                const text = readText(file);
-                const next = file.endsWith(SPEC_EXTENSION)
-                    ? repointDocument(file, move)
-                    : repointSource(file, move);
-                if (next !== text) {
-                    writeFileSync(file, next);
-                }
-            }
+            repointFiles(listReferrers(specsRoot, folder), moves);
             repointModuleTests(specsRoot, moves);
             mkdirSync(shared, { recursive: true });
             for (const { copy, target } of moves) {
