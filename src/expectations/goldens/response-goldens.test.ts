@@ -1,67 +1,21 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, inject, onTestFinished, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { file } from '../../disk/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http/http-file.js';
 import { ResponseAccessor } from '../http/response.js';
-import { deferRewritesTo } from '../in-place/in-place.js';
 import { CaptureScope } from '../tokens/capture-scope.js';
 import { registerMatchers } from './matchers.js';
-import { buildUpdatedResponse, compareResponse } from './response-goldens.js';
-import { WHOLE_MATCHER } from './text-assertions.js';
-
-const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
-
-const WORKDIR = '/tmp/spec-run-abcdef';
-
-function plainCount(dir: string): ResponseAccessor {
-    return new ResponseAccessor(
-        { body: '42', headers: { 'content-type': 'text/plain' }, status: 200 },
-        dir,
-    );
-}
-
-function goldenDir(content: string): { dir: string; read: () => string } {
-    const dir = mkdtempSync(join(tmpdir(), 'untyped-golden-'));
-    onTestFinished(() => {
-        rmSync(dir, { force: true, recursive: true });
-    });
-    mkdirSync(join(dir, '_expected'));
-    const path = join(dir, '_expected', 'count.http');
-    writeFileSync(path, content);
-    return { dir, read: () => readFileSync(path, 'utf8') };
-}
-
-type Whole = (expected: unknown, options: unknown, stack: string) => unknown;
-
-type Registered = (expected: unknown, call: { options: unknown; stack: string }) => unknown;
-
-function wholeOf(subject: unknown, negated = false): Whole {
-    // oxlint-disable-next-line vitest/valid-expect -- the assertion's matcher is the registered comparison, called below by the name no member access spells
-    const assertion = expect(subject);
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the matcher is registered under a name no member access spells; reaching it by that name is how a test hands it a stack of its own
-    const target = (negated ? assertion.not : assertion) as unknown as Record<string, Registered>;
-    return (expected, options, stack) => target[WHOLE_MATCHER]?.(expected, { options, stack });
-}
-
-function scratchTest(call: string): { file: string; read: () => string; stack: string } {
-    const scratch = mkdtempSync(join(tmpdir(), 'whole-in-place-'));
-    const testFile = join(scratch, 'scratch.test.ts');
-    writeFileSync(testFile, `test('records', async () => {\n    ${call}\n});\n`);
-    // invariant: a scratch test is read back by the test that wrote it: written at once.
-    deferRewritesTo(null);
-    onTestFinished(() => {
-        rmSync(scratch, { force: true, recursive: true });
-        deferRewritesTo(() => inject('inPlaceRewrites'));
-    });
-    return {
-        file: testFile,
-        read: () => readFileSync(testFile, 'utf8'),
-        stack: `Error: toMatch call site\n    at ${testFile}:2:5`,
-    };
-}
+import {
+    goldenDir,
+    plainCount,
+    scratchTest,
+    UUID,
+    wholeOf,
+    WORKDIR,
+} from './response-goldens.fixtures.js';
+import { buildUpdatedResponse, compareResponse, matchResponseFile } from './response-goldens.js';
 
 await registerMatchers();
 
@@ -113,9 +67,13 @@ describe('response-goldens', () => {
             status: 200,
         });
 
-        // Then - matching tokens survive, stale literals are replaced
-        expect(updated.status).toBe('{{number}}');
-        expect(updated.body).toStrictEqual({ id: '{{uuid}}', name: 'Alice' });
+        // Then - matching tokens survive, stale literals are replaced, and a reply with no body or a null one records none
+        expect([
+            updated.status,
+            updated.body,
+            buildUpdatedResponse(previous, { body: undefined, headers: {}, status: 204 }).hasBody,
+            buildUpdatedResponse(previous, { body: null, headers: {}, status: 204 }).hasBody,
+        ]).toStrictEqual(['{{number}}', { id: '{{uuid}}', name: 'Alice' }, false, false]);
     });
 
     test('responseGoldens — response update mode — buildUpdatedResponse (rule `no-volatile-literal`) — meta: a freshly updated fixture passes the next comparison run', () => {
@@ -192,51 +150,91 @@ describe('response-goldens', () => {
     });
 
     // RUNTIME one-verb-per-meaning — `toMatch` routes the disk to the golden, and a value to the whole-result comparison or a refusal.
-    test('responseGoldens — response comparison — compareResponse — matches status, header subset, and body with tokens', () => {
-        // Given - a fixture with placeholders
+    test('responseGoldens — response comparison — compareResponse — a status, the listed headers and the body each judged, the first that differs named whole', () => {
+        // Given - a golden with a status token, a header token, a header required present, and a body token
         const expected = parseResponseFile(
-            'HTTP/1.1 200 OK\ncontent-type: {{string}}\n\n{ "id": "{{uuid}}" }\n',
-            'responses/ok.http',
+            'HTTP/1.1 {{any}}\ncontent-type: {{string}}\nx-req: {{any}}\n\n{ "id": "{{uuid}}" }\n',
+            'r.http',
         );
+        const strict = parseResponseFile('HTTP/1.1 201 Created\n\n', 's.http');
+        const json = { 'content-type': 'application/json', 'x-req': 'yes' };
+        const compare = (
+            golden: typeof expected,
+            actual: { body: unknown; headers: Record<string, string>; status: number },
+        ): null | string => compareResponse('r.http', golden, actual, new CaptureScope());
 
-        // Then - a conforming response yields no failure
-        expect(
-            compareResponse(
-                'ok.http',
-                expected,
-                {
-                    body: { id: UUID },
-                    headers: { 'content-type': 'application/json', 'x-extra': 'ignored' },
-                    status: 200,
-                },
-                new CaptureScope(),
-            ),
-        ).toBeNull();
+        // Then - nothing when it all conforms, or the section that differs
+        expect([
+            compare(expected, {
+                body: { id: UUID },
+                headers: { ...json, 'x-extra': 'ignored' },
+                status: 200,
+            }),
+            compare(strict, { body: { anything: true }, headers: {}, status: 201 }),
+            compare(strict, { body: null, headers: {}, status: 200 }),
+            compare(expected, {
+                body: { id: UUID },
+                headers: { 'content-type': 'application/json' },
+                status: 200,
+            }),
+            compare(expected, { body: { id: 'no' }, headers: json, status: 200 })?.split('\n')[0],
+        ]).toStrictEqual([
+            null,
+            null,
+            'Response status mismatch (r.http)\n  expected: 201\n  received: 200',
+            'Response header mismatch (r.http)\n  header: x-req\n  expected: {{any}}\n  received: (absent)',
+            'Response mismatch (r.http)',
+        ]);
     });
 
-    test('responseGoldens — response comparison — compareResponse — reports status, header, and body mismatches distinctly', () => {
-        // Given - a strict fixture
-        const expected = parseResponseFile(
-            'HTTP/1.1 200 OK\nx-req: yes\n\n{ "ok": true }\n',
-            'responses/strict.http',
-        );
-        const scope = new CaptureScope();
+    test('responseGoldens — matchResponseFile — compares a response to its golden, names a missing one, writes it in update mode, and never a frozen one', () => {
+        // Given - a reply, its golden, and names of no golden
+        const { dir } = goldenDir('HTTP/1.1 200 OK\n\n42\n');
+        const missing = (name: string): string => join(dir, '_expected', name);
+        writeFileSync(missing('wrong.http'), 'HTTP/1.1 200 OK\n\n43\n');
 
-        // Then - each failure mode names its section
-        expect(
-            compareResponse('s.http', expected, { body: {}, headers: {}, status: 500 }, scope),
-        ).toContain('status mismatch');
-        expect(
-            compareResponse('s.http', expected, { body: {}, headers: {}, status: 200 }, scope),
-        ).toContain('header mismatch');
-        expect(
-            compareResponse(
-                's.http',
-                expected,
-                { body: { ok: false }, headers: { 'x-req': 'yes' }, status: 200 },
-                scope,
-            ),
-        ).toContain('s.http');
+        // When - matched, then in update mode
+        const verdicts = [
+            matchResponseFile(plainCount(dir), './_expected/count.http', false),
+            matchResponseFile(plainCount(dir), './_expected/wrong.http', false),
+            matchResponseFile(plainCount(dir), './_expected/none.http', true),
+            matchResponseFile(plainCount(dir), './_expected/none.http', false),
+        ].map((result) => [result.pass, result.message()]);
+        vi.stubEnv('TEST_UPDATE', '1');
+        const frozen = matchResponseFile(plainCount(dir), './_expected/frozen.http', true);
+        const written = matchResponseFile(plainCount(dir), './_expected/fresh.http', false);
+
+        // Then - each verdict, the fresh golden written as the reply reads, the frozen one not
+        expect([
+            verdicts,
+            frozen.pass,
+            [written.pass, written.message()],
+            readFileSync(missing('fresh.http'), 'utf8'),
+            existsSync(missing('frozen.http')),
+        ]).toStrictEqual([
+            [
+                [true, 'expected response not to match ./_expected/count.http'],
+                [false, expect.stringContaining('Response mismatch (./_expected/wrong.http)')],
+                [
+                    false,
+                    `Response fixture "./_expected/none.http" does not exist at ${missing('none.http')}.\nThis golden is \`{ frozen }\`: update mode never writes it. Write the file by hand, or drop \`{ frozen }\` for one TEST_UPDATE=1 run and put it back.`,
+                ],
+                [
+                    false,
+                    `Response fixture "./_expected/none.http" does not exist at ${missing('none.http')}.\nRun with TEST_UPDATE=1 (or vitest -u) to create it.`,
+                ],
+            ],
+            false,
+            [true, 'updated ./_expected/fresh.http'],
+            'HTTP/1.1 200 OK\ncontent-type: text/plain\n\n42\n',
+            false,
+        ]);
+        expect(() => matchResponseFile(plainCount(dir), './_expected/count', false)).toThrow(
+            'on response, a golden path with no extension',
+        );
+        expect(() => matchResponseFile(plainCount(dir), '/abs/count.http', false)).toThrow(
+            'toMatch("/abs/count.http")',
+        );
     });
 
     test("responseGoldens — a golden that states no content-type reads its body by the actual response's — in place and by file, a bare 42 is the text of a text/plain reply", async () => {

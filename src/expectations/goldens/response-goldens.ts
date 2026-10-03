@@ -14,6 +14,8 @@ import { failed, passed, recordedGolden } from './file-goldens.js';
 import type { MatcherResult } from './file-goldens.js';
 import { requireExtension } from './text-assertions.js';
 
+const STATUS_CODE = /^\d+$/u;
+
 type ActualResponse = {
     body: unknown;
     headers: Record<string, string>;
@@ -60,7 +62,7 @@ export function compareResponse(
     actual: ActualResponse,
     scope: CaptureScope,
 ): null | string {
-    const statusOk = /^\d+$/u.test(expected.status)
+    const statusOk = STATUS_CODE.test(expected.status)
         ? Number(expected.status) === actual.status
         : structuralEquals(expected.status, String(actual.status), scope);
     if (!statusOk) {
