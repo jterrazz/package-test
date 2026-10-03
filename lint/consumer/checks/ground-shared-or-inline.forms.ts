@@ -1,0 +1,85 @@
+import { GROUND_EXPECTED, GROUND_REQUESTS } from '@jterrazz/typescript/rules';
+import { dirname, extname, relative } from 'node:path';
+
+import { dedent } from '../../kit/project/dedent.js';
+
+/** A role absent here is never written in place. */
+export const INLINE_CAPS: Readonly<Record<string, number>> = {
+    [GROUND_EXPECTED]: 150,
+    [GROUND_REQUESTS]: 30,
+};
+
+export const TEST_FILE = /\.(?:spec|test)\.[cm]?[jt]sx?$/u;
+
+export function written(file: string, target: string): string {
+    return relative(dirname(file), target).split('\\').join('/');
+}
+
+/** Its closing newline is no line of its own. */
+export function valueLines(text: string): number {
+    return text.replace(/\n$/u, '').split('\n').length;
+}
+
+export const JSON_SUBJECT =
+    /\.(?:head|json|jsonLd|screen|value)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
+
+function escapeTemplate(text: string): string {
+    return text
+        .replaceAll('\\', String.raw`\\`)
+        .replaceAll('`', '\\`')
+        .replaceAll('${', '\\${');
+}
+
+function block(text: string, indent: string): string {
+    const lines = text.split('\n');
+    if (lines.length === 1) {
+        return `\`${escapeTemplate(text)}\``;
+    }
+    const inner = `${indent}    `;
+    const last = lines.pop() ?? '';
+    const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
+    const closing = last === '' ? indent : `${inner}${last}`;
+    // invariant: the literal is read back through the runtime's own dedent: a candidate that does not come back unchanged is written as one quoted line.
+    return dedent(`\n${body}\n${closing}`) === text
+        ? `\`\n${escapeTemplate(body)}\n${escapeTemplate(closing)}\``
+        : JSON.stringify(text);
+}
+
+export function value(parsed: unknown, indent: string): string {
+    return (JSON.stringify(parsed, null, 4) ?? 'null').split('\n').join(`\n${indent}`);
+}
+
+export function jsonOf(text: string): unknown {
+    try {
+        return JSON.parse(text) as unknown;
+    } catch {
+        return undefined;
+    }
+}
+
+/** `undefined` for a shape the fixer does not rewrite. */
+export function replacementOf(
+    before: string,
+    content: string,
+    target: string,
+    indent: string,
+): string | undefined {
+    const extension = extname(target);
+    if (/\.request\s*\(\s*$/u.test(before)) {
+        return block(content, indent);
+    }
+    if (/\.(?:post|put)\s*\([^()]*,\s*$/u.test(before)) {
+        const parsed = extension === '.json' ? jsonOf(content) : undefined;
+        return parsed === undefined ? JSON.stringify(content) : value(parsed, indent);
+    }
+    if (!/\.toMatch\s*\(\s*$/u.test(before)) {
+        return undefined;
+    }
+    if (JSON_SUBJECT.test(before)) {
+        const parsed = jsonOf(content);
+        return parsed === undefined ? undefined : value(parsed, indent);
+    }
+    return extension === '.json' && !/\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u.test(before)
+        ? undefined
+        : block(content, indent);
+}
