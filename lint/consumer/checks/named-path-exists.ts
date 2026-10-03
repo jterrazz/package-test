@@ -22,39 +22,35 @@ function missingTarget(named: string, target: string, onDisk: boolean): Teaching
           };
 }
 
+/** A document's `fixture:` entry is a bare path; a call names its kind. */
 function crossedTarget(
     named: string,
     { found, key, path }: { found: 'directory' | 'file'; key: string | undefined; path: string },
 ): Teaching {
-    const bare = path.replace(/\/+$/u, '');
+    const bare = path.replace(/\/$/u, '');
     const spelled = found === 'directory' ? `${bare}/` : bare;
-    if (key === undefined) {
-        return { fix: `write ${found}('${spelled}')`, found: `${named} names a ${found}` };
-    }
     return {
-        fix: key === 'fixture' ? `write "${spelled}"` : `${key}: reads one file — name one`,
+        fix: key === undefined ? `write ${found}('${spelled}')` : `write "${spelled}"`,
         found: `${named} names a ${found}`,
     };
 }
 
 export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[] {
     const violations: Spotted[] = [];
-    const suppressed = file.endsWith(SPEC_EXTENSION)
-        ? new Set<number>()
-        : suppressedLines(readText(file), 'named-path-exists');
-    if (!file.endsWith(SPEC_EXTENSION)) {
-        for (const { column, line, named, target } of anchoredPaths(file)) {
-            if (treeKind(target) !== undefined || suppressed.has(line)) {
-                continue;
-            }
-            violations.push({
-                column,
-                path: relative(rootDir, file),
-                line,
-                ...missingTarget(named, relative(rootDir, target), existsSync(target)),
-                rule: 'named-path-exists',
-            });
+    const suppressed = suppressedLines(readText(file), 'named-path-exists');
+    // Stryker disable next-line ConditionalExpression,MethodExpression: a spec document parses as no module, so it names no anchored path either way
+    const anchored = file.endsWith(SPEC_EXTENSION) ? [] : anchoredPaths(file);
+    for (const { column, line, named, target } of anchored) {
+        if (treeKind(target) !== undefined || suppressed.has(line)) {
+            continue;
         }
+        violations.push({
+            column,
+            path: relative(rootDir, file),
+            line,
+            ...missingTarget(named, relative(rootDir, target), existsSync(target)),
+            rule: 'named-path-exists',
+        });
     }
     for (const { column, key, kind, line, path } of collectFixtureReferences(
         file,
