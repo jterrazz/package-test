@@ -6,7 +6,6 @@ import type {
     SpecEnvToken,
     SpecFileAssertion,
     SpecFixture,
-    SpecPath,
     SpecRun,
     SpecServeEntry,
     SpecStream,
@@ -64,6 +63,7 @@ function readServeEntry(context: Context, node: Node | null): SpecServeEntry {
         fail(context, node, 'a serve: entry names ONE server: `- <name>: { KEY: value }`');
     }
     const [pair] = nodePairs(map);
+    // Stryker disable next-line ConditionalExpression: the one item of a parsed map is a pair
     if (pair === undefined) {
         fail(context, node, 'a serve: entry names ONE server: `- <name>: { KEY: value }`');
     }
@@ -137,6 +137,7 @@ export function readRun(context: Context, node: Node | null, isLast: boolean): S
 
     const commandPair = found.get('command');
     const exitPair = found.get('exit');
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: holdPresence refused a run missing either
     if (commandPair === undefined || exitPair === undefined) {
         fail(context, node, 'a run states its command: and its exit:');
     }
@@ -175,54 +176,25 @@ function groundOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
-type PathRole = {
-    directories: boolean;
-    extensions: readonly string[];
-    folder: string;
-    key: string;
-};
-
-function readPath(context: Context, line: number, value: string, role: PathRole): SpecPath {
-    const at = (message: string): never => {
-        throw new SpecSyntaxError(context.fileName, line, message);
-    };
-    if (!isRelativePath(value)) {
-        at(
-            `${role.key}: "${value}" is not a relative path — name it from this document (./… or ../…)`,
-        );
-    }
-    if (value.endsWith('/') && !role.directories) {
-        at(`${role.key}: "${value}" names a directory — ${role.key}: reads one file`);
-    }
-    const found = groundOf(value);
-    if (found !== role.folder) {
-        const where = `./${role.folder}/ beside the document, or in the ${role.folder}/ of the lowest folder the leaves share (specs/_shared/${role.folder}/ across facets)`;
-        at(
-            `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (verb-reads-its-ground-folder)`,
-        );
-    }
-    if (
-        role.extensions.length > 0 &&
-        !role.extensions.some((extension) => value.endsWith(extension))
-    ) {
-        at(`${role.key}: "${value}" is not a ${role.extensions.join(' or ')} file`);
-    }
-    return { line, path: value };
-}
-
-function readPaths(context: Context, node: Node | null, role: PathRole): SpecPath[] {
-    return stringList(context, node, `${role.key}:`).map(({ line, value }) =>
-        readPath(context, line, value, role),
-    );
-}
-
-const FIXTURE_ROLE: PathRole = {
-    directories: true,
-    extensions: [],
-    folder: GROUND_FIXTURES,
-    key: 'fixture',
-};
-
+/** A fixture is laid from `_fixtures/`, a file or a whole directory. */
 export function readFixtures(context: Context, node: Node | null): SpecFixture[] {
-    return readPaths(context, node, FIXTURE_ROLE);
+    return stringList(context, node, 'fixture:').map(({ line, value }) => {
+        if (!isRelativePath(value)) {
+            throw new SpecSyntaxError(
+                context.fileName,
+                line,
+                `fixture: "${value}" is not a relative path — name it from this document (./… or ../…)`,
+            );
+        }
+        const found = groundOf(value);
+        if (found !== GROUND_FIXTURES) {
+            const where = `./${GROUND_FIXTURES}/ beside the document, or in the ${GROUND_FIXTURES}/ of the lowest folder the leaves share (specs/_shared/${GROUND_FIXTURES}/ across facets)`;
+            throw new SpecSyntaxError(
+                context.fileName,
+                line,
+                `fixture: reads ${GROUND_FIXTURES}/, and "${value}" names ${found === undefined ? `no ${GROUND_FIXTURES}/ folder` : `${found}/`} — put the file in ${where} (verb-reads-its-ground-folder)`,
+            );
+        }
+        return { line, path: value };
+    });
 }
