@@ -4,7 +4,7 @@ import { refusal } from '../chain/refusals/refusal.js';
 export function validateDatabaseOption(
     method: string,
     config: { readonly databaseKeys?: readonly string[] | undefined },
-    database: string | undefined,
+    database?: string,
 ): void {
     const keys = config.databaseKeys;
     if (!keys) {

@@ -220,7 +220,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/chain/action.ts',
             'src/chain/capability.ts',
             'src/chain/state.ts',
-            'src/services/database-option.ts',
             'src/services/startup/registry.ts',
             'src/chain/pause.ts',
             'src/chain/refusals/node-only.ts',
