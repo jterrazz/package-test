@@ -17,6 +17,13 @@ const COMPONENT_TEST = join(ROOT, 'src/locale-note.test.tsx');
 ruleTester().run('one-describe-per-file', oneDescribePerFile, {
     invalid: [
         {
+            name: 'A table titled in a template is prefixed the same.',
+            code: 'describe.each([1, 2])(`page %s`, (n) => {});',
+            errors: [{ column: 22, line: 1, messageId: 'tableTitle' }],
+            filename: SPEC,
+            output: 'describe.each([1, 2])(`pagination — page %s`, (n) => {});',
+        },
+        {
             name: 'No describe: the tests are wrapped in one titled with the aspect.',
             code: "import { test } from 'vitest';\ntest('a', () => {});\ntest('b', () => {});",
             errors: [{ column: 0, line: 2, messageId: 'noDescribe' }],
@@ -94,7 +101,13 @@ ruleTester().run('one-describe-per-file', oneDescribePerFile, {
         },
         {
             code: 'describe.each([1, 2])(TITLE, (n) => {});',
-            errors: [{ column: 22, line: 1, messageId: 'tableTitle' }],
+            errors: [
+                {
+                    column: 22,
+                    line: 1,
+                    message: /^found: the file’s `describe\.each` is titled "a computed title" · /u,
+                },
+            ],
             filename: SPEC,
             output: null,
         },
@@ -120,6 +133,11 @@ ruleTester().run('one-describe-per-file', oneDescribePerFile, {
         },
     ],
     valid: [
+        {
+            name: 'A group with no title names nothing to judge.',
+            code: 'describe();',
+            filename: SPEC,
+        },
         {
             name: 'One describe, titled with the aspect, holding every test.',
             code: "describe('pagination', () => {\n    test('a', () => {});\n});",

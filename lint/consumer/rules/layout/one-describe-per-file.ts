@@ -22,6 +22,7 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
     const [only, second] = members.filter((statement) => isGroup(statement));
     const stray = members.find((statement) => isTest(statement));
     if (only === undefined) {
+        // Stryker disable next-line ConditionalExpression: a member that is no group is a test
         return stray === undefined ? undefined : { messageId: 'noDescribe', node: stray };
     }
     if (second !== undefined) {
@@ -38,6 +39,7 @@ function titleFinding(
 ): undefined | { fix?: FixFn; messageId: string; node: AstNode } {
     const title = firstArgumentOf(group);
     const said = stringValue(title);
+    // Stryker disable next-line OptionalChaining: a group is a call, which has a callee
     const parametrised = calleeOf(group)?.type === 'CallExpression';
     if (
         title === undefined ||
@@ -52,6 +54,7 @@ function titleFinding(
         const kept = flattenedGroup(source, group, named);
         const fix: FixFn = (fixer) => [
             fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${named}'`),
+            // Stryker disable next-line ConditionalExpression: a group that holds tests alone always has a body
             ...(body === undefined || kept === undefined
                 ? []
                 : [fixer.replaceTextRange([nodeStart(body) + 1, nodeEnd(body) - 1], kept)]),
@@ -106,6 +109,7 @@ export const oneDescribePerFile = defineRule(
                 Program(program: AstNode) {
                     const statements = childList(program, 'body');
                     const members = statements.filter((node) => isGroup(node) || isTest(node));
+                    // Stryker disable next-line ConditionalExpression,BlockStatement: no member yields no finding below
                     if (members.length === 0) {
                         return;
                     }
@@ -118,11 +122,14 @@ export const oneDescribePerFile = defineRule(
                         return;
                     }
                     const [only] = members;
+                    // Stryker disable ConditionalExpression: a member is always there
                     const title =
                         only === undefined
                             ? undefined
                             : titleFinding(context.sourceCode.text, only, named);
+                    // Stryker restore ConditionalExpression
                     if (title !== undefined) {
+                        // Stryker disable next-line LogicalOperator: a member is always there
                         const said = stringValue(firstArgumentOf(only ?? program));
                         context.report({
                             ...title,

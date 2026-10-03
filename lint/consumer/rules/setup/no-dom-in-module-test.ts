@@ -24,18 +24,21 @@ function declaredNames(root: AstNode): Set<string> {
     const names = new Set<string>();
     const add = (node: AstNode | undefined): void => {
         const name = identifierName(node);
+        // Stryker disable next-line ConditionalExpression: undefined is no global's name
         if (name !== undefined) {
             names.add(name);
         }
     };
     walk(root, (node) => {
         const key = BINDINGS[node.type];
+        // Stryker disable next-line ConditionalExpression: a node no binding names declares nothing under an undefined key
         if (key !== undefined) {
             add(child(node, key));
         }
         const { params } = node;
         if (Array.isArray(params)) {
             for (const parameter of params) {
+                // Stryker disable next-line ConditionalExpression: a parameter is always a node
                 if (isNode(parameter)) {
                     add(parameter);
                 }
@@ -54,12 +57,14 @@ const TYPE_POSITIONS = new Set([
 
 function isValueReference(node: AstNode): boolean {
     const parent = child(node, 'parent');
+    // Stryker disable next-line ConditionalExpression: an identifier always has a parent
     if (parent === undefined) {
         return true;
     }
     if (TYPE_POSITIONS.has(parent.type)) {
         return false;
     }
+    // Stryker disable next-line ConditionalExpression: only a unary expression has `typeof` for its operator
     if (parent.type === 'UnaryExpression' && parent.operator === 'typeof') {
         // invariant: `typeof window === 'undefined'` reaches no document: it is how a module states it runs in both runtimes.
         return false;
@@ -99,6 +104,7 @@ export const noDomInModuleTest = defineRule(
                 Identifier(node: AstNode) {
                     const name = identifierName(node);
                     if (
+                        // Stryker disable next-line ConditionalExpression: undefined is no global's name
                         name === undefined ||
                         !DOM_GLOBALS.has(name) ||
                         declared.has(name) ||

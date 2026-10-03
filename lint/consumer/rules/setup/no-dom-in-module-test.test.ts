@@ -11,6 +11,17 @@ const PRODUCT_SPEC = '/repo/specs/website/home/page.test.ts';
 tester.run('no-dom-in-module-test', noDomInModuleTest, {
     invalid: [
         {
+            name: 'Negated or read by a computed key, the global is still reached.',
+            code: 'test("x", () => { if (!window) {} capture[document]; ({ a: navigator, [window]: 1 }); });',
+            errors: [
+                { column: 23, line: 1, messageId: 'domGlobal' },
+                { column: 42, line: 1, messageId: 'domGlobal' },
+                { column: 59, line: 1, messageId: 'domGlobal' },
+                { column: 71, line: 1, messageId: 'domGlobal' },
+            ],
+            filename: MODULE_TEST,
+        },
+        {
             code: 'test("x", () => { document.createElement("div"); });',
             errors: [{ column: 18, line: 1, messageId: 'domGlobal' }],
             filename: MODULE_TEST,
@@ -27,6 +38,11 @@ tester.run('no-dom-in-module-test', noDomInModuleTest, {
         },
     ],
     valid: [
+        {
+            name: 'A parameter of that name is the test’s own, and a key of that name reaches nothing.',
+            code: 'test("x", () => { const read = (document) => document.title; const keys = { navigator: 1 }; });',
+            filename: MODULE_TEST,
+        },
         {
             name: 'A type names no document — nothing is reached, nothing is rendered.',
             code: 'test("x", () => { const node: HTMLElement = build(); });',

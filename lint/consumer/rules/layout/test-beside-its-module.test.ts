@@ -32,7 +32,13 @@ ruleTester().run('test-beside-its-module', testBesideItsModule, {
         {
             name: 'No util.ts neighbour in the violation fixture.',
             code: 'test("x", () => {});',
-            errors: [{ column: 0, line: 1, messageId: 'orphanTest' }],
+            errors: [
+                {
+                    column: 0,
+                    line: 1,
+                    message: /^found: a module test with no neighbour "util\.ts" · /u,
+                },
+            ],
             filename: `${OWN}/orphan/src/util.test.ts`,
         },
         {
@@ -44,7 +50,13 @@ ruleTester().run('test-beside-its-module', testBesideItsModule, {
         {
             name: 'A rendered unit with nothing beside it — the same law, outside src/.',
             code: 'test("x", () => {});',
-            errors: [{ column: 0, line: 1, messageId: 'orphanComponent' }],
+            errors: [
+                {
+                    column: 0,
+                    line: 1,
+                    message: /^found: a component test with no neighbour "orphan-card\.tsx" · /u,
+                },
+            ],
             filename: `${OWN}/orphan/src/orphan-card.test.tsx`,
         },
         {
@@ -61,6 +73,12 @@ ruleTester().run('test-beside-its-module', testBesideItsModule, {
         },
     ],
     valid: [
+        {
+            name: 'A module that is no test owes no neighbour, and neither does a spec under specs/.',
+            code: 'export {};',
+            filename: `${OWN}/orphan/src/ghost.ts`,
+        },
+        { code: 'test("x", () => {});', filename: '/repo/specs/api/users/users.test.ts' },
         {
             name: 'A new module is a neighbour before anyone runs `git add`.',
             code: 'test("x", () => {});',

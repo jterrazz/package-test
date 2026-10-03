@@ -15,9 +15,11 @@ function neighboursOf(file: string): string[] {
 
 /** The orphan clause reads `role` and `inSpecs`, never a `src` segment: a repository suite covers a tree and has no neighbour to miss. */
 function owesANeighbour({ inSpecs, strayTestRoot, role }: FileIdentity): boolean {
+    // Stryker disable next-line ConditionalExpression: a stray root is reported before any neighbour is asked for
     if (strayTestRoot !== null) {
         return false;
     }
+    // Stryker disable next-line ConditionalExpression: a `.test` file outside specs/ is a module or a component
     return role === 'component' || (role === 'module' && !inSpecs);
 }
 
@@ -70,9 +72,6 @@ export const testBesideItsModule = defineRule(
                         });
                         return;
                     }
-                    if (!owesANeighbour(identity) || !TEST_FILE.test(file)) {
-                        return;
-                    }
                     const neighbours = neighboursOf(file);
                     if (neighbours.some(isFile)) {
                         return;
@@ -80,6 +79,7 @@ export const testBesideItsModule = defineRule(
                     const rendered = identity.role === 'component';
                     context.report({
                         data: {
+                            // Stryker disable next-line OptionalChaining,LogicalOperator: three neighbours are always named
                             expected: neighbours[rendered ? 1 : 0]?.split(/[/\\]/u).at(-1) ?? '',
                         },
                         messageId: rendered ? 'orphanComponent' : 'orphanTest',
