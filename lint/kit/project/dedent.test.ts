@@ -39,5 +39,7 @@ describe('dedent', () => {
         // Then - its two spaces past the indentation stay; the empty text stays empty
         expect(dedent(written)).toBe('a\n  \nb\n');
         expect(dedent('\n')).toBe('');
+        expect(dedent('\n    a\n  \n    b\n')).toBe('a\n\nb\n');
+        expect(dedent('\n   \n')).toBe('   \n');
     });
 });
