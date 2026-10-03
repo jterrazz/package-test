@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { fakeRedis } from './fake-redis.fixtures.js';
 import { redis } from './redis.adapter.js';
 import type { RedisHandle } from './redis.adapter.js';
 
@@ -26,6 +27,67 @@ async function acquired(
 }
 
 describe('redis', () => {
+    test('redis.adapter — redis handle — answers its healthcheck with a ping on its own string, then hangs up', async () => {
+        // Given - a handle on a server that answers
+        const server = await fakeRedis();
+        const handle = redis();
+        handle.connectionString = server.url;
+
+        // When - it is healthchecked
+        await handle.healthcheck();
+        await server.closed();
+        await server.stop();
+
+        // Then - one ping, and the connection closed
+        expect(server.log).toStrictEqual(['PING', 'close']);
+    });
+
+    test('redis.adapter — redis handle — flushes the index of its pair on acquire, reset and release, and the container’s own once released, hanging up each time', async () => {
+        // Given - worker 20's cache on a server that answers
+        const server = await fakeRedis();
+        const handle = unreachableService('cache');
+        handle.connectionString = server.url;
+        const strategy = handle.isolation();
+
+        // When - it acquires, resets, releases, then resets alone
+        for (const step of [
+            async () => {
+                await strategy.acquire('20');
+            },
+            strategy.reset,
+            strategy.release,
+            async () => {
+                await handle.reset();
+            },
+        ]) {
+            await step();
+            await server.closed();
+        }
+        await server.stop();
+
+        // Then - index 77 flushed three times, then index 0, each on a connection it closed
+        const pair = ['SELECT 77', 'FLUSHDB', 'close'];
+        expect(server.log).toStrictEqual([...pair, ...pair, ...pair, 'FLUSHDB', 'close']);
+    });
+
+    test('redis.adapter — redis handle — a refused flush fails the reset, and the connection is closed all the same', async () => {
+        // Given - a handle on a server that refuses to flush
+        const server = await fakeRedis(['FLUSHDB']);
+        const handle = redis();
+        handle.connectionString = server.url;
+
+        // When - it resets
+        const reset = await handle.reset().catch(String);
+        await server.closed();
+        await server.stop();
+
+        // Then - the refusal, and the connection closed
+        expect([reset, server.log]).toStrictEqual([
+            'Error: ERR FLUSHDB refused',
+            ['FLUSHDB', 'close'],
+        ]);
+    });
+
     test('redis.adapter — redis handle — connects on the image it is handed, asks one container serving an index per worker whatever service it is named, and is no database', () => {
         // Given - a handle stated by nobody, and one handed an image and named by the stack
         const silent = redis();
@@ -103,7 +165,7 @@ describe('redis', () => {
         );
     });
 
-    test('redis.adapter — redis handle — refuses a fifth redis service in one worker, naming the way out', async () => {
+    test('redis.adapter — redis handle — refuses a fifth redis service in one worker, naming the way out, and serves it once one is released', async () => {
         // Given - four services of worker 60 holding their indexes, and a fifth asking
         const held = ['a', 'b', 'c', 'd'].map((name) => {
             const handle = redis();
@@ -129,6 +191,11 @@ describe('redis', () => {
                 'read: docs/18-services.md#per-worker-isolation',
             ].join('\n'),
         );
+        await Promise.allSettled([held[0]?.isolation().release()]);
+        await expect(acquired(fifth, '60')).resolves.toStrictEqual({
+            index: '/237',
+            refused: false,
+        });
     });
 
     test('redis.adapter — redis handle — serves pool id 63 its four services, the last index of the container, and worker 0 the band of pool id 1', async () => {
@@ -159,7 +226,7 @@ describe('redis', () => {
     });
 
     test('redis.adapter — redis handle — keeps a slot while any handle holds it, so another service never lands on a live index', async () => {
-        // Given - two handles of worker 50's "cache" and one of its "queue"; the first cache and the queue released
+        // Given - two handles of worker 50's "cache" and one of its "queue"; the first cache and the queue released, then the second cache
         const [firstCache, queue, secondCache] = [
             unreachableService('cache'),
             unreachableService('queue'),
@@ -172,17 +239,20 @@ describe('redis', () => {
         ];
         await Promise.allSettled([firstCache.isolation().release(), queue.isolation().release()]);
 
-        // When - another queue of worker 50 acquires
+        // When - another queue of worker 50 acquires, and a store once no cache is left
         const later = await acquired(unreachableService('queue'), '50');
+        await Promise.allSettled([secondCache.isolation().release()]);
+        const store = await acquired(unreachableService('store'), '50');
 
-        // Then - both caches shared the first index, and the later queue took the freed one, not the index the second cache still holds
-        expect({ held, later }).toStrictEqual({
+        // Then - both caches shared the first index, the later queue took the freed one, not the index the second cache still holds, and the store the caches' once both let go
+        expect({ held, later, store }).toStrictEqual({
             held: [
                 { index: '/197', refused: false },
                 { index: '/198', refused: false },
                 { index: '/197', refused: false },
             ],
             later: { index: '/198', refused: false },
+            store: { index: '/197', refused: false },
         });
     });
 

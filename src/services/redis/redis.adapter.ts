@@ -1,3 +1,5 @@
+import type { createClient } from 'redis';
+
 import { invariant, refusal } from '../../chain/refusals/refusal.js';
 import type { ContainerOptions } from '../containers/container.port.js';
 import { SERVICE_IMAGES } from '../containers/service-images.js';
@@ -29,34 +31,43 @@ type Held = { holders: number; slot: number };
 /** One worker id per process, so the pairs of every other worker are theirs. */
 const slots = new Map<string, Map<string, Held>>();
 
-function takeSlot(worker: string, service: string): number {
+function slotsOf(worker: string): Map<string, Held> {
     const held = slots.get(worker) ?? new Map<string, Held>();
     slots.set(worker, held);
+    return held;
+}
+
+/** The slot of a service in its worker, shared by every handle of that service; the callback gives this handle's hold back. */
+function takeSlot(held: Map<string, Held>, service: string): { free: () => void; slot: number } {
     const own = held.get(service);
-    if (own !== undefined) {
-        own.holders += 1;
-        return own.slot;
-    }
+    const pair = own ?? { holders: 0, slot: lowestFree(held) };
+    pair.holders += 1;
+    held.set(service, pair);
+    return {
+        free: () => {
+            pair.holders -= 1;
+            if (pair.holders === 0) {
+                held.delete(service);
+            }
+        },
+        slot: pair.slot,
+    };
+}
+
+function lowestFree(held: Map<string, Held>): number {
     const taken = new Set([...held.values()].map((pair) => pair.slot));
     let slot = 0;
     while (taken.has(slot)) {
         slot += 1;
     }
-    held.set(service, { holders: 1, slot });
     return slot;
 }
 
-function freeSlot(worker: string, service: string): void {
-    const held = slots.get(worker);
-    const own = held?.get(service);
-    if (own === undefined) {
-        return;
-    }
-    own.holders -= 1;
-    if (own.holders === 0) {
-        held?.delete(service);
-    }
+// Stryker disable StringLiteral: outside: the driver is installed here; the refusal of a missing peer is peer.ts's, tested there
+async function redisDriver(): Promise<{ createClient: typeof createClient }> {
+    return await loadPeer('redis', 'redis()', async () => await import('redis'));
 }
+// Stryker restore StringLiteral
 
 export class RedisHandle implements ServiceHandle {
     readonly type = 'redis';
@@ -71,9 +82,8 @@ export class RedisHandle implements ServiceHandle {
 
     private dbIndex = 0;
 
-    private pair: null | { service: string; worker: string } = null;
-
-    private sharedConnectionString = '';
+    /** What this handle holds: its slot's release, and the container's own string it extended. */
+    private pair: null | { free: () => void; shared: string } = null;
 
     constructor(options: RedisOptions = {}) {
         this.defaultImage = options.image ?? SERVICE_IMAGES.redis;
@@ -93,11 +103,7 @@ export class RedisHandle implements ServiceHandle {
         }
 
         try {
-            const { createClient } = await loadPeer(
-                'redis',
-                'redis()',
-                async () => await import('redis'),
-            );
+            const { createClient } = await redisDriver();
             const client = createClient({ url: this.connectionString });
             await client.connect();
             await client.ping();
@@ -120,11 +126,7 @@ export class RedisHandle implements ServiceHandle {
     }
 
     async reset(): Promise<void> {
-        const { createClient } = await loadPeer(
-            'redis',
-            'redis()',
-            async () => await import('redis'),
-        );
+        const { createClient } = await redisDriver();
         const client = createClient({ url: this.connectionString, database: this.dbIndex });
         await client.connect();
         try {
@@ -140,9 +142,9 @@ export class RedisHandle implements ServiceHandle {
                 this.letGo();
                 const worker = Number.parseInt(workerId, 10) || 0;
                 const service = this.serviceName ?? this.type;
-                const slot = takeSlot(workerId, service);
+                const { free, slot } = takeSlot(slotsOf(workerId), service);
                 if (slot >= SERVICES_PER_WORKER || worker > WORKERS) {
-                    freeSlot(workerId, service);
+                    free();
                     throw new Error(
                         refusal({
                             fix:
@@ -155,10 +157,9 @@ export class RedisHandle implements ServiceHandle {
                         }),
                     );
                 }
-                this.pair = { service, worker: workerId };
+                this.pair = { free, shared: this.connectionString };
                 this.dbIndex = 1 + SERVICES_PER_WORKER * (Math.max(worker, 1) - 1) + slot;
                 // hazard: the index is in the string the app is handed, or the app would write to index 0 while reset flushes this one.
-                this.sharedConnectionString = this.connectionString;
                 this.connectionString = `${this.connectionString}/${this.dbIndex}`;
                 // invariant: the container outlives the file that held this index before.
                 await this.reset();
@@ -182,10 +183,10 @@ export class RedisHandle implements ServiceHandle {
         if (this.pair === null) {
             return;
         }
-        freeSlot(this.pair.worker, this.pair.service);
+        this.pair.free();
+        this.connectionString = this.pair.shared;
         this.pair = null;
         this.dbIndex = 0;
-        this.connectionString = this.sharedConnectionString;
     }
 }
 
