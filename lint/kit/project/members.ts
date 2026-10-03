@@ -1,10 +1,5 @@
-import {
-    ignoredPaths,
-    readManifest,
-    treeEntries,
-    workspaceMembers,
-} from '@jterrazz/typescript/rules';
-import { basename, join, relative } from 'node:path';
+import { readManifest, treeEntries, workspaceMembers } from '@jterrazz/typescript/rules';
+import { basename, join } from 'node:path';
 
 import { PRUNED_WITH_OUTPUTS } from './module-tests.js';
 
@@ -59,10 +54,6 @@ export function discoverSpecRoots(rootDir: string): string[] {
         };
         walk(member, 0);
     }
-    const found = [...roots].toSorted();
-    const ignored = ignoredPaths(
-        rootDir,
-        found.map((path) => relative(rootDir, path)),
-    );
-    return found.filter((path) => !ignored.has(relative(rootDir, path)));
+    // invariant: the walk reads the tree git keeps, so an ignored folder is never reached.
+    return [...roots].toSorted();
 }
