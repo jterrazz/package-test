@@ -43,6 +43,7 @@ const PRODUCTION_REACHING_TEST_MATERIAL = [
     'src/facets/component/golden/**',
     'src/facets/lint/rule-tester.ts',
     'src/facets/website/browser/playwright.adapter.ts',
+    'src/facets/website/browser/website-visitor.ts',
     'src/stubs/delivery/**',
     'src/clock/**',
     'src/mocks/**',

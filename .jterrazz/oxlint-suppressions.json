@@ -12,14 +12,6 @@
             "count": 1
         }
     },
-    "lint/consumer/checks/document-env-and-serve-registered.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-depth": {
-            "count": 4
-        }
-    },
     "lint/consumer/checks/ground-shared-or-inline.ts": {
         "max-lines": {
             "count": 1
@@ -147,11 +139,6 @@
             "count": 1
         }
     },
-    "src/expectations/goldens/diff.ts": {
-        "typescript/no-base-to-string": {
-            "count": 1
-        }
-    },
     "src/expectations/goldens/matchers.ts": {
         "typescript/require-await": {
             "count": 1
@@ -164,20 +151,6 @@
     },
     "src/facets/api/routes/route-judge.test.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "src/facets/cli/documents/literate.ts": {
-        "complexity": {
-            "count": 1
-        },
-        "max-lines": {
-            "count": 1
-        },
-        "max-lines-per-function": {
-            "count": 1
-        },
-        "max-params": {
             "count": 1
         }
     },
@@ -204,44 +177,12 @@
             "count": 1
         }
     },
-    "src/facets/mobile/device/appium.adapter.ts": {
-        "max-depth": {
-            "count": 1
-        },
-        "max-lines": {
-            "count": 1
-        }
-    },
-    "src/facets/mobile/device/projection.ts": {
-        "complexity": {
-            "count": 1
-        }
-    },
     "src/facets/mobile/mobile.handle.ts": {
         "max-lines-per-function": {
             "count": 1
         }
     },
-    "src/facets/website/browser/playwright.adapter.ts": {
-        "max-lines": {
-            "count": 1
-        },
-        "max-lines-per-function": {
-            "count": 2
-        }
-    },
     "src/facets/website/website.handle.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        }
-    },
-    "src/services/process/serve.ts": {
-        "class-methods-use-this": {
-            "count": 1
-        },
-        "complexity": {
-            "count": 1
-        },
         "max-lines-per-function": {
             "count": 1
         }

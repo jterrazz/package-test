@@ -121,6 +121,8 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/facets/cli/documents/literate.ts',
+            'src/facets/cli/documents/literate-env.ts',
+            'src/facets/cli/documents/literate-judge.ts',
             'src/facets/api/api.facet.ts',
             'src/facets/api/api.handle.ts',
             'src/facets/cli/cli.facet.ts',
@@ -191,6 +193,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/stubs/delivery/same-process/stub-server.ts',
             'src/stubs/delivery/browser-page/worker-script.ts',
             'src/facets/website/browser/page-clock.adapter.ts',
+            'src/facets/website/browser/website-visitor.ts',
             'src/services/postgres/template.ts',
             'src/clock/process-clock.adapter.ts',
             'src/facets/component/page/page-clock.adapter.ts',
