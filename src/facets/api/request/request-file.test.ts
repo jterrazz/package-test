@@ -31,12 +31,33 @@ describe('parseRequestFile', () => {
         expect(parsed.body).toBeUndefined();
     });
 
-    test('http-files — requests — rejects a first line that is not METHOD /path', () => {
-        // Given - a malformed request file
-        // Then - the error names the file and the expected shape
-        expect(() => parseRequestFile('not a request line\n', '_requests/bad.http')).toThrow(
-            'found: _requests/bad.http: the first line is "not a request line"',
-        );
+    test.each(['not a request line', 'x GET /users', 'GET /users HTTP/1.1', 'GET'])(
+        'http-files — requests — rejects a first line that is not METHOD /path: %s',
+        (line) => {
+            // Given - a malformed request line
+            // Then - the error names the file and the line, and the shape it should take
+            expect(() => parseRequestFile(`${line}\n`, '_requests/bad.http')).toThrow(
+                new Error(
+                    [
+                        `found: _requests/bad.http: the first line is "${line}"`,
+                        'why: A request file opens on `METHOD /path`.',
+                        'fix: start the request file with its request line: "POST /users"',
+                        'read: docs/12-api.md#http-request-files--full-format',
+                    ].join('\n'),
+                ),
+            );
+        },
+    );
+
+    test('http-files — requests — reads a request line spaced loosely', () => {
+        // Given - a line indented, spaced twice, and trailed by a space
+        // Then - the method and path all the same
+        expect(parseRequestFile('  DELETE  /users/1 \n', '_requests/loose.http')).toStrictEqual({
+            body: undefined,
+            headers: {},
+            method: 'DELETE',
+            path: '/users/1',
+        });
     });
 
     test('http-files — requests — rejects an empty request file', () => {

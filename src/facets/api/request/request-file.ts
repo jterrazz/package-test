@@ -12,9 +12,7 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
     const { body, headerLines, startLine } = splitSections(content);
 
     const start = /^(?<method>[A-Z]+)\s+(?<path>\S+)$/u.exec(startLine.trim());
-    const method = start?.groups?.method;
-    const path = start?.groups?.path;
-    if (method === undefined || path === undefined) {
+    if (start === null) {
         throw new Error(
             refusal({
                 fix: 'start the request file with its request line: "POST /users"',
@@ -24,6 +22,8 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
             }),
         );
     }
+    // Stryker disable next-line StringLiteral: a match always carries its named groups, so no default is ever taken
+    const { method = '', path = '' } = start.groups ?? {};
 
     return {
         body: body.length > 0 ? body : undefined,
