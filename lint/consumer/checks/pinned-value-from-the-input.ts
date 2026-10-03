@@ -12,12 +12,8 @@ export function checkPinnedValueFromTheInput(
     dir: string,
 ): DocumentFinding[] {
     const findings: DocumentFinding[] = [];
-    const streams = assertedStreams(document);
-    if (streams.length === 0) {
-        return findings;
-    }
     let fixed: null | string = null;
-    for (const stream of streams) {
+    for (const stream of assertedStreams(document)) {
         for (const [index, text] of stream.text.split('\n').entries()) {
             for (const [pattern, token] of [
                 [ISO8601, '{{iso8601}}'],
