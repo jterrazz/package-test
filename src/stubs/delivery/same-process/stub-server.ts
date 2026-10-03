@@ -6,16 +6,9 @@ import { buildStubHandlers } from '../msw-handlers.js';
 import type { Msw } from '../msw-handlers.js';
 import { owningBodies } from './owned-body.js';
 
-let loaded: null | { msw: Msw; setupServer: () => SetupServer } = null;
-
 async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> {
-    if (loaded !== null) {
-        return loaded;
-    }
     const [{ setupServer }, msw] = await Promise.all([import('msw/node'), import('msw')]);
-    const modules = { msw, setupServer: () => setupServer() };
-    loaded = modules;
-    return modules;
+    return { msw, setupServer: () => setupServer() };
 }
 
 let serverInstance: null | SetupServer = null;
@@ -24,9 +17,9 @@ let serverInstance: null | SetupServer = null;
 let installedFetch: null | typeof fetch = null;
 
 /** Once per process; reply bodies are handed over as owned streams, so a cancel settles. */
-async function ensureStubServer(): Promise<void> {
+async function ensureStubServer(): Promise<SetupServer> {
     if (serverInstance !== null) {
-        return;
+        return serverInstance;
     }
     const { setupServer } = await loadMsw();
     const server = setupServer();
@@ -34,18 +27,19 @@ async function ensureStubServer(): Promise<void> {
     serverInstance = server;
     installedFetch = globalThis.fetch;
     globalThis.fetch = owningBodies(installedFetch);
+    return server;
 }
 
 /** The trailing catch-all records any request no stub accepted; the chain's pipeline rethrows it. */
 export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistration> {
-    await ensureStubServer();
+    const server = await ensureStubServer();
     const { msw } = await loadMsw();
     const { handlers, violation } = buildStubHandlers(msw, stubs);
-    serverInstance?.use(...handlers);
+    server.use(...handlers);
 
     return {
         cleanup: () => {
-            serverInstance?.resetHandlers();
+            server.resetHandlers();
         },
         violation,
     };

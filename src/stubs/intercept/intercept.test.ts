@@ -1,6 +1,6 @@
 import { once } from 'node:events';
 import { createServer } from 'node:http';
-import { afterAll, describe, expect, onTestFinished, test } from 'vitest';
+import { afterAll, describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { intercept } from '../delivery/same-process/intercept.js';
 import { stopStubServer } from '../delivery/same-process/stub-server.js';
@@ -185,17 +185,23 @@ describe('interceptThrough', () => {
     });
 
     test('intercept — the network double in module scope — lets the handlers of a block go when the block ends', async () => {
-        // Given - a real server, and a block that stubbed its one route and ended
+        // Given - a real server, and a block that stubbed its one route and ended, the first of the adapter
+        await stopStubServer();
         const real = await realServer();
         {
             await using _ = await intercept(http.get(`${real}/today`), http.json({ celsius: 21 }));
         }
+        const warned = vi.spyOn(console, 'warn').mockReturnValue();
+        onTestFinished(() => {
+            warned.mockRestore();
+        });
 
         // When - the subject calls the route again
         const response = await fetch(`${real}/today`);
 
-        // Then - the real server answers: the block's stub is gone
+        // Then - the real server answers, unremarked: the block's stub is gone, and a call no scope declares passes through
         await expect(response.text()).resolves.toBe('the real forecast');
+        expect(warned).not.toHaveBeenCalled();
     });
 
     test('intercept — the network double in module scope — refuses an empty declaration', async () => {
