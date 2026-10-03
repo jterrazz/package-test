@@ -166,4 +166,98 @@ describe('update-merge', () => {
         expect(mergedText).toBe('cwd {{workdir}}');
         expect(mergedJson).toStrictEqual({ cwd: '{{workdir}}' });
     });
+
+    test('structural — update-mode merges — a token line is spent on the first line it covers, shifted or not, and an aligned one is not taken by another', () => {
+        // Given - goldens whose token lines cover shifted lines, and aligned lines another token line could also cover
+        const scope = new CaptureScope();
+        const merge = (previous: string, actual: string): string =>
+            mergeTextPreservingPlaceholders(previous, actual, scope);
+
+        // Then - each token where it first matches, once
+        expect([
+            merge('id {{uuid}}\nzzz', `q\nid ${UUID_A}\nid ${UUID_B}`),
+            merge('v {{number}}\nzz\nv {{int}}', 'v 1\nmid\nend'),
+        ]).toStrictEqual([`q\nid {{uuid}}\nid ${UUID_B}`, 'v {{number}}\nmid\nend']);
+    });
+
+    test('structural — update-mode merges — a {{any}} block is found between anchors past blank lines, by an exact or a long reworded anchor, and kept only when both are found in order', () => {
+        // Given - blocks at each edge of a golden, anchors short and long, found and not
+        const scope = new CaptureScope();
+        const merge = (previous: string, actual: string): string =>
+            mergeTextPreservingPlaceholders(previous, actual, scope);
+        const long = 'a line opening on more than twenty characters';
+
+        // Then - each block that sits between anchors found in order collapses to its token; elsewhere the token holds the one line it stands on
+        expect([
+            merge('start\n\n{{any}}\n\nend', 'start\n\na\nb\n\nend'),
+            merge('{{any}}\nend', 'x\nendless\nend'),
+            merge('head\n{{any}}', 'head\na\nb'),
+            merge('twenty characters!!!\n{{any}}\nzz', 'twenty characters!!! more\na\nb\nzz'),
+            merge(`a\n{{any}}\n${long}\n{{any}}\nz`, `a\nb1\nb2\n${long} reworded\nc1\nc2\nz`),
+            merge('gone\n{{any}}\ntail', 'x\ny\nz\ntail'),
+            merge('head\n{{any}}\nlost', 'head\nx\ny'),
+            merge('b\n{{any}}\na', 'a\nx\nb'),
+            merge(`a\n{{any}}\n${long}`, `a\n${long} reworded`),
+            merge('start\n\n{{any}}\nend', '\nstart\n\na\nb\nend'),
+            merge('x\n{{int}}\n{{any}}\nend', 'x\n5\na\nb\nend'),
+            merge(`{{any}}\n${long}`, `a\n${long} reworded\nb\n${long}`),
+            merge('start\n  \n{{any}}\nend', '  \nstart\n  \na\nb\nend'),
+            merge(`x\n{{any}}\n${long}`, `${long} reworded\nx\na\nb\n${long} reworded`),
+        ]).toStrictEqual([
+            'start\n\n{{any}}\n\nend',
+            '{{any}}\nend',
+            'head\n{{any}}',
+            'twenty characters!!! more\n{{any}}\nb\nzz',
+            'a\n{{any}}\n{{any}}\n{{any}}\nz',
+            'x\n{{any}}\nz\ntail',
+            'head\n{{any}}\ny',
+            'a\n{{any}}\nb',
+            'a\n{{any}}',
+            '\nstart\n{{any}}\n{{any}}\nend',
+            'x\n{{int}}\n{{any}}\nend',
+            `{{any}}\n${long}`,
+            '  \nstart\n{{any}}\n{{any}}\nend',
+            `${long} reworded\n{{any}}\n{{any}}\n${long} reworded`,
+        ]);
+    });
+
+    test('workdir substitution — a token line holding {{workdir}} covers the line as the run printed it, and a text with no workdir keeps the word undefined', () => {
+        // Given - a scope that knows its workdir, and one that does not
+        const scope = new CaptureScope(WORKDIR);
+
+        // Then - the token line kept, and the word left alone
+        expect([
+            mergeTextPreservingPlaceholders(
+                'at {{workdir}}/x took {{int}}ms',
+                `at ${WORKDIR}/x took 5ms`,
+                scope,
+            ),
+            mergeTextPreservingPlaceholders('was {{int}}', 'is undefined', new CaptureScope()),
+            mergePreservingPlaceholders('{{int}}', { note: 'is undefined' }),
+        ]).toStrictEqual([
+            'at {{workdir}}/x took {{int}}ms',
+            'is undefined',
+            { note: 'is undefined' },
+        ]);
+    });
+
+    test('workdir substitution — mergePreservingPlaceholders substitutes the workdir in nested lists, and takes the run’s value where the shapes differ', () => {
+        // Given - values nested in lists, and previous values of another shape than the run's
+        // Then - each merged
+        expect([
+            mergePreservingPlaceholders(
+                undefined,
+                { list: [`${WORKDIR}/a`, [`${WORKDIR}/b`], 1] },
+                WORKDIR,
+            ),
+            mergePreservingPlaceholders(['{{int}}'], 'text'),
+            mergePreservingPlaceholders('text', ['{{int}}']),
+            mergePreservingPlaceholders({ a: '{{int}}' }, [1]),
+        ]).toStrictEqual([
+            { list: ['{{workdir}}/a', ['{{workdir}}/b'], 1] },
+            'text',
+            ['{{int}}'],
+            [1],
+        ]);
+    });
 });
