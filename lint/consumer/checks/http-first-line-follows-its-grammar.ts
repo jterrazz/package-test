@@ -1,12 +1,10 @@
 import type { Spotted } from './checker.js';
 
-function firstLine(text: string): string {
-    for (const line of text.split('\n')) {
-        if (line.trim().length > 0) {
-            return line.trim();
-        }
-    }
-    return '';
+function firstLine(text: string): string | undefined {
+    return text
+        .split('\n')
+        .map((line) => line.trim())
+        .find((line) => line.length > 0);
 }
 
 const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/u;
@@ -36,7 +34,7 @@ export function checkHttpFirstLineFollowsItsGrammar(
     side: keyof typeof GRAMMAR,
 ): Spotted[] {
     const { line, teaching } = GRAMMAR[side];
-    return line.test(firstLine(text))
+    return line.test(String(firstLine(text)))
         ? []
         : [
               {
