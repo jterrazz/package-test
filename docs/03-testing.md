@@ -404,7 +404,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 6      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
 | `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 9      |
-| `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 8      |
+| `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 9      |
 | `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 6      |
 
 ### Time & doubles

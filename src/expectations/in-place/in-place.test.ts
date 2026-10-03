@@ -56,9 +56,14 @@ describe('in-place', () => {
         const source = "expect(a).toMatch('one'); expect(b).toMatch(`two`, { frozen: true });\n";
         const column = source.lastIndexOf('toMatch') + 1;
 
-        // Then - the second argument, up to its comma
-        const span = locateArgument(source, { column, file: 'x', line: 1 });
-        expect(source.slice(span?.start, span?.end)).toBe('`two`');
+        // Then - the second argument, up to its comma, whether the frame names the call or its parenthesis
+        const spans = [column, column + 'toMatch'.length].map((at) =>
+            locateArgument(source, { column: at, file: 'x', line: 1 }),
+        );
+        expect(spans.map((span) => source.slice(span?.start, span?.end))).toStrictEqual([
+            '`two`',
+            '`two`',
+        ]);
     });
 
     test('locateArgument — the value a toMatch call holds — skips what a template, a string or a nested call holds', () => {
@@ -103,13 +108,31 @@ describe('in-place', () => {
         expect(dedent(read)).toBe(text);
     });
 
+    test('the value written in place reads back as the value — a text of one line is one template, of several a block indented under the call', () => {
+        // Given - texts of one line, of lines ending on a break, and of lines with none
+        // Then - each rendering, whole
+        expect(['one', 'a\nb\n', 'a\n\nb'].map((text) => renderText(text, '    '))).toStrictEqual([
+            '`one`',
+            '`\n        a\n        b\n    `',
+            '`\n        a\n\n        b`',
+        ]);
+    });
+
     test('the value written in place reads back as the value — a json value and rows are written as code indented with the call', () => {
         // Given - a value and rows at an indentation
         // Then - one line per row, the closing bracket on the call's column
         expect(renderValue({ id: '{{uuid}}', tags: ['a'] }, '    ')).toBe(
             '{\n        "id": "{{uuid}}",\n        "tags": [\n            "a"\n        ]\n    }',
         );
-        expect(renderRows([[1, 'Ada', null]], '    ')).toBe('[\n        [1, "Ada", null],\n    ]');
+        expect(
+            renderRows(
+                [
+                    [1, 'Ada', null],
+                    [2, undefined],
+                ],
+                '    ',
+            ),
+        ).toBe('[\n        [1, "Ada", null],\n        [2, null],\n    ]');
         expect(renderRows([], '    ')).toBe('[]');
     });
 
@@ -153,7 +176,14 @@ describe('in-place', () => {
         // Then - refused, the file untouched
         expect(() => {
             writeInPlace({ column: 1, file, line: 1 }, () => '``');
-        }).toThrow(`update mode: no toMatch( stands at ${file}:1:1`);
+        }).toThrow(
+            [
+                `found: update mode: no toMatch( stands at ${file}:1:1 — the value in place cannot be written`,
+                'why: A value written in place is rewritten where its `toMatch(` stands.',
+                'fix: call `.toMatch(` on the expect() written at that line, not through an alias',
+                'read: docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+            ].join('\n'),
+        );
         expect(readFileSync(file, 'utf8')).toBe('const x = 1;\n');
     });
 
@@ -174,5 +204,54 @@ describe('in-place', () => {
         writePendingRewrites(folder);
         expect(readFileSync(file, 'utf8')).toBe('expect(one).toMatch(`first`);\n');
         expect(existsSync(folder)).toBe(false);
+    });
+
+    test('writePendingRewrites — the pending rewrites of a run — each pending file written once, what is no rewrite skipped, a folder never made left alone', () => {
+        // Given - two values written to one file and one to another, beside files no rewrite left
+        const file = scratchFile('expect(one).toMatch(``);\nexpect(two).toMatch(``);\n');
+        const other = join(file, '..', 'other.test.ts');
+        writeFileSync(other, 'expect(three).toMatch(``);\n');
+        const folder = join(file, '..', 'pending');
+        writeInPlace(
+            { column: 13, file, line: 1 },
+            (indent) => renderText('first', indent),
+            folder,
+        );
+        writeInPlace(
+            { column: 13, file, line: 2 },
+            (indent) => renderText('second', indent),
+            folder,
+        );
+        writeInPlace(
+            { column: 15, file: other, line: 1 },
+            (indent) => renderText('third', indent),
+            folder,
+        );
+        writeFileSync(join(folder, 'notes.txt'), 'not json');
+        for (const [name, junk] of Object.entries({
+            list: [file, 'x'],
+            nothing: null,
+            numbered: { file: -5, source: 'x' },
+            partial: { file },
+            text: 'text',
+            unwritable: { file, source: 1 },
+        })) {
+            writeFileSync(join(folder, `${name}.json`), JSON.stringify(junk));
+        }
+
+        // When - the run ends, then a run that left nothing ends
+        writePendingRewrites(folder);
+        writePendingRewrites(join(folder, 'never-made'));
+
+        // Then - both files hold their values, and the folder is gone
+        expect([
+            readFileSync(file, 'utf8'),
+            readFileSync(other, 'utf8'),
+            existsSync(folder),
+        ]).toStrictEqual([
+            'expect(one).toMatch(`first`);\nexpect(two).toMatch(`second`);\n',
+            'expect(three).toMatch(`third`);\n',
+            false,
+        ]);
     });
 });

@@ -3,6 +3,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { join, sep } from 'node:path';
 
 import { dedent } from '../../../lint/kit/project/dedent.js';
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
+import { argumentSpans, closingOf } from '../../../lint/kit/project/source-scan.js';
 import { isFrameworkFrame, stackFrames } from '../../chain/paths/caller.js';
 import type { StackFrame } from '../../chain/paths/caller.js';
 import { refusal } from '../../chain/refusals/refusal.js';
@@ -21,118 +23,32 @@ export function callSiteOf(stack: string): CallSite | undefined {
     );
 }
 
-function offsetOf(source: string, line: number, column: number): number {
+function lineStartOf(source: string, line: number): number {
     let offset = 0;
     for (let current = 1; current < line; current += 1) {
-        const next = source.indexOf('\n', offset);
-        if (next === -1) {
-            return source.length;
-        }
-        offset = next + 1;
+        offset = source.indexOf('\n', offset) + 1;
     }
-    return offset + column - 1;
+    return offset;
 }
 
-function stringEnd(source: string, start: number): number {
-    const quote = source[start];
-    let index = start + 1;
-    while (index < source.length && source[index] !== quote) {
-        index += source[index] === '\\' ? 2 : 1;
-    }
-    return index + 1;
-}
-
-function braceEnd(source: string, start: number): number {
-    let depth = 0;
-    let index = start;
-    while (index < source.length) {
-        const character = source[index];
-        if (character === '"' || character === "'") {
-            index = stringEnd(source, index);
-            continue;
-        }
-        if (character === '`') {
-            index = templateEnd(source, index);
-            continue;
-        }
-        if (character === '{') {
-            depth += 1;
-        } else if (character === '}') {
-            depth -= 1;
-            if (depth === 0) {
-                return index + 1;
-            }
-        }
-        index += 1;
-    }
-    return source.length;
-}
-
-function templateEnd(source: string, start: number): number {
-    let index = start + 1;
-    while (index < source.length && source[index] !== '`') {
-        if (source[index] === '\\') {
-            index += 2;
-        } else if (source[index] === '$' && source[index + 1] === '{') {
-            index = braceEnd(source, index + 1);
-        } else {
-            index += 1;
-        }
-    }
-    return index + 1;
-}
-
-function skipped(source: string, index: number): number {
-    const character = source[index];
-    if (character === '"' || character === "'") {
-        return stringEnd(source, index);
-    }
-    if (character === '`') {
-        return templateEnd(source, index);
-    }
-    if (source.startsWith('//', index)) {
-        const next = source.indexOf('\n', index);
-        return next === -1 ? source.length : next;
-    }
-    return source.startsWith('/*', index) ? source.indexOf('*/', index) + 2 : index;
-}
-
-function argumentEnd(source: string, start: number): number {
-    let depth = 0;
-    let index = start;
-    while (index < source.length) {
-        const past = skipped(source, index);
-        if (past !== index) {
-            index = past;
-            continue;
-        }
-        const character = source[index] ?? '';
-        const closes = ')]}'.includes(character);
-        if ((closes && depth === 0) || (character === ',' && depth === 0)) {
-            return index;
-        }
-        depth += '([{'.includes(character) ? 1 : closes ? -1 : 0;
-        index += 1;
-    }
-    return source.length;
-}
-
+/** The call a frame points at, by its name or its parenthesis, among the calls of its line; its value's span, trimmed. */
 export function locateArgument(source: string, site: CallSite): ArgumentSpan | undefined {
-    const lineStart = offsetOf(source, site.line, 1);
-    const position = offsetOf(source, site.line, site.column);
+    const lineStart = lineStartOf(source, site.line);
+    const position = lineStart + site.column - 1;
     TO_MATCH.lastIndex = lineStart;
     for (const found of source.matchAll(TO_MATCH)) {
-        if (found.index < lineStart || found.index + 'toMatch'.length < position) {
+        // Stryker disable next-line EqualityOperator: a frame points at the name or its parenthesis, never past it
+        if (found.index + 'toMatch'.length < position) {
             continue;
         }
-        let start = found.index + found[0].length;
-        while (/\s/u.test(source[start] ?? '')) {
-            start += 1;
-        }
-        const end = start + source.slice(start, argumentEnd(source, start)).trimEnd().length;
-        const lineOfCall = source.lastIndexOf('\n', found.index) + 1;
-        const indent = /^[\t ]*/u.exec(source.slice(lineOfCall))?.[0] ?? '';
-        return { end, indent, start };
+        const open = found.index + found[0].length - 1;
+        const [span = { end: open + 1, start: open + 1 }] = argumentSpans(
+            source,
+            open + 1,
+            closingOf(source, open),
+        );
+        const line = source.slice(source.lastIndexOf('\n', found.index) + 1);
+        return { ...span, indent: line.slice(0, line.length - line.trimStart().length) };
     }
     return undefined;
 }
@@ -150,7 +66,7 @@ export function renderText(text: string, indent: string): string {
     }
     const inner = `${indent}    `;
     const lines = text.split('\n');
-    const last = lines.pop() ?? '';
+    const last = String(lines.pop());
     const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
     const block = `\n${body}\n${last === '' ? indent : `${inner}${last}`}`;
     return dedent(block) === text ? `\`${escapeTemplate(block)}\`` : JSON.stringify(text);
@@ -178,12 +94,7 @@ const LEDGERS = new Map<string, Ledger>();
 type Pending = { file: string; source: string };
 
 const isPending = (value: unknown): value is Pending =>
-    typeof value === 'object' &&
-    value !== null &&
-    'file' in value &&
-    typeof value.file === 'string' &&
-    'source' in value &&
-    typeof value.source === 'string';
+    isRecord(value) && typeof value.file === 'string' && typeof value.source === 'string';
 
 let pendingFolder: (() => string | undefined) | null = null;
 
@@ -198,7 +109,7 @@ function save(file: string, source: string, folder: string | undefined): void {
         return;
     }
     mkdirSync(folder, { recursive: true });
-    const name = createHash('sha256').update(file).digest('hex').slice(0, 16);
+    const name = createHash('sha256').update(file).digest('hex');
     const pending: Pending = { file, source };
     writeFileSync(join(folder, `${name}.json`), JSON.stringify(pending));
 }
@@ -208,12 +119,13 @@ export function writePendingRewrites(folder: string): void {
         return;
     }
     for (const name of readdirSync(folder).filter((entry) => entry.endsWith('.json'))) {
+        // Stryker disable next-line StringLiteral: a Buffer parses as the same JSON
         const pending: unknown = JSON.parse(readFileSync(join(folder, name), 'utf8'));
         if (isPending(pending)) {
             writeFileSync(pending.file, pending.source);
         }
     }
-    rmSync(folder, { force: true, recursive: true });
+    rmSync(folder, { recursive: true });
 }
 
 export function writeInPlace(
@@ -239,12 +151,8 @@ export function writeInPlace(
     }
     ledger.edits.set(span.start, { end: span.end, text: render(span.indent) });
     let source = ledger.original;
-    const starts = [...ledger.edits.keys()].toSorted((a, b) => b - a);
-    for (const start of starts) {
-        const edit = ledger.edits.get(start);
-        if (edit !== undefined) {
-            source = source.slice(0, start) + edit.text + source.slice(edit.end);
-        }
+    for (const [start, edit] of [...ledger.edits].toSorted(([a], [b]) => b - a)) {
+        source = source.slice(0, start) + edit.text + source.slice(edit.end);
     }
     save(site.file, source, folder);
 }
