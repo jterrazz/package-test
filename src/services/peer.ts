@@ -15,8 +15,10 @@ const INSTALLERS = [
 
 const DEFAULT_INSTALLER = { command: 'npm install -D', name: 'npm' } as const;
 
+type Installer = { command: string; name: (typeof INSTALLERS)[number]['name'] };
+
 /** Every manager withholds install scripts by default (npm 11, pnpm 10, bun 1.2): installing the package does not build it. */
-const BUILDERS: Record<string, (peer: string) => string> = {
+const BUILDERS: Record<Installer['name'], (peer: string) => string> = {
     bun: (peer) => `bun pm trust ${peer}`,
     npm: (peer) => `npm install-scripts approve ${peer} && npm rebuild ${peer}`,
     pnpm: (peer) =>
@@ -36,7 +38,7 @@ function isUnbuilt(error: unknown): boolean {
 
 const NATIVE_PEERS = new Set(['better-sqlite3']);
 
-export function installerAt(from: string): { command: string; name: string } {
+export function installerAt(from: string): Installer {
     const root = installRootOf(from);
     if (root === undefined) {
         return DEFAULT_INSTALLER;
@@ -47,7 +49,7 @@ export function installerAt(from: string): { command: string; name: string } {
     );
 }
 
-function buildNote(peer: string, manager: string): string {
+function buildNote(peer: string, manager: Installer['name']): string {
     if (!NATIVE_PEERS.has(peer) || manager !== 'pnpm') {
         return '';
     }
@@ -59,18 +61,22 @@ function buildNote(peer: string, manager: string): string {
 }
 
 /** A binding the package manager never built surfaces as a `bindings` stack trace; this turns it into a refusal naming the peer and the command. */
-export function requireBuiltPeer(peer: string, what: string, use: () => void): void {
+export function requireBuiltPeer(
+    peer: string,
+    what: string,
+    use: () => void,
+    from: string = process.cwd(),
+): void {
     try {
         use();
     } catch (error) {
         if (!isUnbuilt(error)) {
             throw error;
         }
-        const { name } = installerAt(process.cwd());
-        const build = (BUILDERS[name] ?? BUILDERS.npm)?.(peer) ?? `rebuild ${peer}`;
+        const { name } = installerAt(from);
         throw new Error(
             refusal({
-                fix: build,
+                fix: BUILDERS[name](peer),
                 found: `${what} found \`${peer}\`, and its native binding is not built`,
                 read: 'docs/06-setting-up.md#what-to-install',
                 why: `A native peer is built by its install script, and ${name} runs a dependency's install script only once it is told to.`,
@@ -81,11 +87,16 @@ export function requireBuiltPeer(peer: string, what: string, use: () => void): v
 }
 
 /** `load` is the caller's own `import('<peer>')`: the bundler and the resolver need to see the bare specifier. */
-export async function loadPeer<T>(peer: string, what: string, load: () => Promise<T>): Promise<T> {
+export async function loadPeer<T>(
+    peer: string,
+    what: string,
+    load: () => Promise<T>,
+    from: string = process.cwd(),
+): Promise<T> {
     try {
         return await load();
     } catch (error) {
-        const { command, name } = installerAt(process.cwd());
+        const { command, name } = installerAt(from);
         throw new Error(
             refusal('seam-is-an-optional-peer', {
                 fix: `${command} ${peer}${buildNote(peer, name)}`,
