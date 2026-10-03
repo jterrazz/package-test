@@ -214,19 +214,6 @@ describe('route-judge', () => {
         await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
     });
 
-    test('route judge — the api run judged — a method-less route the app takes on its own methods only, or not at all, fails the run', async () => {
-        // Given - /mcp, /health and /gone declared method-less, the app taking /health on GET alone and no /gone
-        const { directory, root } = methodlessRun(['/mcp', '/health', '/gone']);
-
-        // Then - each declaration that drifted is named
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(
-            methodlessDrift(
-                "  /health — the list names it, and the app takes it on its own methods only: remove '/health'",
-                "  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
-            ),
-        );
-    });
-
     test('route judge — the api run judged — the method-less list is held to the app’s own table, even when an OpenAPI document measures the coverage', async () => {
         // Given - the app takes /mcp on any method, and the member declares a document that knows only its POST
         const { directory, root } = methodlessRun(['/mcp']);
@@ -243,23 +230,6 @@ describe('route-judge', () => {
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: all 2 declared routes reached',
         });
-    });
-
-    test('route judge — the api run judged — a method-less route is the app’s whatever its parameters are named', async () => {
-        // Given - the app takes /mcp/:id on any method, the list naming /mcp/:session, then /mcp/:id/x
-        const agreeing = methodlessRun(['/mcp/:session'], '/mcp/:id');
-        const drifted = methodlessRun(['/mcp/:id/x'], '/mcp/:id');
-
-        // Then - one route by its shape, and a deeper path is another route
-        await expect(judgeRoutes(agreeing.root, agreeing.directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 2 declared routes reached',
-        });
-        await expect(judgeRoutes(drifted.root, drifted.directory, GREEN)).resolves.toStrictEqual(
-            methodlessDrift(
-                "  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'",
-                "  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
-            ),
-        );
     });
 
     test('route judge — a shard of a split run — a shard judges nothing, and records nothing, whatever its ledgers reached', async () => {

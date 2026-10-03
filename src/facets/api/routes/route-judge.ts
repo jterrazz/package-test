@@ -6,6 +6,7 @@ import {
 import type { Lesson } from '../../../chain/refusals/refusal.js';
 import { measure, readLedgers } from './ledger.js';
 import type { Ledger } from './ledger.js';
+import { methodlessDrift, methodlessDrifted } from './methodless.js';
 import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js';
 import type { Route } from './routes.js';
 
@@ -29,36 +30,6 @@ export const SHARD_UNJUDGED =
 
 export const PARTIAL_UNJUDGED =
     'api routes: not judged — a partial run (--changed, a file filter or -t) reaches only some routes';
-
-function shapeOf(path: string): string {
-    return path.replaceAll(/:[^/]+/gu, ':');
-}
-
-function methodlessDrift(table: readonly Route[], methodless: readonly string[]): string[] {
-    const named = new Set(methodless.map((path) => shapeOf(path)));
-    const any = [
-        ...new Map(
-            table
-                .filter((route) => route.method === 'ALL')
-                .map((route) => [shapeOf(route.path), route.path]),
-        ),
-    ];
-    const taken = new Set(any.map(([shape]) => shape));
-    const missed = any
-        .filter(([shape]) => !named.has(shape))
-        .map(
-            ([, path]) =>
-                `  ALL ${path} — the app takes it on any method, and the list misses it: add '${path}'`,
-        );
-    const stale = methodless
-        .filter((path) => !taken.has(shapeOf(path)))
-        .map((path) =>
-            table.some((route) => shapeOf(route.path) === shapeOf(path))
-                ? `  ${path} — the list names it, and the app takes it on its own methods only: remove '${path}'`
-                : `  ${path} — the list names it, and the app's table holds no such route: remove '${path}'`,
-        );
-    return [...missed, ...stale];
-}
 
 export type RouteVerdict = { failure?: Lesson; line?: string };
 
@@ -91,15 +62,6 @@ function unjudgedRun({ failed, scope, update }: RouteRun): RouteVerdict | undefi
               },
           }
         : { line: `api routes: not judged — ${why}` };
-}
-
-function methodlessDrifted(drift: string[]): Lesson {
-    return {
-        fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
-        found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
-        read: 'docs/12-api.md#a-route-taken-on-any-method',
-        why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
-    };
 }
 
 function ratchetMoved(missing: number, held: number, named: string): Lesson {
