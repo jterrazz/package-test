@@ -25,54 +25,44 @@ export const TOKEN_KINDS = [
 export type TokenKind = (typeof TOKEN_KINDS)[number];
 
 const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
-const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
-const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
+const BRACE_BLOCK = /\{\{[^{}]*\}\}/gu;
+const LEADING_WORD = /^[A-Za-z][A-Za-z0-9]*/u;
 
 const KNOWN = new Set<string>(TOKEN_KINDS);
 
 type TokenSite = { line: number; token: string };
 
-/** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored. */
-function misfitOf(inner: string): null | { malformed: boolean } {
+type Verdict = 'known' | 'malformed' | 'unknown';
+
+/** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored; a known kind followed by junk is malformed, never arbitrary noise. */
+function verdictOf(inner: string): undefined | Verdict {
     if (VALID_TOKEN.test(inner)) {
-        return KNOWN.has(inner.split('#')[0] ?? '') ? null : { malformed: false };
+        const [kind = ''] = inner.split('#');
+        return KNOWN.has(kind) ? 'known' : 'unknown';
     }
-    // invariant: flagged only when a known kind is followed by junk, never arbitrary noise.
-    const kind = LEADING_WORD.exec(inner)?.groups?.kind;
-    return kind !== undefined && KNOWN.has(kind) && inner !== kind ? { malformed: true } : null;
+    // Stryker disable next-line ArrayDeclaration,StringLiteral: no word standing for none is a known kind
+    const [word = ''] = LEADING_WORD.exec(inner) ?? [];
+    return KNOWN.has(word) ? 'malformed' : undefined;
 }
 
-function misfitTokens(text: string): (TokenSite & { malformed: boolean })[] {
-    return text.split('\n').flatMap((lineText, index) =>
-        [...lineText.matchAll(BRACE_BLOCK)].flatMap((match) => {
-            const misfit = misfitOf(match.groups?.inner ?? '');
-            return misfit === null ? [] : [{ line: index + 1, ...misfit, token: match[0] }];
-        }),
-    );
+function tokensOf(text: string, verdict: Verdict): TokenSite[] {
+    return text
+        .split('\n')
+        .flatMap((lineText, index) =>
+            [...lineText.matchAll(BRACE_BLOCK)].flatMap(([token]) =>
+                verdictOf(token.slice(2, -2)) === verdict ? [{ line: index + 1, token }] : [],
+            ),
+        );
 }
 
 export function findUnknownTokens(text: string): TokenSite[] {
-    return misfitTokens(text)
-        .filter(({ malformed }) => !malformed)
-        .map(({ line, token }) => ({ line, token }));
+    return tokensOf(text, 'unknown');
 }
 
 export function findMalformedRefs(text: string): TokenSite[] {
-    return misfitTokens(text)
-        .filter(({ malformed }) => malformed)
-        .map(({ line, token }) => ({ line, token }));
+    return tokensOf(text, 'malformed');
 }
 
 export function findKnownTokens(text: string): TokenSite[] {
-    const found: TokenSite[] = [];
-    const lines = text.split('\n');
-    for (const [index, lineText] of lines.entries()) {
-        for (const match of lineText.matchAll(BRACE_BLOCK)) {
-            const inner = match.groups?.inner ?? '';
-            if (VALID_TOKEN.test(inner) && KNOWN.has(inner.split('#')[0] ?? '')) {
-                found.push({ line: index + 1, token: match[0] });
-            }
-        }
-    }
-    return found;
+    return tokensOf(text, 'known');
 }

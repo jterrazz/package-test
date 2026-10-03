@@ -53,4 +53,20 @@ describe('tokens', () => {
             { line: 1, token: '{{uuid}}' },
         ]);
     });
+
+    test('each finder reads its own verdict of the same text', () => {
+        // Given - a known, an unknown and a malformed token on one line, and noise
+        const text = '{{uuid}} {{userid}} {{uuid#}} {{.x}}';
+
+        // Then - each its own
+        expect([
+            findKnownTokens(text),
+            findUnknownTokens(text),
+            findMalformedRefs(text),
+        ]).toStrictEqual([
+            [{ line: 1, token: '{{uuid}}' }],
+            [{ line: 1, token: '{{userid}}' }],
+            [{ line: 1, token: '{{uuid#}}' }],
+        ]);
+    });
 });
