@@ -1,6 +1,6 @@
 import { holdsManifest, nearestRoot } from '@jterrazz/typescript/rules';
 import { existsSync, realpathSync } from 'node:fs';
-import { isAbsolute, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 
 export const installRootOf = (from: string): string | undefined =>
     nearestRoot(from, (directory) => existsSync(join(directory, 'package.json')));
@@ -12,9 +12,6 @@ export function discoverRoot(startDir: string): string {
 export function resolveRoot(root: string | undefined, callerDir: string): string {
     if (root === undefined || root === '') {
         return discoverRoot(callerDir);
-    }
-    if (isAbsolute(root)) {
-        return root;
     }
     return resolve(callerDir, root);
 }

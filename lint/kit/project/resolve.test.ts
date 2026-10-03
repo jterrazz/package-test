@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { discoverRoot, resolveRoot } from './resolve.js';
+import { discoverRoot, installRootOf, resolveRoot } from './resolve.js';
 
 /** `<base>/project` with a manifest and a nested tests dir, and `<base>/plain` with only a package.json. */
 function givenTrees(): string {
@@ -47,13 +47,15 @@ describe('resolve', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('root discovery (rule `no-redundant-root`) — resolveRoot without a root auto-discovers from the caller directory', () => {
+    test('root discovery (rule `no-redundant-root`) — resolveRoot without a root, or with an empty one, auto-discovers from the caller directory', () => {
         const base = givenTrees();
-        // Given - no explicit root
-        const found = resolveRoot(undefined, resolve(base, 'project/tests/feature'));
+        // Given - no explicit root, and an empty one
+        const found = [undefined, ''].map((root) =>
+            resolveRoot(root, resolve(base, 'project/tests/feature')),
+        );
 
-        // Then - discovery kicks in
-        expect(found).toBe(resolve(base, 'project'));
+        // Then - discovery kicks in for both
+        expect(found).toStrictEqual([resolve(base, 'project'), resolve(base, 'project')]);
     });
 
     test('root discovery (rule `no-redundant-root`) — falls back to the starting directory when no marker exists anywhere up', () => {
@@ -100,9 +102,12 @@ describe('resolve', () => {
         writeFileSync(resolve(repository, '.gitignore'), 'pkg/package.json\n');
         execFileSync('git', ['init', '--quiet'], { cwd: repository });
 
-        // Then - the walk passes the ignored marker, and stops at the unstaged one
-        expect(discoverRoot(resolve(repository, 'pkg/src'))).toBe(repository);
-        expect(discoverRoot(resolve(repository, 'fresh/src'))).toBe(resolve(repository, 'fresh'));
+        // Then - the walk passes the ignored marker, and stops at the unstaged one; the install root, read off the disk, stops at both
+        expect([
+            discoverRoot(resolve(repository, 'pkg/src')),
+            discoverRoot(resolve(repository, 'fresh/src')),
+            installRootOf(resolve(repository, 'pkg/src')),
+        ]).toStrictEqual([repository, resolve(repository, 'fresh'), resolve(repository, 'pkg')]);
     });
 
     test('root discovery (rule `no-redundant-root`) — an absolute root override is used verbatim', () => {
