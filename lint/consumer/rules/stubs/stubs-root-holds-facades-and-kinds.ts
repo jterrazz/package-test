@@ -33,6 +33,7 @@ const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
 
 export function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
     const callee = child(node, 'callee');
+    // Stryker disable next-line ConditionalExpression: a call always has a callee
     if (node.type !== 'CallExpression' || callee === undefined) {
         return false;
     }
@@ -46,6 +47,7 @@ export function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): bo
 }
 
 function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<string>): boolean {
+    // Stryker disable next-line ConditionalExpression: a default export always declares something
     if (declaration === undefined) {
         return false;
     }
@@ -67,6 +69,7 @@ function entryBindings(program: AstNode): EntryBindings {
     const bindings: EntryBindings = { builders: new Map(), namespaces: new Set() };
     for (const statement of childList(program, 'body')) {
         if (
+            // Stryker disable next-line ConditionalExpression: a re-export binds no name, and its specifiers import none
             statement.type !== 'ImportDeclaration' ||
             !ENTRY.test(stringValue(child(statement, 'source')) ?? '')
         ) {
@@ -74,12 +77,14 @@ function entryBindings(program: AstNode): EntryBindings {
         }
         for (const specifier of childList(statement, 'specifiers')) {
             const local = identifierName(child(specifier, 'local'));
+            // Stryker disable next-line ConditionalExpression: an import's local name is always read
             if (specifier.type === 'ImportNamespaceSpecifier' && local !== undefined) {
                 bindings.namespaces.add(local);
                 continue;
             }
             const imported = child(specifier, 'imported');
             const kind = identifierName(imported) ?? stringValue(imported);
+            // Stryker disable next-line ConditionalExpression,LogicalOperator: an import names what it imports and what it binds, and no undefined is a kind
             if (kind !== undefined && local !== undefined && isStubKind(kind)) {
                 bindings.builders.set(local, kind);
             }
@@ -90,15 +95,18 @@ function entryBindings(program: AstNode): EntryBindings {
 
 /** `http.get` through a named import, `t.http` through a namespace. */
 function kindReached(node: AstNode, bindings: EntryBindings): string | undefined {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no member has no object, and '' binds nothing
     if (node.type !== 'MemberExpression') {
         return undefined;
     }
+    // Stryker disable next-line StringLiteral: a name no import binds reads as none
     const object = identifierName(child(node, 'object')) ?? '';
     const named = bindings.builders.get(object);
     if (named !== undefined) {
         return named;
     }
     const property = memberPropertyName(node);
+    // Stryker disable next-line ConditionalExpression: no undefined is a kind
     return bindings.namespaces.has(object) && property !== undefined && isStubKind(property)
         ? property
         : undefined;
@@ -153,11 +161,13 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
     let wellFormed = false;
     const bindings = entryBindings(program);
     walk(program, (node) => {
+        // Stryker disable next-line ConditionalExpression: only a named export lists a default
+        const listsDefault = node.type === 'ExportNamedDeclaration' && exportsDefault(node);
         if (node.type === 'ExportDefaultDeclaration') {
             hasDefault = true;
             wellFormed =
                 producesStub(child(node, 'declaration'), bindings.namespaces) || wellFormed;
-        } else if (node.type === 'ExportNamedDeclaration' && exportsDefault(node)) {
+        } else if (listsDefault) {
             hasDefault = true;
             wellFormed = true;
         }
@@ -169,7 +179,7 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
     if (!hasDefault) {
         context.report({ data: { base }, messageId: 'missingDefault', node: program });
     } else if (!wellFormed) {
-        context.report({ data: { base }, messageId: 'notDefineStub', node: program });
+        context.report({ messageId: 'notDefineStub', node: program });
     }
 }
 
@@ -264,9 +274,11 @@ export const stubsRootHoldsFacadesAndKinds = defineRule(
             return {
                 before() {
                     check = checkOf(context);
+                    // Stryker disable next-line ConditionalExpression: a file with no check runs a visitor that checks nothing
                     return check !== undefined;
                 },
                 Program(node: AstNode) {
+                    // Stryker disable next-line OptionalChaining: `before` runs no visitor where it found no check
                     check?.(node);
                 },
             };

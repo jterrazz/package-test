@@ -15,6 +15,39 @@ const UNIT = `${FEATURE}/http/events.ts`;
 ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndKinds, {
     invalid: [
         {
+            name: 'Another call through the entry namespace is no stub, and a unit exporting only by name has no default.',
+            code: `import * as t from '@jterrazz/test';\nexport default t.other({});`,
+            errors: [{ column: 0, line: 1, messageId: 'notDefineStub' }],
+            filename: UNIT,
+        },
+        {
+            code: `import { defineStub, http } from '@jterrazz/test';\nexport const stub = defineStub({ request: http.get('u'), response: http.json({}) });`,
+            errors: [{ column: 0, line: 1, messageId: 'missingDefault' }],
+            filename: UNIT,
+        },
+        {
+            name: 'A facade naming a local as its default, built from no stubs, composes nothing.',
+            code: `import { quiet } from '../helpers.js';\nexport { quiet as default };`,
+            errors: [{ column: 0, line: 1, messageId: 'notDefineStubs' }],
+            filename: FACADE,
+        },
+        {
+            name: 'A constructed defineStub, another call, or defineStub through no namespace of the entry, is no stub.',
+            code: `import { defineStub } from '@jterrazz/test';\nexport default new defineStub({});`,
+            errors: [{ column: 0, line: 1, messageId: 'notDefineStub' }],
+            filename: UNIT,
+        },
+        {
+            code: `export default build();`,
+            errors: [{ column: 0, line: 1, messageId: 'notDefineStub' }],
+            filename: UNIT,
+        },
+        {
+            code: `import * as x from './mine.js';\nexport default x.defineStub({});`,
+            errors: [{ column: 0, line: 1, messageId: 'notDefineStub' }],
+            filename: UNIT,
+        },
+        {
             name: 'A unit stub left at the _setup/stubs/ root.',
             code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
             errors: [{ column: 0, line: 1, messageId: 'rootFile' }],
@@ -105,6 +138,33 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
     ],
     valid: [
+        {
+            name: 'A unit default-exports a function, a named function, a value built above, or the default of another.',
+            code: `import { defineStub, http } from '@jterrazz/test';\nexport default function (id: string) {\n    return defineStub({ request: http.get(id), response: http.json({}) });\n}`,
+            filename: UNIT,
+        },
+        {
+            code: `import { defineStub, http } from '@jterrazz/test';\nexport default (function gone(id: string) {\n    return defineStub({ request: http.get(id), response: http.json({}) });\n});`,
+            filename: UNIT,
+        },
+        {
+            code: `import { defineStub, http } from '../../../../../../src/index.js';\nconst stub = defineStub({ request: http.get('u'), response: http.json({}) });\nexport default stub;`,
+            filename: UNIT,
+        },
+        {
+            code: `export { default } from './other.js';`,
+            filename: UNIT,
+        },
+        {
+            name: 'What no import of the entry binds as a builder — a re-export, a name no kind holds, a member of no namespace — is no kind.',
+            code: `import { defineStub, http, notAKind } from '@jterrazz/test';\nimport * as t from '@jterrazz/test';\nexport { openai } from '@jterrazz/test';\nexport default defineStub({ request: http.get(notAKind.x, t.notAKind, other.openai.chat()), response: openai.reply({}) });`,
+            filename: UNIT,
+        },
+        {
+            name: 'A facade re-exporting everything of another exports by name.',
+            code: `export * from './newsroom.stubs.js';`,
+            filename: `${FEATURE}/pipeline.stubs.ts`,
+        },
         {
             name: "A `stubs` folder above the package is the machine's: a helper of the checkout is no stub.",
             code: 'export const helper = 1;',
