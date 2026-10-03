@@ -5,7 +5,7 @@ import { conventionsPass } from './kit/checker/conventions.js';
 import { recordBaseline } from './kit/checker/record.js';
 
 const conventions: Contribution = {
-    commands: { baseline: async () => await Promise.resolve(recordBaseline(CHECKER)) },
+    commands: { baseline: async () => recordBaseline(CHECKER) },
     held: {
         lower: 'typescript fix',
         passes: ['conventions'],
@@ -14,7 +14,7 @@ const conventions: Contribution = {
         section: 'test',
         summarised: true,
     },
-    passes: { conventions: async () => await Promise.resolve(conventionsPass(CHECKER)) },
+    passes: { conventions: async () => conventionsPass(CHECKER) },
 };
 
 export default conventions;

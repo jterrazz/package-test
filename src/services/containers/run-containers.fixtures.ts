@@ -20,22 +20,18 @@ export function fakeRuntime(options: { failFirstStart?: boolean } = {}): Runtime
             getConnectionString: () => `127.0.0.1:${port}`,
             getHost: () => '127.0.0.1',
             getLogs: async (since?: Date) =>
-                await Promise.resolve(
-                    since === undefined
-                        ? `logs of ${port}`
-                        : `logs of ${port} since ${since.toISOString()}`,
-                ),
+                since === undefined
+                    ? `logs of ${port}`
+                    : `logs of ${port} since ${since.toISOString()}`,
             getMappedPort: () => port,
             start: async () => {
                 if (failing) {
                     failing = false;
                     throw new Error('the image could not be pulled');
                 }
-                await Promise.resolve();
             },
             stop: async () => {
                 stopped.push(port);
-                await Promise.resolve();
             },
         };
     };
@@ -55,7 +51,6 @@ export const POSTGRES_REORDERED: ContainerRequest = {
 };
 
 export async function unreachable(): Promise<void> {
-    await Promise.resolve();
     throw new Error('no Docker daemon answered');
 }
 

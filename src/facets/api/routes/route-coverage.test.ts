@@ -120,10 +120,9 @@ function stubProject({
     const provided = new Map<string, unknown>();
     const project: RouteProject = {
         config: { root },
-        globTestFiles: async () =>
-            await Promise.resolve({
-                testFiles: ['a.spec.ts', 'b.spec.ts'].map((file) => join(root, file)),
-            }),
+        globTestFiles: async () => ({
+            testFiles: ['a.spec.ts', 'b.spec.ts'].map((file) => join(root, file)),
+        }),
         name: 'api',
         provide: (key, value) => {
             provided.set(key, value);

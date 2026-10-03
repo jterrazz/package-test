@@ -98,7 +98,6 @@ describe('orphans', () => {
         const runtime = {
             getContainer: (id: string) => ({
                 remove: async (options: unknown) => {
-                    await Promise.resolve();
                     if (id === 'stuck') {
                         throw new Error('removal already in progress');
                     }
@@ -108,7 +107,6 @@ describe('orphans', () => {
             }),
             listContainers: async (options: unknown) => {
                 asked.push(options);
-                await Promise.resolve();
                 return [
                     listed('orphan', 'exited', { owner: 'host:2', session: 'gone' }),
                     listed('stuck', 'exited', { session: 'gone' }),

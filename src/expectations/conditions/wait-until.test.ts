@@ -28,7 +28,7 @@ describe('waitUntil', () => {
         }, 5);
 
         // Then - the poll awaits each reading
-        await waitUntil(async () => await Promise.resolve(landed), { interval: 1 });
+        await waitUntil(async () => landed, { interval: 1 });
         expect(landed).toBe(true);
     });
 

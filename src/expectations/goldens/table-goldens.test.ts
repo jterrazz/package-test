@@ -57,14 +57,10 @@ function randomIdRuns(count: number): { rows: string[][]; run: number }[] {
 
 function usersTable(rows: unknown[][]): DatabasePort {
     return {
-        columns: async () => await Promise.resolve(['id', 'name', 'created_at']),
-        query: async () => await Promise.resolve(rows),
-        reset: async () => {
-            await Promise.resolve();
-        },
-        seed: async () => {
-            await Promise.resolve();
-        },
+        columns: async () => ['id', 'name', 'created_at'],
+        query: async () => rows,
+        reset: async () => {},
+        seed: async () => {},
     };
 }
 
@@ -156,7 +152,7 @@ describe('table-goldens', () => {
         // Given - a table with no columns
         const subject = new TableAccessor('ghost', {
             ...usersTable([]),
-            columns: async () => await Promise.resolve([]),
+            columns: async () => [],
         });
 
         // Then - refused, before a SELECT with no columns reaches the driver

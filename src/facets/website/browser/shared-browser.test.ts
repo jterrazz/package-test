@@ -30,7 +30,6 @@ function stubLauncher(failures = 0): {
     const launched: StubBrowser[] = [];
     let failing = failures;
     const launch = async (): Promise<StubBrowser> => {
-        await Promise.resolve();
         if (failing > 0) {
             failing -= 1;
             throw new Error('chromium did not start');

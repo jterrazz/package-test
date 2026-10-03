@@ -117,7 +117,7 @@ const routes: Record<string, () => Promise<Response>> = {
     },
     '/health': async () =>
         // No outgoing call at all.
-        await Promise.resolve(Response.json({ ok: true })),
+        Response.json({ ok: true }),
     '/offline': async () => {
         // The transport failing is a different branch from a status:
         // `fetch` REJECTS, and nothing about the reply can be read.

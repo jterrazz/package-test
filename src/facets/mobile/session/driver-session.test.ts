@@ -42,11 +42,11 @@ function stubFactories(): { attach: never; calls: Calls; remote: never } {
     const remote = async (options: { capabilities: Record<string, unknown> }) => {
         calls.asked.push(options.capabilities);
         calls.created += 1;
-        return await Promise.resolve(session(`s-${calls.created}`));
+        return session(`s-${calls.created}`);
     };
     const attach = async (options: { sessionId: string }) => {
         calls.attached.push(options.sessionId);
-        return await Promise.resolve(session(options.sessionId));
+        return session(options.sessionId);
     };
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the two calls opening a session makes, never webdriverio's whole type
     return { attach: attach as never, calls, remote: remote as never };

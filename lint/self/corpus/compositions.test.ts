@@ -23,9 +23,7 @@ function actionStating(accessors: MatrixRow[]): Composition['actions'][number] {
         accessors,
         kind: 'action',
         name: 'trigger',
-        perform: async () => {
-            await Promise.resolve();
-        },
+        perform: async () => {},
         row: { group: 'Terminal action', name: '.trigger()', probe: ".trigger('" },
     };
 }

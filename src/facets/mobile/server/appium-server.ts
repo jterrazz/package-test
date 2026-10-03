@@ -64,7 +64,7 @@ async function mobileServer(): Promise<RunServer | undefined> {
 function notOurs(url: string): AppiumServer {
     return {
         stop: async () => {
-            await Promise.resolve();
+            // invariant: a declared server is the author's: this runner never stops what it did not start.
         },
         url,
     };

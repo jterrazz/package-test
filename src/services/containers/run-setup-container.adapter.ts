@@ -54,7 +54,6 @@ export class RunSetupContainer implements ContainerPort {
 
     async stop(): Promise<void> {
         this.address = null;
-        await Promise.resolve();
     }
 
     getMappedPort(containerPort: number): number {

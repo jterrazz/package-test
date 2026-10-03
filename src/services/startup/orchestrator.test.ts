@@ -17,21 +17,17 @@ function slowContainer(asked: (Date | undefined)[]): ContainerPort {
         getHost: () => '127.0.0.1',
         getLogs: async (since?: Date) => {
             asked.push(since);
-            return await Promise.resolve('boot line');
+            return 'boot line';
         },
         getMappedPort: () => 1,
         start: async () => {
             await clock.advance(10_000);
         },
-        stop: async () => {
-            await Promise.resolve();
-        },
+        stop: async () => {},
     };
 }
 
-async function settled(): Promise<void> {
-    await Promise.resolve();
-}
+async function settled(): Promise<void> {}
 
 function unhealthyService(): ServiceHandle {
     return {

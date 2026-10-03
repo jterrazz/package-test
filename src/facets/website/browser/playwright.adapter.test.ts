@@ -33,7 +33,7 @@ function stubChromium(hold = false): {
     let loads = 0;
     const goto = async (): Promise<null> => {
         if (!hold) {
-            return await Promise.resolve(null);
+            return null;
         }
         loads += 1;
         for (const waiter of waiters.filter((entry) => entry.count <= loads)) {
@@ -42,39 +42,35 @@ function stubChromium(hold = false): {
         return await never;
     };
     const page = {
-        evaluate: async () =>
-            await Promise.resolve({
-                html: '<html></html>',
-                jsonLdBlocks: [],
-                links: [],
-                metas: [],
-                text: '',
-                title: '',
-            }),
+        evaluate: async () => ({
+            html: '<html></html>',
+            jsonLdBlocks: [],
+            links: [],
+            metas: [],
+            text: '',
+            title: '',
+        }),
         goto,
-        locator: () => ({ ariaSnapshot: async () => await Promise.resolve('') }),
+        locator: () => ({ ariaSnapshot: async () => '' }),
         on: () => {},
         screenshot: async ({ path }: { path: string }) => {
             shots.push(path);
-            await Promise.resolve();
         },
         url: () => 'http://site.test/',
     };
     const browser = {
         close: async () => {
             state.closed = true;
-            await Promise.resolve();
         },
         newContext: async () => {
             const context = { closed: false };
             contexts.push(context);
-            return await Promise.resolve({
+            return {
                 close: async () => {
                     context.closed = true;
-                    await Promise.resolve();
                 },
-                newPage: async () => await Promise.resolve(page),
-            });
+                newPage: async () => page,
+            };
         },
         on: () => {},
     };
@@ -83,7 +79,7 @@ function stubChromium(hold = false): {
         if (!isBrowser(browser)) {
             throw new Error('the stub browser opens no context');
         }
-        return await Promise.resolve(browser);
+        return browser;
     };
     const loading = async (count: number): Promise<void> => {
         const waiter = Promise.withResolvers<true>();

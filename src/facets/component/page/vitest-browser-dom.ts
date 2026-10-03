@@ -289,7 +289,6 @@ export function mountDom(mount: DomMount): MountedSurface {
         unmount: async () => {
             teardown?.();
             container.remove();
-            await Promise.resolve();
         },
     };
 }

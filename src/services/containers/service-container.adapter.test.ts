@@ -8,7 +8,7 @@ describe('ServiceContainer', () => {
         // Given - a run serving containers, and a service container locating it, started then stopped
         const runtime = fakeRuntime();
         const url = await servedRun(runtime);
-        const container = new ServiceContainer(POSTGRES, async () => await Promise.resolve(url));
+        const container = new ServiceContainer(POSTGRES, async () => url);
         await container.start();
         const port = container.getMappedPort(5432);
         await container.stop();
@@ -21,9 +21,7 @@ describe('ServiceContainer', () => {
 
     test('the container a declared service gets — refuses every read before it started, and has no logs yet', async () => {
         // Given - a service container nothing started
-        const container = new ServiceContainer(POSTGRES, async () => {
-            await Promise.resolve();
-        });
+        const container = new ServiceContainer(POSTGRES, async () => {});
 
         // Then - an address is refused, and the logs are empty
         expect(() => container.getConnectionString()).toThrow(

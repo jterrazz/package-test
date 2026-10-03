@@ -199,7 +199,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         const statement = this.getDb().prepare<[], { name: string }>(
             `PRAGMA table_info("${table}")`,
         );
-        const rows = await Promise.resolve(statement.all());
+        const rows = statement.all();
         return rows.map((row) => row.name);
     }
 

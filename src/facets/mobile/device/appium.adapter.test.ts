@@ -23,15 +23,10 @@ function stubDriver(): { remote: never; sessions: Session[] } {
     const remote = async (options: Session) => {
         sessions.push(options);
         return {
-            $$: async () => await Promise.resolve([]),
-            deleteSession: async () => {
-                await Promise.resolve();
-            },
-            executeScript: async () => {
-                await Promise.resolve();
-            },
-            getPageSource: async () =>
-                await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
+            $$: async () => [],
+            deleteSession: async () => {},
+            executeScript: async () => {},
+            getPageSource: async () => '<XCUIElementTypeApplication name="App" />',
             takeScreenshot: async () =>
                 await Promise.reject(new Error('no screenshots in the stub')),
         };
@@ -81,32 +76,19 @@ function partialLabelDriver(): { remote: never; state: { taps: number } } {
     const element = {
         click: async () => {
             state.taps += 1;
-            await Promise.resolve();
         },
         elementId: 'button-1',
         getAttribute: async (name: string) =>
-            await Promise.resolve(
-                name === 'label' ? 'Continue to payment' : `XCUIElementType${name}`,
-            ),
-        setValue: async () => {
-            await Promise.resolve();
-        },
+            name === 'label' ? 'Continue to payment' : `XCUIElementType${name}`,
+        setValue: async () => {},
     };
-    const remote = async () =>
-        await Promise.resolve({
-            $$: async (selector: string) =>
-                await Promise.resolve(selector.includes('CONTAINS') ? [element] : []),
-            deleteSession: async () => {
-                await Promise.resolve();
-            },
-            executeScript: async () => {
-                await Promise.resolve();
-            },
-            getPageSource: async () =>
-                await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
-            takeScreenshot: async () =>
-                await Promise.reject(new Error('no screenshots in the stub')),
-        });
+    const remote = async () => ({
+        $$: async (selector: string) => (selector.includes('CONTAINS') ? [element] : []),
+        deleteSession: async () => {},
+        executeScript: async () => {},
+        getPageSource: async () => '<XCUIElementTypeApplication name="App" />',
+        takeScreenshot: async () => await Promise.reject(new Error('no screenshots in the stub')),
+    });
     return { remote: asRemote(remote), state };
 }
 function scopedDriver(): { remote: never; tapped: string[] } {
@@ -114,30 +96,20 @@ function scopedDriver(): { remote: never; tapped: string[] } {
     const buy = (id: string) => ({
         click: async () => {
             tapped.push(id);
-            await Promise.resolve();
         },
         elementId: id,
     });
     const card = {
-        $$: async (selector: string) =>
-            await Promise.resolve(selector.includes('Buy') ? [buy('inside')] : []),
+        $$: async (selector: string) => (selector.includes('Buy') ? [buy('inside')] : []),
         elementId: 'card',
     };
-    const remote = async () =>
-        await Promise.resolve({
-            $$: async (selector: string) =>
-                await Promise.resolve(selector.includes("'card'") ? [card] : [buy('outside')]),
-            deleteSession: async () => {
-                await Promise.resolve();
-            },
-            executeScript: async () => {
-                await Promise.resolve();
-            },
-            getPageSource: async () =>
-                await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
-            takeScreenshot: async () =>
-                await Promise.reject(new Error('no screenshots in the stub')),
-        });
+    const remote = async () => ({
+        $$: async (selector: string) => (selector.includes("'card'") ? [card] : [buy('outside')]),
+        deleteSession: async () => {},
+        executeScript: async () => {},
+        getPageSource: async () => '<XCUIElementTypeApplication name="App" />',
+        takeScreenshot: async () => await Promise.reject(new Error('no screenshots in the stub')),
+    });
     return { remote: asRemote(remote), tapped };
 }
 describe('AppiumAdapter', () => {

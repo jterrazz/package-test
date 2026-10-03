@@ -25,6 +25,10 @@ export type ProcessOptions = {
 };
 
 /** An external process declared as a service: started after its siblings, stopped with the specification. */
+async function nothingToIsolate(): Promise<void> {
+    // invariant: the minted id already tells this run's child apart, so no isolation step acts.
+}
+
 export class ProcessHandle implements ServiceHandle {
     /** Embedded: nothing to pull, nothing to run in a container. */
     readonly defaultImage = '';
@@ -54,32 +58,19 @@ export class ProcessHandle implements ServiceHandle {
     async healthcheck(): Promise<void> {
         // invariant: readiness IS the healthcheck here: `start()` does not resolve until
         // the process answers on `ready`, so there is nothing left to probe.
-        await Promise.resolve();
     }
 
-    /** Never started by the orchestrator: the facet starts it once its siblings' connection strings are readable. */
     async initialize(): Promise<void> {
-        await Promise.resolve();
+        // invariant: never started by the orchestrator: the facet starts it once its siblings' connection strings are readable.
     }
 
     /** Isolation is the run's: one child per evaluation of the specification module, told apart by the minted id. */
     isolation(): IsolationStrategy {
-        return {
-            acquire: async () => {
-                await Promise.resolve();
-            },
-            release: async () => {
-                await Promise.resolve();
-            },
-            reset: async () => {
-                await Promise.resolve();
-            },
-        };
+        return { acquire: nothingToIsolate, release: nothingToIsolate, reset: nothingToIsolate };
     }
 
     async reset(): Promise<void> {
         // invariant: resetting a process between chains would mean restarting it.
-        await Promise.resolve();
     }
 
     /** Spawn it and wait until it answers; `services` is every sibling, already started. */

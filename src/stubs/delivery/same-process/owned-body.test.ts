@@ -26,9 +26,7 @@ describe('owned-body', () => {
         // Given - a fetch answered with a teed reply, every body owned
         const served = teedReply();
         Object.defineProperty(served, 'url', { value: 'https://weather.test/today' });
-        const reply = await owningBodies(async () => await Promise.resolve(served))(
-            'https://weather.test/today',
-        );
+        const reply = await owningBodies(async () => served)('https://weather.test/today');
 
         // Then - what was served, read through the owned stream
         expect([

@@ -130,7 +130,7 @@ export async function startLint(options: LintSpecificationOptions): Promise<Lint
     };
     return {
         cleanup: async () => {
-            await Promise.resolve();
+            // invariant: a lint runner starts no process and no service, so there is nothing to stop.
         },
         lint: lintFacet.open(config),
     };

@@ -67,10 +67,10 @@ function regenerate(cliArguments: readonly string[]): number {
 
 const selfChecks: Contribution = {
     commands: {
-        chapters: async () => await Promise.resolve(regenerate),
-        coverage: async () => await Promise.resolve(coverageFloor(checkCoverageFloor)),
+        chapters: async () => regenerate,
+        coverage: async () => coverageFloor(checkCoverageFloor),
     },
-    passes: { check: async () => await Promise.resolve(atZeroPass(SELF_CHECKER)) },
+    passes: { check: async () => atZeroPass(SELF_CHECKER) },
 };
 
 export default selfChecks;

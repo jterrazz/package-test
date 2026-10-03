@@ -22,9 +22,7 @@ function pluginNames(project: TestProjectInlineConfiguration): string[] {
     );
 }
 
-async function returnsNothing(): Promise<void> {
-    await Promise.resolve();
-}
+async function returnsNothing(): Promise<void> {}
 
 function untyped(source: unknown): UserConfigFn {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an untyped caller's source yields what the type forbids

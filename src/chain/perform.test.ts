@@ -40,7 +40,7 @@ function acting(log: string[], outcome: unknown): AnyAction {
             if (outcome instanceof Error) {
                 throw outcome;
             }
-            return await Promise.resolve(outcome);
+            return outcome;
         },
         row: { group: 'Terminal action', name: '.act()', probe: '.act(' },
     });
@@ -127,7 +127,6 @@ describe('perform', () => {
         const replacing: AnyAction = {
             ...acting(log, 'done'),
             prepare: async () => {
-                await Promise.resolve();
                 log.push('take down');
                 return { workDir: null };
             },

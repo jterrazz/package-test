@@ -20,11 +20,7 @@ const failingWith = (message: string) => (): void => {
 describe('peer', () => {
     test('loadPeer — an optional peer, or a message that fixes it — hands back what the import resolved, untouched', async () => {
         // Given - a peer that is installed
-        const loaded = await loadPeer(
-            'yaml',
-            'a document',
-            async () => await Promise.resolve({ parse: () => 42 }),
-        );
+        const loaded = await loadPeer('yaml', 'a document', async () => ({ parse: () => 42 }));
 
         // Then - the loader is a pass-through on the happy path
         expect(loaded.parse()).toBe(42);

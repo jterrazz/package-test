@@ -13,14 +13,10 @@ const WORKDIR = import.meta.dirname;
 
 function fakeDatabase(): DatabasePort {
     return {
-        columns: async () => await Promise.resolve([]),
-        query: async () => await Promise.resolve([]),
-        reset: async () => {
-            await Promise.resolve();
-        },
-        seed: async () => {
-            await Promise.resolve();
-        },
+        columns: async () => [],
+        query: async () => [],
+        reset: async () => {},
+        seed: async () => {},
     };
 }
 
@@ -36,26 +32,14 @@ function fakeService(options: {
         defaultImage: '',
         defaultPort: 0,
         environment: {},
-        healthcheck: async () => {
-            await Promise.resolve();
-        },
-        initialize: async () => {
-            await Promise.resolve();
-        },
+        healthcheck: async () => {},
+        initialize: async () => {},
         isolation: () => ({
-            acquire: async () => {
-                await Promise.resolve();
-            },
-            release: async () => {
-                await Promise.resolve();
-            },
-            reset: async () => {
-                await Promise.resolve();
-            },
+            acquire: async () => {},
+            release: async () => {},
+            reset: async () => {},
         }),
-        reset: async () => {
-            await Promise.resolve();
-        },
+        reset: async () => {},
         serviceName: null,
         started: true,
         type: options.type,
@@ -75,8 +59,7 @@ type Chain = {
 const handed = defineAction({
     accessors: [],
     name: 'handed',
-    perform: async (_args: [], read, _adapters, { config }) =>
-        await Promise.resolve(childEnv(config, read(env), WORKDIR)),
+    perform: async (_args: [], read, _adapters, { config }) => childEnv(config, read(env), WORKDIR),
     row: { group: 'Terminal action', name: '.handed()', probe: '.handed(' },
 });
 describe('env', () => {

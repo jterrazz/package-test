@@ -109,7 +109,6 @@ export function interceptThrough(
                 restoreOrigin?.();
                 const violation = registration.violation();
                 registration.cleanup();
-                await Promise.resolve();
                 if (violation) {
                     throw violation;
                 }

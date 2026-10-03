@@ -18,12 +18,10 @@ async function connection(url: string): Promise<string> {
 }
 
 async function absent(): Promise<void> {
-    await Promise.resolve();
     throw new Error(DOCKER_ABSENT);
 }
 
 async function refuses(): Promise<never> {
-    await Promise.resolve();
     throw new Error('the loopback refused to listen');
 }
 
@@ -38,7 +36,6 @@ describe('setup', () => {
                 },
             },
             async () => {
-                await Promise.resolve();
                 throw new Error(DOCKER_ABSENT);
             },
         );
@@ -100,7 +97,7 @@ describe('setup', () => {
         Reflect.set(globalThis, foreign, {
             enter: async () => {
                 joined.push('foreign');
-                return await Promise.resolve({ leave: async () => {}, url: 'http://foreign' });
+                return { leave: async () => {}, url: 'http://foreign' };
             },
         });
         const provided: string[] = [];

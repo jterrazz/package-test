@@ -25,10 +25,10 @@ export function stubBackend(
         },
         arm: async (stubs) => {
             if (backend === undefined) {
-                return await Promise.resolve({});
+                return {};
             }
             backend.beginChain(stubs);
-            return await Promise.resolve({ violation: () => backend.violation() });
+            return { violation: () => backend.violation() };
         },
     };
 }
