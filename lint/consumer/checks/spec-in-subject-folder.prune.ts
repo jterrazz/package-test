@@ -168,6 +168,11 @@ export function pruned(text: string): string {
 export const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
+/** `from '…'` and `import('…')` name a module; every other lead names a path on disk. */
+export function isModuleLead(lead: string): boolean {
+    return /^(?:from\b|import\()/u.test(lead);
+}
+
 /** A path naming nothing, a negative spec's missing file, says the same from anywhere. */
 export function rebased(text: string, from: string, to: string): string {
     const strings = literalSpans(blankComments(text));
@@ -178,7 +183,7 @@ export function rebased(text: string, from: string, to: string): string {
         const target = resolve(from, path);
         // Stryker disable next-line EqualityOperator: a call's lead never starts nor ends a literal
         const inText = strings.some((span) => found.index > span.start && found.index < span.end);
-        const isModule = /^(?:from\b|import\()/u.test(lead);
+        const isModule = isModuleLead(lead);
         if (inText || (!isModule && !existsSync(target))) {
             continue;
         }

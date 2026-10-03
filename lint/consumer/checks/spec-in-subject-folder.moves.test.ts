@@ -1,11 +1,15 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { CHARTS, RUNNER, specsTree, TWO_ROUTES } from '../../kit/testing/subject.fixtures.js';
 import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
+
+const listing = (rule: string): string =>
+    `import { api } from '../api.specification.js'; // checker-disable-line ${rule} -- filed by its author\ntest('a', async () => { await api.get('/orders'); });\n`;
 
 describe('fixSpecInSubjectFolder', () => {
     test('subject-moves — the split keeps each test with the imports, constants and helpers it reads, in one describe', () => {
@@ -111,30 +115,6 @@ describe('fixSpecInSubjectFolder', () => {
                 existsSync(join(root, path)),
             ),
         ).toStrictEqual([false, false, false, true]);
-    });
-
-    test('subject-moves — a move leaves a path naming nothing, and a call spelled in a string, as written', () => {
-        // Given - a negative spec's missing file, and a refusal message quoting a call on a file that exists
-        const root = specsTree({
-            'api/api.specification.ts': RUNNER,
-            'api/orders/_requests/x.http': 'GET /orders\n',
-            'api/orders/listing.spec.ts': [
-                "import { api } from '../api.specification.js';",
-                "test('a', async () => { await api.request(file('./_requests/nonexistent.http')); });",
-                "test('b', async () => { await expect(api.get('/orders')).rejects.toThrow('file(\"./_requests/x.http\")'); });",
-                '',
-            ].join('\n'),
-        });
-
-        // When - the fix moves the file one folder down
-        fixSpecInSubjectFolder(root);
-
-        // Then - both read as they did: the missing file is missing from anywhere, the string is text
-        const moved = readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8');
-        expect({
-            missing: moved.includes("file('./_requests/nonexistent.http')"),
-            quoted: moved.includes('file("./_requests/x.http")'),
-        }).toStrictEqual({ missing: true, quoted: true });
     });
 
     test('subject-moves — a test reaching two subjects is reported with its title, and filed with the subject it opens on', () => {
@@ -251,38 +231,65 @@ describe('fixSpecInSubjectFolder', () => {
         });
     });
 
-    test('subject-moves — a lift repoints the document that reads the ground it moves', () => {
-        // Given - a check document and a spec of the fix command, both standing on the check folder's project
+    test('subject-moves — a spec in its folder, silenced on its own rule, or one of whose targets is taken, is left; one silenced on the other rule is moved', () => {
+        // Given - a spec in its folder, a listing and a two-subject spec silenced on their rules, one silenced on the other rule, and specs whose targets are taken
         const root = specsTree({
-            'cli/check/_fixtures/project/index.ts': 'export {};\n',
-            'cli/check/fixed.spec.ts': [
-                "import { directory } from '@jterrazz/test';",
-                "import { cli } from '../cli.specification.js';",
-                "test('fixes', async () => { await cli.fixture(directory('./_fixtures/project/')).exec('fix'); });",
-                '',
-            ].join('\n'),
-            'cli/check/recorded.spec.yaml': [
-                'description: checks the project',
-                'fixture: ./_fixtures/project/',
-                'runs:',
-                '    - command: check',
-                '      exit: 0',
-                '',
-            ].join('\n'),
-            'cli/cli.specification.ts':
-                "export const { cleanup, cli } = await specification.cli('./bin.sh');\n",
+            'api/api.specification.ts': RUNNER,
+            'api/orders/list/listing.spec.ts':
+                "import { api } from '../../api.specification.js';\ntest('a', async () => { await api.get('/orders'); });\n",
+            'api/orders/orders.spec.ts': TWO_ROUTES.replace(
+                '        // Given - an empty table',
+                '        // checker-disable-next-line one-subject-per-spec -- one journey',
+            ),
+            'api/orders/silenced.spec.ts': listing('spec-in-subject-folder'),
+            'api/orders/wrong.spec.ts': listing('one-subject-per-spec'),
+        });
+        const taken = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/create/orders.spec.ts': 'kept\n',
+            'api/orders/list/listing.spec.ts': 'kept\n',
+            'api/orders/listing.spec.ts': listing('no-rule'),
+            'api/orders/orders.spec.ts': TWO_ROUTES,
         });
 
-        // When - the fix files the spec under its command
-        fixSpecInSubjectFolder(root);
+        // When - the fix runs
+        const done = fixSpecInSubjectFolder(root);
 
-        // Then - the project lands where both readers reach it, and the document names it there
-        expect({
-            document: readFileSync(join(root, 'cli/check/recorded.spec.yaml'), 'utf8').includes(
-                'fixture: ../_fixtures/project/',
-            ),
-            lifted: existsSync(join(root, 'cli/_fixtures/project/index.ts')),
-            moved: existsSync(join(root, 'cli/fix/fixed.spec.ts')),
-        }).toStrictEqual({ document: true, lifted: true, moved: true });
+        // Then - only the spec silenced on the other rule moved, and the one in its folder is untouched
+        expect([
+            done,
+            readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8'),
+            fixSpecInSubjectFolder(taken),
+        ]).toStrictEqual([
+            ['api/orders/wrong.spec.ts → api/orders/list/wrong.spec.ts'],
+            "import { api } from '../../api.specification.js';\ntest('a', async () => { await api.get('/orders'); });\n",
+            [],
+        ]);
+    });
+
+    test('subject-moves — a split keeping the file in the folder of its second subject rewrites it there, and git sees the new file beside it, no rename', () => {
+        // Given - a two-subject spec already in its second subject's folder, committed
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/create/orders.spec.ts': TWO_ROUTES.replace("'../api", "'../../api"),
+        });
+        const checkout = dirname(root);
+        const git = (...args: string[]): string =>
+            execFileSync('git', args, { cwd: checkout, encoding: 'utf8' });
+        git('init', '--quiet');
+        git('add', '.');
+        git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '--quiet', '-m', 'specs');
+
+        // When - the fix runs
+        const done = fixSpecInSubjectFolder(root);
+
+        // Then - only the written file is reported, and the kept file is modified in place
+        expect([
+            done,
+            git('status', '--porcelain').split('\n').filter(Boolean).toSorted(),
+        ]).toStrictEqual([
+            ['api/orders/create/orders.spec.ts → api/orders/list/orders.spec.ts'],
+            [' M specs/api/orders/create/orders.spec.ts', '?? specs/api/orders/list/'],
+        ]);
     });
 });
