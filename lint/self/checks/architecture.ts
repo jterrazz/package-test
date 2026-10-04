@@ -253,7 +253,11 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
         from: { path: '^src/', pathNot: either([TEST_MATERIAL, ...SPAWNING_SITES.map(targetOf)]) },
         name: 'process-spawned-by-its-program-owner',
         read: READ_LAYERS,
-        to: { dependencyTypes: ['core'], path: '^(node:)?child_process$' },
+        to: {
+            dependencyTypes: ['core'],
+            dependencyTypesNot: ['type-only'],
+            path: '^(node:)?child_process$',
+        },
         why: 'each program the framework runs has one module that spawns it, so its lifecycle, its options and its errors have one owner (ADR-009)',
     },
     {

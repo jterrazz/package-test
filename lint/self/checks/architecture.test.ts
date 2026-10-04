@@ -151,6 +151,22 @@ describe('ARCHITECTURE', () => {
         ]);
     });
 
+    test('a program is spawned by the module that owns it; a type of child_process spawns nothing', () => {
+        // Given - a spawn outside the spawning sites, one inside, and a module typing the child it is handed
+        const violations = violationsIn({
+            'src/chain/run.ts': "import { spawn } from 'node:child_process';\nexport { spawn };\n",
+            'src/services/process/serve.ts':
+                "import { spawn } from 'node:child_process';\nexport { spawn };\n",
+            'src/services/process/process-group.ts':
+                "import type { ChildProcess } from 'node:child_process';\nexport type Child = ChildProcess;\n",
+        });
+
+        // Then - only the spawn outside its owner is named
+        expect(violations).toStrictEqual([
+            'src/chain/run.ts → child_process  process-spawned-by-its-program-owner',
+        ]);
+    });
+
     test('a package is judged as the pass resolves it: a type-only import, a subpath and the package itself', () => {
         // Given - vitest/browser in and out of its owner, playwright's types in the chain, and the package's own name in a layer
         const violations = violationsIn({
