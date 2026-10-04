@@ -72,5 +72,6 @@ export function getCallerDir(): string {
         ({ file }) => !file.includes('node_modules') && !isFrameworkFrame(file),
     );
     /* invariant: every frame internal: the chain was started from node_modules (a rule pack declaring tests), so the working directory stands in. */
+    // Stryker disable next-line ConditionalExpression: outside: a module test is always a caller frame of its own, so only a chain started from node_modules takes the fallback
     return caller === undefined ? process.cwd() : dirname(caller.file);
 }

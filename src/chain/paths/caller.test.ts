@@ -127,6 +127,14 @@ describe('caller', () => {
         ]);
     });
 
+    test('framework frames are recognised by identity — a frame inside any one of the trees is the framework', () => {
+        // Given - the build and the source a map points back to, a frame in the second
+        // Then - it is the framework's
+        expect(isFrameworkFrame(join(framework, 'index.js'), [join(base, 'app'), framework])).toBe(
+            true,
+        );
+    });
+
     test('framework frames are recognised by identity — the framework directory itself is not inside itself', () => {
         // Given - the directory, not a file within it
         // Then - the containment test is strict
