@@ -7,23 +7,17 @@ const MOBILE_TARGET = 'test-mobile';
 
 const CI_TARGETS = ['build', 'lint', 'test', 'mutation'];
 
-const BESIDE_TARGETS = [
-    MOBILE_TARGET,
-    'test-changed',
-    'test-merge',
-    'check-links',
-    'mutation-specs',
-];
+const BESIDE_TARGETS = [MOBILE_TARGET, 'test-changed', 'test-merge', 'check-links'];
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
 describe('makefile', () => {
-    test('the Makefile — the six targets a repository answers — this repository declares the six, the mutation verdict CI runs, and the five beside them, each phony', () => {
+    test('the Makefile — the six targets a repository answers — this repository declares the six, the mutation verdict CI runs, and the four beside them, each phony', () => {
         // Given - this repository's Makefile
         const targets = makefileAt(ROOT);
         const verbs = [...new Set([...MAKE_TARGETS, ...CI_TARGETS, ...BESIDE_TARGETS])].toSorted();
 
-        // Then - the verbs are the six, mutation, and the five no flow speaks; the one other rule is the install stamp, a file
+        // Then - the verbs are the six, mutation, and the four no flow speaks; the one other rule is the install stamp, a file
         expect(targets.get('.PHONY')?.prerequisites.toSorted()).toStrictEqual(verbs);
         expect(
             [...targets.keys()]

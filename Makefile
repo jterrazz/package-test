@@ -1,4 +1,4 @@
-.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation mutation-specs
+.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation
 
 node_modules/.install: package-lock.json
 	npm ci
@@ -55,8 +55,3 @@ check-links:
 
 mutation: build
 	$(MUTATION)
-
-# The whole suite, the specs and the processes they spawn included: one mutant at a time runs every node project, so it is pointed at ranges, `MUTATE=<file>:<from>-<to>,…`.
-mutation-specs: build
-	@if [ -z "$(MUTATE)" ]; then echo "mutation-specs: name the ranges to measure — make mutation-specs MUTATE=src/stubs/kinds/openai.ts:186-186"; exit 1; fi
-	npx typescript mutation --specs --mutate "$(MUTATE)"

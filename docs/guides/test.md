@@ -191,23 +191,15 @@ write the test — not six months later, when a coverage number moved.
 
 ## The mutants no test kills
 
-`make mutation` measures the module tests alone ([Develop](develop.md)). `make mutation-specs MUTATE=<file>:<from>-<to>,…` measures the whole suite: it builds the instrumented sources, runs every node project against each mutant, and hands the active mutant to every process a spec spawns, through the setup the toolchain derives with the rest of Stryker's config. A mutant a child process reaches is covered by no test of the parent, so each mutant runs all 2 570 tests, and the target is pointed at ranges rather than at the tree.
+`make mutation` runs `typescript mutation` ([Develop](develop.md)): the module tests against the sources they test, then the whole suite — every node project, against a build of the instrumented sources — against what they could not measure, on the lines changed since `HEAD` (in CI, since the commit the push or the pull request started from). Every process a spec spawns is handed the active mutant and hands back the mutants it ran, so a mutant the built package reaches is run against the specs that reach it, not against all of them. A mutant of a module-level table runs against the tests of the files that load it; one they let live is the suite's to judge. What the module tests leave on lines no change has reached is counted, in one number, until a change brings it to the suite.
 
-When the module tests that restated a spec went, in October 2026, 698 mutants they had killed were left to the specs. The specs killed 654, and a spec or a lint case was written for the gaps among the rest. Those ranges were measured again with `make mutation-specs` on the tree as it stands. What it leaves alive is listed here, one reason each.
+Some code no node project can reach, and the suite counts its mutants as run by no test:
 
-| Survivor                                                  | Mutants | Why no test kills it                                                                                                                                                  |
-| --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/facets/cli/documents/literate-plugin.ts:59-92`       | 10      | the Vite plugin runs in Vitest's main process while it collects `.spec.yaml` documents, which no mutant switch of a test reaches; every literate spec runs through it |
-| `src/chain/refusals/node-only.ts:3-12`                    | 6       | it throws only in a page, from the browser build the component project runs in a real browser, out of the measure's reach                                             |
-| `src/facets/component/viewport/viewport.capability.ts:27` | 4       | the component chain arms it in the page, out of the measure's reach                                                                                                   |
-| `src/facets/website/visit/visit.action.ts:68`             | 2       | equivalent: a page opened with an empty set of headers and one opened with none send the same request                                                                 |
-| `src/facets/mobile/session/mobile-session.ts:22`          | 1       | a global setup, run in Vitest's main process, and only beside a simulator                                                                                             |
-| `src/expectations/command/cli.result.ts:89`               | 1       | equivalent: a text accessor's stream name is read only by the component facet's golden message, which a cli result never reaches                                      |
-| `lint/kit/project/source.ts:61`                           | 1       | equivalent: `.tsx?` unanchored differs only for a file carrying `.ts` in the middle of its name, which no judged tree holds                                           |
-| `lint/kit/project/tree.ts:83`                             | 1       | equivalent: a specs root that is not on disk holds no file, so a stray root changes no finding                                                                        |
-| `src/visitor/targets/roles.ts:17`                         | 1       | equivalent: every reader of a target asks whether its `name` is undefined, so an absent name and an undefined one read the same                                       |
-| `src/disk/resolved-spec-path.ts:6`                        | 1       | equivalent through the surface: every path it resolves comes from a `file()` or `directory()` that refused a path not relative already                                |
-| `src/stubs/kinds/openai.ts:186`                           | 1       | equivalent: no module reads a stub request's `adapter`                                                                                                                |
+- **The literate plugin** (`src/facets/cli/documents/literate-plugin.ts`) runs in Vitest's main process while it collects `.spec.yaml` documents, where no test is running; every literate spec runs through it.
+- **Code that only runs in a page** — the refusal of `src/chain/refusals/node-only.ts`, the viewport the component chain arms — runs in the browser the component project drives, which the suite does not run.
+- **A global setup** — `src/facets/mobile/session/mobile-session.ts` — runs in Vitest's main process, and only beside a simulator.
+
+A mutant a test runs and no behaviour can tell apart is declared where it stands, `// Stryker disable next-line <mutator>: <why it is equivalent>`, once a change brings it to the suite.
 
 ## The capability matrix
 
