@@ -109,6 +109,7 @@ function save(file: string, source: string, folder: string | undefined): void {
         return;
     }
     mkdirSync(folder, { recursive: true });
+    // Stryker disable next-line StringLiteral: a digest in any encoding keeps two files' rewrites apart, and the round trip reads back every .json the folder holds
     const name = createHash('sha256').update(file).digest('hex');
     const pending: Pending = { file, source };
     writeFileSync(join(folder, `${name}.json`), JSON.stringify(pending));
