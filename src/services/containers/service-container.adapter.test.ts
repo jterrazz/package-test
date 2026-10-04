@@ -19,9 +19,25 @@ describe('ServiceContainer', () => {
         expect(runtime.stopped).toHaveLength(0);
     });
 
-    test('the container a declared service gets — refuses every read before it started, and has no logs yet', async () => {
-        // Given - a service container nothing started
+    test('the container a declared service gets — lets the run container go when stopped, and its address with it', async () => {
+        // Given - a service container of the run, started then stopped
+        const container = new ServiceContainer(
+            POSTGRES,
+            async () => await servedRun(fakeRuntime()),
+        );
+        await container.start();
+        await container.stop();
+
+        // Then - the address it held is the run's to keep, no longer this service's
+        expect(() => container.getHost()).toThrow(
+            'a container of the run was read before it started',
+        );
+    });
+
+    test('the container a declared service gets — refuses every read before it started, stops as nothing, and has no logs yet', async () => {
+        // Given - a service container nothing started, stopped all the same
         const container = new ServiceContainer(POSTGRES, async () => {});
+        await container.stop();
 
         // Then - an address is refused, and the logs are empty
         expect(() => container.getConnectionString()).toThrow(
