@@ -35,12 +35,14 @@ test-merge: node_modules/.install
 test-changed: node_modules/.install
 	npm test -- --changed
 
-# The three targets CI runs, in its order, then the mutation verdict, which CI runs weekly.
+MUTATION = npx typescript mutation
+
+# The four targets CI runs, in its order.
 check: node_modules/.install
 	$(MAKE) build
 	npm run lint
 	$(MAKE) test
-	npx typescript mutation
+	$(MUTATION)
 
 # Needs Xcode and a simulator: no CI job runs it, and `check` never calls it.
 test-mobile: build
@@ -51,9 +53,9 @@ check-links:
 	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
 	lychee --no-progress README.md docs skills
 
-# Incremental: about two minutes over a day's changes, half an hour the first time in a fresh clone.
+# Incremental: two to four minutes over a day's changes, half an hour the first time in a fresh clone.
 mutation: build
-	npx typescript mutation
+	$(MUTATION)
 
 # The whole suite, the specs and the processes they spawn included: one mutant at a time runs every node project, so it is pointed at ranges, `MUTATE=<file>:<from>-<to>,…`.
 mutation-specs: build
