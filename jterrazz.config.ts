@@ -59,6 +59,8 @@ const READS_THE_SOURCES =
 export default defineConfig({
     kind: 'library',
     optOuts: {
+        'test/no-second-test-runtime-network':
+            'this repository builds the network seam: its stubs are served by msw, and the module test of the handlers that wrap msw drives msw itself',
         'typescript/self-folders-apart':
             'the corpus audits the self checker and the self plugin by importing them, and one self check reads the capability matrix the corpus renders (docs/01-architecture.md)',
     },

@@ -6,8 +6,7 @@ import { buildStubHandlers } from '../msw-handlers.js';
 import type { Msw } from '../msw-handlers.js';
 import { owningBodies } from './owned-body.js';
 
-/** msw's modules, loaded only once a stub is served: a node consumer that declares none never loads them. */
-export async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> {
+async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> {
     const [{ setupServer }, msw] = await Promise.all([import('msw/node'), import('msw')]);
     return { msw, setupServer: () => setupServer() };
 }
