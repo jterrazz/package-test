@@ -88,6 +88,19 @@ describe('match', () => {
         expect(String(match.includes('classify'))).toBe('{{includes:classify}}');
     });
 
+    test('match — typed matchers — each renders as the token it stands for in a failure diff', () => {
+        // Given - a ref, a ref that must differ from another, a typed capture, and a regex
+        // Then - each written as its token
+        expect(
+            [
+                match.ref('user'),
+                match.ref('user', { not: 'admin' }),
+                match.uuid(),
+                match.regex(/^a+$/u),
+            ].map(String),
+        ).toStrictEqual(['{{ref#user}}', '{{ref#user!admin}}', '{{uuid}}', '{{regex:^a+$}}']);
+    });
+
     test('match — typed matchers — matchers compose inside structures', () => {
         // Given - a structure mixing literals and matchers
         const scope = new CaptureScope();
