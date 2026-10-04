@@ -52,10 +52,9 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     connectionString = '';
 
     private client: Client | null = null;
-    /** The container's own string, which a worker's clone replaces and is restored from. */
-    private containerConnectionString = '';
     private template: null | string = null;
-    private database: null | string = null;
+    /** The worker's clone, and the container's own string it replaced and is restored from. */
+    private clone: null | { container: string; database: string } = null;
 
     constructor(options: PostgresOptions = {}) {
         this.defaultImage = options.image ?? SERVICE_IMAGES.postgres;
@@ -104,13 +103,11 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     }
 
     async initialize(dockerDir: string): Promise<void> {
-        if (this.serviceName === undefined) {
-            return;
-        }
-
         // invariant: its own name first, then the type's.
         const initPaths = [
-            resolve(dockerDir, `${this.serviceName}/init.sql`),
+            ...(this.serviceName === null
+                ? []
+                : [resolve(dockerDir, `${this.serviceName}/init.sql`)]),
             resolve(dockerDir, 'postgres/init.sql'),
         ];
 
@@ -192,9 +189,8 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
                     );
                 });
                 await this.closeClient();
-                this.containerConnectionString = this.connectionString;
+                this.clone = { container: this.connectionString, database };
                 this.connectionString = withDatabase(this.connectionString, database);
-                this.database = database;
             },
 
             reset: async () => {
@@ -203,14 +199,14 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
 
             release: async () => {
                 await this.closeClient();
-                const { database } = this;
-                if (database === null) {
+                const { clone } = this;
+                if (clone === null) {
                     return;
                 }
-                this.connectionString = this.containerConnectionString;
-                this.database = null;
+                this.connectionString = clone.container;
+                this.clone = null;
                 await withClient(this.connectionString, async (admin) => {
-                    await admin.query(`DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`);
+                    await admin.query(`DROP DATABASE IF EXISTS "${clone.database}" WITH (FORCE)`);
                 });
             },
         };
