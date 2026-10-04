@@ -166,6 +166,32 @@ function viewName(handle: string, text: string, program: AstNode): string {
     return taken.has(name) ? `${name}View` : name;
 }
 
+/** Only a variable declaration holds `declarations`: any other statement declares no name a setting reads. */
+function declaredNames(statement: AstNode): string[] {
+    const declaration =
+        statement.type === 'ExportNamedDeclaration' ? child(statement, 'declaration') : statement;
+    return childList(declaration, 'declarations').flatMap(
+        (declarator) => identifierName(child(declarator, 'id')) ?? [],
+    );
+}
+
+/** After the imports, and after every top-level declaration a shared setting reads: a view declared above a constant it reads is read before it exists. */
+function viewPosition(program: AstNode, shared: Setting[]): number {
+    const read = new Set(
+        shared.flatMap((setting) => setting.argument.match(/[A-Za-z_$][\w$]*/gu) ?? []),
+    );
+    let after = 0;
+    for (const statement of childList(program, 'body')) {
+        if (
+            statement.type === 'ImportDeclaration' ||
+            declaredNames(statement).some((name) => read.has(name))
+        ) {
+            after = nodeEnd(statement);
+        }
+    }
+    return after;
+}
+
 function declareOnce(
     fixer: Fixer,
     {
@@ -184,10 +210,7 @@ function declareOnce(
         view: string;
     },
 ): Fix[] {
-    const imports = childList(program, 'body').filter(
-        (statement) => statement.type === 'ImportDeclaration',
-    );
-    const after = nodeEnd(imports.at(-1));
+    const after = viewPosition(program, shared);
     const context = shared.map((setting) => `${setting.name}: ${setting.argument}`).join(', ');
     const edits: Fix[] = [
         fixer.insertTextAfterRange(
