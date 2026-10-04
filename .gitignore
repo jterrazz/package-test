@@ -6,3 +6,7 @@ dist
 
 # The Appium a spawned-server mobile run starts: a stub serving the protocol double.
 !specs/mobile/appium/_fixtures/mobile-spawned-session/app/node_modules/
+
+# The oxlint the checker's own-fix fixtures resolve: a shim to the repository's, the ground their ratchet specs stand on.
+!specs/cli/baseline/_fixtures/checker-own-fixes-json/node_modules/
+!specs/cli/checker/_fixtures/checker-own-fixes/node_modules/
