@@ -193,6 +193,7 @@
     CliProjectOptions
     ComponentProjectOptions
     FacetProjectOptions
+    InProcessProjectOptions
     IntegrationProjectOptions
     JobProjectOptions
     LintProjectOptions

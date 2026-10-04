@@ -99,3 +99,22 @@ export function facetProject(
         test: projectTest(facet, options, { include: [`specs/${facet}/**/*.spec.ts`] }),
     });
 }
+
+/** What a facet whose specification boots its subject in this process accepts on top. */
+export type InProcessProjectOptions = FacetProjectOptions & {
+    /** The specification module its spec files import their runner from: stated, a worker's files share one module graph and the module runs again before each file, so every file still boots its own subject. */
+    specification?: string;
+};
+
+export function inProcessProject(
+    facet: string,
+    options: InProcessProjectOptions,
+): TestProjectInlineConfiguration {
+    const project = facetProject(facet, options);
+
+    return options.specification === undefined
+        ? project
+        : (mergeConfig(project, {
+              test: { isolate: false, setupFiles: [options.specification] },
+          }) as TestProjectInlineConfiguration);
+}
