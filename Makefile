@@ -53,7 +53,6 @@ check-links:
 	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
 	lychee --no-progress README.md docs skills
 
-# Incremental: two to four minutes over a day's changes, half an hour the first time in a fresh clone.
 mutation: build
 	$(MUTATION)
 
