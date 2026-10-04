@@ -15,7 +15,7 @@ import type { Teacher } from './teacher.js';
 
 const PLUGIN_PREFIX = 'jterrazz/';
 
-export const CHECKER_READ = 'docs/24-linting.md#the-conventions-checker';
+export const CHECKER_READ = 'docs/reference/linting.md#the-conventions-checker';
 
 export function directoryRefusal(path: string, what: string): null | string {
     const resolved = resolve(path);
@@ -36,7 +36,7 @@ function unformattedRefusals(root: string, specsRoots: readonly string[]): strin
             refusal({
                 fix: "run 'typescript fix', which orders its keys and writes its streams as block scalars",
                 found: `\`${relative(root, join(specsRoot, rel)) || rel}\`, a spec document out of its format`,
-                read: 'docs/15-documents.md#the-schema-and-the-format',
+                read: 'docs/guides/spec-documents.md#the-schema-and-the-format',
                 why: 'one key order and block-scalar streams make every document read and diff alike, and the formatter writes them',
             }),
         ),
@@ -52,7 +52,7 @@ function pluginKeysLeft(root: string): string[] {
                 `baseline-ratchet  ${labelOf(TEST_SECTION)}  ${refusal({
                     fix: "run 'typescript baseline'",
                     found: `\`${key}\` is held in the ${TEST_SECTION} section`,
-                    read: 'docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
+                    read: 'docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
                     why: "the plugin's rules are oxlint's own, held file by file in .jterrazz/oxlint-suppressions.json — one finding, one judge",
                 })}`,
         );

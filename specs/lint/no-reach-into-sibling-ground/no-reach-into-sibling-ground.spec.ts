@@ -50,7 +50,7 @@ describe('no-reach-into-sibling-ground', () => {
                 found: "../../src/x/" leaves widget
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });
 
@@ -64,32 +64,32 @@ describe('no-reach-into-sibling-ground', () => {
                 found: _fixtures/ at the specs root, shared ground outside _shared/
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move it to _shared/_fixtures/ — \`typescript fix\` moves it and rewrites every whole relative path that names it
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
             specs/_seeds:1:1  jterrazz-check(no-reach-into-sibling-ground)
                 found: _seeds/ at the specs root, shared ground outside _shared/
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move it to _shared/_seeds/ — \`typescript fix\` moves it and rewrites every whole relative path that names it
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
             specs/api/orders/listed-over-the-catalog.spec.ts:10:20  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../../_seeds/catalog.sql" leaves api/orders
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside api/orders, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
             specs/api/users/users.spec.ts:9:40  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../../_seeds/catalog.sql" leaves api/users
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside api/users, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
             specs/tool/gadget/renders.spec.yaml:2:1  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../../_fixtures/stub/" leaves tool/gadget
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside tool/gadget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
             specs/tool/widget/renders.spec.yaml:2:1  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../../_fixtures/stub/" leaves tool/widget
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside tool/widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });
 
@@ -103,7 +103,7 @@ describe('no-reach-into-sibling-ground', () => {
                 found: "../gadget/_fixtures/gadget-stub/" leaves widget
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });
 
@@ -117,7 +117,7 @@ describe('no-reach-into-sibling-ground', () => {
                 found: "../gadget/_fixtures/gadget-stub/" leaves widget
                 why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, \`<specs>/_shared/<role>/\`.
                 fix: move what it names beside widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: _shared/<role>/ when they span facets
-                read: docs/24-linting.md#no-reach-into-sibling-ground
+                read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });
 });

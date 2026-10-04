@@ -16,12 +16,12 @@ describe('document-description-reads-as-a-title', () => {
                 found: a \`description:\` ending with a period
                 why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters.
                 fix: drop the period — a title is a fragment, not a sentence
-                read: docs/24-linting.md#document-description-reads-as-a-title
+                read: docs/reference/linting.md#document-description-reads-as-a-title
             specs/widget/builds.spec.yaml:1:1  jterrazz-check(document-description-reads-as-a-title)
                 found: a \`description:\` starting with a capital
                 why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters.
                 fix: start it lowercase: "builds the widget."
-                read: docs/24-linting.md#document-description-reads-as-a-title
+                read: docs/reference/linting.md#document-description-reads-as-a-title
         `);
     });
 

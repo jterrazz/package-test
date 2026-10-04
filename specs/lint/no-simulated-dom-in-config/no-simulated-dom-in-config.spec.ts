@@ -26,7 +26,7 @@ describe('no-simulated-dom-in-config', () => {
                 found: \`environment: 'happy-dom'\` gives every file of this project a drawing of a browser
                 why: \`environment: 'happy-dom'|'jsdom'\` in a test project of \`jterrazz.config.ts\` is an error.
                 fix: delete \`environment: 'happy-dom'\`, and write each rendered test as a \`.test.tsx\` beside its component, collected by the \`component\` project
-                read: docs/24-linting.md#no-simulated-dom-in-config
+                read: docs/reference/linting.md#no-simulated-dom-in-config
         `);
     });
 });

@@ -42,7 +42,7 @@ export function writeAt(context: InPlace, render: (indent: string) => string): M
             refusal({
                 fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
                 found: 'update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written',
-                read: 'docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A value written in place is rewritten in the test that states it.',
             }),
         );

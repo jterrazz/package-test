@@ -63,7 +63,7 @@ function foldersBelowFacet(specsRoot: string, file: string): string[] {
 }
 
 function fixOf(facet: string, shape: string, vocabulary: Set<string>, beside = ''): string {
-    return `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${facet}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/03-testing.md § The capability matrix)`;
+    return `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${facet}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/guides/test.md § The capability matrix)`;
 }
 
 function checkComponentTree(specsRoot: string): Spotted<SelfPassId>[] {

@@ -30,7 +30,7 @@ describe('clock', () => {
                 'found: .clock("soon"), and "soon" is not an instant',
                 'why: A clock is pinned at an instant, written as an ISO-8601 string.',
                 "fix: pass an ISO-8601 string: .clock('2026-03-04T09:30:00Z')",
-                'read: docs/19-time-and-doubles.md#the-clock',
+                'read: docs/reference/time-and-doubles.md#the-clock',
             ].join('\n'),
         );
     });
@@ -43,7 +43,7 @@ describe('clock', () => {
                 'found: .clock() on a chain ending in .fetch(), which opens no page',
                 'why: .clock() pins the clock of a page, and .fetch() is one raw HTTP exchange.',
                 'fix: assert the moment with a token ({{iso8601}}) in the golden, or visit the page',
-                'read: docs/10-website.md#setup-clock',
+                'read: docs/guides/website-specs.md#setup-clock',
             ].join('\n'),
         );
     });

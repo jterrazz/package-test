@@ -1,6 +1,6 @@
-# 15 — Spec documents (`<case>.spec.yaml`)
+# Spec documents (`<case>.spec.yaml`)
 
-A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's; an api or a job case is a TypeScript spec, its whole result written in place ([21](21-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)). This chapter owns the format, from the key a document opens with to the door that runs it.
+A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's; an api or a job case is a TypeScript spec, its whole result written in place ([Assertions](../reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)). This page owns the format, from the key a document opens with to the door that runs it.
 
 - [One file, one test](#one-file-one-test) — the unit, and the golden of the whole session
 - [Paths](#paths) — `fixture:` names the disk the way `file()` and `directory()` do
@@ -17,7 +17,7 @@ A document is ONE test: its `description:` is the vitest title, and nothing in i
 
 ## Paths
 
-`fixture:` takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [21](21-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)):
+`fixture:` takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [Assertions](../reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)):
 
 - **Role** — a path whose first ground folder is not `_fixtures/` is refused by the grammar, on its line, so the checker (`document-follows-its-grammar`) and the runner refuse the same document (`verb-reads-its-ground-folder`'s law, for data).
 - **Locality** — a path leaves its leaf only by climbing: into the ground of a folder that encloses it, or the specs root's shared `<specs>/_shared/_fixtures/` (`no-reach-into-sibling-ground`).
@@ -59,7 +59,7 @@ runs:
 | `env:`     | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                                 |
 | `serve:`   | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                                        |
 
-The words `env:` and `serve:` name are registered once per app, in the options of `specification.cli()` — [14 — CLI specs § Registration](14-cli.md#registration--once-per-app).
+The words `env:` and `serve:` name are registered once per app, in the options of `specification.cli()` — [CLI specs § Registration](cli-specs.md#registration--once-per-app).
 
 ### The runs
 
@@ -117,9 +117,9 @@ The document's JSON Schema ships with the package at `schema/spec.schema.json`, 
 # yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
 ```
 
-A schema says which keys exist, not which ORDER they come in, nor how a stream is written. Both are the document's format, and a formatter owns it, as oxfmt owns a source file's: the canonical order — `description, fixture, env, serve, runs` at the top, then `command, stdin, timeout, waitFor, exit, stdout, stderr, files` in a run — and every stream (`stdout`, `stderr`, `stdin`, `files.*.equals`) as a block scalar, `|` keeping the trailing newline and `|-` dropping it. `typescript fix` (`typescript fix`) writes it; a check run names each document out of it and fails, and no baseline holds one — it is never debt, since the formatter always settles it. The document family of rules is in [24 — Linting](24-linting.md).
+A schema says which keys exist, not which ORDER they come in, nor how a stream is written. Both are the document's format, and a formatter owns it, as oxfmt owns a source file's: the canonical order — `description, fixture, env, serve, runs` at the top, then `command, stdin, timeout, waitFor, exit, stdout, stderr, files` in a run — and every stream (`stdout`, `stderr`, `stdin`, `files.*.equals`) as a block scalar, `|` keeping the trailing newline and `|-` dropping it. `typescript fix` (`typescript fix`) writes it; a check run names each document out of it and fails, and no baseline holds one — it is never debt, since the formatter always settles it. The document family of rules is in [Linting](../reference/linting.md).
 
-The whole [token vocabulary](22-tokens.md) works in what a document ASSERTS — a run's streams and `files:` texts — and **never** in `description`, `command` or `stdin`, which are prose and inputs.
+The whole [token vocabulary](../reference/tokens.md) works in what a document ASSERTS — a run's streams and `files:` texts — and **never** in `description`, `command` or `stdin`, which are prose and inputs.
 
 ## The three doors, one runner
 
@@ -160,7 +160,7 @@ On a mismatch the failure renders the description, the command that ran, everyth
 
 A line the comparison ACCEPTED is rendered as equal, with its token, so the marked lines are the mismatch and nothing else. The stack carries one frame: the document's own line.
 
-`TEST_UPDATE=1` rewrites what the run produced and nothing else: each run's `exit`, `stdout` and `stderr`. The ground, the commands and `files:` are stated by hand and never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. Placeholders survive by **pattern match**, so a token stays a token wherever the line moved to: see [update mode](22-tokens.md#update-mode-tokens-are-preserved).
+`TEST_UPDATE=1` rewrites what the run produced and nothing else: each run's `exit`, `stdout` and `stderr`. The ground, the commands and `files:` are stated by hand and never touched, and neither are comments or key order: the YAML document is edited, not re-emitted. Placeholders survive by **pattern match**, so a token stays a token wherever the line moved to: see [update mode](../reference/tokens.md#update-mode-tokens-are-preserved).
 
 ## When to reach for code
 
@@ -186,4 +186,4 @@ A document that starts wanting a conditional is a chain wearing a header. Write 
 
 ## Related
 
-[14 — CLI specs](14-cli.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [24 — Linting](24-linting.md)
+[CLI specs](cli-specs.md) · [Assertions](../reference/assertions.md) · [Tokens](../reference/tokens.md) · [Linting](../reference/linting.md)

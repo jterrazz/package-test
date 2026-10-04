@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { refuseOptions } from './website.handle.js';
 import type { WebsiteSpecificationOptions } from './website.handle.js';
 
-const OPTIONS = 'read: docs/10-website.md#options';
+const OPTIONS = 'read: docs/guides/website-specs.md#options';
 
 function refusalOf(options: WebsiteSpecificationOptions): string {
     try {

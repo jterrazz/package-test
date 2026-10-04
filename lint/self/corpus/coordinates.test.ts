@@ -32,13 +32,8 @@ describe('coordinates', () => {
         expect(coordinates.length).toBeGreaterThan(300);
     });
 
-    test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every `docs/NN` the source cites names a chapter that exists', () => {
-        // Given - the chapter numbers the corpus actually has, and every one the source names — a test TITLE and a comment cite chapters too, and a renumbering moves the files while leaving those behind
-        const chapters = new Set(
-            readdirSync(resolve(ROOT, 'docs'))
-                .map((entry) => /^(?<number>\d{2})-/u.exec(entry)?.groups?.number)
-                .filter((number) => number !== undefined),
-        );
+    test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every page of the manual the source cites exists', () => {
+        // Given - every page path the source names — a test TITLE and a comment cite pages too, and a move takes the file while leaving those behind
         const cited: string[] = [];
         for (const entry of readdirSync(resolve(ROOT, 'src'), { recursive: true })) {
             const path = `src/${String(entry).replaceAll('\\', '/')}`;
@@ -46,20 +41,17 @@ describe('coordinates', () => {
                 continue;
             }
             for (const hit of readFileSync(resolve(ROOT, path), 'utf8').matchAll(
-                /\bdocs\/(?<number>\d{2})\b/gu,
+                /\bdocs\/(?:start|guides|concepts|reference)\/[a-z\d-]+\.md/gu,
             )) {
-                const number = hit.groups?.number ?? '';
-                if (!chapters.has(number)) {
-                    cited.push(`${path} -> docs/${number}`);
-                }
+                cited.push(`${path} -> ${hit[0]}`);
             }
         }
 
-        // Then - no citation points at a chapter number the renumbering left empty
-        expect(chapters.size).toBeGreaterThan(15);
+        // Then - each one lands on a page that is there
+        expect(cited.length).toBeGreaterThan(2);
         expect(
-            cited,
-            'a chapter number the source cites and the corpus does not have',
+            cited.filter((citation) => !existsSync(resolve(ROOT, citation.split(' -> ')[1] ?? ''))),
+            'a page the source cites and the corpus does not have',
         ).toStrictEqual([]);
     });
 

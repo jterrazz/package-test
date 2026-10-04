@@ -185,7 +185,7 @@ describe('PlaywrightAdapter', () => {
                 'Evidence: <shot>',
                 'why: A visit scenario drives the page step by step, and the first step that fails ends it.',
                 'fix: correct the step that failed, or the page it drives',
-                'read: docs/10-website.md#visit-scenarios--the-when',
+                'read: docs/guides/website-specs.md#visit-scenarios--the-when',
             ].join('\n'),
             true,
             ['goto http://site.test/about {"waitUntil":"load"}', 'screenshot fullPage=true'],

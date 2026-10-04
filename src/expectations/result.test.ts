@@ -72,7 +72,7 @@ describe('result', () => {
             'found: file("absent.txt"), and the run left no such file',
             'why: A file is read only where it exists.',
             'fix: assert `.exists` first, or name a file the run left',
-            'read: docs/21-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+            'read: docs/reference/assertions.md#resultfilepath--single-files-in-the-cwd-cli',
         ].join('\n');
         expect([
             refusalOf(() => result.file('absent.txt').content),
@@ -136,13 +136,13 @@ describe('result', () => {
                 'found: table("users"), and no database is declared',
                 'why: A table is read from a declared database.',
                 'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()`',
-                'read: docs/18-services.md#the-database-rule',
+                'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
             [
                 'found: table("users") reads the database "billing", and none is declared under that key',
                 'why: `database:` names a key of the services record.',
                 'fix: name a declared database: orders, users',
-                'read: docs/18-services.md#the-database-rule',
+                'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
             'found: table() names a database, and "orders" is the only one declared',
         ]);

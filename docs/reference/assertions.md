@@ -1,8 +1,8 @@
-# 21 — Assertions: the reference
+# Assertions: the reference
 
 Every assertion goes through `expect()` (rule `result-accessor-read-only`). The framework auto-registers its matchers into vitest and types them **by subject**: a table subject only offers table matchers, a stream subject only stream matchers — the wrong pairing is a compile error. Result accessors are read-only; there are no assertion methods on accessors (`result.stdout.toContain(…)` does not exist — the methods live on `expect()`).
 
-This chapter is the exhaustive matrix: every matcher, for every valid subject, with its sync/async rule and the file it reads.
+This page is the exhaustive matrix: every matcher, for every valid subject, with its sync/async rule and the file it reads.
 
 ## The two global rules
 
@@ -52,31 +52,31 @@ The disk is named by one of two calls, `file()` and `directory()`, with the path
 - `toMatch(file('./_expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule `golden-path-has-extension`); a path may name a subfolder, `./_expected/build/verbose.txt`, and update mode creates it (rule `golden-path-creates-folders`).
 - `toMatch(directory('./_expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
 
-Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule `golden-read-from-its-path`). By convention it sits in `_expected/` beside the spec — one of the four reserved ground folders ([23 — Conventions](23-conventions.md)).
+Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule `golden-read-from-its-path`). By convention it sits in `_expected/` beside the spec — one of the four reserved ground folders ([Conventions](../concepts/conventions.md)).
 
 `toContain` handed a stream accessor does not compile: a stream is no list, and vitest would search an empty one — its text is `result.stdout.text`, the comparable text (ANSI stripped, the runner's `transform` applied, the text its golden compares).
 
-All file-based comparisons understand the [`{{token}}` grammar](22-tokens.md); all code-side dynamic values use `match.*`.
+All file-based comparisons understand the [`{{token}}` grammar](tokens.md); all code-side dynamic values use `match.*`.
 
 ## Scalars — native `expect`
 
 Plain values take vitest's native matchers. No framework matcher exists (or is needed) for them.
 
-| Subject                                     | Type           | Example                                                                                                          |
-| ------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `result.status`                             | `number`       | `expect(result.status).toBe(201)`                                                                                |
-| `result.exitCode`                           | `number`       | `expect(result.exitCode).toBe(0)`                                                                                |
-| `result.filesystem.cwd`                     | `string`       | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                               |
-| `result.response.body`                      | parsed body    | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                          |
-| `result.json.value`                         | parsed JSON    | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                    |
-| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                      |
-| `result.file(path).exists`                  | `boolean`      | `expect(result.file('dist/index.js').exists).toBe(true)`                                                         |
-| `result.file(path).content`                 | `string`       | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                          |
-| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                       |
-| `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                      |
-| `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                    |
-| `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                               |
-| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [15](15-documents.md#the-three-doors-one-runner) |
+| Subject                                     | Type           | Example                                                                                                                                  |
+| ------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `result.status`                             | `number`       | `expect(result.status).toBe(201)`                                                                                                        |
+| `result.exitCode`                           | `number`       | `expect(result.exitCode).toBe(0)`                                                                                                        |
+| `result.filesystem.cwd`                     | `string`       | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                                                       |
+| `result.response.body`                      | parsed body    | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                                                  |
+| `result.json.value`                         | parsed JSON    | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                                            |
+| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                                              |
+| `result.file(path).exists`                  | `boolean`      | `expect(result.file('dist/index.js').exists).toBe(true)`                                                                                 |
+| `result.file(path).content`                 | `string`       | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                                                  |
+| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                                               |
+| `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                                              |
+| `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                                            |
+| `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                                                       |
+| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [Spec documents](../guides/spec-documents.md#the-three-doors-one-runner) |
 
 ## `result.response` — HTTP response (api)
 
@@ -108,14 +108,14 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 ## `result.table(name, { database }?)` — database tables (api, job, cli, integration)
 
-Always `await expect(…)` (IO). When to name the `database:` is [18 § The `database:` rule (`database-named-only-when-several`)](18-services.md#the-database-rule)'s.
+Always `await expect(…)` (IO). When to name the `database:` is [Services § The `database:` rule (`database-named-only-when-several`)](services.md#the-database-rule)'s.
 
 | Matcher           | Sync/async | Example                                                                |
 | ----------------- | ---------- | ---------------------------------------------------------------------- |
 | `toMatch(<rows>)` | async      | see below                                                              |
 | `toBeEmpty()`     | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
 
-The table is compared WHOLE: every row, and every column in the order the table declares it. A reset restarts the generated ids, so the first row a chain inserts is `1` ([18 — Services](18-services.md#per-worker-isolation)); an instant is compared as its ISO text.
+The table is compared WHOLE: every row, and every column in the order the table declares it. A reset restarts the generated ids, so the first row a chain inserts is `1` ([Services](services.md#per-worker-isolation)); an instant is compared as its ISO text.
 
 A table has no order of its own, so its rows compare as a multiset: each row written in place is paired with a row of the table it matches, whatever order the database hands them back in — a first column of random ids orders them differently run to run. When the order IS the claim, `toMatch(rows, { ordered: true })` compares row by row in the order of the table's first column (the rows are read `ORDER BY 1`). A token that captures, `{{uuid#event}}`, binds on the pairing that holds, and update mode writes the rows in the order the value in place stated them, a new row after them.
 
@@ -125,7 +125,7 @@ await expect(result.table('orders', { database: 'db' })).toMatch([
 ]);
 ```
 
-Cell values are literals, [tokens](22-tokens.md) or `match.*` matchers — including `match.ref(name)`, which captures a generated value in one table and requires it in another ([22 § `match.*`](22-tokens.md#match--the-same-vocabulary-in-code)).
+Cell values are literals, [tokens](tokens.md) or `match.*` matchers — including `match.ref(name)`, which captures a generated value in one table and requires it in another ([Tokens § `match.*`](tokens.md#match--the-same-vocabulary-in-code)).
 
 `toBeEmpty` is a table's matcher, and async: the type-aware `typescript/no-floating-promises`, on in every profile of `@jterrazz/typescript`, refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
 
@@ -133,7 +133,7 @@ A failing table `toMatch` prints the expected grid against the actual rows, ever
 
 ## `result.stdout` / `result.stderr` — stream subjects (cli, container `exec`)
 
-Streams are compared **after ANSI stripping** ([22 § Where tokens work](22-tokens.md#where-tokens-work)): `.text` is that comparable text, `.raw` the capture as it was.
+Streams are compared **after ANSI stripping** ([Tokens § Where tokens work](tokens.md#where-tokens-work)): `.text` is that comparable text, `.raw` the capture as it was.
 
 | Matcher                    | Sync/async | Example                                                                |
 | -------------------------- | ---------- | ---------------------------------------------------------------------- |
@@ -142,7 +142,7 @@ Streams are compared **after ANSI stripping** ([22 § Where tokens work](22-toke
 | `toContain('needle')`      | sync       | `expect(result.stderr.text).toContain("Unknown command 'frobnicate'")` |
 | `toMatch(/pattern/)`       | sync       | `expect(result.stdout.text).toMatch(/built in \d+ms/u)`                |
 
-`toMatch` on a stream is a full-text snapshot, its text written in place or in a file; the golden may contain any [token](22-tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
+`toMatch` on a stream is a full-text snapshot, its text written in place or in a file; the golden may contain any [token](tokens.md) (`{{semver}}`, `{{duration}}`, `{{workdir}}`, …). Token matching decides **pass or fail** only: `textEquals` resolves the placeholders to determine whether the output matches. The rendered failure, though, is a **literal** line-by-line diff (`Output mismatch (name)`, `- Expected` / `+ Received`) of the fixture text against the stripped output — tokens are not resolved in the diff, so a fixture line `Done in {{duration}}` is printed verbatim on the expected side whenever any line diverges, even if the duration itself matched.
 
 > A stream compared whole takes its text — in place, or `file(…)`. A part of it is vitest's, on its text: `expect(result.stdout.text).toMatch(/built/)`, `.toContain('built')`.
 
@@ -157,7 +157,7 @@ expect(result.stdout.grep('products/broken.yaml')).toMatch(file('./_expected/bro
 
 ## `text(value)` — any string as a stream subject
 
-`text(value)` wraps an arbitrary string in the same `TextAccessor` streams surface, anchored on the calling test's directory via the same caller-detection the runners use — the directory its golden's path is read from. It promotes an ad-hoc string — most often a thrown **error message**, a checker line, or a report — into a first-class snapshot subject: ANSI is stripped before comparison (`.text` is the stripped text, `.raw` the string as given), the [`{{token}}`](22-tokens.md) grammar applies to the fixture, and `.grep()` composes exactly as on a captured stream.
+`text(value)` wraps an arbitrary string in the same `TextAccessor` streams surface, anchored on the calling test's directory via the same caller-detection the runners use — the directory its golden's path is read from. It promotes an ad-hoc string — most often a thrown **error message**, a checker line, or a report — into a first-class snapshot subject: ANSI is stripped before comparison (`.text` is the stripped text, `.raw` the string as given), the [`{{token}}`](tokens.md) grammar applies to the fixture, and `.grep()` composes exactly as on a captured stream.
 
 The product surface of a test framework **is** its error messages and reports; golden them in full instead of reconstructing them with a cluster of `toContain` probes.
 
@@ -251,7 +251,7 @@ expect(result.tree).toMatch(file('./_expected/home.aria.yaml'));
 await expect(result.tree).toMatch(file('./_expected/two-of-two-hundred.aria.yaml'));
 ```
 
-The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([20 — The visitor](20-visitor.md#modifiers)).
+The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([The visitor](visitor.md#modifiers)).
 
 ## `result.html` — the markup (component)
 
@@ -307,7 +307,7 @@ const outbox: string[] = [];
 await waitUntil(() => outbox.length === 1, { why: 'the job wrote its one message' });
 ```
 
-The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the condition and the budget, so a timeout reads as a sentence rather than as "expected true, got false". The budget is measured on `performance.now()`, never on `Date`, so `clock.at()` may freeze the calendar around a wait and the timeout still arrives with its own sentence. Not for a subject under `clock.run()` — there the scheduler belongs to the test and `clock.advance(ms)` is what makes time pass ([19 — Time and doubles § The clock](19-time-and-doubles.md#the-clock)).
+The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the condition and the budget, so a timeout reads as a sentence rather than as "expected true, got false". The budget is measured on `performance.now()`, never on `Date`, so `clock.at()` may freeze the calendar around a wait and the timeout still arrives with its own sentence. Not for a subject under `clock.run()` — there the scheduler belongs to the test and `clock.advance(ms)` is what makes time pass ([Time and doubles § The clock](time-and-doubles.md#the-clock)).
 
 ## Matcher summary
 
@@ -324,7 +324,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Update mode
 
-`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The rewrite, the flag, the discipline it asks for and the frozen two-pass are all [22 — Tokens](22-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matchers the flag reaches, and it is `toMatch` on every result subject — a value written in place is rewritten in the test itself, a `file()` or a `directory()` on disk.
+`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The rewrite, the flag, the discipline it asks for and the frozen two-pass are all [Tokens](tokens.md#update-mode-tokens-are-preserved)'s; this page only notes which matchers the flag reaches, and it is `toMatch` on every result subject — a value written in place is rewritten in the test itself, a `file()` or a `directory()` on disk.
 
 ## Common mistakes
 
@@ -334,11 +334,11 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 - **`file('./_expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./_expected/help/')`.
 - **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./_expected/help.txt')` (rule `one-verb-per-meaning`).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rules `disk-named-by-relative-path`, `disk-named-by-relative-path-at-runtime`).
-- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for ([22 § Where tokens work](22-tokens.md#where-tokens-work)) — a RegExp on it is allowed, as in the scalar table above, while a substring check (`toContain`) on it is refused (`no-raw-bypass`).
-- **`database:` on a single-database project** (or missing on a multi-database one) — [18 § The `database:` rule (`database-named-only-when-several`)](18-services.md#the-database-rule).
+- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for ([Tokens § Where tokens work](tokens.md#where-tokens-work)) — a RegExp on it is allowed, as in the scalar table above, while a substring check (`toContain`) on it is refused (`no-raw-bypass`).
+- **`database:` on a single-database project** (or missing on a multi-database one) — [Services § The `database:` rule (`database-named-only-when-several`)](services.md#the-database-rule).
 - **Using `.not.toMatch(file(…))` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
-- **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it — [22 § Frozen fixtures](22-tokens.md#frozen-fixtures--opting-a-negative-fixture-out-of-the-rewrite).
+- **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it — [Tokens § Frozen fixtures](tokens.md#frozen-fixtures--opting-a-negative-fixture-out-of-the-rewrite).
 
 ## Related
 
-[12 — API specs](12-api.md) · [14 — CLI specs](14-cli.md) · [22 — Tokens](22-tokens.md) · [23 — Conventions](23-conventions.md)
+[API specs](../guides/api-specs.md) · [CLI specs](../guides/cli-specs.md) · [Tokens](tokens.md) · [Conventions](../concepts/conventions.md)

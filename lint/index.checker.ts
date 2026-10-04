@@ -9,7 +9,7 @@ const conventions: Contribution = {
     held: {
         lower: 'typescript fix',
         passes: ['conventions'],
-        read: 'docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
+        read: 'docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
         record: 'typescript baseline',
         section: 'test',
         summarised: true,

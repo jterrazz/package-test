@@ -8,7 +8,7 @@ import { fsFixtures } from './fs-fixtures.adapter.js';
 const DISK_WHY =
     'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.';
 
-const DISK_CHAPTER = 'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime';
+const DISK_CHAPTER = 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime';
 
 function workDirectory(): string {
     return mkdtempSync(join(tmpdir(), 'fixtures-work-'));

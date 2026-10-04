@@ -22,7 +22,7 @@ describe('no-test-to-test-import', () => {
                 found: \`specs/app/widget/widget.test.ts\` imports \`./other.test.js\`
                 why: A test file never imports another test file.
                 fix: under \`specs/\`, move what both read into the \`_setup/\` of the lowest folder they share; under \`src/\`, into a sibling \`<file>.fixtures.ts\` for typed input data
-                read: docs/24-linting.md#no-test-to-test-import
+                read: docs/reference/linting.md#no-test-to-test-import
         `);
     });
 });

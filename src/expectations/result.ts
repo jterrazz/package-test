@@ -19,7 +19,7 @@ function missingFile(path: string): Error {
         refusal({
             fix: 'assert `.exists` first, or name a file the run left',
             found: `file(${JSON.stringify(path)}), and the run left no such file`,
-            read: 'docs/21-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+            read: 'docs/reference/assertions.md#resultfilepath--single-files-in-the-cwd-cli',
             why: A_FILE_IS_READ_WHERE_IT_EXISTS,
         }),
     );
@@ -108,13 +108,13 @@ export class BaseResult {
                         ? {
                               fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()`',
                               found: `table("${tableName}"), and no database is declared`,
-                              read: 'docs/18-services.md#the-database-rule',
+                              read: 'docs/reference/services.md#the-database-rule',
                               why: 'A table is read from a declared database.',
                           }
                         : {
                               fix: `name a declared database: ${(this.config.databaseKeys ?? []).join(', ')}`,
                               found: `table("${tableName}") reads the database "${options.database}", and none is declared under that key`,
-                              read: 'docs/18-services.md#the-database-rule',
+                              read: 'docs/reference/services.md#the-database-rule',
                               why: '`database:` names a key of the services record.',
                           },
                 ),

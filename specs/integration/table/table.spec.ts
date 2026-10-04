@@ -41,7 +41,7 @@ describe('table', () => {
                 'found: table() names a database, and "db" is the only one declared',
                 'why: With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
                 "fix: delete { database: 'db' }",
-                'read: docs/24-linting.md#database-named-only-when-several-at-runtime',
+                'read: docs/reference/linting.md#database-named-only-when-several-at-runtime',
             ].join('\n'),
         );
     });

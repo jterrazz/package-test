@@ -76,7 +76,7 @@ describe('xcui-query', () => {
                     "found: navigation(), a landmark — an iOS screen has no 'navigation' region",
                     'why: An iOS screen has no ARIA landmark: a mobile verb is scoped with `within(testId(…), …)`.',
                     "fix: scope with within(testId('…'), …) — any target works as the scope",
-                    'read: docs/24-linting.md#no-landmark-on-mobile',
+                    'read: docs/reference/linting.md#no-landmark-on-mobile',
                 ].join('\n'),
             ),
         );

@@ -100,7 +100,7 @@ function constructions(program: AstNode, classes: ReadonlySet<string>): Judged[]
         found.push({
             at: node,
             teaching: {
-                fix: `a user can cause it: \`new ${name}(refusal({ found, why, fix, read }))\`, its read the chapter heading that explains it; only the framework can: \`invariant('<what broke>')\``,
+                fix: `a user can cause it: \`new ${name}(refusal({ found, why, fix, read }))\`, its read the heading that explains it; only the framework can: \`invariant('<what broke>')\``,
                 found: `\`${written}(…)\` carries a message written by hand`,
             },
         });
@@ -144,7 +144,7 @@ function readOf(lesson: AstNode): Judged[] {
             at: branch ?? lesson,
             teaching: {
                 fix: "write the heading it reads in place: `read: 'docs/<chapter>.md#<heading>'`",
-                found: 'the refusal reads no chapter written in place',
+                found: 'the refusal reads no heading of the manual written in place',
             },
         }));
 }
@@ -163,7 +163,7 @@ function anchorsNamed(program: AstNode, root: string): Judged[] {
             at: node,
             teaching: {
                 fix: 'read a heading that exists, and write the section that explains the refusal where none does',
-                found: `\`${read}\` names a heading no chapter has`,
+                found: `\`${read}\` names a heading no page has`,
             },
         });
     });

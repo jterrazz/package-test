@@ -30,7 +30,7 @@ describe('test-body-within-line-limit', () => {
                 found: a test body of 61 lines of gestures, over 60 — the lines of a \`toMatch(<value>)\` argument are not counted
                 why: A test body spans at most 60 lines of gestures — the function a \`test(…)\`/\`it(…)\` runs, from the line it opens on to the line it closes on, blank lines and comments included, less the lines a \`toMatch(<value>)\` argument holds past the one it opens on: the claim is capped by \`ground-shared-or-inline\`, not here; a longer one is refused at the function.
                 fix: split it into one test per behaviour, or move a long Given into a function the test calls
-                read: docs/24-linting.md#test-body-within-line-limit
+                read: docs/reference/linting.md#test-body-within-line-limit
         `);
     });
 });

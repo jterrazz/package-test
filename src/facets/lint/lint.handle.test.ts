@@ -56,7 +56,7 @@ describe('lint.handle', () => {
         // Then - the refusal names every anchor it searched and the peer to install
         expect(() => oxlintBinary([anchor, ...odd])).toThrow(
             new Error(
-                `found: specification.lint() runs oxlint, and none resolves from ${[anchor, ...odd].join(', ')}\nwhy: A plugin and a config are run by the real oxlint, the one a project lints with.\nfix: install oxlint — an optional peer of @jterrazz/test — beside the project\nread: docs/16-lint.md#options`,
+                `found: specification.lint() runs oxlint, and none resolves from ${[anchor, ...odd].join(', ')}\nwhy: A plugin and a config are run by the real oxlint, the one a project lints with.\nfix: install oxlint — an optional peer of @jterrazz/test — beside the project\nread: docs/guides/lint-specs.md#options`,
             ),
         );
     });
@@ -136,13 +136,13 @@ describe('lint.handle', () => {
                 `found: plugins: ['@acme/no-such-plugin'], which resolves from no node_modules under ${root}`,
                 'why: A plugin is loaded by the oxlint the facet runs, from the path it resolves to.',
                 "fix: install @acme/no-such-plugin, or name the plugin by its path from the specification's folder",
-                'read: docs/16-lint.md#options',
+                'read: docs/guides/lint-specs.md#options',
             ].join('\n'),
             [
                 'found: specification.lint() with no plugin, no config, no checker and no presets',
                 'why: A lint specification runs the linters it names, and one that names none judges nothing.',
                 'fix: name the plugins, the config, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
-                'read: docs/16-lint.md#options',
+                'read: docs/guides/lint-specs.md#options',
             ].join('\n'),
             'found: the presets’ checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape',
         ]);

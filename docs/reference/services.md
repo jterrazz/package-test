@@ -1,4 +1,4 @@
-# 18 — Services: databases, caches, and their init scripts
+# Services: databases, caches, and their init scripts
 
 Infrastructure is declared as a **named record** of service factories on the runner. The record key is the ONLY name a service has: it is your test vocabulary in `.seed()` / `.table()` targeting, it types the `server`/`jobs` factory parameters, it is the name the startup report prints, and — kebab-cased — it is the folder the service reads its init script from. A handle carries no second name of its own.
 
@@ -17,7 +17,7 @@ import { postgres, process, redis, sqlite } from '@jterrazz/test';
 | `sqlite()`   | **No Docker** — a template file copied per worker  | `init` (SQL file) or `prismaSchema` (runs `prisma db push`), paths from the cwd | `file:/…/….sqlite`                    |
 | `process()`  | **No Docker** — a child process the framework owns | `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`                   | `http://127.0.0.1:port`               |
 
-**Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the drivers are optional peers since 16.0, each loaded lazily by the one adapter under `services/` that owns it ([06 — Setting up](06-setting-up.md#what-to-install)). The refusal, when one is missing, names the service that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
+**Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the drivers are optional peers since 16.0, each loaded lazily by the one adapter under `services/` that owns it ([Set up a project](../start/set-up-a-project.md#what-to-install)). The refusal, when one is missing, names the service that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
 
 `image` overrides the container image and `env` (postgres only) the environment variables; each factory carries a default for both, so a record that states neither still starts a real service.
 
@@ -102,7 +102,7 @@ export const { cleanup, website } = await specification.website({
     }
     ```
 
-In a cli spec, the record also drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule `service-urls-injected` — see [CLI specs](14-cli.md#auto-injected-connection-urls)).
+In a cli spec, the record also drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule `service-urls-injected` — see [CLI specs](../guides/cli-specs.md#auto-injected-connection-urls)).
 
 ### The `database:` rule
 
@@ -203,13 +203,13 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 
 `sqlite()` builds a template database once (from `init` SQL or by running `prisma db push` on `prismaSchema`), then hands each worker its own copy. `.seed()` and `result.table()` work identically to Postgres.
 
-`init` and `prismaSchema` are both resolved against the **current working directory**, the folder vitest runs from — the project root when you run it as [05](05-getting-started.md#5-run-it) does — never against the specification file. They name a file of the project, the schema the app itself ships, not ground a test stands on, so they take a bare path rather than `file()`, which resolves against the file that calls it.
+`init` and `prismaSchema` are both resolved against the **current working directory**, the folder vitest runs from — the project root when you run it as [Getting started](../start/getting-started.md#5-run-it) does — never against the specification file. They name a file of the project, the schema the app itself ships, not ground a test stands on, so they take a bare path rather than `file()`, which resolves against the file that calls it.
 
 `prismaSchema` is passed to the CLI as `npx prisma db push --force-reset --schema <absolute path>` — the schema is named explicitly, so it does not have to be the one Prisma would discover from a `prisma.config.ts` at the cwd. Declare no `prismaSchema` and the bare invocation runs, leaving discovery to Prisma.
 
 ### Where the template lives
 
-The template is a **project** artefact: `<root>/.artifacts/vitest/sqlite/template-<sha8>.sqlite`, under the root `no-redundant-root` discovered ([above](#root-auto-discovery)) and covered by the same `.gitignore` line as everything else in `.artifacts/` ([06 — Setting up](06-setting-up.md#where-a-run-writes)).
+The template is a **project** artefact: `<root>/.artifacts/vitest/sqlite/template-<sha8>.sqlite`, under the root `no-redundant-root` discovered ([above](#root-auto-discovery)) and covered by the same `.gitignore` line as everything else in `.artifacts/` ([Set up a project](../start/set-up-a-project.md#where-a-run-writes)).
 
 It used to live in the machine-global OS tmpdir, where two checkouts of one repository shared a single file: whichever ran first built it, the other silently inherited that schema, and a branch that changed the schema poisoned the branch beside it. A path under the project root cannot be reached from another checkout at all. Deleting `.artifacts/` is how you force a cold rebuild.
 
@@ -232,4 +232,4 @@ Two more properties fall out of it: the winner builds on a private path and **re
 
 ## Related
 
-[12 — API specs](12-api.md) · [13 — Job specs](13-job.md) · [14 — CLI specs](14-cli.md) · [23 — Conventions](23-conventions.md)
+[API specs](../guides/api-specs.md) · [Job specs](../guides/job-specs.md) · [CLI specs](../guides/cli-specs.md) · [Conventions](../concepts/conventions.md)

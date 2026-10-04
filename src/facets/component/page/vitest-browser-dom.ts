@@ -281,7 +281,7 @@ export function mountDom(mount: DomMount): MountedSurface {
                 refusal({
                     fix: 'render the DOM function again, in a new render()',
                     found: 'rerender() on a DOM function',
-                    read: 'docs/09-component.md#the-chain',
+                    read: 'docs/guides/component-specs.md#the-chain',
                     why: 'rerender() replaces a React tree, what a parent does with new props.',
                 }),
             );

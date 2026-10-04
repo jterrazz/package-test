@@ -39,7 +39,7 @@ across facets. No `package.json` `imports` alias is added by default: a
 relative import states the placement the law judges.
 
 The law and its rows are
-[23 — Conventions § The naming recap](../23-conventions.md#the-naming-recap)'s.
+[23 — Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)'s.
 
 ## Consequences
 

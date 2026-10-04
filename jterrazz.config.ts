@@ -17,7 +17,7 @@ async function builtPresets(): Promise<Preset[]> {
             refusal({
                 fix: 'run `npm run build`, then run the command again',
                 found: `this repository's presets are not built: ${PRESETS.filter((path) => !existsSync(new URL(path, import.meta.url))).join(', ')} missing`,
-                read: 'docs/02-developing.md#the-build-comes-first',
+                read: 'docs/guides/develop.md#the-build-comes-first',
                 why: 'test() and self() are this repository’s own build, and a run without them judges none of what they hold, so it would pass on nothing',
             }),
         );
@@ -62,7 +62,7 @@ export default defineConfig({
         'test/no-second-test-runtime-network':
             'this repository builds the network seam: the module test of the handlers that wrap msw drives msw itself, so self() holds every other test file to the same law',
         'typescript/self-folders-apart':
-            'the corpus audits the self checker and the self plugin by importing them, and one self check reads the capability matrix the corpus renders (docs/01-architecture.md)',
+            'the corpus audits the self checker and the self plugin by importing them, and one self check reads the capability matrix the corpus renders (docs/concepts/architecture.md)',
     },
     platform: 'node',
     presets,

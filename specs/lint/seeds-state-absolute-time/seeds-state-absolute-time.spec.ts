@@ -16,17 +16,17 @@ describe('seeds-state-absolute-time', () => {
                 found: \`'now'\` reads the clock in a seed
                 why: A \`_seeds/**/*.sql\` states absolute timestamps: \`CURRENT_TIMESTAMP\`/\`CURRENT_DATE\`/\`CURRENT_TIME\`, \`NOW()\` and the quoted \`'now'\` SQLite's date functions take (\`datetime('now')\`, \`strftime(…, 'now')\`, \`date('now', '-1 day')\`) are refused.
                 fix: replace \`'now'\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\`
-                read: docs/24-linting.md#seeds-state-absolute-time
+                read: docs/reference/linting.md#seeds-state-absolute-time
             specs/widget/_seeds/posts.sql:3:1  jterrazz-check(seeds-state-absolute-time)
                 found: \`CURRENT_TIMESTAMP\` reads the clock in a seed
                 why: A \`_seeds/**/*.sql\` states absolute timestamps: \`CURRENT_TIMESTAMP\`/\`CURRENT_DATE\`/\`CURRENT_TIME\`, \`NOW()\` and the quoted \`'now'\` SQLite's date functions take (\`datetime('now')\`, \`strftime(…, 'now')\`, \`date('now', '-1 day')\`) are refused.
                 fix: replace \`CURRENT_TIMESTAMP\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\`
-                read: docs/24-linting.md#seeds-state-absolute-time
+                read: docs/reference/linting.md#seeds-state-absolute-time
             specs/widget/_seeds/posts.sql:4:1  jterrazz-check(seeds-state-absolute-time)
                 found: \`NOW()\` reads the clock in a seed
                 why: A \`_seeds/**/*.sql\` states absolute timestamps: \`CURRENT_TIMESTAMP\`/\`CURRENT_DATE\`/\`CURRENT_TIME\`, \`NOW()\` and the quoted \`'now'\` SQLite's date functions take (\`datetime('now')\`, \`strftime(…, 'now')\`, \`date('now', '-1 day')\`) are refused.
                 fix: replace \`NOW()\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\`
-                read: docs/24-linting.md#seeds-state-absolute-time
+                read: docs/reference/linting.md#seeds-state-absolute-time
         `);
     });
 

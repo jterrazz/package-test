@@ -5,7 +5,7 @@ import { trigger } from './trigger.action.js';
 
 const WHY = 'why: A job is triggered by the name it is registered under.';
 
-const READS = 'read: docs/13-job.md#options';
+const READS = 'read: docs/guides/job-specs.md#options';
 
 const READ = readerOf({ slices: {}, testDir: null });
 const RUN = { config: {}, testDir: '/spec', workDir: null };

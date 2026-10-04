@@ -46,7 +46,7 @@ describe('service-database', () => {
                 'found: seed() names a database, and "db" is the only one declared',
                 'why: With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
                 "fix: delete { database: 'db' }",
-                'read: docs/24-linting.md#database-named-only-when-several-at-runtime',
+                'read: docs/reference/linting.md#database-named-only-when-several-at-runtime',
             ].join('\n'),
         );
     });
@@ -60,7 +60,7 @@ describe('service-database', () => {
                 'found: seed(directory("./_seeds/")), a directory where one file is read',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 "fix: name one file: seed(file('./_seeds/rows.sql'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
         // @ts-expect-error -- a bare path is what the type refuses
@@ -69,7 +69,7 @@ describe('service-database', () => {
                 'found: seed("./_seeds/users.sql"), a value where a file is read',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 "fix: name one file: seed(file('./_seeds/rows.sql'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
     });
@@ -84,7 +84,7 @@ describe('service-database', () => {
                 'found: seed(file("./_fixtures/users.csv")), a file not ending in .sql',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 "fix: name the .sql file seed() reads: seed(file('./_seeds/rows.sql'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
         /* oxlint-enable jterrazz/verb-reads-its-ground-folder */

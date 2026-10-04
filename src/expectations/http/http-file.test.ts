@@ -12,7 +12,7 @@ const refusalOf = (content: string): string => {
         return error instanceof Error ? error.message : String(error);
     }
 };
-const READ_LINK = 'read: docs/12-api.md#http-request-files--full-format';
+const READ_LINK = 'read: docs/guides/api-specs.md#http-request-files--full-format';
 
 const write = (body: unknown, headers: Record<string, string>, contentType?: string): string =>
     serializeResponseFile({ body, hasBody: true, headers, status: '200' }, contentType);

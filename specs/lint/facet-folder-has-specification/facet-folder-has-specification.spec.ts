@@ -16,7 +16,7 @@ describe('facet-folder-has-specification', () => {
                 found: \`specs/job/\`, a facet folder with no specification constructing \`specification.job()\`
                 why: A first-level folder named for one of the seven facets holds a \`*.specification.ts(x)\` calling \`specification.<facet>(\`.
                 fix: create \`specs/job/job.specification.ts\` calling \`specification.job()\`, or rename the folder
-                read: docs/24-linting.md#facet-folder-has-specification
+                read: docs/reference/linting.md#facet-folder-has-specification
         `);
     });
 

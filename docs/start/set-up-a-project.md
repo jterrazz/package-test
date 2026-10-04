@@ -1,6 +1,6 @@
-# 06 — Setting up a project
+# Set up a project
 
-What a project installs, how its `vitest.config.ts` is written, how it turns the conventions on, and where a run writes. [05 — Getting started](05-getting-started.md) walks through the minimum; this chapter is the reference behind it.
+What a project installs, how its `vitest.config.ts` is written, how it turns the conventions on, and where a run writes. [Getting started](getting-started.md) walks through the minimum; this page is the reference behind it.
 
 ## What to install
 
@@ -14,7 +14,7 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest
 
 - **ESM.** The package ships ES modules only, and every specification file awaits its constructor at the top level (`export const { api, cleanup } = await specification.api(…)`). Set `"type": "module"` in `package.json`, or name the config files `.mts` (`vitest.config.mts`).
 - **Node 24 or newer**, as `engines` states.
-- **A tsconfig that knows `using` and top-level await.** Tests pin time with `using _ = clock.at(…)` and dispose with `await using` ([19](19-time-and-doubles.md)), which need `target` and `lib` at `ES2022` or later for top-level await and `ESNext` for `using`, with `module` at `ESNext` or `NodeNext`. The toolchain's tsconfig presets set all of it: `"extends": "@jterrazz/typescript/tsconfig/node"`.
+- **A tsconfig that knows `using` and top-level await.** Tests pin time with `using _ = clock.at(…)` and dispose with `await using` ([Time and doubles](../reference/time-and-doubles.md)), which need `target` and `lib` at `ES2022` or later for top-level await and `ESNext` for `using`, with `module` at `ESNext` or `NodeNext`. The toolchain's tsconfig presets set all of it: `"extends": "@jterrazz/typescript/tsconfig/node"`.
 
 **Everything else is an optional peer**, loaded the first time a test needs it. A project that tests no page, no component and no database installs none of them.
 
@@ -36,7 +36,7 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest
 found: sqlite() requires `better-sqlite3`, and it is not installed
 why: Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.
 fix: pnpm add -D better-sqlite3; under pnpm the binding is not built unless the package is listed: add "better-sqlite3" to `onlyBuiltDependencies` in package.json (or `only-built-dependencies` in .npmrc) and reinstall
-read: docs/24-linting.md#seam-is-an-optional-peer
+read: docs/reference/linting.md#seam-is-an-optional-peer
 ```
 
 **A native peer can be installed and still not built.** npm since 11, pnpm since 10 and bun since 1.2 withhold a dependency's install script by default, so a native package arrives without its compiled `.node`. `better-sqlite3` 13 ships its binding prebuilt and loads anyway; with 12, `sqlite()` notices on first load and says how to build it:
@@ -45,7 +45,7 @@ read: docs/24-linting.md#seam-is-an-optional-peer
 found: sqlite() found `better-sqlite3`, and its native binding is not built
 why: A native peer is built by its install script, and npm runs a dependency's install script only once it is told to.
 fix: npm install-scripts approve better-sqlite3 && npm rebuild better-sqlite3
-read: docs/06-setting-up.md#what-to-install
+read: docs/start/set-up-a-project.md#what-to-install
 ```
 
 Three more constraints come from the peers themselves:
@@ -82,7 +82,7 @@ export default defineConfig({
 });
 ```
 
-`vitest.config.ts` is the file those projects derive, which `typescript fix` writes and `typescript check` holds ([`@jterrazz/typescript`'s Config pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-config-one-file-pass)):
+`vitest.config.ts` is the file those projects derive, which `typescript fix` writes and `typescript check` holds ([`@jterrazz/typescript`'s Config pass](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#the-config-one-file-pass)):
 
 ```typescript
 import { vitestConfig } from '@jterrazz/test/vitest';
@@ -94,7 +94,7 @@ It reads the `jterrazz.config.ts` beside the module whose `import.meta.url` it i
 
 ### The project helpers
 
-There is one helper per kind — `unit`, `integration`, `component`, `website`, `mobile`, `api`, `job`, `cli` and `lint` — named by a project's `facet`, and exported from `@jterrazz/test/vitest` beside `vitestConfig`, for a config written by a tool of your own. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([18 — Services § One container per run](18-services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
+There is one helper per kind — `unit`, `integration`, `component`, `website`, `mobile`, `api`, `job`, `cli` and `lint` — named by a project's `facet`, and exported from `@jterrazz/test/vitest` beside `vitestConfig`, for a config written by a tool of your own. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([Services § One container per run](../reference/services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
 
 | Option                | Does                                                                                                            |
 | --------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -102,7 +102,7 @@ There is one helper per kind — `unit`, `integration`, `component`, `website`, 
 | `timeout`             | Raise or lower the 30 s default for this project alone                                                          |
 | `serial`              | Run the project's files one at a time (`fileParallelism: false`), when they share one server, one file, one app |
 
-`unit()` and `component()` are a pair: `unit()` collects `**/*.test.ts` outside `specs/` and leaves out `**/*.test.tsx`, which `component()` collects. So the suffix beside a file decides which project runs it. `unit()` also takes `roots` when the modules are not at the repository root, and `isolate: false` to run a worker's files in one module graph — only for a project whose tests leave no state behind in a module. `component()` takes the options of the app it renders (`vite`, `wrap`, `viewport`, `clock`, `timezone`, `locale`, `root`), described in [09 — Component specs](09-component.md#the-constructor-there-is-none); `mobile()` takes the simulator the run shares ([11 — Mobile specs](11-mobile.md#one-session-per-run)).
+`unit()` and `component()` are a pair: `unit()` collects `**/*.test.ts` outside `specs/` and leaves out `**/*.test.tsx`, which `component()` collects. So the suffix beside a file decides which project runs it. `unit()` also takes `roots` when the modules are not at the repository root, and `isolate: false` to run a worker's files in one module graph — only for a project whose tests leave no state behind in a module. `component()` takes the options of the app it renders (`vite`, `wrap`, `viewport`, `clock`, `timezone`, `locale`, `root`), described in [Component specs](../guides/component-specs.md#the-constructor-there-is-none); `mobile()` takes the simulator the run shares ([Mobile specs](../guides/mobile-specs.md#one-session-per-run)).
 
 Projects run in groups — the node kinds first, then `website`, then `component`, then `mobile` — so two browser projects never open two Chromiums at once and a simulator runs alone.
 
@@ -125,7 +125,7 @@ const integration = {
 | `test.exclude`                                                                         | vitest's defaults + `**/{_expected,_fixtures,_requests,_seeds}/**` | What a test stands on is input, never a suite to run                                                              |
 | `cacheDir`, `test.coverage.reportsDirectory`, `test.attachmentsDir`, `test.outputFile` | under `.artifacts/vitest/`                                         | Everything a tool writes lives at `.artifacts/<tool>/` ([below](#where-a-run-writes))                             |
 | `test.globalSetup`                                                                     | update mode, the run's temp root                                   | Update mode writes after the run is reported; the temp root is [below](#where-a-run-writes)                       |
-| `plugins`                                                                              | `literate()`, when `literate:` is given                            | Turns each `<case>.spec.yaml` into a test file ([15 — Spec documents](15-documents.md))                           |
+| `plugins`                                                                              | `literate()`, when `literate:` is given                            | Turns each `<case>.spec.yaml` into a test file ([Spec documents](../guides/spec-documents.md))                    |
 
 Coverage attaches to every process a run spawns (`autoAttachSubprocess`), and reads `dist/` only to map each bundle back to the source it was built from (`excludeAfterRemap`): a spec that runs the built command counts toward the sources it exercised.
 
@@ -156,7 +156,7 @@ import { defineConfig, typescript } from '@jterrazz/typescript/config';
 export default defineConfig({ presets: [typescript({ profile: 'node' }), test()] });
 ```
 
-`profile` is one of `node`, `next`, `astro`, `expo`, `bun` or `react`, and decides which lint rules apply — the toolchain's [Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/08-lint-presets.md#the-profiles).
+`profile` is one of `node`, `next`, `astro`, `expo`, `bun` or `react`, and decides which lint rules apply — the toolchain's [Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles).
 
 ```typescript
 // oxlint.config.ts
@@ -167,7 +167,7 @@ import settings from './jterrazz.config.ts';
 export default defineConfig(fromPresets(settings));
 ```
 
-`npx typescript check` then runs all of it: the oxlint plugin, the import and naming rules, and the conventions checker over `specs/`. Nothing is detected from your dependencies — a project that does not list `test()` runs none of these rules. What the preset carries, how to deviate from a rule, and the full catalogue are [24 — Linting](24-linting.md).
+`npx typescript check` then runs all of it: the oxlint plugin, the import and naming rules, and the conventions checker over `specs/`. Nothing is detected from your dependencies — a project that does not list `test()` runs none of these rules. What the preset carries, how to deviate from a rule, and the full catalogue are [Linting](../reference/linting.md).
 
 ## Where a run writes
 
@@ -182,7 +182,7 @@ export default defineConfig(fromPresets(settings));
 
 **Everything else is scratch, in one temp folder per run.** Before the first worker starts, the preset creates `jterrazz-test-runs-<uid>/<pid>-…` in the OS temp directory and points `TMPDIR`, `TMP` and `TEMP` at it, so every temp folder a worker, a spawned child or a tool it runs makes lands inside. That holds each CLI spec's working directory, the per-worker database copies and a browser's profile. The run removes the folder when it ends, and the next run removes the folder of any run that died first. A CLI spec's working directory goes sooner, once its test has finished — except under `test.concurrent`, where it waits for the run.
 
-**One environment variable is yours to set**: `TEST_UPDATE=1`, which turns on update mode ([22 — Tokens § Update mode](22-tokens.md#update-mode-tokens-are-preserved)). The framework also reads `VITEST_POOL_ID`, which vitest sets, to isolate each worker's databases.
+**One environment variable is yours to set**: `TEST_UPDATE=1`, which turns on update mode ([Tokens § Update mode](../reference/tokens.md#update-mode-tokens-are-preserved)). The framework also reads `VITEST_POOL_ID`, which vitest sets, to isolate each worker's databases.
 
 ## Two rough edges of the toolchain's flow
 
@@ -194,8 +194,8 @@ export default defineConfig(fromPresets(settings));
 - **Forgetting `afterAll(cleanup)` in a specification file.** The services leak into the next suite (rule `cleanup-passed-to-after-all`).
 - **Importing from a subpath the package does not publish** (`@jterrazz/test/services`). Every name a test uses comes from `@jterrazz/test`; the tool entries are `/vitest`, `/config`, `/oxlint` and `/schema` (rule `no-unpublished-subpath`).
 - **Writing `browser:` in a config by hand.** `component()` pins the provider to the runner's version, serves the service worker and pre-bundles cold dependencies; a derived config has no place for a hand-written one: a project's `facet` is its helper.
-- **A CommonJS `oxlint.config`.** oxlint loads the plugin as ESM only; from a CommonJS config it prints a warning, registers nothing and exits 0. Use `oxlint.config.ts` or `.mjs` — [24 — Linting § Pitfalls](24-linting.md#pitfalls).
+- **A CommonJS `oxlint.config`.** oxlint loads the plugin as ESM only; from a CommonJS config it prints a warning, registers nothing and exits 0. Use `oxlint.config.ts` or `.mjs` — [Linting § Pitfalls](../reference/linting.md#pitfalls).
 
 ## Related
 
-[05 — Getting started](05-getting-started.md) · [09 — Component specs](09-component.md) · [24 — Linting](24-linting.md) · [04 — Operating](https://github.com/jterrazz/package-test/blob/main/docs/04-operating.md)
+[Getting started](getting-started.md) · [Component specs](../guides/component-specs.md) · [Linting](../reference/linting.md) · [Release](https://github.com/jterrazz/package-test/blob/main/docs/guides/release.md)

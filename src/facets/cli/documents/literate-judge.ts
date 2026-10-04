@@ -51,7 +51,7 @@ function resolveUnderWorkDir(path: string, context: Judgement): string {
             refusal({
                 fix: 'name a relative path under the working directory',
                 found: `${context.displayPath}: files: "${path}" leaves the working directory`,
-                read: 'docs/15-documents.md#files--what-the-run-left-behind',
+                read: 'docs/guides/spec-documents.md#files--what-the-run-left-behind',
                 why: 'A `files:` key is a relative path under the working directory.',
             }),
         );
@@ -119,7 +119,7 @@ function failure(run: SpecRun, context: Judgement, details: string[]): Error {
                 '',
                 `${context.displayPath}:${run.commandLine}`,
             ].join('\n'),
-            read: 'docs/15-documents.md#failure-and-update',
+            read: 'docs/guides/spec-documents.md#failure-and-update',
             why: 'A spec document states what its runs produce: the exit code and the streams, whole.',
         }),
     );

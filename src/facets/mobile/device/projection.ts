@@ -76,7 +76,7 @@ function parsePageSource(xml: string): RawNode {
             refusal({
                 fix: 'restart the Appium server, or upgrade Appium and its XCUITest driver',
                 found: 'the page source Appium answered holds no XML element',
-                read: 'docs/11-mobile.md#requirements--what-the-machine-must-have',
+                read: 'docs/guides/mobile-specs.md#requirements--what-the-machine-must-have',
                 why: 'A screen is read from the XML page source Appium answers.',
             }),
         );

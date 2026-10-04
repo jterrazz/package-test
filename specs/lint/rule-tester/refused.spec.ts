@@ -15,7 +15,7 @@ const lessonFor = (found: string): string =>
         `found: no-debugger: invalid case 0, ${found}`,
         'why: A rule proves where it reports, not only that it did: an error with no position passes for a report on any node.',
         'fix: state each error as an object carrying its `line` and `column`',
-        'read: docs/16-lint.md#a-rule-alone-ruletester',
+        'read: docs/guides/lint-specs.md#a-rule-alone-ruletester',
     ].join('\n');
 
 describe('refused', () => {

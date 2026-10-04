@@ -50,7 +50,7 @@ describe('ambiguousScreenElementError', () => {
                 'fix: designate one of them:',
                 SCOPE_BOOKMARK,
                 OTHER_ELEMENT,
-                'read: docs/24-linting.md#target-matches-one-element',
+                'read: docs/reference/linting.md#target-matches-one-element',
             ].join('\n'),
         );
     });

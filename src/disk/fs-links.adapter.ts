@@ -28,7 +28,7 @@ function sourceOf(name: string, path: null | string, testDir: string): string {
                 refusal({
                     fix: `install ${name} in the project the spec belongs to, or name the package's directory: link('${name}', directory('./_fixtures/…/'))`,
                     found: `link('${name}'): no node_modules from ${testDir} up holds ${name}`,
-                    read: 'docs/14-cli.md#link--a-package-the-working-directory-resolves',
+                    read: 'docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
                     why: 'A bare name links the package the spec’s own project resolves, found as Node finds it.',
                 }),
             );
@@ -68,7 +68,7 @@ function refuseUnusableAncestor(name: string, workDir: string, dest: string): vo
                 refusal({
                     fix: `drop the file at ${ancestor} from the fixture or the command that lays it, so the link can lay its folder there`,
                     found: `link('${name}'): ${ancestor} is a file, not a folder`,
-                    read: 'docs/14-cli.md#link--a-package-the-working-directory-resolves',
+                    read: 'docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
                     why: 'A link is laid at node_modules/<name> inside the working directory, and a file on that path leaves it no folder to lay it in.',
                 }),
             );
@@ -78,7 +78,7 @@ function refuseUnusableAncestor(name: string, workDir: string, dest: string): vo
                 refusal({
                     fix: `drop the symlink at ${ancestor} from the fixture or the command that lays it, so the working directory holds its own node_modules`,
                     found: `link('${name}'): ${ancestor} is a symlink, so the link would replace ${name} wherever it points`,
-                    read: 'docs/14-cli.md#link--a-package-the-working-directory-resolves',
+                    read: 'docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
                     why: 'A link is laid inside the working directory only; through a symlinked folder it would delete a real install outside it.',
                 }),
             );

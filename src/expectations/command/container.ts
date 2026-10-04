@@ -96,7 +96,7 @@ export class ContainerAccessor {
                     refusal({
                         fix: 'assert `.exists` first, or name a file the container holds',
                         found: `file(${JSON.stringify(path)}).content, and the container holds no such file`,
-                        read: 'docs/21-assertions.md#container-subjects-docker-aware-cli',
+                        read: 'docs/reference/assertions.md#container-subjects-docker-aware-cli',
                         why: A_FILE_IS_READ_WHERE_IT_EXISTS,
                     }),
                 );
@@ -127,7 +127,7 @@ export class ContainerAccessor {
                 refusal({
                     fix: 'assert `.exists` first, or name a container the run spawned',
                     found: `ContainerAccessor.${member}, and the container does not exist`,
-                    read: 'docs/21-assertions.md#container-subjects-docker-aware-cli',
+                    read: 'docs/reference/assertions.md#container-subjects-docker-aware-cli',
                     why: 'A container is read only once the run spawned it.',
                 }),
             );

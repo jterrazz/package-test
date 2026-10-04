@@ -199,7 +199,7 @@ export const RUNTIME_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'runtime',
-        sentence: `${REFUSAL_WHY['seam-is-an-optional-peer']} A page, a screen, a component and each service load theirs lazily, the first time a spec needs it, and a missing one is refused where it was needed, naming the peer and the install command — the package manager the project's lockfile names, for a service ([06 — Setting up](06-setting-up.md#what-to-install)).`,
+        sentence: `${REFUSAL_WHY['seam-is-an-optional-peer']} A page, a screen, a component and each service load theirs lazily, the first time a spec needs it, and a missing one is refused where it was needed, naming the peer and the install command — the package manager the project's lockfile names, for a service ([Set up a project](../start/set-up-a-project.md#what-to-install)).`,
         facet: 'model',
         family: 'setup',
         fix: 'Install the peer the refusal names, with the command it gives.',

@@ -20,19 +20,19 @@ describe('error-is-a-refusal-or-an-invariant', () => {
         expect(result.report).toMatch(`
             src/clock/clock.ts:3:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
                 found: \`new Error(…)\` carries a message written by hand
-                why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (\`docs/19-time-and-doubles.md#the-clock\`) or a catalogue row.
-                fix: a user can cause it: \`new Error(refusal({ found, why, fix, read }))\`, its read the chapter heading that explains it; only the framework can: \`invariant('<what broke>')\`
-                read: docs/03-testing.md#error-is-a-refusal-or-an-invariant
+                why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a heading of the manual written in place that exists (\`docs/reference/time-and-doubles.md#the-clock\`) or a catalogue row.
+                fix: a user can cause it: \`new Error(refusal({ found, why, fix, read }))\`, its read the heading that explains it; only the framework can: \`invariant('<what broke>')\`
+                read: docs/guides/test.md#error-is-a-refusal-or-an-invariant
             src/clock/clock.ts:11:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
                 found: \`new PinError(…)\` carries a message written by hand
-                why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (\`docs/19-time-and-doubles.md#the-clock\`) or a catalogue row.
-                fix: a user can cause it: \`new PinError(refusal({ found, why, fix, read }))\`, its read the chapter heading that explains it; only the framework can: \`invariant('<what broke>')\`
-                read: docs/03-testing.md#error-is-a-refusal-or-an-invariant
+                why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a heading of the manual written in place that exists (\`docs/reference/time-and-doubles.md#the-clock\`) or a catalogue row.
+                fix: a user can cause it: \`new PinError(refusal({ found, why, fix, read }))\`, its read the heading that explains it; only the framework can: \`invariant('<what broke>')\`
+                read: docs/guides/test.md#error-is-a-refusal-or-an-invariant
             src/clock/instant.ts:8:19  jterrazz-check(error-is-a-refusal-or-an-invariant)
-                found: \`docs/19-time-and-doubles.md#instants\` names a heading no chapter has
-                why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (\`docs/19-time-and-doubles.md#the-clock\`) or a catalogue row.
+                found: \`docs/reference/time-and-doubles.md#instants\` names a heading no page has
+                why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a heading of the manual written in place that exists (\`docs/reference/time-and-doubles.md#the-clock\`) or a catalogue row.
                 fix: read a heading that exists, and write the section that explains the refusal where none does
-                read: docs/03-testing.md#error-is-a-refusal-or-an-invariant
+                read: docs/guides/test.md#error-is-a-refusal-or-an-invariant
         `);
     });
 });

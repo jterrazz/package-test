@@ -17,7 +17,7 @@ export function requireDockerDaemon(): void {
             refusal({
                 fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
                 found: 'specification.cli({ docker }) asked for Docker, and no Docker daemon answered',
-                read: 'docs/14-cli.md#docker-aware-mode',
+                read: 'docs/guides/cli-specs.md#docker-aware-mode',
                 why: 'Docker-aware mode reads the containers a run spawned, so it needs a Docker daemon.',
             }),
             { cause: error },

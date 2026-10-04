@@ -50,7 +50,7 @@ describe('sequences', () => {
                 'found: .exec([…], { waitFor/timeout }), options on a command sequence',
                 'why: `waitFor` and `timeout` wait on one long-running process.',
                 'fix: wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
-                'read: docs/14-cli.md#long-running-processes-waitfor--timeout',
+                'read: docs/guides/cli-specs.md#long-running-processes-waitfor--timeout',
             ].join('\n'),
         );
     });
@@ -63,7 +63,7 @@ describe('sequences', () => {
                 'found: .exec([]), a sequence of no command',
                 'why: A sequence runs its commands in order, and runs at least one.',
                 "fix: name at least one command: .exec(['build', 'test'])",
-                'read: docs/14-cli.md#sequences-array-form',
+                'read: docs/guides/cli-specs.md#sequences-array-form',
             ].join('\n'),
         );
     });

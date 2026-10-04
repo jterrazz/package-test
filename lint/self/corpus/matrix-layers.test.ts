@@ -12,16 +12,16 @@ const read = (relative: string): string => readFileSync(resolve(ROOT, relative),
 
 describe('matrix-layers', () => {
     test('the layered reading is byte-identical to a fresh generation', () => {
-        // Given - the layers block chapter 03 carries
+        // Given - the layers block the Test page carries
         // Then - regenerating reproduces it exactly, counts included
         expect(
             spliceBetween(
-                read('docs/03-testing.md'),
+                read('docs/guides/test.md'),
                 MATRIX_LAYERS_MARKERS,
                 renderMatrixLayers(ROOT),
-                'docs/03-testing.md',
+                'docs/guides/test.md',
             ),
-        ).toBe(read('docs/03-testing.md'));
+        ).toBe(read('docs/guides/test.md'));
     });
 
     test('every layer of the reading carries files', () => {

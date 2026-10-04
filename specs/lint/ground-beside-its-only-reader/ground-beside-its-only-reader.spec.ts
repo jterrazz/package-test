@@ -16,7 +16,7 @@ describe('ground-beside-its-only-reader', () => {
                 found: \`_expected/\`, read by \`total.spec.ts\` alone of the tests beside it
                 why: Ground in a leaf holding ≥ 2 node tests (\`.test.ts\`, \`.spec.ts\`) that a single one of them reads is an error.
                 fix: give \`total.spec.ts\` a domain folder of its own, and move \`_expected/\` into it
-                read: docs/24-linting.md#ground-beside-its-only-reader
+                read: docs/reference/linting.md#ground-beside-its-only-reader
         `);
     });
 

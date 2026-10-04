@@ -102,7 +102,7 @@ describe('simulator', () => {
                 ...listing,
                 WHY,
                 'fix: name one of the available devices, or create the simulator in Xcode',
-                'read: docs/11-mobile.md#options',
+                'read: docs/guides/mobile-specs.md#options',
             ].join('\n');
 
         // Then - each refusal, whole
@@ -119,7 +119,7 @@ describe('simulator', () => {
                 ...listing.slice(0, 2),
                 WHY,
                 'fix: add `os:` or `udid:` to pick one',
-                'read: docs/11-mobile.md#options',
+                'read: docs/guides/mobile-specs.md#options',
             ].join('\n'),
         ]);
     });

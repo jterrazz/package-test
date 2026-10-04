@@ -16,8 +16,8 @@ export function stubBackend(
                         found: '.intercept(), and this runner has no declared backend',
                         read:
                             facet === 'mobile'
-                                ? 'docs/11-mobile.md#declared-backend'
-                                : 'docs/10-website.md#declared-backend',
+                                ? 'docs/guides/mobile-specs.md#declared-backend'
+                                : 'docs/guides/website-specs.md#declared-backend',
                         why: 'A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
                     }),
                 );

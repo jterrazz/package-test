@@ -113,7 +113,7 @@ export class RedisHandle implements ServiceHandle {
                 refusal({
                     fix: 'check the container is running and reachable (`docker ps`), and run again',
                     found: `redis() did not answer its healthcheck: ${driverReason(error)}`,
-                    read: 'docs/18-services.md#service-factories',
+                    read: 'docs/reference/services.md#service-factories',
                     why: 'A declared service is handed to the chain once it answers its healthcheck.',
                 }),
                 { cause: error },
@@ -152,7 +152,7 @@ export class RedisHandle implements ServiceHandle {
                                     ? `declare fewer redis services: a worker holds ${SERVICES_PER_WORKER} at once`
                                     : `run with fewer workers (--maxWorkers): a container serves ${WORKERS}`,
                             found: `redis: worker ${workerId} has no database index for "${service}"`,
-                            read: 'docs/18-services.md#per-worker-isolation',
+                            read: 'docs/reference/services.md#per-worker-isolation',
                             why: 'A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
                         }),
                     );

@@ -6,7 +6,7 @@ describe('lintReport', () => {
     test("lintReport — a report as a golden keeps it — keeps oxlint's position, rule and lesson, a part per line, and drops its tally", () => {
         // Given - the unix rendering, a lesson and a plain message, and its tally
         const output = [
-            'src/util.test.ts:1:1: found: a module test with no module · why: a test sits beside its module. · fix: move it · read: docs/24-linting.md#test-beside-its-module [Error/jterrazz(test-beside-its-module)]',
+            'src/util.test.ts:1:1: found: a module test with no module · why: a test sits beside its module. · fix: move it · read: docs/reference/linting.md#test-beside-its-module [Error/jterrazz(test-beside-its-module)]',
             'src/a.ts:3:7: Unexpected debugger [Warning/eslint(no-debugger)]',
             '',
             '2 problems',
@@ -21,7 +21,7 @@ describe('lintReport', () => {
                 '    found: a module test with no module',
                 '    why: a test sits beside its module.',
                 '    fix: move it',
-                '    read: docs/24-linting.md#test-beside-its-module',
+                '    read: docs/reference/linting.md#test-beside-its-module',
                 '',
             ].join('\n'),
         );
@@ -110,7 +110,7 @@ describe('lintReport', () => {
                     "found: a report in oxlint's graphical rendering (! jterrazz(no-probe-cluster): 3 probes in one test)",
                     'why: A report is read one line per diagnostic.',
                     'fix: run oxlint with --format=unix or --format=agent: without it, oxlint picks its renderer off the environment',
-                    'read: docs/16-lint.md#the-report',
+                    'read: docs/guides/lint-specs.md#the-report',
                 ].join('\n'),
             ),
         );

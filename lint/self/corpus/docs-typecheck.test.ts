@@ -18,11 +18,12 @@ const INDEX_MODULE = resolve(ROOT, 'src/index.js');
 const TSC_BIN = resolve(ROOT, 'node_modules/typescript/bin/tsc');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 
-/** The skill ships samples too, so it is guarded with the chapters and the README. */
+/** The skill ships samples too, so it is guarded with the pages and the README. */
 function frameworkBlocks(): DocBlock[] {
     const markdowns: string[] = [readFileSync(README, 'utf8'), readFileSync(SKILL, 'utf8')];
-    for (const file of readdirSync(DOCS)) {
-        if (file.endsWith('.md')) {
+    for (const entry of readdirSync(DOCS, { recursive: true })) {
+        const file = String(entry);
+        if (file.endsWith('.md') && !file.startsWith('decisions')) {
             markdowns.push(readFileSync(resolve(DOCS, file), 'utf8'));
         }
     }

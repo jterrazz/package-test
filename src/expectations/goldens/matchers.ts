@@ -135,7 +135,7 @@ async function toBeRunning(received: unknown): Promise<MatcherResult> {
             refusal({
                 fix: 'assert it on a container accessor: result.container(…) or spec.docker(…)',
                 found: 'toBeRunning() on a subject that is no container accessor',
-                read: 'docs/21-assertions.md#container-subjects-docker-aware-cli',
+                read: 'docs/reference/assertions.md#container-subjects-docker-aware-cli',
                 why: '`toBeRunning()` judges a container.',
             }),
         );

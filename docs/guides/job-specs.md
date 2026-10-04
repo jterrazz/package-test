@@ -1,12 +1,12 @@
-# 13 — Job specs (`specification.job`)
+# Job specs (`specification.job`)
 
 `specification.job()` tests background pipelines — cron jobs, queue consumers, nightly reports — by triggering them in-process against real databases and stubbed external providers. No HTTP server is involved: the subject under test is _what a job writes_, not what an endpoint returns.
 
-Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](12-api.md).
+Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](api-specs.md).
 
 ## What it specifies
 
-A job spec answers one question: **when this name is triggered, what does the pipeline do to the world it was handed?** The subject is the assembled job — its handler, its services, the network it reaches — met through the one door the scheduler would use, `.trigger(name)`. What a single pure function inside that pipeline returns is a module test's ([07](07-module-tests.md)); what the pipeline leaves in a database is this chapter's.
+A job spec answers one question: **when this name is triggered, what does the pipeline do to the world it was handed?** The subject is the assembled job — its handler, its services, the network it reaches — met through the one door the scheduler would use, `.trigger(name)`. What a single pure function inside that pipeline returns is a module test's ([Module tests](module-tests.md)); what the pipeline leaves in a database is this page's.
 
 The scheduler that invokes the job in production — a cron, a queue — is out of scope: the job is the subject, and its name is how a spec reaches it.
 
@@ -31,19 +31,19 @@ afterAll(cleanup);
 
 ### Options
 
-| Option     | Required                     | Description                                                                                                       |
-| ---------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](12-api.md), see [services](18-services.md)            |
-| `jobs`     | yes                          | `(services) => Job[]`, or a static array. Each is a named, triggerable job (rule `server-sees-declared-services`) |
-| `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule `no-redundant-root`)                              |
+| Option     | Required                     | Description                                                                                                         |
+| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](api-specs.md), see [services](../reference/services.md) |
+| `jobs`     | yes                          | `(services) => Job[]`, or a static array. Each is a named, triggerable job (rule `server-sees-declared-services`)   |
+| `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule `no-redundant-root`)                                |
 
 There is **no `server`** option: jobs run in-process by definition, and the record of services is the only outside world they meet. A `Job` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
 
 ## The chain
 
-Setups: `.seed(file('./_seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([23](23-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
+Setups: `.seed(file('./_seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
 
-`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [19 — Time and doubles § The clock](19-time-and-doubles.md#the-clock).
+`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [Time and doubles § The clock](../reference/time-and-doubles.md#the-clock).
 
 ```typescript
 // specs/job/nightly-report/pipeline.spec.ts — the job, and the aspect this file asks of it
@@ -68,9 +68,9 @@ describe('pipeline', () => {
 });
 ```
 
-Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](17-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
+Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](../reference/stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, an outgoing request no stub answers fails the spec ([17 § Strict by construction](17-stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, an outgoing request no stub answers fails the spec ([Stubs § Strict by construction](../reference/stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
 
 ### Seeding and sequences for pipelines
 
@@ -104,7 +104,7 @@ The number in `times` IS the assertion: it says the job retries exactly once. A 
 | --------------------------- | ---------------------------------------------------------------------------- |
 | `result.table(name, opts?)` | Table subject, compared whole — `toMatch(<rows>)` / `toBeEmpty()`, `await`ed |
 
-Whether `.seed()` and `.table()` name a database is [18 § The `database:` rule](18-services.md#the-database-rule).
+Whether `.seed()` and `.table()` name a database is [Services § The `database:` rule](../reference/services.md#the-database-rule).
 
 ## Unique here
 
@@ -142,7 +142,7 @@ The three failure families:
 | `openai.timeout()` / `anthropic.timeout()`                             | A provider that never answers within the job's timeout |
 | `openai.malformed('…')`                                                | A 200 whose body violates the provider schema          |
 
-The full builder catalogue lives in [stubs](17-stubs.md).
+The full builder catalogue lives in [stubs](../reference/stubs.md).
 
 ### A crash is read by its rejection
 
@@ -176,4 +176,4 @@ describe('crash', () => {
 
 ## Related
 
-[12 — API specs](12-api.md) · [21 — Assertions](21-assertions.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md)
+[API specs](api-specs.md) · [Assertions](../reference/assertions.md) · [Stubs](../reference/stubs.md) · [Services](../reference/services.md)

@@ -22,7 +22,7 @@ describe('scenario-ends-settled', () => {
                 found: a scenario that acts and ends without reading the screen
                 why: A scenario under \`specs/\` that ACTS (\`click\`, \`fill\`, \`select\`, \`check\`, \`press\`, \`tap\`, \`rerender\`) on the visitor it was handed ends on \`visitor.see(…)\`, \`visitor.gone(…)\` or \`visitor.unmount()\` — through the block, branch, loop or \`.then()\` it ends in.
                 fix: end it on \`visitor.see(<what the action produced>)\` or \`visitor.gone(<what it removed>)\`
-                read: docs/24-linting.md#scenario-ends-settled
+                read: docs/reference/linting.md#scenario-ends-settled
         `);
     });
 });

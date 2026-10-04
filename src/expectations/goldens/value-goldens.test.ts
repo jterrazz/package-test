@@ -205,7 +205,7 @@ describe('value-goldens', () => {
                     'found: update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written',
                     'why: A value written in place is rewritten in the test that states it.',
                     'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
-                    'read: docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                    'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 ].join('\n'),
             ),
         );

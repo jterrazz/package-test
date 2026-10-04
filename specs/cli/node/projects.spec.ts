@@ -60,7 +60,7 @@ describe('projects', () => {
             found: documents/stray.spec.yaml:2: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs
             why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, \`description:\` and \`runs:\` required, \`command:\` and \`exit:\` in every run.
             fix: write the key the grammar names; the reason prints the accepted set
-            read: docs/24-linting.md#document-follows-its-grammar
+            read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });
 });

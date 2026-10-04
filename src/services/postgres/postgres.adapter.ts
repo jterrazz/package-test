@@ -94,7 +94,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
                 refusal({
                     fix: 'check the container is running and reachable (`docker ps`), and run again',
                     found: `postgres() did not answer its healthcheck: ${driverReason(error)}`,
-                    read: 'docs/18-services.md#service-factories',
+                    read: 'docs/reference/services.md#service-factories',
                     why: 'A declared service is handed to the chain once it answers its healthcheck.',
                 }),
                 { cause: error },

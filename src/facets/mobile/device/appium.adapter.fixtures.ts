@@ -168,13 +168,13 @@ export function capabilityOf(sessions: Session[], key: string): unknown {
 export const TIMEOUT_LESSON = [
     'why: A mobile verb waits for one visible match, within the declared action budget.',
     'fix: designate what this screen shows, or raise `timeouts.action` for a slow build',
-    'read: docs/11-mobile.md#declared-timeouts',
+    'read: docs/guides/mobile-specs.md#declared-timeouts',
 ];
 
 export const SCENARIO_LESSON = [
     'why: An open scenario drives the screen step by step, and the first step that fails ends it.',
     'fix: correct the step that failed, or the screen it drives',
-    'read: docs/11-mobile.md#open-scenarios--the-when',
+    'read: docs/guides/mobile-specs.md#open-scenarios--the-when',
 ];
 
 /** The refusal of a target matching both Pay buttons of a screen. */
@@ -187,6 +187,6 @@ export function ambiguousPay(target: string): string {
         'fix: designate one of them:',
         `  • scope it       within(testId('…'), ${target}) — a screen has no landmarks; any target works as the scope`,
         '  • other element  a button() or field() may name one thing where this does not',
-        'read: docs/24-linting.md#target-matches-one-element',
+        'read: docs/reference/linting.md#target-matches-one-element',
     ].join('\n');
 }

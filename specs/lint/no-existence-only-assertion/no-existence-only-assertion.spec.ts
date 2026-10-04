@@ -22,7 +22,7 @@ describe('no-existence-only-assertion', () => {
                 found: \`toBeDefined()\` is this test's only oracle, and passes for almost anything
                 why: A test whose ONE assertion is an existence check (\`toBeDefined\`, \`not.toBeNull\`, \`not.toBeUndefined\` or a bare \`toHaveBeenCalled\`) is an error.
                 fix: assert the value itself — \`toBe\`/\`toStrictEqual\`, the whole result with \`toMatch\`, or the rows
-                read: docs/24-linting.md#no-existence-only-assertion
+                read: docs/reference/linting.md#no-existence-only-assertion
         `);
     });
 });

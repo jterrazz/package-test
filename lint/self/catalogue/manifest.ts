@@ -15,7 +15,7 @@ type Row = CatalogueRow<SelfFamily>;
 /** No published entry imports this module: the published bundles read `consumerRows` alone. */
 
 /** A self rule has no row in the public catalogue, so its message routes here. */
-export const SELF_CHAPTER = 'docs/03-testing.md';
+export const SELF_CHAPTER = 'docs/guides/test.md';
 
 export const SELF_STATIC_RULES: Row[] = [...ARCHITECTURE_STATIC_RULES];
 
@@ -161,13 +161,13 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every coordinate the corpus writes resolves: a relative link lands on a file and its anchor on a heading of that file, and every `docs/NN` a source comment cites names a chapter that exists.',
+            'Every coordinate the corpus writes resolves: a relative link lands on a file and its anchor on a heading of that file, and every page of the manual a source comment cites exists.',
         facet: 'model',
         family: 'catalogue',
         fix: 'Point the link at the heading as it is now written, or restore the heading it named.',
         name: 'links-resolve',
         rationale:
-            'A renamed heading leaves a link that scrolls nowhere and a renumbered chapter one that 404s.',
+            'A renamed heading leaves a link that scrolls nowhere and a moved page one that 404s.',
         reach: 'all',
     },
     {

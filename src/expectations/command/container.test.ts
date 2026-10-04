@@ -70,7 +70,7 @@ describe('ContainerAccessor', () => {
                     'found: ContainerAccessor.inspect, and the container does not exist',
                     'why: A container is read only once the run spawned it.',
                     'fix: assert `.exists` first, or name a container the run spawned',
-                    'read: docs/21-assertions.md#container-subjects-docker-aware-cli',
+                    'read: docs/reference/assertions.md#container-subjects-docker-aware-cli',
                 ].join('\n'),
             ),
         );

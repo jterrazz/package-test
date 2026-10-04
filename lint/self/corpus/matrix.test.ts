@@ -111,16 +111,16 @@ describe('matrix', () => {
     });
 
     test('capability matrix (meta-test `every-capability-exercised`) — the committed projection is byte-identical to a fresh generation', () => {
-        // Given - the matrix `npm run docs` splices into chapter 03
+        // Given - the matrix `npm run docs` splices into the Test page
         // Then - regenerating reproduces it exactly (edit the source, not the projection)
         expect(
             spliceBetween(
-                read('docs/03-testing.md'),
+                read('docs/guides/test.md'),
                 MATRIX_MARKERS,
                 renderMatrixBody(ROOT),
-                'docs/03-testing.md',
+                'docs/guides/test.md',
             ),
-        ).toBe(read('docs/03-testing.md'));
+        ).toBe(read('docs/guides/test.md'));
     });
 
     test.each([

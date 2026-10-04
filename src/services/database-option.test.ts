@@ -46,13 +46,13 @@ describe('validateDatabaseOption', () => {
                 'found: table() names no database, and 2 databases are declared ("orders", "users")',
                 WHY,
                 "fix: pass the database it reads: { database: 'orders' }, or another declared key",
-                'read: docs/24-linting.md#database-named-only-when-several-at-runtime',
+                'read: docs/reference/linting.md#database-named-only-when-several-at-runtime',
             ],
             [
                 'found: seed() names a database, and "orders" is the only one declared',
                 WHY,
                 "fix: delete { database: 'orders' }",
-                'read: docs/24-linting.md#database-named-only-when-several-at-runtime',
+                'read: docs/reference/linting.md#database-named-only-when-several-at-runtime',
             ],
         ]);
     });

@@ -22,7 +22,7 @@ describe('no-sleep', () => {
                 found: an arbitrary sleep in a test
                 why: No arbitrary sleep (\`setTimeout\`/\`setInterval\`/\`Atomics.wait\`, or a \`node:timers/promises\` import) in any test file — synchronisation is \`see()\`/\`gone()\` inside a scenario and \`waitUntil(predicate)\` everywhere else.
                 fix: wait on what the sleep stands for: \`await waitUntil(() => <condition>)\`, or \`see()\`/\`gone()\` inside a scenario
-                read: docs/24-linting.md#no-sleep
+                read: docs/reference/linting.md#no-sleep
         `);
     });
 });

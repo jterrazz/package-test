@@ -177,7 +177,7 @@ describe('request', () => {
                 'found: .post("/orders", directory("./_requests/")), a directory where the body is one file',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 'fix: name one file: .post("/orders", file(\'./_requests/body.json\'))',
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
         expect(

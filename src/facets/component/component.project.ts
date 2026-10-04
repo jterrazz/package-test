@@ -167,7 +167,7 @@ async function reroot(
             refusal({
                 fix,
                 found: `component({ vite }): ${found}`,
-                read: 'docs/09-component.md#the-constructor-there-is-none',
+                read: 'docs/guides/component-specs.md#the-constructor-there-is-none',
                 why: 'A component renders through the Vite pipeline the app builds with, read from its config.',
             }),
         );

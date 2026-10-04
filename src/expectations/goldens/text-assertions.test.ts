@@ -161,7 +161,7 @@ describe('text-assertions', () => {
             'named',
             ...['./_expected/help', './_expected.d/help'].map(
                 (name) =>
-                    `Error: found: toMatch(file("${name}")) on the stream "stdout", a golden path with no extension\nwhy: The extension is part of a golden’s path.\nfix: name the file with its extension: file('./_expected/help.txt')\nread: docs/21-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives`,
+                    `Error: found: toMatch(file("${name}")) on the stream "stdout", a golden path with no extension\nwhy: The extension is part of a golden’s path.\nfix: name the file with its extension: file('./_expected/help.txt')\nread: docs/reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives`,
             ),
         ]);
     });
@@ -197,9 +197,9 @@ describe('text-assertions', () => {
             String(streamValueRoute(accessor, 42)),
             String(streamValueRoute(accessor, /x/u)).split('\n')[0],
         ]).toStrictEqual([
-            'found: toBeEmpty() on the stream "stderr" — an empty stream is an empty text\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: compare its text: expect(<result>.stderr.text).toBe(\'\')\nread: docs/24-linting.md#one-verb-per-meaning',
+            'found: toBeEmpty() on the stream "stderr" — an empty stream is an empty text\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: compare its text: expect(<result>.stderr.text).toBe(\'\')\nread: docs/reference/linting.md#one-verb-per-meaning',
             'whole',
-            'TypeError: found: toMatch(a number) on the stream "stderr"\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: write the whole text in place, toMatch(\'…\'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(…)\nread: docs/24-linting.md#one-verb-per-meaning',
+            'TypeError: found: toMatch(a number) on the stream "stderr"\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: write the whole text in place, toMatch(\'…\'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(…)\nread: docs/reference/linting.md#one-verb-per-meaning',
             'TypeError: found: toMatch(a RegExp) on the stream "stderr"',
         ]);
     });

@@ -211,7 +211,7 @@ export class ServedProcess {
             refusal({
                 fix: reason.fix,
                 found: `specification.${this.facet}(): ${reason.found}.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
-                read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
+                read: 'docs/reference/services.md#process--the-one-shape-an-external-process-takes',
                 why: reason.why,
             }),
         );
@@ -239,7 +239,7 @@ export class ServedProcess {
                 refusal({
                     fix: 'run the command by hand and correct what its output names',
                     found: `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${outcome.stdout + outcome.stderr}`,
-                    read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
+                    read: 'docs/reference/services.md#process--the-one-shape-an-external-process-takes',
                     why: 'A process’s `before` must exit 0 before the process starts.',
                 }),
             );

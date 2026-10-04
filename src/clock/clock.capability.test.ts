@@ -50,7 +50,7 @@ describe('clock', () => {
                     'found: .clock("soon"), and "soon" is not an instant',
                     'why: A clock is pinned at an instant, written as an ISO-8601 string.',
                     "fix: pass an ISO-8601 string: .clock('2026-03-04T09:30:00Z')",
-                    'read: docs/19-time-and-doubles.md#the-clock',
+                    'read: docs/reference/time-and-doubles.md#the-clock',
                 ].join('\n'),
             ),
         );

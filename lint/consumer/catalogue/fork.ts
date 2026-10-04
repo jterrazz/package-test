@@ -1,7 +1,7 @@
 import { cell, markdownTable } from '@jterrazz/typescript/rules';
 import type { Markers } from '@jterrazz/typescript/rules';
 
-export const FORK_CHAPTER = 'docs/05-getting-started.md';
+export const FORK_CHAPTER = 'docs/start/getting-started.md';
 
 export const FORK_MARKERS: Markers = {
     end: '<!-- /GENERATED:fork -->',
@@ -25,7 +25,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/website/<domain>/<aspect>.spec.ts`',
         project: '`website`',
         question: 'Does it render in a browser as a whole served page?',
-        read: '[10](10-website.md)',
+        read: '[Website specs](../guides/website-specs.md)',
     },
     {
         constructor: 'none — the `component` chain',
@@ -33,7 +33,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`<file>.test.tsx` beside `<file>.tsx`',
         project: '`component`',
         question: 'Does it render as a component (React, a DOM function, a hook)?',
-        read: '[09](09-component.md)',
+        read: '[Component specs](../guides/component-specs.md)',
     },
     {
         constructor: '`specification.mobile()`',
@@ -41,7 +41,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/mobile/<domain>/<aspect>.spec.ts`',
         project: '`mobile`',
         question: 'Does it render on a simulator?',
-        read: '[11](11-mobile.md)',
+        read: '[Mobile specs](../guides/mobile-specs.md)',
     },
     {
         constructor: '`specification.api()`',
@@ -49,7 +49,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/api/<resource>/<action>/<aspect>.spec.ts`',
         project: '`api`',
         question: 'Does it answer HTTP?',
-        read: '[12](12-api.md)',
+        read: '[API specs](../guides/api-specs.md)',
     },
     {
         constructor: '`specification.job()`',
@@ -57,7 +57,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/job/<job>/<aspect>.spec.ts`',
         project: '`job`',
         question: 'Is it triggered by name, in-process?',
-        read: '[13](13-job.md)',
+        read: '[Job specs](../guides/job-specs.md)',
     },
     {
         constructor: '`specification.cli(bin)`',
@@ -65,7 +65,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/cli/<command>/` (+ `<case>.spec.yaml`)',
         project: '`cli`',
         question: 'Is it a binary?',
-        read: '[14](14-cli.md), [15](15-documents.md)',
+        read: '[CLI specs](../guides/cli-specs.md), [Spec documents](../guides/spec-documents.md)',
     },
     {
         constructor: '`specification.lint()`',
@@ -73,7 +73,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/lint/<rule>/<aspect>.spec.ts`',
         project: '`lint`',
         question: 'Is it a rule the project ships — a plugin, a checker, a preset?',
-        read: '[16](16-lint.md)',
+        read: '[Lint specs](../guides/lint-specs.md)',
     },
     {
         constructor: '`specification.integration()`',
@@ -81,7 +81,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/integration/<domain>/<aspect>.spec.ts`',
         project: '`integration`',
         question: 'Is it a module that needs a real service, or whose oracle is a golden?',
-        read: '[08](08-integration.md)',
+        read: '[Integration specs](../guides/integration-specs.md)',
     },
     {
         constructor: 'none',
@@ -89,7 +89,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`<file>.test.ts` beside `<file>.ts`',
         project: '`unit`',
         question: 'Is it a module alone?',
-        read: '[07](07-module-tests.md)',
+        read: '[Module tests](../guides/module-tests.md)',
     },
     {
         constructor: 'none',
@@ -97,7 +97,7 @@ export const FORK: ForkRow[] = [
         livesAt: '`specs/<suite>/<domain>/<aspect>.test.ts`',
         project: 'any name',
         question: 'Is it the repository itself — a suite over several apps?',
-        read: '[23 § The third door](23-conventions.md#the-third-door-a-repository-suite)',
+        read: '[Conventions § The third door](../concepts/conventions.md#the-third-door-a-repository-suite)',
     },
 ];
 

@@ -22,12 +22,12 @@ describe('stubs-reached-by-their-surface', () => {
                 found: \`src/stubs/delivery/same-process/intercept.ts\` is reached from outside the stubs, below their surface
                 why: The stubs are entered by what they publish: from outside \`src/stubs/\`, a production module imports \`stub.ts\`, \`exchange.ts\`, a module of \`kinds/\`, or \`intercept/intercept.ts\` or \`intercept/intercept.capability.ts\` — the entries (\`index.ts\`, \`index.browser.ts\`) also the \`delivery/<channel>/intercept.ts\` their channel picks, and a facet the delivery module it wires, each edge declared in \`DELIVERY_READERS\`.
                 fix: import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`lint/self/checks/stubs-reached-by-their-surface.ts\`)
-                read: docs/03-testing.md#stubs-reached-by-their-surface
+                read: docs/guides/test.md#stubs-reached-by-their-surface
             src/facets/job/job.facet.ts:1:1  jterrazz-check(stubs-reached-by-their-surface)
                 found: \`src/stubs/matching/stub-queue.ts\` is reached from outside the stubs, below their surface
                 why: The stubs are entered by what they publish: from outside \`src/stubs/\`, a production module imports \`stub.ts\`, \`exchange.ts\`, a module of \`kinds/\`, or \`intercept/intercept.ts\` or \`intercept/intercept.capability.ts\` — the entries (\`index.ts\`, \`index.browser.ts\`) also the \`delivery/<channel>/intercept.ts\` their channel picks, and a facet the delivery module it wires, each edge declared in \`DELIVERY_READERS\`.
                 fix: import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`lint/self/checks/stubs-reached-by-their-surface.ts\`)
-                read: docs/03-testing.md#stubs-reached-by-their-surface
+                read: docs/guides/test.md#stubs-reached-by-their-surface
         `);
     });
 });

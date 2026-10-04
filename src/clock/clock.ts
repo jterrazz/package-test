@@ -13,7 +13,7 @@ function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): 
             refusal({
                 fix: 'end the first scope before taking another, or state the instant on the chain (`.clock(iso)`) rather than around it',
                 found: `clock.${method}(), and a clock is already pinned`,
-                read: 'docs/19-time-and-doubles.md#the-clock',
+                read: 'docs/reference/time-and-doubles.md#the-clock',
                 why: 'One clock per test: ending a nested scope would end the outer one too.',
             }),
         );
@@ -35,7 +35,7 @@ export const clock = {
                 refusal({
                     fix: "take one first: `using _ = clock.at('<iso>')` (the calendar) or `using _ = clock.run()` (the scheduler)",
                     found: 'clock.advance(), and no clock is pinned',
-                    read: 'docs/19-time-and-doubles.md#the-clock',
+                    read: 'docs/reference/time-and-doubles.md#the-clock',
                     why: 'Only a pinned clock moves: the real one holds no time of the test’s to advance.',
                 }),
             );

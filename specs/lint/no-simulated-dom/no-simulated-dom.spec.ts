@@ -22,7 +22,7 @@ describe('no-simulated-dom', () => {
                 found: \`@vitest-environment happy-dom\` simulates a browser
                 why: A test file declares no simulated DOM: the \`@vitest-environment happy-dom|jsdom\` pragma is an error.
                 fix: delete the pragma, and write the rendered test as a \`.test.tsx\` beside its component, collected by the \`component()\` project
-                read: docs/24-linting.md#no-simulated-dom
+                read: docs/reference/linting.md#no-simulated-dom
         `);
     });
 });

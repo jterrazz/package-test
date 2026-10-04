@@ -47,7 +47,7 @@ describe('waitUntil', () => {
                     'found: waitUntil(): the outbox held one message did not hold within 10ms',
                     'why: `waitUntil()` waits on a condition, within a budget.',
                     'fix: raise the budget if the wait is legitimate, or wait on what actually changes',
-                    'read: docs/21-assertions.md#two-helpers-that-are-not-matchers',
+                    'read: docs/reference/assertions.md#two-helpers-that-are-not-matchers',
                 ].join('\n'),
             ),
         );

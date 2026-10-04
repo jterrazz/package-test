@@ -14,7 +14,7 @@ describe('refused', () => {
                 'found: specification.website({ url, backend }), a backend beside a deployed url',
                 'why: `backend` requires `server` mode: a deployed `url` cannot be pointed at a local stub.',
                 'fix: start the site with `server`, or drop `backend`',
-                'read: docs/10-website.md#options',
+                'read: docs/guides/website-specs.md#options',
             ].join('\n'),
         );
     });
@@ -29,7 +29,7 @@ describe('refused', () => {
                 'found: specification.website({ url: "" }), no site to specify',
                 'why: A website spec names the site it drives: a deployed `url`, or a `server` it starts.',
                 'fix: pass the absolute URL of the site as `url`, or start it with `server`',
-                'read: docs/10-website.md#options',
+                'read: docs/guides/website-specs.md#options',
             ].join('\n'),
         );
     });

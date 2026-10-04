@@ -13,7 +13,7 @@ describe('document-format', () => {
         // Then - the formatter names the document, and the run fails with nothing held
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            found: \`specs/widget/builds.spec.yaml\`, a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'typescript fix', which orders its keys and writes its streams as block scalars · read: docs/15-documents.md#the-schema-and-the-format
+            found: \`specs/widget/builds.spec.yaml\`, a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'typescript fix', which orders its keys and writes its streams as block scalars · read: docs/guides/spec-documents.md#the-schema-and-the-format
         `);
     });
 
@@ -26,7 +26,7 @@ describe('document-format', () => {
         // Then - the formatter names the document
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            found: \`specs/widget/builds.spec.yaml\`, a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'typescript fix', which orders its keys and writes its streams as block scalars · read: docs/15-documents.md#the-schema-and-the-format
+            found: \`specs/widget/builds.spec.yaml\`, a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'typescript fix', which orders its keys and writes its streams as block scalars · read: docs/guides/spec-documents.md#the-schema-and-the-format
         `);
     });
 

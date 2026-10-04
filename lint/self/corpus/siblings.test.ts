@@ -78,13 +78,13 @@ describe('siblings', () => {
         ).toStrictEqual([]);
     });
 
-    test('modules with no sibling test (meta-test `siblingless-module-declared`) — the table chapter 03 publishes is byte-identical to a fresh generation', () => {
+    test('modules with no sibling test (meta-test `siblingless-module-declared`) — the table the Test page publishes is byte-identical to a fresh generation', () => {
         // Given - the kind table, which carries today's count per kind
-        const chapter = readFileSync(resolve(ROOT, 'docs/03-testing.md'), 'utf8');
+        const chapter = readFileSync(resolve(ROOT, 'docs/guides/test.md'), 'utf8');
 
         // Then - regenerating reproduces it exactly (edit the source, not the projection)
         expect(
-            spliceBetween(chapter, SIBLINGS_MARKERS, renderSiblings(ROOT), 'docs/03-testing.md'),
+            spliceBetween(chapter, SIBLINGS_MARKERS, renderSiblings(ROOT), 'docs/guides/test.md'),
         ).toBe(chapter);
     });
 });

@@ -6,7 +6,7 @@ import { scenarioFailure } from './scenario-failure.js';
 const AMBIGUOUS = refusal({
     fix: 'designate one of them',
     found: 'button("Save") matched 2 elements',
-    read: 'docs/10-website.md#visit-scenarios--the-when',
+    read: 'docs/guides/website-specs.md#visit-scenarios--the-when',
     why: 'A target names one element.',
 });
 
@@ -21,7 +21,7 @@ describe('scenarioFailure', () => {
                 'found: button("Save") matched 2 elements\nEvidence: /tmp/evidence/page.png',
                 'why: A target names one element.',
                 'fix: designate one of them',
-                'read: docs/10-website.md#visit-scenarios--the-when',
+                'read: docs/guides/website-specs.md#visit-scenarios--the-when',
             ].join('\n'),
         );
     });
@@ -36,7 +36,7 @@ describe('scenarioFailure', () => {
                 'found: the open scenario failed:\n  tap failed\n  no such element',
                 'why: An open scenario drives the screen step by step, and the first step that fails ends it.',
                 'fix: correct the step that failed, or the screen it drives',
-                'read: docs/11-mobile.md#open-scenarios--the-when',
+                'read: docs/guides/mobile-specs.md#open-scenarios--the-when',
             ].join('\n'),
         );
     });
@@ -51,7 +51,7 @@ describe('scenarioFailure', () => {
                 'found: the visit scenario failed:\n  boom\nEvidence: /tmp/evidence/page.png',
                 'why: A visit scenario drives the page step by step, and the first step that fails ends it.',
                 'fix: correct the step that failed, or the page it drives',
-                'read: docs/10-website.md#visit-scenarios--the-when',
+                'read: docs/guides/website-specs.md#visit-scenarios--the-when',
             ].join('\n'),
             'boom',
         ]);
@@ -63,7 +63,7 @@ describe('scenarioFailure', () => {
             found: 'found: two matched',
             why: 'why: one element',
             fix: 'fix: designate one of them',
-            read: 'read: docs/10-website.md#a',
+            read: 'read: docs/guides/website-specs.md#a',
         };
         const without = (part: keyof typeof parts): string =>
             Object.entries(parts)
@@ -77,7 +77,7 @@ describe('scenarioFailure', () => {
                 without('why'),
                 without('fix'),
                 without('found'),
-                `${without('read')}\nread: see docs/10-website.md#a`,
+                `${without('read')}\nread: see docs/guides/website-specs.md#a`,
             ].map(
                 (message) =>
                     scenarioFailure(new Error(message), null, 'visit').message.split('\n')[0],

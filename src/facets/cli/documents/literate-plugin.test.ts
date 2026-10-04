@@ -86,7 +86,7 @@ describe('literate-plugin', () => {
                     `found: ${document}:3: a run is missing "exit:" — command and exit are mandatory`,
                     'why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
                     'fix: write the key the grammar names; the reason prints the accepted set',
-                    'read: docs/24-linting.md#document-follows-its-grammar',
+                    'read: docs/reference/linting.md#document-follows-its-grammar',
                 ].join('\n'),
             ),
         );

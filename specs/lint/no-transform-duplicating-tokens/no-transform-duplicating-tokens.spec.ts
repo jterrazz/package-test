@@ -14,7 +14,7 @@ describe('no-transform-duplicating-tokens', () => {
                 found: a \`transform\` that only rewrites output into token literals
                 why: A \`transform\` that only rewrites into equivalents of the standard tokens duplicates the grammar → error.
                 fix: delete the transform and write the tokens in the expectation; \`transform\` is for noise no token covers
-                read: docs/24-linting.md#no-transform-duplicating-tokens
+                read: docs/reference/linting.md#no-transform-duplicating-tokens
         `);
     });
 

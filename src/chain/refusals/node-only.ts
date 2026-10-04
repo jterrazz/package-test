@@ -5,7 +5,7 @@ export function refuse(name: string): never {
         refusal({
             fix: 'specify it from a test collected by a node project (unit/api/job/cli/website/mobile); a rendered thing is a `.test.tsx` beside its component',
             found: `${name} runs under node, and was called in a page`,
-            read: 'docs/09-component.md#what-it-does-not-do',
+            read: 'docs/guides/component-specs.md#what-it-does-not-do',
             why: 'A page has no filesystem, no child process and no socket.',
         }),
     );

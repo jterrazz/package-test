@@ -8,7 +8,7 @@ import type { RouteRun, RouteVerdict } from './route-judge.js';
 export const NO_SHARD_LEDGERS: Lesson = {
     fix: 'run every shard (`make test SHARD=<index>/<count>`) before the merge, since a whole run empties the shard folders',
     found: `api routes: not judged — no shard's ledgers under ${ROUTES_DIR}/shard-*/`,
-    read: 'docs/12-api.md#when-a-run-is-not-judged',
+    read: 'docs/guides/api-specs.md#when-a-run-is-not-judged',
     why: 'The split judges the routes over every shard’s ledgers, so a merge with none has no run to judge.',
 };
 

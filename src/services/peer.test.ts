@@ -52,7 +52,7 @@ const notBuilt = (manager: string, fix: string): string =>
         'found: sqlite() found `better-sqlite3`, and its native binding is not built',
         `why: A native peer is built by its install script, and ${manager} runs a dependency's install script only once it is told to.`,
         `fix: ${fix}`,
-        'read: docs/06-setting-up.md#what-to-install',
+        'read: docs/start/set-up-a-project.md#what-to-install',
     ].join('\n');
 
 describe('peer', () => {
@@ -81,7 +81,7 @@ describe('peer', () => {
                 'found: redis() requires `redis`, and it is not installed',
                 'why: Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.',
                 'fix: npm install -D redis',
-                'read: docs/24-linting.md#seam-is-an-optional-peer',
+                'read: docs/reference/linting.md#seam-is-an-optional-peer',
             ].join('\n'),
         );
         await expect(failed).rejects.toHaveProperty('cause', original);

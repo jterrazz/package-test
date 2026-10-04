@@ -19,7 +19,7 @@ unreadable: nothing in a row said which files it judged, so the only way to
 find out was to read the implementation.
 
 **A row could not say what to do.** A ban with no destination is an argument
-rather than a rule, and forty-odd messages ended on `see docs/24-linting.md`
+rather than a rule, and forty-odd messages ended on `see docs/reference/linting.md`
 with no fragment — a route to a chapter, not to a row. Nothing failed when a
 heading moved, so the routes rotted silently.
 
@@ -179,14 +179,14 @@ of — and every kind chapter is rewritten on one seven-section skeleton.
 | 13  | 19  | Linting (carries the generated catalogue) |
 
 A rule message anchored at `docs/13-linting.md#<name>` now reads
-`docs/24-linting.md#<name>`; `links-resolve` holds that every one of them resolves, so a
+`docs/reference/linting.md#<name>`; `links-resolve` holds that every one of them resolves, so a
 renumbering that missed a message fails the suite rather than a reader.
 
 ## What the proof holds, and what it does not
 
 The release proof of this wave reads: the package's own tree green under
 `typescript check`, the `unit` project inside the budget
-[03 — Testing](../03-testing.md) states, the
+[03 — Testing](../guides/test.md) states, the
 catalogue's own meta-tests holding freshness, completeness, reach and channel,
 and the R8 counts above re-derivable from the branch head. All of it holds.
 
@@ -224,7 +224,7 @@ reading.
 - **`response.body.cancel()`.** A seam defect, not a catalogue one, left out
   of the cut. It is fixed since: the node driver hands the body of every reply
   to `fetch` back as a stream the package owns, so the repro runs and M3
-  sanctions no suppression ([17 — Contracts](../17-stubs.md)).
+  sanctions no suppression ([17 — Contracts](../reference/stubs.md)).
 - **W4 stays a runtime row** rather than a type one, for the reason written in
   `src/type-channel.test-d.ts`.
 - **The three statuses.** ADR-006, 007 and 008 are `Proposed`; only the owner

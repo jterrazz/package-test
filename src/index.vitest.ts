@@ -97,7 +97,7 @@ async function projectOf(root: string, declared: unknown): Promise<TestProjectIn
             refusal({
                 fix: `name one of ${[...BUILDERS.keys()].join(', ')} as its \`facet\``,
                 found: `a project of \`test.projects\` names the facet \`${String(facet)}\``,
-                read: 'docs/06-setting-up.md#the-vitest-config',
+                read: 'docs/start/set-up-a-project.md#the-vitest-config',
                 why: 'a project is built by the helper of its facet, which owns its include, its budget and its seam',
             }),
         );
@@ -125,7 +125,7 @@ async function derivedFrom(root: string): Promise<ViteUserConfig> {
             refusal({
                 fix: 'correct jterrazz.config.ts as the finding says, then run vitest again',
                 found: `jterrazz.config.ts ${problem}`,
-                read: 'docs/06-setting-up.md#the-vitest-config',
+                read: 'docs/start/set-up-a-project.md#the-vitest-config',
                 why: 'the test projects are declared there, and a config read without them would run none of them',
             }),
         );

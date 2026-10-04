@@ -122,7 +122,7 @@ describe('projectScreen', () => {
                 'found: the page source Appium answered holds no XML element',
                 'why: A screen is read from the XML page source Appium answers.',
                 'fix: restart the Appium server, or upgrade Appium and its XCUITest driver',
-                'read: docs/11-mobile.md#requirements--what-the-machine-must-have',
+                'read: docs/guides/mobile-specs.md#requirements--what-the-machine-must-have',
             ].join('\n'),
         );
     });

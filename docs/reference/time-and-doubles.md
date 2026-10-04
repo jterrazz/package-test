@@ -1,6 +1,6 @@
-# 19 — Time and doubles
+# Time and doubles
 
-Two things around a subject are neither a service nor the network: the time it reads, and a collaborator it is handed. This chapter covers `clock`, which pins time, and `mockOf()`, which doubles an injected port — and the doubles ladder, which says when a double is the right tool at all.
+Two things around a subject are neither a service nor the network: the time it reads, and a collaborator it is handed. This page covers `clock`, which pins time, and `mockOf()`, which doubles an injected port — and the doubles ladder, which says when a double is the right tool at all.
 
 ## The clock
 
@@ -64,7 +64,7 @@ A chain pins the same instant for its own action with `.clock(iso)`, released wh
 | `website` (`.visit()` only) | the page's calendar, before its first byte is parsed. A `.fetch()` opens no page and refuses the pairing                           |
 | `cli`                       | nothing — a binary is another process. Its instant travels through its own env (`TZ`), or the golden absorbs it with `{{iso8601}}` |
 
-A file whose chains all share one instant states it once, on a view: `const morning = api.with({ clock: '2026-03-04T09:30:00Z' })` — [23 — Conventions § What a file shares](23-conventions.md#what-a-file-shares). A chain whose clock is refused leaves nothing armed: the stubs it armed before the clock are released with the refusal.
+A file whose chains all share one instant states it once, on a view: `const morning = api.with({ clock: '2026-03-04T09:30:00Z' })` — [Conventions § What a file shares](../concepts/conventions.md#what-a-file-shares). A chain whose clock is refused leaves nothing armed: the stubs it armed before the clock are released with the refusal.
 
 ## Doubles
 
@@ -73,8 +73,8 @@ A file whose chains all share one instant states it once, on a view: `const morn
 When a subject needs something it does not own, take the FIRST rung that fits. The list is closed: nothing below the fourth rung is a rung.
 
 1. **The real thing**, in the test's process — a pure module, a Hono app handed to `server`, a component mounted in a real Chromium.
-2. **A declared service** — `sqlite()`, `postgres()`, `redis()`, `process()` ([18 — Services](18-services.md)): real, isolated per worker, reset at the start of every chain.
-3. **A stub** — `.intercept()` on a chain, or `intercept()` around module code ([17 — Stubs](17-stubs.md)). Strict from the first stub: a request no stub answers fails the test.
+2. **A declared service** — `sqlite()`, `postgres()`, `redis()`, `process()` ([Services](services.md)): real, isolated per worker, reset at the start of every chain.
+3. **A stub** — `.intercept()` on a chain, or `intercept()` around module code ([Stubs](stubs.md)). Strict from the first stub: a request no stub answers fails the test.
 4. **A typed port double** — `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function. Asserting a call on one is a boundary observation; asserting only on doubles the test built proves nothing.
 
 **Off the ladder**, each with where to go instead:
@@ -86,7 +86,7 @@ When a subject needs something it does not own, take the FIRST rung that fits. T
 | `toMatchSnapshot()`                              | a golden, `toMatch(file('./_expected/…'))` |
 | `vi.mock()` of your own module                   | inject the port, and double it             |
 
-A native module a project genuinely cannot inject is the one exception, allowed per specifier with a reason in the `no-module-mock` options ([24 — Linting § Deviating from a rule](24-linting.md#deviating-from-a-rule)). Why the ladder is closed: [ADR-005](https://github.com/jterrazz/package-test/blob/main/docs/decisions/005-the-doubles-ladder-is-closed.md).
+A native module a project genuinely cannot inject is the one exception, allowed per specifier with a reason in the `no-module-mock` options ([Linting § Deviating from a rule](linting.md#deviating-from-a-rule)). Why the ladder is closed: [ADR-005](https://github.com/jterrazz/package-test/blob/main/docs/decisions/005-the-doubles-ladder-is-closed.md).
 
 ### `mockOf()`
 
@@ -117,7 +117,7 @@ describe('checkout', () => {
 
 It is deep by default: reading a member nobody stubbed hands back another double, however far the port nests. `mockOf<Port>({ deep: false })` is the flat form — every member of the port and nothing beneath them.
 
-State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app — a class implementing the port, swapped in by the specification — is a test adapter, and lives in `_setup/<port>.adapter.ts` ([23 — Conventions § The naming recap](23-conventions.md#the-naming-recap)).
+State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app — a class implementing the port, swapped in by the specification — is a test adapter, and lives in `_setup/<port>.adapter.ts` ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)).
 
 ## Pitfalls
 
@@ -128,4 +128,4 @@ State the port. `T` has no default, so `mockOf()` with no type argument answers 
 
 ## Related
 
-[07 — Module tests](07-module-tests.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md) · [23 — Conventions](23-conventions.md)
+[Module tests](../guides/module-tests.md) · [Stubs](stubs.md) · [Services](services.md) · [Conventions](../concepts/conventions.md)

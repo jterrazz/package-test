@@ -6,7 +6,7 @@ import { directory, file } from './spec-path.js';
 
 type Linked = Parameters<typeof link.reduce>[0];
 
-const CHAPTER = 'read: docs/14-cli.md#link--a-package-the-working-directory-resolves';
+const CHAPTER = 'read: docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves';
 
 /** A port that logs each link it lays. */
 function linksInto(log: string[]): LinkPort {
@@ -43,7 +43,7 @@ function noDirectory(name: string, handed: string): string {
         `found: link('${name}', ${handed}`,
         'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
         `fix: name the package's directory: link('${name}', directory('./_fixtures/greeter/'))`,
-        'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+        'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
     ].join('\n');
 }
 

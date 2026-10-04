@@ -22,7 +22,7 @@ describe('marker-on-one-line', () => {
                 found: a marker continued on the comment line under it
                 why: A marker is exactly one line: a \`//\` comment directly under one, at the same indentation, is a wrapped marker and an error.
                 fix: fold the continuation into the marker's one line, or separate the two with a blank line
-                read: docs/24-linting.md#marker-on-one-line
+                read: docs/reference/linting.md#marker-on-one-line
         `);
     });
 });

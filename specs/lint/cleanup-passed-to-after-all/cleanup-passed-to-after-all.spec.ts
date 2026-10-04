@@ -22,7 +22,7 @@ describe('cleanup-passed-to-after-all', () => {
                 found: \`cleanup\` is destructured and never handed to \`afterAll\`
                 why: The specification file passes \`cleanup\` to \`afterAll\`; a \`cleanup\` destructured but never handed over is an error.
                 fix: add \`afterAll(cleanup);\` at the end of the specification file
-                read: docs/24-linting.md#cleanup-passed-to-after-all
+                read: docs/reference/linting.md#cleanup-passed-to-after-all
         `);
     });
 });

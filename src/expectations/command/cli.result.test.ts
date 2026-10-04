@@ -189,7 +189,7 @@ describe('CliResult', () => {
                     'found: CliResult.containerIds, and the runner was not configured with a docker option',
                     'why: A CLI result reads the containers its run spawned only under Docker-aware mode.',
                     'fix: pass `docker: { envVar, nameLabel, testRunLabel }` in the specification.cli() options',
-                    'read: docs/14-cli.md#docker-aware-mode',
+                    'read: docs/guides/cli-specs.md#docker-aware-mode',
                 ].join('\n'),
             ),
         );

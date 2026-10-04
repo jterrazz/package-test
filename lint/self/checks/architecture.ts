@@ -7,7 +7,7 @@ import { FRAMEWORK_LAYERS } from './layers.js';
 import type { LayerOptions } from './layers.js';
 import { OWNERS_OF_LIBRARIES } from './libraries.js';
 
-const READ_LAYERS: ChapterAnchor = 'docs/01-architecture.md#the-source-trees';
+const READ_LAYERS: ChapterAnchor = 'docs/concepts/architecture.md#the-source-trees';
 
 const SPAWNING_SITES = [
     'expectations/command/docker-cli.ts',
@@ -155,7 +155,7 @@ function ownerRules(): ArchitectureRule[] {
             ]),
         },
         name: ruleName('library', library, 'has-one-owner'),
-        read: 'docs/01-architecture.md#the-source-trees',
+        read: 'docs/concepts/architecture.md#the-source-trees',
         to: { path: packageOf(library) },
         why: 'a library imported from two slices is two adapters of it that drift, and an optional peer loaded where its owner did not ask is a missing-peer refusal nobody wrote',
     }));
@@ -264,7 +264,7 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
         fix: 'reach the framework through `@jterrazz/test`, the build an install holds, or move the probe beside the module it covers, as a module test',
         from: { path: '(^|/)specs/' },
         name: 'no-framework-internals',
-        read: 'docs/03-testing.md#a-spec-reaches-the-framework-by-its-entry',
+        read: 'docs/guides/test.md#a-spec-reaches-the-framework-by-its-entry',
         to: { dependencyTypesNot: ['aliased'], path: '^src/' },
         why: "a spec of the framework specifies what a consumer installs, through its published name: the source tree, its entries among it, is this repository's alone",
     },

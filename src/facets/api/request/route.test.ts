@@ -7,7 +7,7 @@ function refused(found: string, call: string): string {
         `found: ${found}`,
         'why: A request written as its route template is handed exactly the parameters the template names.',
         `fix: write ${call}`,
-        'read: docs/24-linting.md#route-written-as-template-at-runtime',
+        'read: docs/reference/linting.md#route-written-as-template-at-runtime',
     ].join('\n');
 }
 

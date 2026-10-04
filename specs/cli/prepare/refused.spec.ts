@@ -14,7 +14,7 @@ describe('refused', () => {
                 'found: prepare("git init"), no step to run',
                 'why: A step is run over the working directory once the fixtures are laid; only a function can be run.',
                 "fix: hand it a function of the working directory: .prepare((workdir) => { execFileSync('git', ['init'], { cwd: workdir }); })",
-                'read: docs/14-cli.md#prepare--what-no-fixture-can-carry',
+                'read: docs/guides/cli-specs.md#prepare--what-no-fixture-can-carry',
             ].join('\n'),
         );
     });

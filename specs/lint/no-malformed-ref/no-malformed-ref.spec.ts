@@ -14,7 +14,7 @@ describe('no-malformed-ref', () => {
                 found: the malformed token {{iso8601#}}
                 why: A malformed ref of a known kind (\`{{iso8601#}}\`, \`{{uuid #id}}\`) in a text file under \`_expected/\` is an error.
                 fix: write iso8601 bare, or its named capture iso8601#<name>, between double braces
-                read: docs/24-linting.md#no-malformed-ref
+                read: docs/reference/linting.md#no-malformed-ref
         `);
     });
 

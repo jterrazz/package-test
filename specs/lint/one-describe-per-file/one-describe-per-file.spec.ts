@@ -22,7 +22,7 @@ describe('one-describe-per-file', () => {
                 found: the file’s \`describe\` is titled "events listing"
                 why: A test file — a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\` — holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
                 fix: title it 'pagination', the file's aspect — \`typescript fix\` renames it, keeping the title it said on each of its tests when it holds tests alone
-                read: docs/24-linting.md#one-describe-per-file
+                read: docs/reference/linting.md#one-describe-per-file
         `);
     });
 
@@ -36,7 +36,7 @@ describe('one-describe-per-file', () => {
                 found: the tests of this file stand in no \`describe\`
                 why: A test file — a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\` — holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
                 fix: wrap them in \`describe('pagination', () => { … })\` — \`typescript fix\` does it
-                read: docs/24-linting.md#one-describe-per-file
+                read: docs/reference/linting.md#one-describe-per-file
         `);
     });
 
@@ -50,7 +50,7 @@ describe('one-describe-per-file', () => {
                 found: the file’s \`describe\` is titled "request.action"
                 why: A test file — a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\` — holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
                 fix: title it 'request', the file's subject — \`typescript fix\` renames it, keeping the title it said on each of its tests when it holds tests alone
-                read: docs/24-linting.md#one-describe-per-file
+                read: docs/reference/linting.md#one-describe-per-file
         `);
     });
 });

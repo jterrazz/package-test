@@ -105,7 +105,7 @@ describe('files', () => {
                 'found: seed() targets the database "nonexistent-db", and none is declared under that key',
                 'why: `database:` names a key of the services record.',
                 'fix: name a declared database: analyticsDb, db',
-                'read: docs/18-services.md#the-database-rule',
+                'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
         );
     });
@@ -124,7 +124,7 @@ describe('files', () => {
                     'found: seed(), and no database is declared',
                     'why: A seed writes into a declared database.',
                     'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
-                    'read: docs/18-services.md#the-database-rule',
+                    'read: docs/reference/services.md#the-database-rule',
                 ].join('\n'),
             );
         } finally {

@@ -270,7 +270,7 @@ describe('StubBackend', () => {
                 '  - GET /users',
                 'why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.',
                 "fix: add a stub for each to the chain's composite",
-                'read: docs/24-linting.md#network-strict-after-first-stub',
+                'read: docs/reference/linting.md#network-strict-after-first-stub',
             ].join('\n'),
         ]);
     });

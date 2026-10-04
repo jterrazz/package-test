@@ -14,7 +14,7 @@ describe('no-token-in-request', () => {
                 found: the token {{string}} in a _requests/ file
                 why: A known token in a file under \`_requests/\` → error: requests are inputs, never matched.
                 fix: write the literal value the request sends — a request is sent, never matched
-                read: docs/24-linting.md#no-token-in-request
+                read: docs/reference/linting.md#no-token-in-request
         `);
     });
 

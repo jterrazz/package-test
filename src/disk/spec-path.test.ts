@@ -79,37 +79,37 @@ describe('spec-path', () => {
             [
                 'found: file("/abs/out.txt"), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: file('./abs/out.txt')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: file("out.txt"), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: file('./out.txt')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: file(5), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: file('./_expected/output.txt')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: file("///"), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: file('./_expected/output.txt')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: directory("fixtures/"), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: directory('./fixtures/')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: seed("//x/rows.sql"), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: seed('./x/rows.sql')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: seed("x//rows.sql"), a path that is not relative to the spec file',
                 "fix: start it with ./ or ../, from the spec file: seed('./x//rows.sql')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
         ]);
     });
@@ -124,12 +124,12 @@ describe('spec-path', () => {
             [
                 'found: toMatch(file("./_fixtures/config.json")) on a string, a value with no golden',
                 "fix: wrap the string to golden it — `expect(text(value)).toMatch(file(…))` — or compare it to a value, `toMatch('…')`",
-                'read: docs/24-linting.md#one-verb-per-meaning',
+                'read: docs/reference/linting.md#one-verb-per-meaning',
             ],
             [
                 'found: toMatch(directory("./_fixtures/shop/")) on a string, a value with no golden',
                 "fix: wrap the string to golden it — `expect(text(value)).toMatch(directory(…))` — or compare it to a value, `toMatch('…')`",
-                'read: docs/24-linting.md#one-verb-per-meaning',
+                'read: docs/reference/linting.md#one-verb-per-meaning',
             ],
         ]);
     });
@@ -153,37 +153,37 @@ describe('spec-path', () => {
             [
                 'found: fixture(directory("./_fixtures/shop/")), a directory where one file is read',
                 "fix: name one file: fixture(file('./_fixtures/config.json'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: request("create.http"), a value where a file is read',
                 "fix: name one file: request(file('./_requests/create.http'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: seed(5), a value where a file is read',
                 "fix: name one file: seed(file('./_seeds/rows.sql'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: run(file("./_fixtures/config.json")), a file not ending in .spec.yaml',
                 "fix: name the .spec.yaml file run() reads: run(file('./case.spec.yaml'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: toMatch(file("./_fixtures/config.json")), a file not ending in .txt',
                 "fix: name the .txt file toMatch() reads: toMatch(file('./_expected/output.txt'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: toMatch("x"), a value where a file is read',
                 "fix: name one file: toMatch(file('./_expected/output.txt'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: seed([object Object]), a value where a file is read',
                 "fix: name one file: seed(file('./_seeds/rows.sql'))",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
         ]);
     });
@@ -201,7 +201,7 @@ describe('spec-path', () => {
             [
                 'found: docker("x"), a value where the disk is read',
                 "fix: name the disk: docker(file('./…')) for a file, docker(directory('./…/')) for a directory",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
         ]);
     });
@@ -216,12 +216,12 @@ describe('spec-path', () => {
             [
                 'found: file("./out//"), a path ending in / — a directory\'s',
                 'fix: name the directory with directory("./out//"), or the file without its /: file("./out")',
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
             [
                 'found: directory("./fixtures"), a path that does not end in /',
                 'fix: end it in /: directory("./fixtures/"), or name a file with file("./fixtures")',
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
         ]);
     });

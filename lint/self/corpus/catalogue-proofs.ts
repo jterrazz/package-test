@@ -19,8 +19,8 @@ export const withoutGenerated = (text: string): string =>
 
 export const humanWords = (entry: { audience?: string }): string =>
     entry.audience === 'self'
-        ? withoutGenerated(read('docs/03-testing.md'))
-        : ((read('docs/23-conventions.md').split('## What stays human')[1] ?? '').split(
+        ? withoutGenerated(read('docs/guides/test.md'))
+        : ((read('docs/concepts/conventions.md').split('## What stays human')[1] ?? '').split(
               '\n## ',
           )[0] ?? '');
 

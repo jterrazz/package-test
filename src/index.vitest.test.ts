@@ -24,7 +24,7 @@ const refusal = (facet: string): string =>
         `found: a project of \`test.projects\` names the facet \`${facet}\``,
         'why: a project is built by the helper of its facet, which owns its include, its budget and its seam',
         'fix: name one of api, cli, component, integration, job, lint, mobile, unit, website as its `facet`',
-        'read: docs/06-setting-up.md#the-vitest-config',
+        'read: docs/start/set-up-a-project.md#the-vitest-config',
     ].join('\n');
 
 describe('index.vitest', () => {
@@ -87,7 +87,7 @@ describe('index.vitest', () => {
                     'found: jterrazz.config.ts does not load — presets not built',
                     'why: the test projects are declared there, and a config read without them would run none of them',
                     'fix: correct jterrazz.config.ts as the finding says, then run vitest again',
-                    'read: docs/06-setting-up.md#the-vitest-config',
+                    'read: docs/start/set-up-a-project.md#the-vitest-config',
                 ].join('\n'),
             ),
         );

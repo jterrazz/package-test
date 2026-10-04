@@ -109,7 +109,7 @@ export class ProcessHandle implements ServiceHandle {
                 refusal({
                     fix: 'read it from the started services record — `env: (services) => …` or `server: (services) => …` — never at declaration time',
                     found: 'process().url read before the process was ready',
-                    read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
+                    read: 'docs/reference/services.md#process--the-one-shape-an-external-process-takes',
                     why: 'A process’s URL is known once it is ready.',
                 }),
             );

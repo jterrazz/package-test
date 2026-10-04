@@ -1,6 +1,6 @@
-# 20 — The visitor
+# The visitor
 
-Three kinds of test drive something a person can see — a served page ([10](10-website.md)), a mounted component ([09](09-component.md)) and a screen on a simulator ([11](11-mobile.md)). Each hands its scenario a **visitor**, which acts on the surface the way a person would:
+Three kinds of test drive something a person can see — a served page ([Website specs](../guides/website-specs.md)), a mounted component ([Component specs](../guides/component-specs.md)) and a screen on a simulator ([Mobile specs](../guides/mobile-specs.md)). Each hands its scenario a **visitor**, which acts on the surface the way a person would:
 
 ```typescript
 await visitor.fill(field('Email'), 'visitor@site.test');
@@ -8,7 +8,7 @@ await visitor.click(button('Subscribe'));
 await visitor.see(content('Thanks for subscribing'));
 ```
 
-The visitor has one vocabulary on all three surfaces, and this chapter owns it: the **verbs** (`fill`, `click`, `see` …), the **targets** they act on (`field()`, `button()`, `content()` …), and the **matching** that turns a target into exactly one element. A target names what a person would name — a role and an accessible name. There is no CSS selector, no XPath and no raw predicate; the one escape hatch, `testId()`, must say in a comment what the element lacks (rule `test-id-states-what-is-missing`).
+The visitor has one vocabulary on all three surfaces, and this page owns it: the **verbs** (`fill`, `click`, `see` …), the **targets** they act on (`field()`, `button()`, `content()` …), and the **matching** that turns a target into exactly one element. A target names what a person would name — a role and an accessible name. There is no CSS selector, no XPath and no raw predicate; the one escape hatch, `testId()`, must say in a comment what the element lacks (rule `test-id-states-what-is-missing`).
 
 ## Verbs
 
@@ -41,7 +41,7 @@ Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard t
 
 ### The per-facet matrix
 
-Which surface declares which verb, target and modifier is generated from the code — [03 — Testing § The capability matrix](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#the-capability-matrix), its **Verb** and **Target** sections, a `—` for a word the facet does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector — it is a boundary the adapter refuses at runtime, with a message naming it.
+Which surface declares which verb, target and modifier is generated from the code — [Test § The capability matrix](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-capability-matrix), its **Verb** and **Target** sections, a `—` for a word the facet does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector — it is a boundary the adapter refuses at runtime, with a message naming it.
 
 The ARIA landmarks are web-only: passing one to a mobile verb refuses at runtime with a message naming the boundary — an iOS screen has no ARIA regions, and inventing an equivalent would be a second vocabulary wearing the first one's words.
 
@@ -167,10 +167,10 @@ why: A verb acts on exactly ONE element: a target that matches several is refuse
 fix: designate one of them:
   • scope it       within(navigation(), link("Articles"))   [leaves 1 of 2]   [also here: contentinfo()]
   • other element  a heading(), button() or field() may name one thing where this does not
-read: docs/24-linting.md#target-matches-one-element
+read: docs/reference/linting.md#target-matches-one-element
 ```
 
-The refusal is a lesson in the four parts every message carries ([24](24-linting.md#what-a-finding-says)), one part per line.
+The refusal is a lesson in the four parts every message carries ([Linting](linting.md#what-a-finding-says)), one part per line.
 
 Every suggestion carries what it LEAVES, so a rewrite that would keep the spec ambiguous never reads as a fix: a landmark holding every candidate is not offered at all. A candidate inside a named `<section>` is offered its region by name — `within(region("Orders"), …)`, the name read from the section's `aria-label` or from what its `aria-labelledby` points at — since a page holds several regions; an unnamed `<section>` is no region, so it stays evidence (`in <section>`) and is never offered. The evidence also names the ACCESSIBLE name a candidate matched on when that is not its text — a role target matches the name, so `button('Delete post')` finds an `aria-label="Delete Post a"` too, and printing only the text would send you after something that never matched.
 
@@ -186,7 +186,7 @@ fix: designate one of them:
   • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any target works as the scope
   • test id        testId("event-1-bookmark")   [also here: event-2-bookmark]
   • other element  a button() or field() may name one thing where this does not
-read: docs/24-linting.md#target-matches-one-element
+read: docs/reference/linting.md#target-matches-one-element
 ```
 
 Taking "the first match" is the failure this rule exists to prevent: the spec stays green while the visitor acts on a different element, and nothing ever reports it. Ambiguity is an authoring mistake, not something DOM order should arbitrate.
@@ -218,4 +218,4 @@ A name only part of an accessible name designates nothing, on every surface and 
 
 ## Related
 
-[09 — Component specs](09-component.md) · [10 — Website specs](10-website.md) · [11 — Mobile specs](11-mobile.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [23 — Conventions](23-conventions.md) · [24 — Linting](24-linting.md)
+[Component specs](../guides/component-specs.md) · [Website specs](../guides/website-specs.md) · [Mobile specs](../guides/mobile-specs.md) · [Assertions](assertions.md) · [Tokens](tokens.md) · [Conventions](../concepts/conventions.md) · [Linting](linting.md)

@@ -19,7 +19,7 @@ export function requireExtension(name: string, subject: string): void {
             refusal({
                 fix: `name the file with its extension: file('./_expected/help.txt')`,
                 found: `toMatch(file("${name}")) on ${subject}, a golden path with no extension`,
-                read: 'docs/21-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives',
+                read: 'docs/reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives',
                 why: 'The extension is part of a golden’s path.',
             }),
         );

@@ -22,22 +22,22 @@ describe('no-second-test-runtime', () => {
                 found: \`src/widget.test.ts\` imports \`mockdate\`
                 why: A test file imports no second test runtime: \`@testing-library/*\`, \`happy-dom\`, \`jsdom\`, \`vitest/browser\`, \`vitest-browser-*\`, \`@vitest/browser*\`, \`msw\`, \`msw/*\`, \`nock\`, \`sinon\`, \`vitest-mock-extended\`, \`jest\`, \`@jest/*\`, \`mockdate\`, \`playwright\`, \`playwright-core\`, \`@playwright/test\`, \`webdriverio\` and \`appium\` are errors, one layer per seam — \`no-second-test-runtime-<seam>\` — each named with what replaces it; \`react-dom/server\` is one too, in the \`module\` role alone.
                 fix: time is one primitive — \`using _ = clock.at(iso)\` pins the calendar and gives it back at the end of the scope
-                read: docs/24-linting.md#no-second-test-runtime
+                read: docs/reference/linting.md#no-second-test-runtime
             src/widget.test.ts:2:29  architecture(no-second-test-runtime-network)
                 found: \`src/widget.test.ts\` imports \`msw/node\`
                 why: A test file imports no second test runtime: \`@testing-library/*\`, \`happy-dom\`, \`jsdom\`, \`vitest/browser\`, \`vitest-browser-*\`, \`@vitest/browser*\`, \`msw\`, \`msw/*\`, \`nock\`, \`sinon\`, \`vitest-mock-extended\`, \`jest\`, \`@jest/*\`, \`mockdate\`, \`playwright\`, \`playwright-core\`, \`@playwright/test\`, \`webdriverio\` and \`appium\` are errors, one layer per seam — \`no-second-test-runtime-<seam>\` — each named with what replaces it; \`react-dom/server\` is one too, in the \`module\` role alone.
                 fix: the network answers through stubs — \`await using _ = await intercept(defineStubs(…))\` in module scope, \`.intercept()\` on a chain
-                read: docs/24-linting.md#no-second-test-runtime
+                read: docs/reference/linting.md#no-second-test-runtime
             src/widget.test.ts:3:38  architecture(no-second-test-runtime-string-renderer)
                 found: \`src/widget.test.ts\` imports \`react-dom/server\`
                 why: A test file imports no second test runtime: \`@testing-library/*\`, \`happy-dom\`, \`jsdom\`, \`vitest/browser\`, \`vitest-browser-*\`, \`@vitest/browser*\`, \`msw\`, \`msw/*\`, \`nock\`, \`sinon\`, \`vitest-mock-extended\`, \`jest\`, \`@jest/*\`, \`mockdate\`, \`playwright\`, \`playwright-core\`, \`@playwright/test\`, \`webdriverio\` and \`appium\` are errors, one layer per seam — \`no-second-test-runtime-<seam>\` — each named with what replaces it; \`react-dom/server\` is one too, in the \`module\` role alone.
                 fix: a component rendered to a string is still a component — the test is a \`.test.tsx\` beside it, and \`result.html\` carries the markup
-                read: docs/24-linting.md#no-second-test-runtime
+                read: docs/reference/linting.md#no-second-test-runtime
             src/widget.test.ts:5:26  architecture(no-second-test-runtime-doubles)
                 found: \`src/widget.test.ts\` imports \`vitest-mock-extended\`
                 why: A test file imports no second test runtime: \`@testing-library/*\`, \`happy-dom\`, \`jsdom\`, \`vitest/browser\`, \`vitest-browser-*\`, \`@vitest/browser*\`, \`msw\`, \`msw/*\`, \`nock\`, \`sinon\`, \`vitest-mock-extended\`, \`jest\`, \`@jest/*\`, \`mockdate\`, \`playwright\`, \`playwright-core\`, \`@playwright/test\`, \`webdriverio\` and \`appium\` are errors, one layer per seam — \`no-second-test-runtime-<seam>\` — each named with what replaces it; \`react-dom/server\` is one too, in the \`module\` role alone.
                 fix: the doubles ladder is closed — \`mockOf<Port>()\` for an injected interface, \`vi.fn()\` for a function, \`vi.spyOn\` for an object the test passes in
-                read: docs/24-linting.md#no-second-test-runtime
+                read: docs/reference/linting.md#no-second-test-runtime
         `);
     });
 });

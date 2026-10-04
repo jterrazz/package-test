@@ -14,7 +14,7 @@ describe('no-redundant-root', () => {
                 found: \`root: "../.."\` names the directory the walk already finds
                 why: A \`root\` pointing at the directory the automatic walk would have found is redundant → error.
                 fix: delete the \`root\` option
-                read: docs/24-linting.md#no-redundant-root
+                read: docs/reference/linting.md#no-redundant-root
         `);
     });
 

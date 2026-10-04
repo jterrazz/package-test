@@ -181,7 +181,7 @@ describe('in-place', () => {
                 `found: update mode: no toMatch( stands at ${file}:1:1 — the value in place cannot be written`,
                 'why: A value written in place is rewritten where its `toMatch(` stands.',
                 'fix: call `.toMatch(` on the expect() written at that line, not through an alias',
-                'read: docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
             ].join('\n'),
         );
         expect(readFileSync(file, 'utf8')).toBe('const x = 1;\n');

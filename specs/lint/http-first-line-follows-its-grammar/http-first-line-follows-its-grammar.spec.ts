@@ -16,7 +16,7 @@ describe('http-first-line-follows-its-grammar', () => {
                 found: the first line of create.http is no request line
                 why: The first line of a depth-1 \`.http\` follows its grammar: a request line (\`METHOD /path\`) under \`_requests/\`, a status line (\`HTTP/1.1 <status>\`) under \`_expected/\`.
                 fix: start create.http with its request line, \`GET /path\` or another method
-                read: docs/24-linting.md#http-first-line-follows-its-grammar
+                read: docs/reference/linting.md#http-first-line-follows-its-grammar
         `);
     });
 

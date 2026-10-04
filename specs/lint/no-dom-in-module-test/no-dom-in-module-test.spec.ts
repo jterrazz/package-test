@@ -22,12 +22,12 @@ describe('no-dom-in-module-test', () => {
                 found: \`toBeDefined()\` is this test's only oracle, and passes for almost anything
                 why: A test whose ONE assertion is an existence check (\`toBeDefined\`, \`not.toBeNull\`, \`not.toBeUndefined\` or a bare \`toHaveBeenCalled\`) is an error.
                 fix: assert the value itself — \`toBe\`/\`toStrictEqual\`, the whole result with \`toMatch\`, or the rows
-                read: docs/24-linting.md#no-existence-only-assertion
+                read: docs/reference/linting.md#no-existence-only-assertion
             src/widget.test.ts:6:18  jterrazz(no-dom-in-module-test)
                 found: \`document\` in a module test, where no DOM exists
                 why: A module test touches no DOM global: \`document\`, \`window\`, \`navigator\`, \`HTMLElement\` referenced in VALUE position in a \`module\`-role file OUTSIDE \`specs/\` is an error.
                 fix: move what renders into a \`.test.tsx\` beside its component, collected by the \`component()\` project
-                read: docs/24-linting.md#no-dom-in-module-test
+                read: docs/reference/linting.md#no-dom-in-module-test
         `);
     });
 });

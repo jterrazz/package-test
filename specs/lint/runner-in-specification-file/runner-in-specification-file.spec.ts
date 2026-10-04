@@ -22,7 +22,7 @@ describe('runner-in-specification-file', () => {
                 found: \`specification.cli()\` called outside a \`*.specification.ts\` file
                 why: A runner is created only in a \`*.specification.ts(x)\` file under \`specs/\`: calling \`specification.*\` anywhere else is an error.
                 fix: move the call into \`specs/cli/cli.specification.ts\` and import the handle it exports
-                read: docs/24-linting.md#runner-in-specification-file
+                read: docs/reference/linting.md#runner-in-specification-file
         `);
     });
 });

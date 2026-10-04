@@ -51,7 +51,7 @@ describe('one-subject-per-spec', () => {
                 found: a spec reaching 2 subjects — GET /orders, POST /orders
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
                 fix: split it, one file per subject — api/orders/list/orders.spec.ts, api/orders/create/orders.spec.ts — \`typescript fix\` splits it
-                read: docs/24-linting.md#one-subject-per-spec
+                read: docs/reference/linting.md#one-subject-per-spec
         `);
     });
 
@@ -65,7 +65,7 @@ describe('one-subject-per-spec', () => {
                 found: a spec reaching 2 subjects — exec db migrate, exec db seed
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
                 fix: split it, one file per subject — cli/db/migrate/db.spec.ts, cli/db/seed/db.spec.ts — \`typescript fix\` splits it
-                read: docs/24-linting.md#one-subject-per-spec
+                read: docs/reference/linting.md#one-subject-per-spec
         `);
     });
 });

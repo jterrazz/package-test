@@ -15,7 +15,7 @@ describe('peer-versions', () => {
                 'found: component(): @vitest/browser-playwright is 4.0.9, and vitest is 4.1.0',
                 'why: `@vitest/browser-playwright` peers vitest on an exact version.',
                 'fix: bump both to the same version in one change: npm i -D vitest@4.0.9 @vitest/browser-playwright@4.0.9',
-                'read: docs/06-setting-up.md#what-to-install',
+                'read: docs/start/set-up-a-project.md#what-to-install',
             ].join('\n'),
         );
     });
@@ -32,7 +32,7 @@ describe('peer-versions', () => {
                 'found: component() requires `@vitest/browser-playwright`, and it is not installed',
                 'why: Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.',
                 'fix: npm i -D @vitest/browser-playwright@4.1.0 playwright',
-                'read: docs/24-linting.md#seam-is-an-optional-peer',
+                'read: docs/reference/linting.md#seam-is-an-optional-peer',
             ].join('\n'),
         );
     });

@@ -1,4 +1,4 @@
-# 17 — Stubs: the outside world, declared
+# Stubs: the outside world, declared
 
 Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on every facet that reaches the network — `api`, `job`, `integration`, `component`, `website` and `mobile`.
 
@@ -46,7 +46,7 @@ export default defineStubs(
 );
 ```
 
-If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction)). Under node and on the stub backend, a chain that declares **no** stub is not guarded: strictness begins with the first `.intercept()`. In a page it is ([09](09-component.md)).
+If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction)). Under node and on the stub backend, a chain that declares **no** stub is not guarded: strictness begins with the first `.intercept()`. In a page it is ([Component specs](../guides/component-specs.md)).
 
 ### `times` and `required` — saying what you mean
 
@@ -169,9 +169,9 @@ specs/<facet>/<feature>/
             └── draft-reply.ts
 ```
 
-Stubs are TypeScript that prepares specs, so their root sits in a `_setup/` — the one of the lowest folder the specs using them share ([23 — Conventions § The naming recap](23-conventions.md#the-naming-recap)). A payload is data, and `_setup/` holds code alone: it sits in the `_fixtures/` beside that `_setup/`, placed like any ground.
+Stubs are TypeScript that prepares specs, so their root sits in a `_setup/` — the one of the lowest folder the specs using them share ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)). A payload is data, and `_setup/` holds code alone: it sits in the `_fixtures/` beside that `_setup/`, placed like any ground.
 
-The rules, enforced by [`stubs-root-holds-facades-and-kinds`](24-linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](24-linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](24-linting.md#stub-data-has-a-builder):
+The rules, enforced by [`stubs-root-holds-facades-and-kinds`](linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](linting.md#stub-data-has-a-builder):
 
 - The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
 - A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.
@@ -292,7 +292,7 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 **A body the subject cancels settles.** Under node, every reply to `fetch` reaches the subject with its body as a stream this package owns, so `response.body.cancel()` — what an SDK client does with a body it will not read, before a retry — resolves at once. The status, the headers and the address the reply came from are read as they were served. msw keeps a branch of every body for itself and never cancels it; the owned stream is what stands between that branch and the subject's cancel. A reply no stub answered is owned too, since msw branches the body of a request it passes through to the network as well. `specs/api/intercept/body-cancel.spec.ts` is the proof for a stub's reply: an app that cancels the body of `http.error(503, { … })` answers its request. `specs/integration/intercept/passthrough-cancel.spec.ts` is the proof for a reply passed through to a real server. In a page nothing is wrapped: the worker's reply reaches the subject through the browser's own network stack, and its cancel settles as served — `specs/component/intercept/quote-status.test.tsx` is the proof.
 
-**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its stubs last and its strictness is total ([09](09-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
+**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its stubs last and its strictness is total ([Component specs](../guides/component-specs.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
 ## Three deliveries, one queue
 
@@ -325,7 +325,7 @@ http.post('https://api.shoply.dev/orders', {
 http.get('/me', { without: { headers: ['authorization'] } }); // fires only for an anonymous request
 ```
 
-`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([22 — Tokens](22-tokens.md)).
+`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([Tokens](tokens.md)).
 
 The optional `filter` narrows beyond method + URL, and these are **filters**, so subset is the right default:
 
@@ -464,7 +464,7 @@ found: an unmatched outgoing request, POST https://api.openai.com/v1/chat/comple
   - POST https://api.openai.com/v1/chat/completions (exhausted after 1)
 why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.
 fix: declare a stub for POST https://api.openai.com/v1/chat/completions — or raise the `times` of the one it exhausted
-read: docs/24-linting.md#network-strict-after-first-stub
+read: docs/reference/linting.md#network-strict-after-first-stub
 ```
 
 At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route, and a never stub that was reached fails it, naming the route and each call ([never](#never--a-call-that-must-not-happen)). Every outcome of one action is reported together: a reached never stub, an unmatched request and an unmet `required` stub each keep their own refusal in the one error.
@@ -478,7 +478,7 @@ This is the same boundary rule `one-terminal-action-per-chain` already states fr
 Two scoping notes:
 
 - **A chain with zero stubs does not guard its network** — a deliberate, documented boundary.
-- **A rendered component is the exception.** Its network is strict even with no stub declared, because a page shares its process with nothing else the test does — [09 — Component specs](09-component.md#unique-here).
+- **A rendered component is the exception.** Its network is strict even with no stub declared, because a page shares its process with nothing else the test does — [Component specs](../guides/component-specs.md#unique-here).
 
 ## Pitfalls
 
@@ -492,4 +492,4 @@ Two scoping notes:
 
 ## Related
 
-[12 — API specs](12-api.md) · [13 — Job specs](13-job.md) · [10 — Website specs](10-website.md) · [11 — Mobile specs](11-mobile.md) · [23 — Conventions](23-conventions.md)
+[API specs](../guides/api-specs.md) · [Job specs](../guides/job-specs.md) · [Website specs](../guides/website-specs.md) · [Mobile specs](../guides/mobile-specs.md) · [Conventions](../concepts/conventions.md)

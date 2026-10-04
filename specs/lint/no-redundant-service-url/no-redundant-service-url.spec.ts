@@ -14,7 +14,7 @@ describe('no-redundant-service-url', () => {
                 found: \`.env({ DATABASE_URL: ….connectionString })\` restates what the framework injects
                 why: \`.env({ <SERVICE>_URL: ….connectionString })\` repeats the framework's own injection → error.
                 fix: delete the \`DATABASE_URL\` entry — the service record key already injects \`<KEY>_URL\`, and \`DATABASE_URL\`/\`REDIS_URL\` when unambiguous
-                read: docs/24-linting.md#no-redundant-service-url
+                read: docs/reference/linting.md#no-redundant-service-url
         `);
     });
 

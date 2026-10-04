@@ -22,7 +22,7 @@ describe('no-expect-in-a-loop', () => {
                 found: \`expect()\` inside a for…of, which runs it once per element — and not at all over none
                 why: An \`expect()\` in a test is not called inside a loop — a \`for\`, a \`for…of\`, a \`for…in\`, a \`while\`, a \`do…while\` — nor inside the callback of an array iteration — \`forEach\`, \`map\`, \`flatMap\`, \`filter\`, \`every\`, \`some\`, \`find\`, \`reduce\` — in the same function: a loop runs its assertion once per element, and not at all over an empty collection.
                 fix: compare the whole collection in one assertion — \`expect(rows.map(…)).toStrictEqual([…])\` — or state each case with \`test.each\`
-                read: docs/24-linting.md#no-expect-in-a-loop
+                read: docs/reference/linting.md#no-expect-in-a-loop
         `);
     });
 });

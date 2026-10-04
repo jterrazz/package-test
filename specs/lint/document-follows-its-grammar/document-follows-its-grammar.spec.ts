@@ -13,8 +13,8 @@ describe('document-follows-its-grammar', () => {
             specs/widget/case.spec.yaml:2:1  jterrazz-check(document-follows-its-grammar)
                 found: fixture: reads _fixtures/, and "./_expected/shop/" names _expected/ — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across facets) (verb-reads-its-ground-folder)
                 why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`_fixtures/\`.
-                fix: rewrite the document to its grammar — chapter 15 lists the keys, their order and what each run requires
-                read: docs/24-linting.md#document-follows-its-grammar
+                fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
+                read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });
 
@@ -27,8 +27,8 @@ describe('document-follows-its-grammar', () => {
             specs/widget/case.spec.yaml:5:1  jterrazz-check(document-follows-its-grammar)
                 found: unknown key "cases:" in a spec document — known keys: description, fixture, env, serve, runs
                 why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`_fixtures/\`.
-                fix: rewrite the document to its grammar — chapter 15 lists the keys, their order and what each run requires
-                read: docs/24-linting.md#document-follows-its-grammar
+                fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
+                read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });
 
@@ -43,8 +43,8 @@ describe('document-follows-its-grammar', () => {
             specs/widget/builds.spec.yaml:2:1  jterrazz-check(document-follows-its-grammar)
                 found: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs
                 why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`_fixtures/\`.
-                fix: rewrite the document to its grammar — chapter 15 lists the keys, their order and what each run requires
-                read: docs/24-linting.md#document-follows-its-grammar
+                fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
+                read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });
 

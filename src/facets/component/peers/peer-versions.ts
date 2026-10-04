@@ -16,7 +16,7 @@ export function versionOf(specifier: string): string {
         refusal({
             fix: `reinstall ${specifier}: \`npm install ${specifier}\``,
             found: `the installed ${specifier} manifest carries no version`,
-            read: 'docs/06-setting-up.md#what-to-install',
+            read: 'docs/start/set-up-a-project.md#what-to-install',
             why: 'The component project reads the version of the peers it configures from their installed manifests.',
         }),
     );
@@ -42,7 +42,7 @@ export function assertProviderPin(runner: string, provider: null | string): void
             refusal({
                 fix: `bump both to the same version in one change: npm i -D vitest@${provider} @vitest/browser-playwright@${provider}`,
                 found: `component(): @vitest/browser-playwright is ${provider}, and vitest is ${runner}`,
-                read: 'docs/06-setting-up.md#what-to-install',
+                read: 'docs/start/set-up-a-project.md#what-to-install',
                 why: '`@vitest/browser-playwright` peers vitest on an exact version.',
             }),
         );

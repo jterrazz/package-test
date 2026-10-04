@@ -231,7 +231,7 @@ describe('component', () => {
                 `found: component({ vite }): ${found}\nwhy: A component renders through the Vite pipeline the app builds with, read from its config.\nfix: ${fix}`,
             );
             await expect(loading).rejects.toThrow(
-                /\nread: docs\/09-component\.md#the-constructor-there-is-none$/u,
+                /\nread: docs\/guides\/component-specs\.md#the-constructor-there-is-none$/u,
             );
         },
     );

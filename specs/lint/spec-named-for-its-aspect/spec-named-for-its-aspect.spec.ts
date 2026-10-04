@@ -22,7 +22,7 @@ describe('spec-named-for-its-aspect', () => {
                 found: the aspect "misc" names no question about the subject
                 why: A spec file is named for its aspect: kebab-case (\`not-found.spec.ts\`), and never a name that says the file holds what fit nowhere else — \`misc\`, \`other\`, \`basic\`, \`general\`, \`more\`, \`edge-cases\`, \`tests\`, \`main\`.
                 fix: rename the file for what its tests ask — \`pagination\`, \`filters\`, \`validation\`, \`not-found\`, \`auth\`, \`shape\` — and split it when they ask several
-                read: docs/24-linting.md#spec-named-for-its-aspect
+                read: docs/reference/linting.md#spec-named-for-its-aspect
         `);
     });
 });

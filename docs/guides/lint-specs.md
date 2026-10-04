@@ -1,8 +1,8 @@
-# 16 — Lint specs (`specification.lint`)
+# Lint specs (`specification.lint`)
 
 `specification.lint()` tests the rules a project ships — an oxlint plugin, a cross-file checker, the laws a `@jterrazz/typescript` preset holds a tree to — by running the real linters over fixture trees and comparing their whole report. The subject is a rule, met the way a consumer meets it: a tree in, the linter's verdict out.
 
-Use it when the behaviour you care about starts with "when this tree is linted…". A rule's visitor alone, on one snippet, is a module test with [`ruleTester()`](#a-rule-alone-ruletester); the tree the rule is meant to judge, with its folders and its neighbours, is this chapter's.
+Use it when the behaviour you care about starts with "when this tree is linted…". A rule's visitor alone, on one snippet, is a module test with [`ruleTester()`](#a-rule-alone-ruletester); the tree the rule is meant to judge, with its folders and its neighbours, is this page's.
 
 ## What it specifies
 
@@ -60,7 +60,7 @@ There is nothing to start and nothing to stop: `cleanup` is handed to `afterAll`
 
 ## The chain
 
-Setups: `.fixture(directory('./_fixtures/<tree>/'))` — or a `file()`, copied by name — lays the tree in a fresh working directory ([14 § Fixtures](14-cli.md#the-chain)); `.rules({ … })` states rules and their options for this chain, over the specification's `config`, a later call winning; on a specification that runs no oxlint — no plugin, no config — it is refused, since no linter would read it. Terminal action: `.run()` (rule `one-terminal-action-per-chain`).
+Setups: `.fixture(directory('./_fixtures/<tree>/'))` — or a `file()`, copied by name — lays the tree in a fresh working directory ([CLI specs § Fixtures](cli-specs.md#the-chain)); `.rules({ … })` states rules and their options for this chain, over the specification's `config`, a later call winning; on a specification that runs no oxlint — no plugin, no config — it is refused, since no linter would read it. Terminal action: `.run()` (rule `one-terminal-action-per-chain`).
 
 ```typescript
 // specs/lint/no-module-mock/no-module-mock.spec.ts
@@ -83,7 +83,7 @@ describe('no-module-mock', () => {
                 found: "x" is on the \`modules\` allow-list with no reason
                 why: A test doubles a PORT, never a module.
                 fix: state why no consumer can inject it
-                read: docs/24-linting.md#no-module-mock
+                read: docs/reference/linting.md#no-module-mock
         `);
     });
 });
@@ -113,10 +113,10 @@ specs/app/widget/widget.test.ts:8:36  acme(no-sleep)
     found: an arbitrary sleep in a test
     why: No arbitrary sleep in any test file.
     fix: wait on what the sleep stands for
-    read: docs/24-linting.md#no-sleep
+    read: docs/reference/linting.md#no-sleep
 ```
 
-The diagnostics come in the order a reader walks the tree — file, then line, then column — whichever linter printed them and whatever order its threads finished in; a tally, a summary or any other line is not one. A clean tree is the empty text: `expect(result.report).toMatch('')`. Written in place and rewritten by `TEST_UPDATE=1` ([22](22-tokens.md#update-mode-tokens-are-preserved)), the golden proves where each rule fired, which one, and what it teaches.
+The diagnostics come in the order a reader walks the tree — file, then line, then column — whichever linter printed them and whatever order its threads finished in; a tally, a summary or any other line is not one. A clean tree is the empty text: `expect(result.report).toMatch('')`. Written in place and rewritten by `TEST_UPDATE=1` ([Tokens](../reference/tokens.md#update-mode-tokens-are-preserved)), the golden proves where each rule fired, which one, and what it teaches.
 
 oxlint's graphical rendering is refused, never read as a clean run: the facet states `--format=unix` itself, and a report handed to it in frames names the format to state.
 
@@ -162,9 +162,9 @@ ruleTester().run('no-sleep', noSleep, {
 
 - **Linting a stale build.** The plugins and checkers a project ships are usually loaded from its `dist/`: build before the lint project runs, or the specs judge the previous rules.
 - **A golden cut to the rule ids.** The report carries each lesson whole, so a reworded message moves the golden — that is the contract a reader meets, and `TEST_UPDATE=1` rewrites it.
-- **A literal token in a message.** A lesson that echoes `{{uuid}}` is read as the token in the golden; cover the echo with `{{string}}` ([22 § Known limitations](22-tokens.md#known-limitations)).
+- **A literal token in a message.** A lesson that echoes `{{uuid}}` is read as the token in the golden; cover the echo with `{{string}}` ([Tokens § Known limitations](../reference/tokens.md#known-limitations)).
 - **One specification for every linter.** A plugin's fixture judged by the checker too reports what it was never built to show: give each linter a specification of its own (`checker-lint.specification.ts`, `preset-lint.specification.ts`).
 
 ## Related
 
-[14 — CLI specs](14-cli.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [24 — Linting](24-linting.md)
+[CLI specs](cli-specs.md) · [Assertions](../reference/assertions.md) · [Tokens](../reference/tokens.md) · [Linting](../reference/linting.md)

@@ -14,7 +14,7 @@ describe('no-status-only-test', () => {
                 found: the test's only assertions probe the HTTP status
                 why: A test whose ONLY assertions are HTTP status probes (\`expect(X.status).toBe(N)\` / \`.toEqual(N)\`, N a numeric literal 100–599) → error: this case wants a full golden (\`expect(result.response).toMatch(file('./_expected/case.http'))\`).
                 fix: compare the whole response, \`\`expect(result.response).toMatch(\`HTTP/1.1 …\`)\`\` (\`TEST_UPDATE=1\` fills an empty one), and keep the status probe beside it only if the status is the point
-                read: docs/24-linting.md#no-status-only-test
+                read: docs/reference/linting.md#no-status-only-test
         `);
     });
 

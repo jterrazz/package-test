@@ -53,7 +53,7 @@ const unmet = (line: string): string =>
         line,
         'why: A required stub states the call MUST happen, within the terminal action it is declared for.',
         'fix: the code no longer makes the call, or the stub no longer describes it: correct the one that drifted',
-        'read: docs/17-stubs.md#required-is-verified-per-terminal-action',
+        'read: docs/reference/stubs.md#required-is-verified-per-terminal-action',
     ].join('\n');
 
 describe('StubQueue', () => {
@@ -208,7 +208,7 @@ describe('StubQueue', () => {
                 `  - GET ${String(PATTERN_D)} (without headers cookie, authorization)`,
                 'why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.',
                 'fix: declare a stub for GET https://unregistered.test/x — or raise the `times` of the one it exhausted',
-                'read: docs/24-linting.md#network-strict-after-first-stub',
+                'read: docs/reference/linting.md#network-strict-after-first-stub',
             ].join('\n'),
             [
                 `found: an unmatched outgoing request, GET ${URL_A}; declared:`,
@@ -267,7 +267,7 @@ describe('StubQueue', () => {
                 `  - DELETE ${URL_A} — reached by DELETE ${URL_A}`,
                 "why: A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
                 'fix: take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
-                'read: docs/17-stubs.md#never--a-call-that-must-not-happen',
+                'read: docs/reference/stubs.md#never--a-call-that-must-not-happen',
                 '',
                 'unmatched GET https://api.example.com/x',
                 '',
@@ -276,10 +276,10 @@ describe('StubQueue', () => {
                 `  - POST ${URL_B} — declared and required but never requested`,
                 'why: A required stub states the call MUST happen, within the terminal action it is declared for.',
                 'fix: the code no longer makes the call, or the stub no longer describes it: correct the one that drifted',
-                'read: docs/17-stubs.md#required-is-verified-per-terminal-action',
+                'read: docs/reference/stubs.md#required-is-verified-per-terminal-action',
                 'why: A reached never stub, an unmatched request and an unmet required stub are independent facts about one action, so all are reported at once.',
                 'fix: correct each outcome in turn, by its own fix',
-                'read: docs/17-stubs.md#strict-by-construction',
+                'read: docs/reference/stubs.md#strict-by-construction',
             ].join('\n'),
         ]);
     });

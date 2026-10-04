@@ -7,7 +7,7 @@ import { META_TESTS_MARKERS, metaTests, renderMetaTests } from './meta-tests.js'
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
-const CHAPTER = 'docs/03-testing.md';
+const CHAPTER = 'docs/guides/test.md';
 
 describe('metaTests', () => {
     test('the meta-test channel, read off its own files — every file of the channel is a row, and every row states what it holds', () => {
@@ -33,7 +33,7 @@ describe('metaTests', () => {
         expect(own?.holds).toStrictEqual(['metaTests']);
     });
 
-    test('the meta-test channel, read off its own files — the table in chapter 03 is byte-identical to a fresh generation', () => {
+    test('the meta-test channel, read off its own files — the table in the Test page is byte-identical to a fresh generation', () => {
         // Given - the committed chapter
         const chapter = readFileSync(resolve(ROOT, CHAPTER), 'utf8');
 

@@ -16,7 +16,7 @@ describe('facet-test-uses-its-runner', () => {
                 found: a test under the \`api\` facet that reaches no runner
                 why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
                 fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module
-                read: docs/24-linting.md#facet-test-uses-its-runner
+                read: docs/reference/linting.md#facet-test-uses-its-runner
         `);
     });
 

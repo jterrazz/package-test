@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { clock } from './clock.js';
 
-const CHAPTER = 'read: docs/19-time-and-doubles.md#the-clock';
+const CHAPTER = 'read: docs/reference/time-and-doubles.md#the-clock';
 
 function notAnInstant(call: string): string {
     return [

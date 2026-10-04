@@ -16,12 +16,12 @@ describe('checker-suppression-names-a-pass', () => {
                 found: a checker suppression naming \`c14-database-named-only-when-several\`, which no pass of the checker has
                 why: Every id a \`checker-disable-next-line\` / \`checker-disable-line\` directive names is a pass of the checker, or \`*\`.
                 fix: name the pass this line is the exception to, or delete the directive — \`c14-database-named-only-when-several\` silences nothing
-                read: docs/24-linting.md#checker-suppression-names-a-pass
+                read: docs/reference/linting.md#checker-suppression-names-a-pass
             specs/api/orders/orders.spec.ts:9:1  jterrazz-check(checker-suppression-names-a-pass)
                 found: a checker suppression naming \`no-sleep\`, which no pass of the checker has
                 why: Every id a \`checker-disable-next-line\` / \`checker-disable-line\` directive names is a pass of the checker, or \`*\`.
                 fix: name the pass this line is the exception to, or delete the directive — \`no-sleep\` silences nothing
-                read: docs/24-linting.md#checker-suppression-names-a-pass
+                read: docs/reference/linting.md#checker-suppression-names-a-pass
         `);
     });
 

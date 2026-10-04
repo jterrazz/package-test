@@ -14,7 +14,7 @@ describe('no-silent-refusal', () => {
                 found: \`exit: 1\` with no \`stdout:\` and no \`stderr:\`
                 why: A run whose \`exit:\` is non-zero with neither \`stdout:\` nor \`stderr:\` → error: the document does not say why the command refused.
                 fix: write the words the refusal printed under \`stderr:\` (or \`stdout:\`)
-                read: docs/24-linting.md#no-silent-refusal
+                read: docs/reference/linting.md#no-silent-refusal
         `);
     });
 

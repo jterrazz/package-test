@@ -22,7 +22,7 @@ describe('golden-path-has-extension', () => {
                 found: \`toMatch(file("./_expected/help"))\` names a golden with no extension
                 why: A golden \`file()\`'s path carries its extension (\`toMatch(file('./_expected/help.txt'))\`, \`'./_expected/<case>.aria.yaml'\` for an ARIA tree); a golden file with no extension is an error.
                 fix: add the extension to the path (\`"./_expected/help.txt"\`), or compare a tree with \`toMatch(directory("./_expected/<name>/"))\`
-                read: docs/24-linting.md#golden-path-has-extension
+                read: docs/reference/linting.md#golden-path-has-extension
         `);
     });
 });

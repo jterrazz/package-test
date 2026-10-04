@@ -1,4 +1,4 @@
-# 08 — Integration specs: a module against the real thing
+# Integration specs: a module against the real thing
 
 `specification.integration()` tests a module — a function your test calls — against the real things it depends on: a database, a cache, a process, a declared stub. It also takes a module whose expected answer is a golden file. There is no HTTP, no binary and no page here; what makes this a spec rather than a module test beside the code is what the module stands on.
 
@@ -45,7 +45,7 @@ An integration spec answers one question: **given these real services, what does
 - **a module on a real service** — a repository against Postgres, a cache client against Redis;
 - **a module whose oracle is a golden** — a renderer, a parser, a formatter whose output is long enough to be read as a file.
 
-A subject that answers HTTP, runs as a binary or draws a screen belongs to that kind instead; a module that needs neither a service nor a golden is a module test ([the fork](05-getting-started.md#which-kind-of-test)). Why this is a kind of its own: [ADR-004](https://github.com/jterrazz/package-test/blob/main/docs/decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
+A subject that answers HTTP, runs as a binary or draws a screen belongs to that kind instead; a module that needs neither a service nor a golden is a module test ([the fork](../start/getting-started.md#which-kind-of-test)). Why this is a kind of its own: [ADR-004](https://github.com/jterrazz/package-test/blob/main/docs/decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
 
 ## The constructor
 
@@ -58,13 +58,13 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule `n
 
 ## The chain
 
-Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([23](23-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
+Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
 
-| Setup                              | Means                                                                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `.seed(file('./_seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
-| `.intercept(stubs)`                | declare what the outside world replies ([17](17-stubs.md))                                             |
-| `.clock('2026-03-04T09:30:00Z')`   | pin the module's `Date` for this chain ([19](19-time-and-doubles.md#the-clock))                        |
+| Setup                              | Means                                                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `.seed(file('./_seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several  |
+| `.intercept(stubs)`                | declare what the outside world replies ([Stubs](../reference/stubs.md))                                 |
+| `.clock('2026-03-04T09:30:00Z')`   | pin the module's `Date` for this chain ([Time and doubles](../reference/time-and-doubles.md#the-clock)) |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 
@@ -112,7 +112,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./_expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([22](22-tokens.md), [21](21-assertions.md)).
+Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./_expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([Tokens](../reference/tokens.md), [Assertions](../reference/assertions.md)).
 
 A call that a declared stub never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule `network-strict-after-first-stub`).
 
@@ -182,4 +182,4 @@ specs/integration/
 
 ## Related
 
-[07 — Module tests](07-module-tests.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md)
+[Module tests](module-tests.md) · [Stubs](../reference/stubs.md) · [Services](../reference/services.md) · [Assertions](../reference/assertions.md) · [Tokens](../reference/tokens.md)

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-/** Past it, the skill is restating a chapter. */
+/** Past it, the skill is restating a page. */
 export const SKILL_MAX_LINES = 120;
 
 /** `toMatch` included: the golden rides on it. */
@@ -24,7 +24,7 @@ const EXPORT_DECLARATION =
 const EXPORT_ALL = /export\s+\*\s+from\s+'(?<from>\.[^']+)'/gu;
 const SAMPLE_IMPORT = /import\s+\{(?<names>[^}]*)\}\s+from\s+'(?<from>@jterrazz\/test[^']*)'/gu;
 const PROSE_CALL = /`(?<name>[A-Za-z_$][\w$]*)[(<.]/gu;
-const CHAPTER_LINK = /\]\((?<target>[^)#]+\.md)(?:#[^)]*)?\)/gu;
+const PAGE_LINK = /\]\((?<target>[^)#]+\.md)(?:#[^)]*)?\)/gu;
 
 function namesOf(list: string): string[] {
     return list
@@ -61,12 +61,12 @@ export function exportedNames(file: string): Set<string> {
 }
 
 export type SkillFindings = {
-    missingChapters: string[];
+    missingPages: string[];
     unknownImports: string[];
     unknownCalls: string[];
 };
 
-/** The skill can only cite what exists: a symbol an entry publishes or vitest provides, and a chapter on disk. */
+/** The skill can only cite what exists: a symbol an entry publishes or vitest provides, and a page on disk. */
 export function skillFindings(skillPath: string, root: string): SkillFindings {
     const skill = readFileSync(skillPath, 'utf8');
     const published: Record<string, Set<string>> = {
@@ -89,7 +89,7 @@ export function skillFindings(skillPath: string, root: string): SkillFindings {
         }
     }
     return {
-        missingChapters: [...skill.matchAll(CHAPTER_LINK)]
+        missingPages: [...skill.matchAll(PAGE_LINK)]
             .map((match) => match.groups?.target ?? '')
             .filter((target) => !existsSync(resolve(dirname(skillPath), target))),
         unknownCalls: [...skill.matchAll(PROSE_CALL)]

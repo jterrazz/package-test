@@ -6,7 +6,7 @@ import { cli } from '../cli.specification.js';
 const GOLDEN = './_fixtures/in-place/recorded.test.mjs';
 const WHY =
     'why: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.';
-const READ = 'read: docs/24-linting.md#one-verb-per-meaning';
+const READ = 'read: docs/reference/linting.md#one-verb-per-meaning';
 
 describe('value', () => {
     test('a stream read as its text holds no golden: a file handed to its toMatch is refused, naming the subjects that do', async () => {

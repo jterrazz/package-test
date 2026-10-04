@@ -17,7 +17,7 @@ describe('ReleaseNote', () => {
             await visitor.see(heading('Release 17'));
         });
 
-        // Then - it threw its diff, and throws the SAME diff on a second read: a rewrite would have made the second comparison pass, which is exactly what `{ frozen: true }` forbids under TEST_UPDATE=1 (docs/10 § update mode)
+        // Then - it threw its diff, and throws the SAME diff on a second read: a rewrite would have made the second comparison pass, which is exactly what `{ frozen: true }` forbids under TEST_UPDATE=1 (docs/guides/website-specs.md § update mode)
         const wrong = `
             - main:
               - region "Release":

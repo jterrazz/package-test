@@ -22,7 +22,7 @@ describe('no-imported-expectation', () => {
                 found: the expectation \`FIRST_PAGE\`, imported from "../pages.js"
                 why: A spec imports no expectation: a name imported from another module of its specs tree — neither its \`*.specification\` runner nor a module under \`stubs/\` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument.
                 fix: write the expected value in this test — in place, or \`file(…)\` when several tests of this leaf share it — and stop importing \`FIRST_PAGE\`
-                read: docs/24-linting.md#no-imported-expectation
+                read: docs/reference/linting.md#no-imported-expectation
         `);
     });
 });

@@ -45,8 +45,8 @@ names and take either:
   its leaf only by climbing) and the existence (the checker statically, the
   runtime with the path it resolved to).
 
-The laws are [21 — Assertions](../21-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)'s
-and [23 — Conventions § The naming recap](../23-conventions.md#the-naming-recap)'s;
+The laws are [21 — Assertions](../reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)'s
+and [23 — Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)'s;
 the rows are `disk-named-by-relative-path`, `verb-reads-its-ground-folder`,
 `no-reach-into-sibling-ground`, `named-path-exists` and
 `paths-named-in-the-test`.
@@ -60,4 +60,4 @@ the rows are `disk-named-by-relative-path`, `verb-reads-its-ground-folder`,
   so the types refuse it.
 - A spec document's `fixture:` key takes the same path, with the trailing `/`
   saying a directory, and is judged by the same four guards
-  ([15 — Spec documents § Paths](../15-documents.md#paths)).
+  ([15 — Spec documents § Paths](../guides/spec-documents.md#paths)).

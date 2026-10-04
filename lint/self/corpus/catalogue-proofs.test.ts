@@ -124,7 +124,7 @@ describe('catalogue-proofs', () => {
         const constructors = ['api', 'cli', 'integration', 'job', 'lint', 'mobile', 'website'];
         const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
 
-        // Then - each has one, mobile included: its specs run against the Appium protocol double (docs/03); and the eighth subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
+        // Then - each has one, mobile included: its specs run against the Appium protocol double (docs/guides/test.md); and the eighth subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
         expect([...constructors, 'component'].filter((facet) => !trees.has(facet))).toStrictEqual(
             [],
         );
@@ -260,10 +260,10 @@ describe('catalogue-proofs', () => {
         ).toStrictEqual([]);
     });
 
-    test('catalogueProofs — conventions catalogue — E2E inventory (meta-test) — the docs/22 token table matches TOKEN_KINDS exactly', () => {
+    test('catalogueProofs — conventions catalogue — E2E inventory (meta-test) — the docs/reference/tokens.md token table matches TOKEN_KINDS exactly', () => {
         // Given - the token reference table's first-column cells (`| `{{kind}}` |`)
         const documented = new Set(
-            read('docs/22-tokens.md')
+            read('docs/reference/tokens.md')
                 .split('\n')
                 .map((line) => /^\|\s*`\{\{(?<kind>[a-z0-9]+)\}\}`\s*\|/u.exec(line)?.groups?.kind)
                 .filter((kind): kind is string => kind !== undefined),

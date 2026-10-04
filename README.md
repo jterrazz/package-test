@@ -25,7 +25,7 @@ describe('shape', () => {
 });
 ```
 
-`api` comes from a specification file that builds it once for the suite: `specification.api({ services: { db: sqlite() }, server: … })` starts the database, wires your app to it and serves it in the test process. [Getting started](docs/05-getting-started.md) walks through it from `npm install` to a green run.
+`api` comes from a specification file that builds it once for the suite: `specification.api({ services: { db: sqlite() }, server: … })` starts the database, wires your app to it and serves it in the test process. [Getting started](docs/start/getting-started.md) walks through it from `npm install` to a green run.
 
 ## Why
 
@@ -39,33 +39,33 @@ describe('shape', () => {
 npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
-[`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript) is the toolchain the framework is built for: one devDependency that builds, type-checks, lints and formats a project, run as `npx typescript check` and `npx typescript fix` (its bin is named `typescript`; it is not Microsoft's compiler package). It is a required peer ([why](docs/06-setting-up.md#what-to-install)), and its lint conventions are opt-in: a project that never lists the framework's preset in `jterrazz.config.ts` runs none of them, and writes its tests all the same.
+[`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript) is the toolchain the framework is built for: one devDependency that builds, type-checks, lints and formats a project, run as `npx typescript check` and `npx typescript fix` (its bin is named `typescript`; it is not Microsoft's compiler package). It is a required peer ([why](docs/start/set-up-a-project.md#what-to-install)), and its lint conventions are opt-in: a project that never lists the framework's preset in `jterrazz.config.ts` runs none of them, and writes its tests all the same.
 
-An ES module project on Node 24, vitest 5 and `@jterrazz/typescript` 11 is required ([Setting up § Project requirements](docs/06-setting-up.md#project-requirements)). A browser, a database driver or a simulator is installed only by a project that tests through it, and the error names the package when one is missing — [Setting up a project](docs/06-setting-up.md#what-to-install).
+An ES module project on Node 24, vitest 5 and `@jterrazz/typescript` 11 is required ([Setting up § Project requirements](docs/start/set-up-a-project.md#project-requirements)). A browser, a database driver or a simulator is installed only by a project that tests through it, and the error names the package when one is missing — [Setting up a project](docs/start/set-up-a-project.md#what-to-install).
 
 ## What you can test
 
-| Kind                                  | Subject                                                         | Entry point                    |
-| ------------------------------------- | --------------------------------------------------------------- | ------------------------------ |
-| [Module](docs/07-module-tests.md)     | One module, beside its code, nothing started                    | plain vitest, `<file>.test.ts` |
-| [Integration](docs/08-integration.md) | A module against real services, or against a golden             | `specification.integration()`  |
-| [Component](docs/09-component.md)     | A React component, hook or DOM function in a real Chromium      | `component.render()`           |
-| [Website](docs/10-website.md)         | A served page, fetched or driven in a browser                   | `specification.website()`      |
-| [Mobile](docs/11-mobile.md)           | A native app on an iOS simulator                                | `specification.mobile()`       |
-| [API](docs/12-api.md)                 | An HTTP app, through complete requests                          | `specification.api()`          |
-| [Job](docs/13-job.md)                 | A pipeline triggered by name                                    | `specification.job()`          |
-| [CLI](docs/14-cli.md)                 | A binary in a fresh working directory, often as a YAML document | `specification.cli()`          |
-| [Lint](docs/16-lint.md)               | The rules a project ships, over fixture trees                   | `specification.lint()`         |
+| Kind                                            | Subject                                                         | Entry point                    |
+| ----------------------------------------------- | --------------------------------------------------------------- | ------------------------------ |
+| [Module](docs/guides/module-tests.md)           | One module, beside its code, nothing started                    | plain vitest, `<file>.test.ts` |
+| [Integration](docs/guides/integration-specs.md) | A module against real services, or against a golden             | `specification.integration()`  |
+| [Component](docs/guides/component-specs.md)     | A React component, hook or DOM function in a real Chromium      | `component.render()`           |
+| [Website](docs/guides/website-specs.md)         | A served page, fetched or driven in a browser                   | `specification.website()`      |
+| [Mobile](docs/guides/mobile-specs.md)           | A native app on an iOS simulator                                | `specification.mobile()`       |
+| [API](docs/guides/api-specs.md)                 | An HTTP app, through complete requests                          | `specification.api()`          |
+| [Job](docs/guides/job-specs.md)                 | A pipeline triggered by name                                    | `specification.job()`          |
+| [CLI](docs/guides/cli-specs.md)                 | A binary in a fresh working directory, often as a YAML document | `specification.cli()`          |
+| [Lint](docs/guides/lint-specs.md)               | The rules a project ships, over fixture trees                   | `specification.lint()`         |
 
-Which kind a test is depends on its subject, and one ordered list of questions decides it: [Which kind of test](docs/05-getting-started.md#which-kind-of-test).
+Which kind a test is depends on its subject, and one ordered list of questions decides it: [Which kind of test](docs/start/getting-started.md#which-kind-of-test).
 
 ## Documentation
 
 The manual is [`docs/`](docs/README.md), mapped by the same four families as the package's exports:
 
-- **What is tested** — one chapter per kind, linked above.
-- **What surrounds the subject** — [stubs](docs/17-stubs.md) for the network, [services](docs/18-services.md) for databases and processes, [time and doubles](docs/19-time-and-doubles.md).
-- **Acting on a screen** — [the visitor](docs/20-visitor.md): `click`, `fill`, `see`, and how elements are named.
-- **Judging the result** — [assertions](docs/21-assertions.md) and [tokens](docs/22-tokens.md).
+- **What is tested** — one guide per kind, linked above.
+- **What surrounds the subject** — [stubs](docs/reference/stubs.md) for the network, [services](docs/reference/services.md) for databases and processes, [time and doubles](docs/reference/time-and-doubles.md).
+- **Acting on a screen** — [the visitor](docs/reference/visitor.md): `click`, `fill`, `see`, and how elements are named.
+- **Judging the result** — [assertions](docs/reference/assertions.md) and [tokens](docs/reference/tokens.md).
 
-The conventions and their reasons are [23 — Conventions](docs/23-conventions.md); every rule, generated from the code, is [24 — Linting](docs/24-linting.md). The API is the types the package publishes — your editor reads them. Agents read [`skills/jterrazz-test/SKILL.md`](skills/jterrazz-test/SKILL.md).
+The conventions and their reasons are [Conventions](docs/concepts/conventions.md); every rule, generated from the code, is [Linting](docs/reference/linting.md). The API is the types the package publishes — your editor reads them. Agents read [`skills/jterrazz-test/SKILL.md`](skills/jterrazz-test/SKILL.md).

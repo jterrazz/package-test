@@ -44,7 +44,7 @@ export class JsonAccessor<Value = unknown> {
                 refusal({
                     fix: `read ${this.streamName} as text, or have it hold JSON`,
                     found: `${this.streamName} is not valid JSON: ${preview}`,
-                    read: 'docs/21-assertions.md#resultjson--parsed-stdout-cli',
+                    read: 'docs/reference/assertions.md#resultjson--parsed-stdout-cli',
                     why: '`.json` parses a stream that holds one JSON document.',
                 }),
             );

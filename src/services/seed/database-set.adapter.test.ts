@@ -48,7 +48,7 @@ describe('databaseSet', () => {
                 'found: seed("/seeds/users.sql"), a path that is not relative to the spec file',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 "fix: start it with ./ or ../, from the spec file: seed('./seeds/users.sql')",
-                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         ]);
     });
@@ -111,13 +111,13 @@ describe('databaseSet', () => {
                 'found: seed() targets the database "billing", and none is declared under that key',
                 'why: `database:` names a key of the services record.',
                 'fix: name a declared database: orders, users',
-                'read: docs/18-services.md#the-database-rule',
+                'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
             [
                 'found: seed(), and no database is declared',
                 'why: A seed writes into a declared database.',
                 'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
-                'read: docs/18-services.md#the-database-rule',
+                'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
         ]);
     });

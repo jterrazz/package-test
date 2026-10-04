@@ -170,7 +170,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/mobile/screen/appium-app.adapter.ts',
         ),
         name: 'an adapter',
-        why: 'an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)',
+        why: 'an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)',
     },
     {
         claims: oneOf(

@@ -32,7 +32,7 @@ export function oneVerb(found: string, fix: string): string {
         `found: ${found}`,
         `why: ${REFUSAL_WHY['one-verb-per-meaning']}`,
         `fix: ${fix}`,
-        'read: docs/24-linting.md#one-verb-per-meaning',
+        'read: docs/reference/linting.md#one-verb-per-meaning',
     ].join('\n');
 }
 

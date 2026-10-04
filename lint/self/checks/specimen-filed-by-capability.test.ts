@@ -55,7 +55,7 @@ describe('checkSpecimenFiledByCapability', () => {
         expect(
             checkSpecimenFiledByCapability(root).map(({ fix, path }) => `${path} ${fix}`),
         ).toStrictEqual([
-            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its facet — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/03-testing.md § The capability matrix)',
+            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its facet — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/guides/test.md § The capability matrix)',
         ]);
     });
 
@@ -150,7 +150,7 @@ describe('checkSpecimenFiledByCapability', () => {
             'component/providers.tsx:2 a file of the component tree, filed under `component/`',
         ]);
         expect(checkSpecimenFiledByCapability(root)[0]?.fix).toBe(
-            'file it under the capability it specifies, one folder below its facet — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/03-testing.md § The capability matrix)',
+            'file it under the capability it specifies, one folder below its facet — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/guides/test.md § The capability matrix)',
         );
     });
 

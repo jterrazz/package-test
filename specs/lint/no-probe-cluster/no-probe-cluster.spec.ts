@@ -22,7 +22,7 @@ describe('no-probe-cluster', () => {
                 found: 3 probes on \`result.stdout\`
                 why: Three probes (\`threshold\`, default 3) on one goldenable subject — \`stdout\`, \`stderr\`, \`content\`, \`head\`, \`meta()\`, \`canonical\`, \`alternates\`, \`tree\`, \`html\` — with no \`toMatch(file(…))\` on it is an error.
                 fix: compare it whole — \`\`expect(result.stdout).toMatch(\`…\`)\`\`, \`TEST_UPDATE=1\` writing the value — with tokens for what moves
-                read: docs/24-linting.md#no-probe-cluster
+                read: docs/reference/linting.md#no-probe-cluster
         `);
     });
 });

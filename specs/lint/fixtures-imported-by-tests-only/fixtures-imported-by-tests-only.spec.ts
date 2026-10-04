@@ -22,7 +22,7 @@ describe('fixtures-imported-by-tests-only', () => {
                 found: \`src/widget/widget.ts\` imports \`src/widget/widget.fixtures.ts\`
                 why: A \`*.fixtures.ts\` is importable only from a test file.
                 fix: import it from a \`*.test.ts\` only, or move what the file needs into a module of its own
-                read: docs/24-linting.md#fixtures-imported-by-tests-only
+                read: docs/reference/linting.md#fixtures-imported-by-tests-only
         `);
     });
 });

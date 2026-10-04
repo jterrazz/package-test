@@ -57,7 +57,7 @@ describe('ambiguous', () => {
                 'fix: designate one of them:',
                 '  • scope it       within(navigation(), link("Articles"))   [leaves 1 of 4]',
                 OTHER,
-                'read: docs/24-linting.md#target-matches-one-element',
+                'read: docs/reference/linting.md#target-matches-one-element',
             ].join('\n'),
         );
     });
