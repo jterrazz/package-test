@@ -211,10 +211,13 @@ function containerAt(
     });
 }
 
-export function createDockerReader(testDir: string): (containerId: string) => ContainerAccessor {
+export function createDockerReader(
+    testDir: string,
+    inspect: RunContainers['inspect'] = inspectContainer,
+): (containerId: string) => ContainerAccessor {
     return (containerId: string): ContainerAccessor => {
         try {
-            return containerAt(containerId, inspectContainer(containerId), testDir);
+            return containerAt(containerId, inspect(containerId), testDir);
         } catch {
             return containerAt(null, null, testDir);
         }

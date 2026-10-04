@@ -195,11 +195,11 @@ describe('CliResult', () => {
         );
     });
 
-    test('cli.result — a container read by its id — one docker cannot inspect is absent', () => {
-        // Given - an id no container has
-        const read = createDockerReader('/spec');
+    test('cli.result — a container read by its id — one docker inspects is present, one it cannot inspect is absent', () => {
+        // Given - a docker that knows c1 and refuses c3
+        const read = createDockerReader('/spec', spawned([]).inspect);
 
-        // Then - read as absent rather than thrown
-        expect([read('cli-result-no-such-container').exists]).toStrictEqual([false]);
+        // Then - c1 is read, c3 is absent rather than thrown
+        expect([read('c1').exists, read('c3').exists]).toStrictEqual([true, false]);
     });
 });
