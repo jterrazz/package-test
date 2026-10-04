@@ -6,7 +6,7 @@ import { listFiles, readSource } from './tree.js';
 const NON_RUNNER_BINDINGS: ReadonlySet<string> = new Set(['cleanup', 'docker', 'orchestrator']);
 
 const RUNNER_DECLARATION =
-    /\{(?<names>[^}]*)\}\s*=\s*await\s+specification\.(?:api|cli|job)\s*\(/gu;
+    /\{(?<names>[^{}]*)\}\s*=\s*await\s+specification\.(?:api|cli|job)\s*\(/gu;
 
 const SQL_SERVICES: ReadonlySet<string> = new Set(['mysql', 'postgres', 'sqlite']);
 

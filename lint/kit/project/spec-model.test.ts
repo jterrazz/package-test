@@ -26,10 +26,11 @@ const DOCKER = [
 
 describe('spec-model', () => {
     test('runnerBindings and argumentsAt — the runners a declaration binds and the arguments of a call', () => {
-        // Given - declarations binding runners beside helpers, under their names or others
+        // Given - declarations binding runners beside helpers, under their names or others, one inside a test's body
         const text = [
             'const { api, cleanup } = await specification.api({});',
             'const { cli: run, docker } = await specification.cli(bin);',
+            "test('a', async () => { const { api: bare, cleanup: stop } = await specification.api({}); });",
             'const { page } = await specification.website({});',
             'call(a, (b), c',
         ].join('\n');
@@ -43,6 +44,7 @@ describe('spec-model', () => {
             [
                 { key: 'api', local: 'api' },
                 { key: 'cli', local: 'run' },
+                { key: 'api', local: 'bare' },
             ],
             'a, (b), c',
             'a, (b), c',
