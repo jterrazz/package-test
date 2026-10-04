@@ -18,11 +18,7 @@ import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function hasFrozenOption(args: AstNode[]): boolean {
-    const options = args[1];
-    if (options?.type !== 'ObjectExpression') {
-        return false;
-    }
-    const frozen = findProperty(options, 'frozen');
+    const frozen = findProperty(args[1], 'frozen');
     const value = child(frozen, 'value');
     return value?.type === 'Literal' && value.value === true;
 }
@@ -137,7 +133,7 @@ function isResultSubject(subject: AstNode | undefined): boolean {
             identifierName(callee) === 'text' || memberPropertyName(callee ?? subject) === 'table'
         );
     }
-    const name = subject?.type === 'MemberExpression' ? memberPropertyName(subject) : undefined;
+    const name = memberPropertyName(subject);
     // Stryker disable next-line ConditionalExpression: no name is in the set
     return name !== undefined && RESULT_SUBJECTS.has(name);
 }

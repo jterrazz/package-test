@@ -63,7 +63,7 @@ export const noRawBypass = defineRule(
                         return;
                     }
                     const subject = childList(expectCall, 'arguments')[0];
-                    if (subject !== undefined && memberPropertyName(subject) === 'raw') {
+                    if (memberPropertyName(subject) === 'raw') {
                         context.report({ data: { matcher }, messageId: 'rawBypass', node });
                     }
                 },

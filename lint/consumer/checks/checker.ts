@@ -159,6 +159,7 @@ function memberFindings({
     subject,
 }: MemberRead): CheckerSpotted[] {
     return [
+        // Stryker disable next-line ConditionalExpression: a member with no config reads as an empty text, which names no environment
         ...(config === null ? [] : checkNoSimulatedDomInConfig(config, rootDir)),
         ...checkNoRedundantTestDependency({ label, manifest, memberDir, subject }),
         // invariant: only a walk of the member sees a `.spec.ts` that never reached a `specs/` tree.
