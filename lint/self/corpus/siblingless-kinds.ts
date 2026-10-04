@@ -132,7 +132,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/job/job.handle.ts',
             'src/facets/lint/lint.facet.ts',
             'src/facets/lint/rules.capability.ts',
-            'src/facets/lint/run.action.ts',
             'src/facets/website/website.facet.ts',
             'src/facets/cli/documents/run.action.ts',
             'src/facets/job/trigger.action.ts',
