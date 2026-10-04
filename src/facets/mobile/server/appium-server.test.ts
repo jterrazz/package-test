@@ -3,7 +3,10 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { statusOf } from '../../../stubs/delivery/other-process/stub-backend.fixtures.js';
+import {
+    isListening,
+    statusOf,
+} from '../../../stubs/delivery/other-process/stub-backend.fixtures.js';
 import { reachAppium, runDevice, startAppiumServer } from './appium-server.js';
 
 const run = {
@@ -178,13 +181,18 @@ describe('appium-server', () => {
         const server = await startAppiumServer(root);
         const answered = await statusOf(`${server.url}/status`);
         await server.stop();
+        const listening = await isListening(server.url);
 
-        // Then - it answered while served, and no longer does; the one that exited is refused for the mobile runner
-        expect([answered, exited instanceof Error && exited.message.split('\n')[0]]).toStrictEqual([
+        // Then - it answered while served, and no longer listens; the one that exited is refused for the mobile runner
+        expect([
+            answered,
+            listening,
+            exited instanceof Error && exited.message.split('\n')[0],
+        ]).toStrictEqual([
             200,
+            false,
             'found: specification.mobile(): the server command exited before it was ready.',
         ]);
-        await expect(fetch(`${server.url}/status`)).rejects.toThrow(TypeError);
     });
 
     test('reachAppium — a runner naming its device where no run serves one boots it itself, and is refused a simulator it cannot boot', async () => {

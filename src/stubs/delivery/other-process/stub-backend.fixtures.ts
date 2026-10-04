@@ -1,3 +1,4 @@
+import { connect } from 'node:net';
 import { onTestFinished } from 'vitest';
 
 import { http } from '../../kinds/http.js';
@@ -26,4 +27,19 @@ export async function fetchJson(url: string, init?: RequestInit): Promise<unknow
 export async function statusOf(url: string): Promise<number> {
     const response = await fetch(url);
     return response.status;
+}
+
+/** Asks the port alone, no HTTP: undici can throw uncaught on a request to a socket that is closing. */
+export async function isListening(url: string): Promise<boolean> {
+    const { hostname, port } = new URL(url);
+    return await new Promise((resolve) => {
+        const socket = connect({ host: hostname, port: Number(port) });
+        socket.once('connect', () => {
+            socket.destroy();
+            resolve(true);
+        });
+        socket.once('error', () => {
+            resolve(false);
+        });
+    });
 }

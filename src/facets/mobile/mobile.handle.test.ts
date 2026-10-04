@@ -5,7 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { processService } from '../../services/process/process.adapter.js';
 import { sqlite } from '../../services/sqlite/sqlite.adapter.js';
-import { statusOf } from '../../stubs/delivery/other-process/stub-backend.fixtures.js';
+import { isListening, statusOf } from '../../stubs/delivery/other-process/stub-backend.fixtures.js';
 import { http } from '../../stubs/kinds/http.js';
 import { startMobile } from './mobile.handle.js';
 import { fakeAppium } from './server/fake-appium.fixtures.js';
@@ -95,6 +95,7 @@ describe('startMobile', () => {
         const armed = await statusOf(`${handle.backendUrl ?? ''}/events`);
         await handle.mobile.open();
         await handle.cleanup();
+        const listening = await isListening(handle.backendUrl ?? '');
 
         // Then - no services, so no report printed; the backend armed by the chain; the screen read, one session for both opens and ended, the backend gone
         const lines = printed.mock.calls.flat().map(String);
@@ -102,13 +103,13 @@ describe('startMobile', () => {
         expect([
             lines,
             handle.backendUrl,
-            [unarmed, armed],
+            [unarmed, armed, listening],
             result.content.text,
             appium.calls,
         ]).toStrictEqual([
             [],
             expect.stringMatching(/^http:\/\/127\.0\.0\.1:\d+$/u),
-            [501, 200],
+            [501, 200, false],
             'Orders',
             [
                 'POST /session',
@@ -122,7 +123,6 @@ describe('startMobile', () => {
                 'DELETE /session/:id',
             ],
         ]);
-        await expect(fetch(`${handle.backendUrl ?? ''}/events`)).rejects.toThrow(TypeError);
     });
 
     test('mobile.handle — startMobile — services — come up before the app and stop with the cleanup', async () => {
@@ -145,13 +145,14 @@ describe('startMobile', () => {
 
         // When - the runner cleans up
         await handle.cleanup();
+        const listening = await isListening(bundler.connectionString);
 
-        // Then - the report printed names no app, the bundler answered while the runner lived, and no longer does
+        // Then - the report printed names no app, the bundler answered while the runner lived, and no longer listens
         expect([
             lines.some((line) => line.includes('Starting infrastructure')),
             lines.some((line) => line.includes('app:')),
             answered,
-        ]).toStrictEqual([true, false, 200]);
-        await expect(fetch(bundler.connectionString)).rejects.toThrow(TypeError);
+            listening,
+        ]).toStrictEqual([true, false, 200, false]);
     });
 });
