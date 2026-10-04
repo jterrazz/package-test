@@ -59,7 +59,9 @@ export default defineConfig({
 });
 ```
 
-Then `npx typescript fix` writes the `vitest.config.ts` those projects derive, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and each project is built by the helper its `facet` names: `unit` collects the `*.test.ts` files next to your modules, `api` collects `specs/api/**/*.spec.ts`. [Set up a project](set-up-a-project.md#the-vitest-config) lists every helper and default.
+`kind` and `platform` say what the project is — here an HTTP service on Node — and `@jterrazz/typescript` derives the rest of the toolchain from them: the lint profile, the tsconfig preset, what the manifest must hold. An application kind (`api`, `website`, `mobile`) also asks for `"private": true` in `package.json`. The two lists, and which platforms each kind runs on, are the toolchain's [Getting started § Declare what the project is](https://github.com/jterrazz/package-typescript/blob/main/docs/start/getting-started.md#1-declare-what-the-project-is). `presets: [test()]` adds this package: the shared test defaults, the conventions, and the `test` section below.
+
+Then `npx typescript fix` writes the files that declaration derives — `vitest.config.ts` among them, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and each project is built by the helper its `facet` names: `unit` collects the `*.test.ts` files next to your modules — the project a module test runs in — and `api` collects `specs/api/**/*.spec.ts`. [Set up a project](set-up-a-project.md#the-vitest-config) lists every helper and default.
 
 This `api` project only names a vitest project. The `api` you send requests with is a different thing: the runner that step 3 builds.
 
@@ -80,7 +82,9 @@ export const { api, cleanup } = await specification.api({
 afterAll(cleanup);
 ```
 
-`server` returns your app: any object with a `request()` method, which a Hono `app` is. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
+`server` returns your app, and the facet sends it each request through its `request(path, init)` method, which answers a Fetch `Response` — a Hono `app` is one as it stands. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
+
+An app on another framework needs two things. It needs a `request(path, init)` of its own: Express and Fastify have none, so `server` returns a wrapper you write that answers it with a `Response`. And it exposes no route table, so the run cannot measure route coverage until the project names its routes as an OpenAPI document, `test: { routes: './openapi.yaml' }` in `jterrazz.config.ts`; without one the api run fails ([API specs § An app that is not Hono](../guides/api-specs.md#an-app-that-is-not-hono)).
 
 ### 4. Write the test
 
@@ -120,13 +124,30 @@ The folder says what is tested (`users/list/` is `GET /users`), the file name sa
 npx vitest --run --project api
 ```
 
-The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `.jterrazz/baseline.json`, which you commit, and the count can only go down from there ([API specs § Route coverage](../guides/api-specs.md#route-coverage)).
+`--project api` runs one project; `npx vitest --run` runs every project the config declares, and is the line to put in `package.json` as `"test": "vitest --run"`.
+
+The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. There is no switch to turn it off. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `.jterrazz/baseline.json`, which you commit, and the count can only go down from there ([API specs § Route coverage](../guides/api-specs.md#route-coverage)).
 
 To write the expected value instead of typing it, leave it empty — `toMatch('')` — and run once with `TEST_UPDATE=1`. The framework writes what came back into the test, with tokens where values move; you read the diff before you commit it ([Tokens § Update mode](../reference/tokens.md#update-mode-tokens-are-preserved)).
 
-### 6. Turn the conventions on
+### 6. Check the conventions
 
-The rules that keep the layout above consistent are a preset of `@jterrazz/typescript`. List it once and `npx typescript check` enforces them — [Set up a project § Turning the conventions on](set-up-a-project.md#turning-the-conventions-on).
+The conventions are already on: the `test()` step 2 lists carries them, and the `oxlint.config.ts` that `npx typescript fix` wrote reads it. One command enforces them, with the rest of the toolchain:
+
+```bash
+npx typescript check
+```
+
+What it checks, and how to deviate from a rule, is [Set up a project § Turning the conventions on](set-up-a-project.md#turning-the-conventions-on).
+
+### What you commit
+
+| Path                                                                       | Commit it? | Why                                                                                                                                                       |
+| -------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `jterrazz.config.ts`                                                       | yes        | the one file you write: what the project is, its presets, its test projects                                                                               |
+| `vitest.config.ts`, `oxlint.config.ts`, `oxfmt.config.ts`, `tsconfig.json` | yes        | derived by `typescript fix` and held by `typescript check`; an editor reads them by name                                                                  |
+| `.jterrazz/`                                                               | yes        | the debt the ratchets hold, such as the `baseline.json` step 5 records — commit it with the change that recorded it, since the next run judges against it |
+| `.artifacts/`                                                              | no         | caches, reports and evidence every run rewrites: add `.artifacts/` to `.gitignore`                                                                        |
 
 ## Which kind of test
 

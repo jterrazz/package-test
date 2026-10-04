@@ -28,7 +28,7 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest
 | A lint spec, `ruleTester()` | `oxlint`                                                                                                                                        |
 | Coverage                    | `@vitest/coverage-v8`                                                                                                                           |
 
-`msw`, which delivers stubbed network replies, is a direct dependency: nothing to install. An API spec hands your app to `server`; the adapter needs only an object with a `request()` method, so bring whichever web framework you use.
+`msw`, which delivers stubbed network replies, is a direct dependency: nothing to install. An API spec hands your app to `server`, which must answer `request(path, init)` with a Fetch `Response` and, for route coverage, expose Hono's route table. A Hono app does both. Any other framework needs a wrapper of your own for the first, and an OpenAPI document named in `test: { routes }` for the second ([API specs § An app that is not Hono](../guides/api-specs.md#an-app-that-is-not-hono)).
 
 **A missing peer is named when it is needed.** A facet's refusal names the packages it lacks and the `npm install -D` that brings them. A service's refusal names the service that asked, the peer, and the install command of the package manager your lockfile names; under pnpm a native binding must also be listed to be built, and the message adds that line:
 
@@ -60,7 +60,7 @@ To try an unreleased build of the framework, install the tarball `npm pack` writ
 
 ## The vitest config
 
-The projects a repository runs are declared in `jterrazz.config.ts`, one per kind of test it has, each named by its facet with that helper's options beside it:
+The projects a repository runs are declared in `jterrazz.config.ts`, one per kind of test it has, each named by its facet with that helper's options beside it. The file also declares the project's `kind` and `platform`, which `@jterrazz/typescript` reads to derive the rest of the toolchain ([its Configuration § Kind and platform](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#kind-and-platform)):
 
 ```typescript
 // jterrazz.config.ts
@@ -146,28 +146,18 @@ To adopt the preset from a config written by hand, move each project into `test.
 
 ## Turning the conventions on
 
-The conventions are a preset of the toolchain. A project lists `test()` in `jterrazz.config.ts`, after the base preset that names its profile, and its `oxlint.config.ts` composes what the presets carry:
+The conventions travel in the same `test()` preset that sets the vitest defaults, so the `jterrazz.config.ts` [above](#the-vitest-config) already turns them on. The base preset needs no line of its own: the declared `platform` picks the lint profile it runs ([the toolchain's Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles)), and `test()` adds this package's rules on top.
 
-```typescript
-// jterrazz.config.ts
-import { test } from '@jterrazz/test/config';
-import { defineConfig, typescript } from '@jterrazz/typescript/config';
-
-export default defineConfig({ presets: [typescript({ profile: 'node' }), test()] });
-```
-
-`profile` is one of `node`, `next`, `astro`, `expo`, `bun` or `react`, and decides which lint rules apply — the toolchain's [Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles).
+The linter reads them through the `oxlint.config.ts` that `npx typescript fix` derives, one line like the vitest config:
 
 ```typescript
 // oxlint.config.ts
-import { defineConfig, fromPresets } from '@jterrazz/typescript/oxlint';
+import { oxlintConfig } from '@jterrazz/typescript/oxlint';
 
-import settings from './jterrazz.config.ts';
-
-export default defineConfig(fromPresets(settings));
+export default await oxlintConfig(import.meta.url);
 ```
 
-`npx typescript check` then runs all of it: the oxlint plugin, the import and naming rules, and the conventions checker over `specs/`. Nothing is detected from your dependencies — a project that does not list `test()` runs none of these rules. What the preset carries, how to deviate from a rule, and the full catalogue are [Linting](../reference/linting.md).
+`npx typescript check` then runs all of it: the oxlint plugin, the import and naming rules, and the conventions checker over `specs/`. Nothing is detected from your dependencies — a project that does not list `test()` runs none of these rules, and writes its tests all the same. A rule you set apart is written in `jterrazz.config.ts` with its reason, never in the derived file; how, how to suppress one finding, and the full catalogue are [Linting](../reference/linting.md).
 
 ## Where a run writes
 
@@ -194,7 +184,23 @@ export default defineConfig(fromPresets(settings));
 - **Forgetting `afterAll(cleanup)` in a specification file.** The services leak into the next suite (rule `cleanup-passed-to-after-all`).
 - **Importing from a subpath the package does not publish** (`@jterrazz/test/services`). Every name a test uses comes from `@jterrazz/test`; the tool entries are `/vitest`, `/config`, `/oxlint` and `/schema` (rule `no-unpublished-subpath`).
 - **Writing `browser:` in a config by hand.** `component()` pins the provider to the runner's version, serves the service worker and pre-bundles cold dependencies; a derived config has no place for a hand-written one: a project's `facet` is its helper.
-- **A CommonJS `oxlint.config`.** oxlint loads the plugin as ESM only; from a CommonJS config it prints a warning, registers nothing and exits 0. Use `oxlint.config.ts` or `.mjs` — [Linting § Pitfalls](../reference/linting.md#pitfalls).
+
+## Upgrading
+
+Each release's notes are its [GitHub release](https://github.com/jterrazz/package-test/releases); the package keeps no changelog. A major carries no bridge from the one before — no codemod, no rename map, no rule that recognises the old spellings ([ADR-014](https://github.com/jterrazz/package-test/blob/main/docs/decisions/014-a-major-carries-no-bridge-from-the-one-before.md)) — so a project moves by hand, and the rules of the new major name each leftover in their own terms.
+
+### From 16 to 17
+
+| What a 16 project wrote                                                                                                   | What 17 asks for                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@jterrazz/typescript` ^10                                                                                                | ^11, released first; its own migration is [its Release § Which number moves](https://github.com/jterrazz/package-typescript/blob/main/docs/guides/release.md#which-number-moves) |
+| a hand-written `vitest.config.ts`                                                                                         | `test.projects` in `jterrazz.config.ts`, and the derived one-liner `typescript fix` writes ([§ The vitest config](#the-vitest-config))                                           |
+| the `jterrazz-test-check` bin, chained after `typescript check`                                                           | `presets: [test()]`; `typescript check`, `fix` and `baseline` run the checker                                                                                                    |
+| a bare name — `.seed('two-users.sql')`, `.request('create-user.http')`, the `$`-prefixed alias of the shared fixture pool | a path from the spec file, `file('./_seeds/two-users.sql')` or `directory(…)`; the shared ground is `specs/_shared/<role>/`, reached by the path that climbs to it               |
+| `defineContract()`, `defineContracts()` and the `Contract*` types                                                         | `defineStub()`, `defineStubs()` and the `Stub*` types ([Stubs](../reference/stubs.md))                                                                                           |
+| `specification.jobs()`, its `jobs` runner and the `jobs` folder under `specs/`                                            | `specification.job()`, the `job` runner and `specs/job/` ([Job specs](../guides/job-specs.md))                                                                                   |
+| field probes with no whole comparison, the matcher of a table's rows, an api or job `<case>.spec.yaml`                    | one `toMatch` of the whole result, written in the test or in a `file()` ([Assertions](../reference/assertions.md)); documents stay for cli and lint specs                        |
+| a rule id, in a config, a suppression or a ratchet key                                                                    | its new name, stated as its requirement — [Linting § The rule catalogue](../reference/linting.md#the-rule-catalogue); a directive naming an old id is reported as dead           |
 
 ## Related
 

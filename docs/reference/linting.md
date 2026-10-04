@@ -12,74 +12,20 @@ The conventions of [Conventions](../concepts/conventions.md) are enforced by thr
 specs/api/users/users.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): found: "../orders/_seeds/one.sql" leaves specs/api/users · why: A path leaves its leaf only into the specs root's shared ground, `<specs>/_shared/<role>/`, … · fix: move what it names beside specs/api/users, or … · read: docs/reference/linting.md#no-reach-into-sibling-ground
 ```
 
-This page says what the preset carries, how a project deviates, how each tool reports and keeps its debt, and ends on the generated catalogue of every rule.
+This page opens on what a project does with a finding — look the rule up, deviate from it, suppress one case — then the generated catalogue of every rule, and ends on how the preset is wired and how each tool keeps its debt, which a project rarely needs.
 
-## What the preset carries
+## Quick reference
 
-Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it rather than run by code of this package. Everything this package holds a project to travels in ONE preset, `test()` from `@jterrazz/test/config`: the defaults of the `test` section, its oxlint plugin and rules, those import and naming rules, and the section of `.jterrazz/baseline.json` it owns — `test`, the checker's debt. A project lists it in `jterrazz.config.ts`, after the base preset, as [Set up a project](../start/set-up-a-project.md#turning-the-conventions-on) writes.
-
-How the presets merge, and how a project sets one of their laws aside, is `@jterrazz/typescript`'s: [Configuration § Presets](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#presets). This repository is held the same way: its `oxlint.config.ts` is `fromPresets` of its own `jterrazz.config.ts` — `@jterrazz/test/oxlint`, which `test()` names, resolves to the build the package just made — and adds only its own overrides.
-
-Its rules are the catalogue's `toolchain` channel. The import rules print as `architecture/<rule>` at the import, from the toolchain's Architecture (layer map) pass — `no-second-test-runtime` as one layer per seam it guards, `architecture/no-second-test-runtime-network` for `msw`, each teaching what replaces its package; the name rules print as `names/<rule>` at the file or the folder, from its Names (tree) pass; every one in four parts, its `read` the row of this catalogue. A project that declares no preset runs none of them: a preset is declared, never discovered ([Configuration § Presets](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#presets)). Their debt is the toolchain's ratchet, `.jterrazz/baseline.json › typescript`, recorded by `typescript baseline`.
-
-- The oxlint half of `test()` is `{ jsPlugins: ['@jterrazz/test/oxlint'], rules: recommendedRules, overrides }`. Its `overrides` relaxes `import/exports-last` for `**/*.specification.ts` — the `cleanup-passed-to-after-all` idiom (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec file on a non-export statement, so the relaxation ships here instead of being hand-rolled in every strict consumer. The same idiom has a second consequence the preset cannot carry, because it belongs to a different tool: `cleanup` is exported and used only inside the file that exports it, which Knip reports as an unused export. One line settles it for the whole repository — `"ignoreExportsUsedInFile": true` in `knip.json`.
-- `recommendedRules` (also exported standalone) enables the whole catalogue in one spread, every rule at `error`. There is no warn tier: a rule errors, its debt held by the project's ratchet, or it goes — oxlint's `.jterrazz/oxlint-suppressions.json` holds errors alone, so a warning would be debt nothing holds down.
-- Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. A project lists `test()` in `jterrazz.config.ts`, and its `oxlint.config.ts` composes the presets with `fromPresets`; a project that does not runs no `jterrazz/*` rule. When and how `typescript check` decides to RUN the checker is the toolchain's, not this page's: [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#the-test-conventions-pass).
-- `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule `no-test-code-in-production` — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. `no-unpublished-subpath` exempts every subpath the package's `exports` map publishes, this one among them.
-- `materialAt(path, directory?)` and `testPackageOf(specifier)` (typed, with `MaterialKind`) are the reader `no-test-code-in-production` judges by, published for a build guard: the first names what a module id is — `'a test file'`, `'ground'`, `'the specs tree'`, `'a stub'` — or answers `undefined`; the second names the test package a bare specifier belongs to (`vitest/config` → `vitest`), this tool entry aside. They are published so a build guard — the toolchain's Publish pass — reads what test material is from its one owner, never a copy.
-- **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `lint/self/corpus/oxlint-pin.test.ts` fails the day the two diverge.
-
-## Deviating from a rule
-
-`test()` adds this package's catalogue on top of the profile the base preset names; which profile a project is, and what each adds, is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles).
-
-To deviate on a rule, compose an extra fragment after the presets with `compose()`, which `@jterrazz/typescript/oxlint` exports beside `fromPresets` and `defineConfig`. The whole `oxlint.config.ts`:
+- **Look a rule up.** Every finding's `read:` part is its row: `docs/reference/linting.md#<rule>`, the rule's name as the anchor, in [§ The rule catalogue](#the-rule-catalogue). The row says what the rule holds, the fix and why.
+- **Deviate from a rule** for the whole project, or for a set of files, in `jterrazz.config.ts` under `typescript.oxlint`, with the reason — [§ Deviating from a rule](#deviating-from-a-rule). The derived `oxlint.config.ts` is never edited.
+- **Suppress one finding** on the line below a directive, with its reason after `--` — [§ Suppressions](#suppressions):
 
 ```typescript
-// oxlint.config.ts
-import { compose, defineConfig, fromPresets } from '@jterrazz/typescript/oxlint';
-
-import settings from './jterrazz.config.ts';
-
-export default defineConfig(
-    compose(fromPresets(settings), {
-        rules: {
-            // A stub table is read field by field: raise `no-probe-cluster`'s cluster
-            // Threshold once here instead of suppressing the finding per case.
-            'jterrazz/no-probe-cluster': ['error', { threshold: 6 }],
-
-            'jterrazz/no-module-mock': [
-                'error',
-                {
-                    modules: [
-                        {
-                            module: '@react-native-async-storage/async-storage',
-                            reason: 'a native module no consumer can inject',
-                        },
-                    ],
-                },
-            ],
-        },
-    }),
-);
+// oxlint-disable-next-line jterrazz/runner-in-specification-file -- negative constructor spec: the runner must fail to start
+// checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test
 ```
 
-`defineConfig()` stays the outer call: it types the file and adds nothing, so a config with no deviation is `defineConfig(fromPresets(settings))`. `compose(...fragments)` merges deterministically: `jsPlugins`/`plugins`/`ignorePatterns` concatenated + deduped, `rules`/`categories` shallow-merged (last wins), `overrides` concatenated.
-
-A published package's `isolatedDeclarations` refuses an inferred default export, so its config states its own type once: `const config: OxlintConfig = defineConfig(…); export default config;`, with `type OxlintConfig` imported from the same entry.
-
-A rule that takes options is declared, not suppressed — an `off` loses the check everywhere, a raised threshold keeps it. Three rules take one: `specs-at-declared-depth` (`depth` — the four tree shapes are [Conventions](../concepts/conventions.md#the-folder-follows-the-assets)), `no-probe-cluster` (`threshold`, default 3) and `no-module-mock` (`modules`, the specifiers this repository doubles, each `{ module, reason }` — an entry with no reason clears nothing).
-
-- **Deviation fragments are plain objects — no extra imports.** The trailing `compose(fromPresets(settings), { … })` argument is a bare object literal; `compose()` accepts it directly. Everything a config names arrives from `@jterrazz/typescript` — the profile, `compose`, `defineConfig`, the config types — because a project declaring `oxlint` or `oxfmt` itself would hold two opinions about its own toolchain. This matters most under a **local `file:` link** (developing the framework and a consumer side by side): pulling a linked package's config internals can resolve to an unbuilt path, whereas plain objects composed by the base preset never do.
-- Rules are individually addressable as `jterrazz/<rule-id>` if you want to deviate — prefer scoped `overrides` with a comment over global downgrades.
-
-## What oxlint's own `vitest` plugin owns
-
-This catalogue holds only what no upstream rule already holds. Oxlint ships a `vitest` plugin, and `@jterrazz/typescript` turns it on over the test globs in every profile — so a consumer listing `test()` gets both layers and each convention is enforced exactly once.
-
-Four hygiene rules are that plugin's: no committed `.only`/`.skip` (`vitest/no-focused-tests`, `vitest/no-disabled-tests`), an `expect()` in every test (`vitest/expect-expect`), no two literal titles alike in a file (`vitest/no-identical-title`), a lowercase title (`vitest/prefer-lowercase-title`).
-
-`prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`); the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. A title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees overrides the rule in its own deviation fragment, which is theirs to justify — the form is [§ Deviating from a rule](#deviating-from-a-rule) above, and what a fragment may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles).
+The first form silences a `jterrazz/<rule>` finding of the oxlint plugin; the second a `jterrazz-check(<rule>)` finding of the conventions checker, which oxlint's directives do not reach.
 
 ## What a finding says
 
@@ -91,134 +37,62 @@ A refusal the runtime throws is a block, a part per line: vitest prints an error
 
 The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessonsAt()` of `@jterrazz/typescript/rules`, handed the rule's row by name from the consumer catalogue; a finding's two fields in the checker), and the row gives the other two — its sentence's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part ([Test § The package's own rules](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-packages-own-rules)).
 
-## The conventions checker
+## Deviating from a rule
 
-oxlint reads JavaScript and TypeScript only, and some conventions are about other files — the `{{token}}` grammar of `_requests/` and `_expected/`, the `<case>.spec.yaml` documents — or about several files at once. Those are the **conventions checker**: the checks the `test()` preset names, which `typescript check` runs as its Test Conventions pass, `typescript fix` before its formatter, and `typescript baseline` to record its section. It is no binary of its own — the toolchain runs it through its checker program — and that is the road a run by hand takes too:
+`test()` adds this package's catalogue on top of the profile the declared `platform` picks; what each profile adds is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles).
 
-```bash
-typescript check     # every pass, the conventions among them, over the whole project
-typescript fix       # the conventions' fixes first, then oxlint's and the formatter
-typescript baseline  # records .jterrazz/baseline.json › test beside the toolchain's sections
+A rule set apart is written in `jterrazz.config.ts`, under `typescript.oxlint`, as `{ level, reason }` — the level oxlint reads, options included, and the sentence that says why. The derived `oxlint.config.ts` reads it from there. In the `jterrazz.config.ts` of [Set up a project](../start/set-up-a-project.md#the-vitest-config), imports unchanged:
+
+```typescript
+export default defineConfig({
+    kind: 'api',
+    platform: 'node',
+    presets: [test()],
+    typescript: {
+        oxlint: {
+            rules: {
+                'jterrazz/no-probe-cluster': {
+                    level: ['error', { threshold: 6 }],
+                    reason: 'a stub table is read field by field',
+                },
+            },
+        },
+    },
+});
 ```
 
-Those three are the whole surface: the checker's own command line is the toolchain's to drive, never a gesture a project types ([Test](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-checkers-command-line) keeps what it reads, for this repository's maintainers).
+A set of files judged apart is an entry of `typescript.oxlint.overrides`, `{ files, reason, rules }`. A rule written without its reason, or an override without its files or its reason, is refused in four parts; the toolchain owns the form and the merge order — [its Configuration § The lint rules](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#the-lint-rules).
 
-**It is the rules kit's checker** — `runChecker` of `@jterrazz/typescript/rules`, the conventions pass and the `baseline` command handed to it — and **it prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding on stdout, the message last:
+A rule that takes options is declared, not suppressed — an `off` loses the check everywhere, a raised threshold keeps it. Three rules take one: `specs-at-declared-depth` (`depth` — the four tree shapes are [Conventions](../concepts/conventions.md#the-folder-follows-the-assets)), `no-probe-cluster` (`threshold`, default 3) and `no-module-mock` (`modules`, the specifiers this repository doubles, each `{ module, reason }` — an entry with no reason clears nothing).
 
-```text
-specs/api/orders/create.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): found: "../users/_fixtures/x/" leaves specs/api/orders · why: … · fix: … · read: docs/reference/linting.md#no-reach-into-sibling-ground
-specs/api/_requests/x.http:3:1: error jterrazz-check(no-token-in-request): found: token {{uuid}} in a _requests/ file · why: … · fix: … · read: docs/reference/linting.md#no-token-in-request
+Rules are addressed as `jterrazz/<rule>`; prefer an override scoped to the files that need it over turning a rule off for the whole project.
+
+## Suppressions
+
+Standard oxlint disable comments work, and every suppression must carry its reason:
+
+```typescript
+// oxlint-disable-next-line jterrazz/runner-in-specification-file -- negative constructor spec: the runner must fail to start
 ```
 
-The code is the pass's name, so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A check spots what it finds and teaches it — the position, what was found, the fix for this case — and the pass makes each finding with the kit's `defineCheck(row).finding(…)`, the row giving the why and the read. A spec proves a finding with `specification.lint()` ([Lint specs](../guides/lint-specs.md)): its report reads oxlint's `unix` lines and these alike, heads each finding `file:line:column  jterrazz-check(<code>)` and writes its lesson a part per line below it, and drops every other line — a tally, a summary. It states oxlint's format itself, `--format=unix`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and the report refuses them rather than read them as a clean run.
+The framework's own repo keeps its sanctioned exemptions visible, as `typescript.oxlint.overrides` in its `jterrazz.config.ts`, each with its reason: one for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose), and one turning `no-test-code-in-production` off by path for every module whose job is the runner coupling or a test package — [Architecture § The source trees](https://github.com/jterrazz/package-test/blob/main/docs/concepts/architecture.md#the-source-trees) names them and says why.
 
-A run judges the whole project: every `specs/` tree the workspaces declare below its root, plus every member. The tree passes read the first level of a tree (`file-suffix-matches-place`, `facet-test-uses-its-runner`, `facet-folder-has-specification`), so the run is anchored on each specs tree the project declares.
+The **cross-file checker passes** carry their own suppression comment (oxlint disable comments don't reach them — they are the checker's, not oxlint's):
 
-What it checks:
+```typescript
+// checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
+expect(() => api.seed(file('./_seeds/one-user.sql'))).toThrow(/* … */);
+```
 
-- **`no-malformed-ref`** — every `{{token}}` in an `_expected/` fixture belongs to the frozen vocabulary. It scans **all text files** under `_expected/` (not just `.http`/`.json`/`.txt` — it decodes UTF-8 and skips binary), and flags **malformed captures** of a known kind (`{{iso8601#}}`, `{{uuid #id}}`).
-- **`http-first-line-follows-its-grammar`** — depth-1 `_requests/*.http` must start with a request line (`METHOD /path`); depth-1 `_expected/*.http` with a status line (`HTTP/1.1 <status>`).
-- **`no-token-in-request`** — a `{{token}}` inside a `_requests/` file: requests are inputs, never matched, so a token there is almost always a mistake.
-- **the tree passes** — what a folder says about itself, which no single file can answer for: a facet folder holds the runner its name promises (`facet-folder-has-specification`), a spec under it reaches that runner (`facet-test-uses-its-runner`), a `.test.ts` under a facet folder wears the wrong word and a `.spec.ts` outside every specs tree wears the other one (`file-suffix-matches-place`, fixable), a document is never filed under ground (`no-document-in-ground`), and ground a single spec of a leaf reads belongs beside that spec (`ground-beside-its-only-reader`).
-- **`checker-suppression-states-a-reason`** — every `checker-disable-next-line` / `checker-disable-line` carries its `-- <reason>`. The toolchain's own suppression gate reads `oxlint-disable*` and nothing else, so this channel carries its own.
-- **`checker-suppression-names-a-pass`** — every id such a directive names is a pass of the checker, or `*`: a misspelled id, or one a major retired, silences nothing and is reported at the directive.
+`// checker-disable-next-line <name>[,<name>] -- reason` suppresses the named checker passes (any pass's name, or `*`) on the next non-blank line; `// checker-disable-line <name>` suppresses its own line. The text after `--` is stripped before the ids are matched, so it never affects which pass is silenced; `checker-suppression-states-a-reason` requires it on every directive, and `checker-suppression-names-a-pass` refuses an id no pass has. The idiomatic use is a negative spec that deliberately violates a convention to exercise the runtime channel.
 
-It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `_fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). The exit code is the ratchet's ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)): with no `test` section in `.jterrazz/baseline.json`, 1 on any finding and 0 on none.
+## What oxlint's own `vitest` plugin owns
 
-**`typescript fix` runs the conventions' fixes FIRST and its formatter LAST.** The checker's fixers write code — a moved helper, a view declared once, a value written in place — and none of it is formatted until the formatter runs over it, so the toolchain runs a preset's fixes before its own ([Quality checks § A preset's checks](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#a-presets-checks)), and a repository's `typescript fix` is that one line, `npx typescript fix`.
+This catalogue holds only what no upstream rule already holds. Oxlint ships a `vitest` plugin, and `@jterrazz/typescript` turns it on over the test globs in every profile — so a consumer listing `test()` gets both layers and each convention is enforced exactly once.
 
-What it walks is what git does NOT ignore, like every tree gate of the toolchain: inside a work tree, one `git ls-files --cached --others --exclude-standard` from its top level answers every walk — tracked files, and untracked ones no `.gitignore` names — so a new spec is judged the moment it is written, before anyone runs `git add`, and a `.gitignore`d path (a local data folder belongs there) is never reported, on the workstation that holds it or anywhere else. A directory git places in no work tree (`git rev-parse` fails there) is walked on disk, which is where a copied fixture or a scratch tree is read. The listing judges the project's OWN files: a path inside a `node_modules/` is a dependency's and is read on disk, whatever `.gitignore` says — so `no-unpublished-subpath` reads the `exports` of an installed `@jterrazz/test`, which every consumer's `.gitignore` hides. A listing answers only while it is newer than git's index and than the directory it is asked about, so an editor that keeps the plugin loaded between two runs sees a file written between them — oxlint marks no run boundary a plugin could reset on.
+Four hygiene rules are that plugin's: no committed `.only`/`.skip` (`vitest/no-focused-tests`, `vitest/no-disabled-tests`), an `expect()` in every test (`vitest/expect-expect`), no two literal titles alike in a file (`vitest/no-identical-title`), a lowercase title (`vitest/prefer-lowercase-title`).
 
-The same listing answers every single path a pass probes — `named-path-exists`'s target, `no-unused-ground` and `ground-shared-or-inline`'s pool entry, the member pass's manifests and workspace anchors, the package a walk stops at, the fixture `no-volatile-literal` reads — and every file the plugin's disk-anchored rules read, the neighbour `test-beside-its-module` looks for and the stray `seeds-are-sql` refuses alike, and the root `no-redundant-root` derives, which the runtime derives from the same listing: an ignored file neither satisfies nor violates a rule. The one path read on disk is a repository's own `.git`, which git never lists.
-
-`typescript fix` applies the rewritable passes and writes every spec document in [its format](../guides/spec-documents.md#the-schema-and-the-format), then checks what is left. A document out of its format is no finding and no baseline holds it: a check run names it and fails, as oxfmt's check does for a source file.
-
-## The member pass
-
-Two findings are about a MEMBER rather than about a spec tree, and a member with no `specs/` root has to be judged all the same. A member's `vitest.config.ts` is no longer one of them: it is the line `jterrazz.config.ts` derives, which `@jterrazz/typescript`'s Config pass writes and holds.
-
-They are [`no-simulated-dom-in-config`](#no-simulated-dom-in-config) (a test project of `jterrazz.config.ts` naming a simulated DOM) and [`no-redundant-test-dependency`](#no-redundant-test-dependency) (a dependency the framework carries, or a seam it replaced); each row says what it finds.
-
-A workspace ROOT is a member like any other, and its tests are only those that are its own: the walk stops at the next `package.json`, and a `test` script that hands the work to the members (`--workspaces`, `pnpm -r`, `turbo run`) is the members' tests, not the root's. `yaml` is read from devDependencies alone — in `dependencies` it is the product's own YAML library, which the framework never ships to it.
-
-`no-redundant-test-dependency` says which of the two it found: a carried dependency is "a transitive of `@jterrazz/test` — remove the declaration", a retired seam is "a seam `@jterrazz/test` replaced — the facet is `component()`, `website()`, `clock` or `intercept()`". Removing a transitive changes nothing a test can see; dropping a retired seam means writing its facet.
-
-**The jest allowance follows the tests, not the manifest.** `@testing-library/react-native` stands where jest runs the member's tests, and jest is not always the member's own: a library co-locating its render tests in `src/` while the app beside it owns the only working React Native toolchain runs them from THAT app's `jest.config.*`. So the pass reads two sources — the member's own declaration (a `jest`/`jest-expo` dependency, a `jest` field, a `test` script calling it), and a `jest.config.*` anywhere in the workspace whose `roots`/`testMatch` resolve INTO the member (`<rootDir>` is jest's own token for the config's directory). A config that reaches another member clears nothing here: the allowance is about the files jest collects.
-
-The workspace it searches is walked UP to, from the member, and never taken from the anchor the run was started at: the app that runs the member's tests sits BESIDE it, which is above the member and never below it. A run anchored on the member — the run its own gate makes — otherwise found no jest at all and reported `no-redundant-test-dependency` while the root-anchored run cleared the same member. The walk stops at the first directory declaring a workspace (`workspaces` in its manifest, or a `pnpm-workspace.yaml`) and at the checkout's own boundary, since a `.git` is where this repository ends.
-
-The member pass also carries the two findings a tree walk of the member makes: `no-snapshot-folder` (a folder named for goldens in another word) and `named-path-exists`'s module half — a `file()`/`directory()` in a module test under `src/` or `lint/` names an entry that exists, as surely as one in a spec.
-
-`typescript check` runs both halves over the whole project: every `specs/` root discovered from the root manifest's `workspaces`, and every member. That is the run the ratchet rests on ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)), so the contract is exactly "the run over the whole project reports what a run over each root and each member would" — and the discovery is the toolchain's, to the segment: a `workspaces` glob expands with `*` for one segment and `**` for any depth (bounded at six), and each member is walked for the spec roots it owns, a nested `web/specs` included. A shape `@jterrazz/typescript` reaches and this run did not would be a root its Test Conventions pass runs and the ratchet never counts.
-
-### The ratchet: the `test` section of `.jterrazz/baseline.json`
-
-This package records and judges its consumers' debt. The family keeps one tracked ratchet file, `.jterrazz/baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...} }` — and the `test()` preset owns one, `test`, this section. It is read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `typescript baseline` to record, `typescript fix` to re-record a fall. This repository holds none: its own tree carries no debt to record.
-
-#### The section
-
-- **Its keys** are `{ "<key>": count }`, `jterrazz-check/<name>` for every checker finding. The plugin's `jterrazz/<rule>` diagnostics are oxlint's own, held file by file in `.jterrazz/oxlint-suppressions.json` beside every other oxlint rule — `typescript baseline` records them, `typescript fix` prunes a fall — so a section still holding a `jterrazz/<rule>` key is refused, naming the gesture that moves it: `typescript baseline`, which records both files. One finding, one file, one judge.
-- **It is EXACT.** An entry states where the project stands, never a ceiling, so a count below its entry breaks it as an entry at zero does.
-- **`typescript baseline` writes it** from where the project stands, and leaves every other section byte for byte. A count that rose and a key with no entry are written by `baseline` alone, never by a fix.
-- **`routes/unreached` is the run's key.** The api run counts the routes and alone judges it, as exactly ([API specs § Route coverage](../guides/api-specs.md#route-coverage)); its one recorder is a test run under `TEST_UPDATE=1`, and the checker's recordings — `typescript fix` included — keep it as the run left it, even when the count fell.
-
-#### What `typescript fix` does to it
-
-- **It re-records both falls** — lowering an entry or dropping it — before it judges.
-- **It runs the plugin's own autofixes first**, after its own rewrites and movers: the project's oxlint, under a wrapper of its root config that arms the `jterrazz/*` rules alone, in that config and in every config it extends — a plugin armed through `extends` keeps its fixes, and a JSON config, `.jsonc` or extended, is read as oxlint reads it, comments and trailing commas allowed. So no other rulebook's fixer writes a byte, and the ratchets count the checker's findings and the plugin's diagnostics over the one tree they leave: one `typescript fix` settles a diagnostic its fix writes (`no-repeated-chain-setting`'s view, `one-describe-per-file`'s describe, `expected-constant-shared`'s shared expectation).
-- **A nested oxlint config gets a run of its own**, under the same wrapper of ITS config: a config handed with `-c` turns oxlint's nested discovery off, so the root's run leaves the subtree alone rather than write where another config governs, and the subtree's run fixes it by the config the ratchet's count judges it by.
-- **A config oxlint could not load under the wrapper stops `typescript fix`**, naming it: oxlint exits 1 for it as for diagnostics left, and a pass that read it as the latter would have fixed nothing and said nothing.
-
-#### Which run owns the verdict
-
-ONE run owns it: the run over the whole project, the one `typescript check` always makes. The run the toolchain makes again in a member that declares presets of its own prints what it found and leaves the verdict to that run, naming the file that judges it relative to the project, `judged by .jterrazz/baseline.json › test`.
-
-It counts the project's checker findings; oxlint judges the plugin's diagnostics itself, against its suppressions file, in the Oxlint pass. It fails on a count above its entry, a key with findings and no entry, a count below its entry, an entry at zero, or a `jterrazz/<rule>` key left from before oxlint held its own.
-
-A project with no `test` section fails on any finding, and says in four parts, beneath the findings, the gesture that records them.
-
-#### What it prints
-
-- **Green, exactly one line** — `.jterrazz/baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `.jterrazz/baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run. A fall `typescript fix` re-records is named above it, `re-recorded .jterrazz/baseline.json › test › <key> <was> → <now>`.
-- **Failing**, every checker finding it counts, before the reasons, so a failing verdict and its evidence are one log. The plugin's diagnostics are oxlint's to print, in the Oxlint pass.
-
-The toolchain's side of this — when the pass runs, which install it resolves the checker from, and what the floor version is — is `@jterrazz/typescript`'s [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#the-test-conventions-pass).
-
-## Cross-file checker passes
-
-The same checker also runs the analyses oxlint structurally cannot — those that need to read **two files at once** (a `*.specification.ts` record and the `specs/` tests importing it) or a **whole feature tree** at once. They live in the checker channel and follow its doctrine: **precision over recall** — a heuristic that cannot decide stays silent (under-reports) rather than block a legitimate shape. All are string/scan based (no TS parser in the light lint bundle). The specs root's shared ground (`<specs>/_shared/_fixtures/`, `<specs>/_shared/_seeds/`, `<specs>/_shared/_requests/`, `<specs>/_shared/_expected/`) is pruned from the per-feature walks (verbatim material, the on-purpose violation trees included) and inspected only at its top level.
-
-- **`reserved-folder-in-closed-list`**, **`spec-code-in-setup-folder`**, **`setup-module-at-lowest-common-folder`**, **`adapter-named-for-its-port`** — the shape of a specs tree [Conventions § The naming recap](../concepts/conventions.md#the-naming-recap) states: a root of facets and `_shared/`, the closed list of `_` folders, code in `_setup/`, a shared module at the lowest folder its importers share, a test adapter named for its port. They read the tree and its imports, never a test's body.
-- **`no-unused-ground`** — the mirror of `named-path-exists`: a fixture file no test literal references is dead weight, and a folder holding ground with no test at or below it is an orphan. A referenced `_expected/<name>/` (or `_fixtures/<name>/`) tree counts entirely as used; an entry of the shared ground unreferenced across all of `specs/**` is dead. A template literal with an expression is read as a pattern — its folder, the text before the hole and the text after it — and every entry it can reach counts as referenced; a path built any other way (a variable, `resolve(DIR, name)`) names no entry, so what only it reaches is reported. Nothing is ever downgraded: the rule errors like every other.
-- **`docker-exec-bound-with-await-using`** — reads the docker-aware runners from the `docker:` option of the imported specification file and flags every `<runner>….exec()` result bound without `await using`.
-- **`database-named-only-when-several`** — a spec's `services:` record fixes how many SQL databases exist; the importing tests must (≥ 2) or must not (== 1) pass `{ database }` to every `.seed()` / `.table()`. Non-literal records (a handle variable in `services`) and files importing more than one enforced runner are skipped (ambiguous). Doubled by the runtime channel (the framework throws).
-
-### What the toolchain judges, and what stays here
-
-A rule that only says where a name may sit, or which module may import which, belongs to the declarative tool the toolchain already runs rather than to code of our own. Every such check of this package was measured against ls-lint and dependency-cruiser, and the ones the tool expresses faithfully ride on [the preset](#what-the-preset-carries).
-
-| Rule                                 | Judged by          | What it expresses                                                                                                                 |
-| ------------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `specs-root-holds-facets-and-shared` | ls-lint            | the whole rule: every file at a specs root but a test, a spec, a document or a runner, and a `_setup/` there                      |
-| `underscore-name-in-closed-list`     | ls-lint            | the `_` names outside the closed list, `reserved-folder-in-closed-list`'s first clause, below every specs root                    |
-| `spec-file-in-a-specs-tree`          | ls-lint            | a `.spec.ts` in any folder outside every `specs/` tree, `file-suffix-matches-place`'s first clause                                |
-| `no-test-to-test-import`             | dependency-cruiser | the whole rule: a test path importing a test path, resolved                                                                       |
-| `fixtures-imported-by-tests-only`    | dependency-cruiser | the whole rule: a `*.fixtures.*` module imported from a path that is no test                                                      |
-| `no-second-test-runtime`             | dependency-cruiser | the whole rule, one layer per seam, each package matched installed under `node_modules/` or, not installed, by its bare specifier |
-| `no-unpublished-subpath`             | dependency-cruiser | the whole rule: an `@jterrazz/test/` import the cruise cannot resolve, since it resolves through the `exports` map                |
-
-Three limits come with the tools, and each is stated where it bites. ls-lint never judges a file at the root it runs from, so a `.spec.ts` at a project's own root stays `file-suffix-matches-place`'s. dependency-cruiser cruises the project's top-level folders, never a module at its root, so a root `vitest.config.ts` importing an unpublished subpath is no longer refused. And a cruise follows import edges alone: a `vi.mock('./x.fixtures.js')` string names a fixtures module without importing it, which the plugin rule used to refuse and the layer cannot see.
-
-What stays custom is what neither tool can express:
-
-| Rule                                  | Why it stays                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no-snapshot-folder`                  | A deny-list (`__snapshots__`, `golden`, `goldens`, `snapshots`) RE2 cannot write without a negative lookahead; outside `specs/`, the folder is refused only when it holds no code, which ls-lint cannot read.                                                                                                                                                                                                                                                                               |
-| `reserved-folder-in-closed-list`      | Its remaining clauses read what a folder holds — an unmarked `fixtures/` or `shared/` is refused only when it holds no spec, a `_setup/` only when it holds data — and what `specs/_shared/` holds beside its reserved folders.                                                                                                                                                                                                                                                             |
-| `file-suffix-matches-place`           | The root `.spec.ts` above; a `.test.ts` under a facet folder is judged by whether it reaches a runner, and a document's name by its words and its folder.                                                                                                                                                                                                                                                                                                                                   |
-| `no-test-code-in-production` (source) | Test material is not a path pattern: a `stubs/` folder is test material only where it holds a `*.stubs.ts` facade, a path a module builds or reads (`join(import.meta.dirname, …)`, `readFileSync('./…')`) is no import edge, the test packages a unit allows run from its `test.production.allow`, and the cruise skips the ground folders this rule refuses an edge into. Its tarball half is the toolchain's Publish pass, which loads this package's readers from its `./oxlint` entry. |
-
-The self checks' verdicts are [Test § The package's own rules](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-packages-own-rules).
+`prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`); the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. A title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees sets the rule apart with its reason — the form is [§ Deviating from a rule](#deviating-from-a-rule) above, and what a project may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles).
 
 ## Writing the Given and Then markers under `typescript fix`
 
@@ -252,25 +126,6 @@ const before = await cli.exec('seed'),
 ```
 
 `@jterrazz/typescript` v10 turns that rule off — 198 of 198 hits on real estate code were false positives on wrapped `//` prose — so the rewrite stops happening under the preset. The one-line discipline outlives it anyway: a marker is the title of a step, and reasoning that does not fit on one line belongs in a docblock above the test, never in the marker.
-
-## Suppressions
-
-Standard oxlint disable comments work, and every suppression must carry its reason:
-
-```typescript
-// oxlint-disable-next-line jterrazz/runner-in-specification-file -- negative constructor spec: the runner must fail to start
-```
-
-The framework's own repo keeps its sanctioned exemptions visible, as config `overrides` in its `oxlint.config.ts`, each with its reason: one for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose), and one turning `no-test-code-in-production` off by path for every module whose job is the runner coupling or a test package — [Architecture § The source trees](https://github.com/jterrazz/package-test/blob/main/docs/concepts/architecture.md#the-source-trees) names them and says why.
-
-The **cross-file checker passes** carry their own suppression comment (oxlint disable comments don't reach them — they are the checker's, not oxlint's):
-
-```typescript
-// checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
-expect(() => api.seed(file('./_seeds/one-user.sql'))).toThrow(/* … */);
-```
-
-`// checker-disable-next-line <name>[,<name>] -- reason` suppresses the named checker passes (any pass's name, or `*`) on the next non-blank line; `// checker-disable-line <name>` suppresses its own line. The text after `--` is stripped before the ids are matched, so it never affects which pass is silenced; `checker-suppression-states-a-reason` requires it on every directive, and `checker-suppression-names-a-pass` refuses an id no pass has. The idiomatic use is a negative spec that deliberately violates a convention to exercise the runtime channel.
 
 ## The rule catalogue
 
@@ -468,13 +323,156 @@ A convention with no oxlint rule is held by another channel, and the Channel col
 
 A static rule that probes the filesystem anchors on a file oxlint is already visiting (a feature's sibling `_requests/`, `_seeds/`, `_expected/`, a module test's neighbour), with per-run caching (the kit's `readFileCached` and `listDirectory`) — it never scans the tree blindly.
 
+## What the preset carries
+
+Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it rather than run by code of this package. Everything this package holds a project to travels in ONE preset, `test()` from `@jterrazz/test/config`: the defaults of the `test` section, its oxlint plugin and rules, those import and naming rules, and the section of `.jterrazz/baseline.json` it owns — `test`, the checker's debt. A project lists it in `jterrazz.config.ts`, as [Set up a project](../start/set-up-a-project.md#turning-the-conventions-on) writes.
+
+How the presets merge, and how a project sets one of their laws aside, is `@jterrazz/typescript`'s: [Configuration § Presets](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#presets). This repository is held the same way: its `oxlint.config.ts` is the derived one-liner, and its `jterrazz.config.ts` lists the `test()` of the build the package just made, beside its own overrides.
+
+Its rules are the catalogue's `toolchain` channel. The import rules print as `architecture/<rule>` at the import, from the toolchain's Architecture (layer map) pass — `no-second-test-runtime` as one layer per seam it guards, `architecture/no-second-test-runtime-network` for `msw`, each teaching what replaces its package; the name rules print as `names/<rule>` at the file or the folder, from its Names (tree) pass; every one in four parts, its `read` the row of this catalogue. A project that declares no preset runs none of them: a preset is declared, never discovered ([Configuration § Presets](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#presets)). Their debt is the toolchain's ratchet, `.jterrazz/baseline.json › typescript`, recorded by `typescript baseline`.
+
+- The oxlint half of `test()` is `{ jsPlugins: ['@jterrazz/test/oxlint'], rules: recommendedRules, overrides }`. Its `overrides` relaxes `import/exports-last` for `**/*.specification.ts` — the `cleanup-passed-to-after-all` idiom (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec file on a non-export statement, so the relaxation ships here instead of being hand-rolled in every strict consumer. The same idiom exports a `cleanup` used only inside its own file, which knip would report as unused; the toolchain's knip preset already sets `ignoreExportsUsedInFile`, so nothing is written for it.
+- `recommendedRules` (also exported standalone) enables the whole catalogue in one spread, every rule at `error`. There is no warn tier: a rule errors, its debt held by the project's ratchet, or it goes — oxlint's `.jterrazz/oxlint-suppressions.json` holds errors alone, so a warning would be debt nothing holds down.
+- Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. A project lists `test()` in `jterrazz.config.ts`, and its derived `oxlint.config.ts` reads the presets from there; a project that does not runs no `jterrazz/*` rule. When and how `typescript check` decides to RUN the checker is the toolchain's, not this page's: [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#the-test-conventions-pass).
+- `@jterrazz/test/oxlint` is **tool-facing only**: named by the `test()` preset for the linter to load, never imported by test or production code. It is the one specifier exempt from rule `no-test-code-in-production` — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. `no-unpublished-subpath` exempts every subpath the package's `exports` map publishes, this one among them.
+- `materialAt(path, directory?)` and `testPackageOf(specifier)` (typed, with `MaterialKind`) are the reader `no-test-code-in-production` judges by, published for a build guard: the first names what a module id is — `'a test file'`, `'ground'`, `'the specs tree'`, `'a stub'` — or answers `undefined`; the second names the test package a bare specifier belongs to (`vitest/config` → `vitest`), this tool entry aside. They are published so a build guard — the toolchain's Publish pass — reads what test material is from its one owner, never a copy.
+- **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `lint/self/corpus/oxlint-pin.test.ts` fails the day the two diverge.
+
+## The conventions checker
+
+oxlint reads JavaScript and TypeScript only, and some conventions are about other files — the `{{token}}` grammar of `_requests/` and `_expected/`, the `<case>.spec.yaml` documents — or about several files at once. Those are the **conventions checker**: the checks the `test()` preset names, which `typescript check` runs as its Test Conventions pass, `typescript fix` before its formatter, and `typescript baseline` to record its section. It is no binary of its own — the toolchain runs it through its checker program — and that is the road a run by hand takes too:
+
+```bash
+typescript check     # every pass, the conventions among them, over the whole project
+typescript fix       # the conventions' fixes first, then oxlint's and the formatter
+typescript baseline  # records .jterrazz/baseline.json › test beside the toolchain's sections
+```
+
+Those three are the whole surface: the checker's own command line is the toolchain's to drive, never a gesture a project types ([Test](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-checkers-command-line) keeps what it reads, for this repository's maintainers).
+
+**It is the rules kit's checker** — `runChecker` of `@jterrazz/typescript/rules`, the conventions pass and the `baseline` command handed to it — and **it prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding on stdout, the message last:
+
+```text
+specs/api/orders/create.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): found: "../users/_fixtures/x/" leaves specs/api/orders · why: … · fix: … · read: docs/reference/linting.md#no-reach-into-sibling-ground
+specs/api/_requests/x.http:3:1: error jterrazz-check(no-token-in-request): found: token {{uuid}} in a _requests/ file · why: … · fix: … · read: docs/reference/linting.md#no-token-in-request
+```
+
+The code is the pass's name, so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A check spots what it finds and teaches it — the position, what was found, the fix for this case — and the pass makes each finding with the kit's `defineCheck(row).finding(…)`, the row giving the why and the read. A spec proves a finding with `specification.lint()` ([Lint specs](../guides/lint-specs.md)): its report reads oxlint's `unix` lines and these alike, heads each finding `file:line:column  jterrazz-check(<code>)` and writes its lesson a part per line below it, and drops every other line — a tally, a summary. It states oxlint's format itself, `--format=unix`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and the report refuses them rather than read them as a clean run.
+
+A run judges the whole project: every `specs/` tree the workspaces declare below its root, plus every member. The tree passes read the first level of a tree (`file-suffix-matches-place`, `facet-test-uses-its-runner`, `facet-folder-has-specification`), so the run is anchored on each specs tree the project declares.
+
+What it checks:
+
+- **`no-malformed-ref`** — every `{{token}}` in an `_expected/` fixture belongs to the frozen vocabulary. It scans **all text files** under `_expected/` (not just `.http`/`.json`/`.txt` — it decodes UTF-8 and skips binary), and flags **malformed captures** of a known kind (`{{iso8601#}}`, `{{uuid #id}}`).
+- **`http-first-line-follows-its-grammar`** — depth-1 `_requests/*.http` must start with a request line (`METHOD /path`); depth-1 `_expected/*.http` with a status line (`HTTP/1.1 <status>`).
+- **`no-token-in-request`** — a `{{token}}` inside a `_requests/` file: requests are inputs, never matched, so a token there is almost always a mistake.
+- **the tree passes** — what a folder says about itself, which no single file can answer for: a facet folder holds the runner its name promises (`facet-folder-has-specification`), a spec under it reaches that runner (`facet-test-uses-its-runner`), a `.test.ts` under a facet folder wears the wrong word and a `.spec.ts` outside every specs tree wears the other one (`file-suffix-matches-place`, fixable), a document is never filed under ground (`no-document-in-ground`), and ground a single spec of a leaf reads belongs beside that spec (`ground-beside-its-only-reader`).
+- **`checker-suppression-states-a-reason`** — every `checker-disable-next-line` / `checker-disable-line` carries its `-- <reason>`. The toolchain's own suppression gate reads `oxlint-disable*` and nothing else, so this channel carries its own.
+- **`checker-suppression-names-a-pass`** — every id such a directive names is a pass of the checker, or `*`: a misspelled id, or one a major retired, silences nothing and is reported at the directive.
+
+It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `_fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). The exit code is the ratchet's ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)): with no `test` section in `.jterrazz/baseline.json`, 1 on any finding and 0 on none.
+
+**`typescript fix` runs the conventions' fixes FIRST and its formatter LAST.** The checker's fixers write code — a moved helper, a view declared once, a value written in place — and none of it is formatted until the formatter runs over it, so the toolchain runs a preset's fixes before its own ([Quality checks § A preset's checks](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#a-presets-checks)), and a repository's `typescript fix` is that one line, `npx typescript fix`.
+
+What it walks is what git does NOT ignore, like every tree gate of the toolchain: inside a work tree, one `git ls-files --cached --others --exclude-standard` from its top level answers every walk — tracked files, and untracked ones no `.gitignore` names — so a new spec is judged the moment it is written, before anyone runs `git add`, and a `.gitignore`d path (a local data folder belongs there) is never reported, on the workstation that holds it or anywhere else. A directory git places in no work tree (`git rev-parse` fails there) is walked on disk, which is where a copied fixture or a scratch tree is read. The listing judges the project's OWN files: a path inside a `node_modules/` is a dependency's and is read on disk, whatever `.gitignore` says — so `no-unpublished-subpath` reads the `exports` of an installed `@jterrazz/test`, which every consumer's `.gitignore` hides. A listing answers only while it is newer than git's index and than the directory it is asked about, so an editor that keeps the plugin loaded between two runs sees a file written between them — oxlint marks no run boundary a plugin could reset on.
+
+The same listing answers every single path a pass probes — `named-path-exists`'s target, `no-unused-ground` and `ground-shared-or-inline`'s pool entry, the member pass's manifests and workspace anchors, the package a walk stops at, the fixture `no-volatile-literal` reads — and every file the plugin's disk-anchored rules read, the neighbour `test-beside-its-module` looks for and the stray `seeds-are-sql` refuses alike, and the root `no-redundant-root` derives, which the runtime derives from the same listing: an ignored file neither satisfies nor violates a rule. The one path read on disk is a repository's own `.git`, which git never lists.
+
+`typescript fix` applies the rewritable passes and writes every spec document in [its format](../guides/spec-documents.md#the-schema-and-the-format), then checks what is left. A document out of its format is no finding and no baseline holds it: a check run names it and fails, as oxfmt's check does for a source file.
+
+## The member pass
+
+Two findings are about a MEMBER rather than about a spec tree, and a member with no `specs/` root has to be judged all the same. A member's `vitest.config.ts` is no longer one of them: it is the line `jterrazz.config.ts` derives, which `@jterrazz/typescript`'s Config pass writes and holds.
+
+They are [`no-simulated-dom-in-config`](#no-simulated-dom-in-config) (a test project of `jterrazz.config.ts` naming a simulated DOM) and [`no-redundant-test-dependency`](#no-redundant-test-dependency) (a dependency the framework carries, or a seam it replaced); each row says what it finds.
+
+A workspace ROOT is a member like any other, and its tests are only those that are its own: the walk stops at the next `package.json`, and a `test` script that hands the work to the members (`--workspaces`, `pnpm -r`, `turbo run`) is the members' tests, not the root's. `yaml` is read from devDependencies alone — in `dependencies` it is the product's own YAML library, which the framework never ships to it.
+
+`no-redundant-test-dependency` says which of the two it found: a carried dependency is "a transitive of `@jterrazz/test` — remove the declaration", a retired seam is "a seam `@jterrazz/test` replaced — the facet is `component()`, `website()`, `clock` or `intercept()`". Removing a transitive changes nothing a test can see; dropping a retired seam means writing its facet.
+
+**The jest allowance follows the tests, not the manifest.** `@testing-library/react-native` stands where jest runs the member's tests, and jest is not always the member's own: a library co-locating its render tests in `src/` while the app beside it owns the only working React Native toolchain runs them from THAT app's `jest.config.*`. So the pass reads two sources — the member's own declaration (a `jest`/`jest-expo` dependency, a `jest` field, a `test` script calling it), and a `jest.config.*` anywhere in the workspace whose `roots`/`testMatch` resolve INTO the member (`<rootDir>` is jest's own token for the config's directory). A config that reaches another member clears nothing here: the allowance is about the files jest collects.
+
+The workspace it searches is walked UP to, from the member, and never taken from the anchor the run was started at: the app that runs the member's tests sits BESIDE it, which is above the member and never below it. A run anchored on the member — the run its own gate makes — otherwise found no jest at all and reported `no-redundant-test-dependency` while the root-anchored run cleared the same member. The walk stops at the first directory declaring a workspace (`workspaces` in its manifest, or a `pnpm-workspace.yaml`) and at the checkout's own boundary, since a `.git` is where this repository ends.
+
+The member pass also carries the two findings a tree walk of the member makes: `no-snapshot-folder` (a folder named for goldens in another word) and `named-path-exists`'s module half — a `file()`/`directory()` in a module test under `src/` or `lint/` names an entry that exists, as surely as one in a spec.
+
+`typescript check` runs both halves over the whole project: every `specs/` root discovered from the root manifest's `workspaces`, and every member. That is the run the ratchet rests on ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)), so the contract is exactly "the run over the whole project reports what a run over each root and each member would" — and the discovery is the toolchain's, to the segment: a `workspaces` glob expands with `*` for one segment and `**` for any depth (bounded at six), and each member is walked for the spec roots it owns, a nested `web/specs` included. A shape `@jterrazz/typescript` reaches and this run did not would be a root its Test Conventions pass runs and the ratchet never counts.
+
+### The ratchet: the `test` section of `.jterrazz/baseline.json`
+
+This package records and judges its consumers' debt. The family keeps one tracked ratchet file, `.jterrazz/baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...} }` — and the `test()` preset owns one, `test`, this section. It is read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `typescript baseline` to record, `typescript fix` to re-record a fall. This repository holds none: its own tree carries no debt to record.
+
+#### The section
+
+- **Its keys** are `{ "<key>": count }`, `jterrazz-check/<name>` for every checker finding. The plugin's `jterrazz/<rule>` diagnostics are oxlint's own, held file by file in `.jterrazz/oxlint-suppressions.json` beside every other oxlint rule — `typescript baseline` records them, `typescript fix` prunes a fall — so a section still holding a `jterrazz/<rule>` key is refused, naming the gesture that moves it: `typescript baseline`, which records both files. One finding, one file, one judge.
+- **It is EXACT.** An entry states where the project stands, never a ceiling, so a count below its entry breaks it as an entry at zero does.
+- **`typescript baseline` writes it** from where the project stands, and leaves every other section byte for byte. A count that rose and a key with no entry are written by `baseline` alone, never by a fix.
+- **`routes/unreached` is the run's key.** The api run counts the routes and alone judges it, as exactly ([API specs § Route coverage](../guides/api-specs.md#route-coverage)); its one recorder is a test run under `TEST_UPDATE=1`, and the checker's recordings — `typescript fix` included — keep it as the run left it, even when the count fell.
+
+#### What `typescript fix` does to it
+
+- **It re-records both falls** — lowering an entry or dropping it — before it judges.
+- **It runs the plugin's own autofixes first**, after its own rewrites and movers: the project's oxlint, under a wrapper of its root config that arms the `jterrazz/*` rules alone, in that config and in every config it extends — a plugin armed through `extends` keeps its fixes, and a JSON config, `.jsonc` or extended, is read as oxlint reads it, comments and trailing commas allowed. So no other rulebook's fixer writes a byte, and the ratchets count the checker's findings and the plugin's diagnostics over the one tree they leave: one `typescript fix` settles a diagnostic its fix writes (`no-repeated-chain-setting`'s view, `one-describe-per-file`'s describe, `expected-constant-shared`'s shared expectation).
+- **A nested oxlint config gets a run of its own**, under the same wrapper of ITS config: a config handed with `-c` turns oxlint's nested discovery off, so the root's run leaves the subtree alone rather than write where another config governs, and the subtree's run fixes it by the config the ratchet's count judges it by.
+- **A config oxlint could not load under the wrapper stops `typescript fix`**, naming it: oxlint exits 1 for it as for diagnostics left, and a pass that read it as the latter would have fixed nothing and said nothing.
+
+#### Which run owns the verdict
+
+ONE run owns it: the run over the whole project, the one `typescript check` always makes. The run the toolchain makes again in a member that declares presets of its own prints what it found and leaves the verdict to that run, naming the file that judges it relative to the project, `judged by .jterrazz/baseline.json › test`.
+
+It counts the project's checker findings; oxlint judges the plugin's diagnostics itself, against its suppressions file, in the Oxlint pass. It fails on a count above its entry, a key with findings and no entry, a count below its entry, an entry at zero, or a `jterrazz/<rule>` key left from before oxlint held its own.
+
+A project with no `test` section fails on any finding, and says in four parts, beneath the findings, the gesture that records them.
+
+#### What it prints
+
+- **Green, exactly one line** — `.jterrazz/baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `.jterrazz/baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run. A fall `typescript fix` re-records is named above it, `re-recorded .jterrazz/baseline.json › test › <key> <was> → <now>`.
+- **Failing**, every checker finding it counts, before the reasons, so a failing verdict and its evidence are one log. The plugin's diagnostics are oxlint's to print, in the Oxlint pass.
+
+The toolchain's side of this — when the pass runs, which install it resolves the checker from, and what the floor version is — is `@jterrazz/typescript`'s [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#the-test-conventions-pass).
+
+## Cross-file checker passes
+
+The same checker also runs the analyses oxlint structurally cannot — those that need to read **two files at once** (a `*.specification.ts` record and the `specs/` tests importing it) or a **whole feature tree** at once. They live in the checker channel and follow its doctrine: **precision over recall** — a heuristic that cannot decide stays silent (under-reports) rather than block a legitimate shape. All are string/scan based (no TS parser in the light lint bundle). The specs root's shared ground (`<specs>/_shared/_fixtures/`, `<specs>/_shared/_seeds/`, `<specs>/_shared/_requests/`, `<specs>/_shared/_expected/`) is pruned from the per-feature walks (verbatim material, the on-purpose violation trees included) and inspected only at its top level.
+
+- **`reserved-folder-in-closed-list`**, **`spec-code-in-setup-folder`**, **`setup-module-at-lowest-common-folder`**, **`adapter-named-for-its-port`** — the shape of a specs tree [Conventions § The naming recap](../concepts/conventions.md#the-naming-recap) states: a root of facets and `_shared/`, the closed list of `_` folders, code in `_setup/`, a shared module at the lowest folder its importers share, a test adapter named for its port. They read the tree and its imports, never a test's body.
+- **`no-unused-ground`** — the mirror of `named-path-exists`: a fixture file no test literal references is dead weight, and a folder holding ground with no test at or below it is an orphan. A referenced `_expected/<name>/` (or `_fixtures/<name>/`) tree counts entirely as used; an entry of the shared ground unreferenced across all of `specs/**` is dead. A template literal with an expression is read as a pattern — its folder, the text before the hole and the text after it — and every entry it can reach counts as referenced; a path built any other way (a variable, `resolve(DIR, name)`) names no entry, so what only it reaches is reported. Nothing is ever downgraded: the rule errors like every other.
+- **`docker-exec-bound-with-await-using`** — reads the docker-aware runners from the `docker:` option of the imported specification file and flags every `<runner>….exec()` result bound without `await using`.
+- **`database-named-only-when-several`** — a spec's `services:` record fixes how many SQL databases exist; the importing tests must (≥ 2) or must not (== 1) pass `{ database }` to every `.seed()` / `.table()`. Non-literal records (a handle variable in `services`) and files importing more than one enforced runner are skipped (ambiguous). Doubled by the runtime channel (the framework throws).
+
+### What the toolchain judges, and what stays here
+
+A rule that only says where a name may sit, or which module may import which, belongs to the declarative tool the toolchain already runs rather than to code of our own. Every such check of this package was measured against ls-lint and dependency-cruiser, and the ones the tool expresses faithfully ride on [the preset](#what-the-preset-carries).
+
+| Rule                                 | Judged by          | What it expresses                                                                                                                 |
+| ------------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `specs-root-holds-facets-and-shared` | ls-lint            | the whole rule: every file at a specs root but a test, a spec, a document or a runner, and a `_setup/` there                      |
+| `underscore-name-in-closed-list`     | ls-lint            | the `_` names outside the closed list, `reserved-folder-in-closed-list`'s first clause, below every specs root                    |
+| `spec-file-in-a-specs-tree`          | ls-lint            | a `.spec.ts` in any folder outside every `specs/` tree, `file-suffix-matches-place`'s first clause                                |
+| `no-test-to-test-import`             | dependency-cruiser | the whole rule: a test path importing a test path, resolved                                                                       |
+| `fixtures-imported-by-tests-only`    | dependency-cruiser | the whole rule: a `*.fixtures.*` module imported from a path that is no test                                                      |
+| `no-second-test-runtime`             | dependency-cruiser | the whole rule, one layer per seam, each package matched installed under `node_modules/` or, not installed, by its bare specifier |
+| `no-unpublished-subpath`             | dependency-cruiser | the whole rule: an `@jterrazz/test/` import the cruise cannot resolve, since it resolves through the `exports` map                |
+
+Three limits come with the tools, and each is stated where it bites. ls-lint never judges a file at the root it runs from, so a `.spec.ts` at a project's own root stays `file-suffix-matches-place`'s. dependency-cruiser cruises the project's top-level folders, never a module at its root, so a root `vitest.config.ts` importing an unpublished subpath is no longer refused. And a cruise follows import edges alone: a `vi.mock('./x.fixtures.js')` string names a fixtures module without importing it, which the plugin rule used to refuse and the layer cannot see.
+
+What stays custom is what neither tool can express:
+
+| Rule                                  | Why it stays                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no-snapshot-folder`                  | A deny-list (`__snapshots__`, `golden`, `goldens`, `snapshots`) RE2 cannot write without a negative lookahead; outside `specs/`, the folder is refused only when it holds no code, which ls-lint cannot read.                                                                                                                                                                                                                                                                               |
+| `reserved-folder-in-closed-list`      | Its remaining clauses read what a folder holds — an unmarked `fixtures/` or `shared/` is refused only when it holds no spec, a `_setup/` only when it holds data — and what `specs/_shared/` holds beside its reserved folders.                                                                                                                                                                                                                                                             |
+| `file-suffix-matches-place`           | The root `.spec.ts` above; a `.test.ts` under a facet folder is judged by whether it reaches a runner, and a document's name by its words and its folder.                                                                                                                                                                                                                                                                                                                                   |
+| `no-test-code-in-production` (source) | Test material is not a path pattern: a `stubs/` folder is test material only where it holds a `*.stubs.ts` facade, a path a module builds or reads (`join(import.meta.dirname, …)`, `readFileSync('./…')`) is no import edge, the test packages a unit allows run from its `test.production.allow`, and the cruise skips the ground folders this rule refuses an edge into. Its tarball half is the toolchain's Publish pass, which loads this package's readers from its `./oxlint` entry. |
+
+The self checks' verdicts are [Test § The package's own rules](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-packages-own-rules).
+
 ## Pitfalls
 
 - **Suppressing instead of restructuring.** Most hits have a conventional home: an inline runner belongs in a `*.specification.ts`, a helper several specs share in the `_setup/` of the lowest folder they share, a file-reading module test in `specs/`. Suppress only what is structurally impossible (negative constructor specs).
 - **Forgetting to declare the preset.** Oxlint passing does not validate `.http`/`.json`/`.txt` fixtures — list `test()` in `jterrazz.config.ts`, and `typescript check` runs the conventions with everything else.
-- **Linting generated fixture pools.** Violation fixtures (like this repo's `specs/lint/**/_fixtures/**`) must be excluded via `ignorePatterns` — they violate on purpose.
-- **CJS config silently drops the plugin (loudest pitfall).** The plugin is ESM-only. If your `oxlint.config` is CommonJS (or resolves the plugin through a CJS path), oxlint **prints a load warning and then exits 0** — the plugin is simply not registered, so **none of the `jterrazz/*` rules run** and your lint stays green while enforcing nothing. There is no error to fail CI. Use an ESM config (`oxlint.config.ts`/`.mjs`), and after wiring, sanity-check that a known violation is actually reported (e.g. a `.seed('x.json')` under a `_seeds/` directory, which `seeds-are-sql` rejects).
-- **What the `./oxlint` `require` condition does — and does not — solve.** The `@jterrazz/test/oxlint` export ships both an `import` (`dist/oxlint.js`) and a `require` (`dist/oxlint.cjs`) condition. The `require` condition exists so a **shared preset or config module can pull the catalogue synchronously** — `const { recommendedRules } = require('@jterrazz/test/oxlint')` — instead of forcing top-level `await import(...)` (and thus a top-level-await, ESM-only preset). This is purely about how **your own preset code** reads `recommendedRules`. It does **not** change the pitfall above: oxlint still loads the _plugin itself_ (the `jsPlugins: ['@jterrazz/test/oxlint']` entry) as ESM, and oxlint still requires _your_ `oxlint.config` to be ESM to register any JS plugin. The `require` condition makes sync wiring possible in a preset; it does not make a CommonJS oxlint config work.
+- **Linting violation fixtures.** A tree that breaks the rules on purpose (like this repo's `specs/lint/**/_fixtures/**`) is left out of the linter, by one of the toolchain's doors — [its Quality checks § Leaving a path out](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#leaving-a-path-out).
+- **A hand-written `oxlint.config`.** The plugin is ESM-only, and a CommonJS config would print a load warning, register nothing and exit 0. The derived `oxlint.config.ts` is ESM, and `typescript check` refuses any other content (`config/editor-file-derived`), so a project never writes one. The `./oxlint` entry's `require` condition serves a different reader: a module of your own that reads `recommendedRules` synchronously, `require('@jterrazz/test/oxlint')`.
 
 ## Related
 
