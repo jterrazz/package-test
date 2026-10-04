@@ -21,6 +21,7 @@ export async function perform(
     const read = readerOf(state);
     const { workDir } = (await action.prepare?.(args, read)) ?? { workDir: null };
     const run = { config, testDir, workDir };
+    // Stryker disable next-line ArrayDeclaration: an entry holding neither a violation nor a release changes nothing
     const armed: Armed[] = [];
     const violation = (): Error | null =>
         armed.map((effect) => effect.violation?.() ?? null).find((error) => error !== null) ?? null;

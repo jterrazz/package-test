@@ -89,14 +89,34 @@ describe('perform', () => {
         expect(log).toStrictEqual(['arm intercept', 'act', 'release intercept']);
     });
 
-    test("perform — the one pipeline a terminal action runs through — an adapter's violation fails an action that succeeded", async () => {
+    test("perform — the one pipeline a terminal action runs through — an adapter's violation fails an action that succeeded, whichever setup recorded it", async () => {
         // Given - an adapter that recorded an unmatched request the subject swallowed
         const log: string[] = [];
         const unmatched = new Error('no stub accepted GET https://api.test/rates');
-        const setups = [logged(log, 'intercept', 40, { violation: () => unmatched })];
+        const setups = [
+            logged(log, 'clock', 10, { violation: () => null }),
+            logged(log, 'intercept', 40, { violation: () => unmatched }),
+        ];
 
-        // Then - the action's success does not hide it
+        // Then - the action's success does not hide it, behind a setup that recorded none
         await expect(perform(setups, acting(log, 'ok'), [], WHERE)).rejects.toBe(unmatched);
+    });
+
+    test('perform — the one pipeline a terminal action runs through — an action with nothing to prepare runs with no working directory', async () => {
+        // Given - an action that reads the run it is handed, and prepares nothing
+        const reading = defineAction({
+            accessors: [],
+            name: 'read',
+            perform: async (_args: [], _read, _adapters, run) => await Promise.resolve(run),
+            row: { group: 'Terminal action', name: '.read()', probe: '.read(' },
+        });
+
+        // Then - the run it was handed
+        await expect(perform([], reading, [], WHERE)).resolves.toStrictEqual({
+            config: {},
+            testDir: '/specs',
+            workDir: null,
+        });
     });
 
     test('perform — the one pipeline a terminal action runs through — a setup that refuses when armed still releases what was armed before it', async () => {
