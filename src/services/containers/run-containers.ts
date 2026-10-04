@@ -143,11 +143,11 @@ export async function serveContainers(containers: RunContainers): Promise<Served
     const server = createServer((request, response) => {
         void respond(containers, request, response);
     });
-    // Stryker disable next-line StringLiteral: hazard: bound to loopback alone, the run's containers are unreachable from the network, which no test on this machine sees
+    // Stryker disable next-line StringLiteral: bound to loopback alone, the run's containers are unreachable from the network, which no test on this machine sees
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
     const address = server.address();
-    // Stryker disable all: outside: a server listening on a TCP port always answers it
+    // Stryker disable all: a server listening on a TCP port always answers it
     if (address === null || typeof address === 'string') {
         throw invariant('the run containers are served on no port');
     }

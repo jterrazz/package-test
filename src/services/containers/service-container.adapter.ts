@@ -17,7 +17,7 @@ export class ServiceContainer implements ContainerPort {
     async start(): Promise<void> {
         const url = await this.locate();
         this.delegate =
-            // Stryker disable next-line ConditionalExpression: outside: a container of its own is Docker's to start; the integration specs start one
+            // Stryker disable next-line ConditionalExpression: a container of its own is Docker's to start; the integration specs start one
             url === undefined
                 ? new TestcontainersAdapter(this.request)
                 : new RunSetupContainer(url, this.request);

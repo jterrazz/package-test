@@ -16,6 +16,6 @@ export function nodeOnlyClass(name: string): never {
     function NodeOnly(): never {
         return refuse(name);
     }
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- invariant: the page entry publishes the node entry's types whole, so a node-only class is typed as the class it stands for and refuses when constructed
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the page entry publishes the node entry's types whole, so a node-only class is typed as the class it stands for and refuses when constructed
     return NodeOnly as never;
 }

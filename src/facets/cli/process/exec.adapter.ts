@@ -59,7 +59,7 @@ export async function observeProcess(
         const timeoutTimer = setTimeout(() => {
             finish(124);
         }, options.timeout ?? DEFAULT_WATCH_TIMEOUT);
-        // Stryker disable next-line CallExpression: hazard: unref'd, the timer never holds the run open, which no test inside it can see
+        // Stryker disable next-line CallExpression: unref'd, the timer never holds the run open, which no test inside it can see
         timeoutTimer.unref();
 
         function finish(exitCode: number): void {

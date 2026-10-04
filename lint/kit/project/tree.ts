@@ -202,7 +202,7 @@ export function lowestCommonFolder(folders: readonly string[]): string | undefin
     let common = first;
     while (!others.every((folder) => folder === common || isWithin(common, folder))) {
         const parent = dirname(common);
-        // Stryker disable next-line ConditionalExpression: hazard: only folders on no common root climb to the filesystem's, which none of a tree's are
+        // Stryker disable next-line ConditionalExpression: only folders on no common root climb to the filesystem's, which none of a tree's are
         if (parent === common) {
             return undefined;
         }

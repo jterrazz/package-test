@@ -66,7 +66,7 @@ function byPosition(a: Diagnostic, b: Diagnostic): number {
 
 function messageLines(message: string): string[] {
     const parts = lessonParts(message);
-    // Stryker disable next-line OptionalChaining: outside: lessonParts answers parts for any text, a plain one with none found
+    // Stryker disable next-line OptionalChaining: lessonParts answers parts for any text, a plain one with none found
     if (parts?.found === undefined) {
         return [`${INDENT}${message}`];
     }

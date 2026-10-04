@@ -24,7 +24,7 @@ import type { SqliteOptions } from './sqlite-template.js';
 /** An optional peer, a native module to compile. */
 let databaseConstructor: null | typeof Database = null;
 
-// Stryker disable all: outside: the driver is installed and built here and loads once per process; the refusals of a missing or unbuilt peer are peer.ts's, tested there
+// Stryker disable all: the driver is installed and built here and loads once per process; the refusals of a missing or unbuilt peer are peer.ts's, tested there
 async function loadDatabase(): Promise<typeof Database> {
     if (databaseConstructor === null) {
         const constructor = await loadPeer('better-sqlite3', 'sqlite()', async () => {
@@ -163,7 +163,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 
     private async writeTemplate(buildPath: string): Promise<void> {
-        // Stryker disable next-line ConditionalExpression: outside: prisma db push needs prisma in the project; the specs judge that path
+        // Stryker disable next-line ConditionalExpression: prisma db push needs prisma in the project; the specs judge that path
         if (this.prismaSchema !== null) {
             const { runToCompletion } = await import('../process/serve.js');
             runToCompletion(prismaPushCommand(this.prismaSchema), {

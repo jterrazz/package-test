@@ -59,7 +59,7 @@ export async function serveAppium(
 }
 
 /** The run's Appium server, provided by a `mobile({ device })` project's setup. */
-// Stryker disable all: outside: only a mobile project's setup provides it, which no module test runs, so every read answers undefined; the mobile specs judge it
+// Stryker disable all: only a mobile project's setup provides it, which no module test runs, so every read answers undefined; the mobile specs judge it
 export async function mobileServer(): Promise<RunServer | undefined> {
     try {
         const { inject } = await import('vitest');

@@ -104,7 +104,7 @@ export async function endSessions(directory: string): Promise<void> {
     rmSync(directory, { force: true, recursive: true });
 }
 
-// Stryker disable all: outside: only a mobile project's setup provides it, which no module test runs, so every read answers undefined; the mobile specs judge it
+// Stryker disable all: only a mobile project's setup provides it, which no module test runs, so every read answers undefined; the mobile specs judge it
 export async function mobileSessions(): Promise<string | undefined> {
     try {
         const { inject } = await import('vitest');

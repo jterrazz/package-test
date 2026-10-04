@@ -3,7 +3,7 @@ import { describe, expect, onTestFinished, test, vi } from 'vitest';
 import { shouldUpdateSnapshots } from './update.js';
 
 function unsetEnv(name: string): void {
-    // oxlint-disable-next-line unicorn/no-useless-undefined -- outside: vi.stubEnv deletes a variable when handed undefined, and the argument is required
+    // oxlint-disable-next-line unicorn/no-useless-undefined -- vi.stubEnv deletes a variable when handed undefined, and the argument is required
     vi.stubEnv(name, undefined);
 }
 

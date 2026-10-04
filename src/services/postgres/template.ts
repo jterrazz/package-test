@@ -6,7 +6,7 @@ import { loadPeer } from '../peer.js';
 
 /** An optional peer: a repository that never connects never pays for the import. */
 export async function clientConstructor(): Promise<typeof Client> {
-    // Stryker disable next-line StringLiteral: outside: the driver is installed here; the refusal of a missing peer is peer.ts's, tested there
+    // Stryker disable next-line StringLiteral: the driver is installed here; the refusal of a missing peer is peer.ts's, tested there
     return await loadPeer('pg', 'postgres()', async () => {
         const pg = await import('pg');
         return pg.Client;

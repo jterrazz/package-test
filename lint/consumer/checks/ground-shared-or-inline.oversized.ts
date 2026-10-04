@@ -56,7 +56,7 @@ const PLAIN_SUBJECT =
 // Stryker disable BlockStatement: a catch emptied returns undefined all the same
 function literalValue(source: string): unknown {
     try {
-        // Stryker disable next-line ObjectLiteral: hazard: the bound only matters for a value that never finishes evaluating
+        // Stryker disable next-line ObjectLiteral: the bound only matters for a value that never finishes evaluating
         return runInNewContext(`(${source})`, {}, { timeout: 1000 });
     } catch {
         return undefined;

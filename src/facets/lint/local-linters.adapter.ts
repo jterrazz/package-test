@@ -57,7 +57,7 @@ function runOxlint(
             rules: { ...linters.config.rules, ...run.rules },
         }),
     );
-    // Stryker disable next-line StringLiteral: outside: oxlint picks its renderer off the environment, and one a module test runs in renders as unix
+    // Stryker disable next-line StringLiteral: oxlint picks its renderer off the environment, and one a module test runs in renders as unix
     const args = [linters.oxlint, '--format=unix', '-c', config, '.'];
     if (fix) {
         args.push('--fix');
@@ -72,7 +72,7 @@ function runOxlint(
     // Stryker restore StringLiteral
     const diagnostics = diagnosticsOf(output);
     if (ran.status !== 0 && diagnostics.length === 0) {
-        // Stryker disable next-line MethodExpression: outside: oxlint's failure opens on its message, no blank line before it
+        // Stryker disable next-line MethodExpression: oxlint's failure opens on its message, no blank line before it
         throw unreported('oxlint', output.trim().split('\n'));
     }
     return diagnostics;

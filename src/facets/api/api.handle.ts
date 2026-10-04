@@ -62,7 +62,7 @@ export async function startApi<Services extends ServiceRecord>(
         api: apiFacet.open(config),
         cleanup: async () => {
             const ledgers = await routesLedger();
-            // Stryker disable ConditionalExpression,BlockStatement,ObjectLiteral: outside: only an api project provides a routes ledger, and the api specs run under one
+            // Stryker disable ConditionalExpression,BlockStatement,ObjectLiteral: only an api project provides a routes ledger, and the api specs run under one
             if (ledgers !== undefined) {
                 writeLedger(ledgers, {
                     declared: server.declared(),

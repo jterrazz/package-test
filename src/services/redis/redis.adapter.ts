@@ -63,7 +63,7 @@ function lowestFree(held: Map<string, Held>): number {
     return slot;
 }
 
-// Stryker disable StringLiteral: outside: the driver is installed here; the refusal of a missing peer is peer.ts's, tested there
+// Stryker disable StringLiteral: the driver is installed here; the refusal of a missing peer is peer.ts's, tested there
 async function redisDriver(): Promise<{ createClient: typeof createClient }> {
     return await loadPeer('redis', 'redis()', async () => await import('redis'));
 }

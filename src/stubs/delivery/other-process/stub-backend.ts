@@ -50,14 +50,14 @@ export class StubBackend {
 
         await new Promise<void>((resolve, reject) => {
             server.once('error', reject);
-            // Stryker disable next-line StringLiteral: hazard: bound to loopback alone, the backend is unreachable from the network, which no test on this machine sees
+            // Stryker disable next-line StringLiteral: bound to loopback alone, the backend is unreachable from the network, which no test on this machine sees
             server.listen(this.options.port ?? 0, '127.0.0.1', () => {
                 resolve();
             });
         });
 
         const address = server.address();
-        // Stryker disable all: outside: a server listening on a TCP port always answers it
+        // Stryker disable all: a server listening on a TCP port always answers it
         if (address === null || typeof address === 'string') {
             throw invariant('the stub backend listens on no port');
         }
@@ -114,7 +114,7 @@ export class StubBackend {
     }
 
     private async handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
-        // Stryker disable next-line StringLiteral: outside: a request an http.Server hands over always carries its method
+        // Stryker disable next-line StringLiteral: a request an http.Server hands over always carries its method
         const method = (request.method ?? 'GET').toUpperCase();
         const cors = corsHeaders(request);
 
@@ -125,7 +125,7 @@ export class StubBackend {
             return;
         }
 
-        // Stryker disable next-line StringLiteral: outside: a request an http.Server hands over always carries its url
+        // Stryker disable next-line StringLiteral: a request an http.Server hands over always carries its url
         const url = request.url ?? '/';
         const observed: MatchableRequest = {
             body: await readBody(request),

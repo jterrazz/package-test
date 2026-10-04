@@ -150,7 +150,7 @@ function repointImporter(file: string, module: string, target: string): void {
             ? `${withoutExtension(pathFrom(dirname(file), target))}${extensionOf(path)}`
             : undefined;
     });
-    // Stryker disable next-line ConditionalExpression: hazard: rewriting a file with its own bytes changes nothing but its mtime
+    // Stryker disable next-line ConditionalExpression: rewriting a file with its own bytes changes nothing but its mtime
     if (next !== text) {
         writeFileSync(file, next);
     }

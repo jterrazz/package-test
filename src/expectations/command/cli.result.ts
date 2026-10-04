@@ -199,7 +199,7 @@ function containerAt(
     testDir: string,
     transform?: (text: string) => string,
 ): ContainerAccessor {
-    // Stryker disable next-line ArrowFunction: outside: read only by a container's exec, which runs docker; the container specs run it
+    // Stryker disable next-line ArrowFunction: read only by a container's exec, which runs docker; the container specs run it
     const resultOf = (commandOutput: CliOutput): CliResult =>
         new CliResult({ commandOutput, config: {}, testDir, transform, workDir: testDir });
     return new ContainerAccessor({

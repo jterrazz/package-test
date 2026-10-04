@@ -105,7 +105,7 @@ export function acquireTemplateLock(lockPath: string): boolean {
     try {
         withDescriptor(lockPath, 'wx', (fd) => writeSync(fd, process.pid.toString()));
     } catch (error) {
-        // Stryker disable next-line ConditionalExpression,LogicalOperator: outside: fs throws only errors that carry a code
+        // Stryker disable next-line ConditionalExpression,LogicalOperator: fs throws only errors that carry a code
         if (error instanceof Error && 'code' in error && error.code === 'EEXIST') {
             return false;
         }

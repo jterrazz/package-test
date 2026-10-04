@@ -59,7 +59,7 @@ export type MobileHandle = {
     udid: string | undefined;
 };
 
-// Stryker disable all: outside: only a mobile project's setup provides the run's ledger folder, which no module test runs; the mobile specs judge it
+// Stryker disable all: only a mobile project's setup provides the run's ledger folder, which no module test runs; the mobile specs judge it
 async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefined> {
     const directory = outlivesFile ? await mobileSessions() : undefined;
     return directory === undefined ? undefined : sessionLedger(directory);
@@ -138,7 +138,7 @@ export async function startMobile<Services extends ServiceRecord>(
 
     const device = lazyDevice({
         driven,
-        // Stryker disable next-line ArrowFunction: outside: see runLedger
+        // Stryker disable next-line ArrowFunction: see runLedger
         ledger: async () => await runLedger(outlivesFile),
         serverUrl: appium.url,
         timeouts: options.timeouts,

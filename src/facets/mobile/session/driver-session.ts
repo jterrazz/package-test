@@ -73,7 +73,7 @@ async function succeeded(url: string, method: 'DELETE' | 'GET'): Promise<boolean
             method,
             signal: AbortSignal.timeout(SERVER_CALL_TIMEOUT_MS),
         });
-        // Stryker disable next-line OptionalChaining: outside: Appium answers every call with a JSON body
+        // Stryker disable next-line OptionalChaining: Appium answers every call with a JSON body
         await response.body?.cancel();
         return response.ok;
     } catch {
@@ -110,7 +110,7 @@ export async function openSession(
     const url = new URL(serverUrl);
     const server = { hostname: url.hostname, logLevel: 'error' as const, port: Number(url.port) };
     const capabilities = capabilitiesOf(request);
-    // Stryker disable next-line all: outside: the peer's own webdriverio opens a session on a real Appium server, which no module test has
+    // Stryker disable next-line all: the peer's own webdriverio opens a session on a real Appium server, which no module test has
     const webdriverio = request.webdriverio ?? (await loadWebdriverio());
     const held =
         ledger === undefined

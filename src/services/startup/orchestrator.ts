@@ -108,14 +108,14 @@ export class Orchestrator {
                 reports.push(
                     await abandoned({ container, error, handle, logsSince: startedAt, since }),
                 );
-                // oxlint-disable-next-line eslint/no-console -- outside: vitest attributes console output to the file that printed it, which is where a failed start is read
+                // oxlint-disable-next-line eslint/no-console -- vitest attributes console output to the file that printed it, which is where a failed start is read
                 console.error(formatStartupReport(reports, this.subject));
                 throw error;
             }
         }
 
         this.started = true;
-        // oxlint-disable-next-line eslint/no-console -- outside: vitest attributes console output to the file that printed it, which is where the started services are read
+        // oxlint-disable-next-line eslint/no-console -- vitest attributes console output to the file that printed it, which is where the started services are read
         console.log(formatStartupReport(reports, this.subject));
     }
 

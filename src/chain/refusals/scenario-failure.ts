@@ -15,7 +15,7 @@ function finishedLesson(error: unknown): Lesson | undefined {
     if (!(error instanceof Error)) {
         return undefined;
     }
-    // Stryker disable next-line ObjectLiteral: outside: lessonParts answers parts for any text
+    // Stryker disable next-line ObjectLiteral: lessonParts answers parts for any text
     const { fix = '', found = '', read, why = '' } = lessonParts(error.message) ?? {};
     const anchor = String(read);
     return [fix, found, why].includes('') || !isAnchor(anchor)

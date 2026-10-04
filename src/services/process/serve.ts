@@ -18,7 +18,7 @@ import type { ProcessOptions } from './process.adapter.js';
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 
-// Stryker disable all: hazard: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
+// Stryker disable all: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
 function watchGroup(groupId: number): ChildProcess {
     const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(groupId)], {
         detached: true,
@@ -41,7 +41,7 @@ export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
 
-// Stryker disable all: outside: a server listening on port 0 always answers the port it got, and never errors
+// Stryker disable all: a server listening on port 0 always answers the port it got, and never errors
 async function findFreePort(): Promise<number> {
     return await new Promise((resolve, reject) => {
         const server = createServer();
@@ -125,7 +125,7 @@ export class ServedProcess {
         });
         this.child = child;
         this.exited = false;
-        // Stryker disable next-line ConditionalExpression,LogicalOperator,BlockStatement,EqualityOperator: hazard: see watchGroup
+        // Stryker disable next-line ConditionalExpression,LogicalOperator,BlockStatement,EqualityOperator: see watchGroup
         if (child.pid !== undefined && SIGNALS_GROUPS) {
             this.watchdog = watchGroup(child.pid);
         }
@@ -252,7 +252,7 @@ export class ServedProcess {
             return;
         }
         this.child = null;
-        // Stryker disable next-line OptionalChaining: hazard: see watchGroup
+        // Stryker disable next-line OptionalChaining: see watchGroup
         this.watchdog?.kill('SIGKILL');
         this.watchdog = null;
 
@@ -273,7 +273,7 @@ async function answers(url: string): Promise<boolean> {
 
 /** The group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it. */
 async function endGroup(child: ChildProcess): Promise<void> {
-    // Stryker disable next-line all: hazard: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
+    // Stryker disable next-line all: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
     if (child.pid === undefined) {
         return;
     }
