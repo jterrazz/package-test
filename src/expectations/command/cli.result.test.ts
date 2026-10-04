@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { CliResult } from './cli.result.js';
+import { CliResult, createDockerReader } from './cli.result.js';
 import type { RunContainers } from './cli.result.js';
 
 const DOCKER = { envVar: 'TEST_RUN_ID', nameLabel: 'test.name', testRunLabel: 'test.run' };
@@ -193,5 +193,13 @@ describe('CliResult', () => {
                 ].join('\n'),
             ),
         );
+    });
+
+    test('cli.result — a container read by its id — one docker cannot inspect is absent', () => {
+        // Given - an id no container has
+        const read = createDockerReader('/spec');
+
+        // Then - read as absent rather than thrown
+        expect([read('cli-result-no-such-container').exists]).toStrictEqual([false]);
     });
 });
