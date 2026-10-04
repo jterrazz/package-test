@@ -3,7 +3,6 @@ export function driverReason(error: unknown): string {
     if (error instanceof Error && error.message !== '') {
         return error.message;
     }
-    const code: unknown =
-        typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined;
+    const code: unknown = Reflect.get(new Object(error), 'code');
     return typeof code === 'string' && code !== '' ? code : String(error);
 }

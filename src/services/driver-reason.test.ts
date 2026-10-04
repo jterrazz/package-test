@@ -12,6 +12,7 @@ describe('driverReason', () => {
         ],
         ['neither, as a string', 'socket hang up', 'socket hang up'],
         ['an empty code, as a string', { code: '' }, '[object Object]'],
+        ['nothing at all, as a string', null, 'null'],
     ])('driverReason — reads %s', (_case, error, reason) => {
         // Given - what a driver threw
         // Then - the reason a refusal prints
