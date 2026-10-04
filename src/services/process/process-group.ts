@@ -1,4 +1,5 @@
 import type { ChildProcess } from 'node:child_process';
+import { once } from 'node:events';
 
 import { pause } from '../../chain/pause.js';
 
@@ -47,6 +48,14 @@ async function endedBy(group: number, deadline: number): Promise<boolean> {
 
 export async function groupEnded(group: number, withinMs: number): Promise<boolean> {
     return await endedBy(group, Date.now() + withinMs);
+}
+
+/** Resolves once the child is reaped, at once for one reaped already. */
+export async function reaped(child: ChildProcess): Promise<void> {
+    if (child.exitCode !== null || child.signalCode !== null) {
+        return;
+    }
+    await once(child, 'exit');
 }
 
 /** The child's whole group where groups are signalled, the child alone where they are not or the group is gone; nothing for a child that never started. */

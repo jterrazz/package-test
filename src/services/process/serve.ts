@@ -8,6 +8,7 @@ import { invariant, refusal } from '../../chain/refusals/refusal.js';
 import {
     groupEnded,
     KILL_GRACE_MS,
+    reaped,
     signalGroup,
     SIGNALS_GROUPS,
     WATCHDOG,
@@ -276,8 +277,11 @@ async function endGroup(child: ChildProcess): Promise<void> {
     if (child.pid === undefined) {
         return;
     }
+    const leaderReaped = reaped(child);
     signalGroup(child, 'SIGTERM');
     if (!(await groupEnded(-child.pid, KILL_GRACE_MS))) {
         signalGroup(child, 'SIGKILL');
     }
+    // hazard: macOS skips an exiting process when it signals a group, so the group reads as gone while the leader still holds its port open; its reaping is what proves the port closed.
+    await leaderReaped;
 }
