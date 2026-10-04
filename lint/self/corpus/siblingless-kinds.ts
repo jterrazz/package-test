@@ -162,7 +162,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/expectations/table/table.ts',
             'src/expectations/text/text.ts',
             'src/expectations/text/text-subject.browser.ts',
-            'src/expectations/command/cli.result.ts',
             'src/expectations/text/text-subject.ts',
         ),
         name: 'a result accessor',

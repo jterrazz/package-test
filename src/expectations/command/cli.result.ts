@@ -1,5 +1,6 @@
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import type { MatrixRow } from '../../chain/capability.js';
-import { invariant, refusal } from '../../chain/refusals/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
 import { BaseResult } from '../result.js';
 import type { ResultConfig } from '../result.js';
@@ -48,6 +49,19 @@ export const CLI_RESULT_ROWS: readonly MatrixRow[] = [
     { group: 'Result accessor', member: 'directory', name: '.directory()', probe: '.directory(' },
 ];
 
+/** How a result reads and removes the containers of its run: the docker CLI, unless a test hands its own. */
+export type RunContainers = {
+    labelled: (label: string, value: string) => string[];
+    inspect: (id: string) => unknown;
+    remove: (ids: string[]) => void;
+};
+
+const DOCKER_CLI: RunContainers = {
+    labelled: findContainersByLabel,
+    inspect: inspectContainer,
+    remove: removeContainers,
+};
+
 type CapturedContainer = {
     id: string;
     inspect: unknown;
@@ -56,14 +70,18 @@ type CapturedContainer = {
 /** Result of `.exec()`; with `docker`, containers are queried lazily and removed on dispose. */
 export class CliResult extends BaseResult {
     private readonly commandOutput: CliOutput;
+    /** The working directory the command ran in: a command always runs in one. */
+    private readonly cwd: string;
     private containersCache: Map<string, CapturedContainer> | null = null;
     private readonly dockerConfig?: DockerSpecConfig | undefined;
+    private readonly containers: RunContainers;
     private readonly testRunId?: string | undefined;
     private readonly transform?: ((text: string) => string) | undefined;
 
     constructor(options: {
         commandOutput: CliOutput;
         config: ResultConfig;
+        containers?: RunContainers | undefined;
         dockerConfig?: DockerSpecConfig | undefined;
         testDir: string;
         testRunId?: string | undefined;
@@ -72,7 +90,9 @@ export class CliResult extends BaseResult {
     }) {
         super(options);
         this.commandOutput = options.commandOutput;
+        this.cwd = options.workDir;
         this.dockerConfig = options.dockerConfig;
+        this.containers = options.containers ?? DOCKER_CLI;
         this.testRunId = options.testRunId;
         this.transform = options.transform;
     }
@@ -107,10 +127,7 @@ export class CliResult extends BaseResult {
 
     /** Accessor for the temporary working directory the command ran in. */
     get filesystem(): FilesystemAccessor {
-        if (this.workDir === undefined) {
-            throw invariant('a CLI result was built with no working directory');
-        }
-        return new FilesystemAccessor(this.workDir, this.testDir, this.captures);
+        return new FilesystemAccessor(this.cwd, this.testDir, this.captures);
     }
 
     /** A container the command spawned, by its name-label; `.exists` is `false` when none carries it. */
@@ -134,9 +151,9 @@ export class CliResult extends BaseResult {
         // invariant: re-query when the test never asked: containers it never asserted on are still removed.
         const ids =
             this.containersCache === null
-                ? findContainersByLabel(this.dockerConfig.testRunLabel, this.testRunId)
+                ? this.containers.labelled(this.dockerConfig.testRunLabel, this.testRunId)
                 : [...this.containersCache.values()].map((c) => c.id);
-        removeContainers(ids);
+        this.containers.remove(ids);
     }
 
     private capturedContainers(member: string): ReadonlyMap<string, CapturedContainer> {
@@ -155,10 +172,10 @@ export class CliResult extends BaseResult {
         }
         const { nameLabel, testRunLabel } = this.dockerConfig;
         const map = new Map<string, CapturedContainer>();
-        for (const id of findContainersByLabel(testRunLabel, this.testRunId)) {
+        for (const id of this.containers.labelled(testRunLabel, this.testRunId)) {
             let inspect: unknown;
             try {
-                inspect = inspectContainer(id);
+                inspect = this.containers.inspect(id);
             } catch {
                 continue;
             }
@@ -173,7 +190,7 @@ export class CliResult extends BaseResult {
 
 function labelsOf(inspect: unknown): Readonly<Record<string, unknown>> {
     const labels = fieldOf(fieldOf(inspect, 'Config', 'config'), 'Labels', 'labels');
-    return typeof labels === 'object' && labels !== null ? { ...labels } : {};
+    return isRecord(labels) ? labels : {};
 }
 
 function containerAt(
@@ -182,6 +199,7 @@ function containerAt(
     testDir: string,
     transform?: (text: string) => string,
 ): ContainerAccessor {
+    // Stryker disable next-line ArrowFunction: outside: read only by a container's exec, which runs docker; the container specs run it
     const resultOf = (commandOutput: CliOutput): CliResult =>
         new CliResult({ commandOutput, config: {}, testDir, transform, workDir: testDir });
     return new ContainerAccessor({
