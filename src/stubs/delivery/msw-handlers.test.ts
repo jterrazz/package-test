@@ -4,6 +4,7 @@ import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { clock } from '../../clock/clock.js';
 import { http } from '../kinds/http.js';
 import type { Stub } from '../stub.js';
 import { buildStubHandlers } from './msw-handlers.js';
@@ -124,6 +125,21 @@ describe('buildStubHandlers', () => {
 
         // Then - the fast one landed first
         expect(landed).toStrictEqual(['fast', 'slow']);
+    });
+
+    test('an immediate reply answers while the test holds the scheduler', async () => {
+        // Given - an immediate stub, and the scheduler stopped
+        served([{ request: http.get('/now'), response: http.json('now') }]);
+        using _ = clock.run();
+
+        // Then - it answers without the clock moving
+        await expect(read('/now')).resolves.toStrictEqual([
+            200,
+            'no-store',
+            'text/plain; charset=utf-8',
+            null,
+            'now',
+        ]);
     });
 
     test('strictness — a request no stub takes is answered 501 and recorded once, a method msw has no handler for included, and the runner’s own traffic passes through', async () => {
