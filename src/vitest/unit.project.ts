@@ -20,6 +20,7 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
                 exclude: ['specs/**', '**/*.test.tsx'],
                 include: fromRoots ?? ['**/*.test.ts'],
             }),
+            // Stryker disable next-line ConditionalExpression: the project's merge drops a key stated as undefined
             ...(options.isolate === undefined ? {} : { isolate: options.isolate }),
         },
     });

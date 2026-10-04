@@ -40,10 +40,10 @@ describe('unit', () => {
 
     test('unit() — module tests, and only module tests — turns the trees a repository names into the globs that collect them', () => {
         // Given - a repository whose modules live under two roots
-        const project = testOf(unit({ roots: ['packages', 'apps/'] }));
+        const project = testOf(unit({ roots: ['packages', 'apps/web//'] }));
 
-        // Then - each root is a glob, and the trailing slash is not a second one
-        expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/**/*.test.ts']);
+        // Then - each root is a glob, and the trailing slashes are not a second one
+        expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/web/**/*.test.ts']);
     });
 
     test('unit() — module tests, and only module tests — shares one module graph per worker when a pure project says so, and isolates otherwise', () => {
