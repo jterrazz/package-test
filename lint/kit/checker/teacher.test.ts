@@ -13,23 +13,22 @@ function spottedAt(path: string): {
     return { fix: '', found: '', line: 1, path, rule: 'r' };
 }
 
-/** A declaration the kit is handed, as a module at the root of lint/ hands it one. */
 const PROBE: Row = {
     audience: 'consumer',
     channel: 'checker',
     facet: 'model',
     family: 'layout',
-    fix: 'name a path that exists',
-    name: 'named-path-exists',
-    rationale: 'a probe row',
+    fix: 'A probe fix.',
+    name: 'probe-rule',
+    rationale: 'A probe rationale.',
     reach: 'tests',
-    sentence: 'Every path a test names exists.',
+    sentence: 'A probe.',
 };
 
 describe('teacher', () => {
     test('teacherOf — each spotted finding taught by its rule, at its column or the first', () => {
         // Given - two findings of one rule, one placed on a column and one not
-        const teach = teacherOf({ chapter: 'docs/24-linting.md', rows: [PROBE] });
+        const teach = teacherOf({ chapter: 'docs/probe.md', rows: [PROBE] });
         const spotted = [
             {
                 column: 7,
@@ -37,9 +36,9 @@ describe('teacher', () => {
                 found: 'b',
                 line: 2,
                 path: 'specs/a.spec.ts',
-                rule: 'named-path-exists',
+                rule: 'probe-rule',
             },
-            { fix: 'c', found: 'd', line: 5, path: 'specs/b.spec.ts', rule: 'named-path-exists' },
+            { fix: 'c', found: 'd', line: 5, path: 'specs/b.spec.ts', rule: 'probe-rule' },
         ];
 
         // Then - each at its place, read under the rule's id
@@ -48,8 +47,8 @@ describe('teacher', () => {
                 ({ column, line, path, rule }) => `${rule} ${path}:${line}:${column}`,
             ),
         ).toStrictEqual([
-            'jterrazz-check/named-path-exists specs/a.spec.ts:2:7',
-            'jterrazz-check/named-path-exists specs/b.spec.ts:5:1',
+            'jterrazz-check/probe-rule specs/a.spec.ts:2:7',
+            'jterrazz-check/probe-rule specs/b.spec.ts:5:1',
         ]);
     });
 
