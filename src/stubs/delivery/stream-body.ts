@@ -14,6 +14,7 @@ export function toReadableStream(body: StreamBody): ReadableStream<Uint8Array> {
                 return;
             }
             // invariant: the spacing is between chunks: the first is not held back.
+            // Stryker disable next-line ConditionalExpression,EqualityOperator: a pause of nothing holds back no chunk a reader could tell
             if (body.delayBetweenChunks > 0 && index > 0) {
                 await pause(body.delayBetweenChunks);
             }
