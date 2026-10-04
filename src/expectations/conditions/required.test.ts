@@ -16,7 +16,16 @@ describe('required', () => {
         // Then - the failure reads as a sentence, not as a TypeError
         expect(() => {
             required(undefined, 'the reply carries the new id');
-        }).toThrow('the reply carries the new id — got undefined');
+        }).toThrow(
+            new Error(
+                [
+                    'found: required(): the reply carries the new id — got undefined',
+                    'why: `required()` answers a present value, and `null` and `undefined` are the two it refuses.',
+                    'fix: state it in the Given, or assert on what the subject actually produced',
+                    'read: docs/21-assertions.md#two-helpers-that-are-not-matchers',
+                ].join('\n'),
+            ),
+        );
     });
 
     test('required — the value, or a sentence — tells null from undefined', () => {
