@@ -23,6 +23,8 @@ export const { cli, cleanup } = await specification.cli(
 afterAll(cleanup);
 ```
 
+`bin` takes one of two forms. An absolute path — as above, or the built `dist/cli.js` of the package under test — runs that file. A bare name is looked up in the project's `node_modules/.bin/`, then in the `node_modules/.bin/` of the directory vitest runs from, and is otherwise handed to the shell, which finds it on `PATH`: `specification.cli('shoply')` runs an installed `shoply`. npm links the binaries of your dependencies there, never your own package's `bin`, so a project testing its own command passes the absolute path of the file its `bin` names. A relative path is neither: every spec runs in a fresh temp directory, so it resolves against that directory, not your project.
+
 ### Options
 
 | Option      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |

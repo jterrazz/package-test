@@ -18,11 +18,13 @@ import { specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
 export const { cleanup, website } = await specification.website({
-    server: { command: 'node specs/website/_fixtures/specimen-website/server.mjs', ready: '/' },
+    server: { command: 'npm run start', ready: '/' },
 });
 
 afterAll(cleanup);
 ```
+
+`command` is how you start the site in production or in preview — `npm run start`, `next start`, `astro preview` — run from the project root, and `ready` is a path the site answers once it is up, usually `/`. The command reads its port from `PORT` ([below](#options)).
 
 ```typescript
 // targeting a deployed preview instead of starting one
