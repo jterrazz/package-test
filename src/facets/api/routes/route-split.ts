@@ -32,6 +32,7 @@ export async function judgeSplit(
     }
     return await judgeLedgers(root, ledgers, {
         ...run,
+        // Stryker disable next-line StringLiteral: the judge reads a scope by its two unjudged names, so any other name judges the run
         scope: 'whole',
     });
 }

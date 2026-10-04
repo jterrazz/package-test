@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
+import { markPartial, ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
 import { judgeSplit, NO_SHARD_LEDGERS } from './route-split.js';
 import type { Route } from './routes.js';
 
@@ -31,6 +31,19 @@ function splitRun(...shards: Route[][]): string {
 }
 
 describe('route-split', () => {
+    test('judgeSplit() — the route ratchet of a split run, judged at its merge — leaves unjudged a split whose shards a test name filtered, naming them', async () => {
+        // Given - a split of two shards, both run under -t
+        const root = splitRun([{ method: 'GET', path: '/users' }], []);
+        for (const index of [1, 2]) {
+            markPartial(join(root, shardLedgersDir({ count: 2, index })));
+        }
+
+        // Then - the merge names both and judges nothing
+        await expect(judgeSplit(root, GREEN)).resolves.toStrictEqual({
+            line: 'api routes: not judged — shard-1-2, shard-2-2 ran under a test name filter (-t), so the split reaches only some routes',
+        });
+    });
+
     test("judgeSplit() — the route ratchet of a split run, judged at its merge — reads every shard's ledgers as one run's", async () => {
         // Given - two shards reaching the three routes between them
         const root = splitRun(
