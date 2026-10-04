@@ -37,7 +37,7 @@ make build                        # MUST precede lint and the unit project
 make lint                         # the static verdict
 make fix                          # the fixers
 make test                         # every suite — needs Docker and chromium
-make check                        # the whole verdict: build, lint, test
+make check                        # the whole verdict: build, lint, test, mutation
 make test-mobile                  # the mobile specs — needs Xcode
 make test-changed                 # the loop over what changed
 make test SHARD=1/3               # one shard of a split run

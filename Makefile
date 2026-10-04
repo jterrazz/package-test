@@ -35,11 +35,12 @@ test-merge: node_modules/.install
 test-changed: node_modules/.install
 	npm test -- --changed
 
-# The three targets CI runs, in its order.
+# The three targets CI runs, in its order, then the mutation verdict, which CI runs weekly.
 check: node_modules/.install
 	$(MAKE) build
 	npm run lint
 	$(MAKE) test
+	npx typescript mutation
 
 # Needs Xcode and a simulator: no CI job runs it, and `check` never calls it.
 test-mobile: build
@@ -50,7 +51,7 @@ check-links:
 	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
 	lychee --no-progress README.md docs skills
 
-# Hours where `check` takes minutes, so `check` never calls it.
+# Incremental: about two minutes over a day's changes, half an hour the first time in a fresh clone.
 mutation: build
 	npx typescript mutation
 
