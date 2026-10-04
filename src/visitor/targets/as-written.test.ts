@@ -25,8 +25,10 @@ describe('asWritten', () => {
         // Given - a landmark carrying no accessible name
         const target = main();
 
-        // Then - no empty string is invented for it
-        expect(asWritten(target)).toBe('main()');
+        // Then - no name is invented for it, an empty one or a blank argument
+        expect([target, asWritten(target), asWritten({ exact: true, kind: 'main' })]).toStrictEqual(
+            [{ kind: 'main' }, 'main()', 'main({ exact: true })'],
+        );
     });
 
     test('asWritten — renders a scope as the within() call that produced it', () => {

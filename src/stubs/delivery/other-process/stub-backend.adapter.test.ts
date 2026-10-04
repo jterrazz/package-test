@@ -27,6 +27,21 @@ describe('stubBackend', () => {
         );
     });
 
+    test('stubBackend — the network a chain is armed through — a website runner with no declared backend is pointed at the website chapter', () => {
+        // Given - a website runner that declared no backend
+        const network = stubBackend(undefined, 'website');
+
+        // Then - the refusal names specification.website and its chapter
+        expect(() => {
+            network.accepts();
+        }).toThrow(
+            [
+                "fix: add `backend` to the specification options: specification.website({ …, backend: { env: 'API_URL' } })",
+                'read: docs/10-website.md#declared-backend',
+            ].join('\n'),
+        );
+    });
+
     test('stubBackend — the network a chain is armed through — a chain declaring no stub is not failed by the chain before it', async () => {
         // Given - a chain that declared a stub, then met a request no stub answers
         const backend = new StubBackend();

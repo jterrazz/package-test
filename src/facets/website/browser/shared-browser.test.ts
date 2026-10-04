@@ -3,22 +3,25 @@ import { describe, expect, test } from 'vitest';
 import { createSharedBrowser } from './shared-browser.js';
 
 type StubBrowser = {
-    disconnect: () => void;
+    /** Fires the listeners of one event, as playwright's browser emits it. */
+    emit: (event: string) => void;
     id: number;
-    on: (event: 'disconnected', listener: () => void) => void;
+    on: (event: string, listener: () => void) => void;
 };
 
 function stubBrowser(id: number): StubBrowser {
-    const listeners: (() => void)[] = [];
+    const listeners: [string, () => void][] = [];
     return {
-        disconnect: () => {
-            for (const listener of listeners) {
-                listener();
+        emit: (event) => {
+            for (const [heard, listener] of listeners) {
+                if (heard === event) {
+                    listener();
+                }
             }
         },
         id,
-        on: (_event, listener) => {
-            listeners.push(listener);
+        on: (event, listener) => {
+            listeners.push([event, listener]);
         },
     };
 }
@@ -61,13 +64,15 @@ describe('createSharedBrowser', () => {
         const { launch, launched } = stubLauncher();
         const shared = createSharedBrowser(launch);
         const lost = await shared();
-        lost.disconnect();
+        lost.emit('close');
+        const kept = await shared();
+        lost.emit('disconnected');
 
         // When - a runner asks after the loss
         await shared();
 
-        // Then - a second browser replaced the lost one
-        expect(launched.map((browser) => browser.id)).toStrictEqual([1, 2]);
+        // Then - another event kept it, and a second browser replaced the lost one
+        expect([kept, launched.map((browser) => browser.id)]).toStrictEqual([lost, [1, 2]]);
     });
 
     test('keeps no failed launch: the next ask tries again', async () => {
