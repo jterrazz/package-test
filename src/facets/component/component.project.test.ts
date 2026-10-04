@@ -82,6 +82,22 @@ describe('component', () => {
         expect(project.optimizeDeps?.include).toContain('vitest-browser-react');
     });
 
+    test("component() — the browser project — pre-bundles only the page's own when the app's declaration is no list of names", async () => {
+        // Given - configs an untyped caller wrote: pre-bundling stated as a word, and a list holding a non-name
+        const canonical = await component();
+        const page = canonical.optimizeDeps?.include;
+        const worded = await component({ vite: untyped({ optimizeDeps: 'react-router' }) });
+        const mixed = await component({
+            vite: untyped({ optimizeDeps: { include: [7, 'react-router'] } }),
+        });
+
+        // Then - the word is no declaration, and the non-name is dropped
+        expect([worded.optimizeDeps?.include, mixed.optimizeDeps?.include]).toStrictEqual([
+            page,
+            [...(page ?? []), 'react-router'],
+        ]);
+    });
+
     test('component() — the browser project — leaves msw to the runner, which already excludes it', async () => {
         // Given - the canonical browser project
         const project = await component();
@@ -99,7 +115,9 @@ describe('component', () => {
         // Then - the default exclusion is the default include's twin, never the stated one's
         expect(canonical.include).toStrictEqual(['**/*.test.tsx']);
         expect(canonical.exclude).toContain('specs/**');
-        expect(stated.exclude).not.toContain('specs/**');
+        expect(stated.exclude).toStrictEqual(
+            canonical.exclude?.filter((glob) => glob !== 'specs/**'),
+        );
     });
 
     test('component() — the browser project — hands the page what it cannot read for itself', async () => {
@@ -209,8 +227,12 @@ describe('component', () => {
             const loading = component({ vite: source });
 
             // Then - the refusal's found and fix both name the form it was written in
-            await expect(loading).rejects.toThrow(`found: component({ vite }): ${found}`);
-            await expect(loading).rejects.toThrow(`fix: ${fix}`);
+            await expect(loading).rejects.toThrow(
+                `found: component({ vite }): ${found}\nwhy: A component renders through the Vite pipeline the app builds with, read from its config.\nfix: ${fix}`,
+            );
+            await expect(loading).rejects.toThrow(
+                /\nread: docs\/09-component\.md#the-constructor-there-is-none$/u,
+            );
         },
     );
 

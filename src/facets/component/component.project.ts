@@ -5,6 +5,7 @@ import type { Plugin, PluginOption, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/kit/project/artifacts.js';
+import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { callerFrames } from '../../chain/paths/caller.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
@@ -184,7 +185,7 @@ async function reroot(
 }
 
 function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include: string[] } {
-    const own = typeof declared === 'object' && declared !== null ? { ...declared } : {};
+    const own = isRecord(declared) ? { ...declared } : {};
     const listed = 'include' in own && Array.isArray(own.include) ? own.include : [];
     return {
         ...own,
