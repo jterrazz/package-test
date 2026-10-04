@@ -33,9 +33,15 @@ describe('run', () => {
             testDir: '/spec',
             workDir: '/work',
         });
-        await run.perform([], READ, linters, { config: {}, testDir: '/spec', workDir: null });
+        const result = await run.perform([], READ, linters, {
+            config: {},
+            testDir: '/spec',
+            workDir: null,
+        });
 
-        // Then - each tree, and what each run carried
+        // Then - each tree, what each run carried, and a clean tree's report, read in the result's scope
+        expect([result.report.text, result.report.streamName]).toStrictEqual(['', 'report']);
+        expect(result.report.captures).toBe(result.captures);
         expect(asked).toStrictEqual([
             ['/work', { args: '--member web', fix: true, rules: { 'no-console': 'error' } }],
             ['/spec', { args: '', fix: false, rules: { 'no-console': 'error' } }],
