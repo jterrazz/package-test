@@ -201,7 +201,7 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, because CI provisions no simulator, and the same specs against a real one by `make test-mobile`.',
+            'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, and the same specs against a real simulator by `make test-mobile`, which CI runs on macOS when a change reaches them.',
         facet: 'model',
         family: 'setup',
         fix: 'Specify the facet on the package itself before a rule presumes it.',

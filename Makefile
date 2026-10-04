@@ -44,7 +44,7 @@ check: node_modules/.install
 	$(MAKE) test
 	$(MUTATION)
 
-# Needs Xcode and a simulator: no CI job runs it, and `check` never calls it.
+# Needs Xcode and a simulator: `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
 test-mobile: build
 	node specs/_shared/_fixtures/specimen-mobile/on-simulator.mjs
 
