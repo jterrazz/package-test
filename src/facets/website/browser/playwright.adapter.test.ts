@@ -19,8 +19,10 @@ async function messageOf(work: Promise<unknown>): Promise<string> {
     }
 }
 
-async function failingScenario(): Promise<void> {
-    await Promise.reject(new Error('the button is gone'));
+/** Goes to a second page, then fails there. */
+async function failingScenario(visitor: { goto: (path: string) => Promise<void> }): Promise<void> {
+    await visitor.goto('/about');
+    throw new Error('the button is gone');
 }
 
 describe('PlaywrightAdapter', () => {
@@ -175,7 +177,7 @@ describe('PlaywrightAdapter', () => {
         expect([
             failure.replace(shot, '<shot>'),
             shot.startsWith(`${evidence}${sep}website-`) && shot.endsWith(`${sep}failure.png`),
-            chromium.log.at(-1),
+            chromium.log.slice(-2),
         ]).toStrictEqual([
             [
                 'found: the visit scenario failed:',
@@ -186,7 +188,7 @@ describe('PlaywrightAdapter', () => {
                 'read: docs/10-website.md#visit-scenarios--the-when',
             ].join('\n'),
             true,
-            'screenshot fullPage=true',
+            ['goto http://site.test/about {"waitUntil":"load"}', 'screenshot fullPage=true'],
         ]);
     });
 });
