@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { methodlessDrift } from './methodless.js';
+import { methodlessDrift, methodlessDrifted } from './methodless.js';
 
 const ALL_MCP = { method: 'ALL', path: '/mcp' };
 const GET_HEALTH = { method: 'GET', path: '/health' };
@@ -29,12 +29,21 @@ describe('methodless', () => {
         ]);
     });
 
+    test('the drift is refused with every line of it', () => {
+        // Given - two lines of drift
+        // Then - the found names both, one per line
+        expect(methodlessDrifted(['  a', '  b']).found).toBe(
+            "api routes: `test: { methodless }` in jterrazz.config.ts drifted from the app's table:\n  a\n  b",
+        );
+    });
+
     test('a route is matched by its shape, whatever its parameters are named', () => {
         // Given - the app takes /mcp/:id on any method
         const table = [{ method: 'ALL', path: '/mcp/:id' }];
 
-        // Then - /mcp/:session is the same route, and a deeper path is another
+        // Then - /mcp/:session is the same route, and a literal or deeper path another
         expect(methodlessDrift(table, ['/mcp/:session'])).toStrictEqual([]);
+        expect(methodlessDrift(table, ['/mcp/'])).toHaveLength(2);
         expect(methodlessDrift(table, ['/mcp/:id/x'])).toStrictEqual([
             "  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'",
             "  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
