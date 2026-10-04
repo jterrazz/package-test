@@ -65,6 +65,7 @@ function unjudgedRun({ failed, scope, update }: RouteRun): RouteVerdict | undefi
 }
 
 function ratchetMoved(missing: number, held: number, named: string): Lesson {
+    // Stryker disable next-line EqualityOperator: read only once the count moved, so never at the ratchet
     return missing > held
         ? {
               fix: 'send each from a spec, or record them with TEST_UPDATE=1',

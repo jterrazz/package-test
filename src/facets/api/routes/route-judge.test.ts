@@ -58,10 +58,15 @@ describe('route-judge', () => {
     test('route judge — the api run judged — update mode records where the run stands, and the next run is held by it', async () => {
         // Given - the same run, recorded
         const { directory, root } = runWithOneRouteReached();
-        await judgeRoutes(root, directory, RECORDING);
+        const recorded = await judgeRoutes(root, directory, RECORDING);
 
-        // Then - two held, and the judged run passes naming them
-        expect(heldUnreached(root)).toBe(2);
+        // Then - two held and said so, and the judged run passes naming them
+        expect([recorded, heldUnreached(root)]).toStrictEqual([
+            {
+                line: 'api routes: 2 unreached recorded under .jterrazz/baseline.json › test › routes/unreached',
+            },
+            2,
+        ]);
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: 2 unreached, held by .jterrazz/baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
         });
