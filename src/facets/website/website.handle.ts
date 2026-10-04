@@ -164,7 +164,8 @@ export type WebsiteHandle = {
     website: WebsiteSpecification;
 };
 
-function refuseOptions<Services extends ServiceRecord>(
+/** Refused before anything starts: what a site does once started is the website specs'. */
+export function refuseOptions<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
 ): void {
     // invariant: the type already forbids it; this covers untyped callers.
