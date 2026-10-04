@@ -26,6 +26,8 @@ Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
 ```
 
+A token in a JSON body is written inside quotes — `"total": "{{number}}"` — because the file must stay JSON, and a quoted numeric token still matches a native JSON number as a whole value: `{{number}}`, `{{int}}`, `{{float}}` and `{{port}}` accept `42` as readily as `"42"`. `{{any}}` matches any type at all.
+
 Stream comparisons strip ANSI escape sequences **before** token matching, so fixtures never contain color codes — `.text` is the stripped text, `.raw` the capture as it was.
 
 ## The vocabulary — all 21 tokens

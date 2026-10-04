@@ -173,7 +173,7 @@ Location: /users/{{uuid#user}}
 ```
 
 - First line: `HTTP/1.1 <status>` — mandatory.
-- Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule `expected-headers-are-a-subset`).
+- Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule `expected-headers-are-a-subset`). A header name compares case-blind, as HTTP reads it, so `Content-Type` and `content-type` are one header; its value compares as written.
 - Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](../reference/tokens.md).
 - The body is read by its `content-type` — the file's own, or the actual response's when the file states none — with its surrounding whitespace trimmed on both sides. A text type (`text/*`, `+xml`, `application/xml`, `application/x-ndjson`, …) is the text it is, even a `42` or a `true`: an HTML page, an event stream, a plain message. A binary type — `audio/*`, `font/*`, `image/*`, `video/*`, and under `application/` exactly `gzip`, `octet-stream`, `pdf`, `protobuf`, `vnd.google.protobuf`, `wasm`, `x-gzip`, `x-protobuf`, `x-tar` and `zip` — is not read: its body is `null`, so its `.http` states the status and the headers and no body. Any other type — a JSON type, one the lists above do not name (`application/graphql`, `multipart/*`), or no type at all — is the JSON value its text parses to, or its text when it does not parse.
 
@@ -333,8 +333,10 @@ A `server` that returns anything but the Hono app itself exposes no table the fa
 // jterrazz.config.ts
 import { defineConfig } from '@jterrazz/typescript/config';
 
-export default defineConfig({ test: { routes: './openapi.yaml' } });
+export default defineConfig({ kind: 'api', platform: 'node', test: { routes: './openapi.yaml' } });
 ```
+
+Sending a request needs one more thing such an app may lack: `server` must return an object whose `request(path, init)` answers a Fetch `Response`, which is Hono's own method. Express and Fastify have none, so the project writes that wrapper — for instance one that starts the app on a free port once and forwards each call with `fetch`. Route coverage has no off switch: a project that cannot name its routes cannot run an api spec.
 
 #### A route taken on any method
 
