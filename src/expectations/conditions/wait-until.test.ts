@@ -41,7 +41,34 @@ describe('waitUntil', () => {
                 timeout: 10,
                 why: 'the outbox held one message',
             }),
-        ).rejects.toThrow('the outbox held one message did not hold within 10ms');
+        ).rejects.toThrow(
+            new Error(
+                [
+                    'found: waitUntil(): the outbox held one message did not hold within 10ms',
+                    'why: `waitUntil()` waits on a condition, within a budget.',
+                    'fix: raise the budget if the wait is legitimate, or wait on what actually changes',
+                    'read: docs/21-assertions.md#two-helpers-that-are-not-matchers',
+                ].join('\n'),
+            ),
+        );
+    });
+
+    test('waitUntil — waiting on a condition, never on a duration — reads as often as its interval says, and names no condition it was not told', async () => {
+        // Given - a condition that never holds, read every millisecond within 60
+        let readings = 0;
+        const waiting = waitUntil(
+            () => {
+                readings += 1;
+                return false;
+            },
+            { interval: 1, timeout: 60 },
+        );
+
+        // Then - many readings, not one per default interval, and the condition named generically
+        await expect(waiting).rejects.toThrow(
+            'found: waitUntil(): the condition did not hold within 60ms',
+        );
+        expect(readings).toBeGreaterThan(3);
     });
 
     test('waitUntil — waiting on a condition, never on a duration — times out with its own sentence under a pinned calendar', async () => {

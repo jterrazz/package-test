@@ -26,6 +26,7 @@ export async function waitUntil(
         if (await predicate()) {
             return;
         }
+        // Stryker disable next-line EqualityOperator: the deadline is not met to the microsecond
         if (performance.now() >= deadline) {
             throw new Error(
                 refusal({
