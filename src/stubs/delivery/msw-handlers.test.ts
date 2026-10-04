@@ -1,5 +1,3 @@
-import { HttpResponse, http as mswHttp, passthrough } from 'msw';
-import { setupServer } from 'msw/node';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { describe, expect, onTestFinished, test } from 'vitest';
@@ -8,15 +6,18 @@ import { http } from '../kinds/http.js';
 import type { Stub } from '../stub.js';
 import { buildStubHandlers } from './msw-handlers.js';
 import { fetchJson } from './other-process/stub-backend.fixtures.js';
+import { loadMsw } from './same-process/stub-server.js';
 
 const API = 'http://api.test';
 
-const MSW = { http: mswHttp, HttpResponse, passthrough };
+/** msw as the stub server loads it: the test reaches the network through the framework's own seam. */
+const { msw, setupServer } = await loadMsw();
 
 /** The stubs served in this process for the test, and the violation they record. */
 function served(stubs: Stub[], bypass?: (url: string) => boolean): () => Error | null {
-    const { handlers, violation } = buildStubHandlers(MSW, stubs, bypass);
-    const server = setupServer(...handlers);
+    const { handlers, violation } = buildStubHandlers(msw, stubs, bypass);
+    const server = setupServer();
+    server.use(...handlers);
     server.listen({ onUnhandledRequest: 'error' });
     onTestFinished(() => {
         server.close();
