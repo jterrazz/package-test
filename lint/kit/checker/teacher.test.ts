@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { CHECKER } from '../../consumer/checks/checker.js';
+import type { Row } from '../catalogue/row.js';
 import { teacherOf, underTree } from './teacher.js';
 
 function spottedAt(path: string): {
@@ -13,10 +13,23 @@ function spottedAt(path: string): {
     return { fix: '', found: '', line: 1, path, rule: 'r' };
 }
 
+/** A declaration the kit is handed, as a module at the root of lint/ hands it one. */
+const PROBE: Row = {
+    audience: 'consumer',
+    channel: 'checker',
+    facet: 'model',
+    family: 'layout',
+    fix: 'name a path that exists',
+    name: 'named-path-exists',
+    rationale: 'a probe row',
+    reach: 'tests',
+    sentence: 'Every path a test names exists.',
+};
+
 describe('teacher', () => {
     test('teacherOf — each spotted finding taught by its rule, at its column or the first', () => {
         // Given - two findings of one rule, one placed on a column and one not
-        const teach = teacherOf(CHECKER);
+        const teach = teacherOf({ chapter: 'docs/24-linting.md', rows: [PROBE] });
         const spotted = [
             {
                 column: 7,
