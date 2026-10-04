@@ -120,7 +120,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/cli/documents/literate-env.ts',
             'src/facets/cli/documents/literate-judge.ts',
             'src/facets/api/api.facet.ts',
-            'src/facets/api/api.handle.ts',
             'src/facets/cli/cli.facet.ts',
             'src/facets/cli/cli.handle.ts',
             'src/facets/component/component.facet.ts',
