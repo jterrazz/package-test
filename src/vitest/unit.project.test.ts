@@ -14,10 +14,11 @@ describe('unit', () => {
         // Given - the canonical project, stated by nobody
         const project = testOf(unit());
 
-        // Then - a rendered thing is not a module test, and specs/ is another kind
+        // Then - a rendered thing is not a module test, specs/ is another kind, and .artifacts/ holds copies such as a mutation sandbox
         expect(project.include).toStrictEqual(['**/*.test.ts']);
         expect(project.exclude).toContain('**/*.test.tsx');
         expect(project.exclude).toContain('specs/**');
+        expect(project.exclude).toContain('.artifacts/**');
         expect(project.name).toBe('unit');
     });
 

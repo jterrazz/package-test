@@ -156,6 +156,7 @@ describe('preset', () => {
         expect(excludeOf(config)).toStrictEqual([
             '**/node_modules/**',
             '**/.git/**',
+            '.artifacts/**',
             '**/{_expected,_fixtures,_requests,_seeds}/**',
             'specs/**',
             '**/*.test.tsx',
