@@ -1,0 +1,4 @@
+description: lists the orders
+runs:
+    - command: orders
+      exit: 0

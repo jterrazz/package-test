@@ -94,13 +94,13 @@ describe('link', () => {
         // Given - a file, a bare string and a number where a directory goes
         // Then - each refusal whole, a scope dropped from the folder
         expect([
-            refusalOf(() => linked(['@acme/greeter', file('./greeter.json')])),
+            refusalOf(() => linked(['@acme/greeter', file('./_fixtures/config.json')])),
             refusalOf(() => linked(['greeter', './greeter/'])),
             refusalOf(() => linked(['@acme/greeter', 7])),
         ]).toStrictEqual([
             noDirectory(
                 '@acme/greeter',
-                `file("./greeter.json")), a file where a package's directory is read`,
+                `file("./_fixtures/config.json")), a file where a package's directory is read`,
             ),
             noDirectory('greeter', `"./greeter/"), a value where a package's directory is read`),
             noDirectory('@acme/greeter', `number), a value where a package's directory is read`),

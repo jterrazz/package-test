@@ -1,0 +1,4 @@
+POST /orders
+x-trace: file
+
+{ "sku": "B2" }

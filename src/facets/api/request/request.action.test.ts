@@ -1,6 +1,3 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { readerOf } from '../../../chain/state.js';
@@ -26,19 +23,6 @@ function recording(asked: Asked[]): { server: ServerPort } {
             },
         },
     };
-}
-
-/** A spec folder holding a JSON body, a text body and a request file. */
-function specFolder(): string {
-    const testDir = mkdtempSync(join(tmpdir(), 'request-'));
-    mkdirSync(join(testDir, '_requests'));
-    writeFileSync(join(testDir, '_requests/order.json'), '{ "sku": "A1" }');
-    writeFileSync(join(testDir, '_requests/note.txt'), 'hello');
-    writeFileSync(
-        join(testDir, '_requests/create.http'),
-        'POST /orders\nx-trace: file\n\n{ "sku": "B2" }\n',
-    );
-    return testDir;
 }
 
 const run = (testDir: string): { config: object; testDir: string; workDir: null } => ({
@@ -68,7 +52,7 @@ function refusalOf(work: () => unknown): string {
 describe('request', () => {
     test('request.action — the verbs — each sends its method to the filled route, a file body read by its kind, the chain’s headers only when it carries some', async () => {
         // Given - a spec folder, a recording server, and a chain carrying a header and one carrying none
-        const testDir = specFolder();
+        const testDir = import.meta.dirname;
         const asked: Asked[] = [];
         const adapters = recording(asked);
         const carrying = readerOf({ slices: { headers: { 'x-key': 'k' } }, testDir: null });
@@ -102,7 +86,7 @@ describe('request', () => {
                 template: undefined,
             },
             {
-                body: 'hello',
+                body: 'hello\n',
                 headers: undefined,
                 method: 'PUT',
                 path: '/notes/1',
@@ -120,7 +104,7 @@ describe('request', () => {
 
     test('request.action — .request() — sends a request written in place or in a file, the chain’s headers over the written ones', async () => {
         // Given - a spec folder, and a chain carrying a header the file also writes
-        const testDir = specFolder();
+        const testDir = import.meta.dirname;
         const asked: Asked[] = [];
         const carrying = readerOf({ slices: { headers: { 'x-trace': 'chain' } }, testDir: null });
 
@@ -165,7 +149,7 @@ describe('request', () => {
     test('request.action — refusals — a route handed no params, by each verb, a directory as a body, and a request written off its form', async () => {
         // Given - each verb sent a template with no params, a post handed a directory, and a request in place with no request line
         const bare = readerOf({ slices: {}, testDir: null });
-        const [adapters, ran] = [recording([]), run(specFolder())];
+        const [adapters, ran] = [recording([]), run(import.meta.dirname)];
         const sends = [
             async () => await get.perform(['/users/:id'], bare, adapters, ran),
             async () => await post.perform(['/users/:id'], bare, adapters, ran),

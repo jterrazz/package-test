@@ -33,8 +33,8 @@ const untyped = (value: unknown): never => value as never;
 describe('spec-path', () => {
     test('file() and directory() — a relative path names the disk, branded by its kind, frozen', () => {
         // Given - a file and a directory named from the spec file
-        const named = file('./_expected/out.txt');
-        const folder = directory('../fixtures/');
+        const named = file('./_fixtures/shop/index.txt');
+        const folder = directory('../disk/_fixtures/');
 
         // Then - each value as named, recognised for its kind alone, and frozen
         expect([
@@ -51,8 +51,8 @@ describe('spec-path', () => {
             ].map((value) => isDiskTarget(value)),
             Object.isFrozen(named),
         ]).toStrictEqual([
-            './_expected/out.txt',
-            '../fixtures/',
+            './_fixtures/shop/index.txt',
+            '../disk/_fixtures/',
             [true, false, true],
             [false, true, true],
             [false, false, false, false, true],
@@ -118,16 +118,16 @@ describe('spec-path', () => {
         // Given - a file and a directory handed where a pattern is read
         // Then - each refusal
         expect([
-            refusalOf(() => 'text'.match(untyped(file('./a.txt')))),
-            refusalOf(() => 'text'.match(untyped(directory('./a/')))),
+            refusalOf(() => 'text'.match(untyped(file('./_fixtures/config.json')))),
+            refusalOf(() => 'text'.match(untyped(directory('./_fixtures/shop/')))),
         ]).toStrictEqual([
             [
-                'found: toMatch(file("./a.txt")) on a string, a value with no golden',
+                'found: toMatch(file("./_fixtures/config.json")) on a string, a value with no golden',
                 "fix: wrap the string to golden it — `expect(text(value)).toMatch(file(…))` — or compare it to a value, `toMatch('…')`",
                 'read: docs/24-linting.md#one-verb-per-meaning',
             ],
             [
-                'found: toMatch(directory("./a/")) on a string, a value with no golden',
+                'found: toMatch(directory("./_fixtures/shop/")) on a string, a value with no golden',
                 "fix: wrap the string to golden it — `expect(text(value)).toMatch(directory(…))` — or compare it to a value, `toMatch('…')`",
                 'read: docs/24-linting.md#one-verb-per-meaning',
             ],
@@ -141,7 +141,7 @@ describe('spec-path', () => {
         // Then - each answer
         expect([
             requireDiskFile('fixture', json, '.json') === json,
-            refusalOf(() => requireDiskFile('fixture', directory('./a/'))),
+            refusalOf(() => requireDiskFile('fixture', directory('./_fixtures/shop/'))),
             refusalOf(() => requireDiskFile('request', 'create.http')),
             refusalOf(() => requireDiskFile('seed', 5)),
             refusalOf(() => requireDiskFile('run', json, '.spec.yaml')),
@@ -151,7 +151,7 @@ describe('spec-path', () => {
         ]).toStrictEqual([
             true,
             [
-                'found: fixture(directory("./a/")), a directory where one file is read',
+                'found: fixture(directory("./_fixtures/shop/")), a directory where one file is read',
                 "fix: name one file: fixture(file('./_fixtures/config.json'))",
                 'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
             ],
