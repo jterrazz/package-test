@@ -99,7 +99,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/facets/api/api.project.ts',
-            'src/facets/cli/cli.project.ts',
             'src/facets/integration/integration.project.ts',
             'src/facets/job/job.project.ts',
             'src/facets/website/website.project.ts',
