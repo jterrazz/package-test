@@ -1,10 +1,12 @@
 import type { Preset } from '@jterrazz/typescript/config';
 import { fileURLToPath } from 'node:url';
 
-import { TEST_COMMENT_OPENINGS } from '../consumer/rulebook/preset.js';
+import { presetSeamLawsApartFrom, TEST_COMMENT_OPENINGS } from '../consumer/rulebook/preset.js';
 import { ARCHITECTURE } from './checks/architecture.js';
 import { sourceRootHoldsKnownEntries } from './checks/source-root-holds-known-entries.js';
 import { selfPluginRules } from './rules/plugin.js';
+
+const MSW_ADAPTER_TEST = String.raw`^src/stubs/delivery/msw-handlers\.test\.ts$`;
 
 export function self(): Preset {
     return {
@@ -12,7 +14,7 @@ export function self(): Preset {
             label: 'Self (@jterrazz/test)',
             module: fileURLToPath(new URL('self.js', import.meta.url)),
         },
-        layers: ARCHITECTURE,
+        layers: [...ARCHITECTURE, ...presetSeamLawsApartFrom(['network'], MSW_ADAPTER_TEST)],
         name: 'self',
         names: [sourceRootHoldsKnownEntries],
         oxlint: {

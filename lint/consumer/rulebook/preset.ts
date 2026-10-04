@@ -106,6 +106,27 @@ const SEAMS: readonly Seam[] = [
 
 const secondRuntime = taughtBy('no-second-test-runtime');
 
+function secondRuntimeLaw(seam: Seam, pathNot?: string): ArchitectureRule {
+    return {
+        fix: seam.fix,
+        from: { path: seam.from ?? RUNS_A_TEST, ...(pathNot === undefined ? {} : { pathNot }) },
+        name: `no-second-test-runtime-${seam.seam}`,
+        read: secondRuntime.read,
+        to: { path: packages(seam.packages) },
+        why: secondRuntime.why,
+    };
+}
+
+/** The preset's law of each seam named, every test file held to it but those `pathNot` names. */
+export function presetSeamLawsApartFrom(
+    seams: readonly string[],
+    pathNot: string,
+): ArchitectureRule[] {
+    return SEAMS.filter(({ seam }) => seams.includes(seam)).map((seam) =>
+        secondRuntimeLaw(seam, pathNot),
+    );
+}
+
 function publishedFix(): string {
     const published = declaredSubpaths('@jterrazz/test', import.meta.dirname);
 
@@ -127,14 +148,7 @@ const LAYERS: ArchitectureRule[] = [
         name: 'fixtures-imported-by-tests-only',
         to: { path: String.raw`\.fixtures${SOURCE}` },
     },
-    ...SEAMS.map((seam): ArchitectureRule => ({
-        fix: seam.fix,
-        from: { path: seam.from ?? RUNS_A_TEST },
-        name: `no-second-test-runtime-${seam.seam}`,
-        read: secondRuntime.read,
-        to: { path: packages(seam.packages) },
-        why: secondRuntime.why,
-    })),
+    ...SEAMS.map((seam) => secondRuntimeLaw(seam)),
     {
         ...taughtBy('no-unpublished-subpath'),
         fix: publishedFix(),
