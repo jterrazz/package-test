@@ -98,16 +98,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/facets/api/api.project.ts',
-            'src/facets/integration/integration.project.ts',
-            'src/facets/job/job.project.ts',
-            'src/facets/website/website.project.ts',
-        ),
-        name: "a facet's vitest project",
-        why: 'it builds a project from the shared defaults; what each one collects, under the trees a project states or its own, is listed from the installed package by `specs/cli/node/projects.spec.ts`, and the setups it names by `subpaths.spec.ts`',
-    },
-    {
-        claims: oneOf(
             'src/facets/component/render/console-recorder.ts',
             'src/facets/component/render/render.action.ts',
         ),
