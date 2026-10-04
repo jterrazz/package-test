@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { groupEnded, signalGroup } from './process-group.js';
@@ -21,12 +23,15 @@ describe('process-group', () => {
     });
 
     test('signalGroup — signals the whole group of a child, and the child alone when it has no group', async () => {
-        // Given - a sleeper leading a group with a sleeper of its own, and a child that never started
+        // Given - a sleeper leading a group with a sleeper of its own, and a child that never started, its folder missing
         const leader = spawn('sh', ['-c', 'sleep 30 & sleep 30'], {
             detached: true,
             stdio: 'ignore',
         });
-        const missing = spawn('no-such-command-anywhere', [], { stdio: 'ignore' });
+        const missing = spawn(process.execPath, [], {
+            cwd: join(tmpdir(), 'process-group-no-such-folder'),
+            stdio: 'ignore',
+        });
         missing.on('error', () => {});
 
         // When - each is signalled, the leader's group by the default signal

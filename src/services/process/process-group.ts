@@ -1,5 +1,3 @@
-import type { ChildProcess } from 'node:child_process';
-
 import { pause } from '../../chain/pause.js';
 
 export const KILL_GRACE_MS = 2000;
@@ -49,9 +47,15 @@ export async function groupEnded(group: number, withinMs: number): Promise<boole
     return await endedBy(group, Date.now() + withinMs);
 }
 
+/** What a group is signalled through: the child its spawning module holds, whose pid is none when its spawn failed. */
+type Signalled = {
+    readonly pid?: number | undefined;
+    kill: (signal: NodeJS.Signals | number) => boolean;
+};
+
 /** The child's whole group where groups are signalled, the child alone where they are not or the group is gone; nothing for a child that never started. */
 export function signalGroup(
-    child: ChildProcess,
+    child: Signalled,
     // Stryker disable next-line StringLiteral: an empty signal is read as SIGTERM
     signal: NodeJS.Signals | number = 'SIGTERM',
 ): boolean {
