@@ -55,8 +55,6 @@ The pages follow the package's four export families — what is tested, what sur
 
 The disk a subject reads is laid by its chain — `.fixture()`, `.link()` and, for what git cannot carry, `.prepare()` on a CLI ([CLI specs](guides/cli-specs.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([Lint specs](guides/lint-specs.md)) — and every path a test names is spelled with `file()` or `directory()` ([Conventions § The naming recap](concepts/conventions.md#the-naming-recap)).
 
-The disk a subject reads is laid by its chain — `.fixture()`, `.link()` and, for what git cannot carry, `.prepare()` on a CLI ([CLI specs](guides/cli-specs.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([Lint specs](guides/lint-specs.md)) — and every path a test names is spelled with `file()` or `directory()` ([Conventions § The naming recap](concepts/conventions.md#the-naming-recap)).
-
 ### Acting on a screen
 
 | Page                                | Holds                                                                                                                |
@@ -81,4 +79,4 @@ The examples use made-up products: `shoply`, a shop CLI; a news app with an even
 
 ## Decisions
 
-The decisions this package alone took are in [`decisions/`](decisions/), numbered in the order they were taken, beside the `_template.md` they follow. Neither [Test](guides/test.md) nor `decisions/` ships in the tarball: from inside an install, read them at <https://github.com/jterrazz/package-test/tree/main/docs>. The API itself is the types the package publishes, and no page restates it.
+The decisions this package alone took are in [`decisions/`](decisions/), numbered in the order they were taken, beside the `_template.md` they follow. Neither [Test](guides/test.md) nor `decisions/` ships in the tarball: from inside an install, read them at <https://github.com/jterrazz/package-test/tree/main/docs>. The API itself is the types the package publishes, and no page restates it: they are browsed as the root `README.md` says, `dist/index.d.ts` first.

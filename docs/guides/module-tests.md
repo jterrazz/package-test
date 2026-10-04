@@ -47,6 +47,8 @@ describe('rank', () => {
 });
 ```
 
+The `describe` is titled `rank` because `rank` is what `ranking.ts` exports: a module test names its subject, the export it is about, where a spec names its aspect. When a module exports several values, which one answers is [`one-describe-per-file`'s row](../reference/linting.md#one-describe-per-file), and `typescript fix` writes the title it reads.
+
 ## What it may and may not do
 
 The table is the rule set, and every row names the rule that holds it, where one does ([Linting § The rule catalogue](../reference/linting.md#the-rule-catalogue)).
