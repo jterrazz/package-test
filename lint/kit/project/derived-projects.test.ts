@@ -67,4 +67,24 @@ describe('derivedProjects', () => {
             unit: { roots: ['src', 'specs/unit'] },
         });
     });
+
+    test('derived-projects — an in-process specification is handed its runner where its folder’s one specification module is named for it', () => {
+        // Given - api with its one runner, job with two, integration with one named otherwise, and cli, which runs no subject in-process
+        const root = tree([
+            'specs/api/api.specification.ts',
+            'specs/api/orders.spec.ts',
+            'specs/job/job.specification.ts',
+            'specs/job/other.specification.ts',
+            'specs/integration/redis.specification.ts',
+            'specs/cli/cli.specification.ts',
+        ]);
+
+        // Then - the api project alone runs its files in one module graph
+        expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
+            api: { runner: './specs/api/api.specification.ts' },
+            cli: {},
+            integration: {},
+            job: {},
+        });
+    });
 });

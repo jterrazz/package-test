@@ -10,6 +10,11 @@ const UNIT = 'unit';
 // invariant: every specification a project is built by has its folder, the unit one aside: module tests sit beside their modules.
 const FOLDERED: ReadonlySet<string> = new Set([...SPECIFICATIONS, 'component']);
 
+// invariant: these build their subject in the run's own process, so a worker's files can share one module graph.
+const IN_PROCESS: ReadonlySet<string> = new Set(['api', 'integration', 'job']);
+
+const SPECIFICATION_MODULE = '.specification.ts';
+
 const MODULE_TEST = /\.test\.ts$/u;
 
 const RENDERED_TEST = /\.test\.tsx$/u;
@@ -37,7 +42,18 @@ const foldersIn = (path: string): string[] =>
               .toSorted()
         : [];
 
-/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder, `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
+// invariant: the runner is derived only where the folder's one specification module is named for it: in a shared module graph, a second specification module would load once per worker, and its files would share the first one's subject.
+function runnerOf(root: string, specification: string): Record<string, unknown> {
+    const folder = `${SPECS}/${specification}`;
+    const modules = IN_PROCESS.has(specification)
+        ? readdirSync(join(root, folder)).filter((name) => name.endsWith(SPECIFICATION_MODULE))
+        : [];
+    const own = `${specification}${SPECIFICATION_MODULE}`;
+
+    return modules.length === 1 && modules[0] === own ? { runner: `./${folder}/${own}` } : {};
+}
+
+/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder — an in-process one handed as its `runner` the folder's one specification module, `<specification>.specification.ts` —, `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
 export function derivedProjects(root: string): Map<string, Record<string, unknown>> {
     const specs = foldersIn(join(root, SPECS));
     const named = specs.filter((folder) => FOLDERED.has(folder));
@@ -57,7 +73,7 @@ export function derivedProjects(root: string): Map<string, Record<string, unknow
         projects.set(UNIT, { roots: unitRoots });
     }
     for (const specification of named) {
-        projects.set(specification, {});
+        projects.set(specification, runnerOf(root, specification));
     }
     if (rendered.length > 0) {
         projects.set('component', { include: rendered });

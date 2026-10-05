@@ -109,7 +109,7 @@ There is one helper per kind — `unit`, `integration`, `component`, `website`, 
 
 Projects run in groups — the node kinds first, then `website`, then `component`, then `mobile` — so two browser projects never open two Chromiums at once and a simulator runs alone.
 
-`api()`, `job()` and `integration()` also take `runner`, the module their spec files import their runner from, such as `'./specs/api/api.specification.ts'`. With it, the files of a worker share one module graph (`isolate: false`) and the specification runs again before each file (`setupFiles`): the app's modules load once per worker instead of once per file, and every file still boots its own app on its own services. A spec file imports its runner from the specification itself, since a module of the shared graph that imports it keeps the first file's runner.
+`api()`, `job()` and `integration()` also take `runner`, the module their spec files import their runner from, such as `'./specs/api/api.specification.ts'`. The tree derives it where the folder holds one specification module, named for it — `specs/api/api.specification.ts` alone in `specs/api/` —, so a project states it only for a module named otherwise. With it, the files of a worker share one module graph (`isolate: false`) and the specification runs again before each file (`setupFiles`): the app's modules load once per worker instead of once per file, and every file still boots its own app on its own services. A spec file imports its runner from the specification itself, since a module of the shared graph that imports it keeps the first file's runner.
 
 An env-gated sub-suite is an `exclude`, not a second project:
 
