@@ -9,7 +9,6 @@ export const SIBLINGLESS_LINT_LAYER = [
     'lint/consumer/checks/seeds-state-absolute-time.ts',
     'lint/consumer/checks/document-env-and-serve-registered.ts',
     'lint/consumer/rules/layout/one-describe-per-file.merge.ts',
-    'lint/consumer/rulebook/preset.ts',
     'lint/self/checks/source-root-holds-known-entries.ts',
     'lint/kit/project/suppression.ts',
     'lint/consumer/catalogue/fork.ts',
