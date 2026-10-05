@@ -86,6 +86,32 @@ describe('placeholders', () => {
         expect(tokenMatches('A {{string}} Z', 'A xy Z', scope)).toBe(true);
     });
 
+    test('unnamed {{any}} tokens hold a golden longer than any pattern V8 compiles, each piece in order and none overlapping', () => {
+        // Given - a fresh capture scope, and a golden of a hundred thousand lines around two tokens
+        const scope = new CaptureScope();
+        const lines = Array.from({ length: 100_000 }, (_, index) => `line ${String(index)} (a.b)`);
+        const golden = `head\n{{any}}\n${lines.join('\n')}\n{{any}}tail`;
+
+        // Then - the text holding the lines between the head and the tail matches, a line out of place does not
+        expect(
+            [
+                `head\nversions\n${lines.join('\n')}\nmore tail`,
+                `head\n\n${lines.join('\n')}\ntail`,
+                `head\nversions\n${lines.toReversed().join('\n')}\ntail`,
+                'head\n\ntail',
+                'headtail',
+            ].map((actual) => tokenMatches(golden, actual, scope)),
+        ).toStrictEqual([true, true, false, false, false]);
+        expect(
+            [
+                ['a{{any}}a', 'a'],
+                ['a{{any}}a', 'aa'],
+                ['a.b', 'axb'],
+                ['a.b', 'a.b'],
+            ].map(([expected, actual]) => tokenMatches(expected, actual, scope)),
+        ).toStrictEqual([false, true, false, true]);
+    });
+
     test('{{any}} is always-true only as a whole value; embedded, the frame still constrains', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();

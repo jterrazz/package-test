@@ -165,6 +165,8 @@ export function matcherMatches(matcher: Matcher, actual: unknown, scope: Capture
 }
 
 type ParsedPlaceholderString = {
+    /** The literal text around each token, when every token is an unnamed `{{any}}`; null otherwise. */
+    pieces: null | string[];
     single: null | { kind: MatcherKind; ref?: string | undefined };
     pattern: RegExp;
     refs: { index: number; kind: MatcherKind; ref?: string | undefined }[];
@@ -200,19 +202,46 @@ export function parsePlaceholderString(
     });
     let source = '';
     let lastIndex = 0;
+    const pieces: string[] = [];
     for (const { found, kind } of tokens) {
+        pieces.push(expected.slice(lastIndex, found.index));
         source += `${escapeRegExp(expected.slice(lastIndex, found.index))}(${placeholderSource(kind, scope)})`;
         lastIndex = found.index + found[0].length;
     }
+    pieces.push(expected.slice(lastIndex));
     source += escapeRegExp(expected.slice(lastIndex));
     const [only] = tokens;
     return {
+        pieces: tokens.every(({ kind, ref }) => kind === 'any' && ref === undefined)
+            ? pieces
+            : null,
         // Stryker disable next-line StringLiteral: the token patterns are ASCII, read alike without the unicode flag
         pattern: new RegExp(`^${source}$`, 'u'),
         refs: tokens.map(({ kind, ref }, index) => ({ index, kind, ref })),
         single: only?.found[0] === expected ? { kind: only.kind, ref: only.ref } : null,
         source,
     };
+}
+
+// invariant: a text whose tokens are all unnamed `{{any}}` holds its pieces in order, the first at its start and the last at its end, as its anchored pattern would: V8 compiles no pattern of a long golden ("Regular expression too large"), so the pieces are matched as text.
+function piecesMatch(pieces: readonly string[], text: string): boolean {
+    const [first = '', ...rest] = pieces;
+    const last = rest.pop();
+    if (last === undefined) {
+        return text === first;
+    }
+    if (!text.startsWith(first)) {
+        return false;
+    }
+    let at = first.length;
+    for (const piece of rest) {
+        const found = text.indexOf(piece, at);
+        if (found === -1) {
+            return false;
+        }
+        at = found + piece.length;
+    }
+    return text.length - last.length >= at && text.endsWith(last);
 }
 
 export function placeholderPatternSource(expected: string): string {
@@ -240,6 +269,9 @@ export function placeholderStringMatches(
         return false;
     }
     const text = String(actual);
+    if (parsed.pieces !== null) {
+        return piecesMatch(parsed.pieces, text);
+    }
     const found = parsed.pattern.exec(text);
     if (!found) {
         return false;
