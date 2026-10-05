@@ -27,8 +27,8 @@ describe('project', () => {
         expect(project.sequence?.groupOrder).toBe(0);
         expect([project.fileParallelism, project.testTimeout]).toStrictEqual([undefined, 30_000]);
         expect(project.globalSetup).toStrictEqual([
-            resolve(import.meta.dirname, '../expectations/in-place/in-place-setup.ts'),
-            resolve(import.meta.dirname, '../chain/paths/temp-root.ts'),
+            resolve(import.meta.dirname, '../expectations/in-place/in-place.global-setup.ts'),
+            resolve(import.meta.dirname, '../chain/paths/temp-root.global-setup.ts'),
         ]);
     });
 

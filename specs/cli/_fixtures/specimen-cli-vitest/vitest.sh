@@ -9,7 +9,7 @@
 root="$(cd "$(dirname "$0")/../../../.." && pwd)"
 [ -e node_modules ] || ln -s "$root/node_modules" node_modules
 IN_PLACE_ENTRY="$root/dist/index.js"
-IN_PLACE_SETUP="$root/dist/in-place-setup.js"
+IN_PLACE_SETUP="$root/dist/in-place.global-setup.js"
 RUNNER_ENTRY="$root/dist/vitest.js"
 export IN_PLACE_ENTRY IN_PLACE_SETUP RUNNER_ENTRY
 exec node "$root/node_modules/vitest/vitest.mjs" "$@"

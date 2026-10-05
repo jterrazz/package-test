@@ -1,7 +1,7 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { servicesSetup } from '../../services/containers/run-setup.js';
+import { servicesSetup } from '../../services/containers/services.global-setup.js';
 import { inProcessProject } from '../../vitest/project.js';
 import type { InProcessProjectOptions } from '../../vitest/project.js';
 

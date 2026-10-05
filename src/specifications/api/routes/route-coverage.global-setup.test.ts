@@ -5,8 +5,8 @@ import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
 import type { Shard } from './ledger.js';
-import { routeCoverageSetup, setupRoutes } from './route-coverage.js';
-import type { RouteProject } from './route-coverage.js';
+import { routeCoverageSetup, setupRoutes } from './route-coverage.global-setup.js';
+import type { RouteProject } from './route-coverage.global-setup.js';
 import { PARTIAL_UNJUDGED, SHARD_UNJUDGED } from './route-judge.js';
 import { judgeSplit, partialSplitUnjudged } from './route-split.js';
 
@@ -14,7 +14,9 @@ describe('setup', () => {
     test('route coverage — the global setup — is this module, from a checkout', () => {
         // Given - the source tree
         // Then - the setup a project registers is this very file
-        expect(routeCoverageSetup()).toBe(join(import.meta.dirname, 'route-coverage.ts'));
+        expect(routeCoverageSetup()).toBe(
+            join(import.meta.dirname, 'route-coverage.global-setup.ts'),
+        );
     });
 
     test('route coverage — the global setup reads the run — a whole run starts from no ledger, and says nothing when no specification reached the api', async () => {

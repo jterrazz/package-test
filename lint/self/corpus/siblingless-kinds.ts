@@ -34,6 +34,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/consumer/rules/plugin.ts',
             'lint/index.config.ts',
             'lint/self/preset.ts',
+            'lint/self/plugin.ts',
         ),
         name: 'composition root or barrel',
         why: 'it wires and re-exports; what it publishes is held by the specs that install the packed package (`specs/cli/node/`, `specs/cli/tsc/`) and by every spec that imports the entry',
@@ -175,12 +176,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'lint/index.checker.ts',
-            'lint/self/self-cli.ts',
+            'lint/self/self.cli.ts',
             'lint/kit/checker/at-zero-pass.ts',
             'lint/kit/checker/conventions.ts',
             'lint/kit/checker/record.ts',
-            'src/specifications/api/routes/route-split-cli.ts',
-            'src/specifications/cli/documents/schema-cli.ts',
+            'src/specifications/api/routes/route-split.cli.ts',
+            'src/specifications/cli/documents/schema.cli.ts',
         ),
         name: 'a bundled CLI entry',
         why: 'it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end',
@@ -208,7 +209,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/clock/instant.ts',
             'src/disk/prepare.capability.ts',
             'src/disk/resolved-spec-path.ts',
-            'src/expectations/in-place/in-place-setup.ts',
+            'src/expectations/in-place/in-place.global-setup.ts',
             'src/expectations/text/ansi.ts',
             'src/services/seed/seed.capability.ts',
             'src/services/services.ts',
@@ -218,5 +219,10 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         ),
         name: 'a module the specs reach through the published entry',
         why: 'what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec',
+    },
+    {
+        claims: oneOf('src/standard/standard.ts'),
+        name: 'a standard',
+        why: 'it is data, and the Config pass refuses anything it would compute; the `test()` preset hands it on as written, and `typescript doctor` prints each value beside it',
     },
 ];

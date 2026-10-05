@@ -7,7 +7,7 @@ import { RUNTIME_RULES } from '../../../src/chain/refusals/rows.js';
 import { FORK_CHAPTER, FORK_MARKERS, forkTable } from '../../consumer/catalogue/fork.js';
 import plugin from '../../index.oxlint.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
-import { chapterAt } from '../self-cli.js';
+import { chapterAt } from '../self.cli.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
 import { allRows, SELF_CHAPTER } from './manifest.js';
 

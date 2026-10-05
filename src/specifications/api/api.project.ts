@@ -1,10 +1,10 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { servicesSetup } from '../../services/containers/run-setup.js';
+import { servicesSetup } from '../../services/containers/services.global-setup.js';
 import { inProcessProject } from '../../vitest/project.js';
 import type { InProcessProjectOptions } from '../../vitest/project.js';
-import { routeCoverageSetup } from './routes/route-coverage.js';
+import { routeCoverageSetup } from './routes/route-coverage.global-setup.js';
 
 /** `api()` — the app met through HTTP. */
 export type ApiProjectOptions = InProcessProjectOptions;

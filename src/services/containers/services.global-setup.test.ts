@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { ContainerPort } from './container.port.js';
 import { RunSetupContainer } from './run-setup-container.adapter.js';
-import setup, { DOCKER_ABSENT, servicesSetup } from './run-setup.js';
+import setup, { DOCKER_ABSENT, servicesSetup } from './services.global-setup.js';
 
 async function connection(url: string): Promise<string> {
     return await new Promise((resolve) => {
@@ -44,7 +44,7 @@ describe('setup', () => {
     test('the services setup — is this module, from a checkout', () => {
         // Given - the source tree
         // Then - the setup a project registers is this very file
-        expect(servicesSetup()).toBe(join(import.meta.dirname, 'run-setup.ts'));
+        expect(servicesSetup()).toBe(join(import.meta.dirname, 'services.global-setup.ts'));
     });
 
     test('the services setup — the run containers, served — starts a worker’s container once Docker is prepared, and answers where it listens', async () => {

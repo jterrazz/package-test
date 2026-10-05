@@ -52,8 +52,7 @@ export async function prepareDocker(): Promise<void> {
 }
 
 export function servicesSetup(): string {
-    // Stryker disable next-line StringLiteral: the bundled name is read only from dist, which no module test runs
-    return setupEntry(import.meta.dirname, 'run-setup', 'services-setup');
+    return setupEntry(import.meta.dirname, 'services');
 }
 
 type RunProject = { provide: (key: 'serviceContainers', value: string) => void };

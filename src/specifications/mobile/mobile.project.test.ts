@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { mobile } from './mobile.project.js';
-import { mobileSessionSetup } from './session/mobile-session.js';
+import { mobileSessionSetup } from './session/mobile-session.global-setup.js';
 
 describe('mobile', () => {
     test('mobile() — runs its files one at a time in the third group, a global setup holding the run’s session, and serves the declared device from its root', () => {

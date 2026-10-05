@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { tempRootSetup } from '../../chain/paths/temp-root.js';
-import { inPlaceSetup } from '../../expectations/in-place/in-place-setup.js';
-import { servicesSetup } from '../../services/containers/run-setup.js';
+import { tempRootSetup } from '../../chain/paths/temp-root.global-setup.js';
+import { inPlaceSetup } from '../../expectations/in-place/in-place.global-setup.js';
+import { servicesSetup } from '../../services/containers/services.global-setup.js';
 import { job } from './job.project.js';
 
 describe('job', () => {

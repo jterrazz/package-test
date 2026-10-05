@@ -4,14 +4,16 @@ import { join } from 'node:path';
 import type { ProvidedContext } from 'vitest';
 import { describe, expect, test } from 'vitest';
 
-import setup, { mobileSessionSetup } from './mobile-session.js';
+import setup, { mobileSessionSetup } from './mobile-session.global-setup.js';
 import { MOBILE_SESSIONS_DIR } from './session-ledger.js';
 
 describe('setup', () => {
     test('mobileSessionSetup — names this module as the global setup, read from source', () => {
         // Given - the module run from source
         // Then - the source file beside it
-        expect(mobileSessionSetup()).toBe(join(import.meta.dirname, 'mobile-session.ts'));
+        expect(mobileSessionSetup()).toBe(
+            join(import.meta.dirname, 'mobile-session.global-setup.ts'),
+        );
     });
 
     test('setup — a project with no device provides a ledger folder of its own under the root, and its teardown removes it', async () => {

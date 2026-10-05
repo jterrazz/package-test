@@ -18,7 +18,7 @@ export function self(): Preset {
         name: 'self',
         names: [sourceRootHoldsKnownEntries],
         oxlint: {
-            jsPlugins: [fileURLToPath(new URL('self-oxlint.js', import.meta.url))],
+            jsPlugins: [fileURLToPath(new URL('plugin.js', import.meta.url))],
             rules: {
                 ...selfPluginRules,
                 'jterrazz-typescript/comment-states-its-kind': [

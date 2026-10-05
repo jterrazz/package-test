@@ -4,7 +4,7 @@ import { basename, dirname } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { scratchDirectory } from './scratch.js';
-import { TEMP_ROOTS_PARENT } from './temp-root.js';
+import { TEMP_ROOTS_PARENT } from './temp-root.global-setup.js';
 
 const siblingStarted = Promise.withResolvers<true>();
 const asked = Promise.withResolvers<string>();

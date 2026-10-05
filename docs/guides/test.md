@@ -14,7 +14,7 @@ The suffix says the kind, as in any consumer ([Getting started § Which kind of 
 
 ## The nine projects
 
-`test.projects` in `jterrazz.config.ts` declares nine, and which one you can run is decided by what is installed and running on the machine.
+The tree derives nine — one per folder of `specs/`, `unit` over `src/` and `lint/`, `component` over the component specs and the rendered tests of `src/` —, `test.projects` in `jterrazz.config.ts` states how four of them depart, and which one you can run is decided by what is installed and running on the machine.
 
 | Project       | Collects                                                                                                               | Needs                                                                  |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 137   |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 138   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<specification>/`                                      | the framework's own specifications, each met through its constructor     | 192   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification               | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
@@ -168,11 +168,11 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **154 modules** have no sibling test, and every one of them is claimed:
+Today **156 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| composition root or barrel (17)                           | it wires and re-exports; what it publishes is held by the specs that install the packed package (`specs/cli/node/`, `specs/cli/tsc/`) and by every spec that imports the entry                                                                                                                                                                                                                                                                                                               |
+| composition root or barrel (18)                           | it wires and re-exports; what it publishes is held by the specs that install the packed package (`specs/cli/node/`, `specs/cli/tsc/`) and by every spec that imports the entry                                                                                                                                                                                                                                                                                                               |
 | type-only declaration (27)                                | it declares a shape and executes nothing; the compiler is its test, and the consumer module `specs/cli/tsc/_fixtures/consumer/consumer.ts` holds, against the installed declarations, what the compiler must refuse                                                                                                                                                                                                                                                                          |
 | constant data (18)                                        | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `specification-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguous.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `architecture.test.ts` for the library owners) |
 | a module that runs only in a page (2)                     | it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof                                                                                                                                                                                                              |
@@ -183,6 +183,7 @@ Today **154 modules** have no sibling test, and every one of them is claimed:
 | a lint-layer module (15)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint specification                                                                                                                                                                                                                                                         |
 | a chain or runner internal (6)                            | it is reached through the chain, so its proof is the specification specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                  |
 | a module the specs reach through the published entry (11) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                              |
+| a standard (1)                                            | it is data, and the Config pass refuses anything it would compute; the `test()` preset hands it on as written, and `typescript doctor` prints each value beside it                                                                                                                                                                                                                                                                                                                           |
 
 <!-- /GENERATED:siblings -->
 
@@ -197,7 +198,7 @@ Some code no node project can reach, and the suite counts its mutants as run by 
 
 - **The literate plugin** (`src/specifications/cli/documents/literate-plugin.ts`) runs in Vitest's main process while it collects `.spec.yaml` documents, where no test is running; every literate spec runs through it.
 - **Code that only runs in a page** — the refusal of `src/chain/refusals/node-only.ts`, the viewport the component chain arms — runs in the browser the component project drives, which the suite does not run.
-- **A global setup** — `src/specifications/mobile/session/mobile-session.ts` — runs in Vitest's main process, and only beside a simulator.
+- **A global setup** — `src/specifications/mobile/session/mobile-session.global-setup.ts` — runs in Vitest's main process, and only beside a simulator.
 
 A mutant a test runs and no behaviour can tell apart is declared where it stands, `// Stryker disable next-line <mutator>: <why it is equivalent>`, once a change brings it to the suite.
 
@@ -500,7 +501,7 @@ The freshness meta-test is the reason a documentation change can turn the suite 
 
 Every row of the rule manifest declares its audience (`RowDocs.audience`, `lint/kit/catalogue/row.ts`). A `consumer` rule is what a project using the package meets, and [Linting § The rule catalogue](../reference/linting.md#the-rule-catalogue) lists it. A `self` rule holds this package's own suite — its catalogue, its capability matrix, its specimens, its skill, its meta-tests — and is listed here, where the `read:` part of its message routes.
 
-A self rule is wired only where this repository judges itself, never in what the tarball carries. Its row lives in `lint/self/catalogue/manifest.ts`, which no published entry imports: the published code reads the consumer rows of `lint/consumer/catalogue/manifest.ts` alone, so no bundle the tarball carries holds a self row. A self static rule is a rule of the `jterrazz-self` plugin (`lint/self/rules/plugin.ts`, bundled as `.artifacts/dev/self-oxlint.js`), which the `self()` preset hands this repository's derived lint config, and the lint specs load beside the published plugin; its findings read `jterrazz-self(<rule>)`. The self checker passes (listed by `lint/self/checks/checker.ts`, composed by `lint/self/self-cli.ts`) are the `Contribution` that `.artifacts/dev/self.js` exports by default, which the `self()` preset names as its checker and `typescript check` runs as `Self (@jterrazz/test)` — over every specs tree, and over the project's own `src/` and `lint/`; the program is built into `.artifacts/dev/`, never into `dist/`, and `dist/checker.js` imports nothing of it. A self meta row is a meta-test of this suite, and a self process row is this repository's review. `rule-declares-its-audience` packs the tarball, extracts it, and holds that none of this reaches it: no byte of it names a self row, no entry it publishes registers one, and its private entries (`#checker`), run as the toolchain runs a preset's checks, run none.
+A self rule is wired only where this repository judges itself, never in what the tarball carries. Its row lives in `lint/self/catalogue/manifest.ts`, which no published entry imports: the published code reads the consumer rows of `lint/consumer/catalogue/manifest.ts` alone, so no bundle the tarball carries holds a self row. A self static rule is a rule of the `jterrazz-self` plugin (`lint/self/rules/plugin.ts`, entered at `lint/self/plugin.ts` and bundled as `.artifacts/dev/plugin.js`), which the `self()` preset hands this repository's derived lint config, and the lint specs load beside the published plugin; its findings read `jterrazz-self(<rule>)`. The self checker passes (listed by `lint/self/checks/checker.ts`, composed by `lint/self/self.cli.ts`) are the `Contribution` that `.artifacts/dev/self.js` exports by default, which the `self()` preset names as its checker and `typescript check` runs as `Self (@jterrazz/test)` — over every specs tree, and over the project's own `src/` and `lint/`; the program is built into `.artifacts/dev/`, never into `dist/`, and `dist/checker.js` imports nothing of it. A self meta row is a meta-test of this suite, and a self process row is this repository's review. `rule-declares-its-audience` packs the tarball, extracts it, and holds that none of this reaches it: no byte of it names a self row, no entry it publishes registers one, and its private entries (`#checker`), run as the toolchain runs a preset's checks, run none.
 
 A rule that is both is two: its consumer half ships, its self half stays home. `message-has-four-parts` is the pattern: the four-part form every message takes is the consumer's, stated in [Linting § What a finding says](../reference/linting.md#what-a-finding-says); the meta-test that holds this catalogue's messages to that form is `message-has-four-parts`, below.
 
@@ -597,13 +598,13 @@ node --input-type=module -e "const { GenericContainer } = await import('testcont
 holder=$!
 sleep 10   # until the holder's container runs
 node --input-type=module -e "
-const { default: setup } = await import('./dist/services-setup.js');
+const { default: setup } = await import('./dist/services.global-setup.js');
 let url; await setup({ provide: (_, served) => { url = served; } }, async () => {});
 await fetch(url + '/containers', { method: 'POST', body: JSON.stringify({ image: '$image', port: 6379 }) });
 process.kill(process.pid, 'SIGKILL');"
 docker run -d --label org.testcontainers.session-id=probe-gone "$image" true
 docker ps -a --filter label=com.jterrazz.test.owner   # the killed run's redis, running
-node --input-type=module -e "await (await import('./dist/services-setup.js')).prepareDocker()"
+node --input-type=module -e "await (await import('./dist/services.global-setup.js')).prepareDocker()"
 docker ps -a --filter label=com.jterrazz.test.owner   # empty
 docker ps -a --filter label=org.testcontainers.session-id=probe-gone   # empty
 kill $holder

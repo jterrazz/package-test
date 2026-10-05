@@ -4,7 +4,7 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 import { specificationProject } from '../../vitest/project.js';
 import type { SpecificationProjectOptions } from '../../vitest/project.js';
 import type { MobileDevice } from './device/device.port.js';
-import { mobileSessionSetup } from './session/mobile-session.js';
+import { mobileSessionSetup } from './session/mobile-session.global-setup.js';
 
 /** The common options; for a run whose specs spawn no server, the device its one Appium server drives. */
 export type MobileProjectOptions = SpecificationProjectOptions &

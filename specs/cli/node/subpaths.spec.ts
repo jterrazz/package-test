@@ -83,15 +83,15 @@ describe('subpaths', () => {
         // Then - each setup resolves inside the install: a renamed bundle would fail every consumer's run at startup
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            api: dist/in-place-setup.js (held), dist/temp-root.js (held), dist/services-setup.js (held), dist/route-coverage.js (held)
-            cli: dist/in-place-setup.js (held), dist/temp-root.js (held)
+            api: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held), dist/services.global-setup.js (held), dist/route-coverage.global-setup.js (held)
+            cli: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held)
             component: none
-            integration: dist/in-place-setup.js (held), dist/temp-root.js (held), dist/services-setup.js (held)
-            job: dist/in-place-setup.js (held), dist/temp-root.js (held), dist/services-setup.js (held)
-            lint: dist/in-place-setup.js (held), dist/temp-root.js (held)
-            mobile: dist/in-place-setup.js (held), dist/temp-root.js (held), dist/mobile-session.js (held)
-            unit: dist/in-place-setup.js (held), dist/temp-root.js (held)
-            website: dist/in-place-setup.js (held), dist/temp-root.js (held)
+            integration: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held), dist/services.global-setup.js (held)
+            job: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held), dist/services.global-setup.js (held)
+            lint: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held)
+            mobile: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held), dist/mobile-session.global-setup.js (held)
+            unit: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held)
+            website: dist/in-place.global-setup.js (held), dist/temp-root.global-setup.js (held)
         `);
     });
 });

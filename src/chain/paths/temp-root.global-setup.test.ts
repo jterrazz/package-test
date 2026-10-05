@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import setup, { sweepOrphanRoots, TEMP_ROOTS_PARENT } from './temp-root.js';
+import setup, { sweepOrphanRoots, TEMP_ROOTS_PARENT } from './temp-root.global-setup.js';
 
 describe('setup', () => {
     test("the temp-root setup — a run's scratch lives and dies in one folder — points the temp directory at a root of the run, in the one parent of roots", () => {
