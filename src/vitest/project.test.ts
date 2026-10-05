@@ -1,7 +1,8 @@
+import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { EXCLUDE, facetProject, inProcessProject, statedOnce } from './project.js';
+import { EXCLUDE, facetProject, inProcessProject, projectTest, statedOnce } from './project.js';
 
 function testOf(
     project: TestProjectInlineConfiguration,
@@ -14,12 +15,15 @@ describe('project', () => {
         // Given - a facet project stated by nobody
         const project = testOf(facetProject('api', {}));
 
-        // Then - its own specs tree, named for it, in parallel on the shared 30s
+        // Then - its own specs tree, named for it, in parallel on the shared 30s, the run's two global setups from their sources
         expect(project.include).toStrictEqual(['specs/api/**/*.spec.ts']);
         expect(project.name).toBe('api');
         expect(project.sequence?.groupOrder).toBe(0);
-        expect(project.fileParallelism).toBeUndefined();
-        expect(project.testTimeout).toBe(30_000);
+        expect([project.fileParallelism, project.testTimeout]).toStrictEqual([undefined, 30_000]);
+        expect(project.globalSetup).toStrictEqual([
+            resolve(import.meta.dirname, '../expectations/in-place/in-place-setup.ts'),
+            resolve(import.meta.dirname, '../chain/paths/temp-root.ts'),
+        ]);
     });
 
     test('facetProject — adds a stated exclude to the preset’s', () => {
@@ -65,6 +69,26 @@ describe('project', () => {
             exclude: ['a', 'b'],
             include: ['c'],
             name: 'x',
+        });
+    });
+
+    test('statedOnce — adds no list a config never stated', () => {
+        // Given - a config stating neither list
+        const stated: { exclude?: string[]; include?: string[]; name: string } = { name: 'x' };
+
+        // Then - it comes back as it was, with no key for either list
+        expect(statedOnce(stated)).toStrictEqual({ name: 'x' });
+    });
+
+    test('projectTest — states only what the facet and the options state', () => {
+        // Given - a project with no exclude, no budget and no serial run stated anywhere
+        const project = projectTest('unit', {}, { include: ['src/**/*.test.ts'] });
+
+        // Then - the canonical include, the name and the group, and no key for what nobody stated
+        expect(project).toStrictEqual({
+            include: ['src/**/*.test.ts'],
+            name: 'unit',
+            sequence: { groupOrder: 0 },
         });
     });
 });

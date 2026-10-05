@@ -6,6 +6,7 @@ import { pause } from '../../chain/pause.js';
 export const KILL_GRACE_MS = 2000;
 
 /** outside: Windows has no process groups to signal through a negative pid. */
+// Stryker disable next-line ConditionalExpression,StringLiteral: the suite runs on POSIX alone, where every platform signals groups
 export const SIGNALS_GROUPS = process.platform !== 'win32';
 const GROUP_POLL_MS = 1000;
 const GROUP_SETTLE_MS = 50;

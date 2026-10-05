@@ -17,6 +17,7 @@ export function stackFrames(stack: string): StackFrame[] {
     const frames: StackFrame[] = [];
     for (const text of stack.split('\n')) {
         const groups = FRAME_LOCATION.exec(text.trim())?.groups;
+        // Stryker disable next-line StringLiteral: a line no frame pattern reads holds no position, whatever text stands in for it
         const position = POSITION.exec(groups?.wrapped ?? groups?.bare ?? '')?.groups;
         if (position?.file === undefined || position.file.startsWith('node:')) {
             continue;
@@ -30,6 +31,7 @@ export function stackFrames(stack: string): StackFrame[] {
 }
 
 export function callerFrames(): StackFrame[] {
+    // Stryker disable next-line StringLiteral: the message heads the stack on a line no frame pattern reads
     const { stack } = new Error('@jterrazz/test: reading the call site');
     return stackFrames(stack ?? '').filter(({ file }) => file !== import.meta.filename);
 }

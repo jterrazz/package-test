@@ -4,6 +4,7 @@ import { readerOf } from '../../../chain/state.js';
 import { directory, file } from '../../../disk/spec-path.js';
 import type { ServerPort } from '../server/server.port.js';
 import { del, get, post, put, request } from './request.action.js';
+import { params } from './route.js';
 
 type Asked = { body: unknown; headers: unknown; method: string; path: string; template: unknown };
 
@@ -185,5 +186,25 @@ describe('request', () => {
                 void get.prepare?.(['/users/:id'], bare);
             }),
         ).toBe(refusals[0]);
+    });
+
+    test('each route action takes the route option, and only it', () => {
+        // Given - the four actions a route is sent through
+        const actions = [get, post, put, del];
+
+        // Then - each declares the params option, which names itself as the route option
+        expect([actions.map(({ options }) => options), params]).toStrictEqual([
+            [[params], [params], [params], [params]],
+            {
+                kind: 'option',
+                name: 'params',
+                row: {
+                    group: 'Route option',
+                    member: 'params',
+                    name: '{ params }',
+                    probe: 'params:',
+                },
+            },
+        ]);
     });
 });

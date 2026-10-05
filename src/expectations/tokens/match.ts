@@ -61,6 +61,7 @@ export class Matcher {
             return `{{includes:${this.includes}}}`;
         }
         if (this.kind === 'regex') {
+            // Stryker disable next-line OptionalChaining: match.regex() is the one way to a regex matcher, and it always hands one
             return `{{regex:${this.regex?.source}}}`;
         }
         if (this.kind === 'ref') {

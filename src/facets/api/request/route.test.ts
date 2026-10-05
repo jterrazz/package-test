@@ -38,8 +38,8 @@ describe('route', () => {
         // Given - the same literal path, bare and stated as the route
         // Then - bare, no template is read; stated, the path is its own template
         expect(routeRequest('GET', '/users/me')).toStrictEqual({ path: '/users/me' });
-        expect(routeRequest('GET', '/clock/:9am/a:b/:')).toStrictEqual({
-            path: '/clock/:9am/a:b/:',
+        expect(routeRequest('GET', '/clock/:9am/a:b/:/:a-b')).toStrictEqual({
+            path: '/clock/:9am/a:b/:/:a-b',
         });
         expect(routeRequest('GET', '/users/me', { params: {} })).toStrictEqual({
             path: '/users/me',

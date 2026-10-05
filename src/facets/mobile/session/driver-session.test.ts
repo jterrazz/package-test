@@ -198,7 +198,7 @@ describe('openSession', () => {
     });
 
     test('openSession — the session it asks for — names the device by name, bare version and udid when given, with an idle budget that outlives the gap between two files', async () => {
-        // Given - a device named with its OS and udid, and one by name alone
+        // Given - a device named with its OS, spaced, and udid, one by name alone, and one whose OS only ends in the platform's name
         const serverUrl = await appiumHolding(new Set());
         const factories = stubFactories();
 
@@ -206,11 +206,14 @@ describe('openSession', () => {
         await openSession(
             request(serverUrl, factories, undefined, {
                 name: 'iPhone 17',
-                os: 'iOS 26.5',
+                os: 'iOS  26.5',
                 udid: 'SIM-UDID',
             }),
         );
         await openSession(request(serverUrl, factories));
+        await openSession(
+            request(serverUrl, factories, undefined, { name: 'iPhone 17', os: 'radios 1' }),
+        );
 
         // Then - the capabilities each asked for, on the server's host and port
         const asked = {
@@ -235,6 +238,12 @@ describe('openSession', () => {
             },
             {
                 capabilities: asked,
+                hostname: '127.0.0.1',
+                logLevel: 'error',
+                port: Number(new URL(serverUrl).port),
+            },
+            {
+                capabilities: { ...asked, 'appium:platformVersion': 'radios 1' },
                 hostname: '127.0.0.1',
                 logLevel: 'error',
                 port: Number(new URL(serverUrl).port),

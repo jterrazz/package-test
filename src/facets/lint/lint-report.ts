@@ -9,7 +9,7 @@ const OXLINT_UNIX_LINE =
     /^(?<at>\S+?:\d+:\d+): (?<message>.*) \[(?:Error|Warning)\/(?<rule>[\w-]+\([^)\]]+\))\]$/u;
 
 const COMPILER_LINE =
-    /^(?<at>\S+?:\d+:\d+): (?:error|warning) (?<rule>[\w-]+\([^)]+\)): (?<message>.*)$/u;
+    /^(?<at>\S+?:\d+:\d+): (?:error|warning) (?<rule>[\w-]+\([^)]+\)): (?<message>.*)/u;
 
 const OXLINT_GRAPHICAL_HEAD = /^\s+[!x] [\w-]+\([^)]+\): /u;
 

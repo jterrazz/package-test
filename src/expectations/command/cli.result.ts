@@ -56,6 +56,7 @@ export type RunContainers = {
     remove: (ids: string[]) => void;
 };
 
+// Stryker disable next-line ObjectLiteral: the default reaches the docker CLI, which no module test may run; a test hands its own
 const DOCKER_CLI: RunContainers = {
     labelled: findContainersByLabel,
     inspect: inspectContainer,

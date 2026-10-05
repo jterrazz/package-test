@@ -1,6 +1,9 @@
+import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { assertProviderPin } from './peer-versions.js';
+import { assertProviderPin, versionOf } from './peer-versions.js';
+
+const peer = (name: string): string => resolve(import.meta.dirname, '_fixtures', name);
 
 describe('peer-versions', () => {
     test('refuses a provider on another version than its runner, naming both and the one-change bump', () => {
@@ -46,4 +49,30 @@ describe('peer-versions', () => {
             assertProviderPin(runner, runner);
         }).not.toThrow();
     });
+
+    test('reads the version an installed manifest states', () => {
+        // Given - a peer whose manifest states its version
+        const specifier = peer('versioned');
+
+        // Then - the version, as stated
+        expect(versionOf(specifier)).toBe('1.2.3');
+    });
+
+    test.each(['no-version', 'null-manifest', 'text-manifest'])(
+        'refuses an installed manifest that carries no version: %s',
+        (name) => {
+            // Given - a peer whose manifest is no object holding a version
+            const specifier = peer(name);
+
+            // Then - the refusal names the peer and the reinstall
+            expect(() => versionOf(specifier)).toThrow(
+                [
+                    `found: the installed ${specifier} manifest carries no version`,
+                    'why: The component project reads the version of the peers it configures from their installed manifests.',
+                    `fix: reinstall ${specifier}: \`npm install ${specifier}\``,
+                    'read: docs/start/set-up-a-project.md#what-to-install',
+                ].join('\n'),
+            );
+        },
+    );
 });

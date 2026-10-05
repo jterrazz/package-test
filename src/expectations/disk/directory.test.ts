@@ -20,7 +20,11 @@ describe('directory', () => {
     test('walkDirectory — every file under the root by its path from it, sorted as text, the usual folders and the named ones left out, a missing root holding none', async () => {
         // Given - a tree of nested files beside folders a project keeps out, and a name asked to be ignored
         const root = treeOf({
+            '.DS_Store': 'x',
+            '.cache/x': 'x',
             '.git/HEAD': 'x',
+            '.next/x': 'x',
+            '.turbo/x': 'x',
             'a.txt': 'a',
             'a/b.txt': 'b',
             'a/deep/c.txt': 'c',

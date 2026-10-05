@@ -56,4 +56,12 @@ describe('clock', () => {
         );
         expect(log).toStrictEqual([]);
     });
+
+    test('clock — is the setup a shared `clock` setting names', () => {
+        // Given - the capability as a facet wires it
+        const { context, name } = clock;
+
+        // Then - `with({ clock })` reaches it under its own name
+        expect([context, name]).toStrictEqual(['clock', 'clock']);
+    });
 });

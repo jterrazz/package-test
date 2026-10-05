@@ -74,12 +74,14 @@ describe('link', () => {
             refusalOf(() => linked(['greeTer'])),
             refusalOf(() => linked(['@acme'])),
             refusalOf(() => linked(['./greeter'])),
+            refusalOf(() => linked(['greeter/lib'])),
             refusalOf(() => linked([42])),
             refusalOf(() => linked(['greeter'], ['greeter'])),
         ]).toStrictEqual([
             noName('greeTer'),
             noName('@acme'),
             noName('./greeter'),
+            noName('greeter/lib'),
             noName(42),
             [
                 'found: link("greeter"), stated twice on one chain',

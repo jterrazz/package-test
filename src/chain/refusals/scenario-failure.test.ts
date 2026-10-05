@@ -58,7 +58,7 @@ describe('scenarioFailure', () => {
     });
 
     test('scenarioFailure — a refusal missing a part, or read elsewhere than a chapter — is no finished lesson, and is wrapped', () => {
-        // Given - refusals lacking their why, their fix, their found, and one whose read is no chapter anchor
+        // Given - refusals lacking their why, their fix, their found, one whose read is no chapter anchor, and one whose read runs past its anchor onto another line
         const parts = {
             found: 'found: two matched',
             why: 'why: one element',
@@ -78,11 +78,13 @@ describe('scenarioFailure', () => {
                 without('fix'),
                 without('found'),
                 `${without('read')}\nread: see docs/guides/website-specs.md#a`,
+                `${without('read')}\nread: docs/guides/website-specs.md#a\nand a line after it`,
             ].map(
                 (message) =>
                     scenarioFailure(new Error(message), null, 'visit').message.split('\n')[0],
             ),
         ).toStrictEqual([
+            'found: the visit scenario failed:',
             'found: the visit scenario failed:',
             'found: the visit scenario failed:',
             'found: the visit scenario failed:',

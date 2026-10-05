@@ -136,4 +136,16 @@ describe('RunContainers', () => {
             ],
         ]);
     });
+
+    test('field — reads a named entry of an object, and nothing of a value that is none', () => {
+        // Given - an object holding the entry, null, and a text
+        const values: unknown[] = [{ key: 'k' }, null, 'text'];
+
+        // Then - the entry, and nothing for the others
+        expect(values.map((value) => field(value, 'key'))).toStrictEqual([
+            'k',
+            undefined,
+            undefined,
+        ]);
+    });
 });

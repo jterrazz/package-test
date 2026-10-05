@@ -59,6 +59,7 @@ export function onProjectDefaults(
     stated: TestProjectInlineConfiguration,
 ): TestProjectInlineConfiguration {
     const merged = mergeConfig(projectDefaults(), stated) as TestProjectInlineConfiguration;
+    // Stryker disable next-line ConditionalExpression: the defaults always state a test block, so the merge always holds one
     return merged.test === undefined ? merged : { ...merged, test: statedOnce(merged.test) };
 }
 

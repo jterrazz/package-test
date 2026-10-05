@@ -64,13 +64,13 @@ const PAGE_DEPENDENCIES = [
 ];
 
 const requireFrom = createRequire(import.meta.url);
-
 const HELPERS_FILE = import.meta.filename;
 
 /** A config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`. */
 const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
 
 function callerFile(): string | undefined {
+    // Stryker disable next-line OptionalChaining: a frame outside this file always calls it, so the find always holds one
     return callerFrames().find(({ file }) => file !== HELPERS_FILE)?.file;
 }
 
@@ -91,9 +91,11 @@ function nearestHolding(name: string): string | undefined {
 /** Never `process.cwd()`: knip and `typescript check` load configs from the repository root. Read off the stack; Vite's own loader bundles the config into `node_modules/.vite-temp/`, keeping only its name, looked for upward from the cwd. */
 function callerDirectory(): string {
     const file = callerFile();
+    // Stryker disable next-line ConditionalExpression: a frame outside this file always calls it
     if (file === undefined) {
         return process.cwd();
     }
+    // Stryker disable next-line OptionalChaining: a match of the pattern always holds its one named group
     const bundled = BUNDLED_CONFIG.exec(basename(file))?.groups?.name;
     if (bundled === undefined || basename(dirname(file)) !== '.vite-temp') {
         // invariant: bundled beside the config or not bundled: either way the frame sits in the config's own directory.
@@ -105,6 +107,7 @@ function callerDirectory(): string {
 /** An absent optional peer is simply not pre-bundled. */
 function resolves(specifier: string): boolean {
     try {
+        // Stryker disable next-line CallExpression: every page dependency resolves on this package's own install, so its tests never meet an absent one
         requireFrom.resolve(specifier);
         return true;
     } catch {
@@ -143,9 +146,11 @@ async function reroot(
         // outside: `loadConfigFromFile` resolves a relative path against the tool's cwd, not the config's.
         const from = isAbsolute(source) ? source : resolve(root, source);
         const file = await loadConfigFromFile(environment, from);
+        // Stryker disable OptionalChaining,StringLiteral: vite's loader throws itself on a path holding no config, or one exporting no object, before this refusal
         loaded = file?.config;
         found = `${from} exports no config`;
         fix = "point `vite` at the app's own vite.config.ts";
+        // Stryker restore OptionalChaining,StringLiteral
     } else if (typeof source === 'function') {
         loaded = await source(environment);
         if (typeof loaded === 'function') {
@@ -173,11 +178,12 @@ async function reroot(
         );
     }
 
+    // Stryker disable next-line ConditionalExpression,StringLiteral: this package installs vite 8, so its own tests never meet a vite that transforms with esbuild
     const inactive = transformKey() === 'oxc' ? 'esbuild' : 'oxc';
     const kept: Record<string, unknown> = {};
     const config: Record<string, unknown> = { ...loaded };
     for (const key of PIPELINE_KEYS) {
-        if (config[key] !== undefined && key !== inactive) {
+        if (key !== inactive) {
             kept[key] = config[key];
         }
     }
@@ -191,6 +197,7 @@ function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include:
         ...own,
         include: [
             ...new Set([
+                // Stryker disable next-line MethodExpression: every page dependency resolves on this package's own install
                 ...PAGE_DEPENDENCIES.filter(resolves),
                 ...listed.filter((entry): entry is string => typeof entry === 'string'),
             ]),
@@ -202,6 +209,7 @@ function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include:
 function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown> {
     const key = transformKey();
     const stated = pipeline[key];
+    // Stryker disable next-line ConditionalExpression: this package installs vite 8, so its own tests never meet a vite that transforms with esbuild
     if (key === 'oxc') {
         return { oxc: stated ?? { jsx: { runtime: 'automatic' } } };
     }
@@ -249,6 +257,7 @@ export async function component(
 ): Promise<TestProjectInlineConfiguration> {
     // hazard: read before the first `await`: the caller's frame is on the stack only during the synchronous body.
     const root = options.root ?? callerDirectory();
+    // Stryker disable next-line CallExpression: this package installs the provider on its runner's version, so its tests never meet a mismatch here; the peer-versions test refuses one
     assertProviderPin(versionOf('vitest'), installedVersion('@vitest/browser-playwright'));
     const { playwright } = await import('@vitest/browser-playwright');
     const pipeline = options.vite === undefined ? {} : await reroot(options.vite, root);

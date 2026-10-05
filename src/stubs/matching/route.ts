@@ -8,6 +8,7 @@ import type { StubRequest } from '../exchange.js';
 
 const RELATIVE_BASE = 'http://stub.invalid';
 
+// Stryker disable next-line StringLiteral: the pattern a URL compiles to escapes no character the unicode flag reads otherwise
 const UNICODE = 'u';
 
 /** Never through `new URL()`, which would percent-encode `{{token}}` braces. */

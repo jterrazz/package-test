@@ -175,4 +175,26 @@ describe('lintReport', () => {
             ].join('\n'),
         );
     });
+
+    test('lintReport — a report as a golden keeps it — reads a diagnostic only from a line that is one whole, whatever its numbers', () => {
+        // Given - a unix and a compiler line at two-digit positions, each also with a word before it and after it, and a graphical head no line starts with
+        const output = [
+            'src/a.ts:12:34: Unexpected debugger [Warning/eslint(no-debugger)]',
+            'note: src/a.ts:1:1: Unexpected debugger [Warning/eslint(no-debugger)]',
+            'src/a.ts:1:1: Unexpected debugger [Warning/eslint(no-debugger)] (2 more)',
+            'src/b.ts:56:78: error jterrazz-check(no-token-in-request): a token',
+            'note: src/b.ts:1:1: error jterrazz-check(no-token-in-request): a token',
+            'see   x eslint(no-debugger): in a sentence',
+        ].join('\n');
+
+        // Then - the two whole lines, at their positions, and nothing of the others
+        expect(diagnosticsOf(output)).toStrictEqual([
+            { at: 'src/a.ts:12:34', message: 'Unexpected debugger', rule: 'eslint(no-debugger)' },
+            {
+                at: 'src/b.ts:56:78',
+                message: 'a token',
+                rule: 'jterrazz-check(no-token-in-request)',
+            },
+        ]);
+    });
 });

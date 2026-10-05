@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'vitest';
 
-import { MATCH_TEXT_LENGTH, shortened } from './candidates.js';
+import {
+    CANDIDATE_LIMITS,
+    MATCH_TEXT_LENGTH,
+    MAX_REPORTED_MATCHES,
+    shortened,
+} from './candidates.js';
+import { LANDMARK_SELECTOR } from './landmark-of-tag.js';
 
 describe('candidates', () => {
     test('shortened — collapses whitespace so a candidate reads on one line', () => {
@@ -17,5 +23,17 @@ describe('candidates', () => {
 
         // Then - it stops at the shared length
         expect(shortened(text)).toHaveLength(MATCH_TEXT_LENGTH);
+    });
+
+    test('the limits handed into the page are the module limits, the landmark selector with them', () => {
+        // Given - what the page script is handed, since it reads nothing from module scope
+        const limits = CANDIDATE_LIMITS;
+
+        // Then - the selector, the report cap and the text length
+        expect(limits).toStrictEqual({
+            landmarks: LANDMARK_SELECTOR,
+            limit: MAX_REPORTED_MATCHES,
+            textLength: MATCH_TEXT_LENGTH,
+        });
     });
 });

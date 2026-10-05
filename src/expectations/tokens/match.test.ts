@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { CaptureScope } from './capture-scope.js';
-import { match } from './match.js';
+import { match, Matcher } from './match.js';
 import { renderExpected, structuralEquals } from './structural.js';
 import { mergePreservingPlaceholders } from './update-merge.js';
 
@@ -89,16 +89,25 @@ describe('match', () => {
     });
 
     test('match — typed matchers — each renders as the token it stands for in a failure diff', () => {
-        // Given - a ref, a ref that must differ from another, a typed capture, and a regex
+        // Given - a ref, a ref that must differ from another, two typed matchers, a typed capture, and a regex
         // Then - each written as its token
         expect(
             [
                 match.ref('user'),
                 match.ref('user', { not: 'admin' }),
                 match.uuid(),
+                match.port(),
+                new Matcher('uuid', { refName: 'event' }),
                 match.regex(/^a+$/u),
             ].map(String),
-        ).toStrictEqual(['{{ref#user}}', '{{ref#user!admin}}', '{{uuid}}', '{{regex:^a+$}}']);
+        ).toStrictEqual([
+            '{{ref#user}}',
+            '{{ref#user!admin}}',
+            '{{uuid}}',
+            '{{port}}',
+            '{{uuid#event}}',
+            '{{regex:^a+$}}',
+        ]);
     });
 
     test('match — typed matchers — matchers compose inside structures', () => {

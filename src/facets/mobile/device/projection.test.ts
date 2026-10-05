@@ -126,4 +126,27 @@ describe('projectScreen', () => {
             ].join('\n'),
         );
     });
+
+    test('reads attributes however they are spaced, a closing tag spaced before its bracket, and every named entity', () => {
+        // Given - an application whose button carries its attributes over two lines and every named entity in its label, and whose tags close with a space
+        const screen = projectScreen(
+            [
+                '<XCUIElementTypeApplication label="App" visible="true">',
+                '  <XCUIElementTypeButton  label="&apos;&gt;&lt;&quot;&amp;"',
+                '      visible="true"></XCUIElementTypeButton >',
+                '  <XCUIElementTypeStaticText label="after" visible="true"/>',
+                '</XCUIElementTypeApplication >',
+            ].join('\n'),
+        );
+
+        // Then - the button under the application, its label decoded, and the text after it beside it
+        expect(screen.tree).toStrictEqual({
+            children: [
+                { label: `'><"&`, type: 'Button' },
+                { label: 'after', type: 'StaticText' },
+            ],
+            label: 'App',
+            type: 'Application',
+        });
+    });
 });

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { pause } from '../../chain/pause.js';
-import { groupEnded, reaped, signalGroup } from './process-group.js';
+import { groupEnded, reaped, signalGroup, WATCHDOG } from './process-group.js';
 
 async function outwaited(): Promise<string> {
     await pause(200);
@@ -79,5 +79,24 @@ describe('process-group', () => {
 
         // Then - the running child was still awaited, and every reaped one answers before any deadline
         expect(settled).toStrictEqual(['pending', 'reaped', 'reaped', 'reaped']);
+    });
+
+    test('the watchdog ends the group it guards once its parent closes its stdin', async () => {
+        // Given - a sleeper leading a group of its own, guarded by a watchdog reading its parent's pipe
+        const sleeper = spawn('sleep', ['30'], { detached: true, stdio: 'ignore' });
+        const group = -Number(sleeper.pid);
+        const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(sleeper.pid)], {
+            stdio: ['pipe', 'ignore', 'ignore'],
+        });
+
+        // When - the parent's end of the pipe closes, as when the parent dies
+        watchdog.stdin.end();
+        const ended = await groupEnded(group, 3000);
+        if (!ended) {
+            process.kill(group, 'SIGKILL');
+        }
+
+        // Then - the group is gone, ended by the watchdog alone
+        expect(ended).toBe(true);
     });
 });

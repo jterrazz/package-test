@@ -1,7 +1,15 @@
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { http } from '../../kinds/http.js';
-import { fetchJson, get, started, statusOf } from './stub-backend.fixtures.js';
+import {
+    fetchJson,
+    get,
+    heldRequest,
+    replyOf,
+    started,
+    statusOf,
+    stopsWithin,
+} from './stub-backend.fixtures.js';
 import { StubBackend } from './stub-backend.js';
 
 describe('StubBackend', () => {
@@ -196,15 +204,6 @@ describe('StubBackend', () => {
             { request: http.get('/block.txt'), response: { body: 'anchored' } },
             get('/value', { a: 1 }),
         ]);
-        const read = async (path: string, method = 'GET'): Promise<(null | number | string)[]> => {
-            const response = await fetch(`${url}${path}`, { method });
-            return [
-                response.status,
-                response.headers.get('access-control-allow-origin'),
-                response.headers.get('content-type'),
-                await response.text(),
-            ];
-        };
 
         // Then - each response, and a preflight that asked for no headers
         const preflight = await fetch(`${url}/events/1`, { method: 'OPTIONS' });
@@ -213,11 +212,11 @@ describe('StubBackend', () => {
             method: 'OPTIONS',
         });
         expect([
-            await read('/events/1', 'DELETE'),
-            await read('/bare'),
-            await read('/block.txt'),
-            await read('/value'),
-            await read('/missing?x=1'),
+            await replyOf(`${url}/events/1`, 'DELETE'),
+            await replyOf(`${url}/bare`),
+            await replyOf(`${url}/block.txt`),
+            await replyOf(`${url}/value`),
+            await replyOf(`${url}/missing?x=1`),
             [
                 preflight.status,
                 preflight.headers.get('access-control-allow-headers'),
@@ -275,8 +274,8 @@ describe('StubBackend', () => {
         ]);
     });
 
-    test('stub backend — the server — a fixed port is the port it listens on, and a port taken refuses the start', async () => {
-        // Given - a backend on a port of its own
+    test('stub backend — the server — a fixed port is the port it listens on, a port taken refuses the start, and stopping ends a connection still waiting on its reply', async () => {
+        // Given - a backend on a port of its own, then a client its reply keeps waiting
         const first = new StubBackend();
         onTestFinished(async () => {
             await first.stop();
@@ -290,8 +289,10 @@ describe('StubBackend', () => {
             await second.stop();
         });
 
-        // Then - the second takes that port, the third finds it taken
+        // Then - the second takes that port, the third finds it taken, and the second stops past a held request
         await expect(second.start()).resolves.toBe(`http://127.0.0.1:${port}`);
         await expect(third.start()).rejects.toThrow('EADDRINUSE');
+        await heldRequest(second, `http://127.0.0.1:${port}`);
+        await expect(stopsWithin(second, 2000)).resolves.toBe(true);
     });
 });

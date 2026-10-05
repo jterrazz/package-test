@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { asWritten } from './as-written.js';
+import { asWritten, FUNCTION_NAME_OF_KIND } from './as-written.js';
 import { main, navigation, region, within } from './landmarks.js';
 import { content, link } from './roles.js';
+import type { Target } from './target.js';
 
 describe('asWritten', () => {
     test('asWritten — renders a target as the source that would build it', () => {
@@ -54,5 +55,36 @@ describe('asWritten', () => {
 
         // Then - the author's function is named, never the kind
         expect(asWritten(target)).toBe('content("Hello")');
+    });
+
+    test('asWritten — names every kind by the function an author calls to build it', () => {
+        // Given - one bare target of every kind
+        const kinds = Object.keys(FUNCTION_NAME_OF_KIND)
+            .toSorted()
+            .filter((kind): kind is Target['kind'] => kind in FUNCTION_NAME_OF_KIND);
+
+        // Then - each is spoken as its own function, text as content()
+        expect(kinds.map((kind) => asWritten({ kind }))).toStrictEqual([
+            'banner()',
+            'button()',
+            'complementary()',
+            'contentinfo()',
+            'dialog()',
+            'field()',
+            'form()',
+            'heading()',
+            'link()',
+            'listitem()',
+            'main()',
+            'navigation()',
+            'option()',
+            'region()',
+            'row()',
+            'search()',
+            'status()',
+            'table()',
+            'testId()',
+            'content()',
+        ]);
     });
 });
