@@ -1,11 +1,12 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, onTestFinished, test } from 'vitest';
+import { describe, expect, inject, onTestFinished, test } from 'vitest';
 
 import { dedent } from '../../../lint/kit/project/dedent.js';
 import {
     callSiteOf,
+    deferRewritesTo,
     locateArgument,
     renderRows,
     renderText,
@@ -30,6 +31,14 @@ function readRendered(rendered: string): string {
         return quoted;
     }
     return rendered.slice(1, -1).replaceAll(/\\(?<escaped>[\\`$])/gu, '$<escaped>');
+}
+
+// invariant: a worker's files share the module graph, so a file that registered the matchers left the writes deferred: a test reading its file back writes at once.
+function writeImmediately(): void {
+    deferRewritesTo(null);
+    onTestFinished(() => {
+        deferRewritesTo(() => inject('inPlaceRewrites'));
+    });
 }
 
 describe('in-place', () => {
@@ -137,7 +146,8 @@ describe('in-place', () => {
     });
 
     test('writeInPlace — the test file rewritten where its toMatch stands — two rewrites of one file land where each stack says, the first moving the lines of the second', () => {
-        // Given - a scratch test whose first value is a block, the second call three lines below it
+        // Given - a scratch test whose first value is a block, the second call three lines below it, written at once
+        writeImmediately();
         const source = [
             "test('records', () => {",
             '    expect(one).toMatch(`',

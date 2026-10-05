@@ -1,9 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, inject, onTestFinished, test } from 'vitest';
 import type { BrowserCommandContext } from 'vitest/node';
 
 import { scratchDirectory } from '../../../chain/paths/scratch.js';
+import { deferRewritesTo } from '../../../expectations/in-place/in-place.js';
 import { COMPONENT_COMMANDS } from './commands.js';
 
 type Frame = { column: number; file: string; line: number };
@@ -79,7 +80,11 @@ describe('COMPONENT_COMMANDS', () => {
     });
 
     test('inPlaceWrite — the frame of the test file among others — rewrites the value where that frame stands, and answers the site', () => {
-        // Given - a test file, and a stack whose first frame is a module outside it
+        // Given - a test file written at once, and a stack whose first frame is a module outside it
+        deferRewritesTo(null);
+        onTestFinished(() => {
+            deferRewritesTo(() => inject('inPlaceRewrites'));
+        });
         const directory = scratchDirectory('in-place-write-');
         const testPath = join(directory, 'card.test.tsx');
         writeFileSync(testPath, 'expect(one).toMatch(``);\n');
