@@ -28,8 +28,11 @@ A `postgres()` service runs `docker/<service>/init.sql` when it starts, under th
 import { afterAll } from 'vitest';
 import { specification, postgres, redis } from '@jterrazz/test';
 import { compose } from '../../src/composition/compose.js';
+import type { App } from '../../src/composition/compose.js';
 import { testConfig } from './_setup/config.js';
 import { idleMailer } from './_setup/mailer.js';
+
+let app: App | undefined;
 
 export const { api, cleanup } = await specification.api({
     services: {
@@ -38,16 +41,22 @@ export const { api, cleanup } = await specification.api({
         cache: redis(), // → "cache"
     },
     // testConfig points the app's configuration at each started service
-    server: (services) => compose(testConfig(services), { mailer: idleMailer }).server,
+    server: (services) => {
+        app = compose(testConfig(services), { mailer: idleMailer });
+        return app.server;
+    },
     // root: absent → auto-discovery (see below)
 });
 
-afterAll(cleanup);
+afterAll(async () => {
+    await app?.[Symbol.asyncDispose]();
+    await cleanup();
+});
 ```
 
 ### How the runner builds the app
 
-`server` builds the app the way its process entry does: through the composition root, `compose(config, overrides)`. The runner hands it a configuration pointing at the started services, and, by name, the ports a spec must not reach for real — an agent, a mailer, a clock-driven worker — each a typed member of `Partial<Ports>`, so a wrong double fails the type check rather than a run. It hands the specification the part a request meets, the server. No container is looked up and nothing is cast: what `compose()` is and why the hexagonal map lets only the entry and the runners import it are `@jterrazz/typescript`'s [The composition root](https://github.com/jterrazz/package-typescript/blob/main/docs/concepts/the-composition-root.md).
+`server` builds the app the way its process entry does: through the composition root, `compose(config, overrides)`. The runner hands it a configuration pointing at the started services, and, by name, the ports a spec must not reach for real — an agent, a mailer, a clock-driven worker — each a typed member of `Partial<Ports>`, so a wrong double fails the type check rather than a run. It hands the specification the part a request meets, the server, and keeps the app: the specification stops the services it started, never the app built on them, so the runner's `afterAll` disposes the app — its database connections, its workers — before `cleanup` stops the services under it. No container is looked up and nothing is cast: what `compose()` is and why the hexagonal map lets only the entry and the runners import it are `@jterrazz/typescript`'s [The composition root](https://github.com/jterrazz/package-typescript/blob/main/docs/concepts/the-composition-root.md).
 
 ### Options
 
