@@ -79,6 +79,29 @@ describe('index.vitest', () => {
         ]);
     });
 
+    test('vitestConfig — a preset shapes the projects the tree derives, and makes none exist', async () => {
+        // Given - a preset stating how the unit and lint projects depart by default, over a tree holding module tests and the cli specs alone
+        const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
+        writeFileSync(join(root, 'package.json'), '{ "name": "derived", "type": "module" }\n');
+        writeFileSync(
+            join(root, 'jterrazz.config.ts'),
+            "export default { kind: 'library', platform: 'node', presets: [{ name: 'test', package: '@acme/test', settings: { projects: { lint: { reason: 'r', timeout: 5000 }, unit: { isolate: false, reason: 'r' } } } }] };\n",
+        );
+        for (const file of ['src/orders.test.ts', 'specs/cli/run.spec.ts']) {
+            mkdirSync(dirname(join(root, file)), { recursive: true });
+            writeFileSync(join(root, file), '');
+        }
+
+        // When - the config is derived for it
+        const projects = await projectsOf(root);
+
+        // Then - the unit project shared one module graph, and no lint project is built
+        expect(projects.map(({ test: built }) => [built?.name, built?.isolate])).toStrictEqual([
+            ['unit', false],
+            ['cli', undefined],
+        ]);
+    });
+
     test('vitestConfig — refuses projects written as a list, keyed by no specification it ships, or departing with no reason', async () => {
         // Given - the ways a declared project is no exception to a derived one, a blank reason among them
         const listed = projectDeclaring("[{ specification: 'unit' }]");

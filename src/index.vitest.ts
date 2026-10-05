@@ -180,9 +180,12 @@ async function derivedFrom(root: string): Promise<ViteUserConfig> {
     }
     const section = resolved.sections[TEST_SECTION];
     const declared = declaredProjects(isRecord(section) ? section.projects : undefined);
+    const own = resolved.own[TEST_SECTION]?.projects;
     const derived = derivedProjects(root);
+    // invariant: the standard states how a project departs by default; only the tree, or the project's own file, makes one exist.
     const specifications = [...BUILDERS.keys()].filter(
-        (specification) => derived.has(specification) || declared.has(specification),
+        (specification) =>
+            derived.has(specification) || (isRecord(own) && own[specification] !== undefined),
     );
 
     return presetConfig(

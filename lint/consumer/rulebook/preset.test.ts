@@ -14,7 +14,14 @@ describe('preset', () => {
         const preset = testPreset();
 
         // Then - its section's defaults are the standard's, named by their file
-        const defaults = { collections: [], methodless: [], production: { allow: {} } };
+        const defaults = {
+            projects: {
+                unit: {
+                    isolate: false,
+                    reason: 'a module test leaves no state behind in a module, so a worker runs its files in one module graph',
+                },
+            },
+        };
         expect([preset.name, preset.package, preset.settings, preset.origins]).toStrictEqual([
             'test',
             '@jterrazz/test',
