@@ -44,10 +44,13 @@ const foldersIn = (path: string): string[] =>
 
 // invariant: the runner is derived only where the folder's one specification module is named for it: in a shared module graph, a second specification module would load once per worker, and its files would share the first one's subject.
 function runnerOf(root: string, specification: string): Record<string, unknown> {
+    if (!IN_PROCESS.has(specification)) {
+        return {};
+    }
     const folder = `${SPECS}/${specification}`;
-    const modules = IN_PROCESS.has(specification)
-        ? readdirSync(join(root, folder)).filter((name) => name.endsWith(SPECIFICATION_MODULE))
-        : [];
+    const modules = readdirSync(join(root, folder)).filter((name) =>
+        name.endsWith(SPECIFICATION_MODULE),
+    );
     const own = `${specification}${SPECIFICATION_MODULE}`;
 
     return modules.length === 1 && modules[0] === own ? { runner: `./${folder}/${own}` } : {};

@@ -108,8 +108,26 @@ describe('placeholders', () => {
                 ['a{{any}}a', 'aa'],
                 ['a.b', 'axb'],
                 ['a.b', 'a.b'],
+                ['a{{any}}b', 'xxb'],
+                ['a{{any}}bc{{any}}cd', 'abcd'],
+                ['a{{any}}bc{{any}}cd', 'abccd'],
             ].map(([expected, actual]) => tokenMatches(expected, actual, scope)),
-        ).toStrictEqual([false, true, false, true]);
+        ).toStrictEqual([false, true, false, true, false, false, true]);
+    });
+
+    test('{{any}} beside another token, or named, is matched by its pattern: it crosses lines, {{string}} does not, and a name holds one value', () => {
+        // Given - a fresh capture scope for each comparison
+        // Then - the pattern holds what each token holds
+        expect(
+            [
+                ['A {{any}} {{int}}', 'A x\ny 3'],
+                ['A {{any}} {{int}}', 'A x y'],
+                ['A {{string}} {{int}}', 'A xy 3'],
+                ['A {{string}} {{int}}', 'A x\ny 3'],
+                ['a{{any#x}}-{{any#x}}', 'a1-1'],
+                ['a{{any#x}}-{{any#x}}', 'a1-2'],
+            ].map(([expected, actual]) => tokenMatches(expected, actual, new CaptureScope())),
+        ).toStrictEqual([true, false, true, false, true, false]);
     });
 
     test('{{any}} is always-true only as a whole value; embedded, the frame still constrains', () => {
