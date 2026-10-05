@@ -27,7 +27,9 @@ A `postgres()` service runs `docker/<service>/init.sql` when it starts, under th
 // specs/api/api.specification.ts
 import { afterAll } from 'vitest';
 import { specification, postgres, redis } from '@jterrazz/test';
-import { createApp } from '../../src/app.js';
+import { compose } from '../../src/composition/compose.js';
+import { testConfig } from './_setup/config.js';
+import { idleMailer } from './_setup/mailer.js';
 
 export const { api, cleanup } = await specification.api({
     services: {
@@ -35,17 +37,17 @@ export const { api, cleanup } = await specification.api({
         analyticsDb: postgres(), // → "analytics-db", init from docker/analytics-db/
         cache: redis(), // → "cache"
     },
-    server: ({ db, analyticsDb, cache }) =>
-        createApp({
-            databaseUrl: db.connectionString,
-            analyticsDatabaseUrl: analyticsDb.connectionString,
-            redisUrl: cache.connectionString,
-        }),
+    // testConfig points the app's configuration at each started service
+    server: (services) => compose(testConfig(services), { mailer: idleMailer }).server,
     // root: absent → auto-discovery (see below)
 });
 
 afterAll(cleanup);
 ```
+
+### How the runner builds the app
+
+`server` builds the app the way its process entry does: through the composition root, `compose(config, overrides)`. The runner hands it a configuration pointing at the started services, and, by name, the ports a spec must not reach for real — an agent, a mailer, a clock-driven worker — each a typed member of `Partial<Ports>`, so a wrong double fails the type check rather than a run. It hands the specification the part a request meets, the server. No container is looked up and nothing is cast: what `compose()` is and why the hexagonal map lets only the entry and the runners import it are `@jterrazz/typescript`'s [The composition root](https://github.com/jterrazz/package-typescript/blob/main/docs/concepts/the-composition-root.md).
 
 ### Options
 
