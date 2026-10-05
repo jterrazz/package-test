@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { testPreset } from './preset.js';
+import { recommendedRules } from '../catalogue/manifest.js';
+import { importRulesForSpecifications } from './import.js';
+import { TEST_COMMENT_OPENINGS, testPreset } from './preset.js';
+import { vitestOnTests } from './vitest.js';
 
 describe('preset', () => {
     test('testPreset — the test preset — hands on its standard as written — the defaults of the test section, beside the file they come from', () => {
@@ -14,6 +17,41 @@ describe('preset', () => {
             '@jterrazz/test',
             defaults,
             [{ file: 'src/standard/standard.ts', settings: defaults }],
+        ]);
+    });
+
+    test('testPreset — the test preset — what it holds a repository to — its lint, its checks, its derived vitest config and its debt', () => {
+        // Given - the preset a repository lists
+        const preset = testPreset();
+
+        // Then - the plugin and its rules, the comment openings it adds, the checker, the editor file, and the section it records
+        expect([
+            preset.baseline,
+            preset.oxlint,
+            preset.checker?.label,
+            preset.checker?.module.endsWith('checker.js'),
+            preset.files,
+        ]).toStrictEqual([
+            ['test'],
+            {
+                jsPlugins: ['@jterrazz/test/oxlint'],
+                overrides: [importRulesForSpecifications, vitestOnTests],
+                rules: {
+                    ...recommendedRules,
+                    'jterrazz-typescript/comment-states-its-kind': [
+                        'error',
+                        { openings: [...TEST_COMMENT_OPENINGS] },
+                    ],
+                },
+            },
+            'Test Conventions (@jterrazz/test)',
+            true,
+            {
+                'vitest.config.ts': {
+                    scope: 'unit',
+                    text: "import { vitestConfig } from '@jterrazz/test/vitest';\n\nexport default await vitestConfig(import.meta.url);\n",
+                },
+            },
         ]);
     });
 });
