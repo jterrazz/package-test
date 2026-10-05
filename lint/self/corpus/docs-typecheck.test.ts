@@ -1,3 +1,4 @@
+import { originalOf } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -10,7 +11,7 @@ import {
     typecheckDocBlocks,
 } from './docs-typecheck.js';
 
-const ROOT = resolve(import.meta.dirname, '../../..');
+const ROOT = originalOf(resolve(import.meta.dirname, '../../..'));
 const DOCS = resolve(ROOT, 'docs');
 const README = resolve(ROOT, 'README.md');
 const SKILL = resolve(ROOT, 'skills/jterrazz-test/SKILL.md');

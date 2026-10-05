@@ -1,4 +1,4 @@
-import { rowNamed as rowOf } from '@jterrazz/typescript/rules';
+import { originalOf, rowNamed as rowOf } from '@jterrazz/typescript/rules';
 import type { Chapter } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
 import { allRows, SELF_CHAPTER } from '../catalogue/manifest.js';
 
-export const ROOT = resolve(import.meta.dirname, '../../..');
+export const ROOT = originalOf(resolve(import.meta.dirname, '../../..'));
 
 export function rowNamed(name: string): (typeof allRows)[number] {
     return rowOf(allRows, name);

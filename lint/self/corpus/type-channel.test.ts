@@ -1,10 +1,11 @@
+import { originalOf } from '@jterrazz/typescript/rules';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { refusalsOf, typeRowsOf } from './type-channel.js';
 
-const ROOT = resolve(import.meta.dirname, '../../..');
+const ROOT = originalOf(resolve(import.meta.dirname, '../../..'));
 const CHANNEL = resolve(ROOT, 'specs/cli/tsc/_fixtures/consumer/consumer.ts');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 const A_TSC_RUN_OVER_SRC = 60_000;

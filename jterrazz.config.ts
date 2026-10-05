@@ -1,34 +1,4 @@
-import { defineConfig } from '@jterrazz/typescript/config';
-import type { Preset } from '@jterrazz/typescript/config';
-import { refusal } from '@jterrazz/typescript/rules';
-import { existsSync } from 'node:fs';
-import process from 'node:process';
-
-// invariant: this repository's presets are its own build, and the build reads this file before there is one to import.
-const PRESETS = ['./dist/config.js', './.artifacts/dev/self-config.js'];
-
-const built = PRESETS.every((path) => existsSync(new URL(path, import.meta.url)));
-
-const building = process.argv[2] === 'build';
-
-async function builtPresets(): Promise<Preset[]> {
-    if (!built) {
-        throw new Error(
-            refusal({
-                fix: 'run `npm run build`, then run the command again',
-                found: `this repository's presets are not built: ${PRESETS.filter((path) => !existsSync(new URL(path, import.meta.url))).join(', ')} missing`,
-                read: 'docs/guides/develop.md#the-build-comes-first',
-                why: 'test() and self() are this repository’s own build, and a run without them judges none of what they hold, so it would pass on nothing',
-            }),
-        );
-    }
-    const { test } = await import('./dist/config.js');
-    const { self } = await import('./.artifacts/dev/self-config.js');
-
-    return [test(), self()];
-}
-
-const presets: Preset[] = building && !built ? [] : await builtPresets();
+import { defineConfig, ownPresets } from '@jterrazz/typescript/config';
 
 const PRODUCTION_REACHING_TEST_MATERIAL = [
     'src/index.vitest.ts',
@@ -36,7 +6,7 @@ const PRODUCTION_REACHING_TEST_MATERIAL = [
     'src/specifications/*/*.project.ts',
     'src/specifications/api/routes/**',
     'src/specifications/cli/documents/literate-plugin.ts',
-    'src/specifications/mobile/session/mobile-session.ts',
+    'src/specifications/mobile/session/mobile-session.global-setup.ts',
     'src/specifications/mobile/session/session-ledger.ts',
     'src/specifications/mobile/server/appium-server.ts',
     'src/specifications/component/page/**',
@@ -53,9 +23,6 @@ const PRODUCTION_REACHING_TEST_MATERIAL = [
     'src/expectations/in-place/**',
 ];
 
-const READS_THE_SOURCES =
-    'it reads the sources as text or as types, and sees the instrumented ones';
-
 export default defineConfig({
     kind: 'library',
     optOuts: {
@@ -65,33 +32,24 @@ export default defineConfig({
             'the corpus audits the self checker and the self plugin by importing them, and one self check reads the capability matrix the corpus renders (docs/concepts/architecture.md)',
     },
     platform: 'node',
-    presets,
+    presets: await ownPresets(import.meta.url, {
+        './dist/config.js': 'test',
+        './.artifacts/dev/preset.js': 'self',
+    }),
     test: {
-        projects: [
-            {
-                exclude: [],
-                specification: 'unit',
-                include: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
-            },
-            { specification: 'lint' },
-            {
-                specification: 'cli',
+        projects: {
+            cli: {
                 literate: {
                     include: ['specs/cli/run/*.spec.yaml'],
                     runner: './specs/cli/literate-cli.specification.ts',
                 },
+                reason: 'the documents under run/ drive the literate specimen through its own runner, and those under env/ and fixture/ are the input of the specs proving those keys',
                 setup: ['specs/cli/_setup/packed/per-run.ts'],
             },
-            { specification: 'api' },
-            { specification: 'job' },
-            { specification: 'integration', serial: true },
-            { specification: 'website' },
-            { specification: 'mobile', setup: ['specs/_shared/_setup/appium/per-run.ts'] },
-            {
+            component: {
                 clock: '2026-01-02T03:04:05.000Z',
-                specification: 'component',
-                include: ['specs/component/**/*.test.tsx', 'src/**/*.test.tsx'],
                 locale: 'fr-FR',
+                reason: 'the component specs prove each option of the project reaches the page — clock, locale, zone, viewport, wrap and vite pipeline — and render this package as its browser build',
                 root: 'specs/component',
                 timezone: 'Europe/Paris',
                 viewport: { height: 640, width: 1024 },
@@ -101,69 +59,20 @@ export default defineConfig({
                 },
                 wrap: './wrap/providers.tsx',
             },
-        ],
-    },
-    typescript: {
-        build: {
-            dev: {
-                'route-split': {
-                    reason: 'CI merges the shards of the route ratchet with it, from the Makefile',
-                    source: 'src/specifications/api/routes/route-split-cli.ts',
-                },
-                schema: {
-                    reason: '`npm run docs` writes the spec document schema with it',
-                    source: 'src/specifications/cli/documents/schema-cli.ts',
-                },
-                self: {
-                    reason: 'the self checks, which the self preset runs by path',
-                    source: 'lint/self/self-cli.ts',
-                },
-                'self-config': {
-                    reason: 'the self preset this file lists',
-                    source: 'lint/self/preset.ts',
-                },
-                'self-oxlint': {
-                    reason: 'the self lint plugin, which the self preset loads by path',
-                    source: 'lint/self/rules/plugin.ts',
-                },
+            integration: {
+                reason: 'the integration specs share one database container, which runs a file at a time',
+                serial: true,
             },
-            entries: {
-                'in-place-setup': {
-                    reason: 'a global setup the specifications hand vitest by path',
-                    source: 'src/expectations/in-place/in-place-setup.ts',
-                },
-                'mobile-session': {
-                    reason: 'a global setup mobile() hands vitest by path',
-                    source: 'src/specifications/mobile/session/mobile-session.ts',
-                },
-                'route-coverage': {
-                    reason: 'a global setup api() hands vitest by path',
-                    source: 'src/specifications/api/routes/route-coverage.ts',
-                },
-                'services-setup': {
-                    reason: 'a global setup the service specifications hand vitest by path',
-                    source: 'src/services/containers/run-setup.ts',
-                },
-                'temp-root': {
-                    reason: 'a global setup the specifications hand vitest by path',
-                    source: 'src/chain/paths/temp-root.ts',
-                },
+            mobile: {
+                reason: 'the mobile specs run against an Appium double the whole run shares, unless a real server is named',
+                setup: ['specs/_shared/_setup/appium/per-run.ts'],
             },
         },
+    },
+    typescript: {
         mutation: {
-            mutate: {
-                'lint/*.ts': 'the entries of the lint rules and checks the package ships',
-                'lint/consumer/**/*.ts':
-                    'the lint rules and checks the package ships, beside the src/ every node project measures',
-                'lint/kit/**/*.ts': 'the kit those rules and checks run on',
-            },
             exclude: {
-                'lint/self/checks/error-is-a-refusal-or-an-invariant.test.ts': READS_THE_SOURCES,
-                'lint/self/corpus/docs-typecheck.test.ts': READS_THE_SOURCES,
-                'lint/self/corpus/env-allowlist.test.ts': READS_THE_SOURCES,
-                'lint/self/corpus/messages.test.ts': READS_THE_SOURCES,
-                'lint/self/corpus/type-channel.test.ts': READS_THE_SOURCES,
-                'src/chain/paths/temp-root.test.ts':
+                'src/chain/paths/temp-root.global-setup.test.ts':
                     'the temp root is the run’s own, and cannot judge a mutant',
             },
         },
@@ -180,22 +89,11 @@ export default defineConfig({
                     rules: { 'jterrazz/runner-in-specification-file': 'off' },
                 },
                 {
-                    files: ['lint/consumer/rules/**/*.test.ts'],
-                    reason: 'a rule test is one table of cases for one rule, so its length is the count of what the rule decides, never two subjects in one file',
-                    rules: { 'eslint/max-lines': 'off' },
-                },
-                {
                     files: PRODUCTION_REACHING_TEST_MATERIAL,
                     reason: 'the framework’s own runtime is test code by nature, and ships',
                     rules: { 'jterrazz/no-test-code-in-production': 'off' },
                 },
             ],
-            rules: {
-                'import/consistent-type-specifier-style': {
-                    level: ['error', 'prefer-top-level'],
-                    reason: 'under `verbatimModuleSyntax` an inline type specifier still emits `import {} from "m"`, a runtime edge, so a type-only cycle becomes a load-order crash; `import type` is erased whole',
-                },
-            },
         },
         roots: {
             schema: 'the JSON Schema of a `<case>.spec.yaml` document, published as `@jterrazz/test/schema` and generated by `npm run docs`',
