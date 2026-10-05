@@ -247,7 +247,7 @@ export const testSettingsRows = [
     defineConfig({ ...library, test: {} }),
     defineConfig({ ...library, test: { routes: './openapi.yaml' } }),
     defineConfig({ ...library, test: { collections: ['data', 'people'] } }),
-    defineConfig({ ...library, test: { methodless: ['/mcp'] } }),
+    defineConfig({ ...library, test: { methodless: { '/mcp': 'the MCP transport answers GET and POST' } } }),
     defineConfig({ ...library, test: { projects: { unit: { include: ['src/**/*.test.ts'], reason: 'the modules' } } } }),
     // @ts-expect-error test-settings-section — the collections are a list, never one word [`Type 'string' is not assignable to type 'readonly string[]'`]
     defineConfig({ ...library, test: { collections: 'data' } }),

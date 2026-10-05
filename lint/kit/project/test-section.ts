@@ -6,7 +6,10 @@ import type { TestSettings } from './settings.js';
 export const TEST_SECTION = 'test';
 
 export type ReadTestSettings = Pick<TestSettings, 'routes'> &
-    Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>>;
+    Required<Pick<TestSettings, 'collections' | 'production'>> & {
+        /** The paths of the routes taken on any method; their reasons are the settings file's. */
+        methodless: readonly string[];
+    };
 
 const UNREAD: Readonly<Omit<ReadTestSettings, 'routes'>> = Object.freeze({
     collections: [],
@@ -40,7 +43,7 @@ export function testSettingsOf(test: unknown): ReadTestSettings {
     const allow = isRecord(section.production) ? reasonsOf(section.production.allow) : undefined;
     return {
         collections: wordsOf(section.collections) ?? UNREAD.collections,
-        methodless: wordsOf(section.methodless) ?? UNREAD.methodless,
+        methodless: Object.keys(reasonsOf(section.methodless) ?? {}),
         production: allow === undefined ? UNREAD.production : { allow },
         ...(typeof section.routes === 'string' ? { routes: section.routes } : {}),
     };

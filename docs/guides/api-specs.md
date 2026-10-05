@@ -351,7 +351,7 @@ Sending a request needs one more thing such an app may lack: `server` must retur
 
 #### A route taken on any method
 
-A route the app takes on any method — `app.all('/mcp', …)` — is one the member names in `jterrazz.config.ts`, `test: { methodless: ['/mcp'] }`, so the checker files its specs under its path whatever verb they send ([Conventions § The subject, and its standard name](../concepts/conventions.md#the-subject-and-its-standard-name)). The run holds that list to the app's own table, and fails naming each mismatch — under `TEST_UPDATE=1` too, since the list is written by hand and nothing records it:
+A route the app takes on any method — `app.all('/mcp', …)` — is one the member names in `jterrazz.config.ts`, `test: { methodless: { '/mcp': 'the MCP transport answers GET and POST' } }`, so the checker files its specs under its path whatever verb they send ([Conventions § The subject, and its standard name](../concepts/conventions.md#the-subject-and-its-standard-name)). The run holds that list to the app's own table, and fails naming each mismatch — under `TEST_UPDATE=1` too, since the list is written by hand and nothing records it: the checker files the specs without running the app, so it reads the paths from the settings file, each with why the app takes it on any method:
 
 - a route the table takes on any method that the list misses;
 - a path the list names that the table takes on its own methods only, or holds nowhere.

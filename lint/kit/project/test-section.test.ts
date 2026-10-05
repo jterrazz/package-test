@@ -32,7 +32,9 @@ describe('test-section', () => {
 
     test('the test section of jterrazz.config.ts, as the checker reads it — the method-less routes a unit declares are read', () => {
         // Given - a unit whose api takes any method on /mcp
-        const root = unit("export default { test: { methodless: ['/mcp'] } };\n");
+        const root = unit(
+            "export default { test: { methodless: { '/mcp': 'the transport answers GET and POST' } } };\n",
+        );
 
         // Then - the paths, as declared
         expect(testSettingsAtSync(root)).toStrictEqual({
@@ -87,7 +89,7 @@ describe('test-section', () => {
     test('the test section of jterrazz.config.ts, as the run reads it — the routes document and the method-less paths a member declares are read, types stripped', async () => {
         // Given - a member declaring an OpenAPI document and one method-less route
         const root = unit(
-            "const routes: string = './openapi.yaml';\nexport default { test: { methodless: ['/mcp'], routes } };\n",
+            "const routes: string = './openapi.yaml';\nexport default { test: { methodless: { '/mcp': 'the transport answers GET and POST' }, routes } };\n",
         );
 
         // Then - both reach the run as declared
@@ -115,7 +117,7 @@ describe('test-section', () => {
         const preset = {
             name: 'test',
             package: '@jterrazz/test',
-            settings: { collections: ['data'], methodless: [], production: { allow: {} } },
+            settings: { collections: ['data'], methodless: {}, production: { allow: {} } },
         };
         const root = unit(
             `export default { presets: [${JSON.stringify(preset)}], test: { collections: ['people'] } };\n`,
@@ -132,7 +134,8 @@ describe('test-section', () => {
     test('the test section, read value by value — a list holding one word of another type, a reason list that is no map or holds a blank reason, and a section that is no map are each their default', () => {
         // Given - sections whose every key is half right
         const sections = [
-            { collections: ['data', 1], methodless: [null] },
+            { collections: ['data', 1], methodless: ['/mcp'] },
+            { methodless: { '/mcp': ' ' } },
             { production: { allow: 'playwright' } },
             { production: { allow: { playwright: '   ' } } },
             { production: { allow: { playwright: true } } },

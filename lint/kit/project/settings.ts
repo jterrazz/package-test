@@ -5,8 +5,8 @@ import type {} from '@jterrazz/typescript/config';
 export type TestSettings = {
     /** Api collections no English plural names (`data`, `people`), by route segment. */
     collections?: readonly string[];
-    /** Routes the api takes on any method (`app.all('/mcp', …)`), by path. */
-    methodless?: readonly string[];
+    /** Routes the api takes on any method (`app.all('/mcp', …)`), each path mapped to why it takes any. */
+    methodless?: Readonly<Record<string, string>>;
     production?: { allow: Readonly<Record<string, string>> };
     /** How a project departs from the one its tree derives, keyed by its specification, with the reason. */
     projects?: Readonly<Partial<Record<TestSpecification, TestProject>>>;

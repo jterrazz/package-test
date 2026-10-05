@@ -19,7 +19,7 @@ export function methodlessDrift(table: readonly Route[], methodless: readonly st
         .filter(([shape]) => !named.has(shape))
         .map(
             ([, path]) =>
-                `  ALL ${path} — the app takes it on any method, and the list misses it: add '${path}'`,
+                `  ALL ${path} — the app takes it on any method, and the list misses it: add '${path}' with why the app takes it on any method`,
         );
     const stale = methodless
         .filter((path) => !taken.has(shapeOf(path)))
@@ -33,7 +33,7 @@ export function methodlessDrift(table: readonly Route[], methodless: readonly st
 
 export function methodlessDrifted(drift: string[]): Lesson {
     return {
-        fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
+        fix: 'state in `test: { methodless }` exactly the routes the app takes on any method, each with its reason',
         found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
         read: 'docs/guides/api-specs.md#a-route-taken-on-any-method',
         why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',

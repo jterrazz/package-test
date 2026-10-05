@@ -15,7 +15,7 @@ const RECORDING = { failed: 0, scope: 'whole', update: true } as const;
 function methodlessDrift(...drift: string[]): { failure: Lesson } {
     return {
         failure: {
-            fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
+            fix: 'state in `test: { methodless }` exactly the routes the app takes on any method, each with its reason',
             found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
             read: 'docs/guides/api-specs.md#a-route-taken-on-any-method',
             why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
@@ -213,7 +213,7 @@ describe('route-judge', () => {
 
         // Then - the drift is named, whatever the mode
         const failure = methodlessDrift(
-            "  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp'",
+            "  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp' with why the app takes it on any method",
         );
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(failure);
         await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
@@ -228,7 +228,7 @@ describe('route-judge', () => {
         );
         writeFileSync(
             join(root, 'jterrazz.config.ts'),
-            "export default { test: { methodless: ['/mcp'], routes: './openapi.json' } };\n",
+            "export default { test: { methodless: { '/mcp': 'the transport answers GET and POST' }, routes: './openapi.json' } };\n",
         );
 
         // Then - the list agrees with the app, and the document's routes are reached
@@ -279,6 +279,9 @@ function methodlessRun(
         rmSync(root, { force: true, recursive: true });
     });
     const directory = join(root, 'ledgers');
+    const reasoned = Object.fromEntries(
+        methodless.map((path) => [path, 'the transport answers GET and POST']),
+    );
     writeLedger(directory, {
         declared: [
             { method: 'ALL', path: any },
@@ -291,7 +294,7 @@ function methodlessRun(
     });
     writeFileSync(
         join(root, 'jterrazz.config.ts'),
-        `export default { test: { methodless: ${JSON.stringify(methodless)} } };\n`,
+        `export default { test: { methodless: ${JSON.stringify(reasoned)} } };\n`,
     );
     return { directory, root };
 }
