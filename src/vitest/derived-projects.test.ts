@@ -32,6 +32,7 @@ describe('derivedProjects', () => {
             'specs/api/orders.spec.ts',
             'specs/cli/run.spec.ts',
             'docs/guide.md',
+            'docs/_fixtures/example.test.ts',
         ]);
 
         // Then - each project with the options the tree gives it

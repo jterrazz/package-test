@@ -47,27 +47,30 @@ describe('index.vitest', () => {
         // Given - a derived cli project with a global setup and a budget of its own, and a website project with no folder
         const root = projectDeclaring(
             "{ cli: { reason: 'the packed tarball', setup: ['specs/cli/_setup/start.ts'], timeout: 120000 }, website: { reason: 'the pages', include: ['e2e/**/*.spec.ts'] } }",
-            ['specs/cli/run.spec.ts', 'specs/component/page.test.tsx'],
+            ['specs/cli/run.spec.ts', 'specs/component/page.test.tsx', 'specs/job/run.spec.ts'],
         );
 
         // When - the config is derived for it
         const projects = await projectsOf(root);
 
-        // Then - the declared options over the derived ones, the setup anchored at the root; the component specs collected from their folder
+        // Then - the declared options over the derived ones, the setup anchored at the root; the job and component specs collected from their folders
         expect(projects.map(({ test: built }) => built?.name)).toStrictEqual([
             'cli',
+            'job',
             'website',
             'component',
         ]);
         expect(projects[0]?.test?.globalSetup).toContain(join(root, 'specs/cli/_setup/start.ts'));
         expect(projects[0]?.test?.testTimeout).toBe(120_000);
-        expect(projects[1]?.test?.include).toStrictEqual(['e2e/**/*.spec.ts']);
-        expect(projects[2]?.test?.include).toStrictEqual(['specs/component/**/*.test.tsx']);
+        expect(projects[2]?.test?.include).toStrictEqual(['e2e/**/*.spec.ts']);
+        expect(projects[3]?.test?.include).toStrictEqual(['specs/component/**/*.test.tsx']);
     });
 
     test('vitestConfig — is the preset alone for a tree with no test and no declared project', async () => {
-        // Given - a project holding no test, declaring none
-        const config = await vitestConfig(configIn(projectDeclaring('{}', ['src/index.ts'])));
+        // Given - a project holding no test, its test section declaring no project
+        const config = await vitestConfig(
+            configIn(projectDeclaring('undefined', ['src/index.ts'])),
+        );
 
         // Then - no project is built, and the preset's budgets stand
         expect([config.test?.projects, config.test?.testTimeout]).toStrictEqual([
@@ -77,10 +80,11 @@ describe('index.vitest', () => {
     });
 
     test('vitestConfig — refuses projects written as a list, keyed by no specification it ships, or departing with no reason', async () => {
-        // Given - the three ways a declared project is no exception to a derived one
+        // Given - the ways a declared project is no exception to a derived one, a blank reason among them
         const listed = projectDeclaring("[{ specification: 'unit' }]");
         const unknown = projectDeclaring("{ browser: { reason: 'the pages' } }");
         const unreasoned = projectDeclaring('{ unit: { isolate: false } }');
+        const blank = projectDeclaring("{ unit: { isolate: false, reason: '  ' } }");
 
         // Then - each refusal names what it found, and how to state it
         await expect(vitestConfig(configIn(listed))).rejects.toThrow(
@@ -100,6 +104,14 @@ describe('index.vitest', () => {
             ),
         );
         await expect(vitestConfig(configIn(unreasoned))).rejects.toThrow(
+            new Error(
+                refusal(
+                    '`test.projects.unit` departs from its derived project with no reason',
+                    'state why under `test.projects.unit.reason`, or delete what the tree already derives',
+                ),
+            ),
+        );
+        await expect(vitestConfig(configIn(blank))).rejects.toThrow(
             new Error(
                 refusal(
                     '`test.projects.unit` departs from its derived project with no reason',
@@ -156,11 +168,11 @@ describe('index.vitest', () => {
 
         // Then - the relative alias anchored at the project root, the others as written; the rooted one's own config read; the stray setup dropped; a config with no alias as written
         expect(
-            projects.map((project) => [
+            projects.map((project, index) => [
                 project?.resolve?.alias,
                 [project?.test?.globalSetup ?? []]
                     .flat()
-                    .filter((path) => path.startsWith(aliased)),
+                    .filter((path) => path.startsWith([aliased, rooted, plain][index] ?? '')),
                 project?.define,
             ]),
         ).toStrictEqual([
