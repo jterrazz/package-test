@@ -1,28 +1,5 @@
 import { defineConfig, ownPresets } from '@jterrazz/typescript/config';
 
-const PRODUCTION_REACHING_TEST_MATERIAL = [
-    'src/index.vitest.ts',
-    'src/vitest/**',
-    'src/specifications/*/*.project.ts',
-    'src/specifications/api/routes/**',
-    'src/specifications/cli/documents/literate-plugin.ts',
-    'src/specifications/mobile/session/mobile-session.global-setup.ts',
-    'src/specifications/mobile/session/session-ledger.ts',
-    'src/specifications/mobile/server/appium-server.ts',
-    'src/specifications/component/page/**',
-    'src/specifications/component/golden/**',
-    'src/specifications/lint/rule-tester.ts',
-    'src/specifications/website/browser/playwright.adapter.ts',
-    'src/specifications/website/browser/website-visitor.ts',
-    'src/stubs/delivery/**',
-    'src/clock/**',
-    'src/mocks/**',
-    'src/services/containers/service-container.adapter.ts',
-    'src/chain/paths/scratch.ts',
-    'src/expectations/goldens/**',
-    'src/expectations/in-place/**',
-];
-
 export default defineConfig({
     kind: 'library',
     optOuts: {
@@ -32,11 +9,23 @@ export default defineConfig({
             'the corpus audits the self checker and the self plugin by importing them, and one self check reads the capability matrix the corpus renders (docs/concepts/architecture.md)',
     },
     platform: 'node',
-    presets: await ownPresets(import.meta.url, {
+    presets: ownPresets(import.meta.url, {
         './dist/config.js': 'test',
         './.artifacts/dev/preset.js': 'self',
     }),
     test: {
+        production: {
+            allow: {
+                '@vitest/browser-playwright':
+                    'the component specification runs its pages in a browser through this provider',
+                msw: 'the network stubs the api specification hands a test are msw handlers',
+                playwright: 'the website specification visits its pages through Playwright',
+                vitest: 'the framework builds its projects and assertions on vitest, and ships them',
+                'vitest-browser-react':
+                    'the component specification renders its pages through this renderer',
+                'vitest-mock-extended': 'the mocks a test asks for are built by it',
+            },
+        },
         projects: {
             cli: {
                 literate: {
@@ -87,11 +76,6 @@ export default defineConfig({
                     files: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
                     reason: 'these module tests unit-test the constructors, which is creating a runner outside a specification',
                     rules: { 'jterrazz/runner-in-specification-file': 'off' },
-                },
-                {
-                    files: PRODUCTION_REACHING_TEST_MATERIAL,
-                    reason: 'the framework’s own runtime is test code by nature, and ships',
-                    rules: { 'jterrazz/no-test-code-in-production': 'off' },
                 },
             ],
         },
