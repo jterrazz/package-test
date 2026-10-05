@@ -5,7 +5,7 @@ import {
     isProjectRoot,
     nearestRoot,
 } from '@jterrazz/typescript/rules';
-import { basename, dirname, relative } from 'node:path';
+import { dirname, relative } from 'node:path';
 
 import { SETTINGS_FILE } from './settings-file.js';
 import { isUnderSpecs, segments } from './specs-anchor.js';
@@ -104,10 +104,6 @@ export function isTestFile(filename: string): boolean {
     return isTestRole(role) || role === 'specification' || role === 'document' || inSpecs;
 }
 
-export function directoryOf(filename: string): string {
-    return dirname(filename);
-}
-
 export function packageRootOf(directory: string): string | undefined {
     return nearestRoot(directory, holdsManifest);
 }
@@ -130,8 +126,4 @@ export function projectRootOf(directory: string): string | undefined {
 export function projectSegments(filename: string): string[] {
     const root = projectRootOf(dirname(filename));
     return segments(root === undefined ? filename : relative(root, filename));
-}
-
-export function baseNameOf(filename: string): string {
-    return basename(filename);
 }

@@ -181,13 +181,6 @@ export function removeIfEmpty(folder: string): void {
     }
 }
 
-export function isLeaf(directory: string): boolean {
-    return treeEntries(directory).some(
-        (entry) =>
-            entry.isFile() && (isTestFileName(entry.name) || entry.name.endsWith(SPEC_EXTENSION)),
-    );
-}
-
 export function isWithin(directory: string, path: string): boolean {
     const rest = relative(directory, path);
     return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);

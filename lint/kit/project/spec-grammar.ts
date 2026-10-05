@@ -132,11 +132,6 @@ export type SpecRun = {
     waitFor: null | string;
 };
 
-export type SpecPath = {
-    line: number;
-    path: string;
-};
-
 /** A parsed `<case>.spec.yaml`. */
 export type SpecDocument = {
     /** The vitest test title. */

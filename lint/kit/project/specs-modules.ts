@@ -17,8 +17,6 @@ import { SPEC_EXTENSION } from './spec-grammar.js';
 import { resolveSpecifier } from './specifiers.js';
 import { isWithin, listFiles, lowestCommonFolder, readText } from './tree.js';
 
-export const COMPONENT_TREE = 'component';
-
 export const MAX_SPEC_LINES = 400;
 
 const MODULE = /\.(?:[cm]?[jt]sx?)$/u;
