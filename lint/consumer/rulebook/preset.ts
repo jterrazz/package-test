@@ -11,8 +11,9 @@ import {
 } from '@jterrazz/typescript/rules';
 import { createRequire } from 'node:module';
 
+import STANDARD from '../../../src/standard/standard.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
-import { TEST_DEFAULTS, TEST_SECTION } from '../../kit/project/test-section.js';
+import { TEST_SECTION } from '../../kit/project/test-section.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
 import { vitestOnTests } from './vitest.js';
@@ -234,6 +235,8 @@ export const TEST_COMMENT_OPENINGS: readonly string[] = Object.freeze([
     'testId:',
 ]);
 
+const TEST_STANDARD = STANDARD.test ?? {};
+
 export function testPreset(): Preset {
     return {
         baseline: [TEST_SECTION],
@@ -261,7 +264,8 @@ export function testPreset(): Preset {
                 text: "import { vitestConfig } from '@jterrazz/test/vitest';\n\nexport default await vitestConfig(import.meta.url);\n",
             },
         },
+        origins: [{ file: 'src/standard/standard.ts', settings: TEST_STANDARD }],
         package: '@jterrazz/test',
-        settings: TEST_DEFAULTS,
+        settings: TEST_STANDARD,
     };
 }

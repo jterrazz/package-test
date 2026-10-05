@@ -11,6 +11,7 @@ const TREES = [
     'specifications',
     'mocks',
     'services',
+    'standard',
     'stubs',
     'visitor',
     'vitest',

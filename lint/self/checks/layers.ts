@@ -116,14 +116,16 @@ export const FRAMEWORK_LAYERS = {
             'vitest/',
             'chain/',
             // invariant: update mode's global setup, which every project carries.
-            'expectations/in-place/in-place-setup',
+            'expectations/in-place/in-place.global-setup',
             'lint/kit/',
         ],
         // invariant: the ground folders every project skips are the toolchain's rules kit.
         packages: ['vitest', '@jterrazz/typescript/rules'],
     },
+    // invariant: the standard is data, typed by the toolchain's config entry, and reads no layer.
+    standard: { packages: ['@jterrazz/typescript/config'] },
     lint: {
-        imports: ['lint/'],
+        imports: ['lint/', 'standard/'],
         // invariant: oxlint's plugin types and the toolchain's config type (erased), and the module parser.
         packages: [
             '@oxlint/plugins',
@@ -134,7 +136,7 @@ export const FRAMEWORK_LAYERS = {
         ],
         seams: {
             'lint/self/corpus/compositions.ts': ['specifications/', 'chain/define-specification'],
-            'lint/self/self-cli.ts': ['chain/refusals/rows'],
+            'lint/self/self.cli.ts': ['chain/refusals/rows'],
         },
     },
 } satisfies Record<string, LayerOptions>;

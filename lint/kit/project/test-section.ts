@@ -8,7 +8,7 @@ export const TEST_SECTION = 'test';
 export type ReadTestSettings = Pick<TestSettings, 'routes'> &
     Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>>;
 
-export const TEST_DEFAULTS: Readonly<Omit<ReadTestSettings, 'routes'>> = Object.freeze({
+const UNREAD: Readonly<Omit<ReadTestSettings, 'routes'>> = Object.freeze({
     collections: [],
     methodless: [],
     production: { allow: {} },
@@ -39,9 +39,9 @@ export function testSettingsOf(test: unknown): ReadTestSettings {
     const section = isRecord(test) ? test : {};
     const allow = isRecord(section.production) ? reasonsOf(section.production.allow) : undefined;
     return {
-        collections: wordsOf(section.collections) ?? TEST_DEFAULTS.collections,
-        methodless: wordsOf(section.methodless) ?? TEST_DEFAULTS.methodless,
-        production: allow === undefined ? TEST_DEFAULTS.production : { allow },
+        collections: wordsOf(section.collections) ?? UNREAD.collections,
+        methodless: wordsOf(section.methodless) ?? UNREAD.methodless,
+        production: allow === undefined ? UNREAD.production : { allow },
         ...(typeof section.routes === 'string' ? { routes: section.routes } : {}),
     };
 }

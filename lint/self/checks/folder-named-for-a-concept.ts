@@ -28,6 +28,9 @@ const ROLE_NAMES = new Set([
     'utils',
 ]);
 
+// outside: `@jterrazz/typescript` names the folder of a package's standard, whatever it holds.
+const TOOLCHAIN_FOLDERS: ReadonlySet<string> = new Set(['src/standard']);
+
 /** Ground is exempt: it is what a test stands on. */
 export function checkFolderNamedForAConcept(root: string): Spotted<SelfPassId>[] {
     const paths = listed(resolve(root, 'src'), 'src');
@@ -46,7 +49,7 @@ export function checkFolderNamedForAConcept(root: string): Spotted<SelfPassId>[]
                       }),
                   ]
                 : []),
-            ...(children.length < 2
+            ...(children.length < 2 && !TOOLCHAIN_FOLDERS.has(path)
                 ? [
                       finding('folder-named-for-a-concept', path, {
                           fix: 'fold what it holds into its parent, or give the concept the second file it groups',

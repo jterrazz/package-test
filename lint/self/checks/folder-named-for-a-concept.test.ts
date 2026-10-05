@@ -5,7 +5,7 @@ import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 
 describe('checkFolderNamedForAConcept', () => {
     test('folder-named-for-a-concept — a folder is named for a concept, holds two entries or more, and a specification root holds its face', () => {
-        // Given - the package's own tree, and one with role folders, a lone file and a stray file at a specification's root
+        // Given - the package's own tree, and one with role folders, a lone file, the lone standard the toolchain names and a stray file at a specification's root
         const misshapen = treeOf({
             'src/specifications/api/api.composition.ts': '',
             'src/specifications/api/_fixtures/one.json': '',
@@ -18,6 +18,7 @@ describe('checkFolderNamedForAConcept', () => {
             'src/chain/core/state.ts': '',
             'src/chain/pause.ts': '',
             'src/clock/clock.ts': '',
+            'src/standard/standard.ts': '',
             'src/stubs/stub.ts': '',
             'src/stubs/utils/format.test.ts': '',
             'src/stubs/utils/format.ts': '',
