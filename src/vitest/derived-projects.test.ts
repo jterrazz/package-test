@@ -19,7 +19,7 @@ function tree(files: readonly string[]): string {
 
 describe('derivedProjects', () => {
     test('derived-projects — a project per specification folder, the unit project over each root holding a module test, the component one over each holding a rendered one', () => {
-        // Given - module tests in src/, lint/ and a folder of specs/ no specification names, tests in ground, setup, dot and install folders, two specification folders and a rendered test
+        // Given - module tests in src/, lint/ and a folder of specs/ no specification names, tests in ground, setup, dot and install folders, two specification folders, rendered tests, a snapshot of one, and folders whose names only begin like an install or a build
         const root = tree([
             'src/orders.test.ts',
             'src/button.test.tsx',
@@ -33,14 +33,18 @@ describe('derivedProjects', () => {
             'specs/cli/run.spec.ts',
             'docs/guide.md',
             'docs/_fixtures/example.test.ts',
+            'app/page.test.tsx',
+            'web/view.test.tsx.snap',
+            'distance/route.test.ts',
+            'node_modules.bak/stray.test.ts',
         ]);
 
         // Then - each project with the options the tree gives it
         expect(Object.fromEntries(derivedProjects(root, SPECIFICATIONS))).toStrictEqual({
             api: {},
             cli: {},
-            component: { include: ['src/**/*.test.tsx'] },
-            unit: { roots: ['lint', 'src', 'specs/surface'] },
+            component: { include: ['app/**/*.test.tsx', 'src/**/*.test.tsx'] },
+            unit: { roots: ['distance', 'lint', 'node_modules.bak', 'src', 'specs/surface'] },
         });
     });
 

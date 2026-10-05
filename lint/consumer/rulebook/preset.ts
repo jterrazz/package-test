@@ -235,6 +235,7 @@ export const TEST_COMMENT_OPENINGS: readonly string[] = Object.freeze([
     'testId:',
 ]);
 
+// Stryker disable next-line LogicalOperator: the standard always states its test section; the type keeps every section optional
 const TEST_STANDARD = STANDARD.test ?? {};
 
 export function testPreset(): Preset {
