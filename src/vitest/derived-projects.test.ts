@@ -59,4 +59,14 @@ describe('derivedProjects', () => {
         });
         expect(derivedProjects(bare, SPECIFICATIONS).size).toBe(0);
     });
+
+    test('derived-projects — a specs/unit/ folder is one more root of the unit project, never a project of its own', () => {
+        // Given - module tests in src/ and in specs/unit/
+        const root = tree(['src/orders.test.ts', 'specs/unit/pricing.test.ts']);
+
+        // Then - one unit project over both roots
+        expect(Object.fromEntries(derivedProjects(root, SPECIFICATIONS))).toStrictEqual({
+            unit: { roots: ['src', 'specs/unit'] },
+        });
+    });
 });

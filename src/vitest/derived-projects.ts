@@ -3,6 +3,8 @@ import { join } from 'node:path';
 
 const SPECS = 'specs';
 
+const UNIT = 'unit';
+
 const MODULE_TEST = /\.test\.ts$/u;
 
 const RENDERED_TEST = /\.test\.tsx$/u;
@@ -30,13 +32,13 @@ const foldersIn = (path: string): string[] =>
               .toSorted()
         : [];
 
-/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder, `unit` over each root holding a module test, `component` over each holding a rendered one. */
+/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder, `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
 export function derivedProjects(
     root: string,
     specifications: readonly string[],
 ): Map<string, Record<string, unknown>> {
     const specs = foldersIn(join(root, SPECS));
-    const named = specs.filter((folder) => specifications.includes(folder));
+    const named = specs.filter((folder) => folder !== UNIT && specifications.includes(folder));
     const roots = [
         ...foldersIn(root).filter((folder) => folder !== SPECS),
         ...specs.filter((folder) => !named.includes(folder)).map((folder) => `${SPECS}/${folder}`),
@@ -50,7 +52,7 @@ export function derivedProjects(
     const unitRoots = holding(MODULE_TEST);
     const projects = new Map<string, Record<string, unknown>>();
     if (unitRoots.length > 0) {
-        projects.set('unit', { roots: unitRoots });
+        projects.set(UNIT, { roots: unitRoots });
     }
     for (const specification of named) {
         projects.set(specification, {});
