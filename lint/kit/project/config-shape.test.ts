@@ -56,7 +56,7 @@ describe('config-shape', () => {
             "    a: { literate: { runner: './specs/cli/cli.specification.ts' } },",
             '    b: { literate: { runner: path } },',
             '    c: { literate: true },',
-            "    d: { specification: './elsewhere.ts' },",
+            "    d: { runner: './elsewhere.ts' },",
             '};',
         ].join('\n');
 
