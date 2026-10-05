@@ -34,7 +34,7 @@ and the `test()` preset hands it the files it owns.
   `browser-project-from-component` and `member-has-vitest-config`. The
   toolchain's Config pass holds the derived file, and a project's helper
   sets its name and its browser. The rules that read a project's options —
-  `include-points-at-a-folder`, `literate-runner-exists`,
+  `include-points-at-a-folder`, `literate-specification-exists`,
   `no-simulated-dom-in-config` — read `jterrazz.config.ts` instead.
 - The preset collects coverage from the processes a suite spawns
   (`autoAttachSubprocess`) and judges `dist/` after the remap
