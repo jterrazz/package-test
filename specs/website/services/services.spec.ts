@@ -11,7 +11,7 @@ describe('services', () => {
         expect(result.content.text).toContain('http://127.0.0.1:');
     });
 
-    test('every process of the run carries the id the facet minted', async () => {
+    test('every process of the run carries the id the specification minted', async () => {
         // Given - the same page, which also renders the run id
         const result = await website.visit('/services');
 

@@ -274,7 +274,7 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
             ].join('\n'),
         },
         {
-            name: 'The view is named for the subject of its own facet.',
+            name: 'The view is named for the subject of its own specification.',
             code: [
                 "import { api, job } from '../../api.specification.js';",
                 "test('a', async () => { await job.trigger('sync'); await api.clock('x').get('/events'); });",
@@ -325,7 +325,7 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
             filename: SPEC,
         },
         {
-            name: 'A name a specification exports that is no facet is no runner, and a setting another facet owns is no setting here.',
+            name: 'A name a specification exports that is no specification is no runner, and a setting another specification owns is no setting here.',
             code: "import { helper, api } from '../../api.specification.js';\ntest('a', async () => { await helper.clock('x').get('/e'); await api.env(E).get('/e'); });\ntest('b', async () => { await helper.clock('x').get('/e'); await api.env(E).get('/e'); });",
             filename: SPEC,
         },

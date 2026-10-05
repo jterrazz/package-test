@@ -1,10 +1,10 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import type { FacetProjectOptions } from './project.js';
+import type { SpecificationProjectOptions } from './project.js';
 import { onProjectDefaults, projectTest } from './project.js';
 
 /** `unit()` — module tests, beside the modules they cover (rule `test-beside-its-module`). */
-export type UnitProjectOptions = FacetProjectOptions & {
+export type UnitProjectOptions = SpecificationProjectOptions & {
     /** `false` shares one module graph per worker (`isolate: false`); for pure projects only. */
     isolate?: boolean;
     /** Trees module tests live in, when not `src/`. */

@@ -18,16 +18,16 @@ export const NO_READING: SubjectReading = Object.freeze({ collections: [], metho
 export type Method = 'ALL' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
 
 export type Subject =
-    | { command: string[]; facet: 'cli' }
+    | { command: string[]; specification: 'cli' }
     | {
-          facet: 'api';
+          specification: 'api';
           method: Method;
           path: string;
           template?: boolean;
       }
-    | { facet: 'job'; job: string }
-    | { facet: 'mobile'; journey: string }
-    | { facet: 'website'; page: string };
+    | { specification: 'job'; job: string }
+    | { specification: 'mobile'; journey: string }
+    | { specification: 'website'; page: string };
 
 export type SubjectAt = { index: number; subject: Subject };
 
@@ -86,7 +86,7 @@ export function ambiguousSegment(
     subject: Subject,
     reading: SubjectReading = NO_READING,
 ): string | undefined {
-    if (subject.facet !== 'api' || subject.template === true) {
+    if (subject.specification !== 'api' || subject.template === true) {
         return undefined;
     }
     const segments = segmentsOf(subject.path);
@@ -121,32 +121,32 @@ export function subjectFolder(
     subject: Subject,
     reading: SubjectReading = NO_READING,
 ): string | undefined {
-    if (subject.facet === 'api') {
+    if (subject.specification === 'api') {
         return ambiguousSegment(subject, reading) === undefined
             ? routeFolder(subject.method, subject.path, reading.collections)
             : undefined;
     }
-    if (subject.facet === 'cli') {
+    if (subject.specification === 'cli') {
         return subject.command.length === 0 ? undefined : subject.command.join('/');
     }
     // Stryker disable next-line ConditionalExpression: a page or a journey has no job to read either
-    return subject.facet === 'job' ? subject.job : undefined;
+    return subject.specification === 'job' ? subject.job : undefined;
 }
 
 /** `GET /events/:id`, `trigger digest`, … */
 export function subjectName(subject: Subject): string {
-    if (subject.facet === 'api') {
+    if (subject.specification === 'api') {
         return `${subject.method} ${pathTemplate(subject.path)}`;
     }
-    if (subject.facet === 'cli') {
+    if (subject.specification === 'cli') {
         return subject.command.length === 0
             ? 'exec (no command)'
             : `exec ${subject.command.join(' ')}`;
     }
-    if (subject.facet === 'job') {
+    if (subject.specification === 'job') {
         return `trigger ${subject.job}`;
     }
-    return subject.facet === 'mobile' ? `open ${subject.journey}` : `visit ${subject.page}`;
+    return subject.specification === 'mobile' ? `open ${subject.journey}` : `visit ${subject.page}`;
 }
 
 const HTTP_VERBS: Record<string, Method> = {
@@ -166,7 +166,7 @@ function requestLineOf(text: string): Subject[] {
     const { method = '', path = '/' } = REQUEST_LINE.exec(text)?.groups ?? {};
     const verb = HTTP_VERBS[method.toLowerCase()];
     // invariant: a request file's line is the route: there is no template to write beside it.
-    return verb === undefined ? [] : [{ facet: 'api', method: verb, path, template: true }];
+    return verb === undefined ? [] : [{ specification: 'api', method: verb, path, template: true }];
 }
 
 type RequestReader = (path: string) => string | undefined;
@@ -180,7 +180,7 @@ type TerminalReader = (
 const pageOf: TerminalReader = (first) => {
     const literal = literalOf(first);
     return literal?.startsWith('/') === true
-        ? [{ facet: 'website', page: pathTemplate(literal) }]
+        ? [{ specification: 'website', page: pathTemplate(literal) }]
         : [];
 };
 
@@ -191,10 +191,12 @@ const TERMINALS: Record<string, TerminalReader> = {
             first?.startsWith('[') === true
                 ? literalOf(argumentsOf(first.slice(1, -1))[0])
                 : literalOf(first);
-        return line === undefined ? [] : [{ command: commandWords(line, commands), facet: 'cli' }];
+        return line === undefined
+            ? []
+            : [{ command: commandWords(line, commands), specification: 'cli' }];
     },
     fetch: pageOf,
-    open: (first) => [{ facet: 'mobile', journey: literalOf(first) ?? '(launch)' }],
+    open: (first) => [{ specification: 'mobile', journey: literalOf(first) ?? '(launch)' }],
     request: (first, readRequest) => {
         // Stryker disable next-line OptionalChaining: a match always carries its named groups
         const path = REQUEST_FILE.exec(first ?? '')?.groups?.path;
@@ -203,7 +205,7 @@ const TERMINALS: Record<string, TerminalReader> = {
     },
     trigger: (first) => {
         const job = literalOf(first);
-        return job === undefined ? [] : [{ facet: 'job', job }];
+        return job === undefined ? [] : [{ specification: 'job', job }];
     },
     visit: pageOf,
 };
@@ -218,11 +220,11 @@ function routeOf(method: Method, args: readonly string[]): Subject[] {
     // Stryker disable next-line StringLiteral: no text standing for absent options names params
     const options = args[at] ?? '';
     const template = /\/:[A-Za-z_$]/u.test(path) || /(?<![\w$])params(?![\w$])/u.test(options);
-    return [{ facet: 'api', method, path, template }];
+    return [{ specification: 'api', method, path, template }];
 }
 
 function declaredMethod(subject: Subject, methodless: readonly string[]): Subject {
-    if (subject.facet !== 'api') {
+    if (subject.specification !== 'api') {
         return subject;
     }
     const template = pathTemplate(subject.path);

@@ -58,7 +58,7 @@ describe('unit', () => {
 
     test('unit() — module tests, and only module tests — runs before either browser project', () => {
         // Given - the canonical project
-        // Then - node first (0), the page facets after
+        // Then - node first (0), the page specifications after
         expect(testOf(unit()).sequence).toStrictEqual({ groupOrder: 0 });
     });
 });

@@ -7,19 +7,19 @@ import type { TestProjectInlineConfiguration, ViteUserConfig } from 'vitest/conf
 import { isRecord } from '../lint/kit/project/json-shape.js';
 import { TEST_SECTION } from '../lint/kit/project/test-section.js';
 import { refusal } from './chain/refusals/refusal.js';
-import { api } from './facets/api/api.project.js';
-import { cli, literate } from './facets/cli/cli.project.js';
-import type { LiterateOptions } from './facets/cli/cli.project.js';
-import { component } from './facets/component/component.project.js';
-import { integration } from './facets/integration/integration.project.js';
-import { job } from './facets/job/job.project.js';
-import { lint } from './facets/lint/lint.project.js';
-import { mobile } from './facets/mobile/mobile.project.js';
-import { website } from './facets/website/website.project.js';
+import { api } from './specifications/api/api.project.js';
+import { cli, literate } from './specifications/cli/cli.project.js';
+import type { LiterateOptions } from './specifications/cli/cli.project.js';
+import { component } from './specifications/component/component.project.js';
+import { integration } from './specifications/integration/integration.project.js';
+import { job } from './specifications/job/job.project.js';
+import { lint } from './specifications/lint/lint.project.js';
+import { mobile } from './specifications/mobile/mobile.project.js';
+import { website } from './specifications/website/website.project.js';
 import { presetConfig } from './vitest/preset.js';
 import { unit } from './vitest/unit.project.js';
 
-export { api, type ApiProjectOptions } from './facets/api/api.project.js';
+export { api, type ApiProjectOptions } from './specifications/api/api.project.js';
 export {
     cli,
     type CliProjectOptions,
@@ -27,17 +27,23 @@ export {
     type LiterateDoor,
     type LiterateOptions,
     type LiteratePlugin,
-} from './facets/cli/cli.project.js';
-export { component, type ComponentProjectOptions } from './facets/component/component.project.js';
+} from './specifications/cli/cli.project.js';
+export {
+    component,
+    type ComponentProjectOptions,
+} from './specifications/component/component.project.js';
 export {
     integration,
     type IntegrationProjectOptions,
-} from './facets/integration/integration.project.js';
-export { job, type JobProjectOptions } from './facets/job/job.project.js';
-export { lint, type LintProjectOptions } from './facets/lint/lint.project.js';
-export { mobile, type MobileProjectOptions } from './facets/mobile/mobile.project.js';
-export { website, type WebsiteProjectOptions } from './facets/website/website.project.js';
-export { type FacetProjectOptions, type InProcessProjectOptions } from './vitest/project.js';
+} from './specifications/integration/integration.project.js';
+export { job, type JobProjectOptions } from './specifications/job/job.project.js';
+export { lint, type LintProjectOptions } from './specifications/lint/lint.project.js';
+export { mobile, type MobileProjectOptions } from './specifications/mobile/mobile.project.js';
+export { website, type WebsiteProjectOptions } from './specifications/website/website.project.js';
+export {
+    type InProcessProjectOptions,
+    type SpecificationProjectOptions,
+} from './vitest/project.js';
 export { unit, type UnitProjectOptions } from './vitest/unit.project.js';
 
 /** A vite/vitest config, merged over the preset's defaults, plus `literate`. */
@@ -90,15 +96,15 @@ function aliasesFrom(root: string, vite: unknown): unknown {
 }
 
 async function projectOf(root: string, declared: unknown): Promise<TestProjectInlineConfiguration> {
-    const { facet, setup, ...options } = isRecord(declared) ? declared : {};
-    const builder = BUILDERS.get(String(facet));
+    const { specification, setup, ...options } = isRecord(declared) ? declared : {};
+    const builder = BUILDERS.get(String(specification));
     if (builder === undefined) {
         throw new Error(
             refusal({
-                fix: `name one of ${[...BUILDERS.keys()].join(', ')} as its \`facet\``,
-                found: `a project of \`test.projects\` names the facet \`${String(facet)}\``,
+                fix: `name one of ${[...BUILDERS.keys()].join(', ')} as its \`specification\``,
+                found: `a project of \`test.projects\` names the specification \`${String(specification)}\``,
                 read: 'docs/start/set-up-a-project.md#the-vitest-config',
-                why: 'a project is built by the helper of its facet, which owns its include, its budget and its seam',
+                why: 'a project is built by the helper of its specification, which owns its include, its budget and its seam',
             }),
         );
     }
@@ -107,7 +113,7 @@ async function projectOf(root: string, declared: unknown): Promise<TestProjectIn
     const project = await builder({
         ...options,
         // Stryker disable next-line ConditionalExpression: only a component reads its root as a path from here
-        ...(facet === 'component' ? { root: componentRoot } : {}),
+        ...(specification === 'component' ? { root: componentRoot } : {}),
         vite: aliasesFrom(root, options.vite),
     });
     const setups = Array.isArray(setup) ? setup.filter((path) => typeof path === 'string') : [];

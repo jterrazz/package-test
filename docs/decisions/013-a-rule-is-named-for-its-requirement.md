@@ -62,7 +62,7 @@ said only when a rule arrived, and one code covered several checker passes
 | `e5-no-simulated-dom`                     | `no-simulated-dom`                            |
 | `e5b-no-simulated-dom-config-member`      | `no-simulated-dom-in-config`                  |
 | `a2-known-constructors`                   | `no-unknown-constructor`                      |
-| `e4w-project-binding`                     | `project-named-for-its-facet`                 |
+| `e4w-project-binding`                     | `project-named-for-its-specification`         |
 | `a1-specification-file`                   | `runner-in-specification-file`                |
 | `a8-services-type-the-factory`            | `server-sees-declared-services`               |
 | `g2-per-worker-isolation`                 | `state-isolated-per-worker`                   |
@@ -86,8 +86,8 @@ said only when a rule arrived, and one code covered several checker passes
 | `j9-checker-suppression-reason`           | `checker-suppression-states-a-reason`         |
 | `j5-spec-description`                     | `document-description-reads-as-a-title`       |
 | `j4-spec-description-unique`              | `document-description-unique`                 |
-| `c20-facet-folder`                        | `facet-folder-has-specification`              |
-| `c18-module-test-under-facet`             | `facet-test-uses-its-runner`                  |
+| `c20-facet-folder`                        | `specification-folder-has-its-runner`         |
+| `c18-module-test-under-facet`             | `specification-test-uses-its-runner`          |
 | `c12-spec-file-name`                      | `file-suffix-matches-place`                   |
 | `c1-asset-grouping`                       | `folder-follows-assets`                       |
 | `c5-a-path-names-its-subfolder`           | `golden-path-creates-folders`                 |
@@ -164,7 +164,7 @@ said only when a rule arrived, and one code covered several checker passes
 | `w4-no-landmarks-on-mobile`               | `no-landmark-on-mobile`                       |
 | `w5w-scenario-settles`                    | `scenario-ends-settled`                       |
 | `w2-testid-states-what-is-missing`        | `test-id-states-what-is-missing`              |
-| `w6-verb-subset-per-facet`                | `verb-belongs-to-its-facet`                   |
+| `w6-verb-subset-per-facet`                | `verb-belongs-to-its-specification`           |
 | `f5-fixtures-only-from-tests`             | `fixtures-imported-by-tests-only`             |
 | `f7-no-framework-internals`               | `no-framework-internals`                      |
 | `f8-no-seam-dependency`                   | `no-redundant-test-dependency`                |
@@ -173,7 +173,7 @@ said only when a rule arrived, and one code covered several checker passes
 | `f4-no-test-to-test-import`               | `no-test-to-test-import`                      |
 | `f1-no-subpath-import`                    | `no-unpublished-subpath`                      |
 | `i8-definition-is-its-folder`             | `definition-is-its-module`                    |
-| `i6-facet-is-composition`                 | `facet-is-a-composition`                      |
+| `i6-facet-is-composition`                 | `specification-is-a-composition`              |
 | `i12-folder-shape`                        | `folder-named-for-a-concept`                  |
 | `i1-layer-boundaries`                     | `import-within-declared-layers`               |
 | `i7-kernel-loads-in-a-page`               | `kernel-loads-in-a-page`                      |

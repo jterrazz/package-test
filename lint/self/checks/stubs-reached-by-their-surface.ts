@@ -21,20 +21,22 @@ const CHANNEL_PICK = /^delivery\/[a-z-]+\/intercept\.ts$/u;
 type DeliveryReaders = Readonly<Record<string, readonly string[]>>;
 
 const DELIVERY_READERS: DeliveryReaders = {
-    'delivery/browser-page/msw-worker.adapter.ts': ['src/facets/component/component.facet.ts'],
-    'delivery/browser-page/worker-script.ts': ['src/facets/component/component.project.ts'],
+    'delivery/browser-page/msw-worker.adapter.ts': [
+        'src/specifications/component/component.composition.ts',
+    ],
+    'delivery/browser-page/worker-script.ts': ['src/specifications/component/component.project.ts'],
     'delivery/other-process/stub-backend.adapter.ts': [
-        'src/facets/mobile/mobile.facet.ts',
-        'src/facets/website/website.facet.ts',
+        'src/specifications/mobile/mobile.composition.ts',
+        'src/specifications/website/website.composition.ts',
     ],
     'delivery/other-process/stub-backend.ts': [
-        'src/facets/mobile/mobile.handle.ts',
-        'src/facets/website/website.handle.ts',
+        'src/specifications/mobile/mobile.handle.ts',
+        'src/specifications/website/website.handle.ts',
     ],
     'delivery/same-process/msw-node.adapter.ts': [
-        'src/facets/api/api.facet.ts',
-        'src/facets/integration/integration.facet.ts',
-        'src/facets/job/job.facet.ts',
+        'src/specifications/api/api.composition.ts',
+        'src/specifications/integration/integration.composition.ts',
+        'src/specifications/job/job.composition.ts',
     ],
 };
 
@@ -64,7 +66,7 @@ function reachesBelowTheSurface(
                 'stubs-reached-by-their-surface',
                 from,
                 {
-                    fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
+                    fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\` — or, for a specification wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
                     found: `\`${target}\` is reached from outside the stubs, below their surface`,
                 },
                 reference,

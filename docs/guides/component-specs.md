@@ -2,7 +2,7 @@
 
 `component` tests one thing that draws itself — a React component, a React hook through a small host component written in the test, or a plain DOM function — rendered in a real headless Chromium through Vitest Browser Mode. It lives beside its code as `<file>.test.tsx`, starts nothing, and so has no constructor: the test calls the exported `component` chain directly.
 
-For a whole served page, use [Website specs](website-specs.md); for a module that draws nothing, a [module test](module-tests.md). Why a real browser rather than a simulated DOM: [ADR-003](https://github.com/jterrazz/package-test/blob/main/docs/decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
+For a whole served page, use [Website specs](website-specs.md); for a module that draws nothing, a [module test](module-tests.md). Why a real browser rather than a simulated DOM: [ADR-003](https://github.com/jterrazz/package-test/blob/main/docs/decisions/003-a-rendered-component-is-a-specification-on-vitest-browser-mode.md).
 
 ## What it specifies
 
@@ -22,7 +22,7 @@ The suffix decides which project collects the file and therefore which rules jud
 
 ## What it does not do
 
-The subject is a unit that draws itself IN A BROWSER, which leaves four neighbours outside the facet — each with a route, so none of them is a hole.
+The subject is a unit that draws itself IN A BROWSER, which leaves four neighbours outside the specification — each with a route, so none of them is a hole.
 
 | Not this                               | Because                                                                              | Route                                                                                     |
 | -------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
@@ -35,7 +35,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 
 ## The constructor: there is none
 
-Every other facet starts something — a server, a database, a binary, a simulator — so every other facet has a `*.specification.ts` holding what was started. A component has nothing to start. What a specification file WOULD have held splits by owner:
+Every other specification starts something — a server, a database, a binary, a simulator — so every other specification has a `*.specification.ts` holding what was started. A component has nothing to start. What a specification file WOULD have held splits by owner:
 
 | What                                               | Whose      | Where                                                           |
 | -------------------------------------------------- | ---------- | --------------------------------------------------------------- |
@@ -47,8 +47,8 @@ Every other facet starts something — a server, a database, a binary, a simulat
 ```typescript
 // apps/web/jterrazz.config.ts — its test section
 const projects = [
-    { facet: 'unit', roots: ['src', 'web'] },
-    { facet: 'component', vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' },
+    { specification: 'unit', roots: ['src', 'web'] },
+    { specification: 'component', vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' },
 ];
 ```
 
@@ -78,7 +78,10 @@ const projects = [
 // jterrazz.config.ts of an Astro app — its component project
 import { getViteConfig } from 'astro/config';
 
-const component = { facet: 'component', vite: getViteConfig({}, { root: import.meta.dirname }) };
+const component = {
+    specification: 'component',
+    vite: getViteConfig({}, { root: import.meta.dirname }),
+};
 ```
 
 Both arguments are Astro's. The first is required: Astro reads the app's `root` off it. The second's `root` is the one the project's `root` cannot give: Astro looks for `astro.config.*` in the CWD, not beside the config that calls it, so a config loaded from elsewhere — knip or `typescript check` at a repository root, an app nested in a workspace — finds none, warns `Missing pages directory`, and hands back a pipeline without the app's integrations, its defines or its plugins. Nothing fails then; a component that needed them renders wrong.
@@ -116,7 +119,7 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 
 | Setup             | Does                                                                                                                                                      |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.intercept(…)`   | Declares what the network replies — the same stubs and the same queue as every other facet                                                                |
+| `.intercept(…)`   | Declares what the network replies — the same stubs and the same queue as every other specification                                                        |
 | `.wrap(fn)`       | Wraps every render of this chain: a router stub, a `<StrictMode>`, a provider one test needs                                                              |
 | `.clock(iso)`     | Pins the page's `Date` for this render                                                                                                                    |
 | `.viewport(size)` | The page size THIS render gets — the Given of a component that reads `matchMedia` or a container query. The project's size is restored when the test ends |
@@ -223,12 +226,12 @@ const result = await component.render((container) => {
 ```
 
 - **A router is a test's Given.** A screen that renders `<Link>` or reads `useParams()` throws without a router. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's `network-strict-after-first-stub` stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([Stubs](../reference/stubs.md#intercept--the-same-double-with-no-chain)).
+- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api specification's `network-strict-after-first-stub` stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([Stubs](../reference/stubs.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls
 
-- **Reaching for `@testing-library/react` or `happy-dom`.** Rule `no-second-test-runtime` refuses both, and the second is the reason the facet exists: a simulated DOM behaves almost like a browser, and what ships is judged by a real one.
+- **Reaching for `@testing-library/react` or `happy-dom`.** Rule `no-second-test-runtime` refuses both, and the second is the reason the specification exists: a simulated DOM behaves almost like a browser, and what ships is judged by a real one.
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
 - **Hand-rolling `browser:` in a config.** A derived config has no place for it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.

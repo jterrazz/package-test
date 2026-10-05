@@ -24,7 +24,7 @@ describe('ReleaseNote', () => {
                 - heading "Release 17" [level=1]
                 - list:
                   - listitem: Stubs replace contracts
-                  - listitem: Facets are compositions
+                  - listitem: Specifications are compositions
                   - listitem: Mobile runs on a double`;
         const first = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));
         const second = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));

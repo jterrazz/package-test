@@ -43,7 +43,7 @@ describe('checkSpecimenFiledByCapability', () => {
         ]);
     });
 
-    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a capability another column declares is no folder of this facet', () => {
+    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a capability another column declares is no folder of this specification', () => {
         // Given - a cli spec of a specimen filed under `appium/`, a capability of the mobile column
         const root = specsTree({
             'cli/cli.specification.ts':
@@ -55,7 +55,7 @@ describe('checkSpecimenFiledByCapability', () => {
         expect(
             checkSpecimenFiledByCapability(root).map(({ fix, path }) => `${path} ${fix}`),
         ).toStrictEqual([
-            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its facet — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/guides/test.md § The capability matrix)',
+            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its specification — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/guides/test.md § The capability matrix)',
         ]);
     });
 
@@ -108,7 +108,7 @@ describe('checkSpecimenFiledByCapability', () => {
         ]);
     });
 
-    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is its facet’s fixtures’, and its author’s when inline', () => {
+    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is its specification’s fixtures’, and its author’s when inline', () => {
         // Given - two specs on a module-only runner under a folder the matrix never names
         const runner = "import { integration } from '../pure.specification.js';\n";
         const root = specsTree({
@@ -150,7 +150,7 @@ describe('checkSpecimenFiledByCapability', () => {
             'component/providers.tsx:2 a file of the component tree, filed under `component/`',
         ]);
         expect(checkSpecimenFiledByCapability(root)[0]?.fix).toBe(
-            'file it under the capability it specifies, one folder below its facet — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/guides/test.md § The capability matrix)',
+            'file it under the capability it specifies, one folder below its specification — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/guides/test.md § The capability matrix)',
         );
     });
 

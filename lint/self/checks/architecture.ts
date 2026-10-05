@@ -11,9 +11,9 @@ const READ_LAYERS: ChapterAnchor = 'docs/concepts/architecture.md#the-source-tre
 
 const SPAWNING_SITES = [
     'expectations/command/docker-cli.ts',
-    'facets/cli/process/exec.adapter.ts',
-    'facets/lint/local-linters.adapter.ts',
-    'facets/mobile/server/simulator.ts',
+    'specifications/cli/process/exec.adapter.ts',
+    'specifications/lint/local-linters.adapter.ts',
+    'specifications/mobile/server/simulator.ts',
     'services/process/serve.ts',
 ];
 
@@ -127,7 +127,7 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
                     dependencyTypes: LOCAL_DEPENDENCY,
                     pathNot: either(imports.map((one) => targetOf(one))),
                 },
-                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← facets ← the entries`,
+                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← specifications ← the entries`,
             },
             {
                 fix: 'import it from the slice that owns it, or declare the package on the layer in `FRAMEWORK_LAYERS` with its reason',
@@ -146,7 +146,7 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
 
 function ownerRules(): ArchitectureRule[] {
     return Object.entries(OWNERS_OF_LIBRARIES).map(([library, owners]) => ({
-        fix: `reach \`${library}\` through the port \`${owners.join('` or `')}\` implements, handed in by the facet — or import only what the owner exports`,
+        fix: `reach \`${library}\` through the port \`${owners.join('` or `')}\` implements, handed in by the specification — or import only what the owner exports`,
         from: {
             path: '^(src|lint)/',
             pathNot: either([
@@ -165,57 +165,63 @@ const RUNNER_CONFIG_ENTRY = 'src/index.vitest.ts';
 
 type Reader = { granted: string[]; path: string };
 
-/** Who, outside a facet, reaches which file of one: every edge `FRAMEWORK_LAYERS` grants into `facets/`, keyed by the reader. */
-function facetReaders(): Map<string, Reader> {
+/** Who, outside a specification, reaches which file of one: every edge `FRAMEWORK_LAYERS` grants into `specifications/`, keyed by the reader. */
+function specificationReaders(): Map<string, Reader> {
     const readers = new Map<string, Reader>();
     const grant = (reader: string, path: string, granted: string): void => {
         const known = readers.get(reader) ?? { granted: [], path };
         readers.set(reader, { ...known, granted: [...known.granted, granted] });
     };
     for (const [layer, options] of Object.entries<LayerOptions>(FRAMEWORK_LAYERS)) {
-        for (const path of (options.imports ?? []).filter((one) => one.startsWith('facets/'))) {
+        for (const path of (options.imports ?? []).filter((one) =>
+            one.startsWith('specifications/'),
+        )) {
             grant(treeOf(layer), `^${escaped(treeOf(layer))}`, path);
         }
         for (const [module, paths] of Object.entries(options.seams ?? {})) {
-            for (const path of paths.filter((one) => one.startsWith('facets/'))) {
+            for (const path of paths.filter((one) => one.startsWith('specifications/'))) {
                 grant(module, targetOf(module), path);
             }
         }
     }
-    grant(RUNNER_CONFIG_ENTRY, `^${escaped(RUNNER_CONFIG_ENTRY)}$`, 'facets/*/<facet>.project');
+    grant(
+        RUNNER_CONFIG_ENTRY,
+        `^${escaped(RUNNER_CONFIG_ENTRY)}$`,
+        'specifications/*/<specification>.project',
+    );
 
     return readers;
 }
 
 function grantedTargets(paths: readonly string[]): string[] {
     return paths.map((path) => {
-        if (path === 'facets/*/<facet>.project') {
-            return String.raw`^src/facets/([^/]+)/[^/]+\.project\.ts$`;
+        if (path === 'specifications/*/<specification>.project') {
+            return String.raw`^src/specifications/([^/]+)/[^/]+\.project\.ts$`;
         }
 
-        return path === 'facets/'
-            ? String.raw`^src/facets/[^/]+/[^/]+\.facet\.ts$`
+        return path === 'specifications/'
+            ? String.raw`^src/specifications/[^/]+/[^/]+\.composition\.ts$`
             : targetOf(path);
     });
 }
 
-function facetRules(): ArchitectureRule[] {
-    const face = String.raw`^src/facets/[^/]+/[^/]+\.face(\.browser)?\.ts$`;
-    const readers = facetReaders();
+function specificationRules(): ArchitectureRule[] {
+    const face = String.raw`^src/specifications/[^/]+/[^/]+\.face(\.browser)?\.ts$`;
+    const readers = specificationReaders();
     const outside: Pick<ArchitectureRule, 'fix' | 'read' | 'why'> = {
-        fix: 'import it from the facet’s face — export it from `src/facets/<facet>/<facet>.face.ts` — or move it below the facets',
+        fix: 'import it from the specification’s face — export it from `src/specifications/<specification>/<specification>.face.ts` — or move it below the specifications',
         read: READ_LAYERS,
-        why: 'a facet is entered from outside by its face, and a concept folder reached from outside is an internal that can no longer move',
+        why: 'a specification is entered from outside by its face, and a concept folder reached from outside is an internal that can no longer move',
     };
 
     return [
         {
-            fix: 'move what the two facets share below the facets — to `chain/` or the notion it is (`visitor/`, `expectations/`, `stubs/`, `services/`, `disk/`, `clock/`, `mocks/`) — and import it from there',
-            from: { path: '^src/facets/([^/]+)/', pathNot: TEST_MATERIAL },
-            name: 'facet-imports-no-other-facet',
+            fix: 'move what the two specifications share below the specifications — to `chain/` or the notion it is (`visitor/`, `expectations/`, `stubs/`, `services/`, `disk/`, `clock/`, `mocks/`) — and import it from there',
+            from: { path: '^src/specifications/([^/]+)/', pathNot: TEST_MATERIAL },
+            name: 'specification-imports-no-other-specification',
             read: READ_LAYERS,
-            to: { path: '^src/facets/[^/]+/', pathNot: '^src/facets/$1/' },
-            why: 'a facet reaching into a sibling is the coupling the slices exist to prevent',
+            to: { path: '^src/specifications/[^/]+/', pathNot: '^src/specifications/$1/' },
+            why: 'a specification reaching into a sibling is the coupling the slices exist to prevent',
         },
         {
             ...outside,
@@ -223,20 +229,23 @@ function facetRules(): ArchitectureRule[] {
                 path: '^(src|lint)/',
                 pathNot: either([
                     TEST_MATERIAL,
-                    '^src/facets/[^/]+/',
+                    '^src/specifications/[^/]+/',
                     ...[...readers.values()].map(({ path }) => path),
                 ]),
             },
-            name: 'facet-entered-by-its-face',
-            to: { path: '^src/facets/[^/]+/', pathNot: face },
+            name: 'specification-entered-by-its-face',
+            to: { path: '^src/specifications/[^/]+/', pathNot: face },
         },
         ...[...readers].map(([reader, { granted, path }]) => ({
             fix: outside.fix,
             from: { path, pathNot: TEST_MATERIAL },
             read: outside.read,
             why: outside.why,
-            name: ruleName('facet-entered-by-its-face-from', reader),
-            to: { path: '^src/facets/[^/]+/', pathNot: either([face, ...grantedTargets(granted)]) },
+            name: ruleName('specification-entered-by-its-face-from', reader),
+            to: {
+                path: '^src/specifications/[^/]+/',
+                pathNot: either([face, ...grantedTargets(granted)]),
+            },
         })),
     ];
 }
@@ -247,7 +256,7 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
         layerRules(layer, options),
     ),
     ...ownerRules(),
-    ...facetRules(),
+    ...specificationRules(),
     {
         fix: "spawn it from the concept folder that owns the program, or, inside `services/`, through `services/process/serve.ts`'s `runToCompletion`",
         from: { path: '^src/', pathNot: either([TEST_MATERIAL, ...SPAWNING_SITES.map(targetOf)]) },

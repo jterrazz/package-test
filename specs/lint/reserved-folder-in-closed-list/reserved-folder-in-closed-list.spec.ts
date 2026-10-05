@@ -46,7 +46,7 @@ describe('reserved-folder-in-closed-list', () => {
             specs/cli/orders/_shared/:1:1  jterrazz-check(reserved-folder-in-closed-list)
                 found: \`_shared/\` below the specs root
                 why: A folder under a specs tree whose name starts with \`_\` is never a subject, and the \`_\` names form a closed list: \`_setup/\` (the TypeScript that prepares specs), \`_seeds/\`, \`_requests/\`, \`_expected/\`, \`_fixtures/\` (the ground), and \`_shared/\` directly under the specs root.
-                fix: move what it holds into the reserved folders of \`cli/orders/\` itself — what a folder's leaves share sits in that folder's \`_setup/\` or ground; \`_shared/\` exists only as \`specs/_shared/\`, for what facets share
+                fix: move what it holds into the reserved folders of \`cli/orders/\` itself — what a folder's leaves share sits in that folder's \`_setup/\` or ground; \`_shared/\` exists only as \`specs/_shared/\`, for what specifications share
                 read: docs/reference/linting.md#reserved-folder-in-closed-list
             specs/cli/orders/seeds/:1:1  jterrazz-check(reserved-folder-in-closed-list)
                 found: \`seeds/\`, a reserved name without its \`_\` and no subject: it holds no spec
@@ -56,7 +56,7 @@ describe('reserved-folder-in-closed-list', () => {
             specs/cli/orders/shared/:1:1  jterrazz-check(reserved-folder-in-closed-list)
                 found: \`shared/\` below the specs root
                 why: A folder under a specs tree whose name starts with \`_\` is never a subject, and the \`_\` names form a closed list: \`_setup/\` (the TypeScript that prepares specs), \`_seeds/\`, \`_requests/\`, \`_expected/\`, \`_fixtures/\` (the ground), and \`_shared/\` directly under the specs root.
-                fix: move what it holds into the reserved folders of \`cli/orders/\` itself — what a folder's leaves share sits in that folder's \`_setup/\` or ground; \`_shared/\` exists only as \`specs/_shared/\`, for what facets share
+                fix: move what it holds into the reserved folders of \`cli/orders/\` itself — what a folder's leaves share sits in that folder's \`_setup/\` or ground; \`_shared/\` exists only as \`specs/_shared/\`, for what specifications share
                 read: docs/reference/linting.md#reserved-folder-in-closed-list
             specs/shared/:1:1  jterrazz-check(reserved-folder-in-closed-list)
                 found: \`shared/\`, a reserved name without its \`_\` and no subject: it holds no spec

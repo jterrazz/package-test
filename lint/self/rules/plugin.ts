@@ -1,11 +1,11 @@
 import type { LintPlugin } from '../../kit/project/rule.js';
-import { facetIsAComposition } from './architecture/facet-is-a-composition.js';
+import { specificationIsAComposition } from './architecture/specification-is-a-composition.js';
 
 /** A plugin of its own name, since oxlint keys a rule by the plugin registering it: nothing a consumer composes can name `jterrazz-self/<rule>`. Left out of the tarball. */
 const selfPlugin: LintPlugin = {
     meta: { name: 'jterrazz-self' },
     rules: {
-        'facet-is-a-composition': facetIsAComposition,
+        'specification-is-a-composition': specificationIsAComposition,
     },
 };
 

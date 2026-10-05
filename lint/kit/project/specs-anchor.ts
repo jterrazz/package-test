@@ -7,7 +7,7 @@ export function segments(path: string): string[] {
 
 export type SpecsAnchor = {
     directory: string;
-    /** `[facet, domain, basename]`. */
+    /** `[specification, domain, basename]`. */
     relative: string[];
 };
 

@@ -6,7 +6,7 @@ Use it when the subject under test is an installed native app. For a browser-ren
 
 ## What it specifies
 
-A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this facet's ([Component specs](component-specs.md) states the boundary and what would move it).
+A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this specification's ([Component specs](component-specs.md) states the boundary and what would move it).
 
 ## The constructor
 
@@ -65,7 +65,7 @@ The handle destructures to `{ mobile, cleanup, udid }` (rule `no-runner-alias`) 
 
 ### A declared Appium server
 
-`appium: { url }` points the runner at a server someone else runs — a device farm, a Mac across the network, the protocol double this package specifies its own mobile facet against. The runner connects to it instead of spawning the project's own, and it hands the server the device by capabilities (`appium:deviceName`, `appium:platformVersion` from `os`, `appium:udid` when declared) instead of resolving and booting it through `simctl`: the machine the server runs on owns its simulators. `cleanup` stops nothing it did not start, and under `mobile()` the run's one session outlives it ([One session per run](#one-session-per-run)).
+`appium: { url }` points the runner at a server someone else runs — a device farm, a Mac across the network, the protocol double this package specifies its own mobile specification against. The runner connects to it instead of spawning the project's own, and it hands the server the device by capabilities (`appium:deviceName`, `appium:platformVersion` from `os`, `appium:udid` when declared) instead of resolving and booting it through `simctl`: the machine the server runs on owns its simulators. `cleanup` stops nothing it did not start, and under `mobile()` the run's one session outlives it ([One session per run](#one-session-per-run)).
 
 ```typescript
 export const { cleanup, mobile } = await specification.mobile({
@@ -83,7 +83,11 @@ Under a server that outlives the file — a declared `appium` server, or the run
 
 ```typescript
 // a project of jterrazz.config.ts — one simulator, one Appium server, one session for the run
-const mobile = { device: { name: 'iPhone 17', os: '26.5' }, facet: 'mobile', root: 'apps/mobile' };
+const mobile = {
+    device: { name: 'iPhone 17', os: '26.5' },
+    specification: 'mobile',
+    root: 'apps/mobile',
+};
 ```
 
 The session is keyed on the server's URL and the capabilities asked for, so a second specification naming another app — or, under a declared `appium` server, another device — gets a session of its own, recorded and ended the same way. Files still run one at a time (`fileParallelism: false` is `mobile()`'s default): the app is terminated and relaunched by every `.open()`, and two files driving it at once would fight over it.
@@ -158,7 +162,7 @@ test('bookmarks an event from its detail screen', async () => {
 
 **No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result.
 
-The visitor's vocabulary is [The visitor](../reference/visitor.md)'s, the same one the website and component facets name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this page's, and it is three things.
+The visitor's vocabulary is [The visitor](../reference/visitor.md)'s, the same one the website and component specifications name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this page's, and it is three things.
 
 **The verbs are three.** `tap(element)` is the device's word for a click, `fill(element, value)` fills a text field, and `see(element)` is the only synchronization primitive. There is no `gone()` here ([The visitor § Verbs](../reference/visitor.md#verbs) says why). Every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality. Actionability includes **scroll-into-view**: when a target matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, so prefer a deep link then.
 
@@ -249,7 +253,7 @@ describe('feed', () => {
 
 **The ownership boundary.** The framework owns the simulator and the appium server it started — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
 
-The stub backend behaves exactly as on the website facet ([Website specs](website-specs.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared stub is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero stubs leaves the stub unguarded.
+The stub backend behaves exactly as on the website specification ([Website specs](website-specs.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared stub is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero stubs leaves the stub unguarded.
 
 ### Evidence on failure
 
@@ -273,7 +277,7 @@ Calling `specification.mobile()` (or `.open()`) without them throws exactly that
 
 ```text
 specs/mobile/
-├── mobile.specification.ts     # runner at the facet ROOT (rule `specs-at-declared-depth`)
+├── mobile.specification.ts     # runner at the specification ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── _expected/              # ALL expected fixtures, FLAT (*.screen.json, …)

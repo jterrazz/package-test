@@ -56,7 +56,7 @@ describe('fix-moves', () => {
         );
     });
 
-    test("--fix moves a pool fixture one facet's runner alone reads into that facet's _fixtures/", async () => {
+    test("--fix moves a pool fixture one specification's runner alone reads into that specification's _fixtures/", async () => {
         // Given - the runner-read tree
         const result = await checker
             .fixture(directory('./_fixtures/runner-read/'))

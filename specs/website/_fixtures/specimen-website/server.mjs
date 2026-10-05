@@ -56,7 +56,7 @@ const pages = {
     <script>document.getElementById('now').textContent = new Date().toISOString();</script>
     </body></html>`,
     // What the site was STARTED with: the URL of the process declared beside
-    // It, and the run id the facet minted — neither of them sampled here.
+    // It, and the run id the specification minted — neither of them sampled here.
     '/services': `<!doctype html><html lang="en"><head>${head('Fixture — Services', '/services')}
     </head><body><h1>Services</h1>
     <p id="api">${process.env.API_URL ?? 'unset'}</p>

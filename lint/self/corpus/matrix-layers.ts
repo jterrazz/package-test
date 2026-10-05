@@ -4,9 +4,9 @@ import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { sourcesUnder } from '../../kit/project/tree.js';
-import { FACET_MATRIX_COLUMNS } from './facet-matrix.js';
 import { MATRIX_SOURCES_TREES } from './matrix-sources.js';
 import { META_TESTS_LAYER_ROOTS } from './meta-tests.js';
+import { SPECIFICATION_MATRIX_COLUMNS } from './specification-matrix.js';
 
 export const MATRIX_LAYERS_MARKERS: Markers = {
     end: '<!-- /GENERATED:layers -->',
@@ -38,7 +38,7 @@ export function layers(root: string): Layer[] {
         0,
     );
     // invariant: a `*.specification.ts` builds a runner and asserts nothing.
-    const facetSpecs = FACET_MATRIX_COLUMNS.filter(
+    const specificationSpecs = SPECIFICATION_MATRIX_COLUMNS.filter(
         (column) => column !== 'module' && column !== 'lint',
     ).reduce(
         (total, column) =>
@@ -67,16 +67,16 @@ export function layers(root: string): Layer[] {
             where: '`lint/consumer/rules/<family>/<rule>.test.ts` beside the rule',
         },
         {
-            count: facetSpecs,
-            judges: "the framework's own facets, each met through its constructor",
+            count: specificationSpecs,
+            judges: "the framework's own specifications, each met through its constructor",
             layer: 'The package’s own specs',
-            where: '`specs/<facet>/`',
+            where: '`specs/<specification>/`',
         },
         {
             count: lintSpecs,
             judges: 'the built plugins, checkers and preset end to end, over fixture trees',
             layer: 'The lint specs',
-            where: '`specs/lint/<rule>/`, on the lint facet',
+            where: '`specs/lint/<rule>/`, on the lint specification',
         },
         {
             count: metaTests,

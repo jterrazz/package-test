@@ -52,12 +52,12 @@ describe('no-duplicate-ground', () => {
         expect(result.report).toMatch(`
             specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/users/_seeds/pair.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: give the copies the one name the entry should keep — they go by several, so \`typescript fix\` moves none
                 read: docs/reference/linting.md#no-duplicate-ground
             specs/api/users/_seeds/pair.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/orders/_seeds/two-users.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: give the copies the one name the entry should keep — they go by several, so \`typescript fix\` moves none
                 read: docs/reference/linting.md#no-duplicate-ground
         `);
@@ -74,12 +74,12 @@ describe('no-duplicate-ground', () => {
         expect(result.report).toMatch(`
             specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/users/_seeds/two-users.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: keep one copy in api/_seeds/two-users.sql — it holds another two-users.sql, so rename one of the two first
                 read: docs/reference/linting.md#no-duplicate-ground
             specs/api/users/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/orders/_seeds/two-users.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: keep one copy in api/_seeds/two-users.sql — it holds another two-users.sql, so rename one of the two first
                 read: docs/reference/linting.md#no-duplicate-ground
         `);
@@ -96,12 +96,12 @@ describe('no-duplicate-ground', () => {
         expect(result.report).toMatch(`
             specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/users/_seeds/two-users.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: keep one copy in api/_seeds/two-users.sql — \`typescript fix\` moves it there and rewrites every whole relative path that named a copy
                 read: docs/reference/linting.md#no-duplicate-ground
             specs/api/users/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/orders/_seeds/two-users.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: keep one copy in api/_seeds/two-users.sql — \`typescript fix\` moves it there and rewrites every whole relative path that named a copy
                 read: docs/reference/linting.md#no-duplicate-ground
         `);
@@ -115,12 +115,12 @@ describe('no-duplicate-ground', () => {
         expect(result.report).toMatch(`
             specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/users/_seeds/pair.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: give the copies the one name the entry should keep — they go by several, so \`typescript fix\` moves none
                 read: docs/reference/linting.md#no-duplicate-ground
             specs/api/users/_seeds/pair.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as api/orders/_seeds/two-users.sql
-                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across facets), named by the path that climbs to it.
+                why: Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (\`events/_seeds/<name>\` for \`events/list/\` and \`events/get/\`, \`<specs>/_shared/_seeds/<name>\` across specifications), named by the path that climbs to it.
                 fix: give the copies the one name the entry should keep — they go by several, so \`typescript fix\` moves none
                 read: docs/reference/linting.md#no-duplicate-ground
         `);

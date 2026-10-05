@@ -234,7 +234,7 @@ test('deploys from a shaped workspace', async () => {
 
 #### Where a fixture lives
 
-A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the `_fixtures/` of the lowest folder they share, `specs/_shared/_fixtures/` when they span facets, reached by the path that climbs to it. That law holds for every reserved folder, `_setup/` included, and its owner is [Conventions](../concepts/conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
+A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the `_fixtures/` of the lowest folder they share, `specs/_shared/_fixtures/` when they span specifications, reached by the path that climbs to it. That law holds for every reserved folder, `_setup/` included, and its owner is [Conventions](../concepts/conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
 
 ### `.link()` — a package the working directory resolves
 
@@ -369,7 +369,7 @@ A served stub — a `serve:` server in a spec document — routes the same way o
 
 ## The result
 
-A CLI result carries the streams, the exit code, the files the run left and — under Docker-aware mode — the containers it touched. Every accessor and every matcher it accepts is [Assertions](../reference/assertions.md)'s; what follows is the part only this facet has.
+A CLI result carries the streams, the exit code, the files the run left and — under Docker-aware mode — the containers it touched. Every accessor and every matcher it accepts is [Assertions](../reference/assertions.md)'s; what follows is the part only this specification has.
 
 ### Streams, JSON, grep
 

@@ -24,7 +24,7 @@ type Assert<Row extends true> = Row;
 
 type Carries<Verbs, Verb extends string> = Verb extends keyof Verbs ? true : false;
 
-// verb-belongs-to-its-facet — the verb set is the boundary between the facets; `goto` is the page's alone.
+// verb-belongs-to-its-specification — the verb set is the boundary between the specifications; `goto` is the page's alone.
 export type WebsiteGoes = Assert<Carries<WebsiteVisitor, 'goto'>>;
 export type MobileNeverGoes = Assert<Carries<MobileVisitor, 'goto'> extends false ? true : false>;
 export type ComponentNeverGoes = Assert<
@@ -60,7 +60,7 @@ type SharedBy<Chain> = Chain extends { with: (context: infer Context) => unknown
     ? keyof Context
     : never;
 
-// A chain's `with()` takes the settings its facet composes and nothing else, under a consumer's `strict` alone, and hands back the same chain.
+// A chain's `with()` takes the settings its specification composes and nothing else, under a consumer's `strict` alone, and hands back the same chain.
 export type ApiSharesClockAndHeaders = Assert<
     Same<SharedBy<ApiSpecification<'db'>>, 'clock' | 'headers'>
 >;
@@ -248,11 +248,11 @@ export const testSettingsRows = [
     defineConfig({ ...library, test: { routes: './openapi.yaml' } }),
     defineConfig({ ...library, test: { collections: ['data', 'people'] } }),
     defineConfig({ ...library, test: { methodless: ['/mcp'] } }),
-    defineConfig({ ...library, test: { projects: [{ facet: 'unit', include: ['src/**/*.test.ts'] }] } }),
+    defineConfig({ ...library, test: { projects: [{ specification: 'unit', include: ['src/**/*.test.ts'] }] } }),
     // @ts-expect-error test-settings-section — the collections are a list, never one word [`Type 'string' is not assignable to type 'readonly string[]'`]
     defineConfig({ ...library, test: { collections: 'data' } }),
     // @ts-expect-error test-settings-section — the section reads what it declares, and nothing else [`'coverage' does not exist in type 'TestSettings'`]
     defineConfig({ ...library, test: { coverage: 80 } }),
-    // @ts-expect-error test-settings-section — a project is built by the helper of a facet the package ships [`Type '"browser"' is not assignable to type 'TestFacet'`]
-    defineConfig({ ...library, test: { projects: [{ facet: 'browser' }] } }),
+    // @ts-expect-error test-settings-section — a project is built by the helper of a specification the package ships [`Type '"browser"' is not assignable to type 'TestSpecification'`]
+    defineConfig({ ...library, test: { projects: [{ specification: 'browser' }] } }),
 ];

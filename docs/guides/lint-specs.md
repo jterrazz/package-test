@@ -6,9 +6,9 @@ Use it when the behaviour you care about starts with "when this tree is linted�
 
 ## What it specifies
 
-A lint spec answers one question: **when this tree is linted, where does which rule report, and what does it say?** A rule is a real subject a team tests, like a binary: it has inputs (a tree), a contract (a report), and consumers who read that report. A rule reading ONE file is proven by its report over a tree holding that file; a rule reading the whole tree — a folder's shape, a manifest, what imports what — can only be proven that way, so one facet serves both.
+A lint spec answers one question: **when this tree is linted, where does which rule report, and what does it say?** A rule is a real subject a team tests, like a binary: it has inputs (a tree), a contract (a report), and consumers who read that report. A rule reading ONE file is proven by its report over a tree holding that file; a rule reading the whole tree — a folder's shape, a manifest, what imports what — can only be proven that way, so one specification serves both.
 
-What it does not do: judge the tree it runs in. The facet lints a fixture laid in a fresh working directory, never the repository's own sources — those are `typescript check`'s.
+What it does not do: judge the tree it runs in. The specification lints a fixture laid in a fresh working directory, never the repository's own sources — those are `typescript check`'s.
 
 ## The constructor
 
@@ -29,7 +29,7 @@ export const { lint, cleanup } = await specification.lint({
 afterAll(cleanup);
 ```
 
-A preset's laws, or a checker of the project's own, are linters of the same facet:
+A preset's laws, or a checker of the project's own, are linters of the same specification:
 
 ```typescript
 // specs/lint/preset-lint.specification.ts
@@ -118,7 +118,7 @@ specs/app/widget/widget.test.ts:8:36  acme(no-sleep)
 
 The diagnostics come in the order a reader walks the tree — file, then line, then column — whichever linter printed them and whatever order its threads finished in; a tally, a summary or any other line is not one. A clean tree is the empty text: `expect(result.report).toMatch('')`. Written in place and rewritten by `TEST_UPDATE=1` ([Tokens](../reference/tokens.md#update-mode-tokens-are-preserved)), the golden proves where each rule fired, which one, and what it teaches.
 
-oxlint's graphical rendering is refused, never read as a clean run: the facet states `--format=unix` itself, and a report handed to it in frames names the format to state.
+oxlint's graphical rendering is refused, never read as a clean run: the specification states `--format=unix` itself, and a report handed to it in frames names the format to state.
 
 ## Unique here
 
@@ -126,11 +126,11 @@ oxlint's graphical rendering is refused, never read as a clean run: the facet st
 
 Each linter the specification names, over the working directory:
 
-1. **oxlint**, when `plugins` or `config` is named: the real binary, with a config the facet writes outside the tree — `jsPlugins` the plugins, `rules` the specification's `config.rules` and the chain's `.rules()` over them — at `--format=unix`.
+1. **oxlint**, when `plugins` or `config` is named: the real binary, with a config the specification writes outside the tree — `jsPlugins` the plugins, `rules` the specification's `config.rules` and the chain's `.rules()` over them — at `--format=unix`.
 2. **each checker**, as `<command> <args> .`, from the tree, its first word resolved from the project's `node_modules/.bin` when it is installed there.
 3. **the presets' laws**, in process, through `presetChecks` of `@jterrazz/typescript/rules`, handed the `presets` and the `settings` as one settings object: each finding at its position, one about a whole file or folder at `:1:1`. Settings the kit cannot resolve are refused like a linter that fails with no diagnostic.
 
-A preset's own `oxlint` — its plugin, its rulebook — is not run by `presets`: the presets hand the facet their laws alone. A preset's rules are proven as any plugin's are, the plugin under `plugins` and its rules under `config`, so a report holds only the rules the specification names.
+A preset's own `oxlint` — its plugin, its rulebook — is not run by `presets`: the presets hand the specification their laws alone. A preset's rules are proven as any plugin's are, the plugin under `plugins` and its rules under `config`, so a report holds only the rules the specification names.
 
 A linter that fails and reports no diagnostic is refused in four parts rather than read as a clean tree — a plugin that does not load, a config oxlint cannot build, a checker that cannot start.
 

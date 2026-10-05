@@ -4,7 +4,7 @@ export function ReleaseNote() {
             <h1>Release 17</h1>
             <ul>
                 <li>Stubs replace contracts</li>
-                <li>Facets are compositions</li>
+                <li>Specifications are compositions</li>
             </ul>
         </section>
     );

@@ -40,7 +40,7 @@ describe('checkSpecCodeInSetupFolder', () => {
     });
 
     test('names each loose helper and each fixtures module, from the subject it serves, and leaves what is no such code', () => {
-        // Given - helpers no spec imports, deep under a leaf and under a facet with no spec, a fixtures module loose and one in a _setup, and code that is no loose helper
+        // Given - helpers no spec imports, deep under a leaf and under a specification with no spec, a fixtures module loose and one in a _setup, and code that is no loose helper
         const found = checkSpecCodeInSetupFolder(
             treeOf({
                 'specs/api/_setup/data.fixtures.ts': 'export {};\n',

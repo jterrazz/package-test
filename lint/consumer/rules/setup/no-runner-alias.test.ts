@@ -10,7 +10,7 @@ ruleTester().run('no-runner-alias', noRunnerAlias, {
             errors: [{ column: 8, line: 1, messageId: 'aliased' }],
         },
         {
-            name: 'Renamed facet.',
+            name: 'Renamed specification.',
             code: 'const { cli: myCli, cleanup } = await specification.cli("./bin");',
             errors: [{ column: 8, line: 1, messageId: 'aliased' }],
         },

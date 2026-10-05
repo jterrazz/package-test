@@ -14,7 +14,7 @@ function row(name: string, channel: Row['channel']): Row {
         audience: 'consumer',
         channel,
         sentence: '',
-        facet: 'model',
+        specification: 'model',
         family: 'expectations',
         fix: '',
         name,

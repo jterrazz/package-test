@@ -4,7 +4,6 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { FACET_MATRIX_COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,
     MATRIX_MARKERS,
@@ -12,12 +11,13 @@ import {
     matrixRows,
     renderMatrixBody,
 } from './matrix.js';
+import { SPECIFICATION_MATRIX_COLUMNS } from './specification-matrix.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
 const read = (relative: string): string => readFileSync(resolve(ROOT, relative), 'utf8');
 
-/** Meta-test `every-capability-exercised` (`every-capability-exercised`) — a capability a facet declares with no test file exercising it fails, unless its row names the reason. */
+/** Meta-test `every-capability-exercised` (`every-capability-exercised`) — a capability a specification declares with no test file exercising it fails, unless its row names the reason. */
 describe('matrix', () => {
     test('capability matrix (meta-test `every-capability-exercised`) — every declared capability is exercised, or says why it is not', () => {
         // Given - the matrix derived from the declaration and the package's own trees
@@ -25,7 +25,7 @@ describe('matrix', () => {
 
         // Then - no declared cell is empty without a reason stated on its row
         const holes = rows.flatMap((row) =>
-            FACET_MATRIX_COLUMNS.filter(
+            SPECIFICATION_MATRIX_COLUMNS.filter(
                 (column) =>
                     row.cells[column] === 0 && row.capability.exempt?.[column] === undefined,
             ).map((column) => `${row.capability.name} · ${column}`),
@@ -96,11 +96,11 @@ describe('matrix', () => {
     });
 
     test('capability matrix (meta-test `every-capability-exercised`) — an exemption excuses an empty cell, and goes the day the cell fills', () => {
-        // Given - every reason a capability row states, and the cell it states it for. A token row's reason is the matcher's and holds whatever a facet's goldens carry, so it is no debt to pay off
+        // Given - every reason a capability row states, and the cell it states it for. A token row's reason is the matcher's and holds whatever a specification's goldens carry, so it is no debt to pay off
         const stale = matrixRows(ROOT)
             .filter((row) => row.capability.group !== 'Token')
             .flatMap((row) =>
-                FACET_MATRIX_COLUMNS.filter(
+                SPECIFICATION_MATRIX_COLUMNS.filter(
                     (column) =>
                         row.capability.exempt?.[column] !== undefined && row.cells[column] !== 0,
                 ).map((column) => `${row.capability.name} · ${column}`),

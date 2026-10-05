@@ -6,16 +6,16 @@ import { cli } from '../checker-cli.specification.js';
 describe('cli', () => {
     // invariant: the checker's diagnostics are this package's product, so the whole stream is goldened.
     test('lint — checker CLI contract — a root that is not a specs tree is read as the project holding one', async () => {
-        // Given - the project root of a tree whose facet findings sit one level down
+        // Given - the project root of a tree whose specification findings sit one level down
         const result = await cli
             .fixture(directory('../../_shared/_fixtures/file-suffix-matches-place-placement/'))
             .exec('.');
 
-        // Then - the facet passes report what `specs` reports, anchored on the root that was named
+        // Then - the specification passes report what `specs` reports, anchored on the root that was named
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`typescript fix\` does it with \`git mv\` · read: docs/reference/linting.md#file-suffix-matches-place
-            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(facet-test-uses-its-runner): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/reference/linting.md#facet-test-uses-its-runner
+            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(specification-test-uses-its-runner): found: a test under the \`api\` specification that reaches no runner · why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/reference/linting.md#specification-test-uses-its-runner
             found: every finding above, and .jterrazz/baseline.json records no \`jterrazz-check/\` entry in its \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });

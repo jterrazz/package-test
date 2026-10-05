@@ -25,7 +25,7 @@ describe('refused', () => {
         await expect(specification.lint({ plugins: ['@acme/no-such-plugin'] })).rejects.toThrow(
             [
                 `found: plugins: ['@acme/no-such-plugin'], which resolves from no node_modules under ${PROJECT}`,
-                'why: A plugin is loaded by the oxlint the facet runs, from the path it resolves to.',
+                'why: A plugin is loaded by the oxlint the specification runs, from the path it resolves to.',
                 "fix: install @acme/no-such-plugin, or name the plugin by its path from the specification's folder",
                 'read: docs/guides/lint-specs.md#options',
             ].join('\n'),

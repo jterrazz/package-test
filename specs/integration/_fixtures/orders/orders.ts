@@ -14,7 +14,7 @@ export type Order = {
 /**
  * The module the integration specs are written against: it reads and writes a
  * REAL database and reaches a REAL provider. Nothing here knows it is under
- * test — which is the point of the facet: the subject is the module, and what
+ * test — which is the point of the specification: the subject is the module, and what
  * it stands on is declared by the specification.
  */
 export async function listOrders(databaseUrl: string): Promise<Order[]> {

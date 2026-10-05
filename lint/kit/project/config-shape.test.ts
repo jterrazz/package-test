@@ -7,9 +7,9 @@ import type { AstNode } from './ast.js';
 import {
     collectedSegments,
     collectsAFile,
-    facetOfSegments,
     includedGlobs,
     literateRunners,
+    specificationOfSegments,
     staticPrefix,
 } from './config-shape.js';
 import type { LiteralString } from './config-shape.js';
@@ -121,12 +121,12 @@ describe('config-shape', () => {
         ]);
     });
 
-    test('facetOfSegments — the first segment when it names a facet', () => {
-        // Given - segments opening on a facet, on another folder, and none
-        // Then - only the facet is read
+    test('specificationOfSegments — the first segment when it names a specification', () => {
+        // Given - segments opening on a specification, on another folder, and none
+        // Then - only the specification is read
         expect(
             [['api', 'users'], ['helpers'], [], undefined].map((segments) =>
-                facetOfSegments(segments),
+                specificationOfSegments(segments),
             ),
         ).toStrictEqual(['api', undefined, undefined, undefined]);
     });

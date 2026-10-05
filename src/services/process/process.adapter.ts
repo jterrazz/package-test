@@ -61,7 +61,7 @@ export class ProcessHandle implements ServiceHandle {
     }
 
     async initialize(): Promise<void> {
-        // invariant: never started by the orchestrator: the facet starts it once its siblings' connection strings are readable.
+        // invariant: never started by the orchestrator: the specification starts it once its siblings' connection strings are readable.
     }
 
     /** Isolation is the run's: one child per evaluation of the specification module, told apart by the minted id. */
@@ -83,7 +83,7 @@ export class ProcessHandle implements ServiceHandle {
             typeof this.options.env === 'function' ? this.options.env(services) : this.options.env;
         this.served = new ServedProcess(this.options, root, 'process', {
             ...stated,
-            // invariant: one id per run, minted by the facet: a spec reads it instead of sampling `Date.now()` (`no-sampled-value-in-expectation`).
+            // invariant: one id per run, minted by the specification: a spec reads it instead of sampling `Date.now()` (`no-sampled-value-in-expectation`).
             TEST_RUN_ID: runId,
         });
         this.connectionString = await this.served.start();
@@ -97,7 +97,7 @@ export class ProcessHandle implements ServiceHandle {
         this.started = false;
     }
 
-    /** What it was declared as — what a facet reads to start it in a slot of its own. */
+    /** What it was declared as — what a specification reads to start it in a slot of its own. */
     get spec(): ProcessOptions {
         return this.options;
     }

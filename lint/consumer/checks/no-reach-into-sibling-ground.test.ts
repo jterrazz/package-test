@@ -37,8 +37,8 @@ describe('no-reach-into-sibling-ground', () => {
             ),
         ).toStrictEqual([
             'no-reach-into-sibling-ground specs/_expected:1:- _expected/ at the specs root, shared ground outside specs/_shared/ — move it to specs/_shared/_expected/ — `typescript fix` moves it and rewrites every whole relative path that names it',
-            'no-reach-into-sibling-ground specs/api/users/users.spec.ts:5:21 "../orders/_expected/sibling.json" leaves specs/api/users — move what it names beside specs/api/users, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: specs/_shared/<role>/ when they span facets',
-            'no-reach-into-sibling-ground specs/api/users/users.spec.ts:6:21 "../../_expected/root.json" leaves specs/api/users — move what it names beside specs/api/users, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: specs/_shared/<role>/ when they span facets',
+            'no-reach-into-sibling-ground specs/api/users/users.spec.ts:5:21 "../orders/_expected/sibling.json" leaves specs/api/users — move what it names beside specs/api/users, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: specs/_shared/<role>/ when they span specifications',
+            'no-reach-into-sibling-ground specs/api/users/users.spec.ts:6:21 "../../_expected/root.json" leaves specs/api/users — move what it names beside specs/api/users, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: specs/_shared/<role>/ when they span specifications',
         ]);
     });
 

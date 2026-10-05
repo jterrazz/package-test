@@ -10,25 +10,25 @@ const SUITES = groundTree({ 'posts/add/add.test.ts': '', 'tree/row-names.test.ts
 ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
     invalid: [
         {
-            name: 'A test directly at the facet root — no domain folder.',
+            name: 'A test directly at the specification root — no domain folder.',
             code: 'const x = 1;',
-            errors: [{ column: 0, line: 1, messageId: 'testAtFacetRoot' }],
+            errors: [{ column: 0, line: 1, messageId: 'testAtSpecificationRoot' }],
             filename: '/repo/specs/job/job.test.ts',
         },
         {
-            name: 'A test nested deeper than facet/domain.',
+            name: 'A test nested deeper than specification/domain.',
             code: 'const x = 1;',
             errors: [{ column: 0, line: 1, messageId: 'testTooDeep' }],
             filename: '/repo/specs/cli/check/linter/linter.test.ts',
         },
         {
-            name: 'A specification inside a domain rather than at the facet root.',
+            name: 'A specification inside a domain rather than at the specification root.',
             code: 'const x = 1;',
-            errors: [{ column: 0, line: 1, messageId: 'specNotAtFacetRoot' }],
+            errors: [{ column: 0, line: 1, messageId: 'specNotAtSpecificationRoot' }],
             filename: '/repo/specs/api/intercepts/intercepts.specification.ts',
         },
         {
-            name: '`_shared/` is the shared ground, never a facet: no spec and no specification under it.',
+            name: '`_shared/` is the shared ground, never a specification: no spec and no specification under it.',
             code: 'const x = 1;',
             errors: [{ column: 0, line: 1, messageId: 'specInShared' }],
             filename: '/repo/specs/_shared/users/listed.spec.ts',
@@ -39,7 +39,7 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
             filename: '/repo/specs/_shared/shared.specification.ts',
         },
         {
-            name: 'The facet level is reserved whatever depth the tree declares.',
+            name: 'The specification level is reserved whatever depth the tree declares.',
             code: 'const x = 1;',
             errors: [{ column: 0, line: 1, messageId: 'specInShared' }],
             filename: '/repo/specs/_shared/tree/tree.spec.ts',
@@ -58,12 +58,12 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
         {
             code: 'const x = 1;',
             filename: '/repo/specs/api/helpers.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
             code: 'const x = 1;',
             filename: '/repo/specs/api/users/list/deep/helpers.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
             code: 'const x = 1;',
@@ -71,14 +71,14 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
             options: [{ depth: 'mirror' }],
         },
         {
-            name: 'Tests at facet/domain depth (aspect name is free).',
+            name: 'Tests at specification/domain depth (aspect name is free).',
             code: 'const x = 1;',
             filename: '/repo/specs/api/responses/responses.test.ts',
         },
         { code: 'const x = 1;', filename: '/repo/specs/cli/check/linter.test.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/integration/redis/redis.test.ts' },
         {
-            name: 'Specifications at the facet root.',
+            name: 'Specifications at the specification root.',
             code: 'const x = 1;',
             filename: '/repo/specs/api/api.specification.ts',
         },
@@ -93,7 +93,7 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
         {
             code: 'const x = 1;',
             filename: '/repo/specs/integration/shared/shared.spec.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
             name: 'Module tests under src/ follow the neighbour rule (`test-beside-its-module`), not `specs-at-declared-depth`.',
@@ -104,58 +104,58 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
             name: 'The default is explicit-equivalent: stating it changes nothing.',
             code: 'const x = 1;',
             filename: '/repo/specs/api/responses/responses.test.ts',
-            options: [{ depth: 'facet-domain' }],
+            options: [{ depth: 'specification-domain' }],
         },
     ],
 });
 
-ruleTester().run('specs-at-declared-depth (depth: facet)', specsAtDeclaredDepth, {
+ruleTester().run('specs-at-declared-depth (depth: specification)', specsAtDeclaredDepth, {
     invalid: [
         {
-            name: 'A test loose at the specs root belongs to no facet.',
+            name: 'A test loose at the specs root belongs to no specification.',
             code: 'const x = 1;',
-            errors: [{ column: 0, line: 1, messageId: 'testOutsideFacet' }],
+            errors: [{ column: 0, line: 1, messageId: 'testOutsideSpecification' }],
             filename: '/repo/specs/row-names.test.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
             name: 'A test nested below the one domain folder the mode allows.',
             code: 'const x = 1;',
-            errors: [{ column: 0, line: 1, messageId: 'testTooDeepForFacet' }],
+            errors: [{ column: 0, line: 1, messageId: 'testTooDeepForSpecification' }],
             filename: '/repo/specs/tree/rows/names/names.test.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
-            name: 'A specification inside a domain rather than at the facet root.',
+            name: 'A specification inside a domain rather than at the specification root.',
             code: 'const x = 1;',
-            errors: [{ column: 0, line: 1, messageId: 'specNotAtFacetRoot' }],
+            errors: [{ column: 0, line: 1, messageId: 'specNotAtSpecificationRoot' }],
             filename: `${SUITES}/tree/rows/tree.specification.ts`,
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
     ],
     valid: [
         {
-            name: 'At the facet root — the asset-less sibling shape.',
+            name: 'At the specification root — the asset-less sibling shape.',
             code: 'const x = 1;',
             filename: '/repo/specs/tree/row-names.test.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
             name: 'One domain down — the shape a test with its own assets earns.',
             code: 'const x = 1;',
             filename: '/repo/specs/source/import-paths/import-paths.test.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
-            name: 'Specifications sit at the facet root, exactly as in facet-domain.',
+            name: 'Specifications sit at the specification root, exactly as in specification-domain.',
             code: 'const x = 1;',
             filename: `${SUITES}/tree/tree.specification.ts`,
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
         {
             code: 'const x = 1;',
             filename: '/repo/src/specification/matching/match.test.ts',
-            options: [{ depth: 'facet' }],
+            options: [{ depth: 'specification' }],
         },
     ],
 });
@@ -179,7 +179,7 @@ ruleTester().run('specs-at-declared-depth (depth: mirror)', specsAtDeclaredDepth
         ...['/repo/specs/cli.specification.ts', `${SUITES}/posts/add/add.specification.ts`].map(
             (filename) => ({
                 code: 'const x = 1;',
-                errors: [{ column: 0, line: 1, messageId: 'specNotAtFacetRoot' }],
+                errors: [{ column: 0, line: 1, messageId: 'specNotAtSpecificationRoot' }],
                 filename,
                 options: [{ depth: 'mirror' }],
             }),
@@ -199,7 +199,7 @@ ruleTester().run('specs-at-declared-depth (depth: mirror)', specsAtDeclaredDepth
             options: [{ depth: 'mirror' }],
         },
         {
-            name: 'Three deep — the mirror has no maximum, unlike facet-domain.',
+            name: 'Three deep — the mirror has no maximum, unlike specification-domain.',
             code: 'const x = 1;',
             filename: '/repo/specs/a/b/c/c.test.ts',
             options: [{ depth: 'mirror' }],
@@ -263,7 +263,7 @@ ruleTester().run('specs-at-declared-depth (ground)', specsAtDeclaredDepth, {
             options: [{ depth: 'off' }],
         },
         // invariant: a module in a first-level folder holding no test, in every mode.
-        ...['facet-domain', 'off'].map((depth) => ({
+        ...['specification-domain', 'off'].map((depth) => ({
             code: 'const x = 1;',
             errors: [{ column: 0, line: 1, messageId: 'strayFolder' }],
             filename: `${CODE_GROUND}/support/next-cursor.ts`,
@@ -301,7 +301,7 @@ ruleTester().run('specs-at-declared-depth (depth: off)', specsAtDeclaredDepth, {
     invalid: [
         {
             code: 'const x = 1;',
-            errors: [{ column: 0, line: 1, messageId: 'specNotAtFacetRoot' }],
+            errors: [{ column: 0, line: 1, messageId: 'specNotAtSpecificationRoot' }],
             filename: '/repo/specs/api/intercepts/intercepts.specification.ts',
             options: [{ depth: 'off' }],
         },

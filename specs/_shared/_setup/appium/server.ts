@@ -15,7 +15,7 @@ import { StaleElementError } from './stale-element-error.js';
  * outside: the Appium protocol double — a WebDriver server that answers like Appium's
  * XCUITest driver, from a {@link ScriptedApp} instead of a simulator.
  *
- * It speaks the W3C endpoints the mobile facet's adapter calls: a session
+ * It speaks the W3C endpoints the mobile specification's adapter calls: a session
  * created for the app's bundle id on a named device, the `mobile:` scripts
  * that terminate, activate, deep-link and scroll to an element, element
  * search by `-ios predicate string`, click, clear and value, attributes, the

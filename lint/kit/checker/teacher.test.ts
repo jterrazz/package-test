@@ -16,7 +16,7 @@ function spottedAt(path: string): {
 const PROBE: Row = {
     audience: 'consumer',
     channel: 'checker',
-    facet: 'model',
+    specification: 'model',
     family: 'layout',
     fix: 'A probe fix.',
     name: 'probe-rule',

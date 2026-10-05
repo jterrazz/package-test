@@ -13,7 +13,7 @@ import {
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { entriesOf } from '../../kit/project/facet-folders.js';
+import { entriesOf } from '../../kit/project/specification-folders.js';
 import { isModuleName, isUnmarkedReserved } from '../../kit/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
@@ -43,7 +43,7 @@ function judged(
                 rootDir,
                 folder,
                 `\`${name}/\` below the specs root`,
-                `move what it holds into the reserved folders of \`${relative(specsRoot, dirname(folder))}/\` itself — what a folder's leaves share sits in that folder's \`${SETUP_FOLDER}/\` or ground; \`${SHARED_FOLDER}/\` exists only as \`specs/${SHARED_FOLDER}/\`, for what facets share`,
+                `move what it holds into the reserved folders of \`${relative(specsRoot, dirname(folder))}/\` itself — what a folder's leaves share sits in that folder's \`${SETUP_FOLDER}/\` or ground; \`${SHARED_FOLDER}/\` exists only as \`specs/${SHARED_FOLDER}/\`, for what specifications share`,
             );
         }
         return undefined;

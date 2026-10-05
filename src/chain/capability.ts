@@ -26,7 +26,7 @@ export type Intersect<Union> = (Union extends unknown ? (member: Union) => void 
     ? All
     : never;
 
-export type FacetParams = {
+export type SpecificationParams = {
     readonly databaseKey: string;
     readonly services: Record<string, unknown>;
 };
@@ -34,7 +34,7 @@ export type FacetParams = {
 /** Each definition extends this, naming its methods over `this['self']` and `this['params']`; `ChainOf` fills both in. */
 export interface ChainSignature {
     readonly chain: object;
-    readonly params: FacetParams;
+    readonly params: SpecificationParams;
     readonly self: unknown;
 }
 

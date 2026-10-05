@@ -32,14 +32,14 @@ function counts(published: Row[]): Record<Row['channel'], number> {
     return tally;
 }
 
-const COLUMNS = ['Rule', 'Facet', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
+const COLUMNS = ['Rule', 'Specification', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
 
 export function rowTable(rows: Row[]): string {
     return markdownTable(
         COLUMNS,
         rows.map((entry) => [
             `${anchor(entry.name)}\`${entry.name}\``,
-            entry.facet,
+            entry.specification,
             entry.channel,
             entry.reach,
             cell(entry.sentence),

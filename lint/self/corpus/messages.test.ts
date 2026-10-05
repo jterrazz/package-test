@@ -65,7 +65,7 @@ describe('messages', () => {
     });
 
     test('`message-has-four-parts` — every checker finding a spec goldens is a whole lesson', () => {
-        // Given - the reports the lint facet goldens, and the full-output goldens of the checker's own command line
+        // Given - the reports the lint specification goldens, and the full-output goldens of the checker's own command line
         const lines = [
             ...goldenCheckerLines(resolve(ROOT, 'specs/lint')),
             ...goldenCheckerLines(resolve(ROOT, 'specs/cli')),

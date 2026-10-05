@@ -29,10 +29,10 @@ afterAll(() => {
 
 describe('specsAnchor', () => {
     test('specsAnchor — anchors a spec on its specs/ directory and lists the way down', () => {
-        // Given - a test at facet/domain depth
+        // Given - a test at specification/domain depth
         const file = join(project, 'specs', 'api', '_requests', 'headers.test.ts');
 
-        // Then - the anchor is the specs dir, and the relative segments are [facet, domain, basename] — the depth `specs-at-declared-depth` measures
+        // Then - the anchor is the specs dir, and the relative segments are [specification, domain, basename] — the depth `specs-at-declared-depth` measures
         const anchor = specsAnchor(file);
         expect(anchor?.directory).toBe(join(project, 'specs'));
         expect(anchor?.relative).toStrictEqual(['api', '_requests', 'headers.test.ts']);
@@ -48,7 +48,7 @@ describe('specsAnchor', () => {
     });
 
     test('specsAnchor — takes the NEAREST specs ancestor, not the outermost', () => {
-        // Given - a fixture project nested inside the repo's own specs tree — the shape where an innermost search and an outermost one read one file as two different facets
+        // Given - a fixture project nested inside the repo's own specs tree — the shape where an innermost search and an outermost one read one file as two different specifications
         const file = join(nested, 'integrations', 'adapter.test.ts');
 
         // Then - one answer: the innermost tree owns the file

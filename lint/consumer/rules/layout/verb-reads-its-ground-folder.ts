@@ -71,7 +71,7 @@ function crossing(reads: string | undefined, found: string | undefined): Record<
         where:
             reads === undefined
                 ? 'the folder its verb reads'
-                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across facets)`,
+                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across specifications)`,
     };
 }
 

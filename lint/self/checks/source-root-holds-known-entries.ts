@@ -8,7 +8,7 @@ const TREES = [
     'clock',
     'disk',
     'expectations',
-    'facets',
+    'specifications',
     'mocks',
     'services',
     'stubs',

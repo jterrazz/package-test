@@ -24,8 +24,8 @@ describe('package-exports', () => {
         // Given - the source modules every bundle's map lists (`npm run build` first)
         const sources = compiledSources();
 
-        // Then - the facet constructors among them, and not one test, fixture, spec or ground file
-        expect(sources).toContain(resolve(ROOT, 'src/facets/api/api.handle.ts'));
+        // Then - the specification constructors among them, and not one test, fixture, spec or ground file
+        expect(sources).toContain(resolve(ROOT, 'src/specifications/api/api.handle.ts'));
         const material = sources.filter((source) => materialAt(source) !== undefined);
         expect(material.map((source) => relative(ROOT, source))).toStrictEqual([]);
     });

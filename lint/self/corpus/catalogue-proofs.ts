@@ -52,7 +52,7 @@ export function runtimeMarkers(): Set<string> {
     return found;
 }
 
-// invariant: a rule's specs in `specs/lint/<id>/`, on the lint facet; `meta/` holds the specs named for the meta row they prove.
+// invariant: a rule's specs in `specs/lint/<id>/`, on the lint specification; `meta/` holds the specs named for the meta row they prove.
 export const lintSpecEntries = (specsLint: string): string[] =>
     readdirSync(specsLint, { recursive: true }).map((entry) => String(entry).replaceAll('\\', '/'));
 
@@ -120,7 +120,7 @@ export const SELF_PASSES = new Set<string>(SELF_CHECKER_PASS_IDS);
 /** Files probing the CLI boundary, plus the `output-asserted-as-a-golden` kitchen-sink, sit outside the rule↔fixture inventory. */
 export const CLI_CONTRACT_SPECS = new Set(['kitchen-sink']);
 
-export const FACET_CONTRACT_SPECS = new Set(['linters', 'rule-tester']);
+export const SPECIFICATION_CONTRACT_SPECS = new Set(['linters', 'rule-tester']);
 
 export const citingFiles = (): string[] => {
     const found: string[] = [];

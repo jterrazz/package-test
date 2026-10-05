@@ -87,12 +87,12 @@ const SEAMS: readonly Seam[] = [
         seam: 'clock',
     },
     {
-        fix: 'the website facet drives the browser — `specification.website()` owns the page, and the peer is its',
+        fix: 'the website specification drives the browser — `specification.website()` owns the page, and the peer is its',
         packages: ['playwright', 'playwright-core', '@playwright/test'],
         seam: 'browser',
     },
     {
-        fix: 'the mobile facet drives the simulator — `specification.mobile()` owns the session, and the peers are its',
+        fix: 'the mobile specification drives the simulator — `specification.mobile()` owns the session, and the peers are its',
         packages: ['webdriverio', 'appium'],
         seam: 'simulator',
     },
@@ -196,14 +196,14 @@ const CLOSED_LIST = `regex:${either(['[^_].*', ...RESERVED_FOLDERS.map((name) =>
 
 const NAMES: NamesRule[] = [
     {
-        ...taughtBy('specs-root-holds-facets-and-shared'),
-        fix: `move a file where it belongs — code into \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one facet that reads it, data into the ground folder of its role — and a \`${SETUP_FOLDER}/\` to \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\``,
+        ...taughtBy('specs-root-holds-specifications-and-shared'),
+        fix: `move a file where it belongs — code into \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one specification that reads it, data into the ground folder of its role — and a \`${SETUP_FOLDER}/\` to \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\``,
         ls: {
             '**/specs': specsRootFiles(),
             '**/specs/*': { '.dir': `regex:${anyNameBut(SETUP_FOLDER)}` },
             '**/specs/*/*': { '.dir': 'regex:.+' },
         },
-        name: 'specs-root-holds-facets-and-shared',
+        name: 'specs-root-holds-specifications-and-shared',
     },
     {
         ...taughtBy('underscore-name-in-closed-list'),
@@ -218,7 +218,7 @@ const NAMES: NamesRule[] = [
     },
     {
         ...taughtBy('spec-file-in-a-specs-tree'),
-        fix: 'move it under `specs/<facet>/`, or rename it `.test.ts` beside the module it covers',
+        fix: 'move it under `specs/<specification>/`, or rename it `.test.ts` beside the module it covers',
         ignore: ['specs', '**/specs'],
         ls: { '**': { '.*.spec.ts': 'exists:0', '.spec.ts': 'exists:0' } },
         name: 'spec-file-in-a-specs-tree',

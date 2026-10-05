@@ -27,7 +27,7 @@ ruleTester().run('no-redundant-root', noRedundantRoot, {
             filename: IGNORED_SPEC,
         },
         {
-            name: "Every facet takes the option: an api runner's root is as redundant.",
+            name: "Every specification takes the option: an api runner's root is as redundant.",
             code: 'await specification.api({ root: "../..", server: () => app });',
             errors: [{ column: 26, line: 1, messageId: 'redundant' }],
             filename: SPEC_FILE,

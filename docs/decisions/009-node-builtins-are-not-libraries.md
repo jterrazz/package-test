@@ -14,7 +14,7 @@ port in `kernel/` or in the ONE slice that needs it ([01 — Architecture § The
 source trees](../concepts/architecture.md#the-source-trees)). `one-owner-per-library` (today the `library-*-has-one-owner` rules of `lint/self/checks/architecture.ts`, over `OWNERS_OF_LIBRARIES` in `lint/self/checks/libraries.ts`) holds the
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
-`facets/cli/process/` (the subject binary), `facets/mobile/server/` (`xcrun
+`specifications/cli/process/` (the subject binary), `specifications/mobile/server/` (`xcrun
 simctl`), `expectations/command/` (`docker` for a result's containers), the git tree the rules kit reads (what git does not ignore) and, until
 this record, `world/services/sqlite/` (`prisma db push`).
 
@@ -30,7 +30,7 @@ forbids.
 - A node builtin is not a library in I11's sense: `OWNERS_OF_LIBRARIES` lists
   third-party packages, and the one-slice-per-library rule is read that way.
 - A slice spawns only the program its own concept owns, from within that one
-  concept folder: the cli facet its subject, the mobile server the simulator
+  concept folder: the cli specification its subject, the mobile server the simulator
   tools, `expectations/command/docker-cli.ts` `docker` (its lookup and its
   container reads, one module with one timeout), the git tree `git`.
 - `docker` stays in `expectations/`, not in `world/services/` beside
@@ -41,7 +41,7 @@ forbids.
   (`CliResult.container()`, `ContainerAccessor`). Both readers are results,
   and `expectations/` may import only the kernel, so the move would need an
   `expectations → world` edge the layer map forbids, or a port threaded
-  through every `CliResult` a facet builds for one program with one
+  through every `CliResult` a specification builds for one program with one
   lifecycle — `execSync('docker …')` renamed.
 - Within `world/`, every process goes through `world/services/process/serve.ts`:
   sqlite's schema push now calls its `runToCompletion`, so `world/` has one
@@ -54,8 +54,8 @@ forbids.
 
 - The layer map holds the builtin rule: `architecture/process-spawned-by-its-program-owner`
   lets `node:child_process` into `src/` from the four spawning sites alone —
-  `expectations/command/docker-cli.ts`, `facets/cli/process/exec.adapter.ts`,
-  `facets/mobile/server/simulator.ts` and `world/services/process/serve.ts` —
+  `expectations/command/docker-cli.ts`, `specifications/cli/process/exec.adapter.ts`,
+  `specifications/mobile/server/simulator.ts` and `world/services/process/serve.ts` —
   so a second spawning site fails the Architecture pass. `lint/`'s own tools
   and probes are not the product's slices, and stay outside it.
 - A future port for spawning is not ruled out: when two slices spawn the SAME

@@ -35,7 +35,7 @@ describe('conventions', () => {
     });
 
     test("the installed toolchain's fix applies the conventions' own fixes", async () => {
-        // Given - the consumer whose spec wears the unit's suffix under a facet folder
+        // Given - the consumer whose spec wears the unit's suffix under a specification folder
 
         // When - the fixes run
         const result = await cli

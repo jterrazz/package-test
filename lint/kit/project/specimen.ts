@@ -130,8 +130,8 @@ function importedSpecimen(text: string): string | undefined {
 }
 
 /** Nothing when every runner drives the project's own app. */
-export function specimenOf(file: string, text: string, facet: string): string | undefined {
-    if (facet === CALLS_A_MODULE) {
+export function specimenOf(file: string, text: string, specification: string): string | undefined {
+    if (specification === CALLS_A_MODULE) {
         const called = importedSpecimen(text);
         if (called !== undefined) {
             return called;

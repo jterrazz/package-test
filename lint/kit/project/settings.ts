@@ -9,13 +9,13 @@ export type TestSettings = {
     methodless?: readonly string[];
     production?: { allow: Readonly<Record<string, string>> };
     /** Path to an OpenAPI document (JSON or YAML) declaring the routes, when the app carries no route table. */
-    /** The vitest projects the derived `vitest.config.ts` runs, each a facet and that facet's options; none, the preset's one root project. */
+    /** The vitest projects the derived `vitest.config.ts` runs, each a specification and that specification's options; none, the preset's one root project. */
     projects?: readonly TestProject[];
     routes?: string;
 };
 
-/** The helpers a project is built by, named by their facet. */
-export type TestFacet =
+/** The helpers a project is built by, named by their specification. */
+export type TestSpecification =
     | 'api'
     | 'cli'
     | 'component'
@@ -26,9 +26,9 @@ export type TestFacet =
     | 'unit'
     | 'website';
 
-/** A project of the derived config: its facet, the global setups it runs, and the options its helper takes. */
+/** A project of the derived config: its specification, the global setups it runs, and the options its helper takes. */
 export type TestProject = {
-    readonly facet: TestFacet;
+    readonly specification: TestSpecification;
     readonly setup?: readonly string[];
     readonly [option: string]: unknown;
 };

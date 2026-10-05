@@ -35,7 +35,7 @@ async function missing(peer: string, from: string): Promise<string> {
     try {
         await loadPeer(
             peer,
-            'the facet',
+            'the specification',
             async () => await Promise.reject(new Error(`Cannot find module '${peer}'`)),
             from,
         );
@@ -65,7 +65,7 @@ describe('peer', () => {
     });
 
     // RUNTIME seam-is-an-optional-peer — a missing peer is refused where it was needed, naming the peer and the install command.
-    test('loadPeer — an optional peer, or a message that fixes it — names the facet that asked, the peer, and the command, keeping the original failure as the cause', async () => {
+    test('loadPeer — an optional peer, or a message that fixes it — names the specification that asked, the peer, and the command, keeping the original failure as the cause', async () => {
         // Given - a peer that is not installed
         const original = new Error("Cannot find module 'redis'");
         const failed = loadPeer(
@@ -115,7 +115,7 @@ describe('peer', () => {
         expect(installerAt('/')).toStrictEqual({ command: 'npm install -D', name: 'npm' });
     });
 
-    test('requireBuiltPeer — installed, and still not there — names the peer, the facet and the build command its manager needs, keeping the cause', () => {
+    test('requireBuiltPeer — installed, and still not there — names the peer, the specification and the build command its manager needs, keeping the cause', () => {
         // Given - a native peer whose binding was never compiled, under each manager
         const message = 'Could not locate the bindings file. Tried:\n → build/better_sqlite3.node';
 

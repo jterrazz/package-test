@@ -171,20 +171,20 @@ describe('serve', () => {
             adapter = new ServedProcess(options, process.cwd(), undefined, extra);
             const failure = await adapter.start().then(() => '', String);
             outputs.push({
-                .../found: (?<facet>specification\.\w+\(\)):[\s\S]*Output:\n(?<output>.*)\n/mu.exec(
+                .../found: (?<specification>specification\.\w+\(\)):[\s\S]*Output:\n(?<output>.*)\n/mu.exec(
                     failure,
                 )?.groups,
             });
         }
 
-        // Then - each child saw what its options state, on the default facet's refusal
+        // Then - each child saw what its options state, on the default specification's refusal
         expect(outputs).toStrictEqual([
             {
-                facet: 'specification.website()',
+                specification: 'specification.website()',
                 output: JSON.stringify([SOURCE_FOLDER, 'set', 'added', null, 1]),
             },
             {
-                facet: 'specification.website()',
+                specification: 'specification.website()',
                 output: JSON.stringify([process.cwd(), null, null, null, 1]),
             },
         ]);

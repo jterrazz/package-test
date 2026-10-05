@@ -12,7 +12,7 @@ deleted.
 16 marked the ground a spec stands on with an underscore — `_fixtures/`,
 `_seeds/`, `_requests/`, `_expected/`. The first plan for 17 dropped the
 marker: four bare names, reserved under `specs/`, read better in a path, and
-the rules refused a facet or a domain that took one of them. The tree ran on
+the rules refused a specification or a domain that took one of them. The tree ran on
 bare names through most of the release.
 
 Three things then weighed the other way. The reserved set grew: the
@@ -35,7 +35,7 @@ holding no spec is refused with its `_` spelling.
 
 One placement law holds code and data alike: a shared thing sits in the
 reserved folder of the lowest folder its readers share, and `_shared/` only
-across facets. No `package.json` `imports` alias is added by default: a
+across specifications. No `package.json` `imports` alias is added by default: a
 relative import states the placement the law judges.
 
 The law and its rows are

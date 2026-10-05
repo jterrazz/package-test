@@ -52,7 +52,7 @@ const TREE = {
 
 describe('setup-module-at-lowest-common-folder', () => {
     test('a setup module sits in the setup folder of the lowest folder its readers share, or in its one reader', () => {
-        // Given - modules read from across facets, by one folder, by two, by one spec small and large, through an alias, by a stub reader, and by none
+        // Given - modules read from across specifications, by one folder, by two, by one spec small and large, through an alias, by a stub reader, and by none
         const root = packageWith(TREE);
 
         // Then - each misplaced module, told where it goes

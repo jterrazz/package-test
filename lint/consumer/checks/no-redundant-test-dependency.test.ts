@@ -98,7 +98,7 @@ describe('no-redundant-test-dependency', () => {
 
     test('members — members — the member pass — what a workspace member owes — the RN testing library stands where jest is the runner (`no-redundant-test-dependency`)', () => {
         // Given - a member whose test script is jest and whose vocabulary is the React Native one
-        // Then - nothing fires: the facet that would replace it does not reach that runtime yet
+        // Then - nothing fires: the specification that would replace it does not reach that runtime yet
         expect(codes(memberAt('rn-jest'))).toStrictEqual([]);
     });
 

@@ -1,8 +1,6 @@
 /** The page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name. */
 
 import { nodeOnlyClass, refuse } from './chain/refusals/node-only.js';
-import type { ruleTester as ruleTesterFn } from './facets/lint/lint.face.js';
-import type { Specification } from './facets/specification.js';
 import type { postgres as postgresFn } from './services/postgres/postgres.adapter.js';
 import type {
     processService as processFn,
@@ -10,10 +8,12 @@ import type {
 } from './services/process/process.adapter.js';
 import type { redis as redisFn } from './services/redis/redis.adapter.js';
 import type { sqlite as sqliteFn } from './services/sqlite/sqlite.adapter.js';
+import type { ruleTester as ruleTesterFn } from './specifications/lint/lint.face.js';
+import type { Specification } from './specifications/specification.js';
 
 export type * from './index.js';
 
-export { component } from './facets/component/component.face.browser.js';
+export { component } from './specifications/component/component.face.browser.js';
 /** The seven constructors, present and refusing in a page. */
 export const specification: Specification = {
     api: () => refuse('specification.api()'),

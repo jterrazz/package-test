@@ -39,9 +39,9 @@ const ACTION_MODULES = {
     visit: 'visit',
 };
 
-/** Meta-tests `chain-loads-in-a-page` (`chain-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component facet composes a setup inside a page, so what the chain and a setup load must load there too. */
+/** Meta-tests `chain-loads-in-a-page` (`chain-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component specification composes a setup inside a page, so what the chain and a setup load must load there too. */
 describe('architecture', () => {
-    test('the architecture a facet is composed in (meta-tests) — `chain-loads-in-a-page` — the chain and every setup load no node builtin and no package, at any depth', () => {
+    test('the architecture a specification is composed in (meta-tests) — `chain-loads-in-a-page` — the chain and every setup load no node builtin and no package, at any depth', () => {
         // Given - every module of the chain machinery, and every setup module
         const starts = [
             ...modulesOf(ROOT, 'chain', '.ts').filter(
@@ -54,7 +54,7 @@ describe('architecture', () => {
         expect(outsideLoadsReached(ROOT, starts)).toStrictEqual([]);
     });
 
-    test('the architecture a facet is composed in (meta-tests `chain-loads-in-a-page`, `definition-is-its-module`) — a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
+    test('the architecture a specification is composed in (meta-tests `chain-loads-in-a-page`, `definition-is-its-module`) — a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
         // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads builtins, one of them lazily, and a package
         const root = mkdtempSync(join(tmpdir(), 'architecture-'));
         mkdirSync(join(root, 'src'));
@@ -77,7 +77,7 @@ describe('architecture', () => {
         ]);
     });
 
-    test('the architecture a facet is composed in (meta-tests) — `definition-is-its-module` — the setups and the actions under src/ are exactly the ones the chain offers', async () => {
+    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — the setups and the actions under src/ are exactly the ones the chain offers', async () => {
         // Given - every definition a setup or an action module exports
         const definitions = await definitionsIn(ROOT, [
             ...modulesOf(ROOT, '', '.capability.ts'),
@@ -89,12 +89,12 @@ describe('architecture', () => {
                 .map(({ definition }) => definition.name)
                 .toSorted();
 
-        // Then - one module per setup, and every action is one the list places — a verb two facets share (`run`) is each facet's own module
+        // Then - one module per setup, and every action is one the list places — a verb two specifications share (`run`) is each specification's own module
         expect(named('setup context')).toStrictEqual(SETUPS);
         expect([...new Set(named('action'))]).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
     });
 
-    test('the architecture a facet is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
+    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
         // Given - every definition a setup or an action module exports
         const definitions = await definitionsIn(ROOT, [
             ...modulesOf(ROOT, '', '.capability.ts'),

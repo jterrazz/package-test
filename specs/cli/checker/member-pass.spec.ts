@@ -53,7 +53,7 @@ describe('member-pass', () => {
             `--format json --member ${WORKSPACE}/apps/site/packages/nested ${WORKSPACE}`,
         );
 
-        // Then - the retired seam gets the sentence that names its facet
+        // Then - the retired seam gets the sentence that names its specification
         expect(result.exitCode).toBe(1);
         expect(result.stdout.text).toContain('is a seam `@jterrazz/test` replaced');
     });

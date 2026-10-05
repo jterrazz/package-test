@@ -53,7 +53,7 @@ The handle destructures to `{ website, cleanup, url }` (rule `no-runner-alias`) 
 
 ### Services beside the site
 
-A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([Services](../reference/services.md)) — started before the site, in declaration order, and stopped with the specification.
+A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other specification takes ([Services](../reference/services.md)) — started before the site, in declaration order, and stopped with the specification.
 
 That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time. The example — a `next dev` beside the API it calls and that API's database — is [Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes)'s.
 
@@ -134,7 +134,7 @@ test('subscribes through the form and captures the final state', async () => {
 
 **No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result. Splitting interaction from assertion keeps the setup → action → result grammar intact, and keeps scenarios replayable independent of what they're checked against.
 
-The visitor's verbs and the words it names elements with are [The visitor](../reference/visitor.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the targets and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this page adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
+The visitor's verbs and the words it names elements with are [The visitor](../reference/visitor.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the targets and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this page adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this specification's and the component specification's, never the device's.
 
 Designating exactly one element is rule `target-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [The visitor § Designating exactly one element](../reference/visitor.md#designating-exactly-one-element).
 
@@ -171,7 +171,7 @@ test('sends chain headers on the raw exchange', async () => {
 
 ### Setup: `website.with({ clock, headers })`
 
-The clock and the headers a whole FILE shares are stated once, on a view of the facet whose every chain starts with them — `const french = website.with({ headers: { 'Accept-Language': 'fr' } })` — and a chain's own setup merges over it ([Conventions](../concepts/conventions.md#what-a-file-shares)).
+The clock and the headers a whole FILE shares are stated once, on a view of the specification whose every chain starts with them — `const french = website.with({ headers: { 'Accept-Language': 'fr' } })` — and a chain's own setup merges over it ([Conventions](../concepts/conventions.md#what-a-file-shares)).
 
 ### Setup: `.clock()`
 
@@ -220,7 +220,7 @@ test('lays the article out as a reader walks it', async () => {
 });
 ```
 
-It is produced by the same Playwright `ariaSnapshot()` the component facet calls, so a page's outline and a component's outline are the same kind of golden and comparable to each other. Deterministic where a screenshot is not, and it says what the markup MEANS rather than what it is made of.
+It is produced by the same Playwright `ariaSnapshot()` the component specification calls, so a page's outline and a component's outline are the same kind of golden and comparable to each other. Deterministic where a screenshot is not, and it says what the markup MEANS rather than what it is made of.
 
 ### The `head` golden — one per page
 
@@ -362,7 +362,7 @@ Provisioning the environment is not this package's job. In CI, the shared valida
 
 ```text
 specs/website/
-├── website.specification.ts    # runner at the facet ROOT (rule `specs-at-declared-depth`)
+├── website.specification.ts    # runner at the specification ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── _expected/              # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)

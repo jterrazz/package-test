@@ -31,13 +31,13 @@ function stemOf(base: string): string {
 }
 
 /** There a `.spec.ts` sits as deep as its subject's name (`events/list/`, `db/migrate/`), which `spec-in-subject-folder` judges. */
-const SUBJECT_PATH_FACETS = new Set(['api', 'cli']);
+const SUBJECT_PATH_SPECIFICATIONS = new Set(['api', 'cli']);
 
 function sitsInASubjectPath(relative: string[], base: string): boolean {
-    return base.endsWith('.spec.ts') && SUBJECT_PATH_FACETS.has(relative[0] ?? '');
+    return base.endsWith('.spec.ts') && SUBJECT_PATH_SPECIFICATIONS.has(relative[0] ?? '');
 }
 
-const SPECS_DEPTHS = ['facet', 'facet-domain', 'mirror', 'off'] as const;
+const SPECS_DEPTHS = ['specification', 'specification-domain', 'mirror', 'off'] as const;
 
 export type SpecsDepth = (typeof SPECS_DEPTHS)[number];
 
@@ -51,7 +51,7 @@ function depthOf(option: unknown): SpecsDepth | undefined {
     return SPECS_DEPTHS.find((known) => known === depth);
 }
 
-const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
+const DEFAULT_DEPTH: SpecsDepth = 'specification-domain';
 
 /** `test-beside-its-module`'s pairing tells a ground module's test from a spec that wandered into the ground. */
 function testsItsNeighbour(filename: string): boolean {
@@ -64,20 +64,20 @@ const MESSAGES = {
         fix: 'move the spec out of `{{folder}}/`, into the subject folder it specifies; a reserved folder that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
     },
     specInShared: {
-        found: 'a spec under `specs/_shared/`, what several facets share',
-        fix: 'move it into its facet: `specs/_shared/` holds only `_setup/`, `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
+        found: 'a spec under `specs/_shared/`, what several specifications share',
+        fix: 'move it into its specification: `specs/_shared/` holds only `_setup/`, `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
     },
-    specNotAtFacetRoot: {
-        found: 'a `*.specification.ts` below its facet root',
-        fix: 'move it to `specs/<facet>/<name>.specification.ts`',
+    specNotAtSpecificationRoot: {
+        found: 'a `*.specification.ts` below its specification root',
+        fix: 'move it to `specs/<specification>/<name>.specification.ts`',
     },
     strayFolder: {
-        found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `_shared/`, and holds no test of its own',
-        fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper into the `_setup/` of the lowest folder its tests share, and a fixture in the ground of the lowest folder its tests share (`specs/_shared/_fixtures/` across facets); then remove `specs/{{folder}}/`',
+        found: 'a module in `specs/{{folder}}/`, a first-level folder that is no specification, not `_shared/`, and holds no test of its own',
+        fix: 'move a runner to the root of the specification it builds (`specs/<specification>/<name>.specification.ts`), a test helper into the `_setup/` of the lowest folder its tests share, and a fixture in the ground of the lowest folder its tests share (`specs/_shared/_fixtures/` across specifications); then remove `specs/{{folder}}/`',
     },
-    testAtFacetRoot: {
-        found: 'a spec directly at its facet root',
-        fix: 'move it into a domain folder: `specs/<facet>/<domain>/<aspect>.spec.ts`',
+    testAtSpecificationRoot: {
+        found: 'a spec directly at its specification root',
+        fix: 'move it into a domain folder: `specs/<specification>/<domain>/<aspect>.spec.ts`',
     },
     testAtSpecsRoot: {
         found: 'a spec at the specs root, under `depth: "mirror"`',
@@ -87,17 +87,17 @@ const MESSAGES = {
         found: 'a spec not named after its directory, under `depth: "mirror"`',
         fix: 'rename it `{{directory}}/{{directory}}.spec.ts`',
     },
-    testOutsideFacet: {
-        found: 'a spec outside every facet folder, under `depth: "facet"`',
-        fix: 'move it to `specs/<facet>/<aspect>.spec.ts`, or one domain deeper',
+    testOutsideSpecification: {
+        found: 'a spec outside every specification folder, under `depth: "specification"`',
+        fix: 'move it to `specs/<specification>/<aspect>.spec.ts`, or one domain deeper',
     },
     testTooDeep: {
         found: 'a spec nested below its domain folder',
-        fix: 'move it up to `specs/<facet>/<domain>/<aspect>.spec.ts`',
+        fix: 'move it up to `specs/<specification>/<domain>/<aspect>.spec.ts`',
     },
-    testTooDeepForFacet: {
-        found: 'a spec more than one folder below its facet, under `depth: "facet"`',
-        fix: 'move it to `specs/<facet>/<aspect>.spec.ts` or `specs/<facet>/<domain>/<aspect>.spec.ts`',
+    testTooDeepForSpecification: {
+        found: 'a spec more than one folder below its specification, under `depth: "specification"`',
+        fix: 'move it to `specs/<specification>/<aspect>.spec.ts` or `specs/<specification>/<domain>/<aspect>.spec.ts`',
     },
 };
 
@@ -121,15 +121,15 @@ function reservedVerdict(placement: Placement): undefined | Verdict {
     return testsItsNeighbour(filename) ? null : { data: { folder }, messageId: 'specInReserved' };
 }
 
-function facetVerdict({ base, nesting, relative }: Placement): Verdict {
+function specificationVerdict({ base, nesting, relative }: Placement): Verdict {
     if (!isNodeTest(base)) {
         return null;
     }
     if (nesting < 1) {
-        return { messageId: 'testOutsideFacet' };
+        return { messageId: 'testOutsideSpecification' };
     }
     return nesting > 2 && !sitsInASubjectPath(relative, base)
-        ? { messageId: 'testTooDeepForFacet' }
+        ? { messageId: 'testTooDeepForSpecification' }
         : null;
 }
 
@@ -146,19 +146,19 @@ function mirrorVerdict({ base, nesting, relative }: Placement): Verdict {
         : { data: { directory }, messageId: 'testNotMirroringDirectory' };
 }
 
-function facetDomainVerdict({ base, nesting, relative }: Placement): Verdict {
+function specificationDomainVerdict({ base, nesting, relative }: Placement): Verdict {
     if (!isNodeTest(base)) {
         return null;
     }
     if (nesting < 2) {
-        return { messageId: 'testAtFacetRoot' };
+        return { messageId: 'testAtSpecificationRoot' };
     }
     return nesting > 2 && !sitsInASubjectPath(relative, base) ? { messageId: 'testTooDeep' } : null;
 }
 
 const DEPTH_VERDICTS: Record<SpecsDepth, (placement: Placement) => Verdict> = {
-    facet: facetVerdict,
-    'facet-domain': facetDomainVerdict,
+    specification: specificationVerdict,
+    'specification-domain': specificationDomainVerdict,
     mirror: mirrorVerdict,
     off: () => null,
 };
@@ -179,7 +179,7 @@ function verdictOf(placement: Placement, directory: string, depth: SpecsDepth): 
         return { messageId: 'specInShared' };
     }
     if (base.endsWith(SPECIFICATION_SUFFIX)) {
-        return nesting === 1 ? null : { messageId: 'specNotAtFacetRoot' };
+        return nesting === 1 ? null : { messageId: 'specNotAtSpecificationRoot' };
     }
     return DEPTH_VERDICTS[depth](placement);
 }
@@ -196,7 +196,10 @@ export const specsAtDeclaredDepth = defineRule(
             {
                 additionalProperties: false,
                 properties: {
-                    depth: { enum: ['facet', 'facet-domain', 'mirror', 'off'], type: 'string' },
+                    depth: {
+                        enum: ['specification', 'specification-domain', 'mirror', 'off'],
+                        type: 'string',
+                    },
                 },
                 type: 'object',
             },
@@ -218,7 +221,7 @@ export const specsAtDeclaredDepth = defineRule(
                     const placement: Placement = {
                         base: anchor.relative.at(-1) ?? '',
                         filename: context.filename,
-                        // invariant: `[facet, domain, …]`.
+                        // invariant: `[specification, domain, …]`.
                         nesting: anchor.relative.length - 1,
                         relative: anchor.relative,
                     };

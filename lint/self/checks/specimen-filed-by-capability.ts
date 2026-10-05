@@ -6,8 +6,8 @@ import type { Spotted } from '../../kit/checker/registry.js';
 import { specimenOf } from '../../kit/project/specimen.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
 import { listFiles } from '../../kit/project/tree.js';
-import { FACET_MATRIX_COLUMNS } from '../corpus/facet-matrix.js';
 import { matrixCapabilityFolders } from '../corpus/matrix.js';
+import { SPECIFICATION_MATRIX_COLUMNS } from '../corpus/specification-matrix.js';
 import type { SelfPassId } from './checker.js';
 
 const COMPONENT = 'component';
@@ -27,14 +27,16 @@ const EXAMPLES = [
     'open',
 ];
 
-/** A first-level folder that is no facet — a repository suite — has no column, and takes a capability of any. */
-function vocabularyOf(facet: string): Set<string> {
-    const column = FACET_MATRIX_COLUMNS.find((name) => name === facet && name !== 'module');
+/** A first-level folder that is no specification — a repository suite — has no column, and takes a capability of any. */
+function vocabularyOf(specification: string): Set<string> {
+    const column = SPECIFICATION_MATRIX_COLUMNS.find(
+        (name) => name === specification && name !== 'module',
+    );
     if (column !== undefined) {
         return matrixCapabilityFolders(column);
     }
     const any = new Set<string>();
-    for (const name of FACET_MATRIX_COLUMNS) {
+    for (const name of SPECIFICATION_MATRIX_COLUMNS) {
         for (const folder of matrixCapabilityFolders(name)) {
             any.add(folder);
         }
@@ -58,18 +60,18 @@ function firstCodeLine(text: string): number {
     return 1;
 }
 
-function foldersBelowFacet(specsRoot: string, file: string): string[] {
+function foldersBelowSpecification(specsRoot: string, file: string): string[] {
     return relative(specsRoot, dirname(file)).split(sep).slice(1);
 }
 
-function fixOf(facet: string, shape: string, vocabulary: Set<string>, beside = ''): string {
-    return `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${facet}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/guides/test.md § The capability matrix)`;
+function fixOf(specification: string, shape: string, vocabulary: Set<string>, beside = ''): string {
+    return `file it under the capability it specifies, one folder below its specification — \`${specification}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${specification}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/guides/test.md § The capability matrix)`;
 }
 
 function checkComponentTree(specsRoot: string): Spotted<SelfPassId>[] {
     const vocabulary = matrixCapabilityFolders(COMPONENT);
     return listFiles(join(specsRoot, COMPONENT), (path) => RENDERED.test(path)).flatMap((file) => {
-        const folders = foldersBelowFacet(specsRoot, file);
+        const folders = foldersBelowSpecification(specsRoot, file);
         const [folder = ''] = folders;
         const text = readFileSync(file, 'utf8');
         const line = firstCodeLine(text);
@@ -104,14 +106,14 @@ export function checkSpecimenFiledByCapability(specsRoot: string): Spotted<SelfP
 
 function checkSpecimenSpecs(specsRoot: string): Spotted<SelfPassId>[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts')).flatMap((file) => {
-        const [facet = ''] = relative(specsRoot, file).split(sep);
-        if (facet === SHARED_FOLDER) {
+        const [specification = ''] = relative(specsRoot, file).split(sep);
+        if (specification === SHARED_FOLDER) {
             return [];
         }
         const text = readFileSync(file, 'utf8');
-        const specimen = specimenOf(file, text, facet);
-        const vocabulary = vocabularyOf(facet);
-        const folders = foldersBelowFacet(specsRoot, file);
+        const specimen = specimenOf(file, text, specification);
+        const vocabulary = vocabularyOf(specification);
+        const folders = foldersBelowSpecification(specsRoot, file);
         const [folder = ''] = folders;
         const line = firstCodeLine(text);
         if (
@@ -125,7 +127,7 @@ function checkSpecimenSpecs(specsRoot: string): Spotted<SelfPassId>[] {
         return [
             {
                 path: relative(specsRoot, file).split(sep).join('/'),
-                fix: fixOf(facet, '<aspect>.spec.ts', vocabulary),
+                fix: fixOf(specification, '<aspect>.spec.ts', vocabulary),
                 found: `a spec of the specimen \`${specimen}\`, filed under \`${shown}/\``,
                 line,
                 rule: 'specimen-filed-by-capability' as const,

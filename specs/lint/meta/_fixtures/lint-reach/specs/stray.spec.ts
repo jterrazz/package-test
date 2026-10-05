@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
 test('sits at the specs root, where specs-at-declared-depth — a rule of the specs reach — finds it', () => {
-    // Given - a spec with no facet folder
+    // Given - a spec with no specification folder
     const where = 'specs';
 
     // Then - it is named

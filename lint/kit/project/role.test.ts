@@ -40,7 +40,7 @@ describe('role', () => {
     });
 
     test('roleOf — the kind a path states — a specification file is one wherever it sits', () => {
-        // Given - the runner file at a facet root
+        // Given - the runner file at a specification root
         // Then - the suffix decides, not the folder
         expect(roleOf('/repo/specs/api/api.specification.ts').role).toBe('specification');
     });

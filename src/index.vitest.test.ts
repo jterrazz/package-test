@@ -19,19 +19,19 @@ function projectDeclaring(projects: string): string {
 
 const configIn = (root: string): string => pathToFileURL(join(root, 'vitest.config.ts')).href;
 
-const refusal = (facet: string): string =>
+const refusal = (specification: string): string =>
     [
-        `found: a project of \`test.projects\` names the facet \`${facet}\``,
-        'why: a project is built by the helper of its facet, which owns its include, its budget and its seam',
-        'fix: name one of api, cli, component, integration, job, lint, mobile, unit, website as its `facet`',
+        `found: a project of \`test.projects\` names the specification \`${specification}\``,
+        'why: a project is built by the helper of its specification, which owns its include, its budget and its seam',
+        'fix: name one of api, cli, component, integration, job, lint, mobile, unit, website as its `specification`',
         'read: docs/start/set-up-a-project.md#the-vitest-config',
     ].join('\n');
 
 describe('index.vitest', () => {
-    test('vitestConfig — builds each declared project with the helper of its facet, its setups read from the project root', async () => {
+    test('vitestConfig — builds each declared project with the helper of its specification, its setups read from the project root', async () => {
         // Given - a project declaring a unit project and a cli project with a global setup of its own
         const root = projectDeclaring(
-            "[{ facet: 'unit', include: ['src/**/*.test.ts'] }, { facet: 'cli', setup: ['specs/cli/_setup/start.ts'] }]",
+            "[{ specification: 'unit', include: ['src/**/*.test.ts'] }, { specification: 'cli', setup: ['specs/cli/_setup/start.ts'] }]",
         );
 
         // When - the config is derived for it
@@ -40,7 +40,7 @@ describe('index.vitest', () => {
             typeof project === 'object' && 'test' in project ? [project.test] : [],
         );
 
-        // Then - one project per declaration, named for its facet, the setup anchored at the project root
+        // Then - one project per declaration, named for its specification, the setup anchored at the project root
         expect(projects.map((project) => project?.name)).toStrictEqual(['unit', 'cli']);
         expect(projects[0]?.include).toStrictEqual(['src/**/*.test.ts']);
         expect(projects[1]?.globalSetup).toContain(join(root, 'specs/cli/_setup/start.ts'));
@@ -63,13 +63,13 @@ describe('index.vitest', () => {
         ]);
     });
 
-    test('vitestConfig — refuses a facet the package ships no helper for, and a project naming none, naming the ones it does', async () => {
-        // Given - a project naming a facet that does not exist
-        const root = projectDeclaring("[{ facet: 'browser' }]");
+    test('vitestConfig — refuses a specification the package ships no helper for, and a project naming none, naming the ones it does', async () => {
+        // Given - a project naming a specification that does not exist
+        const root = projectDeclaring("[{ specification: 'browser' }]");
 
         const bare = projectDeclaring("['unit']");
 
-        // Then - the refusal names the facet, or that none was named, and the helpers
+        // Then - the refusal names the specification, or that none was named, and the helpers
         await expect(vitestConfig(configIn(root))).rejects.toThrow(new Error(refusal('browser')));
         await expect(vitestConfig(configIn(bare))).rejects.toThrow(new Error(refusal('undefined')));
     });
@@ -96,7 +96,7 @@ describe('index.vitest', () => {
     test('vitestConfig — a component project resolves its root and its aliases from the project, and a setup is read as a path alone', async () => {
         // Given - a component project with aliases of each kind, one rooted in a folder of its own with its vite config there, and a setup list holding a stray value
         const root = projectDeclaring(
-            "[{ facet: 'component', vite: { resolve: { alias: { '@': './src', abs: '/abs', obj: { x: 1 }, pkg: 'some-package' } } } }, { facet: 'component', root: 'app', vite: './vite.config.ts', setup: ['start.ts', 3] }, { facet: 'component', vite: { define: { A: '1' } } }]",
+            "[{ specification: 'component', vite: { resolve: { alias: { '@': './src', abs: '/abs', obj: { x: 1 }, pkg: 'some-package' } } } }, { specification: 'component', root: 'app', vite: './vite.config.ts', setup: ['start.ts', 3] }, { specification: 'component', vite: { define: { A: '1' } } }]",
         );
         mkdirSync(join(root, 'app'));
         writeFileSync(

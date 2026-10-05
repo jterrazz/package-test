@@ -298,7 +298,7 @@ const id: number = required(body.id, 'the creation reply carries the new id');
 
 `null` and `undefined` are the only values it refuses: `0`, `''` and `false` are present, and go through.
 
-**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule `no-sleep` refuses a sleep in any test file. Every facet that drives something already waits on a condition; this is the primitive for the cases no facet owns — a background write to land, a queue to drain, a file to appear.
+**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule `no-sleep` refuses a sleep in any test file. Every specification that drives something already waits on a condition; this is the primitive for the cases no specification owns — a background write to land, a queue to drain, a file to appear.
 
 ```typescript
 import { waitUntil } from '@jterrazz/test';

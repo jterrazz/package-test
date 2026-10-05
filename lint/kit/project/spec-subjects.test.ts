@@ -55,7 +55,7 @@ describe('spec-subjects', () => {
         expect(withLeadingComments(text, text.indexOf('test'))).toBe(text.indexOf('// one'));
     });
 
-    test('subjectSpecs — each spec of a subject facet, its tests with their spans, titles and the subjects of its own facet', () => {
+    test('subjectSpecs — each spec of a subject specification, its tests with their spans, titles and the subjects of its own specification', () => {
         // Given - a cli spec reading its runners' commands, one runner imported without extension, an api call it does not own, and a module test beside it
         const root = specsTree({
             'api/api.specification.ts': RUNNER,

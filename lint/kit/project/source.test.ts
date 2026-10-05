@@ -4,11 +4,11 @@ import { describe, expect, test } from 'vitest';
 import { packageWith } from '../testing/package-tree.fixtures.js';
 import {
     byPosition,
-    facetOf,
     finding,
     isProduction,
     listed,
     productionReferences,
+    specificationOf,
     targetOf,
 } from './source.js';
 
@@ -31,16 +31,16 @@ describe('source', () => {
         ]);
     });
 
-    test('facetOf and isProduction — the facet a source sits in, and the sources that ship', () => {
-        // Given - paths in and out of a facet, and modules of each kind
+    test('specificationOf and isProduction — the specification a source sits in, and the sources that ship', () => {
+        // Given - paths in and out of a specification, and modules of each kind
         // Then - each answer
         expect([
             [
-                'src/facets/api/route.ts',
-                'src/facets/api',
-                'lint/facets/api/a.ts',
+                'src/specifications/api/route.ts',
+                'src/specifications/api',
+                'lint/specifications/api/a.ts',
                 'src/other/api/a.ts',
-            ].map((path) => facetOf(path)),
+            ].map((path) => specificationOf(path)),
             [
                 'src/a.ts',
                 'src/a.tsx',

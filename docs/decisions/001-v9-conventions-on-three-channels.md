@@ -38,7 +38,7 @@ one of the channels — the package's "rule K".
 
 ## Consequences
 
-- Product specs live under `specs/<facet>/<domain>/`; unit tests are siblings
+- Product specs live under `specs/<specification>/<domain>/`; unit tests are siblings
   of their module. A consumer's own conventions derive from this package,
   except where its doctrine states a more specific shape — the first such case
   is jterrazz-os's `docs/decisions/006-cli-specs-mirror-the-command-tree.md`.

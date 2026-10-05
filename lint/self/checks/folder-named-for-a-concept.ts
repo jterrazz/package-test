@@ -1,7 +1,13 @@
 import { dirname, resolve } from 'node:path';
 
 import type { Spotted } from '../../kit/checker/registry.js';
-import { byPosition, facetOf, finding, inGround, listed } from '../../kit/project/source.js';
+import {
+    byPosition,
+    finding,
+    inGround,
+    listed,
+    specificationOf,
+} from '../../kit/project/source.js';
 import type { Listed } from '../../kit/project/source.js';
 import type { SelfPassId } from './checker.js';
 
@@ -54,19 +60,19 @@ export function checkFolderNamedForAConcept(root: string): Spotted<SelfPassId>[]
 }
 
 function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>[] {
-    const facets = folders.filter(
-        ({ path }) => path.split('/').length === 3 && facetOf(`${path}/x`) !== undefined,
+    const specifications = folders.filter(
+        ({ path }) => path.split('/').length === 3 && specificationOf(`${path}/x`) !== undefined,
     );
-    return facets.flatMap(({ path }) => {
-        const facet = path.split('/').at(-1) ?? '';
+    return specifications.flatMap(({ path }) => {
+        const specification = path.split('/').at(-1) ?? '';
         const children = paths.filter(({ path: entry }) => dirname(entry) === path);
         const flat = !children.some(({ directory, path: entry }) => directory && !inGround(entry));
         const face = new Set([
-            `${facet}.face.ts`,
-            ...(facet === 'component' ? ['component.face.browser.ts'] : []),
-            `${facet}.facet.ts`,
-            `${facet}.handle.ts`,
-            `${facet}.project.ts`,
+            `${specification}.face.ts`,
+            ...(specification === 'component' ? ['component.face.browser.ts'] : []),
+            `${specification}.composition.ts`,
+            `${specification}.handle.ts`,
+            `${specification}.project.ts`,
         ]);
         return flat
             ? []
@@ -81,8 +87,8 @@ function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>
                   )
                   .map((file) =>
                       finding('folder-named-for-a-concept', file, {
-                          fix: 'move it into the concept folder it belongs to; the root of a facet with concept folders holds its face alone — `<facet>.face.ts`, `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts`',
-                          found: `\`${file.split('/').at(-1) ?? ''}\` sits at the root of the facet \`${facet}\`, and is no file of its face`,
+                          fix: 'move it into the concept folder it belongs to; the root of a specification with concept folders holds its face alone — `<specification>.face.ts`, `<specification>.composition.ts`, `<specification>.handle.ts`, `<specification>.project.ts`',
+                          found: `\`${file.split('/').at(-1) ?? ''}\` sits at the root of the specification \`${specification}\`, and is no file of its face`,
                       }),
                   );
     });

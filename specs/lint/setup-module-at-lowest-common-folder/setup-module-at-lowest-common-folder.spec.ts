@@ -12,7 +12,7 @@ describe('setup-module-at-lowest-common-folder', () => {
         expect(result.report).toMatch('');
     });
 
-    test("--fix moves a module to its readers' lowest folder, _shared/ across facets, and the imports with it", async () => {
+    test("--fix moves a module to its readers' lowest folder, _shared/ across specifications, and the imports with it", async () => {
         // Given - the misplaced tree
         const result = await checker
             .fixture(directory('./_fixtures/misplaced/'))

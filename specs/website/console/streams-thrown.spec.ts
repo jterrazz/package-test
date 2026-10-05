@@ -7,7 +7,7 @@ describe('streams-thrown', () => {
         // Given - a page whose script throws and logs nothing
         const result = await website.visit('/thrown');
 
-        // Then - the exception is an error, as the component facet reports one
+        // Then - the exception is an error, as the component specification reports one
         expect(result.errors.text).toBe('Uncaught Error: the page broke');
         expect(result.console.text).toBe('[error] Uncaught Error: the page broke');
     });

@@ -58,7 +58,7 @@ describe('clock', () => {
     });
 
     test('clock — is the setup a shared `clock` setting names', () => {
-        // Given - the capability as a facet wires it
+        // Given - the capability as a specification wires it
         const { context, name } = clock;
 
         // Then - `with({ clock })` reaches it under its own name

@@ -17,7 +17,7 @@ function specsTree(paths: readonly string[]): string {
 
 describe('isStrayFolder', () => {
     test('a folder of helpers holding no test is stray, at any depth below it', () => {
-        // Given - a support folder of mocks and helpers beside a facet
+        // Given - a support folder of mocks and helpers beside a specification
         const root = specsTree([
             'support/next-cursor.ts',
             'support/domain/article.mocks.ts',
@@ -31,8 +31,8 @@ describe('isStrayFolder', () => {
         ]).toStrictEqual([true, true]);
     });
 
-    test('a facet, the shared ground and a suite holding tests are places a tree has', () => {
-        // Given - a facet helper, the shared ground's code, a suite's tests and its helper
+    test('a specification, the shared ground and a suite holding tests are places a tree has', () => {
+        // Given - a specification helper, the shared ground's code, a suite's tests and its helper
         const root = specsTree([
             'api/events/_setup/seeded-at.ts',
             '_shared/_fixtures/app/app.ts',

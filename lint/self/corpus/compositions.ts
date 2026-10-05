@@ -1,26 +1,26 @@
-import type { Composition } from '../../../src/chain/define-facet.js';
-import { apiFacet } from '../../../src/facets/api/api.facet.js';
-import { cliFacet } from '../../../src/facets/cli/cli.facet.js';
-import { componentFacet } from '../../../src/facets/component/component.facet.js';
-import { integrationFacet } from '../../../src/facets/integration/integration.facet.js';
-import { jobFacet } from '../../../src/facets/job/job.facet.js';
-import { lintFacet } from '../../../src/facets/lint/lint.facet.js';
-import { mobileFacet } from '../../../src/facets/mobile/mobile.facet.js';
-import { websiteFacet } from '../../../src/facets/website/website.facet.js';
-import type { Column } from './facet-matrix.js';
+import type { Composition } from '../../../src/chain/define-specification.js';
+import { apiDefinition } from '../../../src/specifications/api/api.composition.js';
+import { cliDefinition } from '../../../src/specifications/cli/cli.composition.js';
+import { componentDefinition } from '../../../src/specifications/component/component.composition.js';
+import { integrationDefinition } from '../../../src/specifications/integration/integration.composition.js';
+import { jobDefinition } from '../../../src/specifications/job/job.composition.js';
+import { lintDefinition } from '../../../src/specifications/lint/lint.composition.js';
+import { mobileDefinition } from '../../../src/specifications/mobile/mobile.composition.js';
+import { websiteDefinition } from '../../../src/specifications/website/website.composition.js';
+import type { Column } from './specification-matrix.js';
 
 type MatrixRow = Composition['options'][string];
 
-/** It imports the facets themselves, so only this package's own tooling loads it. */
+/** It imports the specifications themselves, so only this package's own tooling loads it. */
 export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
-    api: apiFacet.composition,
-    cli: cliFacet.composition,
-    component: componentFacet.composition,
-    integration: integrationFacet.composition,
-    job: jobFacet.composition,
-    lint: lintFacet.composition,
-    mobile: mobileFacet.composition,
-    website: websiteFacet.composition,
+    api: apiDefinition.composition,
+    cli: cliDefinition.composition,
+    component: componentDefinition.composition,
+    integration: integrationDefinition.composition,
+    job: jobDefinition.composition,
+    lint: lintDefinition.composition,
+    mobile: mobileDefinition.composition,
+    website: websiteDefinition.composition,
 };
 
 function actionRows(action: Composition['actions'][number]): MatrixRow[] {

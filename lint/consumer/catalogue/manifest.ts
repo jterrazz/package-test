@@ -1,19 +1,21 @@
 import { byName } from '@jterrazz/typescript/rules';
 
 import type { Row as CatalogueRow } from '../../kit/catalogue/row.js';
-import { FACETS } from '../../kit/project/facets.js';
+import { SPECIFICATIONS } from '../../kit/project/specifications.js';
 import { FAMILIES } from './families.js';
 import type { Family } from './families.js';
 import MANIFEST from './manifest.json' with { type: 'json' };
 
 type Row = CatalogueRow<Family>;
 
-const FACET_LIST = [...FACETS].map((facet) => `\`${facet}\``).join(', ');
+const SPECIFICATION_LIST = [...SPECIFICATIONS]
+    .map((specification) => `\`${specification}\``)
+    .join(', ');
 
 const TEXT_FIELDS = [
     'audience',
     'channel',
-    'facet',
+    'specification',
     'fix',
     'name',
     'rationale',
@@ -37,7 +39,7 @@ function isRow(value: unknown): value is Row {
 function rowsOf(channel: keyof typeof MANIFEST): Row[] {
     return MANIFEST[channel].map((entry) => {
         const row: unknown = Object.assign(structuredClone(entry), {
-            sentence: entry.sentence.replaceAll('<facets>', FACET_LIST),
+            sentence: entry.sentence.replaceAll('<specifications>', SPECIFICATION_LIST),
         });
         if (!isRow(row)) {
             throw new Error(

@@ -14,7 +14,7 @@ Three things make a test suite expensive to keep, and the framework takes each o
 
 Five ideas cover everything else in the manual. They match the four families of the docs map, plus the files a test stands on.
 
-**1. A kind of test, and its runner.** What you test decides the kind: a module, a module against a real service (integration), a rendered component, a website, a mobile screen, an HTTP API, a job, a CLI, or the lint rules a project ships. Each kind except module and component has a constructor — `specification.api()`, `specification.cli()`, … — called once per suite in a `*.specification.ts` file. It starts what the suite needs and returns a runner (`api`, `cli`, …) and a `cleanup` you pass to `afterAll`. The pages call the code behind one kind a **facet**.
+**1. A kind of test, and its runner.** What you test decides the kind: a module, a module against a real service (integration), a rendered component, a website, a mobile screen, an HTTP API, a job, a CLI, or the lint rules a project ships. Each kind except module and component has a constructor — `specification.api()`, `specification.cli()`, … — called once per suite in a `*.specification.ts` file. It starts what the suite needs and returns a runner (`api`, `cli`, …) and a `cleanup` you pass to `afterAll`. The pages call the code behind one kind a **specification**.
 
 **2. A chain: setups, then one action.** Every test is one chain on that runner: zero or more setups (`.seed()`, `.intercept()`, `.clock()`, `.env()` …), then exactly one action (`.get()`, `.exec()`, `.visit()`, `.trigger()`, `.call()` …), which resolves to a result. The chain reads as the test's sentence — the setups are the Given, the action is the When.
 
@@ -55,13 +55,13 @@ export default defineConfig({
     kind: 'api',
     platform: 'node',
     presets: [test()],
-    test: { projects: [{ facet: 'unit' }, { facet: 'api' }] },
+    test: { projects: [{ specification: 'unit' }, { specification: 'api' }] },
 });
 ```
 
 `kind` and `platform` say what the project is — here an HTTP service on Node — and `@jterrazz/typescript` derives the rest of the toolchain from them: the lint profile, the tsconfig preset, what the manifest must hold. An application kind (`api`, `website`, `mobile`) also asks for `"private": true` in `package.json`. The two lists, and which platforms each kind runs on, are the toolchain's [Getting started § Declare what the project is](https://github.com/jterrazz/package-typescript/blob/main/docs/start/getting-started.md#1-declare-what-the-project-is). `presets: [test()]` adds this package: the shared test defaults, the conventions, and the `test` section below.
 
-Then `npx typescript fix` writes the files that declaration derives — `vitest.config.ts` among them, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and each project is built by the helper its `facet` names: `unit` collects the `*.test.ts` files next to your modules — the project a module test runs in — and `api` collects `specs/api/**/*.spec.ts`. [Set up a project](set-up-a-project.md#the-vitest-config) lists every helper and default.
+Then `npx typescript fix` writes the files that declaration derives — `vitest.config.ts` among them, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and each project is built by the helper its `specification` names: `unit` collects the `*.test.ts` files next to your modules — the project a module test runs in — and `api` collects `specs/api/**/*.spec.ts`. [Set up a project](set-up-a-project.md#the-vitest-config) lists every helper and default.
 
 This `api` project only names a vitest project. The `api` you send requests with is a different thing: the runner that step 3 builds.
 
@@ -82,7 +82,7 @@ export const { api, cleanup } = await specification.api({
 afterAll(cleanup);
 ```
 
-`server` returns your app, and the facet sends it each request through its `request(path, init)` method, which answers a Fetch `Response` — a Hono `app` is one as it stands. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
+`server` returns your app, and the specification sends it each request through its `request(path, init)` method, which answers a Fetch `Response` — a Hono `app` is one as it stands. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
 
 An app on another framework needs two things. It needs a `request(path, init)` of its own: Express and Fastify have none, so `server` returns a wrapper you write that answers it with a `Response`. And it exposes no route table, so the run cannot measure route coverage until the project names its routes as an OpenAPI document, `test: { routes: './openapi.yaml' }` in `jterrazz.config.ts`; without one the api run fails ([API specs § An app that is not Hono](../guides/api-specs.md#an-app-that-is-not-hono)).
 

@@ -6,8 +6,8 @@ import {
 } from '@jterrazz/typescript/rules';
 import { basename, join, relative } from 'node:path';
 
-import { PRUNED_WITH_FIXTURES } from '../project/facet-folders.js';
 import { SPEC_EXTENSION } from '../project/spec-grammar.js';
+import { PRUNED_WITH_FIXTURES } from '../project/specification-folders.js';
 import { decodeText } from '../project/tree.js';
 import { runDocument } from './documents.js';
 import type { GroundEntry, GroundPasses, Spotted } from './registry.js';

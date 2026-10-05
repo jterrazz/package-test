@@ -17,7 +17,7 @@ describe('AmbiguousLinks', () => {
             await visitor.click(link('Articles'));
         });
 
-        // Then - the refusal is the website facet's, word for word: same rule, same fix
+        // Then - the refusal is the website specification's, word for word: same rule, same fix
         expect(refusal).toContain('Ambiguous element: link("Articles") matched 2 elements');
         expect(refusal).toContain('within(navigation(), link("Articles"))');
         expect(refusal).toContain('read: docs/reference/linting.md#target-matches-one-element');

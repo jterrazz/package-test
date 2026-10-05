@@ -124,7 +124,7 @@ describe('http-filter', () => {
                 query: { v: '2' },
             },
             expected: true,
-            name: 'a combined filter passes when every facet matches',
+            name: 'a combined filter passes when every specification matches',
             observed: request({
                 body: { action: 'create', payload: {} },
                 headers: { 'content-type': 'application/json' },
@@ -138,7 +138,7 @@ describe('http-filter', () => {
                 query: { v: '2' },
             },
             expected: false,
-            name: 'a combined filter fails when one facet misses',
+            name: 'a combined filter fails when one specification misses',
             observed: request({
                 body: { action: 'create' },
                 headers: { 'content-type': 'application/json' },

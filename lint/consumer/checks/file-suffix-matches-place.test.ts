@@ -29,7 +29,7 @@ describe('file-suffix-matches-place', () => {
         // Then - only the spec file is out of place
         expect(checkFileSuffixMatchesPlaceInMember(root)).toStrictEqual([
             {
-                fix: 'move it under `specs/<facet>/`, or rename it `a.test.ts` beside the module it covers',
+                fix: 'move it under `specs/<specification>/`, or rename it `a.test.ts` beside the module it covers',
                 found: "a `.spec.ts` at the project's root, outside every `specs/` tree",
                 line: 1,
                 path: 'a.spec.ts',
@@ -39,8 +39,8 @@ describe('file-suffix-matches-place', () => {
         expect(checkFileSuffixMatchesPlaceInMember(join(root, 'missing'))).toStrictEqual([]);
     });
 
-    test('a test reaching a runner under a facet is to be renamed a spec, and nothing else is', () => {
-        // Given - one such test, beside tests that are ground, reach no runner, sit loose, under no facet, or in a pruned folder
+    test('a test reaching a runner under a specification is to be renamed a spec, and nothing else is', () => {
+        // Given - one such test, beside tests that are ground, reach no runner, sit loose, under no specification, or in a pruned folder
         const root = packageWith({
             'specs/api/users/_fixtures/app/x.test.ts': SPECIFIES,
             'specs/api/users/helper.test.ts': 'export {};\n',
@@ -57,7 +57,7 @@ describe('file-suffix-matches-place', () => {
         ]);
     });
 
-    test("a tree that is one facet's whole judges every test in it, a loose one and a folder of no facet's name alike", () => {
+    test("a tree that is one specification's whole judges every test in it, a loose one and a folder of no specification's name alike", () => {
         // Given - a mirror tree, its specification at its root
         const root = packageWith({
             'tests/api.specification.ts': '',
@@ -89,7 +89,7 @@ describe('file-suffix-matches-place', () => {
             ],
         ],
     ])('the document %s is named %j', (rel, found) => {
-        // Given - a document's path under its facet
+        // Given - a document's path under its specification
         // Then - what its name repeats or misspells
         expect(checkFileSuffixMatchesPlaceOfDocument(rel).map((one) => one.found)).toStrictEqual(
             found,

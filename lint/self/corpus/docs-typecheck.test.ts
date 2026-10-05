@@ -64,7 +64,7 @@ describe('docs-typecheck', () => {
         // And - the rendered examples are among them: a chapter whose examples
         // are all JSX must not be the one this guard silently skips
         expect(blocks.some((block) => block.jsx)).toBe(true);
-        // And - so are the mobile samples: the facet no CI provisions is the
+        // And - so are the mobile samples: the specification no CI provisions is the
         // one whose samples nothing else would ever compile
         expect(blocks.some((block) => block.code.includes('specification.mobile'))).toBe(true);
 

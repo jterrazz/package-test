@@ -14,7 +14,7 @@ describe('file-suffix-matches-place', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             conventions checker: renamed api/users/creation.test.ts → api/users/creation.spec.ts (file-suffix-matches-place)
-            api/helpers/normalize.test.ts:1:1: error jterrazz-check(facet-test-uses-its-runner): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/reference/linting.md#facet-test-uses-its-runner
+            api/helpers/normalize.test.ts:1:1: error jterrazz-check(specification-test-uses-its-runner): found: a test under the \`api\` specification that reaches no runner · why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/reference/linting.md#specification-test-uses-its-runner
             found: every finding above, and .jterrazz/baseline.json records no \`jterrazz-check/\` entry in its \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
         expect(result.stderr.text).toBe('');

@@ -109,7 +109,7 @@ ruleTester().run('no-sleep', noSleep, {
         {
             name: 'Outside specs/ the rule is inert.',
             code: 'setTimeout(tick, 100);',
-            filename: '/repo/src/specification/facets/_common/orchestrator.ts',
+            filename: '/repo/src/specification/specifications/_common/orchestrator.ts',
         },
     ],
 });

@@ -1,6 +1,6 @@
 # Spec documents (`<case>.spec.yaml`)
 
-A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's; an api or a job case is a TypeScript spec, its whole result written in place ([Assertions](../reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)). This page owns the format, from the key a document opens with to the door that runs it.
+A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli specification's; an api or a job case is a TypeScript spec, its whole result written in place ([Assertions](../reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)). This page owns the format, from the key a document opens with to the door that runs it.
 
 - [One file, one test](#one-file-one-test) — the unit, and the golden of the whole session
 - [Paths](#paths) — `fixture:` names the disk the way `file()` and `directory()` do

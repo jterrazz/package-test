@@ -25,7 +25,8 @@ function siblingsOf(filename: string): string[] {
         : [`${stem}.ts`, `${stem}.tsx`];
 }
 
-const ROLE_SUFFIX = /\.(?:action|adapter|capability|engine|facet|handle|port|project|result)$/u;
+const ROLE_SUFFIX =
+    /\.(?:action|adapter|capability|engine|composition|handle|port|project|result)$/u;
 
 function camelOf(base: string): string {
     return base.replaceAll(/[-_.]+(?<letter>\p{L}|\d)/gu, (_, letter: string) =>

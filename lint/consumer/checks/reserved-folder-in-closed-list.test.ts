@@ -66,7 +66,7 @@ describe('checkReservedFolderInClosedList', () => {
         // Then - the remedy for each
         expect(fixes).toStrictEqual([
             '`specs/_shared/` holds reserved folders alone — code in `_shared/_setup/`, data in the ground folder of its role',
-            "move what it holds into the reserved folders of `api/` itself — what a folder's leaves share sits in that folder's `_setup/` or ground; `_shared/` exists only as `specs/_shared/`, for what facets share",
+            "move what it holds into the reserved folders of `api/` itself — what a folder's leaves share sits in that folder's `_setup/` or ground; `_shared/` exists only as `specs/_shared/`, for what specifications share",
             'move it beside that `_setup/`, to `specs/api/users/_fixtures/`, and the paths that name what it holds',
             'move its modules into `_setup/`, each test adapter named for the port it replaces (`<port>.adapter.ts`), and the paths that import them',
             'rename it `_fixtures/`, and the paths that name it',

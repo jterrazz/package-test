@@ -31,7 +31,7 @@ A spec file asks ONE question (its name, the aspect — never `misc`) of ONE sub
 ## The shape every spec has
 
 ```typescript
-// specs/api/api.specification.ts — the runner, once per suite, at the facet root
+// specs/api/api.specification.ts — the runner, once per suite, at the specification root
 import { afterAll } from 'vitest';
 import { postgres, specification } from '@jterrazz/test';
 

@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 /** `every-reach-proven` — the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable. */
 async function reachRun(): Promise<string> {
     const result = await lint
-        .rules({ 'jterrazz/specs-at-declared-depth': ['error', { depth: 'facet' }] })
+        .rules({ 'jterrazz/specs-at-declared-depth': ['error', { depth: 'specification' }] })
         .fixture(directory('./_fixtures/lint-reach/'))
         .run();
     return result.report.text;
@@ -47,7 +47,7 @@ describe('every-reach-proven', () => {
         const output = await reachRun();
         const suite = about(output, 'specs/build/graph.test.ts');
 
-        // Then - the test rules reach it, and the ones that would call it misplaced do not: `specs-at-declared-depth`'s declared depth is what judges its shape — a spec with no facet folder is what it refuses — and `test-beside-its-module`'s orphan clause stops at the specs boundary
+        // Then - the test rules reach it, and the ones that would call it misplaced do not: `specs-at-declared-depth`'s declared depth is what judges its shape — a spec with no specification folder is what it refuses — and `test-beside-its-module`'s orphan clause stops at the specs boundary
         expect(suite).toStrictEqual(expect.arrayContaining(['no-sleep', 'no-raw-env-write']));
         expect(suite).not.toContain('specs-at-declared-depth');
         expect(about(output, 'specs/stray.spec.ts')).toContain('specs-at-declared-depth');
@@ -105,7 +105,7 @@ describe('every-reach-proven', () => {
     });
 
     test('every test file is judged by the rules that reach tests, whatever its kind', async () => {
-        // Given - the same run, read at the facet spec, a module test and a repository suite, none holding a describe
+        // Given - the same run, read at the specification spec, a module test and a repository suite, none holding a describe
         const output = await reachRun();
 
         // Then - `one-describe-per-file` reaches all three

@@ -1,0 +1,10 @@
+import { describe, expect, test } from 'vitest';
+
+describe('digest', () => {
+test('sends the digest', () => {
+    // Given - nothing constructs the runner this folder promises
+    const sent = true;
+    // Then - the folder is a specification in name only
+    expect(sent).toBe(true);
+});
+});

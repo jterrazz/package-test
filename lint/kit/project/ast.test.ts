@@ -117,7 +117,7 @@ describe('ast', () => {
         ]);
     });
 
-    test('specificationMember — names the facet a specification call constructs', () => {
+    test('specificationMember — names the specification a specification call constructs', () => {
         // Given - the constructor and look-alikes
         const calls = [
             "specification.cli('./bin')",

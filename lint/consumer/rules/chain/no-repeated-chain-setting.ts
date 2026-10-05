@@ -43,7 +43,7 @@ function handlesOf(program: AstNode): Set<string> {
         }
         for (const specifier of childList(statement, 'specifiers')) {
             const name = identifierName(child(specifier, 'local'));
-            // Stryker disable next-line ConditionalExpression,LogicalOperator: an import's local name is always read, and a handle no facet sets is allowed no setting below
+            // Stryker disable next-line ConditionalExpression,LogicalOperator: an import's local name is always read, and a handle no specification sets is allowed no setting below
             if (name !== undefined && name in SETTINGS) {
                 handles.add(name);
             }
@@ -63,7 +63,7 @@ function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | und
         // Stryker disable next-line ConditionalExpression,OptionalChaining: a call always has a callee, and memberPropertyName reads none from a non-member
         const name = callee?.type === 'MemberExpression' ? memberPropertyName(callee) : undefined;
         const [argument] = childList(current, 'arguments');
-        // Stryker disable next-line ConditionalExpression: a setting with no name is no setting a facet allows
+        // Stryker disable next-line ConditionalExpression: a setting with no name is no setting a specification allows
         if (name !== undefined && argument !== undefined) {
             settings.unshift({
                 argument: text.slice(nodeStart(argument), nodeEnd(argument)),
@@ -134,10 +134,10 @@ function camelOf(word: string): string {
 
 /** `events/list/` → `events`, `indicators/chart/` → `chart`; `undefined` for a subject with no standard name. */
 function subjectWord(subject: Subject): string | undefined {
-    if (subject.facet === 'job') {
+    if (subject.specification === 'job') {
         return subject.job;
     }
-    if (subject.facet === 'cli') {
+    if (subject.specification === 'cli') {
         return subject.command[0];
     }
     // Stryker disable next-line ArrayDeclaration: a word holding a space is no name, and leaves the view named for the file
@@ -155,7 +155,9 @@ function viewName(handle: string, text: string, program: AstNode): string {
             taken.add(name);
         }
     });
-    const reached = subjectsOf(text).find(({ subject }) => subject.facet === handle)?.subject;
+    const reached = subjectsOf(text).find(
+        ({ subject }) => subject.specification === handle,
+    )?.subject;
     const word = reached === undefined ? undefined : subjectWord(reached);
     // Stryker disable next-line StringLiteral: no word fails the pattern below as any non-name does
     const name = word === undefined ? '' : camelOf(word);

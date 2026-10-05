@@ -30,19 +30,19 @@ describe('file-suffix-matches-place', () => {
         expect(result.report).toMatch('');
     });
 
-    test('renames a `.test.ts` that sits under a facet folder', async () => {
+    test('renames a `.test.ts` that sits under a specification folder', async () => {
         // Given - a tree holding `specs/api/users/creation.test.ts`
         const result = await checker
             .fixture(directory('../../_shared/_fixtures/file-suffix-matches-place-placement/'))
             .run();
 
-        // Then - the facet folder already says what it specifies; only the word is wrong
+        // Then - the specification folder already says what it specifies; only the word is wrong
         expect(result.report).toMatch(`
-            specs/api/helpers/normalize.test.ts:1:1  jterrazz-check(facet-test-uses-its-runner)
-                found: a test under the \`api\` facet that reaches no runner
-                why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
+            specs/api/helpers/normalize.test.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
+                found: a test under the \`api\` specification that reaches no runner
+                why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
                 fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module
-                read: docs/reference/linting.md#facet-test-uses-its-runner
+                read: docs/reference/linting.md#specification-test-uses-its-runner
             specs/api/users/creation.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
@@ -51,10 +51,10 @@ describe('file-suffix-matches-place', () => {
         `);
     });
 
-    test("renames under a tree that is one facet's whole, with no facet level", async () => {
-        // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not facets
+    test("renames under a tree that is one specification's whole, with no specification level", async () => {
+        // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not specifications
         const result = await checker
-            .fixture(directory('./_fixtures/file-suffix-matches-place-rooted-facet/'))
+            .fixture(directory('./_fixtures/file-suffix-matches-place-rooted-specification/'))
             .run();
 
         // Then - the spec is named, and the ground module's own test beside its module is not
@@ -78,7 +78,7 @@ describe('file-suffix-matches-place', () => {
             packages/stray-spec/creation.spec.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.spec.ts\` at the project's root, outside every \`specs/\` tree
                 why: The suffix says the kind, and the tree agrees with it.
-                fix: move it under \`specs/<facet>/\`, or rename it \`creation.test.ts\` beside the module it covers
+                fix: move it under \`specs/<specification>/\`, or rename it \`creation.test.ts\` beside the module it covers
                 read: docs/reference/linting.md#file-suffix-matches-place
         `);
     });

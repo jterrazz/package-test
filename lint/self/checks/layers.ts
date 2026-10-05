@@ -13,7 +13,7 @@ export type LayerOptions = {
 
 const CHAIN_AND_KIT = ['chain/', 'lint/kit/'];
 
-/** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
+/** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← specifications ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
     chain: {
         folders: {
@@ -67,17 +67,17 @@ export const FRAMEWORK_LAYERS = {
         imports: [...CHAIN_AND_KIT, 'mocks/'],
         packages: ['vitest', ...librariesOwnedIn('src/mocks/')],
     },
-    // invariant: a folder owns its files, and no facet lists another.
-    facets: {
+    // invariant: a folder owns its files, and no specification lists another.
+    specifications: {
         folders: {
-            api: librariesOwnedIn('src/facets/api/'),
-            cli: librariesOwnedIn('src/facets/cli/'),
-            component: librariesOwnedIn('src/facets/component/'),
-            integration: librariesOwnedIn('src/facets/integration/'),
-            job: librariesOwnedIn('src/facets/job/'),
-            lint: ['@jterrazz/typescript/rules', ...librariesOwnedIn('src/facets/lint/')],
-            mobile: librariesOwnedIn('src/facets/mobile/'),
-            website: librariesOwnedIn('src/facets/website/'),
+            api: librariesOwnedIn('src/specifications/api/'),
+            cli: librariesOwnedIn('src/specifications/cli/'),
+            component: librariesOwnedIn('src/specifications/component/'),
+            integration: librariesOwnedIn('src/specifications/integration/'),
+            job: librariesOwnedIn('src/specifications/job/'),
+            lint: ['@jterrazz/typescript/rules', ...librariesOwnedIn('src/specifications/lint/')],
+            mobile: librariesOwnedIn('src/specifications/mobile/'),
+            website: librariesOwnedIn('src/specifications/website/'),
         },
         imports: [
             ...CHAIN_AND_KIT,
@@ -91,24 +91,24 @@ export const FRAMEWORK_LAYERS = {
         ],
         packages: ['vitest'],
         seams: {
-            'facets/specification.ts': [
-                'facets/api/api.handle',
-                'facets/cli/cli.handle',
-                'facets/integration/integration.handle',
-                'facets/job/job.handle',
-                'facets/lint/lint.handle',
-                'facets/mobile/mobile.handle',
-                'facets/website/website.handle',
+            'specifications/specification.ts': [
+                'specifications/api/api.handle',
+                'specifications/cli/cli.handle',
+                'specifications/integration/integration.handle',
+                'specifications/job/job.handle',
+                'specifications/lint/lint.handle',
+                'specifications/mobile/mobile.handle',
+                'specifications/website/website.handle',
             ],
-            // invariant: a facet reaches the runner config from its project alone: it runs in the Vitest main process, never in test code.
-            'facets/api/api.project.ts': ['vitest/project'],
-            'facets/cli/cli.project.ts': ['vitest/project'],
-            'facets/component/component.project.ts': ['vitest/project'],
-            'facets/integration/integration.project.ts': ['vitest/project'],
-            'facets/job/job.project.ts': ['vitest/project'],
-            'facets/lint/lint.project.ts': ['vitest/project'],
-            'facets/mobile/mobile.project.ts': ['vitest/project'],
-            'facets/website/website.project.ts': ['vitest/project'],
+            // invariant: a specification reaches the runner config from its project alone: it runs in the Vitest main process, never in test code.
+            'specifications/api/api.project.ts': ['vitest/project'],
+            'specifications/cli/cli.project.ts': ['vitest/project'],
+            'specifications/component/component.project.ts': ['vitest/project'],
+            'specifications/integration/integration.project.ts': ['vitest/project'],
+            'specifications/job/job.project.ts': ['vitest/project'],
+            'specifications/lint/lint.project.ts': ['vitest/project'],
+            'specifications/mobile/mobile.project.ts': ['vitest/project'],
+            'specifications/website/website.project.ts': ['vitest/project'],
         },
     },
     vitest: {
@@ -133,7 +133,7 @@ export const FRAMEWORK_LAYERS = {
             ...librariesOwnedIn('lint/'),
         ],
         seams: {
-            'lint/self/corpus/compositions.ts': ['facets/', 'chain/define-facet'],
+            'lint/self/corpus/compositions.ts': ['specifications/', 'chain/define-specification'],
             'lint/self/self-cli.ts': ['chain/refusals/rows'],
         },
     },

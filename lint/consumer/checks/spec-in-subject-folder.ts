@@ -19,8 +19,8 @@ function ambiguityOf(
     at: { index: number; subject: Subject },
 ): Spotted | undefined {
     const segment = ambiguousSegment(at.subject, spec.reading);
-    // Stryker disable next-line ConditionalExpression: ambiguousSegment names a segment of an api route alone; the facet check narrows the subject
-    if (segment === undefined || at.subject.facet !== 'api') {
+    // Stryker disable next-line ConditionalExpression: ambiguousSegment names a segment of an api route alone; the specification check narrows the subject
+    if (segment === undefined || at.subject.specification !== 'api') {
         return undefined;
     }
     const { method, path } = at.subject;

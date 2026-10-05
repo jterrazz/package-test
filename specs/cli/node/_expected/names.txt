@@ -192,7 +192,6 @@
     ApiProjectOptions
     CliProjectOptions
     ComponentProjectOptions
-    FacetProjectOptions
     InProcessProjectOptions
     IntegrationProjectOptions
     JobProjectOptions
@@ -202,6 +201,7 @@
     LiteratePlugin
     MobileProjectOptions
     SpecConfig
+    SpecificationProjectOptions
     UnitProjectOptions
     WebsiteProjectOptions
     api
@@ -218,9 +218,9 @@
     website
 
 @jterrazz/test/config:
-    TestFacet
     TestProject
     TestSettings
+    TestSpecification
     test
 
 @jterrazz/test/oxlint:

@@ -17,7 +17,7 @@ An api spec answers one question: **given this state and this request, what does
 | What it proves     | Application logic against real databases, caches and processes                                         |
 | Parallel isolation | Per-worker schema / db-index / file copy (rule `state-isolated-per-worker`)                            |
 
-Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
+Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this specification does not claim it.
 
 A `postgres()` service runs `docker/<service>/init.sql` when it starts, under the kebab-case of its record key; `sqlite()` takes its schema from its own `init` or `prismaSchema` option instead ([Services](../reference/services.md#dockerserviceinitsql)).
 
@@ -82,7 +82,7 @@ Without `root`, the framework finds the package being tested by walking up from 
 | `.intercept(stub)`                               | Mock an outgoing HTTP call with a declared [stub](../reference/stubs.md)                                                                                                 |
 | `.intercept(trigger, response)`                  | Inline intercept for one-off cases                                                                                                                                       |
 | `.clock('2026-03-04T09:30:00Z')`                 | Pin the app's `Date` for this chain, released when the action resolves ([Time and doubles](../reference/time-and-doubles.md#the-clock))                                  |
-| `api.with({ clock, headers })`                   | A view of the facet whose every chain starts with what the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares))                              |
+| `api.with({ clock, headers })`                   | A view of the specification whose every chain starts with what the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares))                      |
 
 Stubs are **strict** (rule `network-strict-after-first-stub`): once a chain declares one, an outgoing request no stub answers fails the spec ([Stubs § Strict by construction](../reference/stubs.md#strict-by-construction)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
@@ -338,7 +338,7 @@ A run is judged, and `TEST_UPDATE=1` records, only when it is green and whole. O
 
 #### An app that is not Hono
 
-A `server` that returns anything but the Hono app itself exposes no table the facet reads, and fails the run, since a measure against no table would read as every route reached. It states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
+A `server` that returns anything but the Hono app itself exposes no table the specification reads, and fails the run, since a measure against no table would read as every route reached. It states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
 
 ```typescript
 // jterrazz.config.ts

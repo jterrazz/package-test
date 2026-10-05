@@ -2,7 +2,7 @@ import { child, childList, identifierName, memberPropertyName, stringValue } fro
 import type { AstNode } from './ast.js';
 import { findTestCallback } from './test-calls.js';
 
-/** A facet that gains a scenario adds its word here, once: three rules judge inside the callback and a fourth judges how it ends. */
+/** A specification that gains a scenario adds its word here, once: three rules judge inside the callback and a fourth judges how it ends. */
 export const SCENARIO_ACTIONS = new Set(['open', 'render', 'visit']);
 
 /** The scenario is the last argument, when it is a function. */

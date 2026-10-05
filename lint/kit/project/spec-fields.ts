@@ -188,7 +188,7 @@ export function readFixtures(context: Context, node: Node | null): SpecFixture[]
         }
         const found = groundOf(value);
         if (found !== GROUND_FIXTURES) {
-            const where = `./${GROUND_FIXTURES}/ beside the document, or in the ${GROUND_FIXTURES}/ of the lowest folder the leaves share (specs/_shared/${GROUND_FIXTURES}/ across facets)`;
+            const where = `./${GROUND_FIXTURES}/ beside the document, or in the ${GROUND_FIXTURES}/ of the lowest folder the leaves share (specs/_shared/${GROUND_FIXTURES}/ across specifications)`;
             throw new SpecSyntaxError(
                 context.fileName,
                 line,

@@ -12,8 +12,8 @@ export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 
         | 'toolchain'
         | 'type'
         | 'upstream';
-    /** Required: `model` is a statement (this reaches every facet), never a default. */
-    facet:
+    /** Required: `model` is a statement (this reaches every specification), never a default. */
+    specification:
         | 'api'
         | 'cli'
         | 'component'

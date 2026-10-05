@@ -1,0 +1,18 @@
+export type { CliSpecification } from './cli.composition.js';
+export type {
+    CliHandle,
+    CliSpecificationOptions,
+    LiterateServeRegistration,
+} from './cli.handle.js';
+export type { LiterateRunFlags } from './documents/literate.js';
+export type {
+    SpecDocument,
+    SpecEnvToken,
+    SpecFileAssertion,
+    SpecFixture,
+    SpecRun,
+    SpecServeEntry,
+    SpecStream,
+} from '../../../lint/kit/project/spec-grammar.js';
+export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './process/cli.port.js';
+export type { PrepareStep } from '../../disk/prepare.port.js';

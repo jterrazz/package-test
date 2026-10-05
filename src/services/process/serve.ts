@@ -67,7 +67,7 @@ export class ServedProcess {
     port: null | number = null;
     private child: ChildProcess | null = null;
     private readonly extraEnv: Record<string, string>;
-    private readonly facet: string;
+    private readonly specification: string;
     private readonly options: ProcessOptions;
     // Stryker disable next-line BooleanLiteral: spawnServer sets it before any read
     private exited = false;
@@ -78,11 +78,11 @@ export class ServedProcess {
     constructor(
         options: ProcessOptions,
         root: string,
-        facet = 'website',
+        specification = 'website',
         extraEnv: Record<string, string> = {},
     ) {
         this.extraEnv = extraEnv;
-        this.facet = facet;
+        this.specification = specification;
         this.options = options;
         this.root = root;
     }
@@ -114,7 +114,7 @@ export class ServedProcess {
             detached: SIGNALS_GROUPS,
             env: {
                 ...process.env,
-                // Stryker disable next-line ConditionalExpression,EqualityOperator,StringLiteral: an env written as a function, which the facet reads into extraEnv, spreads to nothing either way
+                // Stryker disable next-line ConditionalExpression,EqualityOperator,StringLiteral: an env written as a function, which the specification reads into extraEnv, spreads to nothing either way
                 ...(typeof this.options.env === 'function' ? {} : this.options.env),
                 ...this.extraEnv,
                 ...(port === null ? {} : { PORT: String(port) }),
@@ -210,7 +210,7 @@ export class ServedProcess {
         throw new Error(
             refusal({
                 fix: reason.fix,
-                found: `specification.${this.facet}(): ${reason.found}.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                found: `specification.${this.specification}(): ${reason.found}.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
                 read: 'docs/reference/services.md#process--the-one-shape-an-external-process-takes',
                 why: reason.why,
             }),
@@ -238,7 +238,7 @@ export class ServedProcess {
             throw new Error(
                 refusal({
                     fix: 'run the command by hand and correct what its output names',
-                    found: `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${outcome.stdout + outcome.stderr}`,
+                    found: `specification.${this.specification}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${outcome.stdout + outcome.stderr}`,
                     read: 'docs/reference/services.md#process--the-one-shape-an-external-process-takes',
                     why: 'A process’s `before` must exit 0 before the process starts.',
                 }),

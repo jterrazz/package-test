@@ -1,13 +1,13 @@
-/** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
+/** A tree with a `*.specification.ts` at its root is one specification's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
 
 import { isGroundFolder, moveKeepingHistory, PRUNED } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { finding } from '../../kit/project/document-model.js';
-import { entriesOf } from '../../kit/project/facet-folders.js';
-import { FACETS, reachesRunner } from '../../kit/project/facets.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
+import { entriesOf } from '../../kit/project/specification-folders.js';
+import { reachesRunner, SPECIFICATIONS } from '../../kit/project/specifications.js';
 import { readText } from '../../kit/project/tree.js';
 import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
@@ -37,18 +37,18 @@ export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Spotted[
             path: name,
             line: 1,
             // Stryker disable next-line Regex: the name filtered above ends on the suffix
-            fix: `move it under \`specs/<facet>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
+            fix: `move it under \`specs/<specification>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
             found: "a `.spec.ts` at the project's root, outside every `specs/` tree",
             rule: 'file-suffix-matches-place',
         }));
 }
 
-/** A file reaching no runner is `facet-test-uses-its-runner`'s, whose fix is the opposite move: `--fix` never renames a module test into a spec. */
+/** A file reaching no runner is `specification-test-uses-its-runner`'s, whose fix is the opposite move: `--fix` never renames a module test into a spec. */
 export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
-    return movesUnderFacet(specsRoot).map(({ from }) => {
+    return movesUnderSpecification(specsRoot).map(({ from }) => {
         const rel = relative(specsRoot, from);
         const first = rel.split(/[/\\]/u)[0] ?? '';
-        const where = FACETS.has(first) ? `specs/${first}/` : 'specs/';
+        const where = SPECIFICATIONS.has(first) ? `specs/${first}/` : 'specs/';
         return {
             path: rel,
             line: 1,
@@ -60,24 +60,24 @@ export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
     });
 }
 
-function isRootedFacetTree(specsRoot: string): boolean {
+function isRootedSpecificationTree(specsRoot: string): boolean {
     return entriesOf(specsRoot).some(
         (entry) => entry.isFile() && entry.name.includes('.specification.'),
     );
 }
 
-function movesUnderFacet(specsRoot: string): PlacementMove[] {
+function movesUnderSpecification(specsRoot: string): PlacementMove[] {
     const moves: PlacementMove[] = [];
-    const rooted = isRootedFacetTree(specsRoot);
+    const rooted = isRootedSpecificationTree(specsRoot);
     for (const path of walk(specsRoot)) {
         if (!path.endsWith('.test.ts')) {
             continue;
         }
         const parts = relative(specsRoot, path).split(/[/\\]/u);
-        const [facet] = parts;
-        // invariant: a file loose at the specs root is `specs-at-declared-depth`'s, and a non-facet first level is a repository suite, unless the tree itself is one facet's.
-        // Stryker disable next-line StringLiteral: a split path always has a first part, and a test file's name is no facet's
-        if (!rooted && !FACETS.has(facet ?? '')) {
+        const [specification] = parts;
+        // invariant: a file loose at the specs root is `specs-at-declared-depth`'s, and a non-specification first level is a repository suite, unless the tree itself is one specification's.
+        // Stryker disable next-line StringLiteral: a split path always has a first part, and a test file's name is no specification's
+        if (!rooted && !SPECIFICATIONS.has(specification ?? '')) {
             continue;
         }
         // invariant: a `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
@@ -135,7 +135,7 @@ export function checkFileSuffixMatchesPlaceOfDocument(rel: string): DocumentFind
 
 export function fixFileSuffixMatchesPlace(root: string): string[] {
     const renamed: Rename[] = [];
-    for (const { from, to } of movesUnderFacet(root)) {
+    for (const { from, to } of movesUnderSpecification(root)) {
         if (existsSync(to)) {
             continue;
         }

@@ -1,8 +1,12 @@
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
-import { entriesOf, PRUNED_WITH_FIXTURES, walkFiles } from '../../kit/project/facet-folders.js';
 import { isNodeTestFileName } from '../../kit/project/role.js';
+import {
+    entriesOf,
+    PRUNED_WITH_FIXTURES,
+    walkFiles,
+} from '../../kit/project/specification-folders.js';
 import { readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
@@ -17,7 +21,7 @@ function* walkDirectories(dir: string): Generator<string> {
     }
 }
 
-const SUBJECT_FOLDER_FACETS = new Set(['api', 'cli', 'job']);
+const SUBJECT_FOLDER_SPECIFICATIONS = new Set(['api', 'cli', 'job']);
 
 const GROUND = new Set<string>(GROUND_FOLDERS);
 
@@ -28,7 +32,7 @@ const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u
 export function checkGroundBesideItsOnlyReader(specsRoot: string): Spotted[] {
     const violations: Spotted[] = [];
     const derived = (directory: string): boolean =>
-        SUBJECT_FOLDER_FACETS.has(relative(specsRoot, directory).split(/[/\\]/u)[0] ?? '');
+        SUBJECT_FOLDER_SPECIFICATIONS.has(relative(specsRoot, directory).split(/[/\\]/u)[0] ?? '');
     for (const directory of [specsRoot, ...walkDirectories(specsRoot)].filter(
         (candidate) => !derived(candidate),
     )) {

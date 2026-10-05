@@ -45,7 +45,7 @@ An integration spec answers one question: **given these real services, what does
 - **a module on a real service** — a repository against Postgres, a cache client against Redis;
 - **a module whose oracle is a golden** — a renderer, a parser, a formatter whose output is long enough to be read as a file.
 
-A subject that answers HTTP, runs as a binary or draws a screen belongs to that kind instead; a module that needs neither a service nor a golden is a module test ([the fork](../start/getting-started.md#which-kind-of-test)). Why this is a kind of its own: [ADR-004](https://github.com/jterrazz/package-test/blob/main/docs/decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
+A subject that answers HTTP, runs as a binary or draws a screen belongs to that kind instead; a module that needs neither a service nor a golden is a module test ([the fork](../start/getting-started.md#which-kind-of-test)). Why this is a kind of its own: [ADR-004](https://github.com/jterrazz/package-test/blob/main/docs/decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-specification.md).
 
 ## The constructor
 
@@ -143,11 +143,11 @@ The golden is named by a template literal, and the checker's `no-unused-ground` 
 
 ### The `integration()` project
 
-The `integration` facet is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node facets.
+The `integration` specification is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node specifications.
 
 ```typescript
 // jterrazz.config.ts — its test section
-const test = { projects: [{ facet: 'unit' }, { facet: 'integration' }] };
+const test = { projects: [{ specification: 'unit' }, { specification: 'integration' }] };
 ```
 
 An env-gated sub-suite is an option, not a second project — the whole point of `{ include, exclude, timeout }`:
@@ -155,7 +155,7 @@ An env-gated sub-suite is an option, not a second project — the whole point of
 ```typescript
 const integration = {
     exclude: process.env.E2E_NETWORK ? [] : ['specs/integration/network/**'],
-    facet: 'integration',
+    specification: 'integration',
 };
 ```
 
@@ -163,7 +163,7 @@ const integration = {
 
 ```text
 specs/integration/
-├── integration.specification.ts   # the runner, at the facet root
+├── integration.specification.ts   # the runner, at the specification root
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
     ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule `file-suffix-matches-place`)
@@ -178,7 +178,7 @@ specs/integration/
 - **Reaching for `try`/`catch`.** A thrown error is `result.error`. A `try` around `.call()` brings back the shape where a spec passes because nothing threw.
 - **Writing a module test here.** A module alone, with no service and no golden, belongs beside its code as `<file>.test.ts` (rule `test-beside-its-module`). The folder is not a home for tests that were hard to place.
 - **Goldening a volatile value.** An id, a timestamp or a duration inside `result.value` is tokened (`{{int}}`, `{{iso8601}}`), or pinned with `.clock()`. A literal that moves is a test that fails tomorrow (rule `no-volatile-literal`).
-- **Asserting on a double.** The facet exists so the subject meets the real thing. A `mockOf<T>()` inside `.call()` is a module test that started a container for nothing.
+- **Asserting on a double.** The specification exists so the subject meets the real thing. A `mockOf<T>()` inside `.call()` is a module test that started a container for nothing.
 
 ## Related
 

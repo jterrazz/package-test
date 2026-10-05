@@ -1,5 +1,5 @@
 /**
- * A specimen of the api facet whose only job is to make outgoing HTTP calls —
+ * A specimen of the api specification whose only job is to make outgoing HTTP calls —
  * the surface the intercepts guard. Its app is Hono-compatible and in-process,
  * since intercepts are (MSW), and each of its routes is one shape of outgoing
  * traffic a stub has to answer.

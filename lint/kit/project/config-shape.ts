@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { child, childList, findProperty, propertyKeyName, stringValue, walk } from './ast.js';
 import type { AstNode } from './ast.js';
-import { FACETS } from './facets.js';
+import { SPECIFICATIONS } from './specifications.js';
 import { specsAnchor } from './specs-anchor.js';
 
 /** Only the literal form is read: a project a helper builds carries the framework's canonical include, with nothing to disagree with. */
@@ -122,9 +122,9 @@ function globMatcher(glob: string): RegExp {
     return new RegExp(`(?:^|/)${source}$`, 'u');
 }
 
-export function facetOfSegments(segments: string[] | undefined): string | undefined {
+export function specificationOfSegments(segments: string[] | undefined): string | undefined {
     const first = segments?.[0];
-    return (FACETS as ReadonlySet<unknown>).has(first) ? first : undefined;
+    return (SPECIFICATIONS as ReadonlySet<unknown>).has(first) ? first : undefined;
 }
 
 export function literateRunners(program: AstNode): LiteralString[] {

@@ -21,7 +21,7 @@ describe('selfPlugin', () => {
         // Given - the rules this repository's config spreads
         // Then - one entry per rule, `jterrazz-self/<rule>`, an error
         expect(selfPluginRules).toStrictEqual({
-            'jterrazz-self/facet-is-a-composition': 'error',
+            'jterrazz-self/specification-is-a-composition': 'error',
         });
         expect(selfPlugin.meta.name).toBe('jterrazz-self');
     });

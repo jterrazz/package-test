@@ -4,14 +4,14 @@ import type { Markers } from '@jterrazz/typescript/rules';
 import { callShapeOf, isCallOf } from '../../kit/project/call-shapes.js';
 import { TOKEN_KINDS } from '../../kit/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
-import {
-    FACET_MATRIX_CAPABILITIES,
-    FACET_MATRIX_COLUMNS,
-    FACET_MATRIX_EXEMPTIONS,
-} from './facet-matrix.js';
-import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
 import { matrixSources } from './matrix-sources.js';
 import type { Source } from './matrix-sources.js';
+import {
+    SPECIFICATION_MATRIX_CAPABILITIES,
+    SPECIFICATION_MATRIX_COLUMNS,
+    SPECIFICATION_MATRIX_EXEMPTIONS,
+} from './specification-matrix.js';
+import type { Capability, CapabilityGroup, Column } from './specification-matrix.js';
 
 /** A cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more. */
 
@@ -39,9 +39,9 @@ export type MatrixRow = {
 };
 
 const TOKENS_ARE_THE_MATCHERS =
-    'the matcher owns the family (proven in the module column); a facet uses the ones its goldens need';
+    'the matcher owns the family (proven in the module column); a specification uses the ones its goldens need';
 
-const FACET_GROUPS: readonly CapabilityGroup[] = [
+const SPECIFICATION_GROUPS: readonly CapabilityGroup[] = [
     'Constructor option',
     'Setup',
     'Terminal action',
@@ -51,17 +51,17 @@ const FACET_GROUPS: readonly CapabilityGroup[] = [
     'Result accessor',
 ];
 
-/** A row two facets state is one row. */
+/** A row two specifications state is one row. */
 function declaredCapabilities(): Capability[] {
     const rows: Capability[] = [];
-    for (const column of FACET_MATRIX_COLUMNS) {
+    for (const column of SPECIFICATION_MATRIX_COLUMNS) {
         const composition = column === 'module' ? undefined : COMPOSITIONS[column];
         for (const row of composition === undefined ? [] : rowsOfCompositions(composition)) {
             const at = rows.find(
                 (capability) => capability.group === row.group && capability.name === row.name,
             );
             if (at === undefined) {
-                const exempt = FACET_MATRIX_EXEMPTIONS[`${row.group} · ${row.name}`];
+                const exempt = SPECIFICATION_MATRIX_EXEMPTIONS[`${row.group} · ${row.name}`];
                 rows.push({
                     ...row,
                     columns: [column],
@@ -76,10 +76,11 @@ function declaredCapabilities(): Capability[] {
             }
         }
     }
-    const facets = rows.toSorted(
-        (one, other) => FACET_GROUPS.indexOf(one.group) - FACET_GROUPS.indexOf(other.group),
+    const specifications = rows.toSorted(
+        (one, other) =>
+            SPECIFICATION_GROUPS.indexOf(one.group) - SPECIFICATION_GROUPS.indexOf(other.group),
     );
-    return [...facets, ...FACET_MATRIX_CAPABILITIES];
+    return [...specifications, ...SPECIFICATION_MATRIX_CAPABILITIES];
 }
 
 export function matrixCapabilities(): Capability[] {
@@ -89,7 +90,7 @@ export function matrixCapabilities(): Capability[] {
         name: `{{${kind}}}`,
         probe: `{{${kind}`,
         probeByColumn: { module: `match.${kind}` },
-        // invariant: a token family is declared by the matcher, not a facet: a family no golden here needs is no hole in that facet, and the module column is the matcher's proof.
+        // invariant: a token family is declared by the matcher, not a specification: a family no golden here needs is no hole in that specification, and the module column is the matcher's proof.
         exempt: {
             api: TOKENS_ARE_THE_MATCHERS,
             cli: TOKENS_ARE_THE_MATCHERS,
@@ -171,7 +172,7 @@ function cellOf(count: null | number): string {
 export function exemptions(rows: MatrixRow[]): { column: Column; name: string; why: string }[] {
     const found: { column: Column; name: string; why: string }[] = [];
     for (const row of rows) {
-        for (const column of FACET_MATRIX_COLUMNS) {
+        for (const column of SPECIFICATION_MATRIX_COLUMNS) {
             const why = row.capability.exempt?.[column];
             if (row.cells[column] === 0 && why !== undefined) {
                 found.push({ column, name: row.capability.name, why });
@@ -186,11 +187,13 @@ export function renderMatrixBody(root: string): string {
     const groups = [...new Set(rows.map((row) => row.capability.group))];
     const sections = groups.map((group) => {
         const body = markdownTable(
-            ['Capability', ...FACET_MATRIX_COLUMNS],
+            ['Capability', ...SPECIFICATION_MATRIX_COLUMNS],
             rows
                 .filter((row) => row.capability.group === group)
                 .map((row) => {
-                    const counts = FACET_MATRIX_COLUMNS.map((column) => cellOf(row.cells[column]));
+                    const counts = SPECIFICATION_MATRIX_COLUMNS.map((column) =>
+                        cellOf(row.cells[column]),
+                    );
                     counts.unshift(cell(`\`${row.capability.name}\``));
                     return counts;
                 }),
@@ -203,6 +206,6 @@ export function renderMatrixBody(root: string): string {
     }
     const notes = [...byReason].map(([why, cells]) => `- ${why} — ${cells.join(', ')}`);
     const intro =
-        'What the framework can do, and how many of this package\u2019s own test FILES exercise it, per facet: a call read from each file\u2019s syntax tree, whatever lines a formatter splits it across, and any other probe read as its literal with comments stripped \u2014 strings too for a key or an accessor \u2014 so a sentence or a string naming a capability never counts as a test of it. A blank (`\u2014`) is a capability the facet does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
+        'What the framework can do, and how many of this package\u2019s own test FILES exercise it, per specification: a call read from each file\u2019s syntax tree, whatever lines a formatter splits it across, and any other probe read as its literal with comments stripped \u2014 strings too for a key or an accessor \u2014 so a sentence or a string naming a capability never counts as a test of it. A blank (`\u2014`) is a capability the specification does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }

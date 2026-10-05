@@ -8,7 +8,7 @@
 A repository wrote its `vitest.config.ts` by hand: `defineSpecConfig()` and
 one helper call per project, with whatever else vitest accepts beside them.
 Six rules existed to hold that file to its intended shape — that it started
-from `defineSpecConfig`, that a project was named for its facet, that a
+from `defineSpecConfig`, that a project was named for its specification, that a
 browser block came from `component()`, that a member with tests kept one,
 that it named no simulated DOM. `@jterrazz/typescript` now derives every
 file an editor discovers from `jterrazz.config.ts`, which declares what the
@@ -18,7 +18,7 @@ and the `test()` preset hands it the files it owns.
 ## Decision
 
 - The projects a repository runs are `test.projects` in `jterrazz.config.ts`:
-  each a `facet` — one of the helpers this package ships — the options that
+  each a `specification` — one of the helpers this package ships — the options that
   helper takes, and the global setups it runs (`setup`).
 - `vitest.config.ts` is the file the `test()` preset derives,
   `export default await vitestConfig(import.meta.url)` from
@@ -30,7 +30,7 @@ and the `test()` preset hands it the files it owns.
   only re-exports from a package, and its loader, like vitest's, reads a
   module that awaits at its top.
 - The rules whose object was a hand-written config retire with it:
-  `vitest-config-from-define-spec-config`, `project-named-for-its-facet`,
+  `vitest-config-from-define-spec-config`, `project-named-for-its-specification`,
   `browser-project-from-component` and `member-has-vitest-config`. The
   toolchain's Config pass holds the derived file, and a project's helper
   sets its name and its browser. The rules that read a project's options —

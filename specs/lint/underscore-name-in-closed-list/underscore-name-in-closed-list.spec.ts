@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { lint as preset } from '../preset-lint.specification.js';
 
 describe('underscore-name-in-closed-list', () => {
-    test('accepts a _setup/ under a facet and _shared/_setup/ at the root', async () => {
+    test('accepts a _setup/ under a specification and _shared/_setup/ at the root', async () => {
         // Given - the reserved tree
         const result = await preset.fixture(directory('./_fixtures/reserved/')).run();
 

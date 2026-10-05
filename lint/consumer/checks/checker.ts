@@ -19,8 +19,6 @@ import { checkDocumentDescriptionReadsAsATitle } from './document-description-re
 import { checkDocumentDescriptionUnique } from './document-description-unique.js';
 import { checkDocumentEnvAndServeRegistered } from './document-env-and-serve-registered.js';
 import { checkDocumentFollowsItsGrammar } from './document-follows-its-grammar.js';
-import { checkFacetFolderHasSpecification } from './facet-folder-has-specification.js';
-import { checkFacetTestUsesItsRunner } from './facet-test-uses-its-runner.js';
 import {
     checkFileSuffixMatchesPlace,
     checkFileSuffixMatchesPlaceInMember,
@@ -58,6 +56,8 @@ import {
 import { checkSpecCodeInSetupFolder } from './spec-code-in-setup-folder.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
+import { checkSpecificationFolderHasItsRunner } from './specification-folder-has-its-runner.js';
+import { checkSpecificationTestUsesItsRunner } from './specification-test-uses-its-runner.js';
 
 /** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
 export const TREE_PASS_IDS = [
@@ -70,8 +70,8 @@ export const TREE_PASS_IDS = [
     'file-suffix-matches-place',
     'no-reach-into-sibling-ground',
     'no-document-in-ground',
-    'facet-test-uses-its-runner',
-    'facet-folder-has-specification',
+    'specification-test-uses-its-runner',
+    'specification-folder-has-its-runner',
     'ground-beside-its-only-reader',
     'seeds-state-absolute-time',
     'no-duplicate-ground',
@@ -205,8 +205,8 @@ export const CHECKER: CheckerRegistry = {
         checkSetupModuleAtLowestCommonFolder,
         checkAdapterNamedForItsPort,
         checkFileSuffixMatchesPlace,
-        checkFacetFolderHasSpecification,
-        checkFacetTestUsesItsRunner,
+        checkSpecificationFolderHasItsRunner,
+        checkSpecificationTestUsesItsRunner,
         checkGroundBesideItsOnlyReader,
         checkCheckerSuppressionStatesAReason,
         (root) => checkCheckerSuppressionNamesAPass(root, CHECKER_PASS_IDS),

@@ -1,5 +1,5 @@
 /**
- * A specimen of the job facet over two databases, built from the services the
+ * A specimen of the job specification over two databases, built from the services the
  * runner started: a job copying rows from one to the other, one crashing after
  * a write, one reaching out to an HTTP API, and one stamping the instant it ran.
  */

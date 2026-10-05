@@ -1,6 +1,6 @@
-import type { Capability, ChainSignature, FacetParams, Intersect } from './capability.js';
+import type { Capability, ChainSignature, Intersect, SpecificationParams } from './capability.js';
 import type { ChainContext } from './context/with.capability.js';
-import type { Composition } from './define-facet.js';
+import type { Composition } from './define-specification.js';
 
 type Names<List extends readonly { readonly name: string }[]> = List[number]['name'];
 
@@ -25,7 +25,7 @@ type SharingOf<C extends Composition, Self> =
           }
         : unknown;
 
-type MethodsOf<Member, P extends FacetParams, Self> = Member extends {
+type MethodsOf<Member, P extends SpecificationParams, Self> = Member extends {
     readonly signature?: infer Signature;
 }
     ? Signature extends ChainSignature
@@ -33,11 +33,11 @@ type MethodsOf<Member, P extends FacetParams, Self> = Member extends {
         : never
     : never;
 
-type Methods<C extends Composition, P extends FacetParams, Self> = Intersect<
+type Methods<C extends Composition, P extends SpecificationParams, Self> = Intersect<
     MethodsOf<C['actions'][number] | C['capabilities'][number], P, Self>
 >;
 
-export type ChainOf<C extends Composition, P extends FacetParams, Self> = Pick<
+export type ChainOf<C extends Composition, P extends SpecificationParams, Self> = Pick<
     Methods<C, P, Self>,
     Extract<Names<C['actions']> | Names<C['capabilities']>, keyof Methods<C, P, Self>>
 > &

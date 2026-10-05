@@ -27,7 +27,7 @@ describe('entry-import', () => {
     });
 
     test('withEntryImport — adds the entry import before the first relative one', () => {
-        // Given - a spec importing only its facet's runner
+        // Given - a spec importing only its specification's runner
         const text = "import { api } from '../api.specification.js';\n\napi.get('/');\n";
 
         // Then - the package import opens the block, a blank line before the relative one

@@ -11,7 +11,7 @@ describe('document-follows-its-grammar', () => {
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             specs/widget/case.spec.yaml:2:1  jterrazz-check(document-follows-its-grammar)
-                found: fixture: reads _fixtures/, and "./_expected/shop/" names _expected/ — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across facets) (verb-reads-its-ground-folder)
+                found: fixture: reads _fixtures/, and "./_expected/shop/" names _expected/ — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across specifications) (verb-reads-its-ground-folder)
                 why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`_fixtures/\`.
                 fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
                 read: docs/reference/linting.md#document-follows-its-grammar

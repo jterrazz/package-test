@@ -12,7 +12,7 @@ describe('spec-chains', () => {
             'const db = run.with({});',
         ].join('\n');
 
-        // Then - each handle's door, a view under its runner's, for the facet asked about
+        // Then - each handle's door, a view under its runner's, for the specification asked about
         expect(doorsOf(source, 'cli')).toStrictEqual({
             cli: '../cli.specification.js',
             db: '../db-cli.specification.js',
@@ -36,8 +36,8 @@ describe('spec-chains', () => {
         });
     });
 
-    test('the handles are the facets a specification exports, under their local names, and every view reached from them', () => {
-        // Given - a renamed import broken over lines, a non-facet import, a view of a view written first, and a view of a stranger
+    test('the handles are the specifications a specification exports, under their local names, and every view reached from them', () => {
+        // Given - a renamed import broken over lines, a non-specification import, a view of a view written first, and a view of a stranger
         const source = [
             'const deep = events.with({});',
             "import {\n    api\n        as\n    served,\n    helper,\n} from '../api.specification.js';",

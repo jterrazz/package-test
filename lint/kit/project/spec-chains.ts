@@ -1,6 +1,6 @@
 import { closingOf } from './source-scan.js';
 
-export const SUBJECT_FACETS = ['api', 'cli', 'job', 'mobile', 'website'] as const;
+export const SUBJECT_SPECIFICATIONS = ['api', 'cli', 'job', 'mobile', 'website'] as const;
 
 export type ChainCall = { args: string; name: string };
 
@@ -65,7 +65,7 @@ function doorsWanted(text: string, wanted: (imported: string) => boolean): Map<s
 export function handlesOf(text: string): string[] {
     return [
         ...doorsWanted(text, (imported) =>
-            (SUBJECT_FACETS as readonly string[]).includes(imported),
+            (SUBJECT_SPECIFICATIONS as readonly string[]).includes(imported),
         ).keys(),
     ];
 }
@@ -80,7 +80,7 @@ export function chainsOf(text: string, handles: readonly string[]): Chain[] {
 
 export function doorsOf(
     text: string,
-    facet: (typeof SUBJECT_FACETS)[number],
+    specification: (typeof SUBJECT_SPECIFICATIONS)[number],
 ): Record<string, string> {
-    return Object.fromEntries(doorsWanted(text, (imported) => imported === facet));
+    return Object.fromEntries(doorsWanted(text, (imported) => imported === specification));
 }

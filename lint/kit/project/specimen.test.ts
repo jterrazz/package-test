@@ -124,7 +124,7 @@ describe('specimenOf', () => {
     });
 
     test('specimen — a spec building its runner inline drives the specimen it names', () => {
-        // Given - a spec that starts its own runner over a binary of its facet's fixtures
+        // Given - a spec that starts its own runner over a binary of its specification's fixtures
         const spec =
             "const BIN = resolve(import.meta.dirname, '../_fixtures/specimen-cli/cli.sh');\nexport const { cli } = await specification.cli(BIN);\n";
         const root = specsTree({ 'cli/exec/refusals.spec.ts': spec });
@@ -136,7 +136,7 @@ describe('specimenOf', () => {
     });
 
     test('specimen — an integration spec reaches the module of the fixtures its chains call', () => {
-        // Given - a spec importing a module of its facet's fixtures, under integration and under api
+        // Given - a spec importing a module of its specification's fixtures, under integration and under api
         const spec =
             "import { listOrders } from '../_fixtures/orders/orders.js';\nimport { integration } from '../pure.specification.js';\n";
         const root = specsTree({

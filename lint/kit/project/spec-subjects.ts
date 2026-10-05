@@ -5,7 +5,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { declaredCommands } from './command-words.js';
 import { projectRootOf } from './role.js';
 import { closingOf } from './source-scan.js';
-import { doorsOf, SUBJECT_FACETS } from './spec-chains.js';
+import { doorsOf, SUBJECT_SPECIFICATIONS } from './spec-chains.js';
 import { specimenOf } from './specimen.js';
 import { subjectFolder, subjectName, subjectsOf } from './subject.js';
 import type { Subject, SubjectReading } from './subject.js';
@@ -20,7 +20,7 @@ export type Span = { end: number; start: number };
 export type TestOf = Span & { subjects: string[]; title: string };
 
 export type SpecRead = {
-    facet: string;
+    specification: string;
     file: string;
     reading: SubjectReading;
     subjects: Map<string, { index: number; subject: Subject }>;
@@ -79,7 +79,7 @@ function testsOf(source: string): Omit<TestOf, 'subjects'>[] {
     return tests;
 }
 
-function facetOf(specsRoot: string, file: string): string {
+function specificationOf(specsRoot: string, file: string): string {
     return relative(specsRoot, file).split(/[/\\]/u)[0] ?? '';
 }
 
@@ -105,10 +105,10 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
 
 function readSpec(specsRoot: string, file: string): SpecRead {
     const text = readFileSync(file, 'utf8');
-    const facet = facetOf(specsRoot, file);
+    const specification = specificationOf(specsRoot, file);
     const reading = readingOf(specsRoot, file, text);
     const reached = subjectsOf(text, (path) => readBeside(file, path), reading).filter(
-        ({ subject }) => subject.facet === facet,
+        ({ subject }) => subject.specification === specification,
     );
     const subjects = new Map<string, { index: number; subject: Subject }>();
     for (const at of reached) {
@@ -127,14 +127,18 @@ function readSpec(specsRoot: string, file: string): SpecRead {
             title,
         };
     });
-    return { facet, file, reading, subjects, tests, text };
+    return { specification, file, reading, subjects, tests, text };
 }
 
 export function subjectSpecs(specsRoot: string): SpecRead[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts'))
-        .filter((file) => (SUBJECT_FACETS as readonly string[]).includes(facetOf(specsRoot, file)))
+        .filter((file) =>
+            (SUBJECT_SPECIFICATIONS as readonly string[]).includes(
+                specificationOf(specsRoot, file),
+            ),
+        )
         .map((file) => readSpec(specsRoot, file))
-        .filter((spec) => specimenOf(spec.file, spec.text, spec.facet) === undefined);
+        .filter((spec) => specimenOf(spec.file, spec.text, spec.specification) === undefined);
 }
 
 export function positionOf(text: string, index: number): { column: number; line: number } {
@@ -172,7 +176,7 @@ export function targetOf(
             ? spec.file
             : join(dirname(spec.file), `${aspect}-${slugOf(lastWord)}.spec.ts`);
     }
-    return join(specsRoot, spec.facet, folder, `${aspect}.spec.ts`);
+    return join(specsRoot, spec.specification, folder, `${aspect}.spec.ts`);
 }
 
 export function openedSubjects(spec: SpecRead): string[] {

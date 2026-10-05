@@ -16,7 +16,6 @@ import {
     citingSources,
     CLI_CONTRACT_SPECS,
     e2eSpecIdsOf,
-    FACET_CONTRACT_SPECS,
     handedToTheToolchain,
     humanWords,
     idsCitedIn,
@@ -28,6 +27,7 @@ import {
     ROOT,
     runtimeMarkers,
     SELF_PASSES,
+    SPECIFICATION_CONTRACT_SPECS,
     specsOf,
     TOOLCHAIN_ROWS,
     withSpecsOf,
@@ -125,9 +125,9 @@ describe('catalogue-proofs', () => {
         const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
 
         // Then - each has one, mobile included: its specs run against the Appium protocol double (docs/guides/test.md); and the eighth subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
-        expect([...constructors, 'component'].filter((facet) => !trees.has(facet))).toStrictEqual(
-            [],
-        );
+        expect(
+            [...constructors, 'component'].filter((specification) => !trees.has(specification)),
+        ).toStrictEqual([]);
         expect(
             readdirSync(resolve(ROOT, 'specs/component'), { recursive: true }).some((entry) =>
                 String(entry).endsWith('.test.tsx'),
@@ -196,7 +196,7 @@ describe('catalogue-proofs', () => {
         expect(families.filter((title) => title.includes('names no family'))).toStrictEqual([]);
     });
 
-    test('catalogueProofs — conventions catalogue — E2E inventory (meta-test) — every plugin rule is specified on the lint facet over trees of its own', () => {
+    test('catalogueProofs — conventions catalogue — E2E inventory (meta-test) — every plugin rule is specified on the lint specification over trees of its own', () => {
         // Given - each shipped rule
         expect(pluginRules.size).toBeGreaterThan(0);
 
@@ -245,7 +245,7 @@ describe('catalogue-proofs', () => {
         const metaRows = new Set(META_ROWS.map((row) => row.name));
         expect(e2eSpecIds.size).toBeGreaterThan(0);
 
-        // Then - it is a shipped rule, a known checker pass, a rule handed to the toolchain, a meta row, a CLI-contract probe or the lint facet's own contract
+        // Then - it is a shipped rule, a known checker pass, a rule handed to the toolchain, a meta row, a CLI-contract probe or the lint specification's own contract
         expect(
             [...e2eSpecIds].filter(
                 (id) =>
@@ -254,7 +254,7 @@ describe('catalogue-proofs', () => {
                     !SELF_PASSES.has(id) &&
                     !TOOLCHAIN_ROWS.has(id) &&
                     !CLI_CONTRACT_SPECS.has(id) &&
-                    !FACET_CONTRACT_SPECS.has(id) &&
+                    !SPECIFICATION_CONTRACT_SPECS.has(id) &&
                     !metaRows.has(id),
             ),
         ).toStrictEqual([]);

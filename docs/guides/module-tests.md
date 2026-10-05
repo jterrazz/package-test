@@ -15,7 +15,7 @@ src/domain/posts/
 └── ranking.fixtures.ts      # the payloads it feeds itself, if any
 ```
 
-The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<facet>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([Component specs](component-specs.md)).
+The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<specification>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([Component specs](component-specs.md)).
 
 Nothing in this kind is slow, so the `unit` project is the one a developer runs on every save.
 
@@ -72,7 +72,7 @@ A module that fetches a RELATIVE url is browser code and cannot run under node a
 
 ### `intercept()` — the network, declared, with no chain
 
-A module that reaches the network states what it expects to find there, in the same stub vocabulary every facet uses — the same double, with no chain to hang it on.
+A module that reaches the network states what it expects to find there, in the same stub vocabulary every specification uses — the same double, with no chain to hang it on.
 
 ```typescript
 test('reads the feed the gateway publishes', async () => {
@@ -121,9 +121,9 @@ There is no result object here, because there is no chain to hand one back. The 
 
 ## Unique here
 
-- **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<facet>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is `facet-test-uses-its-runner`'s error in one direction and `file-suffix-matches-place`'s in the other.
+- **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<specification>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is `specification-test-uses-its-runner`'s error in one direction and `file-suffix-matches-place`'s in the other.
 - **It is the only kind that may build its own double.** In every other kind a double is DECLARED — a stub, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
-- **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration facet is where that goes ([Integration specs](integration-specs.md#the-golden-half--a-pure-module-no-services-at-all)).
+- **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration specification is where that goes ([Integration specs](integration-specs.md#the-golden-half--a-pure-module-no-services-at-all)).
 
 ## Pitfalls
 

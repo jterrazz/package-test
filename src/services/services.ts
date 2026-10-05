@@ -5,11 +5,11 @@ import type { ServiceHandle } from './service.port.js';
 /** Services declared as a named record: the keys are the spec's database vocabulary. */
 export type ServiceRecord = Record<string, ServiceHandle>;
 
-/** The services a facet declared, or none. */
+/** The services a specification declared, or none. */
 export function declaredServices<Services extends ServiceRecord>(
     services: Services | undefined,
 ): Services {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- TypeScript cannot narrow a generic record to its empty member, and a facet given no services is given the empty one
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- TypeScript cannot narrow a generic record to its empty member, and a specification given no services is given the empty one
     return services ?? ({} as Services);
 }
 

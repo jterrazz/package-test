@@ -49,7 +49,7 @@ describe('PostTable', () => {
             await visitor.see(content('Could not load posts'));
         });
 
-        // Then - strictness is total on this facet: the unmatched request IS the failure
+        // Then - strictness is total on this specification: the unmatched request IS the failure
         await expect(render).rejects.toThrow(/\/api\/posts/u);
     });
 

@@ -2,7 +2,13 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { EXCLUDE, facetProject, inProcessProject, projectTest, statedOnce } from './project.js';
+import {
+    EXCLUDE,
+    inProcessProject,
+    projectTest,
+    specificationProject,
+    statedOnce,
+} from './project.js';
 
 function testOf(
     project: TestProjectInlineConfiguration,
@@ -11,9 +17,9 @@ function testOf(
 }
 
 describe('project', () => {
-    test('facetProject — collects the facet’s spec files, in group 0, on the preset’s budget', () => {
-        // Given - a facet project stated by nobody
-        const project = testOf(facetProject('api', {}));
+    test('specificationProject — collects the specification’s spec files, in group 0, on the preset’s budget', () => {
+        // Given - a specification project stated by nobody
+        const project = testOf(specificationProject('api', {}));
 
         // Then - its own specs tree, named for it, in parallel on the shared 30s, the run's two global setups from their sources
         expect(project.include).toStrictEqual(['specs/api/**/*.spec.ts']);
@@ -26,17 +32,17 @@ describe('project', () => {
         ]);
     });
 
-    test('facetProject — adds a stated exclude to the preset’s', () => {
-        // Given - a facet project that stays out of one folder
-        const project = testOf(facetProject('api', { exclude: ['specs/api/slow/**'] }));
+    test('specificationProject — adds a stated exclude to the preset’s', () => {
+        // Given - a specification project that stays out of one folder
+        const project = testOf(specificationProject('api', { exclude: ['specs/api/slow/**'] }));
 
         // Then - the preset's ground folders are still out, and the stated one with them
         expect(project.exclude).toStrictEqual([...EXCLUDE, 'specs/api/slow/**']);
     });
 
-    test('facetProject — runs its files one at a time on its own budget when stated', () => {
-        // Given - a facet project that shares one app and needs a minute
-        const project = testOf(facetProject('api', { serial: true, timeout: 60_000 }));
+    test('specificationProject — runs its files one at a time on its own budget when stated', () => {
+        // Given - a specification project that shares one app and needs a minute
+        const project = testOf(specificationProject('api', { serial: true, timeout: 60_000 }));
 
         // Then - no file parallelism, and the stated budget
         expect(project.fileParallelism).toBe(false);
@@ -44,13 +50,13 @@ describe('project', () => {
     });
 
     test('inProcessProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {
-        // Given - the same facet with its specification named, and without
+        // Given - the same specification with its specification named, and without
         const named = testOf(
             inProcessProject('api', { runner: './specs/api/api.specification.ts' }),
         );
         const unnamed = testOf(inProcessProject('api', {}));
 
-        // Then - the named one runs its specification as a setup file over a shared graph; the other is the plain facet
+        // Then - the named one runs its specification as a setup file over a shared graph; the other is the plain specification
         expect([
             { isolate: named.isolate, setupFiles: named.setupFiles },
             { isolate: unnamed.isolate, setupFiles: unnamed.setupFiles },
@@ -80,7 +86,7 @@ describe('project', () => {
         expect(statedOnce(stated)).toStrictEqual({ name: 'x' });
     });
 
-    test('projectTest — states only what the facet and the options state', () => {
+    test('projectTest — states only what the specification and the options state', () => {
         // Given - a project with no exclude, no budget and no serial run stated anywhere
         const project = projectTest('unit', {}, { include: ['src/**/*.test.ts'] });
 

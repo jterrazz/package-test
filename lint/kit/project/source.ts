@@ -31,9 +31,11 @@ export function inGround(path: string): boolean {
     return path.split('/').some((segment) => GROUND.has(segment));
 }
 
-export function facetOf(path: string): string | undefined {
-    const [source, tree, facet, below] = path.split('/');
-    return source === 'src' && tree === 'facets' && below !== undefined ? facet : undefined;
+export function specificationOf(path: string): string | undefined {
+    const [source, tree, specification, below] = path.split('/');
+    return source === 'src' && tree === 'specifications' && below !== undefined
+        ? specification
+        : undefined;
 }
 
 const AT_ITS_TOP = { column: 1, line: 1 };

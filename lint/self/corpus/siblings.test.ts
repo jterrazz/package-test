@@ -66,7 +66,7 @@ describe('siblings', () => {
         // Given - a new module in each of the trees a prefix kind used to swallow
         const newcomers = [
             'src/chain/lens.ts',
-            'src/facets/api/lens.ts',
+            'src/specifications/api/lens.ts',
             'lint/lens.ts',
             'src/vitest/lens.ts',
             'src/services/lens.ts',

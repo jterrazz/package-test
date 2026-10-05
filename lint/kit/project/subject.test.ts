@@ -17,7 +17,7 @@ describe('subject', () => {
         'subjectFolder — the standard name, derived from the subject — %s',
         (_, subject, folder) => {
             // Given - a subject a spec reaches
-            // Then - the folder it is filed under, relative to its facet folder
+            // Then - the folder it is filed under, relative to its specification folder
             expect(subjectFolder(subject)).toBe(folder);
         },
     );
@@ -90,7 +90,7 @@ describe('subject', () => {
         'the subject a spec reaches, read statically — a word after a collection, with more path after it, reads two ways: %s → %s',
         (path, segment) => {
             // Given - a literal path sent with no template, `data` a declared collection
-            const subject = { facet: 'api' as const, method: 'GET' as const, path };
+            const subject = { specification: 'api' as const, method: 'GET' as const, path };
 
             // Then - the word that may be a value, if any
             expect(ambiguousSegment(subject, { ...NO_READING, collections: ['data'] })).toBe(
@@ -115,7 +115,7 @@ describe('subject', () => {
     });
 
     test('the subject a spec reaches, read statically — reads a job, the words of a command, a page and a journey', () => {
-        // Given - one chain of each other facet
+        // Given - one chain of each other specification
         const source = [
             "import { cli, job, mobile, website } from '../x.specification.js';",
             "await job.trigger('digest');",
@@ -182,7 +182,7 @@ describe('subject', () => {
         'what a repository declares — its runner commands, its irregular collections — a GET on %s with the collections %j is filed under %s',
         (path, collections, folder) => {
             // Given - a GET on one resource, and the collections the repository declares
-            const subject: Subject = { facet: 'api', method: 'GET', path };
+            const subject: Subject = { specification: 'api', method: 'GET', path };
 
             // Then - a declared collection is listed, the plural test holding for the rest
             expect(subjectFolder(subject, { ...NO_READING, collections })).toBe(folder);
@@ -232,7 +232,7 @@ describe('subject', () => {
         ).toStrictEqual([]);
     });
 
-    test('the subject a spec reaches, read statically — names each facet, a request file is its own route, and params mark a template where its verb reads them', () => {
+    test('the subject a spec reaches, read statically — names each specification, a request file is its own route, and params mark a template where its verb reads them', () => {
         // Given - a request file on a word that reads two ways, a fetched page, a bare command, and params in each position
         const source = [
             "import { api, cli, website } from '../x.specification.js';",

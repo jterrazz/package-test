@@ -10,7 +10,7 @@ describe('projects', () => {
             .fixture(directory('./_fixtures/projects/'))
             .exec('node projects.mjs');
 
-        // Then - a facet takes its specs, the cli its documents too, and the unit project every module test but a rendered one
+        // Then - a specification takes its specs, the cli its documents too, and the unit project every module test but a rendered one
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             [api] specs/api/orders/list.spec.ts > runs

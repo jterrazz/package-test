@@ -101,7 +101,7 @@ describe('caller', () => {
     });
 
     test('framework frames are recognised by identity — a module of another layer is a framework frame, from the DEFAULT tree', () => {
-        // Given - a sibling facet's module, judged against the tree this module derives from its own location (no explicit frameworkTree)
+        // Given - a sibling specification's module, judged against the tree this module derives from its own location (no explicit frameworkTree)
         const other = resolve(
             import.meta.dirname,
             '..',

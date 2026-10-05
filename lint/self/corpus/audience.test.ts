@@ -109,7 +109,7 @@ describe('audience', () => {
         const fragment = {
             testing: {
                 jsPlugins: ['jterrazz-self/plugin'],
-                overrides: [{ rules: { 'jterrazz/facet-is-a-composition': 'off' } }],
+                overrides: [{ rules: { 'jterrazz/specification-is-a-composition': 'off' } }],
             },
             nested: [{ meta: { docs: { audience: 'self' } } }],
             plugin: { rules: { 'specimen-filed-by-capability': {} } },
@@ -118,7 +118,7 @@ describe('audience', () => {
         // Then - each is answered at the path it was found
         expect(selfExposures(fragment, self, 'x')).toStrictEqual([
             'x.testing.jsPlugins.0 = jterrazz-self/plugin',
-            'x.testing.overrides.0.rules.jterrazz/facet-is-a-composition',
+            'x.testing.overrides.0.rules.jterrazz/specification-is-a-composition',
             'x.nested.0 (meta.docs.audience: self)',
             'x.plugin.rules.specimen-filed-by-capability',
         ]);

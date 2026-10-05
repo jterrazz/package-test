@@ -9,7 +9,7 @@
 container stack described by a `docker/compose.test.yaml` rather than as a Hono
 app handed to `server`. It carried a binding resolver, a compose-file reader, a
 `composeService` name on every service handle, a `TEST_MODE` environment
-variable, a fetch adapter for the api facet, five lint rules (A5, A6, A6w, A10,
+variable, a fetch adapter for the api specification, five lint rules (A5, A6, A6w, A10,
 I3) with their fixtures and specs, an `api-stack` project, and an orchestrator
 that had to start two shapes of world.
 
@@ -28,7 +28,7 @@ Compose mode leaves, with no deprecation window: none opens for a consumer that
 does not exist.
 
 What goes: `mode`, `TEST_MODE`, the `docker/compose.test.yaml` binding,
-`composeService`, `src/integrations/compose/`, the api facet's fetch adapter,
+`composeService`, `src/integrations/compose/`, the api specification's fetch adapter,
 rules A5, A6, A6w, A10 and I3 with every fixture and spec of theirs, and the
 `api-stack` project.
 
@@ -40,7 +40,7 @@ from the key at start, and the init script a database runs is read from
 ## Consequences
 
 - One shape of world: a specification starts the services its record declares
-  and hands the subject to `server`. An agent that knows one facet knows them
+  and hands the subject to `server`. An agent that knows one specification knows them
   all, and the orchestrator has one path through startup instead of two.
 - A consumer config naming a removed rule id fails oxlint's unknown-rule check
   — the same failure mode ADR-002 had for J1/J3/J4/J5, and the survey found no

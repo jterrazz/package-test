@@ -146,12 +146,12 @@ const REFUSED: [string, string, string][] = [
     [
         'a fixture outside any fixtures folder',
         documentWith('fixture: ./a.json\n'),
-        'case.spec.yaml:2: fixture: reads _fixtures/, and "./a.json" names no _fixtures/ folder — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across facets) (verb-reads-its-ground-folder)',
+        'case.spec.yaml:2: fixture: reads _fixtures/, and "./a.json" names no _fixtures/ folder — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across specifications) (verb-reads-its-ground-folder)',
     ],
     [
         'a fixture in another ground folder',
         documentWith('fixture: ./_expected/a.json\n'),
-        'case.spec.yaml:2: fixture: reads _fixtures/, and "./_expected/a.json" names _expected/ — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across facets) (verb-reads-its-ground-folder)',
+        'case.spec.yaml:2: fixture: reads _fixtures/, and "./_expected/a.json" names _expected/ — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across specifications) (verb-reads-its-ground-folder)',
     ],
 ];
 

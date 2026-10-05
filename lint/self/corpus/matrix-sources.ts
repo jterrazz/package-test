@@ -5,7 +5,7 @@ import type { AstNode } from '../../kit/project/ast.js';
 import { callsOf } from '../../kit/project/call-shapes.js';
 import { stringsOf, withoutComments } from '../../kit/project/source-scan.js';
 import { sourcesUnder } from '../../kit/project/tree.js';
-import type { Column } from './facet-matrix.js';
+import type { Column } from './specification-matrix.js';
 
 /** `files` serves the one column with no constructor: component's options are the project's, stated in this repository's `jterrazz.config.ts`. */
 export const MATRIX_SOURCES_TREES: Record<

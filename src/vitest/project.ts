@@ -64,12 +64,12 @@ export function onProjectDefaults(
 }
 
 /** What every helper accepts on top of its canonical project. */
-export type FacetProjectOptions = {
-    /** Globs to stay out of: added to the preset's on a facet helper, replacing the canonical ones on `unit()` and `component()`. */
+export type SpecificationProjectOptions = {
+    /** Globs to stay out of: added to the preset's on a specification helper, replacing the canonical ones on `unit()` and `component()`. */
     exclude?: string[];
     /** Replace the canonical `include` globs. */
     include?: string[];
-    /** Run files one at a time, for facets sharing a served app, a database file or a browser profile. */
+    /** Run files one at a time, for specifications sharing a served app, a database file or a browser profile. */
     serial?: boolean;
     /** Raise (or lower) the 30s budget for this project alone. */
     timeout?: number;
@@ -79,10 +79,10 @@ type CanonicalGlobs = { exclude?: string[]; include: string[] };
 
 type ProjectTest = NonNullable<TestProjectInlineConfiguration['test']>;
 
-/** A stated `include` or `exclude` replaces the canonical one; the group is 0 until a facet states its own. */
+/** A stated `include` or `exclude` replaces the canonical one; the group is 0 until a specification states its own. */
 export function projectTest(
     name: string,
-    options: FacetProjectOptions,
+    options: SpecificationProjectOptions,
     canonical: CanonicalGlobs,
 ): ProjectTest {
     const exclude = options.exclude ?? canonical.exclude;
@@ -96,26 +96,28 @@ export function projectTest(
     };
 }
 
-export function facetProject(
-    facet: string,
-    options: FacetProjectOptions,
+export function specificationProject(
+    specification: string,
+    options: SpecificationProjectOptions,
 ): TestProjectInlineConfiguration {
     return onProjectDefaults({
-        test: projectTest(facet, options, { include: [`specs/${facet}/**/*.spec.ts`] }),
+        test: projectTest(specification, options, {
+            include: [`specs/${specification}/**/*.spec.ts`],
+        }),
     });
 }
 
-/** What a facet whose specification boots its subject in this process accepts on top. */
-export type InProcessProjectOptions = FacetProjectOptions & {
+/** What a specification whose runner boots its subject in this process accepts on top. */
+export type InProcessProjectOptions = SpecificationProjectOptions & {
     /** The `*.specification.ts` module its spec files import their runner from: stated, a worker's files share one module graph and the module runs again before each file, so every file still boots its own subject. */
     runner?: string;
 };
 
 export function inProcessProject(
-    facet: string,
+    specification: string,
     options: InProcessProjectOptions,
 ): TestProjectInlineConfiguration {
-    const project = facetProject(facet, options);
+    const project = specificationProject(specification, options);
 
     return options.runner === undefined
         ? project

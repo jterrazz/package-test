@@ -40,7 +40,7 @@ ruleTester().run('scenario-ends-settled', scenarioEndsSettled, {
             filename: SPEC,
         },
         {
-            name: 'A facet spec that has not taken the suffix yet is the same scenario.',
+            name: 'A specification spec that has not taken the suffix yet is the same scenario.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(button('Next'));
             });`,

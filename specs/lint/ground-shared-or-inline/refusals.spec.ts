@@ -46,7 +46,7 @@ describe('refusals', () => {
         `);
     });
 
-    test('a pool seed two sibling routes of one facet reach for is refused where it sits', async () => {
+    test('a pool seed two sibling routes of one specification reach for is refused where it sits', async () => {
         // Given - the sibling-routes tree
         const result = await checker.fixture(directory('./_fixtures/sibling-routes/')).run();
 
@@ -60,7 +60,7 @@ describe('refusals', () => {
         `);
     });
 
-    test("a pool fixture one facet's runner alone reads is refused where it sits", async () => {
+    test("a pool fixture one specification's runner alone reads is refused where it sits", async () => {
         // Given - the runner-read tree
         const result = await checker.fixture(directory('./_fixtures/runner-read/')).run();
 

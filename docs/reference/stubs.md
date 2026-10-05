@@ -1,6 +1,6 @@
 # Stubs: the outside world, declared
 
-Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on every facet that reaches the network — `api`, `job`, `integration`, `component`, `website` and `mobile`.
+Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on every specification that reaches the network — `api`, `job`, `integration`, `component`, `website` and `mobile`.
 
 A stub states what the provider replies, and nothing runs it against the provider it stands for — so it is named for what it does, never for a verification it does not make.
 
@@ -152,7 +152,7 @@ export const withArticleGone = (id: string) =>
 The file layout follows the same split: a **public facade** per feature, **internal units** under it.
 
 ```text
-specs/<facet>/<feature>/
+specs/<specification>/<feature>/
 ├── <feature>.test.ts
 ├── _fixtures/
 │   └── events.json                    the payload a unit serves
@@ -208,7 +208,7 @@ export default defineStub({
 
 ## Using them: `.intercept()`
 
-Every facet that reaches the network takes the same three forms:
+Every specification that reaches the network takes the same three forms:
 
 | Form                            | Use                                                        |
 | ------------------------------- | ---------------------------------------------------------- |
@@ -298,7 +298,7 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 A stub reaches the subject by one of three deliveries, named for where the subject runs.
 
-| Facets                                                    | Delivery                                                          | Notes                                                                               |
+| Specifications                                            | Delivery                                                          | Notes                                                                               |
 | --------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `api`, `job`, `integration`, and a module's `intercept()` | **same process** — msw server                                     | The subject runs here, so its outgoing requests pass through this process           |
 | `component`                                               | **browser page** — msw worker                                     | The component runs in Chromium, so the service worker answers its requests there    |
@@ -390,7 +390,7 @@ The point: your stub states the **business payload** (`{ category: 'TECH' }`) an
 
 ### Streamed replies
 
-A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three deliveries honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile facets serve from.
+A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three deliveries honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile specifications serve from.
 
 ```typescript
 import { http, intercept } from '@jterrazz/test';

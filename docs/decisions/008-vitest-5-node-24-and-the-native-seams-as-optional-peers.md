@@ -36,7 +36,7 @@ flow bumps the pair in one unit.
 **`engines.node: ">=24"`** — the toolchain's floor, not a third one.
 
 **The four native seams become OPTIONAL peers**, each loaded on first use
-through `loadPeer()`, whose refusal names the facet, the peer, the install
+through `loadPeer()`, whose refusal names the specification, the peer, the install
 command of the package manager the project's own lockfile names, and — under
 pnpm — the `onlyBuiltDependencies` line. What stays a dependency is what every
 consumer uses and none should declare: `msw`, `vitest-mock-extended`, `yaml`.

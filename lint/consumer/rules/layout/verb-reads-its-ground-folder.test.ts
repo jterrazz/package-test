@@ -45,7 +45,7 @@ ruleTester().run('verb-reads-its-ground-folder', verbReadsItsGroundFolder, {
                     column: 14,
                     line: 1,
                     message:
-                        /^found: `seed\(\)` reads _seeds\/, and `file\('\.\.\/\.\.\/_shared\/_fixtures\/_seeds\/rows\.sql'\)` names _fixtures\/ · .* · fix: move the file to \.\/_seeds\/ beside the test, or in the _seeds\/ of the lowest folder the leaves share \(specs\/_shared\/_seeds\/ across facets\)/u,
+                        /^found: `seed\(\)` reads _seeds\/, and `file\('\.\.\/\.\.\/_shared\/_fixtures\/_seeds\/rows\.sql'\)` names _fixtures\/ · .* · fix: move the file to \.\/_seeds\/ beside the test, or in the _seeds\/ of the lowest folder the leaves share \(specs\/_shared\/_seeds\/ across specifications\)/u,
                 },
             ],
             filename: SPEC,

@@ -1,13 +1,13 @@
-export { specification, type SpecificationConfig } from './facets/specification.js';
-export type * from './facets/api/api.face.js';
-export type * from './facets/cli/cli.face.js';
-export * from './facets/component/component.face.js';
-export type * from './facets/integration/integration.face.js';
-export type * from './facets/job/job.face.js';
-export type * from './facets/lint/lint.face.js';
-export { ruleTester } from './facets/lint/lint.face.js';
-export type * from './facets/mobile/mobile.face.js';
-export type * from './facets/website/website.face.js';
+export { specification, type SpecificationConfig } from './specifications/specification.js';
+export type * from './specifications/api/api.face.js';
+export type * from './specifications/cli/cli.face.js';
+export * from './specifications/component/component.face.js';
+export type * from './specifications/integration/integration.face.js';
+export type * from './specifications/job/job.face.js';
+export type * from './specifications/lint/lint.face.js';
+export { ruleTester } from './specifications/lint/lint.face.js';
+export type * from './specifications/mobile/mobile.face.js';
+export type * from './specifications/website/website.face.js';
 
 export {
     directory,

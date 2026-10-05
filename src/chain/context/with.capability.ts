@@ -13,7 +13,7 @@ export type ChainContext = {
     headers?: Record<string, string>;
 };
 
-/** A key the facet composes no setup for is ignored. */
+/** A key the specification composes no setup for is ignored. */
 export const sharing: Sharing = {
     kind: 'context',
     name: 'with',

@@ -5,7 +5,7 @@ export default defineConfig({
     kind: 'api',
     platform: 'node',
     presets: [test()],
-    test: { projects: [{ facet: 'cli' }] },
+    test: { projects: [{ specification: 'cli' }] },
     typescript: {
         knip: {
             entry: {

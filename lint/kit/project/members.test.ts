@@ -38,7 +38,7 @@ describe('members', () => {
         ]);
     });
 
-    test('members — where the member pass looks — a member whose own root is the specs tree is a specs root (`file-suffix-matches-place`, `facet-test-uses-its-runner`, `ground-beside-its-only-reader`)', () => {
+    test('members — where the member pass looks — a member whose own root is the specs tree is a specs root (`file-suffix-matches-place`, `specification-test-uses-its-runner`, `ground-beside-its-only-reader`)', () => {
         // Given - that member run on its own, the way the toolchain runs it
         const roots = discoverSpecRoots(resolve(WORKSPACE, 'specs'));
 
@@ -46,7 +46,7 @@ describe('members', () => {
         expect(roots).toStrictEqual([resolve(WORKSPACE, 'specs')]);
     });
 
-    test('members — where the member pass looks — a member that nests its facet tree is still a specs root', () => {
+    test('members — where the member pass looks — a member that nests its specification tree is still a specs root', () => {
         // Given - `@fixture/clean` keeps its trees under `web/`
         const roots = discoverSpecRoots(WORKSPACE).map((dir) => dir.replace(`${WORKSPACE}/`, ''));
 
