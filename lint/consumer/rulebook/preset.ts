@@ -13,6 +13,7 @@ import { createRequire } from 'node:module';
 
 import STANDARD from '../../../src/standard/standard.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
+import { derivedProjects } from '../../kit/project/derived-projects.js';
 import { TEST_SECTION } from '../../kit/project/test-section.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
@@ -259,6 +260,7 @@ export function testPreset(): Preset {
             label: 'Test Conventions (@jterrazz/test)',
             module: createRequire(import.meta.url).resolve('#checker'),
         },
+        derive: (root) => ({ projects: Object.fromEntries(derivedProjects(root)) }),
         files: {
             'vitest.config.ts': {
                 scope: 'unit',

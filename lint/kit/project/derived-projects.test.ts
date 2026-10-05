@@ -5,8 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { derivedProjects } from './derived-projects.js';
 
-const SPECIFICATIONS = ['unit', 'cli', 'api', 'component'];
-
 function tree(files: readonly string[]): string {
     const root = mkdtempSync(join(tmpdir(), 'derived-projects-'));
     for (const file of files) {
@@ -40,7 +38,7 @@ describe('derivedProjects', () => {
         ]);
 
         // Then - each project with the options the tree gives it
-        expect(Object.fromEntries(derivedProjects(root, SPECIFICATIONS))).toStrictEqual({
+        expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
             api: {},
             cli: {},
             component: { include: ['app/**/*.test.tsx', 'src/**/*.test.tsx'] },
@@ -54,10 +52,10 @@ describe('derivedProjects', () => {
         const bare = tree(['src/index.ts']);
 
         // Then - the component project alone, then nothing
-        expect(Object.fromEntries(derivedProjects(component, SPECIFICATIONS))).toStrictEqual({
+        expect(Object.fromEntries(derivedProjects(component))).toStrictEqual({
             component: { include: ['specs/component/**/*.test.tsx'] },
         });
-        expect(derivedProjects(bare, SPECIFICATIONS).size).toBe(0);
+        expect(derivedProjects(bare).size).toBe(0);
     });
 
     test('derived-projects — a specs/unit/ folder is one more root of the unit project, never a project of its own', () => {
@@ -65,7 +63,7 @@ describe('derivedProjects', () => {
         const root = tree(['src/orders.test.ts', 'specs/unit/pricing.test.ts']);
 
         // Then - one unit project over both roots
-        expect(Object.fromEntries(derivedProjects(root, SPECIFICATIONS))).toStrictEqual({
+        expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
             unit: { roots: ['src', 'specs/unit'] },
         });
     });

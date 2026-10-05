@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { recommendedRules } from '../catalogue/manifest.js';
@@ -53,5 +56,18 @@ describe('preset', () => {
                 },
             },
         ]);
+    });
+
+    test('testPreset — the test preset — derives the test projects of a tree for doctor to show', () => {
+        // Given - a tree holding a module test and the api specs
+        const root = mkdtempSync(join(tmpdir(), 'test-preset-'));
+        mkdirSync(join(root, 'src'));
+        mkdirSync(join(root, 'specs/api'), { recursive: true });
+        writeFileSync(join(root, 'src/orders.test.ts'), '');
+
+        // Then - the projects the vitest config builds from it
+        expect(testPreset().derive?.(root)).toStrictEqual({
+            projects: { api: {}, unit: { roots: ['src'] } },
+        });
     });
 });

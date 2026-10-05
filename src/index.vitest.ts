@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration, ViteUserConfig } from 'vitest/config';
 
+import { derivedProjects } from '../lint/kit/project/derived-projects.js';
 import { isRecord } from '../lint/kit/project/json-shape.js';
 import { TEST_SECTION } from '../lint/kit/project/test-section.js';
 import { refusal } from './chain/refusals/refusal.js';
@@ -16,7 +17,6 @@ import { job } from './specifications/job/job.project.js';
 import { lint } from './specifications/lint/lint.project.js';
 import { mobile } from './specifications/mobile/mobile.project.js';
 import { website } from './specifications/website/website.project.js';
-import { derivedProjects } from './vitest/derived-projects.js';
 import { presetConfig } from './vitest/preset.js';
 import { unit } from './vitest/unit.project.js';
 
@@ -180,7 +180,7 @@ async function derivedFrom(root: string): Promise<ViteUserConfig> {
     }
     const section = resolved.sections[TEST_SECTION];
     const declared = declaredProjects(isRecord(section) ? section.projects : undefined);
-    const derived = derivedProjects(root, [...BUILDERS.keys()]);
+    const derived = derivedProjects(root);
     const specifications = [...BUILDERS.keys()].filter(
         (specification) => derived.has(specification) || declared.has(specification),
     );

@@ -1,9 +1,14 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { SPECIFICATIONS } from './specifications.js';
+
 const SPECS = 'specs';
 
 const UNIT = 'unit';
+
+// invariant: every specification a project is built by has its folder, the unit one aside: module tests sit beside their modules.
+const FOLDERED: ReadonlySet<string> = new Set([...SPECIFICATIONS, 'component']);
 
 const MODULE_TEST = /\.test\.ts$/u;
 
@@ -33,12 +38,9 @@ const foldersIn = (path: string): string[] =>
         : [];
 
 /** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder, `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
-export function derivedProjects(
-    root: string,
-    specifications: readonly string[],
-): Map<string, Record<string, unknown>> {
+export function derivedProjects(root: string): Map<string, Record<string, unknown>> {
     const specs = foldersIn(join(root, SPECS));
-    const named = specs.filter((folder) => folder !== UNIT && specifications.includes(folder));
+    const named = specs.filter((folder) => FOLDERED.has(folder));
     const roots = [
         ...foldersIn(root).filter((folder) => folder !== SPECS),
         ...specs.filter((folder) => !named.includes(folder)).map((folder) => `${SPECS}/${folder}`),

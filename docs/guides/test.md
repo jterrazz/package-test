@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 138   |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 137   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<specification>/`                                      | the framework's own specifications, each met through its constructor     | 192   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification               | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
