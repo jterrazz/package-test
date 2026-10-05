@@ -46,7 +46,7 @@ describe('project', () => {
     test('inProcessProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {
         // Given - the same facet with its specification named, and without
         const named = testOf(
-            inProcessProject('api', { specification: './specs/api/api.specification.ts' }),
+            inProcessProject('api', { runner: './specs/api/api.specification.ts' }),
         );
         const unnamed = testOf(inProcessProject('api', {}));
 

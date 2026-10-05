@@ -127,15 +127,15 @@ export function facetOfSegments(segments: string[] | undefined): string | undefi
     return (FACETS as ReadonlySet<unknown>).has(first) ? first : undefined;
 }
 
-export function literateSpecifications(program: AstNode): LiteralString[] {
+export function literateRunners(program: AstNode): LiteralString[] {
     const found: LiteralString[] = [];
     walk(program, (node) => {
         if (propertyKeyName(node) !== 'literate') {
             return;
         }
-        const specification = literalOf(findProperty(child(node, 'value'), 'specification'));
-        if (specification !== undefined) {
-            found.push(specification);
+        const runner = literalOf(findProperty(child(node, 'value'), 'runner'));
+        if (runner !== undefined) {
+            found.push(runner);
         }
     });
     return found;

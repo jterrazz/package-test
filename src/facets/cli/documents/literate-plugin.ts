@@ -15,13 +15,13 @@ export type LiterateOptions = {
     /** Globs added to the test include; narrow it when a tree holds documents that are inputs to other specs. */
     include?: string[];
     /** Path to the `*.specification.ts` whose export named for each document's `kind:` runs it; stated, never guessed. */
-    specification: string;
+    runner: string;
 };
 
 /** Structural, so the runner coupling stays one dependency (the layer map); assignable to vite's `Plugin`. */
 export type LiteratePlugin = {
     config: () => { test: { include: string[] } };
-    /** Vite hands the resolved root here — what a relative `specification` is resolved against. */
+    /** Vite hands the resolved root here — what a relative `runner` is resolved against. */
     configResolved: (resolved: { root: string }) => void;
     enforce: 'pre';
     load: (id: string) => null | string;
@@ -49,15 +49,11 @@ function readDocument(content: string, displayPath: string): SpecFile {
 }
 
 /** The document is handed to `cli.run()` spelled by its brand, so the module imports the runner alone. */
-export function literateModule(
-    content: string,
-    filePath: string,
-    specificationPath: string,
-): string {
+export function literateModule(content: string, filePath: string, runnerPath: string): string {
     const { description } = readDocument(content, filePath).document;
     return [
         "import { test } from 'vitest';",
-        `import { cli } from ${JSON.stringify(specificationPath)};`,
+        `import { cli } from ${JSON.stringify(runnerPath)};`,
         '',
         `test(${JSON.stringify(description)}, async () => {`,
         `    await cli.run({ [Symbol.for(${JSON.stringify(DISK_KEY)})]: 'file', path: ${JSON.stringify(`./${basename(filePath)}`)} });`,
@@ -85,10 +81,10 @@ export function literate(options: LiterateOptions): LiteratePlugin {
                 return null;
             }
             const filePath = cleanId(id);
-            const specificationPath = isAbsolute(options.specification)
-                ? options.specification
-                : resolve(root, options.specification);
-            return literateModule(readFileSync(filePath, 'utf8'), filePath, specificationPath);
+            const runnerPath = isAbsolute(options.runner)
+                ? options.runner
+                : resolve(root, options.runner);
+            return literateModule(readFileSync(filePath, 'utf8'), filePath, runnerPath);
         },
         name: 'jterrazz-test:literate',
     };

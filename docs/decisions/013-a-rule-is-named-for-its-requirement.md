@@ -52,7 +52,7 @@ said only when a rule arrived, and one code covered several checker passes
 | `e1-env-allowlist`                        | `environment-read-allow-listed`               |
 | `m1-constructor-has-a-tree`               | `every-constructor-has-specs`                 |
 | `e7w-include-prefix-exists`               | `include-points-at-a-folder`                  |
-| `e8-literate-specification-exists`        | `literate-specification-exists`               |
+| `e8-literate-specification-exists`        | `literate-runner-exists`                      |
 | `e3-config-present`                       | `member-has-vitest-config`                    |
 | `g4-no-dom-in-module-test`                | `no-dom-in-module-test`                       |
 | `e9w-env-assignment-in-test`              | `no-raw-env-write`                            |

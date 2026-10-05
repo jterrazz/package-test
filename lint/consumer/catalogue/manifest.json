@@ -465,11 +465,11 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "`literate.specification`, resolved from the config directory, names a file that exists. The config directory is what the path is read against; a project that moves Vite’s `root` states its door relative to the config all the same.",
+            "sentence": "`literate.runner`, resolved from the config directory, names a file that exists. The config directory is what the path is read against; a project that moves Vite’s `root` states its door relative to the config all the same.",
             "facet": "cli",
             "family": "setup",
             "fix": "Point it at the `*.specification.ts` that exports the `cli` its documents run through.",
-            "name": "literate-specification-exists",
+            "name": "literate-runner-exists",
             "rationale": "A path that resolves to nothing fails at collection time with a message about an import, several layers from the line that caused it.",
             "reach": "config"
         },

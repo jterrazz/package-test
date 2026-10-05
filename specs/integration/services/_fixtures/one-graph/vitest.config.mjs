@@ -7,9 +7,9 @@ export default {
         maxWorkers: 1,
         projects: [
             integration(
-                process.env.SPECIFICATION === undefined
+                process.env.RUNNER === undefined
                     ? files
-                    : { ...files, specification: process.env.SPECIFICATION },
+                    : { ...files, runner: process.env.RUNNER },
             ),
         ],
     },

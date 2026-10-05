@@ -9,7 +9,7 @@ import {
     collectsAFile,
     facetOfSegments,
     includedGlobs,
-    literateSpecifications,
+    literateRunners,
     staticPrefix,
 } from './config-shape.js';
 import type { LiteralString } from './config-shape.js';
@@ -49,19 +49,19 @@ describe('config-shape', () => {
         ]);
     });
 
-    test('literateSpecifications — the specification each `literate` block names, and none where it names no literal', () => {
-        // Given - a literal specification, a computed one, a literate block that is no object, and an unrelated property
+    test('literateRunners — the runner each `literate` block names, and none where it names no literal', () => {
+        // Given - a literal runner, a computed one, a literate block that is no object, and an unrelated property
         const source = [
             'export default {',
-            "    a: { literate: { specification: './specs/cli/cli.specification.ts' } },",
-            '    b: { literate: { specification: path } },',
+            "    a: { literate: { runner: './specs/cli/cli.specification.ts' } },",
+            '    b: { literate: { runner: path } },',
             '    c: { literate: true },',
             "    d: { specification: './elsewhere.ts' },",
             '};',
         ].join('\n');
 
         // Then - the one literal
-        expect(literateSpecifications(programOf(source)).map(located)).toStrictEqual([
+        expect(literateRunners(programOf(source)).map(located)).toStrictEqual([
             './specs/cli/cli.specification.ts@38',
         ]);
     });

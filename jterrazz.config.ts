@@ -74,7 +74,7 @@ export default defineConfig({
                 facet: 'cli',
                 literate: {
                     include: ['specs/cli/run/*.spec.yaml'],
-                    specification: './specs/cli/literate-cli.specification.ts',
+                    runner: './specs/cli/literate-cli.specification.ts',
                 },
                 setup: ['specs/cli/_setup/packed/per-run.ts'],
             },

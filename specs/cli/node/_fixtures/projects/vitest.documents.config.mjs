@@ -6,7 +6,7 @@ export default defineSpecConfig({
             cli({
                 literate: {
                     include: ['documents/*.spec.yaml'],
-                    specification: './specs/cli/cli.specification.ts',
+                    runner: './specs/cli/cli.specification.ts',
                 },
             }),
         ],

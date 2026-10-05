@@ -107,8 +107,8 @@ export function facetProject(
 
 /** What a facet whose specification boots its subject in this process accepts on top. */
 export type InProcessProjectOptions = FacetProjectOptions & {
-    /** The specification module its spec files import their runner from: stated, a worker's files share one module graph and the module runs again before each file, so every file still boots its own subject. */
-    specification?: string;
+    /** The `*.specification.ts` module its spec files import their runner from: stated, a worker's files share one module graph and the module runs again before each file, so every file still boots its own subject. */
+    runner?: string;
 };
 
 export function inProcessProject(
@@ -117,9 +117,9 @@ export function inProcessProject(
 ): TestProjectInlineConfiguration {
     const project = facetProject(facet, options);
 
-    return options.specification === undefined
+    return options.runner === undefined
         ? project
         : (mergeConfig(project, {
-              test: { isolate: false, setupFiles: [options.specification] },
+              test: { isolate: false, setupFiles: [options.runner] },
           }) as TestProjectInlineConfiguration);
 }

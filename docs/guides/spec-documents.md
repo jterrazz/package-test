@@ -131,14 +131,14 @@ The whole [token vocabulary](../reference/tokens.md) works in what a document AS
 
 **The plugin.** `literate()` from `@jterrazz/test/vitest` adds the `.spec.yaml` glob to a project's include and transforms each document into a one-test module that runs it through the bound specification's `cli`. The runner shows the document's path as the test file and `description:` as the title, so a failing case opens where it is written. The `cli()` project helper wires it:
 
-| `literate`                        | Collects                                                                      |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| omitted                           | every `specs/cli/**/*.spec.yaml`, bound to `./specs/cli/cli.specification.ts` |
-| `{ specification: './other.ts' }` | the same documents, bound to another runner                                   |
-| `{ include: [...] }`              | a narrower glob                                                               |
-| `false`                           | no documents at all — a suite written entirely in code                        |
+| `literate`                 | Collects                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| omitted                    | every `specs/cli/**/*.spec.yaml`, bound to `./specs/cli/cli.specification.ts` |
+| `{ runner: './other.ts' }` | the same documents, bound to another runner                                   |
+| `{ include: [...] }`       | a narrower glob                                                               |
+| `false`                    | no documents at all — a suite written entirely in code                        |
 
-The `specification` is **stated, never guessed** beyond that convention: a repository may declare several cli runners, and nothing could pick the right one without silently binding a case to the wrong app. The door is the `literate` option of the one `cli` project that collects those documents.
+The `runner` is **stated, never guessed** beyond that convention: a repository may declare several cli runners, and nothing could pick the right one without silently binding a case to the wrong app. The door is the `literate` option of the one `cli` project that collects those documents.
 
 **The bridge.** `cli.run(file('./<case>.spec.yaml'))` runs a document from a spec and resolves with the LAST run's result, so code adds what the document cannot express.
 

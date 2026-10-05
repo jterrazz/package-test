@@ -32,7 +32,7 @@ export function cli(options: CliProjectOptions = {}): TestProjectInlineConfigura
         plugins: [
             literate({
                 include: door?.include ?? ['specs/cli/**/*.spec.yaml'],
-                specification: door?.specification ?? './specs/cli/cli.specification.ts',
+                runner: door?.runner ?? './specs/cli/cli.specification.ts',
             }),
         ],
     }) as TestProjectInlineConfiguration;

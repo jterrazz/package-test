@@ -106,7 +106,7 @@ There is one helper per kind — `unit`, `integration`, `component`, `website`, 
 
 Projects run in groups — the node kinds first, then `website`, then `component`, then `mobile` — so two browser projects never open two Chromiums at once and a simulator runs alone.
 
-`api()`, `job()` and `integration()` also take `specification`, the module their spec files import the runner from, such as `'./specs/api/api.specification.ts'`. With it, the files of a worker share one module graph (`isolate: false`) and the specification runs again before each file (`setupFiles`): the app's modules load once per worker instead of once per file, and every file still boots its own app on its own services. A spec file imports its runner from the specification itself, since a module of the shared graph that imports it keeps the first file's runner.
+`api()`, `job()` and `integration()` also take `runner`, the module their spec files import their runner from, such as `'./specs/api/api.specification.ts'`. With it, the files of a worker share one module graph (`isolate: false`) and the specification runs again before each file (`setupFiles`): the app's modules load once per worker instead of once per file, and every file still boots its own app on its own services. A spec file imports its runner from the specification itself, since a module of the shared graph that imports it keeps the first file's runner.
 
 An env-gated sub-suite is an `exclude`, not a second project:
 
@@ -140,7 +140,7 @@ The `<case>.spec.yaml` documents are collected by the `cli` project, which takes
 ```typescript
 const cli = {
     facet: 'cli',
-    literate: { specification: './specs/cli/cli.specification.ts' },
+    literate: { runner: './specs/cli/cli.specification.ts' },
 };
 ```
 

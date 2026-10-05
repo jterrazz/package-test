@@ -38,8 +38,8 @@ function documentIn(content: string): string {
 describe('literate-plugin', () => {
     test('literate — the plugin — runs before the other loaders, and adds every document to the include unless told which', () => {
         // Given - a plugin stated with no include, and one with its own
-        const plain = literate({ specification: './cli.specification.ts' });
-        const narrowed = literate({ include: ['docs/*.spec.yaml'], specification: './s.ts' });
+        const plain = literate({ runner: './cli.specification.ts' });
+        const narrowed = literate({ include: ['docs/*.spec.yaml'], runner: './s.ts' });
 
         // Then - its identity, and the include each adds
         expect([plain.name, plain.enforce, plain.config(), narrowed.config()]).toStrictEqual([
@@ -53,8 +53,8 @@ describe('literate-plugin', () => {
     test('literate — the plugin — loads a document as a test calling the specification, resolved against the root vite hands it, a query dropped', () => {
         // Given - a document in a root, and plugins over a relative and an absolute specification
         const root = documentIn(DOCUMENT);
-        const relative = literate({ specification: './cli.specification.ts' });
-        const absolute = literate({ specification: '/specs/cli.specification.ts' });
+        const relative = literate({ runner: './cli.specification.ts' });
+        const absolute = literate({ runner: '/specs/cli.specification.ts' });
         relative.configResolved({ root });
         const document = join(root, 'orders.spec.yaml');
 
@@ -75,7 +75,7 @@ describe('literate-plugin', () => {
     test('literate — the plugin — refuses a document off its grammar, naming the line and keeping the parser’s reason', () => {
         // Given - a document whose run has no exit
         const root = documentIn('description: builds\nruns:\n    - command: build\n');
-        const plugin = literate({ specification: '/s.ts' });
+        const plugin = literate({ runner: '/s.ts' });
 
         // Then - the refusal names the document's line, and carries the syntax error as its cause
         const document = join(root, 'orders.spec.yaml');

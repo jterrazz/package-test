@@ -38,7 +38,7 @@ import { noModuleMock } from './mocks/no-module-mock.js';
 import { seedsAreSql } from './services/seeds-are-sql.js';
 import { cleanupPassedToAfterAll } from './setup/cleanup-passed-to-after-all.js';
 import { includePointsAtAFolder } from './setup/include-points-at-a-folder.js';
-import { literateSpecificationExists } from './setup/literate-specification-exists.js';
+import { literateRunnerExists } from './setup/literate-runner-exists.js';
 import { noDomInModuleTest } from './setup/no-dom-in-module-test.js';
 import { noRawEnvWrite } from './setup/no-raw-env-write.js';
 import { noRedundantRoot } from './setup/no-redundant-root.js';
@@ -99,7 +99,7 @@ const plugin: LintPlugin = {
         'no-status-only-test': noStatusOnlyTest,
         'no-simulated-dom': noSimulatedDom,
         'include-points-at-a-folder': includePointsAtAFolder,
-        'literate-specification-exists': literateSpecificationExists,
+        'literate-runner-exists': literateRunnerExists,
         'no-raw-env-write': noRawEnvWrite,
         'no-test-code-in-production': noTestCodeInProduction,
         'no-dom-in-module-test': noDomInModuleTest,

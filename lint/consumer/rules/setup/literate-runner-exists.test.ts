@@ -1,7 +1,7 @@
 import { ruleTester } from '@jterrazz/test';
 import { resolve } from 'node:path';
 
-import { literateSpecificationExists } from './literate-specification-exists.js';
+import { literateRunnerExists } from './literate-runner-exists.js';
 
 // invariant: placed at this package's own root, where `specs/cli/cli.specification.ts` exists
 // and `specs/cli/gone.specification.ts` does not, so the stat answers against a real tree.
@@ -10,10 +10,10 @@ const CONFIG = resolve(ROOT, 'jterrazz.config.ts');
 
 const configNaming = (...paths: string[]): string =>
     `export default defineSpecConfig({ projects: [${paths
-        .map((path) => `{ literate: { specification: '${path}' } }`)
+        .map((path) => `{ literate: { runner: '${path}' } }`)
         .join(', ')}] });`;
 
-ruleTester().run('literate-specification-exists', literateSpecificationExists, {
+ruleTester().run('literate-runner-exists', literateRunnerExists, {
     invalid: [
         {
             code: configNaming(
@@ -22,7 +22,7 @@ ruleTester().run('literate-specification-exists', literateSpecificationExists, {
             ),
             errors: [
                 {
-                    column: 128,
+                    column: 121,
                     data: { path: './specs/cli/gone.specification.ts' },
                     line: 1,
                     messageId: 'missing',
