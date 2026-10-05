@@ -7,7 +7,7 @@ import { onProjectDefaults, projectTest } from './project.js';
 export type UnitProjectOptions = SpecificationProjectOptions & {
     /** `false` shares one module graph per worker (`isolate: false`); for pure projects only. */
     isolate?: boolean;
-    /** Trees module tests live in, when not `src/`. */
+    /** The trees module tests live in, each collected whole: none, every `.test.ts` outside `specs/`. */
     roots?: string[];
 };
 
@@ -17,7 +17,8 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
     return onProjectDefaults({
         test: {
             ...projectTest('unit', options, {
-                exclude: ['specs/**', '**/*.test.tsx'],
+                exclude:
+                    fromRoots === undefined ? ['specs/**', '**/*.test.tsx'] : ['**/*.test.tsx'],
                 include: fromRoots ?? ['**/*.test.ts'],
             }),
             // Stryker disable next-line ConditionalExpression: the project's merge drops a key stated as undefined

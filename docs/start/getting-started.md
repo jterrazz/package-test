@@ -55,13 +55,12 @@ export default defineConfig({
     kind: 'api',
     platform: 'node',
     presets: [test()],
-    test: { projects: [{ specification: 'unit' }, { specification: 'api' }] },
 });
 ```
 
 `kind` and `platform` say what the project is — here an HTTP service on Node — and `@jterrazz/typescript` derives the rest of the toolchain from them: the lint profile, the tsconfig preset, what the manifest must hold. An application kind (`api`, `website`, `mobile`) also asks for `"private": true` in `package.json`. The two lists, and which platforms each kind runs on, are the toolchain's [Getting started § Declare what the project is](https://github.com/jterrazz/package-typescript/blob/main/docs/start/getting-started.md#1-declare-what-the-project-is). `presets: [test()]` adds this package: the shared test defaults, the conventions, and the `test` section below.
 
-Then `npx typescript fix` writes the files that declaration derives — `vitest.config.ts` among them, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and each project is built by the helper its `specification` names: `unit` collects the `*.test.ts` files next to your modules — the project a module test runs in — and `api` collects `specs/api/**/*.spec.ts`. [Set up a project](set-up-a-project.md#the-vitest-config) lists every helper and default.
+Then `npx typescript fix` writes the files that declaration derives — `vitest.config.ts` among them, a line you never edit. The preset sets the shared defaults (timeouts, artefact paths, no retries), and the projects are read off the tree, each built by the helper of its specification: `unit` collects the `*.test.ts` files next to your modules — the project a module test runs in — and `specs/api/` makes the `api` project, which collects `specs/api/**/*.spec.ts`. [Set up a project](set-up-a-project.md#the-vitest-config) lists every helper and default.
 
 This `api` project only names a vitest project. The `api` you send requests with is a different thing: the runner that step 3 builds.
 

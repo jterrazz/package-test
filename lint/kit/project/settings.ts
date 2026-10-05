@@ -8,9 +8,9 @@ export type TestSettings = {
     /** Routes the api takes on any method (`app.all('/mcp', …)`), by path. */
     methodless?: readonly string[];
     production?: { allow: Readonly<Record<string, string>> };
+    /** How a project departs from the one its tree derives, keyed by its specification, with the reason. */
+    projects?: Readonly<Partial<Record<TestSpecification, TestProject>>>;
     /** Path to an OpenAPI document (JSON or YAML) declaring the routes, when the app carries no route table. */
-    /** The vitest projects the derived `vitest.config.ts` runs, each a specification and that specification's options; none, the preset's one root project. */
-    projects?: readonly TestProject[];
     routes?: string;
 };
 
@@ -26,9 +26,9 @@ export type TestSpecification =
     | 'unit'
     | 'website';
 
-/** A project of the derived config: its specification, the global setups it runs, and the options its helper takes. */
+/** What a declared project states beyond its derived one: the global setups it runs, the options its helper takes, and why. */
 export type TestProject = {
-    readonly specification: TestSpecification;
+    readonly reason: string;
     readonly setup?: readonly string[];
     readonly [option: string]: unknown;
 };

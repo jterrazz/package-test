@@ -16,6 +16,7 @@ import { job } from './specifications/job/job.project.js';
 import { lint } from './specifications/lint/lint.project.js';
 import { mobile } from './specifications/mobile/mobile.project.js';
 import { website } from './specifications/website/website.project.js';
+import { derivedProjects } from './vitest/derived-projects.js';
 import { presetConfig } from './vitest/preset.js';
 import { unit } from './vitest/unit.project.js';
 
@@ -66,16 +67,17 @@ type Project = Promise<TestProjectInlineConfiguration> | TestProjectInlineConfig
 
 type Builder = (options: Readonly<Record<string, unknown>>) => Project;
 
+// invariant: the order the projects run in: module tests first, then each specification, the browser last.
 const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
-    ['api', api],
-    ['cli', cli],
-    ['component', component],
-    ['integration', integration],
-    ['job', job],
-    ['lint', lint],
-    ['mobile', mobile],
     ['unit', unit],
+    ['lint', lint],
+    ['cli', cli],
+    ['api', api],
+    ['job', job],
+    ['integration', integration],
     ['website', website],
+    ['mobile', mobile],
+    ['component', component],
 ]);
 
 const anchored = (root: string, path: string): string =>
@@ -95,18 +97,58 @@ function aliasesFrom(root: string, vite: unknown): unknown {
     return { ...vite, resolve: { ...vite.resolve, alias } };
 }
 
-async function projectOf(root: string, declared: unknown): Promise<TestProjectInlineConfiguration> {
-    const { specification, setup, ...options } = isRecord(declared) ? declared : {};
-    const builder = BUILDERS.get(String(specification));
-    if (builder === undefined) {
-        throw new Error(
-            refusal({
-                fix: `name one of ${[...BUILDERS.keys()].join(', ')} as its \`specification\``,
-                found: `a project of \`test.projects\` names the specification \`${String(specification)}\``,
-                read: 'docs/start/set-up-a-project.md#the-vitest-config',
-                why: 'a project is built by the helper of its specification, which owns its include, its budget and its seam',
-            }),
+function refused(found: string, fix: string): Error {
+    return new Error(
+        refusal({
+            fix,
+            found,
+            read: 'docs/start/set-up-a-project.md#the-vitest-config',
+            why: 'a project is derived from the tree, and a declared one only states how it departs from that, with its reason',
+        }),
+    );
+}
+
+// invariant: a declared project is the exception to its derived one: keyed by a specification the package ships, and stating why.
+function declaredProjects(declared: unknown): Map<string, Record<string, unknown>> {
+    if (declared === undefined) {
+        return new Map();
+    }
+    if (!isRecord(declared)) {
+        throw refused(
+            '`test.projects` is not a record',
+            'key each project by its specification — `projects: { cli: { timeout: 120_000, reason: … } }`',
         );
+    }
+    const projects = new Map<string, Record<string, unknown>>();
+    for (const [specification, project] of Object.entries(declared)) {
+        if (!BUILDERS.has(specification)) {
+            throw refused(
+                `\`test.projects\` names the specification \`${specification}\``,
+                `key it by one of ${[...BUILDERS.keys()].join(', ')}`,
+            );
+        }
+        const { reason, ...options } = isRecord(project) ? project : {};
+        if (typeof reason !== 'string' || reason.trim() === '') {
+            throw refused(
+                `\`test.projects.${specification}\` departs from its derived project with no reason`,
+                `state why under \`test.projects.${specification}.reason\`, or delete what the tree already derives`,
+            );
+        }
+        projects.set(specification, options);
+    }
+
+    return projects;
+}
+
+async function projectOf(
+    root: string,
+    specification: string,
+    { setup, ...options }: Readonly<Record<string, unknown>>,
+): Promise<TestProjectInlineConfiguration> {
+    const builder = BUILDERS.get(specification);
+    // Stryker disable next-line ConditionalExpression: every specification reaching here is a key of the builders
+    if (builder === undefined) {
+        return {};
     }
     // Stryker disable next-line StringLiteral: the project root is a component's default root, spelled '.' or ''
     const componentRoot = anchored(root, typeof options.root === 'string' ? options.root : '.');
@@ -137,15 +179,25 @@ async function derivedFrom(root: string): Promise<ViteUserConfig> {
         );
     }
     const section = resolved.sections[TEST_SECTION];
-    const projects = isRecord(section) && Array.isArray(section.projects) ? section.projects : [];
+    const declared = declaredProjects(isRecord(section) ? section.projects : undefined);
+    const derived = derivedProjects(root, [...BUILDERS.keys()]);
+    const specifications = [...BUILDERS.keys()].filter(
+        (specification) => derived.has(specification) || declared.has(specification),
+    );
 
     return presetConfig(
-        projects.length === 0
+        specifications.length === 0
             ? {}
             : {
                   test: {
                       projects: await Promise.all(
-                          projects.map(async (declared) => await projectOf(root, declared)),
+                          specifications.map(
+                              async (specification) =>
+                                  await projectOf(root, specification, {
+                                      ...derived.get(specification),
+                                      ...declared.get(specification),
+                                  }),
+                          ),
                       ),
                   },
               },

@@ -43,8 +43,10 @@ describe('unit', () => {
         // Given - a repository whose modules live under two roots
         const project = testOf(unit({ roots: ['packages', 'apps/web//'] }));
 
-        // Then - each root is a glob, and the trailing slashes are not a second one
+        // Then - each root is a glob, the trailing slashes are not a second one, and a root under specs/ is not left out
         expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/web/**/*.test.ts']);
+        expect(project.exclude).not.toContain('specs/**');
+        expect(project.exclude).toContain('**/*.test.tsx');
     });
 
     test('unit() — module tests, and only module tests — shares one module graph per worker when a pure project says so, and isolates otherwise', () => {

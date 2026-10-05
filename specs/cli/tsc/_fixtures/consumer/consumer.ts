@@ -248,11 +248,13 @@ export const testSettingsRows = [
     defineConfig({ ...library, test: { routes: './openapi.yaml' } }),
     defineConfig({ ...library, test: { collections: ['data', 'people'] } }),
     defineConfig({ ...library, test: { methodless: ['/mcp'] } }),
-    defineConfig({ ...library, test: { projects: [{ specification: 'unit', include: ['src/**/*.test.ts'] }] } }),
+    defineConfig({ ...library, test: { projects: { unit: { include: ['src/**/*.test.ts'], reason: 'the modules' } } } }),
     // @ts-expect-error test-settings-section — the collections are a list, never one word [`Type 'string' is not assignable to type 'readonly string[]'`]
     defineConfig({ ...library, test: { collections: 'data' } }),
     // @ts-expect-error test-settings-section — the section reads what it declares, and nothing else [`'coverage' does not exist in type 'TestSettings'`]
     defineConfig({ ...library, test: { coverage: 80 } }),
-    // @ts-expect-error test-settings-section — a project is built by the helper of a specification the package ships [`Type '"browser"' is not assignable to type 'TestSpecification'`]
-    defineConfig({ ...library, test: { projects: [{ specification: 'browser' }] } }),
+    // @ts-expect-error test-settings-section — a project is keyed by a specification the package ships [`'browser' does not exist in type`]
+    defineConfig({ ...library, test: { projects: { browser: { reason: 'the pages' } } } }),
+    // @ts-expect-error test-settings-section — a declared project states why it departs from the derived one [`Property 'reason' is missing`]
+    defineConfig({ ...library, test: { projects: { unit: { isolate: false } } } }),
 ];

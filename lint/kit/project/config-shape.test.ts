@@ -49,6 +49,25 @@ describe('config-shape', () => {
         ]);
     });
 
+    test('includedGlobs — the literal globs of the projects `jterrazz.config.ts` keys by specification', () => {
+        // Given - a test section declaring two projects, one of them with no include
+        const source = [
+            'export default {',
+            '    test: {',
+            '        projects: {',
+            "            api: { include: ['specs/api/**/*.spec.ts'], reason: 'the api' },",
+            "            unit: { reason: 'the modules' },",
+            '        },',
+            '    },',
+            '};',
+        ].join('\n');
+
+        // Then - the one literal glob, where it is written
+        expect(includedGlobs(programOf(source)).map(located)).toStrictEqual([
+            'specs/api/**/*.spec.ts@78',
+        ]);
+    });
+
     test('literateRunners — the runner each `literate` block names, and none where it names no literal', () => {
         // Given - a literal runner, a computed one, a literate block that is no object, and an unrelated property
         const source = [

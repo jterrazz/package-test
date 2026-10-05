@@ -143,19 +143,14 @@ The golden is named by a template literal, and the checker's `no-unused-ground` 
 
 ### The `integration()` project
 
-The `integration` specification is the canonical project: it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node specifications.
+The `integration` specification is the canonical project: a `specs/integration/` folder makes it, it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node specifications. `jterrazz.config.ts` states nothing for it until it departs from that.
 
-```typescript
-// jterrazz.config.ts — its test section
-const test = { projects: [{ specification: 'unit' }, { specification: 'integration' }] };
-```
-
-An env-gated sub-suite is an option, not a second project — the whole point of `{ include, exclude, timeout }`:
+An env-gated sub-suite is an option of `test.projects.integration`, not a second project — the whole point of `{ include, exclude, timeout }`:
 
 ```typescript
 const integration = {
     exclude: process.env.E2E_NETWORK ? [] : ['specs/integration/network/**'],
-    specification: 'integration',
+    reason: 'the network specs reach the internet, which a run turns on with E2E_NETWORK',
 };
 ```
 

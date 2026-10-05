@@ -1,5 +1,5 @@
 export default {
     kind: 'library',
     platform: 'node',
-    test: { projects: [{ specification: 'api', include: ['specs/api/**/*.spec.ts'] }] },
+    test: { projects: { api: { include: ['specs/api/**/*.spec.ts'], reason: 'the api specs' } } },
 };

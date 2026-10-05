@@ -1,5 +1,5 @@
 export default {
     kind: 'library',
     platform: 'node',
-    test: { projects: [{ specification: 'unit', include: ['missing/**/*.test.ts'] }] },
+    test: { projects: { unit: { include: ['missing/**/*.test.ts'], reason: 'the modules sit under missing/' } } },
 };

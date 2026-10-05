@@ -85,7 +85,7 @@ Under a server that outlives the file — a declared `appium` server, or the run
 // a project of jterrazz.config.ts — one simulator, one Appium server, one session for the run
 const mobile = {
     device: { name: 'iPhone 17', os: '26.5' },
-    specification: 'mobile',
+    reason: 'the app and its Appium install live in the workspace member',
     root: 'apps/mobile',
 };
 ```

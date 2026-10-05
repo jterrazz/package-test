@@ -46,27 +46,30 @@ Every other specification starts something — a server, a database, a binary, a
 
 ```typescript
 // apps/web/jterrazz.config.ts — its test section
-const projects = [
-    { specification: 'unit', roots: ['src', 'web'] },
-    { specification: 'component', vite: './web/vite.config.ts', wrap: './web/src/providers.tsx' },
-];
+const projects = {
+    component: {
+        reason: 'the app renders through its Vite pipeline, inside its providers',
+        vite: './web/vite.config.ts',
+        wrap: './web/src/providers.tsx',
+    },
+};
 ```
 
 **A relative `vite` or `wrap` is the project's path.** Both are resolved against the component project's `root`, which is the directory holding `jterrazz.config.ts` unless the project states one, so the two paths above mean `apps/web/web/…`. A `root` the project states is read from that same directory.
 
 `wrap` is a MODULE PATH whose default export is `(ui) => ReactNode` — a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
 
-| Option                | Description                                                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `wrap`                | Module path, default-exporting `(ui) => ReactNode` — the app's own providers, around every render of the project         |
-| `vite`                | The app's pipeline: a config path, the object, or the function a framework exports. Only the PIPELINE is adopted (below) |
-| `clock`               | An ISO instant pinned for every render — a project whose components stamp the time                                       |
-| `viewport`            | `{ width, height }` of the page. Default `1280 × 720`                                                                    |
-| `timezone` / `locale` | The browser context's. Defaults `'UTC'` and `'en-US'`                                                                    |
-| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory holding `jterrazz.config.ts`                |
-| `include` / `exclude` | The globs. Default `['**/*.test.tsx']`, kept out of `specs/` — state your own `include` and the exclusion is yours too   |
-| `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                |
-| `serial`              | `fileParallelism: false` — the project's renders run one file at a time                                                  |
+| Option                | Description                                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `wrap`                | Module path, default-exporting `(ui) => ReactNode` — the app's own providers, around every render of the project           |
+| `vite`                | The app's pipeline: a config path, the object, or the function a framework exports. Only the PIPELINE is adopted (below)   |
+| `clock`               | An ISO instant pinned for every render — a project whose components stamp the time                                         |
+| `viewport`            | `{ width, height }` of the page. Default `1280 × 720`                                                                      |
+| `timezone` / `locale` | The browser context's. Defaults `'UTC'` and `'en-US'`                                                                      |
+| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory holding `jterrazz.config.ts`                  |
+| `include` / `exclude` | The globs. Derived: `specs/component/**/*.test.tsx`, and each root holding a `*.test.tsx` — state your own to replace them |
+| `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                  |
+| `serial`              | `fileParallelism: false` — the project's renders run one file at a time                                                    |
 
 **Only the pipeline of `vite` is adopted.** An app's config says where the app LIVES — its `root`, its `build`, its `server.port`, its `publicDir` — and adopting those re-roots the run so the project collects nothing. The kept keys are an allow-list (`plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json`, `optimizeDeps`), and the consumer's `plugins` are concatenated after `component()`'s own, never assigned over them. So is its `optimizeDeps.include`, joined to the project's own: every dependency a component imports belongs there, since one Vite first finds when a test imports it is optimised mid-run, and the reload fails the tests already loading.
 
@@ -79,7 +82,7 @@ const projects = [
 import { getViteConfig } from 'astro/config';
 
 const component = {
-    specification: 'component',
+    reason: 'the app builds with Astro, whose config function hands over its pipeline',
     vite: getViteConfig({}, { root: import.meta.dirname }),
 };
 ```

@@ -1,5 +1,5 @@
 export default {
     kind: 'library',
     platform: 'node',
-    test: { projects: [{ specification: 'unit', include: ['src/**/*.test.ts'] }] },
+    test: { projects: { unit: { include: ['src/**/*.test.ts'], reason: 'the modules sit under src/' } } },
 };

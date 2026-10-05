@@ -1164,7 +1164,7 @@
         {
             "audience": "consumer",
             "channel": "type",
-            "sentence": "`jterrazz.config.ts` takes a `test` section, typed by `@jterrazz/test`: `projects`, the vitest projects the derived `vitest.config.ts` runs, each named by its specification; `routes`, a path to an OpenAPI document; `collections` and `methodless`, lists of route segments and paths; `production.allow`. A key the package does not read is refused, and so is a list written as one word, and a specification the package does not ship.",
+            "sentence": "`jterrazz.config.ts` takes a `test` section, typed by `@jterrazz/test`: `projects`, how a vitest project departs from the one the tree derives, keyed by its specification with its `reason`; `routes`, a path to an OpenAPI document; `collections` and `methodless`, lists of route segments and paths; `production.allow`. A key the package does not read is refused, and so is a list written as one word, a specification the package does not ship, and a project stating no reason.",
             "specification": "model",
             "family": "setup",
             "fix": "Write only the keys `@jterrazz/test` reads, lists as lists: `test: { collections: ['data'] }`.",
