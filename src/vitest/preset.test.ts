@@ -21,7 +21,7 @@ describe('preset', () => {
         // Given - the preset alone, nothing stated
         const config = presetConfig();
 
-        // Then - both writers point inside the one artefact folder, and the coverage block names the provider the ratchet reads (`json-summary`)
+        // Then - both writers point inside the one artefact folder, and the coverage block names the machine-readable report beside text and html (`json-summary`)
         expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
         expect(config.test?.coverage).toMatchObject({
             provider: 'v8',
