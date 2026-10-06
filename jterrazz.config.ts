@@ -59,6 +59,14 @@ export default defineConfig({
         },
     },
     typescript: {
+        knip: {
+            entry: {
+                'specs/cli/_setup/packed/consumer.ts':
+                    'specs/cli/packed-cli.specification.ts spawns it by its path',
+                'specs/component/wrap/providers.tsx':
+                    'the component project loads it by the path its `wrap` names',
+            },
+        },
         mutation: {
             exclude: {
                 'src/chain/paths/temp-root.global-setup.test.ts':
