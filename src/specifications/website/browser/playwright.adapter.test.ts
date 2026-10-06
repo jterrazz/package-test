@@ -1,5 +1,6 @@
 import { rmSync } from 'node:fs';
-import { dirname, join, sep } from 'node:path';
+import { tmpdir } from 'node:os';
+import { basename, dirname, join, sep } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { EVIDENCE_DIR } from '../../../../lint/kit/project/artifacts.js';
@@ -171,9 +172,9 @@ describe('PlaywrightAdapter', () => {
             adapter.open('http://site.test/', { ...VISIT, scenario: failingScenario }),
         );
 
-        // Then - the visit's refusal names the one screenshot, taken whole under the evidence folder
+        // Then - the visit's refusal names the one screenshot, taken whole under the run's folder of the evidence folder
         const [shot = ''] = chromium.shots;
-        const evidence = join(process.cwd(), EVIDENCE_DIR);
+        const evidence = join(process.cwd(), EVIDENCE_DIR, basename(tmpdir()));
         expect([
             failure.replace(shot, '<shot>'),
             shot.startsWith(`${evidence}${sep}website-`) && shot.endsWith(`${sep}failure.png`),

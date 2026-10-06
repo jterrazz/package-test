@@ -173,7 +173,7 @@ export default await oxlintConfig(import.meta.url);
 | `.artifacts/vitest/`                             | vite's transform cache, vitest's reports                   | Reused across runs              |
 | `.artifacts/vitest/coverage/`                    | the coverage provider                                      | Rewritten per coverage run      |
 | `.artifacts/vitest/sqlite/template-<key>.sqlite` | `sqlite()`'s schema template                               | Reused until the schema changes |
-| `.artifacts/vitest/evidence/`                    | the screenshot of a website or mobile scenario that failed | Kept until you remove it        |
+| `.artifacts/vitest/evidence/<pid>-…/`            | the screenshot of a website or mobile scenario that failed | Kept until the next run starts  |
 
 **Everything else is scratch, in one temp folder per run.** Before the first worker starts, the preset creates `jterrazz-test-runs-<uid>/<pid>-…` in the OS temp directory and points `TMPDIR`, `TMP` and `TEMP` at it, so every temp folder a worker, a spawned child or a tool it runs makes lands inside. That holds each CLI spec's working directory, the per-worker database copies and a browser's profile. The run removes the folder when it ends, and the next run removes the folder of any run that died first. A CLI spec's working directory goes sooner, once its test has finished — except under `test.concurrent`, where it waits for the run.
 

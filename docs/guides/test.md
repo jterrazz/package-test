@@ -90,9 +90,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 138   |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 139   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
-| The package’s own specs | `specs/<specification>/`                                      | the framework's own specifications, each met through its constructor     | 192   |
+| The package’s own specs | `specs/<specification>/`                                      | the framework's own specifications, each met through its constructor     | 193   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification               | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
 | Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -270,7 +270,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 5   | —    | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —   | 46  | 109  | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —   | 47  | 109  | —           | —       | —      | —         | —      |
 | `.link()`      | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.prepare()`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
@@ -287,7 +287,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.put()`     | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 58  | —    | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 59  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 110  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 10          | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —    | —           | 22      | —      | —         | —      |
@@ -358,9 +358,9 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.table()`      | 7   | 4   | 1   | —    | 2           | —       | —      | —         | —      |
 | `.file()`       | 1   | —   | 15  | 7    | 4           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —   | 37  | —    | —           | —       | —      | —         | —      |
+| `.stdout`       | —   | —   | 38  | —    | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —   | 14  | —    | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —   | 43  | —    | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —   | 44  | —    | —           | —       | —      | —         | —      |
 | `.json`         | —   | —   | 6   | —    | —           | 2       | —      | —         | —      |
 | `.filesystem`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |

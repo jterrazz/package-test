@@ -1,31 +1,15 @@
-import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 
+import { EVIDENCE_DIR } from '../../../lint/kit/project/artifacts.js';
+import { sweepFinishedEvidence, sweepOrphanRoots } from './run-folders.js';
 import { setupEntry } from './setup-entry.js';
 
 /** Named by uid: a temp directory users share never holds a folder one of them cannot sweep. */
 export const TEMP_ROOTS_PARENT = `jterrazz-test-runs-${process.getuid?.() ?? 'user'}`;
 
 const TEMP_VARIABLES = ['TMPDIR', 'TMP', 'TEMP'] as const;
-
-function isAlive(pid: number): boolean {
-    try {
-        process.kill(pid, 0);
-        return true;
-    } catch (error) {
-        return error instanceof Error && 'code' in error && error.code === 'EPERM';
-    }
-}
-
-export function sweepOrphanRoots(parent: string): void {
-    for (const entry of readdirSync(parent)) {
-        const pid = Number(entry.split('-')[0]);
-        if (Number.isInteger(pid) && pid > 0 && !isAlive(pid)) {
-            rmSync(join(parent, entry), { force: true, recursive: true });
-        }
-    }
-}
 
 function setVariables(values: Record<string, string | undefined>): void {
     for (const [name, value] of Object.entries(values)) {
@@ -61,6 +45,7 @@ export default function setup(): () => void {
     const parent = join(tmpdir(), TEMP_ROOTS_PARENT);
     mkdirSync(parent, { recursive: true });
     sweepOrphanRoots(parent);
+    sweepFinishedEvidence(resolve(EVIDENCE_DIR));
     const root = mkdtempSync(join(parent, `${process.pid}-`));
     const previous = Object.fromEntries(
         // env-sanction: the temp-directory variables, read to be restored

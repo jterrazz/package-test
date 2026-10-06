@@ -257,7 +257,7 @@ The stub backend behaves exactly as on the website specification ([Website specs
 
 ### Evidence on failure
 
-When a scenario throws — an element never appears, a `see()` times out — the error carries a screenshot of the state the scenario died in, referenced by its path in the error message. It is written under `.artifacts/vitest/evidence/`, so it outlives the run and its temp root. A timeout additionally includes a compact excerpt of the labels currently on screen, so the failure reads without relaunching anything. The original error is never masked.
+When a scenario throws — an element never appears, a `see()` times out — the error carries a screenshot of the state the scenario died in, referenced by its path in the error message. It is written under `.artifacts/vitest/evidence/`, in the folder of the run that took it, so it outlives the run and its temp root — until the next run starts, which sweeps every run's evidence but a living one's. A timeout additionally includes a compact excerpt of the labels currently on screen, so the failure reads without relaunching anything. The original error is never masked.
 
 ### Requirements — what the machine must have
 

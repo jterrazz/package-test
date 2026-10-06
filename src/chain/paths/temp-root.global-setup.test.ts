@@ -1,9 +1,9 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { describe, expect, onTestFinished, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import setup, { sweepOrphanRoots, TEMP_ROOTS_PARENT } from './temp-root.global-setup.js';
+import setup, { TEMP_ROOTS_PARENT } from './temp-root.global-setup.js';
 
 describe('setup', () => {
     test("the temp-root setup — a run's scratch lives and dies in one folder — points the temp directory at a root of the run, in the one parent of roots", () => {
@@ -48,27 +48,5 @@ describe('setup', () => {
         expect(afterJoined).toBe(true);
         expect(existsSync(root)).toBe(false);
         expect(process.env.TMPDIR).toBe(system);
-    });
-
-    test("the temp-root setup — a run's scratch lives and dies in one folder — sweeps a root whose run died, and leaves a living run its own", () => {
-        // Given - a parent of roots holding the root of a dead run and the root of this one
-        const parent = mkdtempSync(join(tmpdir(), 'temp-roots-'));
-        onTestFinished(() => {
-            rmSync(parent, { force: true, recursive: true });
-        });
-        const dead = join(parent, '2147483646-abc');
-        const living = join(parent, `${process.pid}-abc`);
-        const unrelated = join(parent, 'someone-else');
-        for (const folder of [dead, living, unrelated]) {
-            mkdirSync(folder);
-        }
-
-        // When - a new run sweeps that parent
-        sweepOrphanRoots(parent);
-
-        // Then - only the dead run's root is gone
-        expect(existsSync(dead)).toBe(false);
-        expect(existsSync(living)).toBe(true);
-        expect(existsSync(unrelated)).toBe(true);
     });
 });

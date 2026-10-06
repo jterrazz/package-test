@@ -203,7 +203,7 @@ describe('AppiumAdapter', () => {
             /Evidence: (?<path>\S+)/u.exec(shot.error?.message ?? '')?.groups?.path ?? '';
         expect([
             shot.error?.message.replace(evidence, '<evidence>'),
-            /\/\.artifacts\/vitest\/evidence\/mobile-\w+\/failure\.png$/u.test(evidence),
+            /\/\.artifacts\/vitest\/evidence\/\d+-\w+\/mobile-\w+\/failure\.png$/u.test(evidence),
             readFileSync(evidence, 'utf8'),
             none.error?.message,
         ]).toStrictEqual([

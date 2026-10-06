@@ -1,5 +1,6 @@
 import { mkdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { basename, join, resolve } from 'node:path';
 
 /** Every path here is relative to the project root. */
 export const ARTIFACTS_DIR = '.artifacts';
@@ -16,8 +17,9 @@ export const ATTACHMENTS_DIR = `${VITEST_ARTIFACTS_DIR}/attachments`;
 /** Under the project: the run's temp root is gone by the time the error naming the file is read. */
 export const EVIDENCE_DIR = `${VITEST_ARTIFACTS_DIR}/evidence`;
 
+/** Filed under the run's temp root name, `<pid>-…`: the next run's start sweeps every run that is no longer alive. */
 export function evidenceDirectory(prefix: string): string {
-    const parent = resolve(EVIDENCE_DIR);
+    const parent = resolve(EVIDENCE_DIR, basename(tmpdir()));
     mkdirSync(parent, { recursive: true });
     return join(parent, prefix);
 }
