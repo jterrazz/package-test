@@ -60,7 +60,7 @@ function byName(a: string, b: string): number {
     return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
 }
 
-export function mergedIntoEntry(text: string, called: Set<string>): string | undefined {
+function mergedIntoEntry(text: string, called: Set<string>): string | undefined {
     const clause = clausesOf(text).find(({ from }) => isEntry(from));
     if (clause === undefined) {
         return undefined;

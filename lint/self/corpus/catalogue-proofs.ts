@@ -14,7 +14,7 @@ export const ROOT = resolve(import.meta.dirname, '../../..');
 
 export const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8');
 
-export const withoutGenerated = (text: string): string =>
+const withoutGenerated = (text: string): string =>
     text.replaceAll(/<!-- GENERATED:[\s\S]*?<!-- \/GENERATED:[^>]*-->/gu, '');
 
 export const humanWords = (entry: { audience?: string }): string =>
@@ -137,7 +137,7 @@ export const citingFiles = (): string[] => {
     return found;
 };
 
-export const DEAD_ID_INPUT =
+const DEAD_ID_INPUT =
     'specs/lint/checker-suppression-names-a-pass/_fixtures/checker-suppression-names-a-pass/';
 
 /** Comments cite too. */
@@ -159,11 +159,11 @@ export const citingSources = (): string[] => {
 
 export const NAME = String.raw`[a-z][a-z0-9]*(?:-[a-z0-9]+)*`;
 
-export const TICK = '`';
+const TICK = '`';
 
-export const CITED = `${TICK}${NAME}${TICK}`;
+const CITED = `${TICK}${NAME}${TICK}`;
 
-export const citationPatterns = (): RegExp[] => [
+const citationPatterns = (): RegExp[] => [
     new RegExp(String.raw`\brules?\s+(${CITED}(?:\s*(?:,|and|or|/)\s*${CITED})*)`, 'gu'),
     new RegExp(String.raw`(?<![@\w./-])jterrazz(?:-self)?/(${NAME})(?![\w/-])`, 'gu'),
     new RegExp(String.raw`\bjterrazz(?:-self)?-check[(/](${NAME})`, 'gu'),

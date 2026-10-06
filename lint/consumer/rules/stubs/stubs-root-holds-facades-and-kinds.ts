@@ -31,7 +31,7 @@ const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
 /** `_setup/stubs/<kind>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
 
-export function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
+function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
     const callee = child(node, 'callee');
     // Stryker disable next-line ConditionalExpression: a call always has a callee
     if (node.type !== 'CallExpression' || callee === undefined) {

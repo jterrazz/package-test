@@ -19,7 +19,7 @@ function treeWith(files: Record<string, string>): string {
     return root;
 }
 
-describe('retired-spellings', () => {
+describe('retiredSpellingsIn', () => {
     test('a major carries no bridge (ADR-014) — no code, chapter, spec or skill of this repository writes a 16 spelling', () => {
         // Given - the repository as it stands, its negative inputs aside
         const found = retiredSpellingsIn(ROOT);

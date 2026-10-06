@@ -51,7 +51,7 @@ export const TWO_ROUTES = [
     '',
 ].join('\n');
 
-export function chartSpec(terminal: string): string {
+function chartSpec(terminal: string): string {
     return [
         "import { api } from '../api.specification.js';",
         `test('a', async () => { await api.${terminal}; });`,

@@ -49,7 +49,7 @@ function readDocument(content: string, displayPath: string): SpecFile {
 }
 
 /** The document is handed to `cli.run()` spelled by its brand, so the module imports the runner alone. */
-export function literateModule(content: string, filePath: string, runnerPath: string): string {
+function literateModule(content: string, filePath: string, runnerPath: string): string {
     const { description } = readDocument(content, filePath).document;
     return [
         "import { test } from 'vitest';",

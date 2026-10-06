@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import type { ContainerRuntimeClient } from 'testcontainers';
 
 import { setupEntry } from '../../chain/paths/setup-entry.js';
 import { refusal } from '../../chain/refusals/refusal.js';
@@ -14,15 +15,20 @@ import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
 export const DOCKER_ABSENT = 'no Docker daemon answered';
 
-export async function prepareDocker(): Promise<void> {
+/** `connect` stands in for the runtime's own client lookup, so the refusal is reachable without a daemon to stop. */
+export async function prepareDocker(
+    connect?: () => Promise<ContainerRuntimeClient>,
+): Promise<void> {
+    // Stryker disable StringLiteral: the runtime is installed here; the refusal of a missing peer is peer.ts's, tested there
     const { getContainerRuntimeClient, ImageName } = await loadPeer(
         'testcontainers',
         'a declared service',
         async () => await import('testcontainers'),
     );
+    // Stryker restore StringLiteral
     let client: Awaited<ReturnType<typeof getContainerRuntimeClient>>;
     try {
-        client = await getContainerRuntimeClient();
+        client = await (connect ?? getContainerRuntimeClient)();
     } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(

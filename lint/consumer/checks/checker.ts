@@ -60,7 +60,7 @@ import { checkSpecificationFolderHasItsRunner } from './specification-folder-has
 import { checkSpecificationTestUsesItsRunner } from './specification-test-uses-its-runner.js';
 
 /** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
-export const TREE_PASS_IDS = [
+const TREE_PASS_IDS = [
     'reserved-folder-in-closed-list',
     'spec-code-in-setup-folder',
     'setup-module-at-lowest-common-folder',
@@ -96,7 +96,7 @@ export const TREE_PASS_IDS = [
     'document-description-reads-as-a-title',
 ] as const;
 
-export const MEMBER_PASS_IDS = [
+const MEMBER_PASS_IDS = [
     'file-suffix-matches-place',
     'named-path-exists',
     'no-snapshot-folder',

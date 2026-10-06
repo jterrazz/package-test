@@ -15,7 +15,7 @@ function optionOf(rule: string): { options: Record<string, string>; severity: un
     return { options: named, severity };
 }
 
-describe('vitest', () => {
+describe('vitestOnTests', () => {
     test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — `no-vitest-snapshot` — the seven snapshot matchers are refused, each naming the golden', () => {
         // Given - the option the fragment sets on vitest's own rule
         const { options: matchers, severity } = optionOf('vitest/no-restricted-matchers');
@@ -69,5 +69,16 @@ describe('vitest', () => {
         // Then - a second level of context is refused
         expect(severity).toBe('error');
         expect(options).toStrictEqual({ max: '1' });
+    });
+
+    test('the vitest rulebook — governs every test file and everything under specs/, so a helper of a spec tree is judged with its specs', () => {
+        // Given - the override the fragment sets
+        const { files } = vitestOnTests;
+
+        // Then - it names both globs, and only them
+        expect(files).toStrictEqual([
+            '**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}',
+            '**/specs/**/*.{ts,tsx}',
+        ]);
     });
 });

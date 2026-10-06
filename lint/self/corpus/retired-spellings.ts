@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-export const RETIRED_SPELLINGS = ['toMatchRows', 'runFile', '$FIXTURES/'];
+const RETIRED_SPELLINGS = ['toMatchRows', 'runFile', '$FIXTURES/'];
 
-export const NEGATIVE_INPUTS = [
+const NEGATIVE_INPUTS = [
     'lint/kit/project/spec-document.test.ts',
     'lint/self/corpus/retired-spellings.test.ts',
     'lint/self/corpus/retired-spellings.ts',

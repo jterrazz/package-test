@@ -233,7 +233,7 @@ function declaredMethod(subject: Subject, methodless: readonly string[]): Subjec
         : subject;
 }
 
-export function subjectsOfChain(
+function subjectsOfChain(
     chain: Chain,
     // Stryker disable next-line ArrowFunction: no reader reads no request, as one reading nothing
     readRequest: RequestReader = () => '',

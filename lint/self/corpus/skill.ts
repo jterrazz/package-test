@@ -40,7 +40,7 @@ function namesOf(list: string): string[] {
 }
 
 /** Following its `export * from` lines. */
-export function exportedNames(file: string): Set<string> {
+function exportedNames(file: string): Set<string> {
     const text = readFileSync(file, 'utf8');
     const names = new Set<string>();
     for (const match of text.matchAll(EXPORT_LIST)) {

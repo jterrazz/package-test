@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 137   |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 138   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
 | The package’s own specs | `specs/<specification>/`                                      | the framework's own specifications, each met through its constructor     | 192   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification               | the built plugins, checkers and preset end to end, over fixture trees    | 111   |
@@ -168,7 +168,7 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **155 modules** have no sibling test, and every one of them is claimed:
+Today **154 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -182,7 +182,7 @@ Today **155 modules** have no sibling test, and every one of them is claimed:
 | a bundled CLI entry (7)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                                      |
 | a lint-layer module (14)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint specification                                                                                                                                                                                                                                                         |
 | a chain or runner internal (6)                            | it is reached through the chain, so its proof is the specification specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                  |
-| a module the specs reach through the published entry (11) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                              |
+| a module the specs reach through the published entry (10) | what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec                                                                                                                                                                                                                                              |
 | a standard (1)                                            | it is data, and the Config pass refuses anything it would compute; the `test()` preset hands it on as written, and `typescript doctor` prints each value beside it                                                                                                                                                                                                                                                                                                                           |
 
 <!-- /GENERATED:siblings -->
@@ -473,7 +473,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/package-exports.test.ts`      | package-exports      | 2     |
 | `lint/self/corpus/port-readers.test.ts`         | portReaders          | 2     |
 | `lint/self/corpus/positions.test.ts`            | unpositionedRules    | 2     |
-| `lint/self/corpus/retired-spellings.test.ts`    | retired-spellings    | 2     |
+| `lint/self/corpus/retired-spellings.test.ts`    | retiredSpellingsIn   | 2     |
 | `lint/self/corpus/rule-state.test.ts`           | rule-state           | 2     |
 | `lint/self/corpus/schema-documents.test.ts`     | schema-documents     | 9     |
 | `lint/self/corpus/siblings.test.ts`             | siblings             | 6     |

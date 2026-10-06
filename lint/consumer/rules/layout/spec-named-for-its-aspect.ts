@@ -9,7 +9,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-export const GENERIC_ASPECTS = new Set([
+const GENERIC_ASPECTS = new Set([
     'basic',
     'edge-cases',
     'general',

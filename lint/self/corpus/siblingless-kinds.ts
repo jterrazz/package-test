@@ -209,7 +209,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/clock/instant.ts',
             'src/disk/prepare.capability.ts',
             'src/disk/resolved-spec-path.ts',
-            'src/expectations/in-place/in-place.global-setup.ts',
             'src/expectations/text/ansi.ts',
             'src/services/seed/seed.capability.ts',
             'src/services/services.ts',

@@ -19,7 +19,7 @@ import {
 } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-export function poolsOf(specsRoot: string): string[] {
+function poolsOf(specsRoot: string): string[] {
     return GROUND_FOLDERS.map((ground) => join(specsRoot, SHARED_FOLDER, ground));
 }
 

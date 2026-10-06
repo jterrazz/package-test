@@ -15,7 +15,7 @@ import type { Capability, CapabilityGroup, Column } from './specification-matrix
 
 /** A cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more. */
 
-export const WRITTEN_IN_CODE = new Set<Capability['group']>([
+const WRITTEN_IN_CODE = new Set<Capability['group']>([
     'Constructor option',
     'Target',
     'Result accessor',
@@ -169,7 +169,7 @@ function cellOf(count: null | number): string {
     return count === null ? '—' : String(count);
 }
 
-export function exemptions(rows: MatrixRow[]): { column: Column; name: string; why: string }[] {
+function exemptions(rows: MatrixRow[]): { column: Column; name: string; why: string }[] {
     const found: { column: Column; name: string; why: string }[] = [];
     for (const row of rows) {
         for (const column of SPECIFICATION_MATRIX_COLUMNS) {

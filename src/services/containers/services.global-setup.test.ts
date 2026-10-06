@@ -2,9 +2,10 @@ import { connect } from 'node:net';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { refusal } from '../../chain/refusals/refusal.js';
 import type { ContainerPort } from './container.port.js';
 import { RunSetupContainer } from './run-setup-container.adapter.js';
-import setup, { DOCKER_ABSENT, servicesSetup } from './services.global-setup.js';
+import setup, { DOCKER_ABSENT, prepareDocker, servicesSetup } from './services.global-setup.js';
 
 async function connection(url: string): Promise<string> {
     return await new Promise((resolve) => {
@@ -220,5 +221,27 @@ describe('setup', () => {
         await expect(connection(String(url))).resolves.toBe('open');
         await second();
         await expect(connection(String(url))).resolves.toBe('ECONNREFUSED');
+    });
+
+    test('the services setup — preparing Docker — a runtime no daemon answers is refused, naming Docker and the gesture that starts it', async () => {
+        // Given - a runtime whose client finds no daemon
+        const absence = new Error('connect ENOENT /var/run/docker.sock');
+        const refused: unknown = await prepareDocker(async () => {
+            await Promise.resolve();
+            throw absence;
+        }).catch((error: unknown) => error);
+
+        // Then - the refusal says what was asked, what answered, and what to start, over the error the runtime met
+        expect(refused).toStrictEqual(
+            new Error(
+                refusal({
+                    fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
+                    found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (connect ENOENT /var/run/docker.sock)`,
+                    read: 'docs/reference/services.md#one-container-per-run',
+                    why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',
+                }),
+                { cause: absence },
+            ),
+        );
     });
 });

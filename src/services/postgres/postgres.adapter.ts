@@ -41,7 +41,7 @@ const DISPOSABLE: ContainerOptions = {
     tmpfs: { '/var/lib/postgresql/data': 'rw' },
 };
 
-export class PostgresHandle implements DatabasePort, ServiceHandle {
+class PostgresHandle implements DatabasePort, ServiceHandle {
     readonly type = 'postgres';
     serviceName: null | string = null;
     readonly defaultPort = 5432;

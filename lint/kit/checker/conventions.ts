@@ -15,7 +15,7 @@ import type { Teacher } from './teacher.js';
 
 const PLUGIN_PREFIX = 'jterrazz/';
 
-export const CHECKER_READ = 'docs/reference/linting.md#the-conventions-checker';
+const CHECKER_READ = 'docs/reference/linting.md#the-conventions-checker';
 
 export function directoryRefusal(path: string, what: string): null | string {
     const resolved = resolve(path);

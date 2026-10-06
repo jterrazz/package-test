@@ -2,10 +2,7 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 type Override = NonNullable<OxlintConfig['overrides']>[number];
 
-export const TEST_GLOBS = [
-    '**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}',
-    '**/specs/**/*.{ts,tsx}',
-];
+const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/**/*.{ts,tsx}'];
 
 /** `no-vitest-snapshot` — every snapshot matcher points back at `toMatch(file('./_expected/<name>.<ext>'))`. */
 const SNAPSHOT_MATCHERS: Record<string, string> = {

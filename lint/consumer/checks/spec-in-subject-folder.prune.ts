@@ -169,7 +169,7 @@ export const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
 /** `from '…'` and `import('…')` name a module; every other lead names a path on disk. */
-export function isModuleLead(lead: string): boolean {
+function isModuleLead(lead: string): boolean {
     return /^(?:from\b|import\()/u.test(lead);
 }
 

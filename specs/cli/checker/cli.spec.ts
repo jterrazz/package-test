@@ -49,9 +49,10 @@ describe('cli', () => {
         // Given - a target directory that does not exist
         const result = await cli.exec('does-not-exist-xyz');
 
-        // Then - the checker rejects it (exit 1) rather than passing vacuously
+        // Then - the checker rejects it (exit 1) rather than passing vacuously, and points at the chapter that says where it runs
         expect(result.exitCode).toBe(1);
         expect(result.stdout.text).toContain('no such directory');
+        expect(result.stdout.text).toContain('docs/reference/linting.md#the-conventions-checker');
     });
 
     test('lint — checker CLI contract — a ratchet the project broke fails the run, naming each key and the gesture', async () => {

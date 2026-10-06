@@ -5,7 +5,7 @@ import { invariant } from '../../chain/refusals/refusal.js';
 import { loadPeer } from '../peer.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
-export const CONTAINER_LABEL = 'com.jterrazz.test';
+const CONTAINER_LABEL = 'com.jterrazz.test';
 
 export const REUSED_LABEL = 'com.jterrazz.test.reuse';
 

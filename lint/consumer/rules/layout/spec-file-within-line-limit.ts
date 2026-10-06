@@ -12,7 +12,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 const GROUPS_SHOWN = 5;
 
 /** What stands before ` — ` or `:`, else the first word. */
-export function titlePrefix(title: string): string {
+function titlePrefix(title: string): string {
     const head = title.split(/ — |: /u)[0] ?? title;
     // Stryker disable next-line Regex: only the first word is kept, wherever the run of spaces ends
     return head === title ? (title.split(/\s+/u)[0] ?? title) : head;

@@ -11,7 +11,7 @@ type FixtureCopyPlan = {
 };
 
 /** `./dir/` spreads a directory's contents, `./file` copies one file; a path naming the other kind, or nothing, is refused. */
-export function copyPlan(path: string, specDir: string, workDir: string): FixtureCopyPlan {
+function copyPlan(path: string, specDir: string, workDir: string): FixtureCopyPlan {
     const src = resolveSpecPath('fixture', path, specDir);
     if (!existsSync(src)) {
         throw new Error(
