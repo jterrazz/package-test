@@ -725,7 +725,7 @@
             "sentence": "A test under `specs/<specification>/`, where the specification root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a `__fixtures__/`, `__expected__/`, `__requests__/` or `__seeds__/` folder is a spec, a `.test.ts` under `__expected__/` being the GOLDEN a fixer writes. So is any first-level folder that is not a specification: a specification with no module to sit beside and no runner to reach lives in a repository suite there.",
             "specification": "model",
             "family": "layout",
-            "fix": "Import `{ <specification> }` from `<specification>.specification.js`, move a module test into the `__tests__/` of its module's folder, or move a repository suite to a first-level folder of its own under `specs/`.",
+            "fix": "Import `{ <specification> }` from `<specification>.specification.js`, move a module test into the `__tests__/` of its module's folder, or move a repository suite to a first-level folder of its own under `specs/`. A module of the specs tree itself has no module test — its `__tests__/` would be a special folder the ground refuses — so it moves out of `specs/` into a code root (`src/`, or one `typescript.roots` declares) with its test.",
             "name": "specification-test-uses-its-runner",
             "rationale": "A test reaching no runner under a specification is a module test paying the specification's budget and services to prove something that belongs in its module's `__tests__/`.",
             "reach": "specs"

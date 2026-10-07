@@ -26,7 +26,7 @@ describe('spec-code-in-setup-folder', () => {
             specs/cli/orders/format.test.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
                 found: a test under the \`cli\` specification that reaches no runner
                 why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
-                fix: import \`{ cli }\` from \`cli.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder
+                fix: a module of a specs tree has no module test: move \`format.ts\` out of \`specs/\` into a code root — \`src/\`, or one \`typescript.roots\` declares, such as \`scripts/\` — with its test in that folder's \`__tests__/\`; or import \`{ cli }\` and drive the product through it
                 read: docs/reference/linting.md#specification-test-uses-its-runner
             specs/cli/orders/format.ts:1:1  jterrazz-check(spec-code-in-setup-folder)
                 found: \`format.ts\`, code that prepares specs outside every \`__setup__/\`
