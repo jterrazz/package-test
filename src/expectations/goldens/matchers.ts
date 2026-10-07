@@ -225,7 +225,7 @@ export async function registerMatchers(): Promise<void> {
     if (Reflect.get(globalThis, REGISTERED) === true) {
         return;
     }
-    // Stryker disable next-line BooleanLiteral: registering again registers the same matchers
+    // Stryker disable next-line BooleanLiteral,CallExpression: registering again registers the same matchers
     Reflect.set(globalThis, REGISTERED, true);
 
     try {
