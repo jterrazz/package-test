@@ -1,0 +1,6 @@
+{
+    "name": "estate",
+    "private": true,
+    "type": "module",
+    "workspaces": ["specs"]
+}

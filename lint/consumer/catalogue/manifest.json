@@ -632,7 +632,7 @@
         {
             "audience": "consumer",
             "channel": "toolchain",
-            "sentence": "The specs root holds its specification folders and the special folders of what they share alone — a repository suite is a first-level folder too: code every specification shares is `<specs>/__setup__/`, data the ground at the specs root. A file directly under it that is no test, no spec, no document and no runner is an error. A spec or a runner at the root is `specs-at-declared-depth`’s, and a path into a sibling's ground `no-reach-into-sibling-ground`’s.",
+            "sentence": "The specs root holds its specification folders and the special folders of what they share alone — a repository suite is a first-level folder too: code every specification shares is `<specs>/__setup__/`, data the ground at the specs root. A file directly under it that is no test, no spec, no document and no runner is an error — save the four files of a unit, `package.json`, `jterrazz.config.ts`, `tsconfig.json` and `vitest.config.ts`, which a workspace's own suite, a member at `specs/`, keeps. A spec or a runner at the root is `specs-at-declared-depth`’s, and a path into a sibling's ground `no-reach-into-sibling-ground`’s.",
             "specification": "model",
             "family": "layout",
             "fix": "Move code into `<specs>/__setup__/` — or the `__setup__/` of the one specification that reads it — and data into the ground folder of its role.",

@@ -174,6 +174,12 @@ const AT_THE_SPECS_ROOT = [
 
 const ANY_OTHER_FILE = ['.*', '.*.*', '.*.*.*', '.*.*.*.*'];
 
+// invariant: a workspace's own suite is a unit of its own, so its specs root also holds the four files of a unit.
+const OF_A_UNIT: readonly [string, string][] = [
+    ['.json', 'regex:(package|tsconfig)'],
+    ['.config.ts', 'regex:(jterrazz|vitest)'],
+];
+
 function specsRootFiles(): Record<string, string> {
     const refused = ANY_OTHER_FILE.map((key): [string, string] => [key, 'exists:0']);
     const held = AT_THE_SPECS_ROOT.flatMap((key): [string, string][] => [
@@ -181,7 +187,7 @@ function specsRootFiles(): Record<string, string> {
         [`.*${key}`, 'regex:.+'],
     ]);
 
-    return Object.fromEntries([...refused, ...held]);
+    return Object.fromEntries([...refused, ...held, ...OF_A_UNIT]);
 }
 
 const CLOSED_LIST = `regex:${either(['[^_].*', ...SPECIAL_FOLDERS.map((name) => escaped(name))])}`;
