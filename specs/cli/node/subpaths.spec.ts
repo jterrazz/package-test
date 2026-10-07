@@ -7,7 +7,7 @@ describe('subpaths', () => {
     test('every target the exports map publishes is in the install, and loads under its condition', async () => {
         // Given - a consumer's project with the tarball installed
         const result = await cli
-            .fixture(directory('./_fixtures/consumer/'))
+            .fixture(directory('./__fixtures__/consumer/'))
             .exec('node subpaths.mjs');
 
         // Then - each subpath answers every condition it declares: node loads its builds, and every package the browser build's one module imports — static, side-effect or dynamic — resolves under the browser condition
@@ -30,7 +30,9 @@ describe('subpaths', () => {
 
     test('the node entry loads no library a spec pays for only when it declares one', async () => {
         // Given - a consumer's project importing the node entry into a fresh module graph
-        const result = await cli.fixture(directory('./_fixtures/consumer/')).exec('node eager.mjs');
+        const result = await cli
+            .fixture(directory('./__fixtures__/consumer/'))
+            .exec('node eager.mjs');
 
         // Then - the network double's library, the browser and the device driver stay behind their adapters' lazy imports
         expect(result.exitCode).toBe(0);
@@ -49,14 +51,14 @@ describe('subpaths', () => {
     test('the oxlint entry answers what test material is alike from its ESM and its CommonJS build', async () => {
         // Given - a consumer's project asking both builds the questions its `no-test-code-in-production` guard asks
         const result = await cli
-            .fixture(directory('./_fixtures/consumer/'))
+            .fixture(directory('./__fixtures__/consumer/'))
             .exec('node readers.mjs');
 
         // Then - a module id and a specifier are read the same whichever loader the consumer's config runs under
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             import materialAt(src/orders.test.ts): a test file
-            import materialAt(specs/api/_fixtures/app.ts): the specs tree
+            import materialAt(specs/api/__fixtures__/app.ts): the specs tree
             import materialAt(specs): the specs tree
             import materialAt(src/orders.ts): none
             import testPackageOf(vitest/config): vitest
@@ -64,7 +66,7 @@ describe('subpaths', () => {
             import testPackageOf(@jterrazz/test/oxlint): none
             import testPackageOf(hono): none
             require materialAt(src/orders.test.ts): a test file
-            require materialAt(specs/api/_fixtures/app.ts): the specs tree
+            require materialAt(specs/api/__fixtures__/app.ts): the specs tree
             require materialAt(specs): the specs tree
             require materialAt(src/orders.ts): none
             require testPackageOf(vitest/config): vitest
@@ -77,7 +79,7 @@ describe('subpaths', () => {
     test('every global setup a project helper names is a module the install holds', async () => {
         // Given - a consumer's project building each project of the runner-config entry, as its vitest config does
         const result = await cli
-            .fixture(directory('./_fixtures/consumer/'))
+            .fixture(directory('./__fixtures__/consumer/'))
             .exec('node setups.mjs');
 
         // Then - each setup resolves inside the install: a renamed bundle would fail every consumer's run at startup

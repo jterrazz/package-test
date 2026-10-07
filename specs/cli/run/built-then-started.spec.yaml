@@ -1,5 +1,5 @@
 description: start runs what build wrote in the same working directory
-fixture: ../_fixtures/specimen-cli/
+fixture: ../__fixtures__/specimen-cli/
 runs:
     - command: build
       exit: 0

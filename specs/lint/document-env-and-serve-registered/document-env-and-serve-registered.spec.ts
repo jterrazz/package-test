@@ -7,7 +7,7 @@ describe('document-env-and-serve-registered', () => {
     test('rejects env and serve names no runner registers', async () => {
         // Given - a typo in both registries, beside a specification file that has neither
         const result = await checker
-            .fixture(directory('./_fixtures/document-env-and-serve-registered/'))
+            .fixture(directory('./__fixtures__/document-env-and-serve-registered/'))
             .run();
 
         // Then - the pass names the document, the line and what to write instead
@@ -28,7 +28,7 @@ describe('document-env-and-serve-registered', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .run();
 
         // Then - nothing is reported

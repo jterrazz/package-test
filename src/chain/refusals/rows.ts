@@ -52,7 +52,7 @@ export const RUNTIME_RULES: Row[] = [
         audience: 'consumer',
         channel: 'runtime',
         sentence:
-            'An `_expected/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
+            'An `__expected__/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
         specification: 'api',
         family: 'expectations',
         fix: 'List the headers the case is about; leave the rest out.',
@@ -65,7 +65,7 @@ export const RUNTIME_RULES: Row[] = [
         audience: 'consumer',
         channel: 'runtime',
         sentence:
-            "A golden's path may name a subfolder (`./_expected/build/verbose.txt`): the path is the file, and update mode creates the folders it names.",
+            "A golden's path may name a subfolder (`./__expected__/build/verbose.txt`): the path is the file, and update mode creates the folders it names.",
         specification: 'model',
         family: 'layout',
         fix: 'Name the subfolder in the path.',
@@ -81,7 +81,7 @@ export const RUNTIME_RULES: Row[] = [
             "Every golden reads the `file()` or `directory()` it is given, from the spec file's directory — response, stream, json, tree alike — and `request()` reads a request the same way. Nothing resolves against a folder the line does not name.",
         specification: 'model',
         family: 'expectations',
-        fix: "Name the golden from the spec: `file('./_expected/<case>.<ext>')`.",
+        fix: "Name the golden from the spec: `file('./__expected__/<case>.<ext>')`.",
         name: 'golden-read-from-its-path',
         rationale:
             'One resolution rule, written on the line, means a reader knows where a golden lives without knowing any convention or which accessor produced it.',
@@ -130,7 +130,7 @@ export const RUNTIME_RULES: Row[] = [
         sentence: `${REFUSAL_WHY['disk-named-by-relative-path-at-runtime']} The framework refuses at run time a verb that reads the disk (\`seed\`, \`request\`, \`fixture\`, \`run\`) handed anything but a \`file()\`/\`directory()\` — a bare string names the wrapper to write — and a \`file()\`, \`directory()\` or document \`fixture:\` whose path does not start with \`./\` or \`../\`. The trailing \`/\` says which of the two a path is, and the disk must agree: a directory named without it, or a file named with it, is refused, and so is a path that names nothing, with the path it resolved to.`,
         specification: 'model',
         family: 'chain',
-        fix: "Name the disk from the spec file: `file('./_seeds/users.sql')`, `directory('../../_shared/_fixtures/shop/')`.",
+        fix: "Name the disk from the spec file: `file('./__seeds__/users.sql')`, `directory('../../__fixtures__/shop/')`.",
         name: 'disk-named-by-relative-path-at-runtime',
         rationale:
             'The type refuses a bare name at the call; the runtime keeps the law for a caller the compiler does not see — a JavaScript spec, a cast, a document.',
@@ -166,7 +166,7 @@ export const RUNTIME_RULES: Row[] = [
         sentence: `${REFUSAL_WHY['one-verb-per-meaning']} Its argument says where the expectation lives: a value written in place — a stream's text, a response's \`.http\` text, a json's value, a table's rows (awaited) — or a \`file()\`/\`directory()\` golden. On a plain string it is vitest's own — a string or a RegExp — and a \`file()\` or a \`directory()\` handed to it is refused, a runner started or none (the path object would otherwise read as the pattern \`[object Object]\`); a string is goldened wrapped, \`expect(text(value)).toMatch(file(…))\`, and a stream's text is \`result.stdout.text\`. A value of the wrong shape — a RegExp on a stream, a response or a json, anything but rows on a table — does not compile, and past the compiler it is refused in both builds, naming the form that takes it; a directory, the working directory and a container take no value, and are refused naming \`directory()\` or \`toBeRunning()\`; a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: \`toBeEmpty\` is a table's matcher, and handed a stream it is refused in both builds, naming \`expect(<stream>.text).toBe('')\`.`,
         specification: 'model',
         family: 'expectations',
-        fix: "Write the whole result in place, ``toMatch(`…`)``, or `toMatch(file('./_expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
+        fix: "Write the whole result in place, ``toMatch(`…`)``, or `toMatch(file('./__expected__/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
         name: 'one-verb-per-meaning',
         rationale:
             "A result is not a string, so vitest's substring meaning never applied to it: one verb compares it whole, the value in place when the test is its only reader, a branded `file()` when the expectation lives on disk — and the runtime refuses the crossed form a type cannot see (a cast, a JavaScript spec).",

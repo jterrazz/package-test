@@ -6,7 +6,7 @@ import { lint as self } from '../self-lint.specification.js';
 describe('stubs-reached-by-their-surface', () => {
     test('a specification importing a kind and the delivery it wires, and an entry its channel pick, pass, and so do a module test, its ground and a script reaching below the surface', async () => {
         // Given - the surfaced tree, whose module test, the ground it stands on and a `.mjs` script import the stub queue: none is a production module
-        const result = await self.fixture(directory('./_fixtures/surfaced/')).run();
+        const result = await self.fixture(directory('./__fixtures__/surfaced/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('stubs-reached-by-their-surface', () => {
 
     test("a specification reaching the matching, and a specification taking an entry's channel pick, are refused at the import", async () => {
         // Given - the reaching tree
-        const result = await self.fixture(directory('./_fixtures/reaching/')).run();
+        const result = await self.fixture(directory('./__fixtures__/reaching/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

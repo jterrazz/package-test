@@ -1,10 +1,10 @@
 import {
-    isReservedFolder,
+    isSpecialFolder,
     PRUNED,
+    RENAMED_FOLDERS,
+    RETIRED_SHARED_FOLDERS,
     SETUP_FOLDER,
-    SHARED_FOLDER,
     treeEntries,
-    UNMARKED_RESERVED,
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, join } from 'node:path';
 
@@ -50,14 +50,9 @@ export function setupFolderOf(specsRoot: string, file: string): string | undefin
     return undefined;
 }
 
-export function ownerOfSetup(specsRoot: string, setup: string): string {
-    const owner = dirname(setup);
-    return owner === join(specsRoot, SHARED_FOLDER) ? specsRoot : owner;
-}
-
 export function placeOf(specsRoot: string, reader: string): string {
     const setup = setupFolderOf(specsRoot, reader);
-    return setup === undefined ? dirname(reader) : ownerOfSetup(specsRoot, setup);
+    return setup === undefined ? dirname(reader) : dirname(setup);
 }
 
 type Imported = { relative: boolean; targets: string[] };
@@ -119,25 +114,39 @@ export function holdsASpec(folder: string): boolean {
     return entries.some((entry) =>
         entry.isDirectory()
             ? !PRUNED.has(entry.name) &&
-              !isReservedFolder(entry.name) &&
+              !isSpecialFolder(entry.name) &&
               holdsASpec(join(folder, entry.name))
             : declaresTests(entry.name),
     );
 }
 
-export function isUnmarkedReserved(specsRoot: string, folder: string): boolean {
+/** The special folder an earlier spelling names — `_setup/`, or a bare `setup/` holding no spec — or `undefined`. */
+export function renamedSpecialOf(specsRoot: string, folder: string): string | undefined {
+    const name = basename(folder);
+    const renamed = RENAMED_FOLDERS[name];
+    if (renamed === undefined) {
+        return undefined;
+    }
+    return name.startsWith('_') || dirname(folder) === specsRoot || !holdsASpec(folder)
+        ? renamed
+        : undefined;
+}
+
+/** `_shared/` anywhere, or a bare `shared/` holding no spec: what specifications share sits at the specs root now. */
+export function isRetiredShared(specsRoot: string, folder: string): boolean {
+    const name = basename(folder);
     return (
-        UNMARKED_RESERVED[basename(folder)] !== undefined &&
-        (dirname(folder) === specsRoot || !holdsASpec(folder))
+        RETIRED_SHARED_FOLDERS.includes(name) &&
+        (name.startsWith('_') || dirname(folder) === specsRoot || !holdsASpec(folder))
     );
 }
 
 function isRefusedReserved(specsRoot: string, folder: string): boolean {
     const name = basename(folder);
     return (
-        (name.startsWith('_') && !isReservedFolder(name)) ||
-        (name === SHARED_FOLDER && dirname(folder) !== specsRoot) ||
-        isUnmarkedReserved(specsRoot, folder)
+        (name.startsWith('_') && !isSpecialFolder(name)) ||
+        renamedSpecialOf(specsRoot, folder) !== undefined ||
+        isRetiredShared(specsRoot, folder)
     );
 }
 

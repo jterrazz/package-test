@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('cli-runs-the-product-binary', () => {
     test('rejects when the cli binary is a third-party node_modules/.bin', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
@@ -20,7 +20,7 @@ describe('cli-runs-the-product-binary', () => {
 
     test('stays silent on the product command wrapper', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');

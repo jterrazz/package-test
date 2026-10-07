@@ -58,13 +58,13 @@ export function layers(root: string): Layer[] {
             count: allModuleTests,
             judges: 'one module, through its own exports, with nothing started',
             layer: 'Module tests',
-            where: '`src/**/*.test.ts` beside the module',
+            where: '`src/**/__tests__/*.test.ts`, in the folder of the module',
         },
         {
             count: ruleTests,
             judges: 'one rule: what it flags, what it leaves alone, and the message it prints',
             layer: 'Rule tests',
-            where: '`lint/consumer/rules/<family>/<rule>.test.ts` beside the rule',
+            where: '`lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule',
         },
         {
             count: specificationSpecs,

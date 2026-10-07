@@ -1,8 +1,8 @@
 import {
     isDirectory,
     isGroundFolder,
+    isSpecialFolder,
     listDirectory,
-    SHARED_FOLDER,
 } from '@jterrazz/typescript/rules';
 
 import { SPECIFICATIONS } from '../../../kit/project/specifications.js';
@@ -23,7 +23,7 @@ export function isStrayFolder(specs: string, relative: readonly string[]): boole
     return (
         relative.length > 1 &&
         !SPECIFICATIONS.has(first) &&
-        first !== SHARED_FOLDER &&
+        !isSpecialFolder(first) &&
         !holdsATest(`${specs}/${first}`)
     );
 }

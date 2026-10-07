@@ -29,21 +29,21 @@ describe('refused', () => {
         // Given - each wrapper handed the other's path
         // Then - each names the call to write instead
         // @ts-expect-error -- a path the types refuse, refused at run time too
-        expect(() => cli.fixture(directory('./_fixtures/chain-ground'))).toThrow(
+        expect(() => cli.fixture(directory('./__fixtures__/chain-ground'))).toThrow(
             [
-                'found: directory("./_fixtures/chain-ground"), a path that does not end in /',
+                'found: directory("./__fixtures__/chain-ground"), a path that does not end in /',
                 WHY,
-                'fix: end it in /: directory("./_fixtures/chain-ground/"), or name a file with file("./_fixtures/chain-ground")',
+                'fix: end it in /: directory("./__fixtures__/chain-ground/"), or name a file with file("./__fixtures__/chain-ground")',
                 READ,
             ].join('\n'),
         );
         // checker-disable-next-line named-path-exists -- the refusal under test: a file() naming a directory is refused before the disk is read
         // @ts-expect-error -- a path the types refuse, refused at run time too
-        expect(() => cli.fixture(file('./_fixtures/chain-ground/'))).toThrow(
+        expect(() => cli.fixture(file('./__fixtures__/chain-ground/'))).toThrow(
             [
-                'found: file("./_fixtures/chain-ground/"), a path ending in / — a directory\'s',
+                'found: file("./__fixtures__/chain-ground/"), a path ending in / — a directory\'s',
                 WHY,
-                'fix: name the directory with directory("./_fixtures/chain-ground/"), or the file without its /: file("./_fixtures/chain-ground")',
+                'fix: name the directory with directory("./__fixtures__/chain-ground/"), or the file without its /: file("./__fixtures__/chain-ground")',
                 READ,
             ].join('\n'),
         );
@@ -53,9 +53,9 @@ describe('refused', () => {
         // Given - the fixture's path without the wrapper that says what it names
         // Then - the verb names the wrappers that read the disk
         // @ts-expect-error -- a path the types refuse, refused at run time too
-        expect(() => cli.fixture('./_fixtures/chain-ground/')).toThrow(
+        expect(() => cli.fixture('./__fixtures__/chain-ground/')).toThrow(
             [
-                'found: fixture("./_fixtures/chain-ground/"), a value where the disk is read',
+                'found: fixture("./__fixtures__/chain-ground/"), a value where the disk is read',
                 WHY,
                 "fix: name the disk: fixture(file('./…')) for a file, fixture(directory('./…/')) for a directory",
                 READ,
@@ -67,21 +67,21 @@ describe('refused', () => {
         // Given - a directory named as a file, and a file named as a directory
         // Then - each refusal names what the disk holds, and the call that reads it
         // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: the path names the other kind on purpose
-        await expect(cli.fixture(file('./_fixtures/chain-ground')).exec('help')).rejects.toThrow(
+        await expect(cli.fixture(file('./__fixtures__/chain-ground')).exec('help')).rejects.toThrow(
             [
-                'found: fixture: "./_fixtures/chain-ground" names a directory',
+                'found: fixture: "./__fixtures__/chain-ground" names a directory',
                 WHY,
-                "fix: end its path in /: directory('./_fixtures/chain-ground/') — its contents are spread into the working directory",
+                "fix: end its path in /: directory('./__fixtures__/chain-ground/') — its contents are spread into the working directory",
                 READ,
             ].join('\n'),
         );
         // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: the path names the other kind on purpose
-        const fileAsDirectory = cli.fixture(directory('./_fixtures/invalid.ts/'));
+        const fileAsDirectory = cli.fixture(directory('./__fixtures__/invalid.ts/'));
         await expect(fileAsDirectory.exec('help')).rejects.toThrow(
             [
-                'found: fixture: "./_fixtures/invalid.ts/" names a file',
+                'found: fixture: "./__fixtures__/invalid.ts/" names a file',
                 WHY,
-                "fix: drop the /: file('./_fixtures/invalid.ts')",
+                "fix: drop the /: file('./__fixtures__/invalid.ts')",
                 READ,
             ].join('\n'),
         );
@@ -89,13 +89,13 @@ describe('refused', () => {
 
     test('a path that names nothing is refused with the path it resolved to', async () => {
         // Given - a fixture the leaf does not hold
-        const resolved = resolve(import.meta.dirname, '_fixtures/absent.txt');
+        const resolved = resolve(import.meta.dirname, '__fixtures__/absent.txt');
 
         // Then - refused before the binary runs, naming where it looked
         // checker-disable-next-line named-path-exists -- the absence is the refusal under test
-        await expect(cli.fixture(file('./_fixtures/absent.txt')).exec('help')).rejects.toThrow(
+        await expect(cli.fixture(file('./__fixtures__/absent.txt')).exec('help')).rejects.toThrow(
             [
-                `found: fixture: "./_fixtures/absent.txt" names nothing — ${resolved} does not exist`,
+                `found: fixture: "./__fixtures__/absent.txt" names nothing — ${resolved} does not exist`,
                 WHY,
                 `fix: create ${resolved}, or correct the path`,
                 READ,

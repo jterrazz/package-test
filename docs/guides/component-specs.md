@@ -28,7 +28,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 | -------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | A React Native screen                  | The renderer is a real Chromium, and a native view never reaches one                 | jest stays, until an experiment rendering it through `react-native-web` shows it can move |
 | An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [Website specs](website-specs.md)                                        |
-| A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                                                     |
+| A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` in the `__tests__/` of the island’s folder, here                            |
 | A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                                                   |
 
 **What runs under node stays there.** In a page, each node-only name the entry publishes — the seven constructors, the services, the docker accessors, the results that walk a disk — refuses where it is called: a page has no filesystem, no child process and no socket.
@@ -112,7 +112,7 @@ describe('PostTable', () => {
         });
 
         // Then - the table is qualified by what it is not showing
-        await expect(result.tree).toMatch(file('./_expected/one-of-two-hundred.aria.yaml'));
+        await expect(result.tree).toMatch(file('./__expected__/one-of-two-hundred.aria.yaml'));
         expect(result.console.text).toBe('');
     });
 });
@@ -154,12 +154,12 @@ The scenario is the When, and assertions stay in the Then (rule `no-expect-in-sc
 `toMatch(file(…))` is **awaited** on all five, because each is a `RenderedText` — a `TextAccessor` whose golden lives on the node side: a golden captured inside a page is read back through a server command, so the file crosses from the page to the node side. Which matchers are IO — and therefore awaited — is [Assertions](../reference/assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
-await expect(result.tree).toMatch(file('./_expected/two-of-two-hundred.aria.yaml'));
+await expect(result.tree).toMatch(file('./__expected__/two-of-two-hundred.aria.yaml'));
 expect(result.html.text).toContain('row row--live');
 expect(result.errors.text).toBe('');
 ```
 
-The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [Website specs](website-specs.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([Tokens](../reference/tokens.md)).
+The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [Website specs](website-specs.md) produces for a whole page. Goldens live in `__expected__/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([Tokens](../reference/tokens.md)).
 
 ## Unique here
 
@@ -237,9 +237,9 @@ const result = await component.render((container) => {
 - **Reaching for `@testing-library/react` or `happy-dom`.** Rule `no-second-test-runtime` refuses both, and the second is the reason the specification exists: a simulated DOM behaves almost like a browser, and what ships is judged by a real one.
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
 - **Hand-rolling `browser:` in a config.** A derived config has no place for it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
-- **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
+- **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx`, in the `__tests__/` of its component's folder; the project that collects it opens a browser.
 - **Asserting focus with a golden.** The tree carries no focus — [The visitor § Modifiers](../reference/visitor.md#modifiers) says what asserts it.
-- **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./_expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
+- **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./__expected__/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
 - **Reading the `target-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [The visitor § A name designates the accessible name WHOLE](../reference/visitor.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.

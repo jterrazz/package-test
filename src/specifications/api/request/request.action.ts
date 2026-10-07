@@ -59,7 +59,7 @@ async function send(
     if (isDiskDirectory(body)) {
         throw new TypeError(
             refusal('disk-named-by-relative-path-at-runtime', {
-                fix: `name one file: .${method.toLowerCase()}(${JSON.stringify(path)}, file('./_requests/body.json'))`,
+                fix: `name one file: .${method.toLowerCase()}(${JSON.stringify(path)}, file('./__requests__/body.json'))`,
                 found: `.${method.toLowerCase()}(${JSON.stringify(path)}, directory(${JSON.stringify(body.path)})), a directory where the body is one file`,
             }),
         );
@@ -98,7 +98,7 @@ export type RequestSignature = ChainSignature & {
             body?: unknown,
             ...options: RouteArguments<Path>
         ) => Promise<HttpResult>;
-        /** Send a complete request: its `.http` text written in the test, or `file('./_requests/<name>.http')`. */
+        /** Send a complete request: its `.http` text written in the test, or `file('./__requests__/<name>.http')`. */
         request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
     };
 };

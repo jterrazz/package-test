@@ -18,7 +18,7 @@ describe('conventions', () => {
     test("the installed toolchain runs the conventions a consumer's declared preset brings", async () => {
         // Given - a consumer declaring test() in its settings file, whose specs tree breaks one convention and nothing else
         const result = await cli
-            .fixture(directory('./_fixtures/declaring-test/'))
+            .fixture(directory('./__fixtures__/declaring-test/'))
             .exec('typescript check');
 
         // Then - the check fails on the conventions, which name the finding with the page that explains it
@@ -39,7 +39,7 @@ describe('conventions', () => {
 
         // When - the fixes run
         const result = await cli
-            .fixture(directory('./_fixtures/declaring-test/'))
+            .fixture(directory('./__fixtures__/declaring-test/'))
             .exec('typescript fix');
 
         // Then - the spec is renamed for its place, and the conventions have nothing left to hold
@@ -56,7 +56,7 @@ describe('conventions', () => {
 
         // When - the baseline is recorded
         const result = await cli
-            .fixture(directory('./_fixtures/declaring-test/'))
+            .fixture(directory('./__fixtures__/declaring-test/'))
             .exec('typescript baseline');
 
         // Then - the test section holds the convention's key at the count it stands at
@@ -69,7 +69,7 @@ describe('conventions', () => {
     test("the installed toolchain passes a consumer's tree that keeps the conventions", async () => {
         // Given - a consumer declaring test() in its settings file, every file in order
         const result = await cli
-            .fixture(directory('./_fixtures/declaring-test-kept/'))
+            .fixture(directory('./__fixtures__/declaring-test-kept/'))
             .exec('typescript check');
 
         // Then - the whole check passes, and the conventions say what the ratchet holds

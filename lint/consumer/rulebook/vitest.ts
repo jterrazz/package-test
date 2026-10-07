@@ -4,18 +4,18 @@ type Override = NonNullable<OxlintConfig['overrides']>[number];
 
 const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/**/*.{ts,tsx}'];
 
-/** `no-vitest-snapshot` — every snapshot matcher points back at `toMatch(file('./_expected/<name>.<ext>'))`. */
+/** `no-vitest-snapshot` — every snapshot matcher points back at `toMatch(file('./__expected__/<name>.<ext>'))`. */
 const SNAPSHOT_MATCHERS: Record<string, string> = {
     toMatchAriaSnapshot:
-        "The ARIA tree is a golden: `expect(result.tree).toMatch(file('./_expected/<case>.aria.yaml'))`.",
+        "The ARIA tree is a golden: `expect(result.tree).toMatch(file('./__expected__/<case>.aria.yaml'))`.",
     toMatchFileSnapshot:
-        "Name the file yourself: `expect(subject).toMatch(file('./_expected/<case>.<ext>'))`.",
+        "Name the file yourself: `expect(subject).toMatch(file('./__expected__/<case>.<ext>'))`.",
     toMatchInlineSnapshot:
-        "An inline snapshot is the run judging itself: `expect(subject).toMatch(file('./_expected/<case>.<ext>'))`, or compare to a literal with `toStrictEqual`.",
+        "An inline snapshot is the run judging itself: `expect(subject).toMatch(file('./__expected__/<case>.<ext>'))`, or compare to a literal with `toStrictEqual`.",
     toMatchScreenshot:
         'A screenshot is not a golden this dialect can read: assert the ARIA tree, the content, or the markup.',
     toMatchSnapshot:
-        "The golden is `expect(subject).toMatch(file('./_expected/<name>.<ext>'))`, a path from the spec file; under `src/` compare to a literal with `toStrictEqual`.",
+        "The golden is `expect(subject).toMatch(file('./__expected__/<name>.<ext>'))`, a path from the spec file; under `src/` compare to a literal with `toStrictEqual`.",
     toThrowErrorMatchingInlineSnapshot:
         "State the message: `expect(fn).toThrow('<what the subject says>')`.",
     toThrowErrorMatchingSnapshot:

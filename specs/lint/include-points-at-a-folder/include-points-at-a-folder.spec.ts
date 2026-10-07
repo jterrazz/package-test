@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('include-points-at-a-folder', () => {
     test('accepts an include rooted in a folder that exists', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('include-points-at-a-folder', () => {
 
     test('rejects an include whose folder does not exist', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

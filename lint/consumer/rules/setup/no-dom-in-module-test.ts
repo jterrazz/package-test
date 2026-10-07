@@ -87,7 +87,7 @@ export const noDomInModuleTest = defineRule(
         messages: {
             domGlobal: {
                 found: '`{{name}}` in a module test, where no DOM exists',
-                fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',
+                fix: 'move what renders into a `.test.tsx` in the `__tests__/` of its component’s folder, collected by the `component()` project',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

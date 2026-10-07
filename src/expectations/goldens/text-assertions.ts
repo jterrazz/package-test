@@ -17,7 +17,7 @@ export function requireExtension(name: string, subject: string): void {
     if (!/\.[A-Za-z0-9]+$/u.test(name)) {
         throw new Error(
             refusal({
-                fix: `name the file with its extension: file('./_expected/help.txt')`,
+                fix: `name the file with its extension: file('./__expected__/help.txt')`,
                 found: `toMatch(file("${name}")) on ${subject}, a golden path with no extension`,
                 read: 'docs/reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives',
                 why: 'The extension is part of a golden’s path.',

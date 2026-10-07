@@ -5,9 +5,9 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '__expected__');
 
-/** Git keeps no empty folder, so `_expected/` goes with its last golden. */
+/** Git keeps no empty folder, so `__expected__/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -29,7 +29,7 @@ function inUpdateMode(block: () => void): void {
 describe('failure', () => {
     test('text exposes stderr content', async () => {
         // Given - a failing run
-        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('fail');
+        const result = await cli.fixture(directory('../__fixtures__/specimen-cli/')).exec('fail');
 
         // Then - stderr text is readable
         expect(result.stderr.text).toContain('Fatal: something went wrong');
@@ -39,14 +39,14 @@ describe('failure', () => {
         // Given - a stderr fixture created via update mode
         const fixtureName = `stderr-transient-${Date.now()}.txt`;
         try {
-            const a = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('fail');
+            const a = await cli.fixture(directory('../__fixtures__/specimen-cli/')).exec('fail');
             inUpdateMode(() => {
-                expect(a.stderr).toMatch(file(`./_expected/${fixtureName}`));
+                expect(a.stderr).toMatch(file(`./__expected__/${fixtureName}`));
             });
 
             // Then - a second identical run matches
-            const b = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('fail');
-            expect(b.stderr).toMatch(file(`./_expected/${fixtureName}`));
+            const b = await cli.fixture(directory('../__fixtures__/specimen-cli/')).exec('fail');
+            expect(b.stderr).toMatch(file(`./__expected__/${fixtureName}`));
         } finally {
             removeGolden(resolve(EXPECTED_DIR, fixtureName));
         }

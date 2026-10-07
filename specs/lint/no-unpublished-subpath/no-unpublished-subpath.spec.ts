@@ -6,7 +6,7 @@ import { lint as preset } from '../preset-lint.specification.js';
 describe('no-unpublished-subpath', () => {
     test('accepts the single public entry point and every published subpath', async () => {
         // Given - the compliant tree
-        const result = await preset.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await preset.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('no-unpublished-subpath', () => {
 
     test('rejects an @jterrazz/test subpath import', async () => {
         // Given - the violation tree
-        const result = await preset.fixture(directory('./_fixtures/violation/')).run();
+        const result = await preset.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

@@ -8,7 +8,10 @@ import { resolve } from 'node:path';
 export type MetaTest = { file: string; holds: string[]; tests: number };
 
 /** `specs/lint/meta/` runs the real linters, so it sits with the lint specification's specs. */
-export const META_TESTS_LAYER_ROOTS = ['lint/self/catalogue', 'lint/self/corpus'];
+export const META_TESTS_LAYER_ROOTS = [
+    'lint/self/catalogue/__tests__',
+    'lint/self/corpus/__tests__',
+];
 
 const ROOTS = [...META_TESTS_LAYER_ROOTS, 'specs/lint/meta'];
 

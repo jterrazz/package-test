@@ -1,6 +1,6 @@
 # ADR-012: A folder that is no subject carries the `_` marker
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-017](017-a-special-folder-is-spelt-with-double-underscores.md)
 **Date:** 2026-09-26
 
 Written 2026-09-27 from the working page of the 17 release, where the owner

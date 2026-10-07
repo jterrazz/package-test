@@ -9,7 +9,7 @@ describe('shared-run', () => {
     test('two service-bearing projects of one run are served by the one run services', async () => {
         // Given - a scratch run of an integration() and a job() project, each worker recording the address it was provided
         const result = await vitestCli
-            .fixture(directory('./_fixtures/shared-run/'))
+            .fixture(directory('./__fixtures__/shared-run/'))
             .exec('run --configLoader runner');
         expect(result.exitCode).toBe(0);
         const integrationUrl = result.file('integration.url').content;
@@ -22,7 +22,7 @@ describe('shared-run', () => {
     test('workers of two projects running at once never share a pool id, the band each isolates its data by', async () => {
         // Given - a scratch run of two service-bearing projects, three slow files each, each file recording its pool id and when it ran
         const result = await vitestCli
-            .fixture(directory('./_fixtures/shared-run/'))
+            .fixture(directory('./__fixtures__/shared-run/'))
             .exec('run --configLoader runner');
         expect(result.exitCode).toBe(0);
         const runs = (project: string): WorkerRun[] =>

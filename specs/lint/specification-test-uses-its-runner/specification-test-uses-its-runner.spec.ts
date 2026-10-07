@@ -7,7 +7,7 @@ describe('specification-test-uses-its-runner', () => {
     test('rejects a spec that reaches no runner under its specification', async () => {
         // Given - a tree violating `specification-test-uses-its-runner`
         const result = await checker
-            .fixture(directory('./_fixtures/specification-test-uses-its-runner/'))
+            .fixture(directory('./__fixtures__/specification-test-uses-its-runner/'))
             .run();
 
         // Then - the pass names the file and what to do about it
@@ -15,15 +15,15 @@ describe('specification-test-uses-its-runner', () => {
             specs/api/orders/total.spec.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
                 found: a test under the \`api\` specification that reaches no runner
                 why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
-                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module
+                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder
                 read: docs/reference/linting.md#specification-test-uses-its-runner
         `);
     });
 
-    test('leaves a golden under `_expected/` alone, as it leaves `_fixtures/`', async () => {
+    test('leaves a golden under `__expected__/` alone, as it leaves `__fixtures__/`', async () => {
         // Given - the compliant twin, whose ground holds a `.test.ts` that IS a golden: the file a fixer is expected to write
         const result = await checker
-            .fixture(directory('./_fixtures/specification-test-uses-its-runner-ok/'))
+            .fixture(directory('./__fixtures__/specification-test-uses-its-runner-ok/'))
             .run();
 
         // Then - ground is ground whichever of the four names it carries: nothing under an underscored folder reaches a runner
@@ -33,7 +33,7 @@ describe('specification-test-uses-its-runner', () => {
     test('accepts a spec that imports the runner of its specification', async () => {
         // Given - the compliant twin, whose second spec names the specification module with no extension
         const result = await checker
-            .fixture(directory('./_fixtures/specification-test-uses-its-runner-ok/'))
+            .fixture(directory('./__fixtures__/specification-test-uses-its-runner-ok/'))
             .run();
 
         // Then - nothing is reported: the import SOURCE is what reaches the runner, however it spells the extension

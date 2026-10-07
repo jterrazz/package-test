@@ -6,7 +6,7 @@ import { cli } from '../packed-cli.specification.js';
 describe('hygiene', () => {
     test('a project the installed preset builds gives back the spies, variables and globals a test stubbed', async () => {
         // Given - a consumer's test stubbing all three and restoring none, then a test reading them
-        const result = await cli.fixture(directory('./_fixtures/hygiene/')).exec('node run.mjs');
+        const result = await cli.fixture(directory('./__fixtures__/hygiene/')).exec('node run.mjs');
 
         // Then - the second test finds the real ones: the preset restored them between tests
         expect(result.exitCode).toBe(0);

@@ -6,7 +6,7 @@ import { lint as self } from '../self-lint.specification.js';
 describe('specimen-filed-by-capability', () => {
     test('a spec of a specimen filed under a capability of the matrix passes, whatever route it reaches', async () => {
         // Given - the filed tree
-        const result = await self.fixture(directory('./_fixtures/filed/')).run();
+        const result = await self.fixture(directory('./__fixtures__/filed/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('specimen-filed-by-capability', () => {
 
     test("a unit and its test at the component tree's root, outside every capability, are refused", async () => {
         // Given - the unfiled-component tree
-        const result = await self.fixture(directory('./_fixtures/unfiled-component/')).run();
+        const result = await self.fixture(directory('./__fixtures__/unfiled-component/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
@@ -33,7 +33,7 @@ describe('specimen-filed-by-capability', () => {
 
     test('a spec of a specimen filed by the route it reaches is refused at its first line', async () => {
         // Given - the misfiled tree
-        const result = await self.fixture(directory('./_fixtures/misfiled/')).run();
+        const result = await self.fixture(directory('./__fixtures__/misfiled/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

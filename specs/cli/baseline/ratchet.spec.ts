@@ -8,7 +8,7 @@ describe('ratchet', () => {
         // Given - two trees the plugin's fixes rewrite: the root's `.oxlintrc.json` extends a commented JSON, and a commented `.oxlintrc.jsonc` governs web/, laid down before the checker starts
         const result = await cli
             .env({ NODE_OPTIONS: '--import=$WORKDIR/lay-configs.mjs' })
-            .fixture(directory('./_fixtures/checker-own-fixes-json/'))
+            .fixture(directory('./__fixtures__/checker-own-fixes-json/'))
             .exec(['baseline .', '. --fix']);
 
         // Then - both views written, and the section — the checker's passes alone — holds nothing
@@ -25,7 +25,7 @@ describe('ratchet', () => {
     test('lint — checker CLI, the ratchet is exact — a green run over a section that holds nothing prints `nothing held`', async () => {
         // Given - a clean project, recorded — nothing to hold, so no ledger — then judged
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/no-unused-ground-ok/'))
+            .fixture(directory('../../__fixtures__/no-unused-ground-ok/'))
             .exec(['baseline .', '.']);
 
         // Then - the same line as a project that keeps no section, never a count of nothing

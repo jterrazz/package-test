@@ -3,7 +3,6 @@ import {
     filesUnder,
     isGroundFolder,
     PRUNED,
-    SHARED_FOLDER,
     treeEntries,
     treeKind,
 } from '@jterrazz/typescript/rules';
@@ -13,16 +12,13 @@ import { basename, dirname, isAbsolute, join, relative } from 'node:path';
 import { isTestFileName } from './role.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
 
-export function isSharedFolder(dir: string): boolean {
-    return basename(dir) === SHARED_FOLDER && basename(dirname(dir)) === 'specs';
-}
-
+/** A ground folder at the specs root holds what several specifications share. */
 function isPool(dir: string): boolean {
-    return isGroundFolder(basename(dir)) && isSharedFolder(dirname(dir));
+    return isGroundFolder(basename(dir)) && basename(dirname(dir)) === 'specs';
 }
 
 export function specsRootOfPool(pool: string): string {
-    return dirname(dirname(pool));
+    return dirname(pool);
 }
 
 /** A fixture project with a `specs/` tree of its own is an input, judged where a spec runs the checker over it. */
@@ -135,7 +131,7 @@ export function readSource(path: string): string {
     return blankComments(readText(path));
 }
 
-/** A document counts: a rendered unit's ARIA golden sits in the same `_expected/` as a spec's. */
+/** A document counts: a rendered unit's ARIA golden sits in the same `__expected__/` as a spec's. */
 export function isReferrer(name: string): boolean {
     return isTestFileName(name) || name.endsWith(SPEC_EXTENSION);
 }
@@ -204,8 +200,8 @@ export function lowestCommonFolder(folders: readonly string[]): string | undefin
     return common;
 }
 
-export function reservedFolderOf(specsRoot: string, owner: string, reserved: string): string {
-    return owner === specsRoot ? join(specsRoot, SHARED_FOLDER, reserved) : join(owner, reserved);
+export function reservedFolderOf(owner: string, reserved: string): string {
+    return join(owner, reserved);
 }
 
 export function decodeText(path: string): null | string {

@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('spec-named-for-its-aspect', () => {
     test('a spec named for the question it asks passes', async () => {
         // Given - the named tree
-        const result = await lint.fixture(directory('./_fixtures/named/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/named/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('spec-named-for-its-aspect', () => {
 
     test('a spec named for what fit nowhere else is refused at its first line', async () => {
         // Given - the generic tree
-        const result = await lint.fixture(directory('./_fixtures/generic/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/generic/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

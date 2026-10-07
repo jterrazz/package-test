@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('no-transform-duplicating-tokens', () => {
     test('rejects when a transform only rewrites output into known tokens', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
@@ -20,7 +20,7 @@ describe('no-transform-duplicating-tokens', () => {
 
     test('stays silent for a transform covering real applicative noise', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');

@@ -11,7 +11,6 @@ import {
     findPools,
     isConventionalSubdir,
     isReferrer,
-    isSharedFolder,
     isWithin,
     listDirs,
     listFiles,
@@ -79,7 +78,7 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
 /** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
 type References = { paths: Set<string>; patterns: LiteralPattern[] };
 
-/** A source's literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/_shared/_fixtures/app/server.mjs`). */
+/** A source's literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/__fixtures__/app/server.mjs`). */
 function pathsNamedBy(file: string): string[] {
     const from = dirname(file);
     if (file.endsWith(SPEC_EXTENSION)) {
@@ -120,8 +119,7 @@ function entryReferenced(path: string, references: References): boolean {
 }
 
 function groundSubdirsOf(dir: string): string[] {
-    const ignored =
-        basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER || isSharedFolder(dir);
+    const ignored = basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER;
     if (ignored) {
         return [];
     }

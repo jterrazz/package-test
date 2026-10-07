@@ -135,7 +135,7 @@ test('shows the events feed behind its deep link', async () => {
     const result = await mobile.open('news://events');
 
     // Then - one golden covers the whole screen
-    expect(result.screen).toMatch(file('./_expected/events.screen.json'));
+    expect(result.screen).toMatch(file('./__expected__/events.screen.json'));
 });
 ```
 
@@ -209,7 +209,7 @@ test('renders the events feed', async () => {
     const result = await mobile.open('news://events');
 
     // Then - the whole projected tree matches one golden
-    expect(result.screen).toMatch(file('./_expected/events.screen.json'));
+    expect(result.screen).toMatch(file('./__expected__/events.screen.json'));
 });
 ```
 
@@ -219,7 +219,7 @@ The tree describes the **whole mounted hierarchy**, including rows below the fol
 
 ### Declared backend
 
-A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](../reference/stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
+A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](../reference/stubs.md) — the feature's `__setup__/stubs/` facade, exactly the form `api`/`job` use:
 
 ```typescript
 // specs/mobile/mobile.specification.ts
@@ -234,7 +234,7 @@ afterAll(cleanup);
 
 ```typescript
 // specs/mobile/events/feed.spec.ts
-import newsroom from './_setup/stubs/newsroom.stubs.js';
+import newsroom from './__setup__/stubs/newsroom.stubs.js';
 
 describe('feed', () => {
     test('renders the events feed from the declared backend', async () => {
@@ -242,7 +242,7 @@ describe('feed', () => {
         const result = await mobile.intercept(newsroom).open('news://events');
 
         // Then - the screen rendered what the stub declared
-        expect(result.screen).toMatch(file('./_expected/events.screen.json'));
+        expect(result.screen).toMatch(file('./__expected__/events.screen.json'));
     });
 });
 ```
@@ -280,13 +280,13 @@ specs/mobile/
 ├── mobile.specification.ts     # runner at the specification ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
-    ├── _expected/              # ALL expected fixtures, FLAT (*.screen.json, …)
-    └── _setup/stubs/           # the stubs declaring what the backend serves — with the `backend` option
+    ├── __expected__/              # ALL expected fixtures, FLAT (*.screen.json, …)
+    └── __setup__/stubs/           # the stubs declaring what the backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```
 
-No `_seeds/` or `_requests/` — a mobile chain has no `.seed()` and no request-file format; `.open()` calls are inline, and the golden is always `_expected/<name>`.
+No `__seeds__/` or `__requests__/` — a mobile chain has no `.seed()` and no request-file format; `.open()` calls are inline, and the golden is always `__expected__/<name>`.
 
 ## Pitfalls
 

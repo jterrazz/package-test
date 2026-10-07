@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('cleanup-passed-to-after-all', () => {
     test('accepts a specification file calling afterAll(cleanup)', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('cleanup-passed-to-after-all', () => {
 
     test('rejects a specification file that never registers cleanup with afterAll', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

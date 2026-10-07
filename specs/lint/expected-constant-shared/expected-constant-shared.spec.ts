@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('expected-constant-shared', () => {
     test('a file-level expectation two tests read is shared, and stays', async () => {
         // Given - the two-readers tree
-        const result = await lint.fixture(directory('./_fixtures/two-readers/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/two-readers/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('expected-constant-shared', () => {
 
     test('a file-level expectation one test reads is refused at its declaration', async () => {
         // Given - the one-reader tree
-        const result = await lint.fixture(directory('./_fixtures/one-reader/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/one-reader/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

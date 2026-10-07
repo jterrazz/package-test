@@ -8,7 +8,7 @@ import { cli } from '../cli.specification.js';
 describe('usage', () => {
     test('surfaces the whole usage banner on stdout', async () => {
         // Given - the help command
-        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('help');
+        const result = await cli.fixture(directory('../__fixtures__/specimen-cli/')).exec('help');
 
         // Then - the whole usage banner is surfaced on stdout
         expect(result.exitCode).toBe(0);
@@ -23,7 +23,7 @@ describe('usage', () => {
 
     test('exec with no arguments runs the bare command', async () => {
         // Given - the specimen run with no word, which prints its usage
-        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec();
+        const result = await cli.fixture(directory('../__fixtures__/specimen-cli/')).exec();
 
         // Then - the bare command ran, and its whole usage banner is surfaced on stdout
         expect(result.exitCode).toBe(0);
@@ -39,7 +39,7 @@ describe('usage', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — returns non-zero when the process exits without matching', async () => {
         // Given - help exits immediately without matching pattern
         const result = await cli
-            .fixture(directory('../_fixtures/specimen-cli/'))
+            .fixture(directory('../__fixtures__/specimen-cli/'))
             .exec('help', { timeout: 5000, waitFor: 'NONEXISTENT_PATTERN' });
 
         // Then - exit code 1 (pattern not matched before process exited)

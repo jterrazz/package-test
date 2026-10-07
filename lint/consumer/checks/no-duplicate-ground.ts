@@ -14,7 +14,6 @@ import {
     isConventionalSubdir,
     isDir,
     isReferrer,
-    isSharedFolder,
     listDirs,
     listFiles,
     lowestCommonFolder,
@@ -63,7 +62,7 @@ function leafGroundOf(
 ): Map<string, { copies: string[]; fingerprint: string; role: string }> {
     const groups = new Map<string, { copies: string[]; fingerprint: string; role: string }>();
     for (const dir of listDirs(specsRoot)) {
-        if (dir === specsRoot || isSharedFolder(dir)) {
+        if (dir === specsRoot) {
             continue;
         }
         for (const role of GROUND_FOLDERS) {
@@ -98,7 +97,7 @@ function copiedGround(rootDir: string): CopiedGround[] {
             const target =
                 // Stryker disable next-line ConditionalExpression: one name is a first name
                 names.size === 1 && name !== undefined
-                    ? join(reservedFolderOf(specsRoot, lowest, role), name)
+                    ? join(reservedFolderOf(lowest, role), name)
                     : null;
             copied.push({
                 copies: copies.filter((copy) => copy !== target).toSorted(),

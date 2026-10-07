@@ -7,7 +7,7 @@ describe('specification-folder-has-its-runner', () => {
     test('rejects a specification folder with no runner', async () => {
         // Given - a tree violating `specification-folder-has-its-runner`
         const result = await checker
-            .fixture(directory('./_fixtures/specification-folder-has-its-runner/'))
+            .fixture(directory('./__fixtures__/specification-folder-has-its-runner/'))
             .run();
 
         // Then - the pass names the file and what to do about it
@@ -23,7 +23,7 @@ describe('specification-folder-has-its-runner', () => {
     test('accepts a specification folder holding the runner it promises', async () => {
         // Given - the compliant twin
         const result = await checker
-            .fixture(directory('./_fixtures/specification-folder-has-its-runner-ok/'))
+            .fixture(directory('./__fixtures__/specification-folder-has-its-runner-ok/'))
             .run();
 
         // Then - nothing is reported

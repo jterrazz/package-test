@@ -7,7 +7,7 @@ describe('file-suffix-matches-place', () => {
     test('rejects a case name that only repeats its directory', async () => {
         // Given - specs/rm/rm.spec.yaml
         const result = await checker
-            .fixture(directory('./_fixtures/file-suffix-matches-place/'))
+            .fixture(directory('./__fixtures__/file-suffix-matches-place/'))
             .run();
 
         // Then - the pass names the document, the line and what to write instead
@@ -23,7 +23,7 @@ describe('file-suffix-matches-place', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .run();
 
         // Then - nothing is reported
@@ -33,7 +33,7 @@ describe('file-suffix-matches-place', () => {
     test('renames a `.test.ts` that sits under a specification folder', async () => {
         // Given - a tree holding `specs/api/users/creation.test.ts`
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/file-suffix-matches-place-placement/'))
+            .fixture(directory('../../__fixtures__/file-suffix-matches-place-placement/'))
             .run();
 
         // Then - the specification folder already says what it specifies; only the word is wrong
@@ -41,7 +41,7 @@ describe('file-suffix-matches-place', () => {
             specs/api/helpers/normalize.test.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
                 found: a test under the \`api\` specification that reaches no runner
                 why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
-                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module
+                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder
                 read: docs/reference/linting.md#specification-test-uses-its-runner
             specs/api/users/creation.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product
@@ -54,7 +54,7 @@ describe('file-suffix-matches-place', () => {
     test("renames under a tree that is one specification's whole, with no specification level", async () => {
         // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not specifications
         const result = await checker
-            .fixture(directory('./_fixtures/file-suffix-matches-place-rooted-specification/'))
+            .fixture(directory('./__fixtures__/file-suffix-matches-place-rooted-specification/'))
             .run();
 
         // Then - the spec is named, and the ground module's own test beside its module is not
@@ -70,7 +70,7 @@ describe('file-suffix-matches-place', () => {
     test("names a `.spec.ts` at a member's own root, the one place ls-lint never judges", async () => {
         // Given - a member holding `creation.spec.ts` at its root
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/member-workspace/'))
+            .fixture(directory('../../__fixtures__/member-workspace/'))
             .run({ args: '--member packages/stray-spec' });
 
         // Then - the member pass is the only run that sees outside a specs tree
@@ -78,7 +78,7 @@ describe('file-suffix-matches-place', () => {
             packages/stray-spec/creation.spec.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.spec.ts\` at the project's root, outside every \`specs/\` tree
                 why: The suffix says the kind, and the tree agrees with it.
-                fix: move it under \`specs/<specification>/\`, or rename it \`creation.test.ts\` beside the module it covers
+                fix: move it under \`specs/<specification>/\`, or rename it \`creation.test.ts\` in the \`__tests__/\` of the folder of the module it covers
                 read: docs/reference/linting.md#file-suffix-matches-place
         `);
     });

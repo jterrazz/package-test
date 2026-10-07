@@ -6,7 +6,9 @@ import { cli } from '../cli.specification.js';
 describe('captures', () => {
     test('a ref captured on stdout holds on the same result’s stderr', async () => {
         // Given - a command writing one session id to both streams, captured on stdout
-        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('session');
+        const result = await cli
+            .fixture(directory('../__fixtures__/specimen-cli/'))
+            .exec('session');
         expect(result.stdout).toMatch(`
             session {{uuid#session}}
         `);
@@ -20,7 +22,7 @@ describe('captures', () => {
     test('a ref captured on stdout refuses another value on the same result’s stderr', async () => {
         // Given - a command writing a different session id to each stream, captured on stdout
         const result = await cli
-            .fixture(directory('../_fixtures/specimen-cli/'))
+            .fixture(directory('../__fixtures__/specimen-cli/'))
             .exec('two-sessions');
         expect(result.stdout).toMatch(`
             session {{uuid#session}}
@@ -39,8 +41,10 @@ describe('captures', () => {
 
     test('a ref captured on one result never constrains another result’s stderr', async () => {
         // Given - two runs, each writing its own session id, the first captured on stdout
-        const first = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('session');
-        const second = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('session');
+        const first = await cli.fixture(directory('../__fixtures__/specimen-cli/')).exec('session');
+        const second = await cli
+            .fixture(directory('../__fixtures__/specimen-cli/'))
+            .exec('session');
         expect(first.stdout).toMatch(`
             session {{uuid#session}}
         `);

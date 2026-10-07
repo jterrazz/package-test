@@ -7,7 +7,7 @@ describe('linked', () => {
     test('a named directory is the package the binary requires by that name', async () => {
         // Given - a package beside the spec, linked under a scoped name
         const result = await cli
-            .link('@acme/greeter', directory('./_fixtures/greeter/'))
+            .link('@acme/greeter', directory('./__fixtures__/greeter/'))
             .exec('package @acme/greeter');
 
         // Then - Node resolves it from the working directory

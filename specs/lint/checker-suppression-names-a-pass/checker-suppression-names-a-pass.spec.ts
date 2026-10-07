@@ -7,7 +7,7 @@ describe('checker-suppression-names-a-pass', () => {
     test('rejects a checker suppression naming a retired id and one no pass has', async () => {
         // Given - a tree whose directive names a retired letter-code id and a lint rule
         const result = await checker
-            .fixture(directory('./_fixtures/checker-suppression-names-a-pass/'))
+            .fixture(directory('./__fixtures__/checker-suppression-names-a-pass/'))
             .run();
 
         // Then - each id no pass has is named at its directive
@@ -28,7 +28,7 @@ describe('checker-suppression-names-a-pass', () => {
     test('accepts a suppression naming a pass of the checker', async () => {
         // Given - the compliant twin
         const result = await checker
-            .fixture(directory('./_fixtures/checker-suppression-names-a-pass-ok/'))
+            .fixture(directory('./__fixtures__/checker-suppression-names-a-pass-ok/'))
             .run();
 
         // Then - nothing is reported

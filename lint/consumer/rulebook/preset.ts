@@ -1,12 +1,11 @@
 import type { ArchitectureRule, NamesRule, Preset } from '@jterrazz/typescript/config';
 import {
     declaredSubpaths,
-    GROUND_FOLDERS,
     readAt,
-    RESERVED_FOLDERS,
+    RENAMED_FOLDERS,
     rowNamed,
     SETUP_FOLDER,
-    SHARED_FOLDER,
+    SPECIAL_FOLDERS,
     whyOf,
 } from '@jterrazz/typescript/rules';
 import { createRequire } from 'node:module';
@@ -59,7 +58,7 @@ const SEAMS: readonly Seam[] = [
         seam: 'renderer',
     },
     {
-        fix: 'a drawing of a browser proves what a browser does not — a rendered thing is a `.test.tsx` beside its component, collected by `component()`',
+        fix: 'a drawing of a browser proves what a browser does not — a rendered thing is a `.test.tsx` in the `__tests__/` of its component’s folder, collected by `component()`',
         packages: ['happy-dom', 'jsdom'],
         seam: 'simulated-dom',
     },
@@ -99,7 +98,7 @@ const SEAMS: readonly Seam[] = [
         seam: 'simulator',
     },
     {
-        fix: 'a component rendered to a string is still a component — the test is a `.test.tsx` beside it, and `result.html` carries the markup',
+        fix: 'a component rendered to a string is still a component — the test is a `.test.tsx` in the `__tests__/` of its folder, and `result.html` carries the markup',
         from: String.raw`\.test\.ts$`,
         packages: ['react-dom/server'],
         seam: 'string-renderer',
@@ -138,7 +137,7 @@ function publishedFix(): string {
 const LAYERS: ArchitectureRule[] = [
     {
         ...taughtBy('no-test-to-test-import'),
-        fix: 'under `specs/`, move what both read into the `_setup/` of the lowest folder they share; under `src/`, into a sibling `<file>.fixtures.ts` for typed input data',
+        fix: 'under `specs/`, move what both read into the `__setup__/` of the lowest folder they share; under `src/`, into a `__tests__/<file>.fixtures.ts` for typed input data',
         from: { path: TEST_FILE },
         name: 'no-test-to-test-import',
         to: { path: String.raw`\.test\.[cm]?[jt]sx?$` },
@@ -159,17 +158,6 @@ const LAYERS: ArchitectureRule[] = [
         to: { couldNotResolve: true, path: '^@jterrazz/test/' },
     },
 ];
-
-/** RE2 has no negative lookahead: "any name but this one" is spelled as the names that differ from it at some character, or in length. */
-function anyNameBut(word: string): string {
-    const prefixes = Array.from({ length: word.length }, (_, index) => word.slice(0, index));
-    const differing = prefixes.map(
-        (prefix) => `${escaped(prefix)}[^${escaped(word.charAt(prefix.length))}].*`,
-    );
-    const shorter = prefixes.filter(Boolean).map((prefix) => escaped(prefix));
-
-    return either([...differing, ...shorter, `${escaped(word)}.+`]);
-}
 
 const EXTENSIONS = ['c', 'm', ''].flatMap((module) =>
     ['j', 't'].flatMap((language) => ['x', ''].map((jsx) => `${module}${language}s${jsx}`)),
@@ -194,33 +182,35 @@ function specsRootFiles(): Record<string, string> {
     return Object.fromEntries([...refused, ...held]);
 }
 
-const CLOSED_LIST = `regex:${either(['[^_].*', ...RESERVED_FOLDERS.map((name) => escaped(name))])}`;
+const CLOSED_LIST = `regex:${either(['[^_].*', ...SPECIAL_FOLDERS.map((name) => escaped(name))])}`;
+
+const LISTED = SPECIAL_FOLDERS.map((name) => `\`${name}/\``).join(', ');
+
+const EARLIER_SPELLINGS = Object.entries(RENAMED_FOLDERS)
+    .filter(([earlier]) => earlier.startsWith('_'))
+    .map(([earlier, now]) => `\`${earlier}/\` is \`${now}/\``)
+    .join(', ');
 
 const NAMES: NamesRule[] = [
     {
         ...taughtBy('specs-root-holds-specifications-and-shared'),
-        fix: `move a file where it belongs — code into \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one specification that reads it, data into the ground folder of its role — and a \`${SETUP_FOLDER}/\` to \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\``,
+        fix: `move a file where it belongs — code into \`specs/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one specification that reads it, data into the ground folder of its role`,
         ls: {
             '**/specs': specsRootFiles(),
-            '**/specs/*': { '.dir': `regex:${anyNameBut(SETUP_FOLDER)}` },
-            '**/specs/*/*': { '.dir': 'regex:.+' },
+            '**/specs/*': { '.dir': 'regex:.+' },
         },
         name: 'specs-root-holds-specifications-and-shared',
     },
     {
-        ...taughtBy('underscore-name-in-closed-list'),
-        fix: `rename it to the reserved folder that says what it holds — ${RESERVED_FOLDERS.map((name) => `\`${name}/\``).join(', ')} — or drop the \`_\` if it is a subject`,
-        ignore: [
-            `**/${SETUP_FOLDER}`,
-            `**/specs/${SHARED_FOLDER}`,
-            ...GROUND_FOLDERS.map((name) => `**/${name}`),
-        ],
+        ...taughtBy('special-folder-in-closed-list'),
+        fix: `rename it to the special folder that says what it holds — ${LISTED} — or drop the \`_\` if it is a subject; an earlier spelling names its own — ${EARLIER_SPELLINGS} — and what \`_shared/\` held sits in the special folders at the specs root`,
+        ignore: SPECIAL_FOLDERS.map((name) => `**/${name}`),
         ls: { '**/specs/**': { '.dir': CLOSED_LIST } },
-        name: 'underscore-name-in-closed-list',
+        name: 'special-folder-in-closed-list',
     },
     {
         ...taughtBy('spec-file-in-a-specs-tree'),
-        fix: 'move it under `specs/<specification>/`, or rename it `.test.ts` beside the module it covers',
+        fix: 'move it under `specs/<specification>/`, or rename it `.test.ts` in the `__tests__/` of the folder of the module it covers',
         ignore: ['specs', '**/specs'],
         ls: { '**': { '.*.spec.ts': 'exists:0', '.spec.ts': 'exists:0' } },
         name: 'spec-file-in-a-specs-tree',

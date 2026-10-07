@@ -1,0 +1,6 @@
+{
+    "name": "shop",
+    "type": "module",
+    "imports": { "#cli-setup/*": "./specs/cli/__setup__/*" },
+    "scripts": { "test": "vitest --run" }
+}

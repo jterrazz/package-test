@@ -270,7 +270,7 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
         why: 'each program the framework runs has one module that spawns it, so its lifecycle, its options and its errors have one owner (ADR-009)',
     },
     {
-        fix: 'reach the framework through `@jterrazz/test`, the build an install holds, or move the probe beside the module it covers, as a module test',
+        fix: 'reach the framework through `@jterrazz/test`, the build an install holds, or move the probe into the `__tests__/` of the folder of the module it covers, as a module test',
         from: { path: '(^|/)specs/' },
         name: 'no-framework-internals',
         read: 'docs/guides/test.md#a-spec-reaches-the-framework-by-its-entry',

@@ -1,0 +1,6 @@
+{
+    "test": {
+        "jterrazz-check/no-unused-ground": 1,
+        "jterrazz/test-in-its-tests-folder": 2
+    }
+}

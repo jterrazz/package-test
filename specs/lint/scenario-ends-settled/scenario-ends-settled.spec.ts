@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('scenario-ends-settled', () => {
     test('accepts a scenario that names what the action produced', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('scenario-ends-settled', () => {
 
     test('rejects a scenario that ends on the action', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

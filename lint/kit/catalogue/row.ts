@@ -1,7 +1,7 @@
 import type { RuleDocs } from '@jterrazz/typescript/rules';
 
 /** `audience`: `consumer` ships and is in the public catalogue; `self` is this package's own discipline, run only here. A rule that is both is two rules. */
-export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 'name'> & {
+export type RowDocs<Family extends string = string> = {
     /** One per row: a convention enforced two ways is two rows, so a reader knows which pass a finding comes from. */
     channel:
         | 'checker'
@@ -27,7 +27,7 @@ export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 
     rationale: string;
     /** An `upstream` row names the rule whose option carries it; the completeness meta-test reads it. */
     upstream?: string;
-    /** `module` is the colocated unit test; a module-role file under `specs/` is a repository suite. */
+    /** `module` is the unit test in its module’s `__tests__/`; a module-role file under `specs/` is a repository suite. */
     reach:
         | 'all'
         | 'component'
@@ -41,7 +41,7 @@ export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 
         | 'specs'
         | 'stub'
         | 'tests';
-};
+} & Omit<RuleDocs, 'family' | 'name'>;
 
 export type Row<Family extends string = string> = RowDocs<Family> & {
     /** Unique across the catalogue. */

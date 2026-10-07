@@ -6,7 +6,7 @@ A stub states what the provider replies, and nothing runs it against the provide
 
 ## The principle
 
-> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`_requests/`, `_expected/`) — never a mock format.
+> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`__requests__/`, `__expected__/`) — never a mock format.
 
 A stub is behavior: it decides what matches and what is served, it can count, it can be required, it can compose. That belongs in TypeScript, where the type checker and the app's own builders are reachable. A 200-line payload is not behavior — it is data, and it goes to a sibling `.json` the stub imports. And `.http` keeps the one role it is good at: a complete, readable document of a request your api receives or a response your api returns.
 
@@ -154,9 +154,9 @@ The file layout follows the same split: a **public facade** per feature, **inter
 ```text
 specs/<specification>/<feature>/
 ├── <feature>.test.ts
-├── _fixtures/
+├── __fixtures__/
 │   └── events.json                    the payload a unit serves
-└── _setup/
+└── __setup__/
     └── stubs/
         ├── newsroom.stubs.ts          PUBLIC — the world and its scenarios, by name
         ├── http/
@@ -169,21 +169,21 @@ specs/<specification>/<feature>/
             └── draft-reply.ts
 ```
 
-Stubs are TypeScript that prepares specs, so their root sits in a `_setup/` — the one of the lowest folder the specs using them share ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)). A payload is data, and `_setup/` holds code alone: it sits in the `_fixtures/` beside that `_setup/`, placed like any ground.
+Stubs are TypeScript that prepares specs, so their root sits in a `__setup__/` — the one of the lowest folder the specs using them share ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)). A payload is data, and `__setup__/` holds code alone: it sits in the `__fixtures__/` beside that `__setup__/`, placed like any ground.
 
 The rules, enforced by [`stubs-root-holds-facades-and-kinds`](linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](linting.md#stub-data-has-a-builder):
 
 - The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
 - A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.
 - A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
-- Data with real mass goes to a payload in `_fixtures/` (served), which the unit imports, or to a sibling `.request.ts` (matched). The stem before the FIRST dot pairs a `.request.ts` with its stub: `classify-article.request.ts` belongs to `classify-article.ts`, and an orphan one is an error.
+- Data with real mass goes to a payload in `__fixtures__/` (served), which the unit imports, or to a sibling `.request.ts` (matched). The stem before the FIRST dot pairs a `.request.ts` with its stub: `classify-article.request.ts` belongs to `classify-article.ts`, and an orphan one is an error.
 - **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
-- Shared data has ONE owner: a second stub imports the same `_fixtures/events.json`. No copies.
+- Shared data has ONE owner: a second stub imports the same `__fixtures__/events.json`. No copies.
 
 A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
 
 ```typescript
-// _setup/stubs/newsroom.stubs.ts — the facade a test imports
+// __setup__/stubs/newsroom.stubs.ts — the facade a test imports
 import { defineStubs } from '@jterrazz/test';
 
 import articleGone from './http/article-gone.js';
@@ -195,10 +195,10 @@ export const withArticleGone = (id: string) => newsroom.with(articleGone(id));
 ```
 
 ```typescript
-// _setup/stubs/http/events.ts — a unit, serving its payload from _fixtures/
+// __setup__/stubs/http/events.ts — a unit, serving its payload from __fixtures__/
 import { defineStub, http } from '@jterrazz/test';
 
-import payload from '../../../_fixtures/events.json' with { type: 'json' };
+import payload from '../../../__fixtures__/events.json' with { type: 'json' };
 
 export default defineStub({
     request: http.get('/events'),
@@ -221,7 +221,7 @@ import { http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
-import { newsroom } from './_setup/stubs/newsroom.stubs.js';
+import { newsroom } from './__setup__/stubs/newsroom.stubs.js';
 
 describe('report', () => {
     test('serves the declared world', async () => {
@@ -431,7 +431,7 @@ A provider's streamed reply is its provider's stub, not an `http` one: `openai.s
 Both take `delay`, the milliseconds between two events. Any other server-sent stream is an `http.sse()` stub.
 
 ```typescript
-// specs/api/assistant/_setup/stubs/openai/greeting.ts
+// specs/api/assistant/__setup__/stubs/openai/greeting.ts
 import { defineStub, openai } from '@jterrazz/test';
 
 export default defineStub({
@@ -482,13 +482,13 @@ Two scoping notes:
 
 ## Pitfalls
 
-- **Reaching into a kind folder from a test.** `import events from './_setup/stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead — that is what facades are for.
+- **Reaching into a kind folder from a test.** `import events from './__setup__/stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead — that is what facades are for.
 - **Pinning a prompt by copying it.** A 550-line prompt pasted into a stub is a fossil. Import the app's real builder, or match a stable prefix with `match.includes` — the stub pins the _interaction_, not the wording.
 - **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference — use `match.includes` if that is genuinely what you mean.
 - **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.
 - **Relying on declaration specificity instead of order.** Selection is first-match. `.with()` prepends precisely so an override wins without deleting the generic route — outside `.with()`, order is yours to get right.
 - **Letting a pipeline hit the network.** An unintercepted call is a test escaping the sandbox, not extra realism. Once one stub is declared, `network-strict-after-first-stub` turns a stray call into a failure.
-- **Duplicating a payload.** The 45-line article exists ONCE, as a file of `_fixtures/`; the second stub imports it.
+- **Duplicating a payload.** The 45-line article exists ONCE, as a file of `__fixtures__/`; the second stub imports it.
 
 ## Related
 

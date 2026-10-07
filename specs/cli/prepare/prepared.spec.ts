@@ -10,7 +10,7 @@ describe('prepared', () => {
     test('a step runs over the tree the fixtures laid, and lays what no fixture can carry', async () => {
         // Given - a project fixture, made a repository whose index holds what the fixture laid
         const result = await cli
-            .fixture(directory('./_fixtures/project/'))
+            .fixture(directory('./__fixtures__/project/'))
             .prepare((workdir) => {
                 execFileSync('git', ['init', '--quiet'], { cwd: workdir });
                 execFileSync('git', ['add', '.'], { cwd: workdir });
@@ -27,7 +27,7 @@ describe('prepared', () => {
     test('steps run in the order stated, and a file laid after the index is no part of it', async () => {
         // Given - a repository staged by one step, then a file a second step writes
         const result = await cli
-            .fixture(directory('./_fixtures/project/'))
+            .fixture(directory('./__fixtures__/project/'))
             .prepare((workdir) => {
                 execFileSync('git', ['init', '--quiet'], { cwd: workdir });
                 execFileSync('git', ['add', '.'], { cwd: workdir });

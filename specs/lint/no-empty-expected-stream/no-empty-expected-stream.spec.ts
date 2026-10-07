@@ -7,7 +7,7 @@ describe('no-empty-expected-stream', () => {
     test('refuses a stream that is only {{any}}', async () => {
         // Given - a run that executes and proves nothing
         const result = await checker
-            .fixture(directory('./_fixtures/no-empty-expected-stream/'))
+            .fixture(directory('./__fixtures__/no-empty-expected-stream/'))
             .run();
 
         // Then - the pass names the document, the line and what to write instead
@@ -23,7 +23,7 @@ describe('no-empty-expected-stream', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .run();
 
         // Then - nothing is reported

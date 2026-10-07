@@ -6,7 +6,7 @@ import { ARCHITECTURE } from './checks/architecture.js';
 import { sourceRootHoldsKnownEntries } from './checks/source-root-holds-known-entries.js';
 import { selfPluginRules } from './rules/plugin.js';
 
-const MSW_ADAPTER_TEST = String.raw`^src/stubs/delivery/msw-handlers\.test\.ts$`;
+const MSW_ADAPTER_TEST = String.raw`^src/stubs/delivery/__tests__/msw-handlers\.test\.ts$`;
 
 export function self(): Preset {
     return {

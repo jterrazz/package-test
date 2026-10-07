@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('result-compared-whole', () => {
     test('a result read only for the cursor the next request sends owes no comparison', async () => {
         // Given - the cursor-carried tree
-        const result = await lint.fixture(directory('./_fixtures/cursor-carried/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/cursor-carried/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('result-compared-whole', () => {
 
     test('a precise assertion beside the whole comparison passes', async () => {
         // Given - the whole-and-probe tree
-        const result = await lint.fixture(directory('./_fixtures/whole-and-probe/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/whole-and-probe/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -22,7 +22,7 @@ describe('result-compared-whole', () => {
 
     test('a carried value also claimed is a read, and a later result only probed is refused', async () => {
         // Given - the cursor-claimed tree
-        const result = await lint.fixture(directory('./_fixtures/cursor-claimed/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/cursor-claimed/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
@@ -41,7 +41,7 @@ describe('result-compared-whole', () => {
 
     test('a test probing its response and never comparing it whole is refused at the read', async () => {
         // Given - the probe-alone tree
-        const result = await lint.fixture(directory('./_fixtures/probe-alone/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/probe-alone/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

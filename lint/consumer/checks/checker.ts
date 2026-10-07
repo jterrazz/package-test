@@ -33,10 +33,7 @@ import { noDocumentInGroundFindings } from './no-document-in-ground.js';
 import { checkNoDuplicateGround, fixNoDuplicateGround } from './no-duplicate-ground.js';
 import { checkNoEmptyExpectedStream } from './no-empty-expected-stream.js';
 import { noMalformedRefFindings } from './no-malformed-ref.js';
-import {
-    checkNoReachIntoSiblingGround,
-    fixNoReachIntoSiblingGround,
-} from './no-reach-into-sibling-ground.js';
+import { checkNoReachIntoSiblingGround } from './no-reach-into-sibling-ground.js';
 import { checkNoRedundantTestDependency } from './no-redundant-test-dependency.js';
 import { checkNoSilentRefusal } from './no-silent-refusal.js';
 import { checkNoSimulatedDomInConfig } from './no-simulated-dom-in-config.js';
@@ -178,10 +175,6 @@ function specFilesRewritten(root: string): string[] {
 export const CHECKER: CheckerRegistry = {
     chapter: CATALOGUE_CHAPTER,
     fixes: [
-        (root) =>
-            fixNoReachIntoSiblingGround(root).map(
-                (move) => `moved ${move} (no-reach-into-sibling-ground)`,
-            ),
         fixFileSuffixMatchesPlace,
         specFilesRewritten,
         (root) =>

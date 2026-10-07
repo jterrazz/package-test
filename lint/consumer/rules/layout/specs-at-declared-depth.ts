@@ -5,7 +5,6 @@ import {
     readAt,
     rowNamed,
     SETUP_FOLDER,
-    SHARED_FOLDER,
 } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
@@ -53,7 +52,7 @@ function depthOf(option: unknown): SpecsDepth | undefined {
 
 const DEFAULT_DEPTH: SpecsDepth = 'specification-domain';
 
-/** `test-beside-its-module`'s pairing tells a ground module's test from a spec that wandered into the ground. */
+/** A module’s test beside it — a specs tree holds no `__tests__/` — tells a ground module’s test from a spec that wandered into the ground. */
 function testsItsNeighbour(filename: string): boolean {
     return filename.endsWith(TEST_SUFFIX) && isFile(`${filename.slice(0, -TEST_SUFFIX.length)}.ts`);
 }
@@ -63,17 +62,13 @@ const MESSAGES = {
         found: 'a spec under `{{folder}}/`, a reserved folder that is no subject',
         fix: 'move the spec out of `{{folder}}/`, into the subject folder it specifies; a reserved folder that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
     },
-    specInShared: {
-        found: 'a spec under `specs/_shared/`, what several specifications share',
-        fix: 'move it into its specification: `specs/_shared/` holds only `_setup/`, `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
-    },
     specNotAtSpecificationRoot: {
         found: 'a `*.specification.ts` below its specification root',
         fix: 'move it to `specs/<specification>/<name>.specification.ts`',
     },
     strayFolder: {
-        found: 'a module in `specs/{{folder}}/`, a first-level folder that is no specification, not `_shared/`, and holds no test of its own',
-        fix: 'move a runner to the root of the specification it builds (`specs/<specification>/<name>.specification.ts`), a test helper into the `_setup/` of the lowest folder its tests share, and a fixture in the ground of the lowest folder its tests share (`specs/_shared/_fixtures/` across specifications); then remove `specs/{{folder}}/`',
+        found: 'a module in `specs/{{folder}}/`, a first-level folder that is no specification, no special folder, and holds no test of its own',
+        fix: 'move a runner to the root of the specification it builds (`specs/<specification>/<name>.specification.ts`), a test helper into the `__setup__/` of the lowest folder its tests share, and a fixture in the ground of the lowest folder its tests share (`specs/__fixtures__/` across specifications); then remove `specs/{{folder}}/`',
     },
     testAtSpecificationRoot: {
         found: 'a spec directly at its specification root',
@@ -117,7 +112,7 @@ function reservedVerdict(placement: Placement): undefined | Verdict {
     if (folder === undefined) {
         return undefined;
     }
-    // invariant: a ground module's test answers to `test-beside-its-module`, not to depth.
+    // invariant: a ground module's test answers to `test-in-its-tests-folder`, not to depth.
     return testsItsNeighbour(filename) ? null : { data: { folder }, messageId: 'specInReserved' };
 }
 
@@ -172,11 +167,6 @@ function verdictOf(placement: Placement, directory: string, depth: SpecsDepth): 
     const reserved = reservedVerdict(placement);
     if (reserved !== undefined) {
         return reserved;
-    }
-    const spec = isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX);
-    // Stryker disable next-line ConditionalExpression: a file at the specs root is never `_shared` itself
-    if (spec && nesting >= 1 && relative[0] === SHARED_FOLDER) {
-        return { messageId: 'specInShared' };
     }
     if (base.endsWith(SPECIFICATION_SUFFIX)) {
         return nesting === 1 ? null : { messageId: 'specNotAtSpecificationRoot' };

@@ -6,7 +6,7 @@ import { lint as preset } from '../preset-lint.specification.js';
 describe('fixtures-imported-by-tests-only', () => {
     test('a module test importing its sibling fixtures module passes', async () => {
         // Given - the compliant tree
-        const result = await preset.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await preset.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('fixtures-imported-by-tests-only', () => {
 
     test('production code importing a fixtures module is refused', async () => {
         // Given - the violation tree
-        const result = await preset.fixture(directory('./_fixtures/violation/')).run();
+        const result = await preset.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

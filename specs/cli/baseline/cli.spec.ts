@@ -7,7 +7,7 @@ describe('cli', () => {
     test('lint — checker CLI contract — `baseline` records the project where it stands, and the next run is held by it', async () => {
         // Given - a project with one dead fixture and no ratchet, recorded then judged
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
+            .fixture(directory('../../__fixtures__/no-unused-ground/'))
             .exec(['baseline .', '.']);
 
         // Then - the family file holds the test section and its one finding, and the run it holds exits 0
@@ -20,7 +20,7 @@ describe('cli', () => {
     test('lint — checker CLI contract — `baseline` rewrites the test section and keeps the typescript section byte for byte', async () => {
         // Given - a family file holding both sections, the typescript one spelled on one line
         const result = await cli
-            .fixture(directory('../_fixtures/checker-ratchet/'))
+            .fixture(directory('../__fixtures__/checker-ratchet/'))
             .exec('baseline .');
 
         // Then - the recorded debt is the tree's, and the other package's section is untouched
@@ -33,7 +33,7 @@ describe('cli', () => {
     test('lint — checker CLI contract — a green ratchet run prints exactly the held line, and not the findings it holds', async () => {
         // Given - a project with one dead fixture, recorded, then judged
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
+            .fixture(directory('../../__fixtures__/no-unused-ground/'))
             .exec(['baseline .', '.']);
 
         // Then - the summary alone; the held finding prints only when a verdict fails
@@ -45,7 +45,7 @@ describe('cli', () => {
     test('lint — checker CLI contract — a green `--fix` run prints exactly the held line', async () => {
         // Given - a project with one dead fixture, recorded, then fixed
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
+            .fixture(directory('../../__fixtures__/no-unused-ground/'))
             .exec(['baseline .', '. --fix']);
 
         // Then - the same one line the check prints: nothing to rewrite, nothing more to say
@@ -57,7 +57,7 @@ describe('cli', () => {
     test('lint — checker CLI contract — `--verbose` adds to the held line where the run stood and what ran', async () => {
         // Given - a project with one dead fixture, recorded, then judged verbosely
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
+            .fixture(directory('../../__fixtures__/no-unused-ground/'))
             .exec(['baseline .', '. --verbose']);
 
         // Then - the held line, then the project root and every pass
@@ -72,20 +72,20 @@ describe('cli', () => {
     test('lint — checker CLI, the logs a ratchet run prints — `--format json` prints the findings on a green ratchet run too', async () => {
         // Given - a project whose one finding is recorded, judged with the JSON format
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/no-unused-ground/'))
+            .fixture(directory('../../__fixtures__/no-unused-ground/'))
             .exec(['baseline .', '. --format json']);
 
         // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            [{"column":1,"line":1,"message":"found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/reference/linting.md#no-unused-ground","path":"specs/widget/_seeds/dead.sql","rule":"jterrazz-check/no-unused-ground"}]
+            [{"column":1,"line":1,"message":"found: __seeds__/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete __seeds__/dead.sql, or name it from the test that stands on it · read: docs/reference/linting.md#no-unused-ground","path":"specs/widget/__seeds__/dead.sql","rule":"jterrazz-check/no-unused-ground"}]
         `);
     });
 
     test('lint — checker CLI, the logs a ratchet run prints — a green root member run prints exactly the held line', async () => {
         // Given - a project whose checker finding is recorded
         const result = await cli
-            .fixture(directory('../_fixtures/checker-ratchet/'))
+            .fixture(directory('../__fixtures__/checker-ratchet/'))
             .exec(['baseline .', '--member .']);
 
         // Then - one line and nothing after it: what typescript check shows on a green run

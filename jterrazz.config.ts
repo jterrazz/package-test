@@ -33,7 +33,7 @@ export default defineConfig({
                     runner: './specs/cli/literate-cli.specification.ts',
                 },
                 reason: 'the documents under run/ drive the literate specimen through its own runner, and those under env/ and fixture/ are the input of the specs proving those keys',
-                setup: ['specs/cli/_setup/packed/per-run.ts'],
+                setup: ['specs/cli/__setup__/packed/per-run.ts'],
             },
             component: {
                 clock: '2026-01-02T03:04:05.000Z',
@@ -54,22 +54,20 @@ export default defineConfig({
             },
             mobile: {
                 reason: 'the mobile specs run against an Appium double the whole run shares, unless a real server is named',
-                setup: ['specs/_shared/_setup/appium/per-run.ts'],
+                setup: ['specs/__setup__/appium/per-run.ts'],
             },
         },
     },
     typescript: {
         knip: {
             entry: {
-                'specs/cli/_setup/packed/consumer.ts':
+                'specs/cli/__setup__/packed/consumer.ts':
                     'specs/cli/packed-cli.specification.ts spawns it by its path',
-                'specs/component/wrap/providers.tsx':
-                    'the component project loads it by the path its `wrap` names',
             },
         },
         mutation: {
             exclude: {
-                'src/chain/paths/temp-root.global-setup.test.ts':
+                'src/chain/paths/__tests__/temp-root.global-setup.test.ts':
                     'the temp root is the run’s own, and cannot judge a mutant',
             },
         },

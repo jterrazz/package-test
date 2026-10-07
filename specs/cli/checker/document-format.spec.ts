@@ -7,7 +7,7 @@ describe('document-format', () => {
     test('refuses a document whose runs sit above its env', async () => {
         // Given - a document declaring runs: before env:
         const result = await cli
-            .fixture(directory('./_fixtures/document-format/keys-out-of-order/'))
+            .fixture(directory('./__fixtures__/document-format/keys-out-of-order/'))
             .exec('.');
 
         // Then - the formatter names the document, and the run fails with nothing held
@@ -20,7 +20,7 @@ describe('document-format', () => {
     test('refuses a stream written as a quoted string', async () => {
         // Given - a stdout: spelled with backslash-n escapes
         const result = await cli
-            .fixture(directory('./_fixtures/document-format/stream-quoted/'))
+            .fixture(directory('./__fixtures__/document-format/stream-quoted/'))
             .exec('.');
 
         // Then - the formatter names the document
@@ -33,7 +33,7 @@ describe('document-format', () => {
     test('writes the document in its format under --fix, and the run passes', async () => {
         // Given - the document whose runs sit above its env
         const result = await cli
-            .fixture(directory('./_fixtures/document-format/keys-out-of-order/'))
+            .fixture(directory('./__fixtures__/document-format/keys-out-of-order/'))
             .exec('. --fix');
 
         // Then - the keys stand in the canonical order, and nothing is refused
@@ -60,11 +60,11 @@ describe('document-format', () => {
     test('accepts a document in its format', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./__expected__/clean.txt'));
     });
 });

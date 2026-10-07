@@ -18,7 +18,7 @@ export const stubsImportedThroughFacade = defineRule(
         messages: {
             internal: {
                 found: 'the import "{{source}}" reaches into a stub kind folder',
-                fix: 'export a named scenario from the `_setup/stubs/*.stubs.ts` facade, and import that',
+                fix: 'export a named scenario from the `__setup__/stubs/*.stubs.ts` facade, and import that',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
@@ -34,7 +34,7 @@ export const stubsImportedThroughFacade = defineRule(
                 }),
                 before() {
                     const { inSpecs, role } = identityOf(context);
-                    // invariant: inside `_setup/stubs/` the internal half is the file's own business.
+                    // invariant: inside `__setup__/stubs/` the internal half is the file's own business.
                     return inSpecs && role !== 'stub';
                 },
             };

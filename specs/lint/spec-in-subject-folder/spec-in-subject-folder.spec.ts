@@ -6,7 +6,7 @@ import { lint as checker } from '../checker-lint.specification.js';
 describe('spec-in-subject-folder', () => {
     test('a spec of GET /orders filed under orders/list/ passes', async () => {
         // Given - the filed tree
-        const result = await checker.fixture(directory('./_fixtures/filed/')).run();
+        const result = await checker.fixture(directory('./__fixtures__/filed/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -15,7 +15,7 @@ describe('spec-in-subject-folder', () => {
     test('--fix files a command under every leading word its runner declares', async () => {
         // Given - the declared-commands tree
         const result = await checker
-            .fixture(directory('./_fixtures/declared-commands/'))
+            .fixture(directory('./__fixtures__/declared-commands/'))
             .run({ fix: true });
 
         // Then - nothing is reported
@@ -29,7 +29,7 @@ describe('spec-in-subject-folder', () => {
     test('--fix lists a collection jterrazz.config.ts declares, where no plural names it', async () => {
         // Given - the declared-collection tree
         const result = await checker
-            .fixture(directory('./_fixtures/declared-collection/'))
+            .fixture(directory('./__fixtures__/declared-collection/'))
             .run({ fix: true });
 
         // Then - nothing is reported
@@ -42,16 +42,16 @@ describe('spec-in-subject-folder', () => {
 
     test("--fix moves the spec to its subject's folder, and the ground it stands on with it", async () => {
         // Given - the moved tree
-        const result = await checker.fixture(directory('./_fixtures/moved/')).run({ fix: true });
+        const result = await checker.fixture(directory('./__fixtures__/moved/')).run({ fix: true });
 
         // Then - nothing is left to report, and the fixed tree is its golden
         expect(result.report).toMatch('');
-        await expect(result.directory()).toMatch(directory('./_expected/moved/'));
+        await expect(result.directory()).toMatch(directory('./__expected__/moved/'));
     });
 
     test('a spec of GET /orders filed anywhere but orders/list/ is refused at its first line', async () => {
         // Given - the misfiled tree
-        const result = await checker.fixture(directory('./_fixtures/misfiled/')).run();
+        const result = await checker.fixture(directory('./__fixtures__/misfiled/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

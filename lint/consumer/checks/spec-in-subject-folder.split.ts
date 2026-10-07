@@ -147,7 +147,7 @@ function importLine(read: readonly string[], types: ReadonlySet<string>, from: s
     return `import { ${names.join(', ')} } from '${from}';`;
 }
 
-/** A module already at `<folder>/_setup/<aspect>.ts` is the author's: the copies stay. */
+/** A module already at `<folder>/__setup__/<aspect>.ts` is the author's: the copies stay. */
 function withSharedHelpers(
     specsRoot: string,
     spec: SpecRead,
@@ -164,10 +164,7 @@ function withSharedHelpers(
     const folder =
         lowestCommonFolder(drafts.filter(holds).map((draft) => dirname(draft.target))) ??
         dirname(spec.file);
-    const module = join(
-        reservedFolderOf(specsRoot, folder, SETUP_FOLDER),
-        `${aspectOf(spec.file)}.ts`,
-    );
+    const module = join(reservedFolderOf(folder, SETUP_FOLDER), `${aspectOf(spec.file)}.ts`);
     if (existsSync(module)) {
         return { drafts };
     }
@@ -283,7 +280,7 @@ function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
     });
 }
 
-/** The files a split writes: one per subject, the one it opens on first, then the `_setup` module its shared helpers move to. */
+/** The files a split writes: one per subject, the one it opens on first, then the `__setup__` module its shared helpers move to. */
 export function splitFiles(specsRoot: string, spec: SpecRead, plan: Map<string, string>): Draft[] {
     const shared = withSharedHelpers(specsRoot, spec, splitDrafts(spec, plan));
     return shared.setup === undefined ? shared.drafts : [...shared.drafts, shared.setup];

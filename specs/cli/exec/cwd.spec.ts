@@ -9,7 +9,7 @@ describe('cwd', () => {
     test('a command runs in the folder of the working directory it names', async () => {
         // Given - a workspace fixture, and a command run from its member
         const result = await cli
-            .fixture(directory('./_fixtures/workspace/'))
+            .fixture(directory('./__fixtures__/workspace/'))
             .exec('here', { cwd: 'packages/site' });
 
         // Then - the binary ran in the member's folder
@@ -40,7 +40,7 @@ describe('cwd', () => {
     test('a folder the fixtures never laid is refused', async () => {
         // Given - a cwd naming a member the workspace does not hold
         const run = cli
-            .fixture(directory('./_fixtures/workspace/'))
+            .fixture(directory('./__fixtures__/workspace/'))
             .exec('here', { cwd: 'packages/absent' });
 
         // Then - refused, naming where the folder comes from

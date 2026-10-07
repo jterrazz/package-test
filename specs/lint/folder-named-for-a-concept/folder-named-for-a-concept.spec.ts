@@ -6,7 +6,7 @@ import { lint as self } from '../self-lint.specification.js';
 describe('folder-named-for-a-concept', () => {
     test('concept folders of two files, and a specification root holding its face, pass', async () => {
         // Given - the concepts tree
-        const result = await self.fixture(directory('./_fixtures/concepts/')).run();
+        const result = await self.fixture(directory('./__fixtures__/concepts/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('folder-named-for-a-concept', () => {
 
     test('a role folder, a one-file folder and a stray file at a specification root are each refused where they sit', async () => {
         // Given - the roles tree
-        const result = await self.fixture(directory('./_fixtures/roles/')).run();
+        const result = await self.fixture(directory('./__fixtures__/roles/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

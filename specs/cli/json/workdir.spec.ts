@@ -5,9 +5,9 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '__expected__');
 
-/** Git keeps no empty folder, so `_expected/` goes with its last golden. */
+/** Git keeps no empty folder, so `__expected__/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -22,7 +22,7 @@ describe('workdir', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             const result = await cli
-                .fixture(directory('../_fixtures/specimen-cli/'))
+                .fixture(directory('../__fixtures__/specimen-cli/'))
                 .exec('json-cwd');
             const { value } = result.json;
             const rawCwd =
@@ -31,7 +31,7 @@ describe('workdir', () => {
                     : '';
             vi.stubEnv('TEST_UPDATE', '1');
             try {
-                expect(result.json).toMatch(file(`./_expected/${fixtureName}`));
+                expect(result.json).toMatch(file(`./__expected__/${fixtureName}`));
             } finally {
                 vi.unstubAllEnvs();
             }
@@ -44,9 +44,9 @@ describe('workdir', () => {
 
             // Then - a second run (different cwd) matches the updated fixture
             const second = await cli
-                .fixture(directory('../_fixtures/specimen-cli/'))
+                .fixture(directory('../__fixtures__/specimen-cli/'))
                 .exec('json-cwd');
-            expect(second.json).toMatch(file(`./_expected/${fixtureName}`));
+            expect(second.json).toMatch(file(`./__expected__/${fixtureName}`));
         } finally {
             removeGolden(fixturePath);
         }

@@ -6,7 +6,7 @@ export function noTokenInRequestFindings(file: string, text: string): Spotted[] 
         path: file,
         line,
         fix: 'write the literal value the request sends — a request is sent, never matched',
-        found: `the token ${token} in a _requests/ file`,
+        found: `the token ${token} in a __requests__/ file`,
         rule: 'no-token-in-request',
     }));
 }

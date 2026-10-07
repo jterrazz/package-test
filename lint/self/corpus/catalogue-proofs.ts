@@ -40,7 +40,7 @@ export function runtimeMarkers(): Set<string> {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
             if (
                 (!path.endsWith('.spec.ts') && !path.endsWith('.test.ts')) ||
-                path.includes('_fixtures/')
+                path.includes('__fixtures__/')
             ) {
                 continue;
             }
@@ -77,21 +77,21 @@ export const e2eSpecIdsOf = (entries: readonly string[]): Set<string> =>
 export function metaProofs(specsLint: string): Set<string> {
     const found = new Set<string>();
     const sources = [
-        read('lint/self/catalogue/manifest.test.ts'),
-        read('lint/self/corpus/catalogue-rows.test.ts'),
-        read('lint/self/corpus/catalogue-proofs.test.ts'),
-        read('lint/self/corpus/coordinates.test.ts'),
-        read('lint/self/corpus/architecture.test.ts'),
-        read('lint/self/corpus/audience.test.ts'),
-        read('lint/self/corpus/env-allowlist.test.ts'),
-        read('lint/self/corpus/messages.test.ts'),
-        read('lint/self/corpus/matrix.test.ts'),
-        read('lint/self/corpus/port-readers.test.ts'),
-        read('lint/self/corpus/positions.test.ts'),
-        read('lint/self/corpus/siblings.test.ts'),
+        read('lint/self/catalogue/__tests__/manifest.test.ts'),
+        read('lint/self/corpus/__tests__/catalogue-rows.test.ts'),
+        read('lint/self/corpus/__tests__/catalogue-proofs.test.ts'),
+        read('lint/self/corpus/__tests__/coordinates.test.ts'),
+        read('lint/self/corpus/__tests__/architecture.test.ts'),
+        read('lint/self/corpus/__tests__/audience.test.ts'),
+        read('lint/self/corpus/__tests__/env-allowlist.test.ts'),
+        read('lint/self/corpus/__tests__/messages.test.ts'),
+        read('lint/self/corpus/__tests__/matrix.test.ts'),
+        read('lint/self/corpus/__tests__/port-readers.test.ts'),
+        read('lint/self/corpus/__tests__/positions.test.ts'),
+        read('lint/self/corpus/__tests__/siblings.test.ts'),
     ];
     for (const path of lintSpecEntries(specsLint)) {
-        if (path.endsWith('.test.ts') && !path.includes('_fixtures/')) {
+        if (path.endsWith('.test.ts') && !path.includes('__fixtures__/')) {
             sources.push(readFileSync(resolve(specsLint, path), 'utf8'));
         }
     }
@@ -138,7 +138,7 @@ export const citingFiles = (): string[] => {
 };
 
 const DEAD_ID_INPUT =
-    'specs/lint/checker-suppression-names-a-pass/_fixtures/checker-suppression-names-a-pass/';
+    'specs/lint/checker-suppression-names-a-pass/__fixtures__/checker-suppression-names-a-pass/';
 
 /** Comments cite too. */
 export const citingSources = (): string[] => {

@@ -92,11 +92,11 @@ describe('sending', () => {
         // Given - a body named by directory()
         // Then - the chain rejects before a request is sent: a body is one file
         // checker-disable-next-line named-path-exists -- negative spec: the refusal fires before the disk is read
-        await expect(api.post('/users', directory('./_requests/'))).rejects.toThrow(
+        await expect(api.post('/users', directory('./__requests__/'))).rejects.toThrow(
             [
-                'found: .post("/users", directory("./_requests/")), a directory where the body is one file',
+                'found: .post("/users", directory("./__requests__/")), a directory where the body is one file',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
-                'fix: name one file: .post("/users", file(\'./_requests/body.json\'))',
+                'fix: name one file: .post("/users", file(\'./__requests__/body.json\'))',
                 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
@@ -106,6 +106,8 @@ describe('sending', () => {
         // Given - reference to a nonexistent .http file
         // Then - the chain rejects with ENOENT
         // checker-disable-next-line named-path-exists -- negative spec: the missing file IS the behaviour under test
-        await expect(api.request(file('./_requests/nonexistent.http'))).rejects.toThrow('ENOENT');
+        await expect(api.request(file('./__requests__/nonexistent.http'))).rejects.toThrow(
+            'ENOENT',
+        );
     });
 });

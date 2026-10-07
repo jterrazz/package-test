@@ -1,0 +1,5 @@
+description: renders the widget over the shared stub
+fixture: ../../__fixtures__/stub/
+runs:
+    - command: widget
+      exit: 0

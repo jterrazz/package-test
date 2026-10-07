@@ -9,7 +9,7 @@ describe('one-graph-per-worker', () => {
     test('a project naming its runner shares one module graph per worker, and boots a subject for every file', async () => {
         // Given - two spec files on one worker, both importing the specification and a module it counts its loads in
         const result = await vitestCli
-            .fixture(directory('./_fixtures/one-graph/'))
+            .fixture(directory('./__fixtures__/one-graph/'))
             .env({ RUNNER })
             .exec('run --configLoader runner');
 
@@ -23,7 +23,7 @@ describe('one-graph-per-worker', () => {
     test('a project naming no runner isolates every file', async () => {
         // Given - the same two files, the project stated with no runner
         const result = await vitestCli
-            .fixture(directory('./_fixtures/one-graph/'))
+            .fixture(directory('./__fixtures__/one-graph/'))
             .exec('run --configLoader runner');
 
         // Then - each file loaded its own graph, and booted the subject once in it

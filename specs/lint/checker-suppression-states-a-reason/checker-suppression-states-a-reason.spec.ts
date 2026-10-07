@@ -7,7 +7,7 @@ describe('checker-suppression-states-a-reason', () => {
     test('rejects a checker suppression with no reason', async () => {
         // Given - a tree violating \`checker-suppression-states-a-reason\`
         const result = await checker
-            .fixture(directory('./_fixtures/checker-suppression-states-a-reason/'))
+            .fixture(directory('./__fixtures__/checker-suppression-states-a-reason/'))
             .run();
 
         // Then - the pass names the file and what to do about it
@@ -23,7 +23,7 @@ describe('checker-suppression-states-a-reason', () => {
     test('accepts a suppression that says why', async () => {
         // Given - the compliant twin
         const result = await checker
-            .fixture(directory('./_fixtures/checker-suppression-states-a-reason-ok/'))
+            .fixture(directory('./__fixtures__/checker-suppression-states-a-reason-ok/'))
             .run();
 
         // Then - nothing is reported

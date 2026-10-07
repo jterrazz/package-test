@@ -1,9 +1,4 @@
-import {
-    isGroundFolder,
-    moveKeepingHistory,
-    SHARED_FOLDER,
-    treeKind,
-} from '@jterrazz/typescript/rules';
+import { isGroundFolder, moveKeepingHistory, treeKind } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
@@ -39,14 +34,6 @@ function entryOf(specsRoot: string, target: string): Entry | undefined {
         return undefined;
     }
     return { entry, ground: join(specsRoot, ...segments.slice(0, at + 1)) };
-}
-
-function ownerOf(specsRoot: string, ground: string): string | undefined {
-    const owner = dirname(ground);
-    if (owner === specsRoot) {
-        return undefined;
-    }
-    return owner === join(specsRoot, SHARED_FOLDER) ? specsRoot : owner;
 }
 
 const WHOLE_LITERAL = /^(?:\.\/)?specs\/[^\s]*$/gu;
@@ -137,13 +124,8 @@ function misplacedGround(rootDir: string): Misplaced[] {
         );
         for (const [key, { entry, ground, leaves, referrers }] of usageUnder(specsRoot)) {
             const lowest = lowestCommonFolder([...leaves]) ?? specsRoot;
-            const owner = ownerOf(specsRoot, ground);
-            if (
-                owner === undefined ||
-                !isWithin(owner, lowest) ||
-                readOutside.has(key) ||
-                treeKind(key) === undefined
-            ) {
+            const owner = dirname(ground);
+            if (!isWithin(owner, lowest) || readOutside.has(key) || treeKind(key) === undefined) {
                 continue;
             }
             misplaced.push({

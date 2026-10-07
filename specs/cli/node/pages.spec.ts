@@ -6,7 +6,9 @@ import { cli } from '../packed-cli.specification.js';
 describe('pages', () => {
     test('every page the install points a reader at is one the install holds', async () => {
         // Given - a consumer's project, reading the README and every installed module for the pages they cite
-        const result = await cli.fixture(directory('./_fixtures/consumer/')).exec('node pages.mjs');
+        const result = await cli
+            .fixture(directory('./__fixtures__/consumer/'))
+            .exec('node pages.mjs');
 
         // Then - a diagnostic's `read:` and a README link resolve inside node_modules, where the consumer reads them
         expect(result.exitCode).toBe(0);

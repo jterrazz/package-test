@@ -1,7 +1,7 @@
 import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { stamp } from '../_fixtures/orders/stamp.js';
+import { stamp } from '../__fixtures__/orders/stamp.js';
 import { integration } from '../pure.specification.js';
 
 describe('clock', () => {
@@ -10,7 +10,7 @@ describe('clock', () => {
         const result = await integration.clock('2026-03-04T09:30:00Z').call(stamp);
 
         // Then - the stamp is that instant, not the run's
-        expect(result.value).toMatch(file('./_expected/stamped.json'));
+        expect(result.value).toMatch(file('./__expected__/stamped.json'));
     });
 
     test('a view made with() pins every call it starts', async () => {
@@ -18,7 +18,7 @@ describe('clock', () => {
         const result = await integration.with({ clock: '2026-03-04T09:30:00Z' }).call(stamp);
 
         // Then - the stamp is that instant
-        expect(result.value).toMatch(file('./_expected/stamped.json'));
+        expect(result.value).toMatch(file('./__expected__/stamped.json'));
     });
 
     test('gives the calendar back to the next chain', async () => {
@@ -27,6 +27,6 @@ describe('clock', () => {
         const result = await integration.call(stamp);
 
         // Then - the reading moved on: the pin lasted exactly one chain
-        expect(result.value).not.toMatch(file('./_expected/stamped.json'));
+        expect(result.value).not.toMatch(file('./__expected__/stamped.json'));
     });
 });

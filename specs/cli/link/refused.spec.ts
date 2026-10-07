@@ -34,10 +34,10 @@ describe('refused', () => {
 
     test('one name linked twice on one chain is refused, rather than the second silently replacing the first', () => {
         // Given - the same package linked from the same source, twice
-        const once = cli.link('@acme/greeter', directory('./_fixtures/greeter/'));
+        const once = cli.link('@acme/greeter', directory('./__fixtures__/greeter/'));
 
         // Then - the second statement is refused
-        expect(() => once.link('@acme/greeter', directory('./_fixtures/greeter/'))).toThrow(
+        expect(() => once.link('@acme/greeter', directory('./__fixtures__/greeter/'))).toThrow(
             [
                 'found: link("@acme/greeter"), stated twice on one chain',
                 'why: A name resolves to one package: a second link of it would silently replace the first.',
@@ -52,12 +52,12 @@ describe('refused', () => {
         // Then - refused, with the call to write instead
         expect(() =>
             // @ts-expect-error -- a source the types refuse, refused at run time too
-            cli.link('@acme/greeter', file('./_fixtures/greeter/package.json')),
+            cli.link('@acme/greeter', file('./__fixtures__/greeter/package.json')),
         ).toThrow(
             [
-                "found: link('@acme/greeter', file(\"./_fixtures/greeter/package.json\")), a file where a package's directory is read",
+                "found: link('@acme/greeter', file(\"./__fixtures__/greeter/package.json\")), a file where a package's directory is read",
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
-                "fix: name the package's directory: link('@acme/greeter', directory('./_fixtures/greeter/'))",
+                "fix: name the package's directory: link('@acme/greeter', directory('./__fixtures__/greeter/'))",
                 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );

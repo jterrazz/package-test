@@ -1,10 +1,10 @@
 import { postgres, redis, specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
-import { createApp } from '../_shared/_fixtures/specimen-api/app.js';
+import { createApp } from '../__fixtures__/specimen-api/app.js';
 
 export const { api, cleanup } = await specification.api({
-    root: '../_shared/_fixtures/specimen-api',
+    root: '../__fixtures__/specimen-api',
     server: ({ analyticsDb, cache, db }) =>
         createApp({
             analyticsDatabaseUrl: analyticsDb.connectionString,

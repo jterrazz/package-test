@@ -74,7 +74,8 @@ export function isProductionModule(filename: string): boolean {
     if (!SOURCE.test(filename) || materialAt(filename) !== undefined) {
         return false;
     }
-    return !TOOL_CONFIG.test(basename(filename)) && roleOf(filename).strayTestRoot === null;
+    const { inTests, strayTestRoot } = roleOf(filename);
+    return !TOOL_CONFIG.test(basename(filename)) && strayTestRoot === null && !inTests;
 }
 
 export function testPackageOf(specifier: string): string | undefined {

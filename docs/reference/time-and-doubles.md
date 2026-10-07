@@ -79,12 +79,12 @@ When a subject needs something it does not own, take the FIRST rung that fits. T
 
 **Off the ladder**, each with where to go instead:
 
-| Instead of                                       | Use                                        |
-| ------------------------------------------------ | ------------------------------------------ |
-| `vi.stubGlobal('fetch')`, `msw`, `nock`, `sinon` | `intercept()` or `.intercept()`, a stub    |
-| `vi.useFakeTimers()`, `vi.setSystemTime()`       | `clock`                                    |
-| `toMatchSnapshot()`                              | a golden, `toMatch(file('./_expected/…'))` |
-| `vi.mock()` of your own module                   | inject the port, and double it             |
+| Instead of                                       | Use                                           |
+| ------------------------------------------------ | --------------------------------------------- |
+| `vi.stubGlobal('fetch')`, `msw`, `nock`, `sinon` | `intercept()` or `.intercept()`, a stub       |
+| `vi.useFakeTimers()`, `vi.setSystemTime()`       | `clock`                                       |
+| `toMatchSnapshot()`                              | a golden, `toMatch(file('./__expected__/…'))` |
+| `vi.mock()` of your own module                   | inject the port, and double it                |
 
 A native module a project genuinely cannot inject is the one exception, allowed per specifier with a reason in the `no-module-mock` options ([Linting § Deviating from a rule](linting.md#deviating-from-a-rule)). Why the ladder is closed: [ADR-005](https://github.com/jterrazz/package-test/blob/main/docs/decisions/005-the-doubles-ladder-is-closed.md).
 
@@ -117,7 +117,7 @@ describe('checkout', () => {
 
 It is deep by default: reading a member nobody stubbed hands back another double, however far the port nests. `mockOf<Port>({ deep: false })` is the flat form — every member of the port and nothing beneath them.
 
-State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app — a class implementing the port, swapped in by the specification — is a test adapter, and lives in `_setup/<port>.adapter.ts` ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)).
+State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app — a class implementing the port, swapped in by the specification — is a test adapter, and lives in `__setup__/<port>.adapter.ts` ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)).
 
 ## Pitfalls
 

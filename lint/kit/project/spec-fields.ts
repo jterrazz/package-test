@@ -176,7 +176,7 @@ function groundOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
-/** A fixture is laid from `_fixtures/`, a file or a whole directory. */
+/** A fixture is laid from `__fixtures__/`, a file or a whole directory. */
 export function readFixtures(context: Context, node: Node | null): SpecFixture[] {
     return stringList(context, node, 'fixture:').map(({ line, value }) => {
         if (!isRelativePath(value)) {
@@ -188,7 +188,7 @@ export function readFixtures(context: Context, node: Node | null): SpecFixture[]
         }
         const found = groundOf(value);
         if (found !== GROUND_FIXTURES) {
-            const where = `./${GROUND_FIXTURES}/ beside the document, or in the ${GROUND_FIXTURES}/ of the lowest folder the leaves share (specs/_shared/${GROUND_FIXTURES}/ across specifications)`;
+            const where = `./${GROUND_FIXTURES}/ beside the document, or in the ${GROUND_FIXTURES}/ of the lowest folder the leaves share (specs/${GROUND_FIXTURES}/ across specifications)`;
             throw new SpecSyntaxError(
                 context.fileName,
                 line,

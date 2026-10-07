@@ -7,11 +7,11 @@ describe('tokens', () => {
     test('tokens match inside tree-snapshot file contents', async () => {
         // Given - a scaffold whose out/report.txt embeds a fresh uuid
         const result = await cli
-            .fixture(directory('../_fixtures/specimen-cli/'))
+            .fixture(directory('../__fixtures__/specimen-cli/'))
             .exec('scaffold-dynamic');
 
         // Then - the committed tree fixture matches via the {{uuid}} token
         expect(result.exitCode).toBe(0);
-        await expect(result.directory('out')).toMatch(directory('./_expected/dynamic-tree/'));
+        await expect(result.directory('out')).toMatch(directory('./__expected__/dynamic-tree/'));
     });
 });

@@ -7,7 +7,7 @@ describe('document-description-reads-as-a-title', () => {
     test('rejects a description that is a capitalised sentence', async () => {
         // Given - a description: starting on a capital and ending on a period
         const result = await checker
-            .fixture(directory('./_fixtures/document-description-reads-as-a-title/'))
+            .fixture(directory('./__fixtures__/document-description-reads-as-a-title/'))
             .run();
 
         // Then - the pass names the document, the line and what to write instead
@@ -28,7 +28,7 @@ describe('document-description-reads-as-a-title', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .run();
 
         // Then - nothing is reported

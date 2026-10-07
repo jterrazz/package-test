@@ -7,10 +7,10 @@ describe('no-redundant-test-dependency', () => {
     test("the React Native testing library passes where jest runs the member's tests", async () => {
         // Given - the member-workspace tree
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/member-workspace/'))
+            .fixture(directory('../../__fixtures__/member-workspace/'))
             .run({ args: '--member packages/rn-jest' });
         const next = await checker
-            .fixture(directory('../../_shared/_fixtures/member-workspace/'))
+            .fixture(directory('../../__fixtures__/member-workspace/'))
             .run({ args: '--member packages/rn-library' });
 
         // Then - nothing is reported
@@ -21,10 +21,10 @@ describe('no-redundant-test-dependency', () => {
     test('a dependency the framework carries, or a seam it replaced, is refused where declared', async () => {
         // Given - the member-workspace tree
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/member-workspace/'))
+            .fixture(directory('../../__fixtures__/member-workspace/'))
             .run({ args: '--member packages/seam-dependency' });
         const next = await checker
-            .fixture(directory('../../_shared/_fixtures/member-workspace/'))
+            .fixture(directory('../../__fixtures__/member-workspace/'))
             .run({ args: '--member apps/site/packages/nested' });
 
         // Then - each finding at its line and column, with its lesson

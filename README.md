@@ -12,7 +12,7 @@ import { api } from '../../api.specification.js';
 describe('shape', () => {
     test('lists the users the database holds', async () => {
         // Given - two users, from the seed beside the test
-        const result = await api.seed(file('./_seeds/two-users.sql')).get('/users');
+        const result = await api.seed(file('./__seeds__/two-users.sql')).get('/users');
 
         // Then - the whole response
         expect(result.response).toMatch(`

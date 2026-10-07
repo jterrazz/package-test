@@ -11,7 +11,7 @@ A terminal session that is data is written as data: one `<case>.spec.yaml` per t
 
 ## One file, one test
 
-A document is ONE test: its `description:` is the vitest title, and nothing in it lists cases. There is no `cases:` key, no `extends:` and no `kind:` — a case inheriting its given from another file is a given no reader sees, and a document describes a cli session and nothing else. What several cases share is composed visibly instead: `fixture:` takes one path or a list, applied in order, so the pool's base and the leaf's delta both stand on the line (`fixture: [../../_fixtures/shop/, ./_fixtures/sold-out/]`).
+A document is ONE test: its `description:` is the vitest title, and nothing in it lists cases. There is no `cases:` key, no `extends:` and no `kind:` — a case inheriting its given from another file is a given no reader sees, and a document describes a cli session and nothing else. What several cases share is composed visibly instead: `fixture:` takes one path or a list, applied in order, so the pool's base and the leaf's delta both stand on the line (`fixture: [../../__fixtures__/shop/, ./__fixtures__/sold-out/]`).
 
 **The assertion is the whole session**: every run's exit code and both its streams, byte for byte, `files:` for what it left on disk. Nothing here is new capability — a document is the chain's semantics in the shape of a data file an editor validates: `fixture:` is `.fixture()`, a run is `.exec()`. The keys, in their canonical order, are `description`, `fixture`, `env`, `serve`, `runs`; `description:` and `runs:` are mandatory.
 
@@ -19,18 +19,18 @@ A document is ONE test: its `description:` is the vitest title, and nothing in i
 
 `fixture:` takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [Assertions](../reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)):
 
-- **Role** — a path whose first ground folder is not `_fixtures/` is refused by the grammar, on its line, so the checker (`document-follows-its-grammar`) and the runner refuse the same document (`verb-reads-its-ground-folder`'s law, for data).
-- **Locality** — a path leaves its leaf only by climbing: into the ground of a folder that encloses it, or the specs root's shared `<specs>/_shared/_fixtures/` (`no-reach-into-sibling-ground`).
+- **Role** — a path whose first ground folder is not `__fixtures__/` is refused by the grammar, on its line, so the checker (`document-follows-its-grammar`) and the runner refuse the same document (`verb-reads-its-ground-folder`'s law, for data).
+- **Locality** — a path leaves its leaf only by climbing: into the ground of a folder that encloses it, or the specs root's shared `<specs>/__fixtures__/` (`no-reach-into-sibling-ground`).
 - **Existence** — every path names an entry git does not ignore, of the kind it names — a directory with its trailing `/`, a file without (`named-path-exists`); at run time a missing one is refused with what it resolved to.
 - **Liveness** — a fixture a document names is referenced, exactly as a `file()` literal references it (`no-unused-ground`, `ground-shared-or-inline`).
 
 ## A cli document
 
-A terminal session is already a specification: a command, its exit code, what it printed, what it left on disk. A cli document writes it as that — never under `_expected/`, which holds goldens, not scenarios.
+A terminal session is already a specification: a command, its exit code, what it printed, what it left on disk. A cli document writes it as that — never under `__expected__/`, which holds goldens, not scenarios.
 
 ```yaml
 description: refuses to guess when it is run outside the checkout
-fixture: ../../_shared/_fixtures/repositories-stub/
+fixture: ../../__fixtures__/repositories-stub/
 env:
     - frozen
     - SHOPLY_ORIGIN=http://127.0.0.1:9
@@ -53,11 +53,11 @@ runs:
 
 ### The ground
 
-| Key        | Shape                                       | Meaning                                                                                                                                                                                                                                                                                                               |
-| ---------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fixture:` | string or list                              | The two forms the chain's `file()` and `directory()` take — the trailing `/` says which: `./_fixtures/shop/` spreads a directory's contents, `./_fixtures/config.toml` copies one file under its own name; a path whose `/` disagrees with the disk is refused. Executable bits preserved. A list **layers** in order |
-| `env:`     | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                                 |
-| `serve:`   | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                                        |
+| Key        | Shape                                       | Meaning                                                                                                                                                                                                                                                                                                                     |
+| ---------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fixture:` | string or list                              | The two forms the chain's `file()` and `directory()` take — the trailing `/` says which: `./__fixtures__/shop/` spreads a directory's contents, `./__fixtures__/config.toml` copies one file under its own name; a path whose `/` disagrees with the disk is refused. Executable bits preserved. A list **layers** in order |
+| `env:`     | string or list                              | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                                       |
+| `serve:`   | string, list of strings, or `- name: { … }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                                              |
 
 The words `env:` and `serve:` name are registered once per app, in the options of `specification.cli()` — [CLI specs § Registration](cli-specs.md#registration--once-per-app).
 
@@ -148,11 +148,11 @@ test('scaffolds a shop and leaves the tree we expect', async () => {
     const result = await cli.run(file('./scaffold.spec.yaml'));
 
     // Then - one assertion the format has no vocabulary for
-    await expect(result.directory('my-shop')).toMatch(directory('./_expected/shop-scaffold/'));
+    await expect(result.directory('my-shop')).toMatch(directory('./__expected__/shop-scaffold/'));
 });
 ```
 
-`.run()` is a DOOR, not a fallback: it stays for a document whose result needs one assertion the grammar has no vocabulary for, or for a document the plugin's glob cannot collect — generated at test time, or an input under `_fixtures/` whose refusal is the subject of a negative spec. `{ frozen: true }` opts one document out of the update rewrite, the guard `toMatch(file(…), { frozen: true })` is for a golden.
+`.run()` is a DOOR, not a fallback: it stays for a document whose result needs one assertion the grammar has no vocabulary for, or for a document the plugin's glob cannot collect — generated at test time, or an input under `__fixtures__/` whose refusal is the subject of a negative spec. `{ frozen: true }` opts one document out of the update rewrite, the guard `toMatch(file(…), { frozen: true })` is for a golden.
 
 ## Failure and update
 
@@ -177,10 +177,10 @@ A document that starts wanting a conditional is a chain wearing a header. Write 
 
 ## Pitfalls
 
-- **Putting a `<case>.spec.yaml` under `_expected/`.** A document is the CASE, not a golden — it lives beside the spec it belongs to (`no-document-in-ground`).
+- **Putting a `<case>.spec.yaml` under `__expected__/`.** A document is the CASE, not a golden — it lives beside the spec it belongs to (`no-document-in-ground`).
 - **Writing a token in a `description:`, a `command:` or a `stdin:`.** Those are prose and inputs; placeholders work in what is asserted.
 - **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — it is out of [the format](#the-schema-and-the-format), and `typescript fix` rewrites it.
-- **A `fixture:` naming a golden's folder.** It reads `_fixtures/`; `./_expected/shop/` is refused on its line.
+- **A `fixture:` naming a golden's folder.** It reads `__fixtures__/`; `./__expected__/shop/` is refused on its line.
 - **Listing cases in one file, or inheriting a given.** One file is one test, and the given is visible: a list of paths layers, `extends:` does not exist.
 - **Writing an api or a job case as a document.** The format is a cli session's; an api or job case is a spec, its whole result in place — `kind:` is an unknown key.
 

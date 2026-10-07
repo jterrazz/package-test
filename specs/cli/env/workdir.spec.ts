@@ -32,7 +32,7 @@ describe('workdir', () => {
         const result = await underSymlinkedTmp(
             async () =>
                 await cli
-                    .fixture(directory('../_fixtures/specimen-cli/'))
+                    .fixture(directory('../__fixtures__/specimen-cli/'))
                     .env({ CACHE_DIR: '$WORKDIR/sub' })
                     .exec('workdir-var'),
         );

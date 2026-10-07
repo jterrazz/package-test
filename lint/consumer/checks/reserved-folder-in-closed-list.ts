@@ -4,21 +4,23 @@ import {
     GROUND_REQUESTS,
     GROUND_SEEDS,
     isGroundFolder,
-    isReservedFolder,
+    isSpecialFolder,
     PRUNED,
-    RESERVED_FOLDERS,
     SETUP_FOLDER,
-    SHARED_FOLDER,
-    UNMARKED_RESERVED,
+    SPECIAL_FOLDERS,
 } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { entriesOf } from '../../kit/project/specification-folders.js';
-import { isModuleName, isUnmarkedReserved } from '../../kit/project/specs-modules.js';
+import {
+    isModuleName,
+    isRetiredShared,
+    renamedSpecialOf,
+} from '../../kit/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-const CLOSED_LIST = RESERVED_FOLDERS.map((name) => `\`${name}/\``).join(', ');
+const CLOSED_LIST = SPECIAL_FOLDERS.map((name) => `\`${name}/\``).join(', ');
 
 function finding(rootDir: string, path: string, found: string, fix: string): Spotted {
     return {
@@ -30,40 +32,41 @@ function finding(rootDir: string, path: string, found: string, fix: string): Spo
     };
 }
 
+function shownFolder(specsRoot: string, folder: string): string {
+    const owner = relative(specsRoot, folder);
+    return owner === '' ? 'specs/' : `specs/${owner}/`;
+}
+
+/** A `_` name is the closed-list rule's; a bare name is judged here, where the tree tells a subject from a special folder spelt without its marks. */
 function judged(
     rootDir: string,
     specsRoot: string,
     folder: string,
     name: string,
 ): Spotted | undefined {
-    const atRoot = relative(specsRoot, folder) === name;
-    if ((name === SHARED_FOLDER || name === 'shared') && !atRoot) {
-        if (name === SHARED_FOLDER || isUnmarkedReserved(specsRoot, folder)) {
-            return finding(
-                rootDir,
-                folder,
-                `\`${name}/\` below the specs root`,
-                `move what it holds into the reserved folders of \`${relative(specsRoot, dirname(folder))}/\` itself — what a folder's leaves share sits in that folder's \`${SETUP_FOLDER}/\` or ground; \`${SHARED_FOLDER}/\` exists only as \`specs/${SHARED_FOLDER}/\`, for what specifications share`,
-            );
-        }
+    if (name.startsWith('_')) {
         return undefined;
     }
-    const marked = UNMARKED_RESERVED[name];
-    // Stryker disable next-line ConditionalExpression,BlockStatement: isUnmarkedReserved asks the same of the name first
-    if (marked === undefined) {
-        return undefined;
-    }
-    if (isUnmarkedReserved(specsRoot, folder)) {
+    if (isRetiredShared(specsRoot, folder)) {
         return finding(
             rootDir,
             folder,
-            `\`${name}/\`, a reserved name without its \`_\` and no subject: it holds no spec`,
-            name === 'doubles'
-                ? `move its modules into \`${SETUP_FOLDER}/\`, each test adapter named for the port it replaces (\`<port>.adapter.ts\`), and the paths that import them`
-                : `rename it \`${marked}/\`, and the paths that name it`,
+            `\`${name}/\`, a folder of what several specifications share, and no subject: it holds no spec`,
+            `move what it holds into the special folders of \`${shownFolder(specsRoot, dirname(folder))}\` itself — what the leaves of a folder share sits in that folder's \`${SETUP_FOLDER}/\` or ground, \`specs/${SETUP_FOLDER}/\` and the ground at the specs root for what specifications share`,
         );
     }
-    return undefined;
+    const renamed = renamedSpecialOf(specsRoot, folder);
+    if (renamed === undefined) {
+        return undefined;
+    }
+    return finding(
+        rootDir,
+        folder,
+        `\`${name}/\`, a special folder spelt without its marks, and no subject: it holds no spec`,
+        name === 'doubles'
+            ? `move its modules into \`${SETUP_FOLDER}/\`, each test adapter named for the port it replaces (\`<port>.adapter.ts\`), and the paths that import them`
+            : `rename it \`${renamed}/\`, and the paths that name it`,
+    );
 }
 
 const DECLARATION = /\.d\.[cm]?ts$/u;
@@ -102,8 +105,8 @@ function refusedInSetup(
         return finding(
             rootDir,
             path,
-            `\`${name}/\` inside a \`${SETUP_FOLDER}/\`, a \`_\` name outside the closed list`,
-            `drop the \`_\` and name it for what it holds — the reserved folders, ${CLOSED_LIST}, sit beside a \`${SETUP_FOLDER}/\`, never inside it`,
+            `\`${name}/\` inside a \`${SETUP_FOLDER}/\`, where every folder is the code's own`,
+            `drop the \`_\` and name it for what it holds — the special folders, ${CLOSED_LIST}, sit beside a \`${SETUP_FOLDER}/\`, never inside it`,
         );
     }
     if (isDirectory || isModuleName(name) || DECLARATION.test(name)) {
@@ -141,35 +144,23 @@ function refusedInsideSetup(place: Place, setup: string): Spotted[] {
 
 function refusedUnder(rootDir: string, specsRoot: string): Spotted[] {
     const found: Spotted[] = [];
-    const visit = (dir: string, inShared: boolean): void => {
+    const visit = (dir: string): void => {
         for (const entry of entriesOf(dir)) {
-            const path = join(dir, entry.name);
-            if (inShared && !isReservedFolder(entry.name)) {
-                found.push(
-                    finding(
-                        rootDir,
-                        path,
-                        `\`${relative(specsRoot, path)}\`, which is no reserved folder`,
-                        `\`specs/${SHARED_FOLDER}/\` holds reserved folders alone — code in \`${SHARED_FOLDER}/${SETUP_FOLDER}/\`, data in the ground folder of its role`,
-                    ),
-                );
-                continue;
-            }
             if (!entry.isDirectory() || PRUNED.has(entry.name) || isGroundFolder(entry.name)) {
                 continue;
             }
+            const path = join(dir, entry.name);
             const refused = judged(rootDir, specsRoot, path, entry.name);
             if (refused !== undefined) {
                 found.push(refused);
             } else if (entry.name === SETUP_FOLDER) {
                 found.push(...refusedInsideSetup({ rootDir, specsRoot }, path));
-            } else {
-                // invariant: a pool below the root is refused above, so only the root's is walked as one.
-                visit(path, entry.name === SHARED_FOLDER);
+            } else if (!isSpecialFolder(entry.name)) {
+                visit(path);
             }
         }
     };
-    visit(specsRoot, false);
+    visit(specsRoot);
     return found;
 }
 

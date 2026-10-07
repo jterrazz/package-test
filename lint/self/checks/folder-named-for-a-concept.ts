@@ -5,6 +5,7 @@ import {
     byPosition,
     finding,
     inGround,
+    inTestsFolder,
     listed,
     specificationOf,
 } from '../../kit/project/source.js';
@@ -31,10 +32,12 @@ const ROLE_NAMES = new Set([
 // outside: `@jterrazz/typescript` names the folder of a package's standard, whatever it holds.
 const TOOLCHAIN_FOLDERS: ReadonlySet<string> = new Set(['src/standard']);
 
-/** Ground is exempt: it is what a test stands on. */
+/** Ground and a tests folder are exempt: what a test stands on, and where it sits. */
 export function checkFolderNamedForAConcept(root: string): Spotted<SelfPassId>[] {
     const paths = listed(resolve(root, 'src'), 'src');
-    const folders = paths.filter(({ directory, path }) => directory && !inGround(path));
+    const folders = paths.filter(
+        ({ directory, path }) => directory && !inGround(path) && !inTestsFolder(path),
+    );
     const childrenOf = (folder: string): Listed[] =>
         paths.filter(({ path }) => dirname(path) === folder);
     const found = folders.flatMap(({ path }) => {
@@ -69,7 +72,9 @@ function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>
     return specifications.flatMap(({ path }) => {
         const specification = path.split('/').at(-1) ?? '';
         const children = paths.filter(({ path: entry }) => dirname(entry) === path);
-        const flat = !children.some(({ directory, path: entry }) => directory && !inGround(entry));
+        const flat = !children.some(
+            ({ directory, path: entry }) => directory && !inGround(entry) && !inTestsFolder(entry),
+        );
         const face = new Set([
             `${specification}.face.ts`,
             ...(specification === 'component' ? ['component.face.browser.ts'] : []),

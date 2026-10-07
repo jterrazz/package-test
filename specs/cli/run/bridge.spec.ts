@@ -7,7 +7,7 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { cli } from '../literate-cli.specification.js';
 
-/** Every scenario runs through both doors, the plugin and `cli.run`; the `_fixtures/` twins are deliberately wrong and kept out of the plugin's glob. */
+/** Every scenario runs through both doors, the plugin and `cli.run`; the `__fixtures__/` twins are deliberately wrong and kept out of the plugin's glob. */
 
 function scratchFile(content: string): string {
     const dir = mkdtempSync(resolve(tmpdir(), 'spec-document-'));

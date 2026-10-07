@@ -1,7 +1,7 @@
 import { http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { quoteOrder } from '../_fixtures/orders/orders.js';
+import { quoteOrder } from '../__fixtures__/orders/orders.js';
 import { integration } from '../pure.specification.js';
 
 const PRICING = 'https://pricing.spec.test';

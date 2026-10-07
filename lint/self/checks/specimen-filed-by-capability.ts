@@ -1,4 +1,4 @@
-import { SHARED_FOLDER } from '@jterrazz/typescript/rules';
+import { isSpecialFolder } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
@@ -107,7 +107,7 @@ export function checkSpecimenFiledByCapability(specsRoot: string): Spotted<SelfP
 function checkSpecimenSpecs(specsRoot: string): Spotted<SelfPassId>[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts')).flatMap((file) => {
         const [specification = ''] = relative(specsRoot, file).split(sep);
-        if (specification === SHARED_FOLDER) {
+        if (isSpecialFolder(specification)) {
             return [];
         }
         const text = readFileSync(file, 'utf8');

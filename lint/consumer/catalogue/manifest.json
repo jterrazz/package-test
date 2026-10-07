@@ -135,10 +135,10 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A specs tree DECLARES its shape through the `depth` option: `specification-domain` (the default — a test at specification/domain depth), `specification` (a test at the specification root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. In every mode, `off` included, a `*.specification.ts` sits at the ROOT of its specification — the one place a runner lives. Under `specification-domain` and `specification`, a `.spec.ts` of the api or cli specification sits as deep as its subject’s standard name — a route’s resource and action (`events/list/`), a command’s words (`db/migrate/`) — which `spec-in-subject-folder` judges. A first-level folder that is no specification — a repository suite, `surface/` or `lint/` — is judged by the same depth as a specification is. In every mode, `off` included: a directory named `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` is GROUND, and `_setup/` holds the code that prepares specs — no spec lives inside either. One exception, and only one: a reserved folder may hold CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is `test-beside-its-module`). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. `specs/_shared/` is the one folder the specs root keeps beside its specifications, holding what the specifications share, so a spec or a specification under it is refused in every mode. A first-level folder is a specification, `_shared/`, or a repository suite, which holds tests of its own — one test is enough: a module in one that is none of the three (a `support/` of helpers and mocks), a runner included, is refused in every mode, `off` included — a runner lives at the root of the specification it builds, a test helper in the `_setup/` of the lowest folder its tests share, a fixture under `specs/_shared/_fixtures/`. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a specification/domain tree — `test-beside-its-module` holds its neighbourhood.",
+            "sentence": "A specs tree DECLARES its shape through the `depth` option: `specification-domain` (the default — a test at specification/domain depth), `specification` (a test at the specification root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. In every mode, `off` included, a `*.specification.ts` sits at the ROOT of its specification — the one place a runner lives. Under `specification-domain` and `specification`, a `.spec.ts` of the api or cli specification sits as deep as its subject’s standard name — a route’s resource and action (`events/list/`), a command’s words (`db/migrate/`) — which `spec-in-subject-folder` judges. A first-level folder that is no specification — a repository suite, `surface/` or `lint/` — is judged by the same depth as a specification is. In every mode, `off` included: a directory named `__fixtures__/`, `__expected__/`, `__requests__/` or `__seeds__/` is GROUND, and `__setup__/` holds the code that prepares specs — no spec lives inside either. One exception, and only one: a special folder may hold CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there — a specs tree holds no `__tests__/`. A test with no neighbouring module, or a `*.specification.ts`, is still a violation. A first-level folder is a specification, a special folder — what the specifications share — or a repository suite, which holds tests of its own — one test is enough: a module in one that is none of the three (a `support/` of helpers and mocks), a runner included, is refused in every mode, `off` included — a runner lives at the root of the specification it builds, a test helper in the `__setup__/` of the lowest folder its tests share, a fixture under `specs/__fixtures__/`. A `.test.tsx` is out of reach: a rendered unit is specified in the `__tests__/` of its component’s folder, never in a specification/domain tree — `test-in-its-tests-folder` holds its neighbourhood.",
             "specification": "model",
             "family": "layout",
-            "fix": "Move the file to the depth the tree declares, or declare the depth the tree actually has; move a runner to its specification root, and a helper into the `_setup/` of the lowest folder its tests share.",
+            "fix": "Move the file to the depth the tree declares, or declare the depth the tree actually has; move a runner to its specification root, and a helper into the `__setup__/` of the lowest folder its tests share.",
             "name": "specs-at-declared-depth",
             "rationale": "A fixed depth makes every file's place predictable and statically checkable.",
             "reach": "specs"
@@ -146,7 +146,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "Outside `specs/**/_setup/stubs/`, an import resolving into a kind folder (`_setup/stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.",
+            "sentence": "Outside `specs/**/__setup__/stubs/`, an import resolving into a kind folder (`__setup__/stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.",
             "specification": "model",
             "family": "stubs",
             "fix": "Add a named scenario export to the facade and import that instead.",
@@ -157,7 +157,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "Inside a kind folder of `_setup/stubs/`, every `*.request.ts` — the exact request a unit matches — has a `<stem>.ts` sibling, the stem the name up to the FIRST dot (`classify-article.request.ts` → `classify-article.ts`). Orphan data is an error, reported on the orphan itself. A payload a unit serves is data, so it sits in the ground beside the `_setup/` (`_fixtures/<name>.json`), which `_setup/` never holds (`reserved-folder-in-closed-list`).",
+            "sentence": "Inside a kind folder of `__setup__/stubs/`, every `*.request.ts` — the exact request a unit matches — has a `<stem>.ts` sibling, the stem the name up to the FIRST dot (`classify-article.request.ts` → `classify-article.ts`). Orphan data is an error, reported on the orphan itself. A payload a unit serves is data, so it sits in the ground beside the `__setup__/` (`__fixtures__/<name>.json`), which `__setup__/` never holds (`reserved-folder-in-closed-list`).",
             "specification": "model",
             "family": "stubs",
             "fix": "Write the stub that matches the request, or delete the request.",
@@ -168,7 +168,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "`_requests/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.",
+            "sentence": "`__requests__/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.",
             "specification": "api",
             "family": "layout",
             "fix": "Name the file with its extension: `.http` for a whole request, the body's own format otherwise.",
@@ -179,7 +179,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "Under `specs/**/_setup/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — by name, or through a namespace import (`t.<kind>.…`), in its request, its reply or anywhere else — is an error. A kind folder is flat — a file nested below it is an error — and a folder under the root that is no kind is an error at each unit it holds; each file is judged on its own, and a file that is no module is `reserved-folder-in-closed-list`’s.",
+            "sentence": "Under `specs/**/__setup__/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — by name, or through a namespace import (`t.<kind>.…`), in its request, its reply or anywhere else — is an error. A kind folder is flat — a file nested below it is an error — and a folder under the root that is no kind is an error at each unit it holds; each file is judged on its own, and a file that is no module is `reserved-folder-in-closed-list`’s.",
             "specification": "model",
             "family": "stubs",
             "fix": "Move the file to the half it belongs to: a facade at the root, a unit under the folder of the builder it calls.",
@@ -190,7 +190,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A golden `file()`'s path carries its extension (`toMatch(file('./_expected/help.txt'))`, `'./_expected/<case>.aria.yaml'` for an ARIA tree); a golden file with no extension is an error. A tree golden is `toMatch(directory(…))`, whose path ends in `/`.",
+            "sentence": "A golden `file()`'s path carries its extension (`toMatch(file('./__expected__/help.txt'))`, `'./__expected__/<case>.aria.yaml'` for an ARIA tree); a golden file with no extension is an error. A tree golden is `toMatch(directory(…))`, whose path ends in `/`.",
             "specification": "model",
             "family": "layout",
             "fix": "Write the fixture's full name, extension included.",
@@ -201,10 +201,10 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "`_seeds/` holds `*.sql` files only; any other file is an error.",
+            "sentence": "`__seeds__/` holds `*.sql` files only; any other file is an error.",
             "specification": "model",
             "family": "services",
-            "fix": "Write the seed as SQL, or move the file to `_fixtures/` as the material it is.",
+            "fix": "Write the seed as SQL, or move the file to `__fixtures__/` as the material it is.",
             "name": "seeds-are-sql",
             "rationale": "`.seed()` carries database state only — no seed handlers, no prefix dispatch.",
             "reach": "ground"
@@ -212,12 +212,12 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "The verb and the ground folder agree: `seed()` reads `_seeds/`, `request()` and a request body (`post`/`put`) read `_requests/`, `fixture()` reads `_fixtures/`, a golden `toMatch(file|directory(…))` reads `_expected/`, and `run()` reads a document beside the test, under no ground folder — or under `_fixtures/` for a document that is an input a negative spec runs. The same four folders under the specs root's `_shared/` hold what several leaves share, so a shared seed is `<specs>/_shared/_seeds/x.sql` (`../../_shared/_seeds/x.sql`), never `<specs>/_shared/_fixtures/_seeds/x.sql` — the role folder under `_shared/` is the first ground folder the path passes through, and it is the one judged. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held to `_fixtures/` by its grammar (`document-follows-its-grammar`).",
+            "sentence": "The verb and the ground folder agree: `seed()` reads `__seeds__/`, `request()` and a request body (`post`/`put`) read `__requests__/`, `fixture()` reads `__fixtures__/`, a golden `toMatch(file|directory(…))` reads `__expected__/`, and `run()` reads a document beside the test, under no ground folder — or under `__fixtures__/` for a document that is an input a negative spec runs. The same four folders at the specs root hold what several specifications share, so a shared seed is `<specs>/__seeds__/x.sql` (`../../__seeds__/x.sql`), never `<specs>/__fixtures__/__seeds__/x.sql` — the role folder is the first ground folder the path passes through, and it is the one judged. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held to `__fixtures__/` by its grammar (`document-follows-its-grammar`).",
             "specification": "model",
             "family": "layout",
-            "fix": "Move the file into the folder its verb reads — the leaf's own, or the specs root's under `_shared/` when several leaves share it — and spell the path through it.",
+            "fix": "Move the file into the folder its verb reads — the leaf's own, or the one of the lowest folder the leaves share — the specs root's when they span specifications — and spell the path through it.",
             "name": "verb-reads-its-ground-folder",
-            "rationale": "Four reserved names are a vocabulary only if each means one thing: a seed parked in `_fixtures/` or a golden in `_requests/` makes the folder lie about what it holds, and the next reader trusts the folder.",
+            "rationale": "Four reserved names are a vocabulary only if each means one thing: a seed parked in `__fixtures__/` or a golden in `__requests__/` makes the folder lie about what it holds, and the next reader trusts the folder.",
             "reach": "tests"
         },
         {
@@ -234,7 +234,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A test file — a `.spec.ts`, a `.test.ts`, a `.test.tsx` — holds one top-level `describe`, titled with what the file is about, and every test inside it. A spec file's title is its aspect: `pagination.spec.ts` → `describe('pagination', …)`. A colocated test's is its subject, read from the module beside it (`<base>.ts`, `<base>.tsx`): the name its default export declares; else its one value export; else the value export spelling the base name in camelCase or PascalCase, or the base less its role suffix (`request.action` → `request`); else the base name — `locale-note.test.tsx` beside `export function LocaleNote` → `describe('LocaleNote', …)`. A `describe.each` names its rows, so its title starts with that name, `'pagination — page %s'`; a subject keeps its case, the `test()` preset exempting the top-level `describe` from `vitest/prefer-lowercase-title` (`ignoreTopLevelDescribe`). A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything else at the title; a file that declares no test through `describe`/`test`/`it` (a rule tester's cases, a type test) is out of reach.",
+            "sentence": "A test file — a `.spec.ts`, a `.test.ts`, a `.test.tsx` — holds one top-level `describe`, titled with what the file is about, and every test inside it. A spec file's title is its aspect: `pagination.spec.ts` → `describe('pagination', …)`. A module test's is its subject, read from the module it names — `<base>.ts`, `<base>.tsx` in the folder above its `__tests__/`, or beside a rendered unit under `specs/`: the name its default export declares; else its one value export; else the value export spelling the base name in camelCase or PascalCase, or the base less its role suffix (`request.action` → `request`); else the base name — `__tests__/locale-note.test.tsx` naming `export function LocaleNote` → `describe('LocaleNote', …)`. A `describe.each` names its rows, so its title starts with that name, `'pagination — page %s'`; a subject keeps its case, the `test()` preset exempting the top-level `describe` from `vitest/prefer-lowercase-title` (`ignoreTopLevelDescribe`). A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything else at the title; a file that declares no test through `describe`/`test`/`it` (a rule tester's cases, a type test) is out of reach.",
             "specification": "model",
             "family": "layout",
             "fix": "Title the file's one `describe` with its aspect or its subject, and put every test inside it — `typescript fix` renames a title (the title it said kept on each test, `<title> — <test>`, when the group holds tests alone; a table's by prefixing the name), wraps a file that has none, and merges several groups into one, each test titled `<group> — <test>`, when every group holds tests alone; what stands between the tests stays at module scope.",
@@ -322,7 +322,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `_setup/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest` under any local name, statically or by `await import('vitest')`, `<namespace>.expect` on a namespace of `vitest`, and `expect.soft`, `expect.poll` on either — so a method or a local of that name is not.",
+            "sentence": "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `__setup__/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest` under any local name, statically or by `await import('vitest')`, `<namespace>.expect` on a namespace of `vitest`, and `expect.soft`, `expect.poll` on either — so a method or a local of that name is not.",
             "specification": "model",
             "family": "expectations",
             "fix": "Return what the module reads, and assert it in the test that calls it.",
@@ -347,7 +347,7 @@
             "sentence": "Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch(file(…))` on it is an error. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.",
             "specification": "model",
             "family": "expectations",
-            "fix": "Golden the subject: `expect(result.stdout).toMatch(file('./_expected/<case>.txt'))`, tokens for what moves.",
+            "fix": "Golden the subject: `expect(result.stdout).toMatch(file('./__expected__/<case>.txt'))`, tokens for what moves.",
             "name": "no-probe-cluster",
             "rationale": "Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.",
             "reach": "tests"
@@ -432,7 +432,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → error: this case wants a full golden (`expect(result.response).toMatch(file('./_expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
+            "sentence": "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → error: this case wants a full golden (`expect(result.response).toMatch(file('./__expected__/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
             "specification": "api",
             "family": "expectations",
             "fix": "Assert what the response carries, not only the code it came back with.",
@@ -446,7 +446,7 @@
             "sentence": "A test file declares no simulated DOM: the `@vitest-environment happy-dom|jsdom` pragma is an error. Reach: the roles that RUN a test (`module`, `component`, `specification`) — a project config is `no-simulated-dom-in-config`’s.",
             "specification": "component",
             "family": "setup",
-            "fix": "A rendered thing is a `.test.tsx` beside its component, collected by the `component()` project.",
+            "fix": "A rendered thing is a `.test.tsx` in the `__tests__/` of its component's folder, collected by the `component()` project.",
             "name": "no-simulated-dom",
             "rationale": "A simulated DOM behaves ALMOST like a browser, and what ships is judged by a real one: the component specification renders in the Chromium the website specification already drives.",
             "reach": "tests"
@@ -487,7 +487,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a separate test root (`__tests__/`, a root `test/` or `tests/`, `test-beside-its-module`'s); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
+            "sentence": "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a `__tests__/` folder or a separate test root (a root `test/` or `tests/`, `test-in-its-tests-folder`'s); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `__fixtures__/`, `__expected__/`, `__requests__/` or `__seeds__/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, in a module's `__tests__/` as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
             "specification": "model",
             "family": "imports",
             "fix": "Move the code that needs the reference into a test, move what production needs out of the test material, or inject it as a port.",
@@ -501,7 +501,7 @@
             "sentence": "A module test touches no DOM global: `document`, `window`, `navigator`, `HTMLElement` referenced in VALUE position in a `module`-role file OUTSIDE `specs/` is an error. A name in type position (`x as HTMLElement`) and a `typeof window` guard reach no document and stay out of reach.",
             "specification": "component",
             "family": "setup",
-            "fix": "A rendered thing is a `.test.tsx` beside its component, collected by `component()`.",
+            "fix": "A rendered thing is a `.test.tsx` in the `__tests__/` of its component's folder, collected by `component()`.",
             "name": "no-dom-in-module-test",
             "rationale": "A module test runs under node, where `document` does not exist: a test asking for one is not testing a module, it is rendering something — and it now has somewhere to go.",
             "reach": "module"
@@ -509,21 +509,21 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "The test of `<file>.ts` is `<file>.test.ts` beside it; a misnamed `.test.ts`, a `__tests__/` directory or a package's `tests/` or `test/` root is an error. A RENDERED unit answers to the same law wherever it lives: a `.test.tsx` is the neighbour of the `.tsx` it renders, or of the `.ts` of the hook or DOM function whose Host it carries. A `module`-role file under a `specs/` tree is a repository suite — it covers a tree, so it has no neighbour to miss.",
+            "sentence": "The test of `<dir>/<file>.ts` is `<dir>/__tests__/<file>.test.ts` — the conventional folder of its module's folder, holding its tests, the typed data they read (`<file>.fixtures.ts`) and the ground they stand on. A module test outside a `__tests__/` is an error, the fix naming the folder it moves to; one in a `__tests__/` naming no module of the folder above it, and a package's `tests/` or `test/` root, are errors. A RENDERED unit answers to the same law: a `.test.tsx` names the `.tsx` it renders, or the `.ts` of the hook or DOM function whose Host it carries. A specs tree holds no `__tests__/`: a rendered unit under `specs/` keeps its component beside it, and a `module`-role file there is a repository suite — it covers a tree, so it names no module.",
             "specification": "model",
             "family": "layout",
-            "fix": "Put the test beside the unit it covers, under the same basename.",
-            "name": "test-beside-its-module",
+            "fix": "Move the test into the `__tests__/` of the folder of the unit it covers, under the same basename, and each relative path it imports one folder up.",
+            "name": "test-in-its-tests-folder",
             "rationale": "Neighbouring tests (parity with Go's `foo_test.go`) keep a test and its code together and discoverable.",
             "reach": "tests"
         },
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
+            "sentence": "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
             "specification": "model",
             "family": "mocks",
-            "fix": "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module as `{ module, reason }` (Module tests § Doubles).",
+            "fix": "Double the port with `mockOf<Port>()`, keep a module test's payload in a `__tests__/<file>.fixtures.ts` beside it and a spec's in `__fixtures__/`, and allow-list a native module as `{ module, reason }` (Module tests § Doubles).",
             "name": "no-module-mock",
             "rationale": "A module test that reaches for a real file or a module mock is describing an assembled product, and that has a specification of its own.",
             "reach": "tests"
@@ -591,9 +591,9 @@
             "sentence": "A test file never imports another test file.",
             "specification": "model",
             "family": "imports",
-            "fix": "Under `specs/`, move what the two read into the `_setup/` of the lowest folder they share; for a module test under `src/`, into a sibling `<file>.fixtures.ts` for typed input data.",
+            "fix": "Under `specs/`, move what the two read into the `__setup__/` of the lowest folder they share; for a module test under `src/`, into a `__tests__/<file>.fixtures.ts` for typed input data.",
             "name": "no-test-to-test-import",
-            "rationale": "Sharing between tests goes through a module that prepares them — a `_setup/` module under `specs/`, a sibling `<file>.fixtures.ts` under `src/` — not through test-to-test imports that couple the files.",
+            "rationale": "Sharing between tests goes through a module that prepares them — a `__setup__/` module under `specs/`, a `__tests__/<file>.fixtures.ts` under `src/` — not through test-to-test imports that couple the files.",
             "reach": "tests"
         },
         {
@@ -632,10 +632,10 @@
         {
             "audience": "consumer",
             "channel": "toolchain",
-            "sentence": "The specs root holds its specification folders and `_shared/` alone — a repository suite is a first-level folder too. A file directly under it that is no test, no spec, no document and no runner is an error, and so is a `_setup/` there: code every specification shares is `<specs>/_shared/_setup/`. A spec or a runner at the root is `specs-at-declared-depth`’s, and a ground folder there `no-reach-into-sibling-ground`’s.",
+            "sentence": "The specs root holds its specification folders and the special folders of what they share alone — a repository suite is a first-level folder too: code every specification shares is `<specs>/__setup__/`, data the ground at the specs root. A file directly under it that is no test, no spec, no document and no runner is an error. A spec or a runner at the root is `specs-at-declared-depth`’s, and a path into a sibling's ground `no-reach-into-sibling-ground`’s.",
             "specification": "model",
             "family": "layout",
-            "fix": "Move code into `<specs>/_shared/_setup/` — or the `_setup/` of the one specification that reads it — and data into the ground folder of its role.",
+            "fix": "Move code into `<specs>/__setup__/` — or the `__setup__/` of the one specification that reads it — and data into the ground folder of its role.",
             "name": "specs-root-holds-specifications-and-shared",
             "rationale": "The first listing a reader opens names the specifications: a helper or a data file beside them is a second kind of thing at the one level where every entry is a constructor.",
             "reach": "specs"
@@ -643,12 +643,12 @@
         {
             "audience": "consumer",
             "channel": "toolchain",
-            "sentence": "A folder under a specs tree whose name starts with `_` is one of the closed list — `_setup/`, `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`, `_shared/` — and any other `_` name is an error at the folder. What sits inside a `_setup/` or directly in `specs/_shared/` is `reserved-folder-in-closed-list`’s, and ground is never entered.",
+            "sentence": "A folder under a specs tree whose name starts with `_` is one of the closed list of special folders — `__setup__/`, `__expected__/`, `__fixtures__/`, `__requests__/`, `__seeds__/` — and any other `_` name is an error at the folder, the closed list in its fix: an unknown `__<word>__/` (`__mocks__/`, `__snapshots__/`, `__helpers__/`, `__tests__/`), a subject that starts with `_`, and an earlier spelling — `_setup/`, `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`, whose fix names its special folder, and `_shared/`, whose folders sit at the specs root now. What sits inside a `__setup__/` is `reserved-folder-in-closed-list`’s, and ground is never entered.",
             "specification": "model",
             "family": "layout",
-            "fix": "Rename the folder to the reserved name that says what it holds, and the paths that name it; drop the `_` from a subject.",
-            "name": "underscore-name-in-closed-list",
-            "rationale": "A route, a command or a job names its subject folder, so a subject can take any word: only a marker keeps the folders that are no subject from colliding with one, and only a closed list keeps the marker meaning something.",
+            "fix": "Rename the folder to the special folder that says what it holds — an earlier `_<name>/` to its `__<name>__/` — and the paths that name it; move what a `_shared/` held into the special folders at the specs root; drop the `_` from a subject.",
+            "name": "special-folder-in-closed-list",
+            "rationale": "A route, a command or a job names its subject folder, so a subject can take any word: only a marker keeps the folders that are no subject from colliding with one, and only a closed list keeps the marker meaning something — the `__<word>__/` the ecosystem already reads as no route (Jest's `__tests__/`, `__mocks__/`).",
             "reach": "specs"
         },
         {
@@ -657,7 +657,7 @@
             "sentence": "A `.spec.ts` — the ASSEMBLED product — sits under a `specs/` tree; one in any other folder is an error at the file. One at a project’s own root is `file-suffix-matches-place`’s.",
             "specification": "model",
             "family": "layout",
-            "fix": "Move it under `specs/<specification>/`, or rename it `.test.ts` beside the module it covers.",
+            "fix": "Move it under `specs/<specification>/`, or rename it `.test.ts` in the `__tests__/` of the folder of the module it covers.",
             "name": "spec-file-in-a-specs-tree",
             "rationale": "The suffix says the kind: a `.spec.ts` outside the specs tree is a spec nobody running the specifications finds, or a unit test wearing the wrong name.",
             "reach": "all"
@@ -667,10 +667,10 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A folder under a specs tree whose name starts with `_` is never a subject, and the `_` names form a closed list: `_setup/` (the TypeScript that prepares specs), `_seeds/`, `_requests/`, `_expected/`, `_fixtures/` (the ground), and `_shared/` directly under the specs root. Any other `_` name is `underscore-name-in-closed-list`’s; a `_shared/` anywhere deeper is an error, and so is an entry of `specs/_shared/` that is none of the other five. A folder with a reserved name but no `_` — `setup/`, `seeds/`, `requests/`, `expected/`, `fixtures/`, `shared/`, and `doubles/` for test adapters — is an error wherever it holds no spec, the fix naming its `_` spelling (`doubles/` → `_setup/`) — a `shared/` below the root excepted, whose fix is a `_shared/` there’s: the reserved folders of the folder that encloses it; one holding a spec is a subject (`GET /requests` files under `api/requests/list/`) and passes, except directly under the specs root, which holds no subject. Inside a `_setup/` the names are the code’s own and no bare reserved name is judged, but `_setup/` holds code alone: a ground folder in it is an error, and so is any file that is no module (`.ts`, `.tsx`, `.js`, `.mjs`, a `.d.ts` and their kin), the fix naming the ground folder of its role beside that `_setup/` — `_seeds/` for a `.sql`, `_requests/` for a `.http`, `_expected/` for what a test compares against, `_fixtures/` for any other input. Ground is never entered: what a fixture holds is its own.",
+            "sentence": "A folder under a specs tree whose name starts with `_` is never a subject, and the special folders form a closed list: `__setup__/` (the TypeScript that prepares specs), `__seeds__/`, `__requests__/`, `__expected__/`, `__fixtures__/` (the ground) — at the specs root, they hold what the specifications share, as a folder's hold what its leaves share. Any other `_` name is `special-folder-in-closed-list`’s. A folder with a special name but no marks — `setup/`, `seeds/`, `requests/`, `expected/`, `fixtures/`, and `doubles/` for test adapters — is an error wherever it holds no spec, the fix naming its special folder (`doubles/` → `__setup__/`), and so is a `shared/`, whose fix is the special folders of the folder that encloses it; one holding a spec is a subject (`GET /requests` files under `api/requests/list/`) and passes, except directly under the specs root, which holds no subject. Inside a `__setup__/` the names are the code’s own and no bare reserved name is judged, but `__setup__/` holds code alone: a ground folder in it is an error, and so is any file that is no module (`.ts`, `.tsx`, `.js`, `.mjs`, a `.d.ts` and their kin), the fix naming the ground folder of its role beside that `__setup__/` — `__seeds__/` for a `.sql`, `__requests__/` for a `.http`, `__expected__/` for what a test compares against, `__fixtures__/` for any other input. Ground is never entered: what a fixture holds is its own.",
             "specification": "model",
             "family": "layout",
-            "fix": "Rename the folder to the reserved name that says what it holds, and the paths that name it; drop the `_` from a subject.",
+            "fix": "Rename the folder to the special folder that says what it holds, and the paths that name it; move what a `shared/` holds into the special folders of the folder that encloses it.",
             "name": "reserved-folder-in-closed-list",
             "rationale": "A route, a command or a job names its subject folder, so a subject can take any word: only a marker keeps the folders that are no subject from colliding with one, and only a closed list keeps the marker meaning something.",
             "reach": "specs"
@@ -678,10 +678,10 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "Under a specs tree, a module — `.ts`, `.tsx`, `.js`, `.mjs` and their kin — that is no spec (`*.spec.ts`), no test (`*.test.ts`, `*.test.tsx`) and no runner (`*.specification.ts`) sits under a `_setup/`: a test adapter, a shared value, a helper, a stub facade and its kind folders (`_setup/stubs/`). Ground is out of reach, and so is a rendered unit — the `.tsx`, or the `.ts` of a hook — beside the `*.test.tsx` of the same name that renders it (`test-beside-its-module`): it is that test’s subject, not code that prepares it. A `*.fixtures.ts` is an error anywhere under the tree, `_setup/` included: a fixture is input data — a file in `_fixtures/` — so a module that prepares specs is named for what it holds. A file directly at the specs root is `specs-root-holds-specifications-and-shared`’s.",
+            "sentence": "Under a specs tree, a module — `.ts`, `.tsx`, `.js`, `.mjs` and their kin — that is no spec (`*.spec.ts`), no test (`*.test.ts`, `*.test.tsx`) and no runner (`*.specification.ts`) sits under a `__setup__/`: a test adapter, a shared value, a helper, a stub facade and its kind folders (`__setup__/stubs/`). Ground is out of reach, and so is a rendered unit — the `.tsx`, or the `.ts` of a hook — beside the `*.test.tsx` of the same name that renders it (`test-in-its-tests-folder`): it is that test’s subject, not code that prepares it. A `*.fixtures.ts` is an error anywhere under the tree, `__setup__/` included: a fixture is input data — a file in `__fixtures__/` — so a module that prepares specs is named for what it holds. A file directly at the specs root is `specs-root-holds-specifications-and-shared`’s.",
             "specification": "model",
             "family": "layout",
-            "fix": "Move the module into the `_setup/` of the lowest folder its readers share, named for what it holds, and the paths that import it.",
+            "fix": "Move the module into the `__setup__/` of the lowest folder its readers share, named for what it holds, and the paths that import it.",
             "name": "spec-code-in-setup-folder",
             "rationale": "A spec folder holds specs, and a reader listing it expects questions asked of the subject: code beside them is a second kind of file mixed in, and a module called `fixtures` promises data it does not hold.",
             "reach": "specs"
@@ -689,10 +689,10 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A `_setup/` module sits in the `_setup/` of the LOWEST folder every module importing it shares — the law ground follows (`ground-shared-or-inline`), read on imports: a reader is any module of the tree importing it by a relative path or a `package.json` `imports` alias, and a reader inside a `_setup/` counts as the folder that `_setup/` belongs to. Readers meeting only at the specs root share `<specs>/_shared/_setup/`. A module one spec or test file alone imports is an error at the module: it belongs in that file, written in place — unless the two together would pass the 400 lines `spec-file-within-line-limit` holds a spec to, and then it stays a file in its reader’s `_setup/`, and a module under `stubs/` excepted, since a stub is imported through its facade. A module no module of the tree imports is out of this check’s reach and knip’s to report, as an unused file: a config may name it (a vitest `setupFiles` entry), which no import shows. Fixed by `typescript fix`: a module off its readers’ lowest folder moves to that folder’s `_setup/` — a `git mv` in a work tree — its own relative literals and every importer’s path to it rewritten; one a reader reaches through an `imports` alias is left where it is, since the alias is the package’s to rewrite; one a single spec reads is written into that spec by its author.",
+            "sentence": "A `__setup__/` module sits in the `__setup__/` of the LOWEST folder every module importing it shares — the law ground follows (`ground-shared-or-inline`), read on imports: a reader is any module of the tree importing it by a relative path or a `package.json` `imports` alias, and a reader inside a `__setup__/` counts as the folder that `__setup__/` belongs to. Readers meeting only at the specs root share `<specs>/__setup__/`. A module one spec or test file alone imports is an error at the module: it belongs in that file, written in place — unless the two together would pass the 400 lines `spec-file-within-line-limit` holds a spec to, and then it stays a file in its reader’s `__setup__/`, and a module under `stubs/` excepted, since a stub is imported through its facade. A module no module of the tree imports is out of this check’s reach and knip’s to report, as an unused file: a config may name it (a vitest `setupFiles` entry), which no import shows. Fixed by `typescript fix`: a module off its readers’ lowest folder moves to that folder’s `__setup__/` — a `git mv` in a work tree — its own relative literals and every importer’s path to it rewritten; one a reader reaches through an `imports` alias is left where it is, since the alias is the package’s to rewrite; one a single spec reads is written into that spec by its author.",
             "specification": "model",
             "family": "layout",
-            "fix": "Run `typescript fix`, which moves it to the `_setup/` the finding names and rewrites the paths that import it — or write it in its one reader.",
+            "fix": "Run `typescript fix`, which moves it to the `__setup__/` the finding names and rewrites the paths that import it — or write it in its one reader.",
             "name": "setup-module-at-lowest-common-folder",
             "rationale": "Where shared code sits says who shares it: a helper parked above its readers reads as everyone’s and one parked beside one of them reads as that leaf’s, so the reader cannot trust the folder to tell them what a change reaches.",
             "reach": "specs"
@@ -700,7 +700,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A `_setup/` module whose class `implements` a type it imports from outside the specs tree — the application’s port — is a test adapter, and its file is named for that port: `<port>.adapter.ts`, the port’s name kebab-cased with a trailing `Port` dropped (`TickerSourcePort` → `ticker-source.adapter.ts`); the class keeps whatever name it has. Where a module’s classes implement several ports, any one of their names passes. A double built otherwise — an object literal, a class extending the adapter it replaces — is out of reach, and review names it.",
+            "sentence": "A `__setup__/` module whose class `implements` a type it imports from outside the specs tree — the application’s port — is a test adapter, and its file is named for that port: `<port>.adapter.ts`, the port’s name kebab-cased with a trailing `Port` dropped (`TickerSourcePort` → `ticker-source.adapter.ts`); the class keeps whatever name it has. Where a module’s classes implement several ports, any one of their names passes. A double built otherwise — an object literal, a class extending the adapter it replaces — is out of reach, and review names it.",
             "specification": "model",
             "family": "layout",
             "fix": "Rename the file `<port>.adapter.ts` for the port its class implements, and the paths that import it.",
@@ -711,7 +711,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A `<case>.spec.yaml` is a SPEC, not ground: a document under `_expected/`, `_requests/`, `_seeds/` or `_fixtures/` is an error.",
+            "sentence": "A `<case>.spec.yaml` is a SPEC, not ground: a document under `__expected__/`, `__requests__/`, `__seeds__/` or `__fixtures__/` is an error.",
             "specification": "cli",
             "family": "layout",
             "fix": "Move the document beside the test that runs it.",
@@ -722,12 +722,12 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A test under `specs/<specification>/`, where the specification root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder is a spec, a `.test.ts` under `_expected/` being the GOLDEN a fixer writes. So is any first-level folder that is not a specification: a specification with no module to sit beside and no runner to reach lives in a repository suite there.",
+            "sentence": "A test under `specs/<specification>/`, where the specification root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a `__fixtures__/`, `__expected__/`, `__requests__/` or `__seeds__/` folder is a spec, a `.test.ts` under `__expected__/` being the GOLDEN a fixer writes. So is any first-level folder that is not a specification: a specification with no module to sit beside and no runner to reach lives in a repository suite there.",
             "specification": "model",
             "family": "layout",
-            "fix": "Import `{ <specification> }` from `<specification>.specification.js`, move a module test beside its module, or move a repository suite to a first-level folder of its own under `specs/`.",
+            "fix": "Import `{ <specification> }` from `<specification>.specification.js`, move a module test into the `__tests__/` of its module's folder, or move a repository suite to a first-level folder of its own under `specs/`.",
             "name": "specification-test-uses-its-runner",
-            "rationale": "A test reaching no runner under a specification is a module test paying the specification's budget and services to prove something that belongs beside its module.",
+            "rationale": "A test reaching no runner under a specification is a module test paying the specification's budget and services to prove something that belongs in its module's `__tests__/`.",
             "reach": "specs"
         },
         {
@@ -744,7 +744,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A `_seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
+            "sentence": "A `__seeds__/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
             "specification": "model",
             "family": "services",
             "fix": "Write the instant the case is about, and pin the run's clock with `.clock()` on the chain.",
@@ -810,7 +810,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "Every `{{token}}` in an `_expected/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.",
+            "sentence": "Every `{{token}}` in an `__expected__/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.",
             "specification": "model",
             "family": "expectations",
             "fix": "Write a token the grammar knows; the message prints the full list.",
@@ -821,7 +821,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `_expected/` is an error.",
+            "sentence": "A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `__expected__/` is an error.",
             "specification": "model",
             "family": "expectations",
             "fix": "Write `{{kind#name}}` with no space, and a name for the ref.",
@@ -832,7 +832,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `_requests/`, a status line (`HTTP/1.1 <status>`) under `_expected/`.",
+            "sentence": "The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `__requests__/`, a status line (`HTTP/1.1 <status>`) under `__expected__/`.",
             "specification": "api",
             "family": "expectations",
             "fix": "Write the opening line the folder calls for, or move the file to the other one.",
@@ -843,7 +843,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A `<case>.spec.yaml` document follows its grammar: closed keys — `description`, `fixture`, `env`, `serve`, `runs` — and closed keys inside a run; `description:` and `runs:` required; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every `fixture:` path relative, reaching `_fixtures/`.",
+            "sentence": "A `<case>.spec.yaml` document follows its grammar: closed keys — `description`, `fixture`, `env`, `serve`, `runs` — and closed keys inside a run; `description:` and `runs:` required; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every `fixture:` path relative, reaching `__fixtures__/`.",
             "specification": "cli",
             "family": "expectations",
             "fix": "Write the key the grammar names; the message prints the accepted set.",
@@ -854,10 +854,10 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<specification>/`: one at a project’s own root is an error here, one in any folder `spec-file-in-a-specs-tree`’s. A `.test.ts` — the UNIT — lives beside its module; under a specification folder (<specifications>) it is an error, fixable by `typescript fix` (a `git mv`). A `.test.ts` that reaches no runner is `specification-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a specification is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one specification’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.",
+            "sentence": "The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<specification>/`: one at a project’s own root is an error here, one in any folder `spec-file-in-a-specs-tree`’s. A `.test.ts` — the UNIT — lives in the `__tests__/` of its module's folder; under a specification folder (<specifications>) it is an error, fixable by `typescript fix` (a `git mv`). A `.test.ts` that reaches no runner is `specification-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a specification is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one specification’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.",
             "specification": "model",
             "family": "layout",
-            "fix": "Move the `.spec.ts` under `specs/<specification>/` (or rename it `.test.ts` beside its module); rename the specification `.test.ts` to `.spec.ts` — `typescript fix` does it with `git mv`, and names every `include`/`exclude` entry of the member the rename broke.",
+            "fix": "Move the `.spec.ts` under `specs/<specification>/` (or rename it `.test.ts` in the `__tests__/` of its module's folder); rename the specification `.test.ts` to `.spec.ts` — `typescript fix` does it with `git mv`, and names every `include`/`exclude` entry of the member the rename broke.",
             "name": "file-suffix-matches-place",
             "rationale": "With no agreement between the suffix and the tree, a reader cannot say what a test proves without opening it; and the filename is the first sentence they read — `rm/rm.spec.yaml` says nothing twice.",
             "reach": "specs"
@@ -887,7 +887,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `_expected/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `_fixtures/` is excluded before it is judged.",
+            "sentence": "No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `__expected__/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `__fixtures__/` is excluded before it is judged.",
             "specification": "cli",
             "family": "expectations",
             "fix": "Write the token the message names — `{{workdir}}`, `{{url}}` — in place of the literal.",
@@ -898,7 +898,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion the Conventions page carries.",
+            "sentence": "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `__fixtures__/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `__expected__/` the same class waits for `no-unseeded-value-in-golden`, whose criterion the Conventions page carries.",
             "specification": "cli",
             "family": "expectations",
             "fix": "Token it, or seed it — a value the document pins is a value it may assert.",
@@ -942,7 +942,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A known token in a file under `_requests/` → error: requests are inputs, never matched.",
+            "sentence": "A known token in a file under `__requests__/` → error: requests are inputs, never matched.",
             "specification": "api",
             "family": "expectations",
             "fix": "Write the literal value the request actually sends.",
@@ -953,7 +953,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "No dead fixtures: every file under `_seeds/`/`_requests/`/`_fixtures/` and every top-level entry of `_expected/` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under `<specs>/_shared/`; a folder holding ground with no test file and no `*.spec.yaml` at or below it is an orphan. A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./_seeds/x.sql` in a leaf vouches for that leaf's `_seeds/x.sql`, and not for `<specs>/_shared/_seeds/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
+            "sentence": "No dead fixtures: every file under `__seeds__/`/`__requests__/`/`__fixtures__/` and every top-level entry of `__expected__/` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no `*.spec.yaml` at or below it is an orphan. A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./__seeds__/x.sql` in a leaf vouches for that leaf's `__seeds__/x.sql`, and not for `<specs>/__seeds__/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
             "specification": "model",
             "family": "layout",
             "fix": "Reference it from the spec it stands under, or delete it.",
@@ -964,7 +964,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A ground file exists only if it is shared, and a value lives in a test only while it stays short. The checker counts the TESTS that read each file of the specs trees — a `test()`/`it()` whose body names it with a literal `file()`/`directory()`, a document — and judges its level. Read by ONE test, and named by no module test of the member, a file of `_expected/` or `_requests/` is an error where the test names it: it belongs in the test, written in place — a golden as the value `toMatch` compares, a request as its text or its body value — unless it is a directory tree, a binary file, or longer than its role's cap: 30 lines for `_requests/`, 150 for `_expected/` (a JSON file counted as the value it becomes). The caps hold the other way too: a request or a body written in the test past 30 lines, an expectation past 150, is an error where it is written, and belongs in a file beside the test. `_seeds/` has no form in place — SQL is never written in a test, and SQL tagged in one is an error where the tag stands: a seed is a `.sql` file, beside its test in `./_seeds/` when one test reads it, never an error for being unshared. `_fixtures/` is file state a program reads, never a value, and stays a file. Read by several tests, a file lives in the ground of the LOWEST folder its readers share, the law `setup-module-at-lowest-common-folder` holds code to: beside them when they are one leaf's, in `events/_seeds/` when `events/list/` and `events/get/` read it, in a route's own when the route and the routes under it read it (`map/pois/` and `map/pois/detail/`), and in the specs root's shared ground (`<specs>/_shared/_seeds/`, …) only when they meet at the root, across specifications. An entry kept above that folder — a pool entry one specification alone reaches among them — is an error where it sits, and belongs in that folder's ground of the same role — and every reader counts where it stands: a test at its folder, a runner at its specification root, a `_setup/` module at the folder that owns that `_setup/`. Only a reader outside the specs tree keeps an entry where it is whatever the specs say: a module test of the member, by a relative literal, the literal pieces `named-path-exists` reads or a whole literal spelled from the member root (`'specs/…'`), and the member's Makefile or vitest config, by a path spelled from that root. `no-reach-into-sibling-ground` refuses the path that leaves a leaf for a sibling's, and `no-duplicate-ground` finds copies. A reference outside every test — a `const` of the file, a specification, a helper — counts as shared, and zero references is `no-unused-ground`'s. Fixed by `typescript fix`: SQL a test holds is written to `./_seeds/<name>.sql` beside it — named by its first `--` comment, kebab-cased, else by the first four meaningful words of its test's title — and named with `file()`; a value past its cap is written to `./_requests/` or `./_expected/` beside its test, named by the test's title, and named with `file()` — never one a plain value is compared to (`expect(message).toMatch(…)`, a name or a string literal as the subject): a string has no golden, and the finding names `text()` to wrap it with; a single-use file whose one reference is a literal `file()` handed to `.request(`, `.post(`/`.put(` or `toMatch(` is written in place and deleted (a `file` import no longer used dropped, an emptied ground folder removed); an entry kept above the lowest folder its readers share is moved into that folder's ground (a `git mv` in a work tree) and the literals rewritten from each referrer.",
+            "sentence": "A ground file exists only if it is shared, and a value lives in a test only while it stays short. The checker counts the TESTS that read each file of the specs trees — a `test()`/`it()` whose body names it with a literal `file()`/`directory()`, a document — and judges its level. Read by ONE test, and named by no module test of the member, a file of `__expected__/` or `__requests__/` is an error where the test names it: it belongs in the test, written in place — a golden as the value `toMatch` compares, a request as its text or its body value — unless it is a directory tree, a binary file, or longer than its role's cap: 30 lines for `__requests__/`, 150 for `__expected__/` (a JSON file counted as the value it becomes). The caps hold the other way too: a request or a body written in the test past 30 lines, an expectation past 150, is an error where it is written, and belongs in a file beside the test. `__seeds__/` has no form in place — SQL is never written in a test, and SQL tagged in one is an error where the tag stands: a seed is a `.sql` file, beside its test in `./__seeds__/` when one test reads it, never an error for being unshared. `__fixtures__/` is file state a program reads, never a value, and stays a file. Read by several tests, a file lives in the ground of the LOWEST folder its readers share, the law `setup-module-at-lowest-common-folder` holds code to: beside them when they are one leaf's, in `events/__seeds__/` when `events/list/` and `events/get/` read it, in a route's own when the route and the routes under it read it (`map/pois/` and `map/pois/detail/`), and in the specs root's shared ground (`<specs>/__seeds__/`, …) only when they meet at the root, across specifications. An entry kept above that folder — a pool entry one specification alone reaches among them — is an error where it sits, and belongs in that folder's ground of the same role — and every reader counts where it stands: a test at its folder, a runner at its specification root, a `__setup__/` module at the folder that owns that `__setup__/`. Only a reader outside the specs tree keeps an entry where it is whatever the specs say: a module test of the member, by a relative literal, the literal pieces `named-path-exists` reads or a whole literal spelled from the member root (`'specs/…'`), and the member's Makefile or vitest config, by a path spelled from that root. `no-reach-into-sibling-ground` refuses the path that leaves a leaf for a sibling's, and `no-duplicate-ground` finds copies. A reference outside every test — a `const` of the file, a specification, a helper — counts as shared, and zero references is `no-unused-ground`'s. Fixed by `typescript fix`: SQL a test holds is written to `./__seeds__/<name>.sql` beside it — named by its first `--` comment, kebab-cased, else by the first four meaningful words of its test's title — and named with `file()`; a value past its cap is written to `./__requests__/` or `./__expected__/` beside its test, named by the test's title, and named with `file()` — never one a plain value is compared to (`expect(message).toMatch(…)`, a name or a string literal as the subject): a string has no golden, and the finding names `text()` to wrap it with; a single-use file whose one reference is a literal `file()` handed to `.request(`, `.post(`/`.put(` or `toMatch(` is written in place and deleted (a `file` import no longer used dropped, an emptied ground folder removed); an entry kept above the lowest folder its readers share is moved into that folder's ground (a `git mv` in a work tree) and the literals rewritten from each referrer.",
             "specification": "model",
             "family": "layout",
             "fix": "Run `typescript fix`: it writes SQL and a value past its cap to a file beside the test, writes a single-use file into its one test and deletes it, and moves an entry kept above its readers down to the lowest folder they share. A test whose subject IS the file form keeps it, with a reasoned `checker-disable-next-line ground-shared-or-inline`.",
@@ -975,7 +975,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (`GET /events/:id`, the request line of a `.http` a `.request(file())` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens. A file reaching several is an error at the first chain that reaches a second. Fixed by `typescript fix`: each test goes to the file of its subject — the subject’s standard folder under the specification, as `spec-in-subject-folder` names it, the file keeping its aspect’s name; beside the file, named for the subject, where the subject has none — keeping the imports and the file-level declarations it reads, and a hook (`beforeEach`, `afterEach`, …) only where the file’s tests read what it sets or clears — a declaration two of the new files read, and every declaration it reads in turn — a type alias or an interface among them — moves once into a module of the `_setup/` of the lowest folder they share, named for the aspect of the file it came from (`<folder>/_setup/<aspect>.ts`, `<specs>/_shared/_setup/` when they meet at the root), exported and imported by each, unless it builds a `file()` or a `directory()` (`paths-named-in-the-test`) or the module already exists, and then it stays copied; the paths the code names keep pointing where they pointed, and the old leaf’s ground another leaf reads goes to the ground of the lowest folder its readers share (`<specs>/_shared/<role>/` when they span specifications), a module test’s relative literal naming it following. A test whose own chains reach two subjects is reported and left. A spec of a SPECIMEN is out of reach — one whose runner drives an app under a `_fixtures/` — its specification’s or the pool’s — its specification module (or the one that module imports a runner from) naming it in a literal: its routes, jobs and commands are no subject of the project.",
+            "sentence": "Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (`GET /events/:id`, the request line of a `.http` a `.request(file())` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens. A file reaching several is an error at the first chain that reaches a second. Fixed by `typescript fix`: each test goes to the file of its subject — the subject’s standard folder under the specification, as `spec-in-subject-folder` names it, the file keeping its aspect’s name; beside the file, named for the subject, where the subject has none — keeping the imports and the file-level declarations it reads, and a hook (`beforeEach`, `afterEach`, …) only where the file’s tests read what it sets or clears — a declaration two of the new files read, and every declaration it reads in turn — a type alias or an interface among them — moves once into a module of the `__setup__/` of the lowest folder they share, named for the aspect of the file it came from (`<folder>/__setup__/<aspect>.ts`, `<specs>/__setup__/` when they meet at the root), exported and imported by each, unless it builds a `file()` or a `directory()` (`paths-named-in-the-test`) or the module already exists, and then it stays copied; the paths the code names keep pointing where they pointed, and the old leaf’s ground another leaf reads goes to the ground of the lowest folder its readers share (`<specs>/<role>/` when they span specifications), a module test’s relative literal naming it following. A test whose own chains reach two subjects is reported and left. A spec of a SPECIMEN is out of reach — one whose runner drives an app under a `__fixtures__/` — its specification’s or the pool’s — its specification module (or the one that module imports a runner from) naming it in a literal: its routes, jobs and commands are no subject of the project.",
             "specification": "model",
             "family": "layout",
             "fix": "Run `typescript fix`: it splits the file, one per subject. A test reaching two subjects states what it stands on with a seed instead of a second action.",
@@ -997,7 +997,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (`events/_seeds/<name>` for `events/list/` and `events/get/`, `<specs>/_shared/_seeds/<name>` across specifications), named by the path that climbs to it. Fixed by `typescript fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every whole relative literal that named a copy rewritten — a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the copy has moved. Copies of several names, and a ground already holding the name with other content, are left to the author.",
+            "sentence": "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (`events/__seeds__/<name>` for `events/list/` and `events/get/`, `<specs>/__seeds__/<name>` across specifications), named by the path that climbs to it. Fixed by `typescript fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every whole relative literal that named a copy rewritten — a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the copy has moved. Copies of several names, and a ground already holding the name with other content, are left to the author.",
             "specification": "model",
             "family": "layout",
             "fix": "Run `typescript fix`, or keep the copies apart on purpose and record them in the ratchet.",
@@ -1008,10 +1008,10 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A path leaves its leaf only by climbing: into the ground of a folder that encloses it, or into the specs root's shared ground, `<specs>/_shared/<role>/`. A path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory, nor under one of `<specs>/_shared/_fixtures/`, `<specs>/_shared/_seeds/`, `<specs>/_shared/_requests/`, `<specs>/_shared/_expected/` — the four roles under the one folder the specs root keeps beside its specifications — nor under the four of a folder above it (`map/pois/detail/` reads `../_seeds/` of `map/pois/`, and `events/list/` and `events/get/` read `../_seeds/` of `events/`), is an error; ground shared by several leaves goes to the lowest folder they share, in the folder of its role (`verb-reads-its-ground-folder` judges which, `ground-shared-or-inline` which folder). A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too. A role folder at the specs root itself (`<specs>/_seeds/`) is shared ground outside `_shared/`, an error at the folder; fixed by `typescript fix`, which moves each entry into `<specs>/_shared/<role>/` — a `git mv` in a work tree — and rewrites every whole relative literal that named it: a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the entry has moved (an entry `_shared/` already holds by that name stays, for the author).",
+            "sentence": "A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included — `<specs>/<role>/`, what the specifications share. A path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory, nor under one of `<specs>/__fixtures__/`, `<specs>/__seeds__/`, `<specs>/__requests__/`, `<specs>/__expected__/` — the four roles the specs root keeps beside its specifications — nor under the four of a folder above it (`map/pois/detail/` reads `../__seeds__/` of `map/pois/`, and `events/list/` and `events/get/` read `../__seeds__/` of `events/`), is an error; ground shared by several leaves goes to the lowest folder they share, in the folder of its role (`verb-reads-its-ground-folder` judges which, `ground-shared-or-inline` which folder). A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too.",
             "specification": "model",
             "family": "layout",
-            "fix": "Copy it under this leaf's own ground, or move it to the ground of the lowest folder the leaves share — `<specs>/_shared/<role>/` when they span specifications; `typescript fix` moves a role folder at the specs root into `<specs>/_shared/`.",
+            "fix": "Copy it under this leaf's own ground, or move it to the ground of the lowest folder the leaves share — `<specs>/<role>/` when they span specifications.",
             "name": "no-reach-into-sibling-ground",
             "rationale": "A leaf reaching into a neighbour's fixtures is the pool through another door, without the pool's visibility: the neighbour breaks a spec two folders away without knowing.",
             "reach": "ground"
@@ -1019,7 +1019,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every path a document's `fixture:` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. So does a path a test resolves from its own directory with literal pieces alone — `resolve(import.meta.dirname, …)`, `join(…)` alike, `__dirname` alike, `new URL('…', import.meta.url)` — of either kind: several pieces are read joined (`resolve(import.meta.dirname, '..', '_fixtures', 'gone')`), one piece only when it is spelled `./` or `../`, as a `file()` is — a lone bare piece (`resolve(import.meta.dirname, '_expected')`) is an output folder a test makes as often as a path it reads, and is not read. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed piece leaves its whole path out of reach, as a computed path is, a path spelled into a command a process runs is the author's, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
+            "sentence": "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test in its `__tests__/` alike — and every path a document's `fixture:` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. So does a path a test resolves from its own directory with literal pieces alone — `resolve(import.meta.dirname, …)`, `join(…)` alike, `__dirname` alike, `new URL('…', import.meta.url)` — of either kind: several pieces are read joined (`resolve(import.meta.dirname, '..', '__fixtures__', 'gone')`), one piece only when it is spelled `./` or `../`, as a `file()` is — a lone bare piece (`resolve(import.meta.dirname, '__expected__')`) is an output folder a test makes as often as a path it reads, and is not read. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed piece leaves its whole path out of reach, as a computed path is, a path spelled into a command a process runs is the author's, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
             "specification": "model",
             "family": "layout",
             "fix": "Create the entry (out of `.gitignore`), or fix the path — the message names what it resolved to.",
@@ -1030,12 +1030,12 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "One word per meaning: a folder named `snapshots/`, `__snapshots__/`, `golden/` or `goldens/` is an error anywhere in a member when a test would stand on it — any such folder under `specs/`, and elsewhere one that holds no module of code (a `goldens/` folder of matcher source is named for what its code does). What it would hold is what a test asserts, and that is `_expected/`. Ground is not entered: a fixture project may carry the word on purpose.",
+            "sentence": "One word per meaning: a folder named `snapshots/`, `__snapshots__/`, `golden/` or `goldens/` is an error anywhere in a member when a test would stand on it — any such folder under `specs/`, and elsewhere one that holds no module of code (a `goldens/` folder of matcher source is named for what its code does). What it would hold is what a test asserts, and that is `__expected__/`. Ground is not entered: a fixture project may carry the word on purpose.",
             "specification": "model",
             "family": "layout",
-            "fix": "Rename the folder `_expected/`, and the paths that name it.",
+            "fix": "Rename the folder `__expected__/`, and the paths that name it.",
             "name": "no-snapshot-folder",
-            "rationale": "Four reserved names are a vocabulary only while nobody adds a fifth: a second word for the goldens is a second place a reader has to look, and the rules that read `_expected/` never see it.",
+            "rationale": "Four reserved names are a vocabulary only while nobody adds a fifth: a second word for the goldens is a second place a reader has to look, and the rules that read `__expected__/` never see it.",
             "reach": "all"
         },
         {
@@ -1076,10 +1076,10 @@
         {
             "audience": "consumer",
             "channel": "type",
-            "sentence": "A string is a value and the disk is `file()` or `directory()`: `seed('./_seeds/x.sql')` (a bare string where a file is meant), `seed(file('./_seeds/x.json'))` (the wrong extension), `file('x.sql')` (not a relative path), `directory('./_fixtures/shop')` (a directory without its `/`), `get(file(…))` (a file where a value is meant) and `toMatch(directory(…))` on a stream do not compile.",
+            "sentence": "A string is a value and the disk is `file()` or `directory()`: `seed('./__seeds__/x.sql')` (a bare string where a file is meant), `seed(file('./__seeds__/x.json'))` (the wrong extension), `file('x.sql')` (not a relative path), `directory('./__fixtures__/shop')` (a directory without its `/`), `get(file(…))` (a file where a value is meant) and `toMatch(directory(…))` on a stream do not compile.",
             "specification": "model",
             "family": "chain",
-            "fix": "Name the disk from the spec file: `file('./_seeds/users.sql')`, `file('./_expected/help.txt')`, `directory('../../_shared/_fixtures/shop/')`.",
+            "fix": "Name the disk from the spec file: `file('./__seeds__/users.sql')`, `file('./__expected__/help.txt')`, `directory('../../__fixtures__/shop/')`.",
             "name": "disk-named-by-relative-path",
             "rationale": "A bare name resolved against a hidden folder is a convention the reader has to know; a relative path is read where it is written, and the compiler refuses the other form at the call.",
             "reach": "tests"
@@ -1180,7 +1180,7 @@
             "sentence": "No vitest snapshot matcher: `toMatchSnapshot`, `toMatchInlineSnapshot`, `toMatchFileSnapshot`, `toMatchAriaSnapshot`, `toMatchScreenshot`, `toThrowErrorMatchingSnapshot` and `toThrowErrorMatchingInlineSnapshot` are refused by `vitest/no-restricted-matchers`, whose option the `test()` preset sets (ADR-005).",
             "specification": "model",
             "family": "expectations",
-            "fix": "Write the golden: `expect(subject).toMatch(file('./_expected/<name>.<ext>'))`; under `src/` compare to a literal with `toStrictEqual`.",
+            "fix": "Write the golden: `expect(subject).toMatch(file('./__expected__/<name>.<ext>'))`; under `src/` compare to a literal with `toStrictEqual`.",
             "name": "no-vitest-snapshot",
             "rationale": "A snapshot is written by the run that was supposed to be judged by it: nobody reads the diff, and a wrong answer becomes the expectation the moment someone re-records.",
             "reach": "tests",

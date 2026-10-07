@@ -17,12 +17,12 @@ describe('results', () => {
     test('response matches expected file', async () => {
         // Given - seeded data
         const result = await api
-            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../__seeds__/two-users.sql'), { database: 'db' })
             .get('/users');
 
-        // Then - status + body match _expected/all-users.http
+        // Then - status + body match __expected__/all-users.http
         // checker-disable-next-line ground-shared-or-inline -- the file form is the subject: a response compared to its .http golden on disk
-        expect(result.response).toMatch(file('./_expected/all-users.http'));
+        expect(result.response).toMatch(file('./__expected__/all-users.http'));
     });
 
     /* invariant: the framework's own mismatch diff is the product under test, so it is goldened in full. */
@@ -30,7 +30,7 @@ describe('results', () => {
     test('toMatch shows diff on body mismatch', async () => {
         // Given - response differs from expected file
         const result = await api
-            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../__seeds__/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - error names the fixture and shows the full -/+ diff of both values frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The error golden below legitimately updates, but the wrong fixture must never be rewritten
@@ -86,14 +86,16 @@ describe('results', () => {
         // Then - clear error pointing at TEST_UPDATE frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still throw "does not exist" rather than be spuriously created
         expect(() => {
             // checker-disable-next-line named-path-exists -- negative spec: the missing fixture IS the behaviour under test
-            expect(result.response).toMatch(file('./_expected/nonexistent.http'), { frozen: true });
+            expect(result.response).toMatch(file('./__expected__/nonexistent.http'), {
+                frozen: true,
+            });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
     test('a table is compared whole to its rows written in place — every column, in its order', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../__seeds__/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the whole table, its generated id through a token
@@ -105,7 +107,7 @@ describe('results', () => {
     test('table details — shows diff on multi-column mismatch', async () => {
         // Given - two users in table, expecting wrong values
         const result = await api
-            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../__seeds__/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - error shows both columns in the full -/+ diff
@@ -137,7 +139,7 @@ describe('results', () => {
     test('table details — shows diff on extra rows', async () => {
         // Given - table has more rows than expected
         const result = await api
-            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../__seeds__/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - row count mismatch + extra rows with + marker (full diff)
@@ -196,7 +198,7 @@ describe('results', () => {
     test('table details — toBeEmpty fails on a table holding a row, naming the count', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../__seeds__/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the matcher refuses, and says how many rows it found

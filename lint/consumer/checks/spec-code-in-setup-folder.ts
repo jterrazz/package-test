@@ -38,7 +38,7 @@ function subjectOf(specsRoot: string, file: string): string {
 function setupTargetOf(specsRoot: string, file: string, readers: readonly string[]): string {
     const subject = subjectOf(specsRoot, file);
     const owner = lowestPlaceOf(specsRoot, readers) ?? subject;
-    const home = reservedFolderOf(specsRoot, owner, SETUP_FOLDER);
+    const home = reservedFolderOf(owner, SETUP_FOLDER);
     return relative(specsRoot, join(home, relative(subject, file)));
 }
 
@@ -60,7 +60,7 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Spotted[] {
                 path: shown,
                 line: 1,
                 fix: `name the module for what it holds and move it into the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — \`specs/${home}/<meaning>.ts\` — and the paths that import it`,
-                found: `\`${name}\` under specs/: a fixture is input data, a file in \`_fixtures/\`, never a module`,
+                found: `\`${name}\` under specs/: a fixture is input data, a file in \`__fixtures__/\`, never a module`,
                 rule: 'spec-code-in-setup-folder',
             });
             continue;

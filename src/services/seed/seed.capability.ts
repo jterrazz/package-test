@@ -17,7 +17,7 @@ export type SeedMethod<Self, DatabaseKey extends string> = (
 type QueuedSeed = { readonly database: string | undefined; readonly path: string };
 
 export type SeedChain<Self, DatabaseKey extends string> = {
-    /** Queue a SQL seed — `file('./_seeds/<name>.sql')` — to run before the action. */
+    /** Queue a SQL seed — `file('./__seeds__/<name>.sql')` — to run before the action. */
     seed: SeedMethod<Self, DatabaseKey>;
 };
 

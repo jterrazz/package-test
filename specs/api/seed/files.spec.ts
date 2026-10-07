@@ -8,11 +8,11 @@ describe('files', () => {
     test('seeds apply in the order listed, each to the database it names', async () => {
         // Given - a user, a second seeded after it, and an event in the other database
         const result = await api
-            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
-            .seed(file('./_seeds/charlie.sql'), {
+            .seed(file('../__seeds__/one-user.sql'), { database: 'db' })
+            .seed(file('./__seeds__/charlie.sql'), {
                 database: 'db',
             })
-            .seed(file('./_seeds/one-event.sql'), { database: 'analyticsDb' })
+            .seed(file('./__seeds__/one-event.sql'), { database: 'analyticsDb' })
             .get('/users');
 
         // Then - the users in the order the seeds ran, and the event where it was laid
@@ -41,8 +41,8 @@ describe('files', () => {
     test('lays a leaf seed over a shared one', async () => {
         // Given - the shared pool's two users, and a third from the leaf's own seed
         const result = await api
-            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
-            .seed(file('./_seeds/carol.sql'), { database: 'db' })
+            .seed(file('../../__seeds__/two-users.sql'), { database: 'db' })
+            .seed(file('./__seeds__/carol.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the three rows, in the order the seeds ran
@@ -78,7 +78,7 @@ describe('files', () => {
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
         // Then - .seed() without a database option violates `database-named-only-when-several-at-runtime`, synchronously checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
-        expect(() => api.seed(file('../_seeds/one-user.sql'))).toThrow(
+        expect(() => api.seed(file('../__seeds__/one-user.sql'))).toThrow(
             'found: seed() names no database, and 2 databases are declared ("analyticsDb", "db")',
         );
     });
@@ -88,7 +88,7 @@ describe('files', () => {
         // Then - the chain rejects with ENOENT
         await expect(
             // checker-disable-next-line named-path-exists -- negative spec: the missing file IS the behaviour under test
-            api.seed(file('./_seeds/nonexistent.sql'), { database: 'db' }).get('/users'),
+            api.seed(file('./__seeds__/nonexistent.sql'), { database: 'db' }).get('/users'),
         ).rejects.toThrow('ENOENT');
     });
 
@@ -98,7 +98,7 @@ describe('files', () => {
         await expect(
             api
                 // @ts-expect-error -- `nonexistent-db` is no database key, which the compiler refuses too
-                .seed(file('../_seeds/one-user.sql'), { database: 'nonexistent-db' })
+                .seed(file('../__seeds__/one-user.sql'), { database: 'nonexistent-db' })
                 .get('/users'),
         ).rejects.toThrow(
             [
@@ -119,7 +119,7 @@ describe('files', () => {
 
         try {
             // Then - the chain fails because nothing can execute the SQL
-            await expect(bareApi.seed(file('../_seeds/one-user.sql')).get('/')).rejects.toThrow(
+            await expect(bareApi.seed(file('../__seeds__/one-user.sql')).get('/')).rejects.toThrow(
                 [
                     'found: seed(), and no database is declared',
                     'why: A seed writes into a declared database.',

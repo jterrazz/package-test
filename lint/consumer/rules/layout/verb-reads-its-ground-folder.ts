@@ -19,7 +19,7 @@ import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `_fixtures/`. */
+/** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `__fixtures__/`. */
 const ROLES: Record<string, { argument: number; grounds: readonly (string | undefined)[] }> = {
     fixture: { argument: 0, grounds: [GROUND_FIXTURES] },
     post: { argument: 1, grounds: [GROUND_REQUESTS] },
@@ -71,7 +71,7 @@ function crossing(reads: string | undefined, found: string | undefined): Record<
         where:
             reads === undefined
                 ? 'the folder its verb reads'
-                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across specifications)`,
+                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/${reads}/ across specifications)`,
     };
 }
 

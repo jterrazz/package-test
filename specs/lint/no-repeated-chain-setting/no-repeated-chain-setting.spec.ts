@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('no-repeated-chain-setting', () => {
     test("two chains pinning two instants state two conditions, not the file's", async () => {
         // Given - the apart tree
-        const result = await lint.fixture(directory('./_fixtures/apart/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/apart/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('no-repeated-chain-setting', () => {
 
     test('a clock every chain of a file pins alike is refused at the first chain', async () => {
         // Given - the repeated tree
-        const result = await lint.fixture(directory('./_fixtures/repeated/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/repeated/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

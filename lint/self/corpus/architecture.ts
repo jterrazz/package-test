@@ -1,3 +1,4 @@
+import { moduleTestOf } from '@jterrazz/typescript/rules';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { basename, dirname, join, relative, resolve } from 'node:path';
@@ -109,10 +110,10 @@ export function straysOf(
     }
     if (
         definition.kind !== 'context' &&
-        !existsSync(resolve(root, path.replace(/\.ts$/u, '.test.ts'))) &&
+        !existsSync(resolve(root, moduleTestOf(path))) &&
         !SIBLINGLESS_KINDS.some((kind) => kind.claims(path))
     ) {
-        found.push(`${path}: ${definition.name} has no test beside it`);
+        found.push(`${path}: ${definition.name} has no test in its folder's __tests__/`);
     }
     const ported = existsSync(resolve(root, dirname(path), `${module}.port.ts`));
     if (definition.kind === 'setup' && ported !== (definition.arm !== undefined)) {

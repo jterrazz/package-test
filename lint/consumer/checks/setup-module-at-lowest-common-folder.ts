@@ -9,7 +9,6 @@ import {
     lowestPlaceOf,
     MAX_SPEC_LINES,
     modulesUnder,
-    ownerOfSetup,
     readersOf,
     setupFolderOf,
 } from '../../kit/project/specs-modules.js';
@@ -78,7 +77,7 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
         if (lowest === undefined) {
             continue;
         }
-        const home = reservedFolderOf(specsRoot, lowest, SETUP_FOLDER);
+        const home = reservedFolderOf(lowest, SETUP_FOLDER);
         if (home !== setup) {
             const target = join(home, relative(setup, module));
             const aliased = read.some((reader) => importsThroughAlias(reader, module));
@@ -115,7 +114,7 @@ function findingOf(rootDir: string, misplaced: Misplaced): Spotted {
         fix: misplaced.aliased
             ? `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`typescript fix\` moves no module an alias reaches`
             : `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it; \`typescript fix\` does both`,
-        found: `\`specs/${rel}\`, whose readers share \`${shown(specsRoot, misplaced.lowest)}\`, not \`${shown(specsRoot, ownerOfSetup(specsRoot, misplaced.setup))}\``,
+        found: `\`specs/${rel}\`, whose readers share \`${shown(specsRoot, misplaced.lowest)}\`, not \`${shown(specsRoot, dirname(misplaced.setup))}\``,
         rule: 'setup-module-at-lowest-common-folder',
     };
 }

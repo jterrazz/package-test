@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('no-redundant-service-url', () => {
     test('rejects a hand-wired DATABASE_URL from connectionString', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
@@ -20,7 +20,7 @@ describe('no-redundant-service-url', () => {
 
     test('stays silent for non-URL env variables', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');

@@ -1,5 +1,5 @@
 description: a chained fixture lies under the document's own fixture
-fixture: ./_fixtures/document-ground/
+fixture: ./__fixtures__/document-ground/
 runs:
     - command: echo-line
       exit: 0

@@ -16,14 +16,14 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'seeds-are-sql');
 
-/** Anchored on the visited test file, reading the listing of its sibling `_seeds/`. */
+/** Anchored on the visited test file, reading the listing of its sibling `__seeds__/`. */
 export const seedsAreSql = defineRule(
     {
         docs: row,
         messages: {
             notSql: {
-                found: '`_seeds/{{entry}}` is not a `.sql` file',
-                fix: 'move it to `_fixtures/` and lay it with `.fixture(file(…))`; `_seeds/` holds database state only',
+                found: '`__seeds__/{{entry}}` is not a `.sql` file',
+                fix: 'move it to `__fixtures__/` and lay it with `.fixture(file(…))`; `__seeds__/` holds database state only',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

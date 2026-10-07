@@ -37,7 +37,7 @@ export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Spotted[
             path: name,
             line: 1,
             // Stryker disable next-line Regex: the name filtered above ends on the suffix
-            fix: `move it under \`specs/<specification>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
+            fix: `move it under \`specs/<specification>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` in the \`__tests__/\` of the folder of the module it covers`,
             found: "a `.spec.ts` at the project's root, outside every `specs/` tree",
             rule: 'file-suffix-matches-place',
         }));
@@ -80,7 +80,7 @@ function movesUnderSpecification(specsRoot: string): PlacementMove[] {
         if (!rooted && !SPECIFICATIONS.has(specification ?? '')) {
             continue;
         }
-        // invariant: a `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
+        // invariant: a ground module's test is `test-in-its-tests-folder`'s, never a misnamed spec.
         if (parts.some((part) => isGroundFolder(part))) {
             continue;
         }

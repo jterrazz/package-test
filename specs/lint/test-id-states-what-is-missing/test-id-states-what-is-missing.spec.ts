@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('test-id-states-what-is-missing', () => {
     test('accepts the hatch when the line above says what the element lacks', async () => {
         // Given - the compliant tree
-        const result = await lint.fixture(directory('./_fixtures/compliant/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/compliant/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('test-id-states-what-is-missing', () => {
 
     test('refuses a testId() that states nothing about the element', async () => {
         // Given - the violation tree
-        const result = await lint.fixture(directory('./_fixtures/violation/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

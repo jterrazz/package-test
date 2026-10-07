@@ -17,7 +17,7 @@ export const goldenPathHasExtension = defineRule(
         messages: {
             missingExtension: {
                 found: '`toMatch(file("{{name}}"))` names a golden with no extension',
-                fix: 'add the extension to the path (`"./_expected/help.txt"`), or compare a tree with `toMatch(directory("./_expected/<name>/"))`',
+                fix: 'add the extension to the path (`"./__expected__/help.txt"`), or compare a tree with `toMatch(directory("./__expected__/<name>/"))`',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

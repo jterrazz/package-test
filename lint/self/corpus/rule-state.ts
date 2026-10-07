@@ -19,7 +19,7 @@ export function optionsOf(rules: Readonly<Record<string, unknown>>): Map<string,
 }
 
 export function corpusOf(rule: string, lintSpecs: string): string[] {
-    const fixtures = join(lintSpecs, rule, '_fixtures');
+    const fixtures = join(lintSpecs, rule, '__fixtures__');
     let entries: string[];
     try {
         entries = readdirSync(fixtures, { recursive: true }).map(String);

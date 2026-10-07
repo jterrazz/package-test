@@ -60,7 +60,7 @@ export function collectFixtureReferences(
     });
 }
 
-/** A lone piece counts only when spelled `./` or `../`: a bare one (`resolve(import.meta.dirname, '../_expected')`) is as often an output folder as a path read; a piece opening on `/` restarts the path. */
+/** A lone piece counts only when spelled `./` or `../`: a bare one (`resolve(import.meta.dirname, '../__expected__')`) is as often an output folder as a path read; a piece opening on `/` restarts the path. */
 export function anchoredPaths(
     file: string,
 ): { column: number; line: number; named: string; target: string }[] {

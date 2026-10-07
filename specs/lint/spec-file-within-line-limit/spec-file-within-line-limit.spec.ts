@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('spec-file-within-line-limit', () => {
     test('a spec file under the cap passes', async () => {
         // Given - the short tree
-        const result = await lint.fixture(directory('./_fixtures/short/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/short/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('spec-file-within-line-limit', () => {
 
     test('a spec file over 400 lines is refused at its first line', async () => {
         // Given - the long tree
-        const result = await lint.fixture(directory('./_fixtures/long/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/long/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

@@ -38,7 +38,7 @@ export function checkSpecificationTestUsesItsRunner(specsRoot: string): Spotted[
             violations.push({
                 path: rel,
                 line: 1,
-                fix: `import \`{ ${specification} }\` from \`${specification}.specification.js\` and drive the product through it, or move the module test beside its module`,
+                fix: `import \`{ ${specification} }\` from \`${specification}.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder`,
                 found: `a test under the \`${specification}\` specification that reaches no runner`,
                 rule: 'specification-test-uses-its-runner',
             });

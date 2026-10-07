@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('no-imported-expectation', () => {
     test("a typed helper the test calls builds the test's own expectation", async () => {
         // Given - the built tree
-        const result = await lint.fixture(directory('./_fixtures/built/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/built/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('no-imported-expectation', () => {
 
     test('an expectation imported from another module is refused where the test hands it over', async () => {
         // Given - the imported tree
-        const result = await lint.fixture(directory('./_fixtures/imported/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/imported/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

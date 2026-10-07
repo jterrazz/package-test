@@ -26,7 +26,7 @@ describe('orders', () => {
     test('reads the orders the day left behind', async () => {
         // Given - two orders in the real database, from the seed beside the test
         const result = await integration
-            .seed(file('./_seeds/two-orders.sql'))
+            .seed(file('./__seeds__/two-orders.sql'))
             .call(async ({ db }) => await listOrders(db.connectionString));
 
         // Then - the module answered with both, compared whole
@@ -60,11 +60,11 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule `n
 
 Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
 
-| Setup                              | Means                                                                                                   |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `.seed(file('./_seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several  |
-| `.intercept(stubs)`                | declare what the outside world replies ([Stubs](../reference/stubs.md))                                 |
-| `.clock('2026-03-04T09:30:00Z')`   | pin the module's `Date` for this chain ([Time and doubles](../reference/time-and-doubles.md#the-clock)) |
+| Setup                                 | Means                                                                                                   |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `.seed(file('./__seeds__/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several  |
+| `.intercept(stubs)`                   | declare what the outside world replies ([Stubs](../reference/stubs.md))                                 |
+| `.clock('2026-03-04T09:30:00Z')`      | pin the module's `Date` for this chain ([Time and doubles](../reference/time-and-doubles.md#the-clock)) |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 
@@ -112,7 +112,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./_expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([Tokens](../reference/tokens.md), [Assertions](../reference/assertions.md)).
+Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./__expected__/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([Tokens](../reference/tokens.md), [Assertions](../reference/assertions.md)).
 
 A call that a declared stub never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule `network-strict-after-first-stub`).
 
@@ -134,12 +134,12 @@ test.each(CASES)('renders $name', async ({ name, input }) => {
     const result = await integration.call(() => render(input));
 
     // Then - the golden for that case
-    expect(result.value).toMatch(file(`./_expected/${name}.json`));
+    expect(result.value).toMatch(file(`./__expected__/${name}.json`));
     expect(result.error.text).toBe('');
 });
 ```
 
-The golden is named by a template literal, and the checker's `no-unused-ground` dead-fixture pass reads that form: a golden whose name matches the literal's static ends is one the table could have asked for, so a wall of `_expected/` files stays alive without a hand-written literal each.
+The golden is named by a template literal, and the checker's `no-unused-ground` dead-fixture pass reads that form: a golden whose name matches the literal's static ends is one the table could have asked for, so a wall of `__expected__/` files stays alive without a hand-written literal each.
 
 ### The `integration()` project
 
@@ -162,8 +162,8 @@ specs/integration/
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
     ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule `file-suffix-matches-place`)
-    ├── _seeds/two-orders.sql       # ground: database state — beside its one test, or the tests of the leaf that share it
-    └── _expected/                  # ground: a golden several tests share — one test's is written in place (`ground-shared-or-inline`)
+    ├── __seeds__/two-orders.sql       # ground: database state — beside its one test, or the tests of the leaf that share it
+    └── __expected__/                  # ground: a golden several tests share — one test's is written in place (`ground-shared-or-inline`)
 ```
 
 **`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the stubs it declared are checked when that call ends, and a stub declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.
@@ -171,7 +171,7 @@ specs/integration/
 ## Pitfalls
 
 - **Reaching for `try`/`catch`.** A thrown error is `result.error`. A `try` around `.call()` brings back the shape where a spec passes because nothing threw.
-- **Writing a module test here.** A module alone, with no service and no golden, belongs beside its code as `<file>.test.ts` (rule `test-beside-its-module`). The folder is not a home for tests that were hard to place.
+- **Writing a module test here.** A module alone, with no service and no golden, belongs beside its code as `<file>.test.ts` (rule `test-in-its-tests-folder`). The folder is not a home for tests that were hard to place.
 - **Goldening a volatile value.** An id, a timestamp or a duration inside `result.value` is tokened (`{{int}}`, `{{iso8601}}`), or pinned with `.clock()`. A literal that moves is a test that fails tomorrow (rule `no-volatile-literal`).
 - **Asserting on a double.** The specification exists so the subject meets the real thing. A `mockOf<T>()` inside `.call()` is a module test that started a container for nothing.
 

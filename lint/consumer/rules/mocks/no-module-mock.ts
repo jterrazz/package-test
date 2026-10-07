@@ -127,8 +127,8 @@ function scopeOf(context: Context): Scope | undefined {
     const { role } = identityOf(context);
     const banned = segmentsOf(context)
         .slice(0, -1)
-        .find((part) => part === '__mocks__' || part === '__fixtures__');
-    // invariant: plus any file inside one of the two banned directories: that clause names the directory itself.
+        .find((part) => part === '__mocks__');
+    // invariant: plus any file inside the banned directory: that clause names the directory itself.
     if (!isTestRole(role) && banned === undefined) {
         return undefined;
     }
@@ -151,11 +151,11 @@ export const noModuleMock = defineRule(
         messages: {
             assetImport: {
                 found: 'a module test imports the data asset "{{source}}"',
-                fix: 'write the data as code in a sibling `<file>.fixtures.ts`, or move the test under `specs/` as a `.spec.ts`',
+                fix: 'write the data as code in a `<file>.fixtures.ts` beside the test, or move the test under `specs/` as a `.spec.ts`',
             },
             bannedDir: {
                 found: 'a `{{dir}}/` directory',
-                fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a sibling `<file>.fixtures.ts`, a spec's in `_fixtures/` — and delete the directory",
+                fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a `<file>.fixtures.ts` beside it, a spec's in `__fixtures__/` — and delete the directory",
             },
             unreasoned: {
                 found: '"{{source}}" is on the `modules` allow-list with no reason',

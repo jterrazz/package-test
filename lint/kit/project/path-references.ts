@@ -88,7 +88,7 @@ function literalTail(pieces: AstNode[]): string[] {
     return tail;
 }
 
-/** `join(import.meta.dirname, '_fixtures', name)` names `<here>/_fixtures`. */
+/** `join(import.meta.dirname, '__fixtures__', name)` names `<here>/__fixtures__`. */
 function builtPath(
     node: AstNode,
     here: string,
@@ -106,7 +106,7 @@ function builtPath(
     return resolve(here, ...tail);
 }
 
-/** `` `${import.meta.dirname}/_fixtures/a.json` `` names `<here>/_fixtures/a.json`. */
+/** `` `${import.meta.dirname}/__fixtures__/a.json` `` names `<here>/__fixtures__/a.json`. */
 function templatePath(
     node: AstNode,
     here: string,

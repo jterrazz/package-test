@@ -83,19 +83,19 @@ test('serves robots.txt as plain text', async () => {
 
     // Then - the whole file matches one golden
     expect(result.headers['content-type']).toBe('text/plain');
-    expect(result.body).toMatch(file('./_expected/robots.txt'));
+    expect(result.body).toMatch(file('./__expected__/robots.txt'));
 });
 ```
 
 `FetchResult` accessors:
 
-| Member            | Type                  | Description                                                              |
-| ----------------- | --------------------- | ------------------------------------------------------------------------ |
-| `result.status`   | `number`              | HTTP status — 3xx surfaces exactly as sent, never followed               |
-| `result.location` | `string \| undefined` | The `location` header, or undefined                                      |
-| `result.headers`  | flat map              | Response headers, lower-cased keys                                       |
-| `result.body`     | `TextAccessor`        | Raw response body — `toMatch(file('./_expected/robots.txt'))`, `.grep()` |
-| `result.json`     | `JsonAccessor`        | Response body parsed as JSON                                             |
+| Member            | Type                  | Description                                                                 |
+| ----------------- | --------------------- | --------------------------------------------------------------------------- |
+| `result.status`   | `number`              | HTTP status — 3xx surfaces exactly as sent, never followed                  |
+| `result.location` | `string \| undefined` | The `location` header, or undefined                                         |
+| `result.headers`  | flat map              | Response headers, lower-cased keys                                          |
+| `result.body`     | `TextAccessor`        | Raw response body — `toMatch(file('./__expected__/robots.txt'))`, `.grep()` |
+| `result.json`     | `JsonAccessor`        | Response body parsed as JSON                                                |
 
 #### `.visit(path, scenario?)` — a rendered page
 
@@ -108,7 +108,7 @@ test('captures the full head surface of a rendered page', async () => {
 
     // Then - one golden covers title, canonical, alternates, and metas
     expect(result.status).toBe(200);
-    expect(result.head).toMatch(file('./_expected/home.head.json'));
+    expect(result.head).toMatch(file('./__expected__/home.head.json'));
 });
 ```
 
@@ -216,7 +216,7 @@ test('lays the article out as a reader walks it', async () => {
     const result = await website.visit('/articles/hexagonal');
 
     // Then - the outline is what a screen reader would walk
-    expect(result.tree).toMatch(file('./_expected/article.aria.yaml'));
+    expect(result.tree).toMatch(file('./__expected__/article.aria.yaml'));
 });
 ```
 
@@ -237,7 +237,7 @@ test('exposes canonical, alternates, and named metas directly', async () => {
     expect(result.meta('og:title')).toBe('Fixture — Home');
 
     // …or snapshot the whole surface at once
-    expect(result.head).toMatch(file('./_expected/home.head.json'));
+    expect(result.head).toMatch(file('./__expected__/home.head.json'));
 });
 ```
 
@@ -259,7 +259,7 @@ Structured data gets the same treatment — every `ld+json` block on the page, i
 test('parses every json-ld block into one array', async () => {
     const result = await website.visit('/');
 
-    expect(result.jsonLd).toMatch(file('./_expected/home.jsonld.json'));
+    expect(result.jsonLd).toMatch(file('./__expected__/home.jsonld.json'));
 });
 ```
 
@@ -282,7 +282,7 @@ test('separates console errors from the full stream', async () => {
     const result = await website.visit('/noisy');
 
     // Then - the full stream carries both, the error stream only the error
-    expect(result.console).toMatch(file('./_expected/noisy.console.txt'));
+    expect(result.console).toMatch(file('./__expected__/noisy.console.txt'));
     expect(result.errors.text).toContain('boom');
 });
 ```
@@ -310,10 +310,10 @@ afterAll(cleanup);
 
 `backend` requires `server` mode — with `url` it refuses (the type already forbids the combination): a deployed site cannot be pointed at a local stub. The **ownership boundary**: the framework owns the server child, so it injects the env var itself — that is the whole wiring.
 
-What the stub serves is declared per chain, as [stubs](../reference/stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
+What the stub serves is declared per chain, as [stubs](../reference/stubs.md) — the feature's `__setup__/stubs/` facade, exactly the form `api`/`job` use:
 
 ```typescript
-import newsroom from './_setup/stubs/newsroom.stubs.js';
+import newsroom from './__setup__/stubs/newsroom.stubs.js';
 
 describe('declared backend', () => {
     test('renders the events feed from the declared backend', async () => {
@@ -365,13 +365,13 @@ specs/website/
 ├── website.specification.ts    # runner at the specification ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
-    ├── _expected/              # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
-    └── _setup/stubs/           # the stubs declaring what the backend serves — with the `backend` option
+    ├── __expected__/              # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
+    └── __setup__/stubs/           # the stubs declaring what the backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```
 
-No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `_expected/<name>`.
+No `__seeds__/` or `__requests__/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `__expected__/<name>`.
 
 ## Pitfalls
 
@@ -383,7 +383,7 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.
-- **Reading `result.head` field-by-field instead of snapshotting it.** It is designed as the one golden per page (`toMatch(file('./_expected/home.head.json'))`) — use the direct accessors (`canonical`, `alternates`, `meta()`) only for a single targeted probe.
+- **Reading `result.head` field-by-field instead of snapshotting it.** It is designed as the one golden per page (`toMatch(file('./__expected__/home.head.json'))`) — use the direct accessors (`canonical`, `alternates`, `meta()`) only for a single targeted probe.
 - **Calling `.intercept()` without the `backend` option.** It throws immediately, naming the fix: add `backend: { env: '…' }` to the `specification.website()` options — a chain's `.http` exchanges need a stub to serve them.
 - **Combining `backend` with `url` mode.** The type forbids it and the runtime refuses: a deployed site reads its API URL at its own deploy time — there is nothing a local stub could inject into.
 

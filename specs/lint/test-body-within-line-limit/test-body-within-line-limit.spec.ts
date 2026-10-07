@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('test-body-within-line-limit', () => {
     test('a test whose body spans sixty lines of gestures passes', async () => {
         // Given - the short tree
-        const result = await lint.fixture(directory('./_fixtures/short/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/short/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('test-body-within-line-limit', () => {
 
     test('twenty lines of gestures and a ninety-line inline expectation pass — the claim is not counted', async () => {
         // Given - the claim tree
-        const result = await lint.fixture(directory('./_fixtures/claim/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/claim/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -22,7 +22,7 @@ describe('test-body-within-line-limit', () => {
 
     test('a test whose body spans more than sixty lines of gestures is refused at its function', async () => {
         // Given - the long tree
-        const result = await lint.fixture(directory('./_fixtures/long/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/long/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

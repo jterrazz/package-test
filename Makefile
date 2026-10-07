@@ -46,7 +46,7 @@ check: node_modules/.install
 
 # Needs Xcode and a simulator: `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
 test-mobile: build
-	node specs/_shared/_fixtures/specimen-mobile/on-simulator.mjs
+	node specs/__fixtures__/specimen-mobile/on-simulator.mjs
 
 # Needs the network and a lychee on the machine: `check` never calls it.
 check-links:

@@ -7,7 +7,7 @@ describe('templates', () => {
     test('a user is read back by its id', async () => {
         // Given - one user, numbered 1 by the reset
         const result = await api
-            .seed(file('../_seeds/alice.sql'), {
+            .seed(file('../__seeds__/alice.sql'), {
                 database: 'db',
             })
             .get('/users/:id', { params: { id: 1 } });
@@ -40,7 +40,7 @@ describe('templates', () => {
 
     test('a template handed no values is refused, naming the parameter it holds, before the chain seeds anything', async () => {
         // Given - a chain whose seed fails if it runs, sending a template without its params past the types
-        const send = api.seed(file('./_seeds/unknown-table.sql'), { database: 'db' }).get as (
+        const send = api.seed(file('./__seeds__/unknown-table.sql'), { database: 'db' }).get as (
             path: string,
         ) => Promise<unknown>;
 

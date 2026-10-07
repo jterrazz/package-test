@@ -6,7 +6,7 @@ import { lint } from '../lint.specification.js';
 describe('specification-is-a-composition', () => {
     test('a composition file holding its composition alone, and a constructor that opens it, pass', async () => {
         // Given - the composed tree
-        const result = await lint.fixture(directory('./_fixtures/composed/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/composed/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('specification-is-a-composition', () => {
 
     test('a composition file holding logic, and a constructor running a step, are refused', async () => {
         // Given - the logic tree
-        const result = await lint.fixture(directory('./_fixtures/logic/')).run();
+        const result = await lint.fixture(directory('./__fixtures__/logic/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

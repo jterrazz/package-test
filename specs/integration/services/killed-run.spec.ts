@@ -16,7 +16,7 @@ describe('killed-run', () => {
     test('a run killed with SIGKILL leaves no process() server behind', async () => {
         // Given - a scratch run whose process() server answers it, then SIGKILLs its own vitest and worker, teardown never reached
         const result = await vitestCli
-            .fixture(directory('./_fixtures/killed-run/'))
+            .fixture(directory('./__fixtures__/killed-run/'))
             .exec('run', { timeout: 60_000 });
         expect(result.exitCode).not.toBe(0);
         const servedPid = Number(result.file('served.pid').content);

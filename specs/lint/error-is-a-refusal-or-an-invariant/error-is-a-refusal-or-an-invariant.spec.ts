@@ -6,7 +6,7 @@ import { lint as self } from '../self-lint.specification.js';
 describe('error-is-a-refusal-or-an-invariant', () => {
     test('a refusal reading a heading that exists, and an invariant, pass', async () => {
         // Given - the declared tree
-        const result = await self.fixture(directory('./_fixtures/declared/')).run();
+        const result = await self.fixture(directory('./__fixtures__/declared/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('error-is-a-refusal-or-an-invariant', () => {
 
     test('a hand-written message is refused where built, a subclass too, a missing heading where read', async () => {
         // Given - the hand-written tree
-        const result = await self.fixture(directory('./_fixtures/hand-written/')).run();
+        const result = await self.fixture(directory('./__fixtures__/hand-written/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

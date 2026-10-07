@@ -7,7 +7,7 @@ describe('docker-exec-bound-with-await-using', () => {
     test('rejects a docker runner result bound without await using', async () => {
         // Given - a docker-aware spec and a test binding its result with const
         const result = await checker
-            .fixture(directory('./_fixtures/docker-exec-bound-with-await-using/'))
+            .fixture(directory('./__fixtures__/docker-exec-bound-with-await-using/'))
             .run();
 
         // Then - the checker fails with the full diagnostic naming the runner
@@ -23,7 +23,7 @@ describe('docker-exec-bound-with-await-using', () => {
     test('accepts a docker runner result bound with await using', async () => {
         // Given - the compliant twin (await using)
         const result = await checker
-            .fixture(directory('./_fixtures/docker-exec-bound-with-await-using-ok/'))
+            .fixture(directory('./__fixtures__/docker-exec-bound-with-await-using-ok/'))
             .run();
 
         // Then - nothing is reported

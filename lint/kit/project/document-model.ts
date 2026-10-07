@@ -28,7 +28,7 @@ export function finding<PassId extends string>(
     return { fix, found, line, rule };
 }
 
-/** `_fixtures/` holds inputs, never scenarios. */
+/** `__fixtures__/` holds inputs, never scenarios. */
 const UNLISTED: ReadonlySet<string> = new Set([...PRUNED, GROUND_FIXTURES]);
 
 export function listSpecFiles(dir: string): string[] {
@@ -106,7 +106,7 @@ export function isBlock(scalar: Scalar): boolean {
     return (scalar.type ?? '').startsWith('BLOCK');
 }
 
-/** A sibling `_fixtures/` is the document's material whether or not a `fixture:` line names the exact file. */
+/** A sibling `__fixtures__/` is the document's material whether or not a `fixture:` line names the exact file. */
 export function fixedData(document: SpecDocument, dir: string): string {
     const parts = document.runs.flatMap((run) => [run.stdin ?? '', run.command]);
     for (const token of document.env) {

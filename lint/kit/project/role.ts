@@ -4,13 +4,14 @@ import {
     holdsManifest,
     isProjectRoot,
     nearestRoot,
+    TESTS_FOLDER,
 } from '@jterrazz/typescript/rules';
 import { dirname, relative } from 'node:path';
 
 import { SETTINGS_FILE } from './settings-file.js';
 import { isUnderSpecs, segments } from './specs-anchor.js';
 
-/** The suffix decides the kind, and folders are read below the project root: a checkout under `_fixtures/` or `__tests__/` is the machine's business. */
+/** The suffix decides the kind, and folders are read below the project root: a checkout under `__fixtures__/` is the machine's business. */
 
 export type FileRole =
     | 'component'
@@ -23,23 +24,21 @@ export type FileRole =
     | 'specification'
     | 'stub';
 
-export type StrayTestRoot = '__tests__' | 'test' | 'tests' | null;
+export type StrayTestRoot = 'test' | 'tests' | null;
 
 export type FileIdentity = {
     inSpecs: boolean;
+    /** Under a `__tests__/` folder: a module test, the typed data it reads, its ground. */
+    inTests: boolean;
     strayTestRoot: StrayTestRoot;
     role: FileRole;
 };
 
 const GROUND = new Set<string>(GROUND_FOLDERS);
 
-/** `__tests__/` anywhere; `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name. */
+/** `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name. */
 function strayTestRootOf(filename: string): StrayTestRoot {
     const parts = projectSegments(filename);
-    // Stryker disable next-line MethodExpression: no source file is named __tests__
-    if (parts.slice(0, -1).includes('__tests__')) {
-        return '__tests__';
-    }
     // Stryker disable next-line ConditionalExpression,EqualityOperator: no source file at the root is named test or tests
     const first = parts.length > 1 ? parts[0] : undefined;
     if (projectRootOf(dirname(filename)) !== undefined && (first === 'tests' || first === 'test')) {
@@ -52,7 +51,12 @@ function strayTestRootOf(filename: string): StrayTestRoot {
 export function roleOf(filename: string): FileIdentity {
     const parts = projectSegments(filename);
     const base = parts.at(-1) ?? '';
-    const identity = { inSpecs: isUnderSpecs(filename), strayTestRoot: strayTestRootOf(filename) };
+    const identity = {
+        inSpecs: isUnderSpecs(filename),
+        // Stryker disable next-line MethodExpression: no source file is named __tests__
+        inTests: parts.slice(0, -1).includes(TESTS_FOLDER),
+        strayTestRoot: strayTestRootOf(filename),
+    };
 
     if (base.endsWith('.specification.ts') || base.endsWith('.specification.tsx')) {
         return { ...identity, role: 'specification' };

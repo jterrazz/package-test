@@ -7,7 +7,7 @@ import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { cli } from '../literate-cli.specification.js';
 
-/** Every scenario runs through both doors, the plugin and `cli.run`; the `_fixtures/` twins are deliberately wrong and kept out of the plugin's glob. */
+/** Every scenario runs through both doors, the plugin and `cli.run`; the `__fixtures__/` twins are deliberately wrong and kept out of the plugin's glob. */
 
 function scratchFile(content: string): string {
     const dir = mkdtempSync(resolve(tmpdir(), 'spec-document-'));
@@ -205,13 +205,13 @@ describe('update-mode', () => {
 
     test('a frozen document is never rewritten under TEST_UPDATE', async () => {
         // Given - a deliberately-wrong golden, run in update mode
-        const target = resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml');
+        const target = resolve(import.meta.dirname, '__fixtures__/wrong-stdout.spec.yaml');
         const before = readFileSync(target, 'utf8');
         vi.stubEnv('TEST_UPDATE', '1');
         let message: string;
         try {
             message = await failureOf(
-                cli.run(file('./_fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+                cli.run(file('./__fixtures__/wrong-stdout.spec.yaml'), { frozen: true }),
             );
         } finally {
             vi.unstubAllEnvs();

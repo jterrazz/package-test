@@ -17,14 +17,14 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'request-file-extension-known');
 
-/** Anchored on the visited test file: its sibling `_requests/` is probed, and a file with no extension is reported there. */
+/** Anchored on the visited test file: its sibling `__requests__/` is probed, and a file with no extension is reported there. */
 export const requestFileExtensionKnown = defineRule(
     {
         docs: row,
         messages: {
             noExtension: {
-                found: '`_requests/{{entry}}` carries no extension',
-                fix: 'name it by how it is sent — `_requests/{{entry}}.http` for a whole request, `_requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
+                found: '`__requests__/{{entry}}` carries no extension',
+                fix: 'name it by how it is sent — `__requests__/{{entry}}.http` for a whole request, `__requests__/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

@@ -1,7 +1,7 @@
 import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { tally } from '../_fixtures/orders/tally.js';
+import { tally } from '../__fixtures__/orders/tally.js';
 import { integration as withDatabase } from '../integration.specification.js';
 import { integration } from '../pure.specification.js';
 
@@ -18,7 +18,7 @@ describe('table', () => {
         const result = await integration.call(() => tally(of));
 
         // Then - the golden the row names is the oracle
-        expect(result.value).toMatch(file(`./_expected/${name}.json`));
+        expect(result.value).toMatch(file(`./__expected__/${name}.json`));
         expect(result.error.text).toBe('');
     });
 

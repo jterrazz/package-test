@@ -3,7 +3,7 @@ import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { quoteOrder } from '../_fixtures/orders/orders.js';
+import { quoteOrder } from '../__fixtures__/orders/orders.js';
 import { integration } from '../pure.specification.js';
 
 const PRICING = 'https://pricing.spec.test';

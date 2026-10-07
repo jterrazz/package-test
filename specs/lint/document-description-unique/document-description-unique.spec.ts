@@ -7,7 +7,7 @@ describe('document-description-unique', () => {
     test('rejects two documents of one directory sharing a description', async () => {
         // Given - two .spec.yaml files whose description: is the same sentence
         const result = await checker
-            .fixture(directory('./_fixtures/document-description-unique/'))
+            .fixture(directory('./__fixtures__/document-description-unique/'))
             .run();
 
         // Then - the second one is named, with the first it collides with
@@ -23,7 +23,7 @@ describe('document-description-unique', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .run();
 
         // Then - nothing is reported

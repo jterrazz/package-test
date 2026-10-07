@@ -1,0 +1,5 @@
+description: renders the gadget over the shared stub
+fixture: ../../__fixtures__/stub/
+runs:
+    - command: gadget
+      exit: 0

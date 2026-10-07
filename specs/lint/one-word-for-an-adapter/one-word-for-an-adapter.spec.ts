@@ -6,7 +6,7 @@ import { lint as self } from '../self-lint.specification.js';
 describe('one-word-for-an-adapter', () => {
     test('a module adapting the clock, named `*.adapter.ts` for what it adapts, passes', async () => {
         // Given - the adapters tree
-        const result = await self.fixture(directory('./_fixtures/adapters/')).run();
+        const result = await self.fixture(directory('./__fixtures__/adapters/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,7 +14,7 @@ describe('one-word-for-an-adapter', () => {
 
     test('a module adapting the clock named `*.driver.ts` is refused at its first line', async () => {
         // Given - the drivers tree
-        const result = await self.fixture(directory('./_fixtures/drivers/')).run();
+        const result = await self.fixture(directory('./__fixtures__/drivers/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

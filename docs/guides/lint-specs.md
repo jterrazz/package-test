@@ -60,7 +60,7 @@ There is nothing to start and nothing to stop: `cleanup` is handed to `afterAll`
 
 ## The chain
 
-Setups: `.fixture(directory('./_fixtures/<tree>/'))` — or a `file()`, copied by name — lays the tree in a fresh working directory ([CLI specs § Fixtures](cli-specs.md#the-chain)); `.rules({ … })` states rules and their options for this chain, over the specification's `config`, a later call winning; on a specification that runs no oxlint — no plugin, no config — it is refused, since no linter would read it. Terminal action: `.run()` (rule `one-terminal-action-per-chain`).
+Setups: `.fixture(directory('./__fixtures__/<tree>/'))` — or a `file()`, copied by name — lays the tree in a fresh working directory ([CLI specs § Fixtures](cli-specs.md#the-chain)); `.rules({ … })` states rules and their options for this chain, over the specification's `config`, a later call winning; on a specification that runs no oxlint — no plugin, no config — it is refused, since no linter would read it. Terminal action: `.run()` (rule `one-terminal-action-per-chain`).
 
 ```typescript
 // specs/lint/no-module-mock/no-module-mock.spec.ts
@@ -74,7 +74,7 @@ describe('no-module-mock', () => {
         // Given - a module on the allow-list, and no reason beside it
         const result = await lint
             .rules({ 'acme/no-module-mock': ['error', { modules: [{ module: 'x', reason: '' }] }] })
-            .fixture(directory('./_fixtures/allow-listed/'))
+            .fixture(directory('./__fixtures__/allow-listed/'))
             .run();
 
         // Then - the finding, where it fires, with its lesson
@@ -136,7 +136,7 @@ A linter that fails and reports no diagnostic is refused in four parts rather th
 
 ### A rule alone: `ruleTester()`
 
-A rule's visitor, on snippets, is a module test beside the rule. `ruleTester()` is oxlint's `RuleTester` (`oxlint/plugins-dev`) bound to vitest — its suites and cases are vitest's — and it requires a position on every invalid case: each expected error is an object stating its `line` and `column`. A count, an empty list, or an error with no position, is refused before the case runs, since it passes for a report on any node.
+A rule's visitor, on snippets, is a module test in the `__tests__/` of the rule's folder. `ruleTester()` is oxlint's `RuleTester` (`oxlint/plugins-dev`) bound to vitest — its suites and cases are vitest's — and it requires a position on every invalid case: each expected error is an object stating its `line` and `column`. A count, an empty list, or an error with no position, is refused before the case runs, since it passes for a report on any node.
 
 The two tools count columns differently, and each keeps its own convention: `ruleTester()` reads oxlint's RuleTester columns, **0-based** — `column: 25` below is the `setTimeout` at index 25 — while a lint spec's report prints the compiler's `file:line:column`, **1-based**, so the same finding reads `:1:26` there.
 

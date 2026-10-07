@@ -21,7 +21,7 @@ const nodeOnly = (binding: string): Error =>
         [
             `found: ${binding} runs under node, and was called in a page`,
             'why: A page has no filesystem, no child process and no socket.',
-            'fix: specify it from a test collected by a node project (unit/api/job/cli/website/mobile); a rendered thing is a `.test.tsx` beside its component',
+            'fix: specify it from a test collected by a node project (unit/api/job/cli/website/mobile); a rendered thing is a `.test.tsx` in the `__tests__/` of its component’s folder',
             'read: docs/guides/component-specs.md#what-it-does-not-do',
         ].join('\n'),
     );

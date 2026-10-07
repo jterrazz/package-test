@@ -1,0 +1,11 @@
+import { describe, expect, test } from 'vitest';
+
+describe('widget', () => {
+test('the stubs tree is malformed', () => {
+    // Given - a __setup__/stubs/ folder that breaks the `stubs-root-holds-facades-and-kinds` layout
+    const layout = 'broken';
+
+    // Then - oxlint reports every structural fault
+    expect(layout).toBe('broken');
+});
+});

@@ -6,23 +6,23 @@ import { lint as checker } from '../checker-lint.specification.js';
 describe('one-subject-per-spec', () => {
     test('--fix splits a file of two routes; the seed one route reads moves beside it, a module test following', async () => {
         // Given - the split tree
-        const result = await checker.fixture(directory('./_fixtures/split/')).run({ fix: true });
+        const result = await checker.fixture(directory('./__fixtures__/split/')).run({ fix: true });
 
         // Then - nothing is left to report, and the fixed tree is its golden
         expect(result.report).toMatch('');
-        await expect(result.directory()).toMatch(directory('./_expected/split/'));
+        await expect(result.directory()).toMatch(directory('./__expected__/split/'));
     });
 
-    test('--fix moves a helper two of the split files read into the _setup/ of the folder they share', async () => {
+    test('--fix moves a helper two of the split files read into the __setup__/ of the folder they share', async () => {
         // Given - the shared-helper tree
         const result = await checker
-            .fixture(directory('./_fixtures/shared-helper/'))
+            .fixture(directory('./__fixtures__/shared-helper/'))
             .run({ fix: true });
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
         expect(result.file('specs/api/orders/orders.spec.ts').exists).toBe(false);
-        expect(result.file('specs/api/orders/_setup/orders.ts').content).toBe(
+        expect(result.file('specs/api/orders/__setup__/orders.ts').content).toBe(
             [
                 "export const ITEM = 'book';",
                 '',
@@ -34,16 +34,16 @@ describe('one-subject-per-spec', () => {
             ].join('\n'),
         );
         expect(result.file('specs/api/orders/create/orders.spec.ts').content).toContain(
-            "import { order } from '../_setup/orders.js';",
+            "import { order } from '../__setup__/orders.js';",
         );
         expect(result.file('specs/api/orders/update/orders.spec.ts').content).toContain(
-            "import { order } from '../_setup/orders.js';",
+            "import { order } from '../__setup__/orders.js';",
         );
     });
 
     test('a spec whose chains reach two routes is refused at the chain that reaches the second', async () => {
         // Given - the two-routes tree
-        const result = await checker.fixture(directory('./_fixtures/two-routes/')).run();
+        const result = await checker.fixture(directory('./__fixtures__/two-routes/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
@@ -57,7 +57,7 @@ describe('one-subject-per-spec', () => {
 
     test('a cli spec whose chains run two commands names each by its words', async () => {
         // Given - the two-commands tree, a runner whose `commands` list holds `db migrate` and `db seed`
-        const result = await checker.fixture(directory('./_fixtures/two-commands/')).run();
+        const result = await checker.fixture(directory('./__fixtures__/two-commands/')).run();
 
         // Then - the finding names both commands, every word of each
         expect(result.report).toMatch(`

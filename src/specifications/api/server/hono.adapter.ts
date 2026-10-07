@@ -52,7 +52,7 @@ export class HonoAdapter implements ServerPort {
             sent.set(name, value);
         }
         const init: RequestInit = {
-            // invariant: strings are pre-serialized (a `_requests/*.http` body); everything else is JSON, and no body stringifies to none.
+            // invariant: strings are pre-serialized (a `__requests__/*.http` body); everything else is JSON, and no body stringifies to none.
             body: typeof body === 'string' ? body : JSON.stringify(body),
             headers: sent,
             method,

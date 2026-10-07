@@ -6,7 +6,7 @@ import { lint as checker } from '../checker-lint.specification.js';
 describe('no-silent-refusal', () => {
     test('refuses a non-zero exit with neither stream', async () => {
         // Given - a refusal the document never quotes
-        const result = await checker.fixture(directory('./_fixtures/no-silent-refusal/')).run();
+        const result = await checker.fixture(directory('./__fixtures__/no-silent-refusal/')).run();
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.report).toMatch(`
@@ -21,7 +21,7 @@ describe('no-silent-refusal', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker
-            .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
+            .fixture(directory('../../__fixtures__/spec-document-ok/'))
             .run();
 
         // Then - nothing is reported

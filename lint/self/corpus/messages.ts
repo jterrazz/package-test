@@ -45,7 +45,7 @@ export function goldenCheckerLines(dir: string): string[] {
     const lines: string[] = [];
     for (const entry of readdirSync(dir, { recursive: true })) {
         const path = String(entry);
-        if (path.includes('_fixtures') || !/\.(?:spec\.ts|txt)$/u.test(path)) {
+        if (path.includes('__fixtures__') || !/\.(?:spec\.ts|txt)$/u.test(path)) {
             continue;
         }
         const text = readFileSync(resolve(dir, path), 'utf8').split('\n');

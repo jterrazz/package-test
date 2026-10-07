@@ -2,7 +2,7 @@ import { defineStubs, http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { api, QUOTES_URL } from '../intercepts.specification.js';
-import latestNews from './_setup/stubs/latest-news.stubs.js';
+import latestNews from './__setup__/stubs/latest-news.stubs.js';
 
 describe('composition', () => {
     test('a stub and an inline pair mix in one chain', async () => {

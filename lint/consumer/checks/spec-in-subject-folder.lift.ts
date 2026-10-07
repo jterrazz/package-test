@@ -66,7 +66,7 @@ export function liftGround(specsRoot: string, leaf: string): string[] {
             }
             const lowest =
                 lowestCommonFolder(readers.map(({ file }) => dirname(file))) ?? specsRoot;
-            const destination = join(reservedFolderOf(specsRoot, lowest, role), entry.name);
+            const destination = join(reservedFolderOf(lowest, role), entry.name);
             // invariant: the pool holds that name: `no-reach-into-sibling-ground` keeps reporting the reach.
             if (existsSync(destination)) {
                 continue;

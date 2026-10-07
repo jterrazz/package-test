@@ -16,7 +16,7 @@ function reportedAt(name: string): RegExp {
 
 function goldens(root: string, name: string): string[] {
     return pathsUnder(join(root, 'specs/lint', name)).filter(
-        (path) => !path.includes('/_fixtures/'),
+        (path) => !path.includes('/__fixtures__/'),
     );
 }
 

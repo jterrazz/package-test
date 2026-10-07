@@ -91,7 +91,7 @@ export const { cleanup, website } = await specification.website({
 
 ## The services record — three jobs for one key
 
-1. **Vocabulary.** The key is how tests target the service: `.seed(file('./_seeds/x.sql'), { database: 'analyticsDb' })`, `result.table('events', { database: 'analyticsDb' })`. Typed — a typo is a compile error.
+1. **Vocabulary.** The key is how tests target the service: `.seed(file('./__seeds__/x.sql'), { database: 'analyticsDb' })`, `result.table('events', { database: 'analyticsDb' })`. Typed — a typo is a compile error.
 2. **Typing.** The `server` / `jobs` factory receives the exact same record, fully typed, once everything is started (rule `server-sees-declared-services`).
 3. **Identity.** The key is the name the service is known by: the startup report prints it, and its **kebab-case** conversion is the folder the init script is read from — `analyticsDb` reports as `analytics-db` and initialises from `docker/analytics-db/init.sql`, with no option to state anywhere:
 
@@ -110,11 +110,11 @@ With **2 or more databases** in the record, `database:` is mandatory on every `.
 
 ```typescript
 // one database → no database: anywhere
-await migrateCli.seed(file('./_seeds/legacy-schema.sql')).exec('up');
+await migrateCli.seed(file('./__seeds__/legacy-schema.sql')).exec('up');
 await expect(result.table('schema_migrations')).toMatch([…]);
 
 // two databases → database: everywhere
-await api.seed(file('./_seeds/catalog.sql'), { database: 'db' }).request(file('./_requests/new-order.http'));
+await api.seed(file('./__seeds__/catalog.sql'), { database: 'db' }).request(file('./__requests__/new-order.http'));
 await expect(result.table('events', { database: 'analyticsDb' })).toMatch([…]);
 ```
 

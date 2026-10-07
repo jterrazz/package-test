@@ -24,11 +24,11 @@ import {
 
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');
 
-/** `_setup/stubs/<kebab>.stubs.ts`. */
+/** `__setup__/stubs/<kebab>.stubs.ts`. */
 const COMPOSITE_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.stubs\.[cm]?ts$/u;
-/** `_setup/stubs/<kind>/<kebab>.ts`. */
+/** `__setup__/stubs/<kind>/<kebab>.ts`. */
 const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
-/** `_setup/stubs/<kind>/<stem>.request.ts`. */
+/** `__setup__/stubs/<kind>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
 
 function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
@@ -229,7 +229,7 @@ export const stubsRootHoldsFacadesAndKinds = defineRule(
         docs: row,
         messages: {
             badKindDir: {
-                found: '`_setup/stubs/{{entry}}/` is no stub kind',
+                found: '`__setup__/stubs/{{entry}}/` is no stub kind',
                 fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
             },
             badName: {
@@ -253,15 +253,15 @@ export const stubsRootHoldsFacadesAndKinds = defineRule(
                 fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
             },
             foreignBuilder: {
-                found: 'a stub under `_setup/stubs/{{kind}}/` calls the `{{used}}` builder',
-                fix: 'move it to `_setup/stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
+                found: 'a stub under `__setup__/stubs/{{kind}}/` calls the `{{used}}` builder',
+                fix: 'move it to `__setup__/stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
             },
             rootFile: {
-                found: 'the stub unit "{{base}}" sits at the `_setup/stubs/` root',
+                found: 'the stub unit "{{base}}" sits at the `__setup__/stubs/` root',
                 fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
             },
             tooDeep: {
-                found: 'the stub file "{{base}}" is nested below `_setup/stubs/<kind>/`',
+                found: 'the stub file "{{base}}" is nested below `__setup__/stubs/<kind>/`',
                 fix: 'move it up into its kind folder',
             },
         },

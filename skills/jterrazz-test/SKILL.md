@@ -16,17 +16,17 @@ First, whether the test should exist: end to end through the surface a user meet
 Ask in order; the first yes is the kind, and the kind fixes the file, the constructor and the project ([Getting started § Which kind of test](../../docs/start/getting-started.md#which-kind-of-test) carries the table, and a meta-test holds this list to it).
 
 1. A whole served page in a browser? → **website**, `specs/website/<domain>/<aspect>.spec.ts`
-2. A component (React, a DOM function, a hook)? → **component**, `<file>.test.tsx` beside `<file>.tsx`
+2. A component (React, a DOM function, a hook)? → **component**, `__tests__/<file>.test.tsx` in the folder of `<file>.tsx`
 3. A screen on a simulator? → **mobile**, `specs/mobile/<domain>/<aspect>.spec.ts`
 4. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts` — the folder derived from the route (`GET /events` → `events/list/`)
 5. Triggered by name, in-process? → **job**, `specs/job/<job>/<aspect>.spec.ts`
 6. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
 7. A rule the project ships — a plugin, a checker, a preset? → **lint**, `specs/lint/<rule>/<aspect>.spec.ts`; the rule's visitor alone is a module test on `ruleTester()`
 8. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
-9. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
+9. A module alone? → **module**, `__tests__/<file>.test.ts` in the folder of `<file>.ts`
 10. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
 
-A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect; a colocated `.test.ts(x)` holds one `describe` titled with the export it covers. `typescript fix` splits, moves and retitles ([Conventions § One file, one subject](../../docs/concepts/conventions.md#one-file-one-subject)).
+A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect; a module test `__tests__/<file>.test.ts(x)` holds one `describe` titled with the export it covers. `typescript fix` splits, moves and retitles ([Conventions § One file, one subject](../../docs/concepts/conventions.md#one-file-one-subject)).
 
 ## The shape every spec has
 
@@ -53,10 +53,10 @@ import { api } from '../../api.specification.js';
 describe('shape', () => {
     test('creates a user', async () => {
         // Given - an empty users table
-        const result = await api.request(file('./_requests/create-user.http'));
+        const result = await api.request(file('./__requests__/create-user.http'));
 
         // Then - the response and the row it wrote
-        expect(result.response).toMatch(file('./_expected/user-created.http'));
+        expect(result.response).toMatch(file('./__expected__/user-created.http'));
         await expect(result.table('users')).toMatch([[1, 'Alice']]);
     });
 });
@@ -68,12 +68,12 @@ describe('shape', () => {
 
 ## What goes wrong most
 
-- **A bare string where a file is meant** — `.seed('users.sql')` does not compile. Name the disk with `file('./_seeds/users.sql')` or `directory(…)`, relative to the spec, in the test that reads it.
-- **A probe where the whole result belongs** — compare a response, a json, a table or an output WHOLE, written in place (``toMatch(`HTTP/1.1 200 OK …`)``) or in `_expected/` when several tests share it; add one precise assertion only if one property is the subject ([Assertions](../../docs/reference/assertions.md)).
+- **A bare string where a file is meant** — `.seed('users.sql')` does not compile. Name the disk with `file('./__seeds__/users.sql')` or `directory(…)`, relative to the spec, in the test that reads it.
+- **A probe where the whole result belongs** — compare a response, a json, a table or an output WHOLE, written in place (``toMatch(`HTTP/1.1 200 OK …`)``) or in `__expected__/` when several tests share it; add one precise assertion only if one property is the subject ([Assertions](../../docs/reference/assertions.md)).
 - **A value that moves** — a `{{token}}`, never a literal; `TEST_UPDATE=1` writes the expected value, then read the diff ([Tokens](../../docs/reference/tokens.md)).
 - **A double before the real thing** — the real thing → a declared service → a stub (`.intercept()`) → `mockOf<T>()`, the first rung that fits ([Time and doubles](../../docs/reference/time-and-doubles.md#the-doubles-ladder)). A call that must not happen is `http.never(…)` ([Stubs](../../docs/reference/stubs.md)).
 - **Time** — `clock` only: `.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope; never `vi.useFakeTimers` ([Time and doubles](../../docs/reference/time-and-doubles.md#the-clock)).
-- **A folder that is no subject, spelled without its `_`** — `_setup/`, `_seeds/`, `_requests/`, `_expected/`, `_fixtures/`, and `_shared/` at the specs root are the closed list; what several leaves share sits in the lowest folder they share ([Conventions § The naming recap](../../docs/concepts/conventions.md#the-naming-recap)).
+- **A folder that is no subject, spelt otherwise than `__<word>__/`** — `__setup__/`, `__seeds__/`, `__requests__/`, `__expected__/`, `__fixtures__/` are the closed list under `specs/`, and `__tests__/` the one in a code root; what several leaves share sits in the lowest folder they share — the specs root's for several specifications ([Conventions § The naming recap](../../docs/concepts/conventions.md#the-naming-recap)).
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles"; scope with `within(…)` ([The visitor](../../docs/reference/visitor.md)).
 - **An `expect` in a scenario, a helper or a loop** — a scenario is the When; a helper returns what it reads; a loop asserts nothing over an empty collection.
 - **Awaiting a sync matcher, or not awaiting an IO one** — a table, a directory and a page-captured subject are awaited; the types say which.

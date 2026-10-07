@@ -1,0 +1,7 @@
+description: lays a fixture nobody wrote
+fixture:
+    - ./__fixtures__/shop/
+    - ./__fixtures__/config.json
+runs:
+    - command: build
+      exit: 0

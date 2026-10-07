@@ -37,7 +37,7 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'A definition is its module. Every setup a `<name>.capability.ts` exports is named `<name>`, and every action an `*.action.ts` exports is one that file is listed for; the setups and the actions found under `src/` are exactly the ones the meta-test lists. Each is tested beside its module, or claimed by a kind of `lint/self/corpus/siblingless-kinds.ts` that says what proves it instead, and a setup has a `<name>.port.ts` beside it exactly when it arms an adapter.',
+            'A definition is its module. Every setup a `<name>.capability.ts` exports is named `<name>`, and every action an `*.action.ts` exports is one that file is listed for; the setups and the actions found under `src/` are exactly the ones the meta-test lists. Each is tested in the `__tests__/` of its folder, or claimed by a kind of `lint/self/corpus/siblingless-kinds.ts` that says what proves it instead, and a setup has a `<name>.port.ts` beside it exactly when it arms an adapter.',
         specification: 'model',
         family: 'architecture',
         fix: 'Name the definition for its module, write its test beside it (or declare its kind in `lint/self/corpus/siblingless-kinds.ts` when no test can run it where it lives), and declare the port its `arm` goes through (or drop the port it does not use).',
@@ -53,7 +53,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         sentence:
-            'A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`, `core/`, `shared/`, `misc/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a specification with concept folders holds at its root its face alone: `<specification>.face.ts` (and the component\u2019s `component.face.browser.ts`), `<specification>.composition.ts`, `<specification>.handle.ts`, `<specification>.project.ts` and their tests. Ground (`_fixtures/`, `_expected/`, `_requests/`, `_seeds/`) is exempt. An error at the folder, or at the stray file.',
+            'A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`, `core/`, `shared/`, `misc/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a specification with concept folders holds at its root its face alone: `<specification>.face.ts` (and the component\u2019s `component.face.browser.ts`), `<specification>.composition.ts`, `<specification>.handle.ts`, `<specification>.project.ts` and their tests. Ground (`__fixtures__/`, `__expected__/`, `__requests__/`, `__seeds__/`) is exempt. An error at the folder, or at the stray file.',
         specification: 'model',
         family: 'architecture',
         fix: 'Name the folder for what its files are about, fold a lone file into its parent, and move a specification\u2019s other root files into the concept folder they belong to.',
@@ -108,7 +108,7 @@ export const ARCHITECTURE_TOOLCHAIN_RULES: Row[] = [
         audience: 'self',
         channel: 'toolchain',
         sentence:
-            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, and the trees of the sentence — `specifications/`, what is tested; `visitor/`, how a screen is touched; `expectations/`, how a result is judged; `stubs/`, `services/`, `disk/`, `clock/` and `mocks/`, what surrounds the subject; `chain/`, the machinery that composes them; `vitest/`, the runner config — and nothing else. An error at the stray entry.',
+            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, and the trees of the sentence — `specifications/`, what is tested; `visitor/`, how a screen is touched; `expectations/`, how a result is judged; `stubs/`, `services/`, `disk/`, `clock/` and `mocks/`, what surrounds the subject; `chain/`, the machinery that composes them; `vitest/`, the runner config — and `__tests__/`, the entries’ tests, and nothing else. An error at the stray entry.',
         specification: 'model',
         family: 'architecture',
         fix: 'Move the module into the tree whose concept it is — what is tested (`specifications/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), what surrounds the subject (`stubs/`, `services/`, `disk/`, `clock/`, `mocks/`), the machinery (`chain/`) or the runner config (`vitest/`).',

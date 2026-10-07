@@ -12,7 +12,7 @@ describe('captures', () => {
         `);
 
         // Then - the tree is compared within the same capture scope, and the ref holds
-        await expect(result.filesystem).toMatch(directory('./_expected/session/'));
+        await expect(result.filesystem).toMatch(directory('./__expected__/session/'));
     });
 
     test('a ref captured on stdout refuses another value in the working directory’s files', async () => {
@@ -24,7 +24,9 @@ describe('captures', () => {
 
         // Then - the file's id is held to the one stdout captured, and the comparison fails on it
         await expect(
-            expect(result.filesystem).toMatch(directory('./_expected/session/'), { frozen: true }),
+            expect(result.filesystem).toMatch(directory('./__expected__/session/'), {
+                frozen: true,
+            }),
         ).rejects.toThrow(/changed.*out\/session\.txt/u);
     });
 });
