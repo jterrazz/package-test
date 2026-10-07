@@ -12,7 +12,7 @@ const listing = (rule: string): string =>
     `import { api } from '../api.specification.js'; // checker-disable-line ${rule} -- filed by its author\ntest('a', async () => { await api.get('/orders'); });\n`;
 
 describe('fixSpecInSubjectFolder', () => {
-    test('subject-moves — the split keeps each test with the imports, constants and helpers it reads, in one describe', () => {
+    test('subject-moves — the split keeps each test with the imports, constants and helpers it reads, under the group it stood in', () => {
         // Given - the same file, and the golden its GET test reads through a helper
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -33,7 +33,7 @@ describe('fixSpecInSubjectFolder', () => {
                 '',
                 "const ORDER = { item: 'book' };",
                 '',
-                "describe('orders', () => {",
+                "describe('writing', () => {",
                 "    test('creates an order', async () => {",
                 '        // Given - an empty table',
                 "        const result = await api.post('/orders', ORDER);",
@@ -186,48 +186,42 @@ describe('fixSpecInSubjectFolder', () => {
         ]).toStrictEqual([]);
     });
 
-    test('subject-moves — a file of two pages keeps the first in place and writes the second beside it, named for it', () => {
+    test('subject-moves — a file of two pages is left whole: no folder names the second page, and the split names no file its author did not', () => {
         // Given - one website file visiting the pricing page and an article page
+        const spec = [
+            "import { test } from 'vitest';",
+            '',
+            "import { website } from '../website.specification.js';",
+            '',
+            "test('shows the prices', async () => {",
+            "    await website.visit('/pricing', async () => {});",
+            '});',
+            '',
+            "test('shows an article', async () => {",
+            "    await website.visit('/articles/42', async () => {});",
+            '});',
+            '',
+        ].join('\n');
         const root = specsTree({
-            'website/pages/home.spec.ts': [
-                "import { test } from 'vitest';",
-                '',
-                "import { website } from '../website.specification.js';",
-                '',
-                "test('shows the prices', async () => {",
-                "    await website.visit('/pricing', async () => {});",
-                '});',
-                '',
-                "test('shows an article', async () => {",
-                "    await website.visit('/articles/42', async () => {});",
-                '});',
-                '',
-            ].join('\n'),
+            'website/pages/home.spec.ts': spec,
             'website/website.specification.ts':
                 'export const { cleanup, website } = await specification.website({});\n',
         });
 
-        // When - the fix splits it
-        fixSpecInSubjectFolder(root);
+        // When - the fix runs
+        const done = fixSpecInSubjectFolder(root);
 
-        // Then - each page's test in its own file, both in the authored folder, no derived folder made
-        const read = (file: string): string => readFileSync(join(root, file), 'utf8');
+        // Then - nothing written, the file as it was, and the check says why the fixer left it
         expect({
-            article: read('website/pages/home-articles-id.spec.ts').includes("'shows an article'"),
-            articleLeft: read('website/pages/home.spec.ts').includes("'shows an article'"),
-            derived: ['website/pages/pricing', 'website/pages/articles'].map((path) =>
-                existsSync(join(root, path)),
-            ),
-            pricing: read('website/pages/home.spec.ts').includes("'shows the prices'"),
-            pricingCopied: read('website/pages/home-articles-id.spec.ts').includes(
-                "'shows the prices'",
-            ),
+            done,
+            fix: checkOneSubjectPerSpec(root).map((spotted) => spotted.fix),
+            kept: readFileSync(join(root, 'website/pages/home.spec.ts'), 'utf8') === spec,
         }).toStrictEqual({
-            article: true,
-            articleLeft: false,
-            derived: [false, false],
-            pricing: true,
-            pricingCopied: false,
+            done: [],
+            fix: [
+                "split it by hand, one file per subject — `typescript fix` refuses: visit /articles/:id has no standard folder: the file it goes to is its author's to name",
+            ],
+            kept: true,
         });
     });
 

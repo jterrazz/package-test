@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
-import { pruned, rebased } from '../spec-in-subject-folder.prune.js';
+import { moduleExtensionOf, pruned, rebased } from '../spec-in-subject-folder.prune.js';
 
 const lines = (...text: string[]): string => text.join('\n');
 
@@ -166,5 +166,27 @@ describe('spec-in-subject-folder.prune', () => {
                 '',
             ),
         );
+    });
+
+    test('moduleExtensionOf — a relative module is imported as the spec imports its own: `.js` unless one of them is bare; a package import says nothing', () => {
+        // Given - specs importing their relative modules with an extension, bare, both, or only packages
+        const specs = [
+            lines(
+                "import { a } from './a.js';",
+                "import { b } from '../b.mjs';",
+                "import { c } from 'c';",
+            ),
+            lines("import { a } from './a.js';", "import { b } from '../b';"),
+            lines("import { c } from 'c';", "import { d } from 'd/e';"),
+            lines("import { a } from './a.cjs';"),
+        ];
+
+        // Then - the extension each one writes
+        expect(specs.map((text) => moduleExtensionOf(text))).toStrictEqual([
+            '.js',
+            '',
+            '.js',
+            '.js',
+        ]);
     });
 });

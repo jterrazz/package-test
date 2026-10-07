@@ -9,6 +9,7 @@ import {
     silenced,
     splitPlan,
     subjectSpecs,
+    testsIn,
     withLeadingComments,
 } from '../spec-subjects.js';
 
@@ -93,12 +94,35 @@ describe('spec-subjects', () => {
         ]);
     });
 
-    test('splitPlan — each subject to its folder, the first keeping the file when no folder holds it and the others named by their last word', () => {
-        // Given - a spec opening on a subject with no folder, then on two that have one
+    test('testsIn — a table test is one test to the close of its last call, titled by that call, whatever its rows call and wherever its calls break', () => {
+        // Given - a table whose rows are built by calls, then a plain test
+        const text = [
+            'test.each([row(1), row(2)])',
+            "    ('reads %s', async (n) => {",
+            '    expect(n).toBeDefined();',
+            '});',
+            "it.each([row(3)])('direct', (n) => {});",
+            "test('plain', () => {});",
+            '',
+        ].join('\n');
+
+        // Then - two tests, each whole, each under its title
+        expect(
+            testsIn(text).map(({ end, start, title }) => [title, text.slice(start, end)]),
+        ).toStrictEqual([
+            ['reads %s', text.split('it.each')[0]],
+            ['direct', "it.each([row(3)])('direct', (n) => {});\n"],
+            ['plain', "test('plain', () => {});\n"],
+        ]);
+    });
+
+    test('splitPlan — each subject to its folder, the first keeping the file when no folder holds it, a later one with no folder left out, a test of no subject planning nothing', () => {
+        // Given - a spec opening on a test of no subject, then on a subject with no folder, then on one that has one; and the reverse
         const root = specsTree({
             'cli/cli.specification.ts': CLI_RUNNER,
             'cli/project/project.spec.ts': [
                 "import { cli } from '../cli.specification.js';",
+                "test('neutral', () => {});",
                 "test('a', async () => { await cli.exec(''); });",
                 "test('b', async () => { await cli.exec('build'); });",
                 '',
@@ -125,10 +149,7 @@ describe('spec-subjects', () => {
                 'exec (no command)': 'cli/project/project.spec.ts',
                 'exec build': 'cli/build/project.spec.ts',
             },
-            {
-                'exec (no command)': 'cli/tasks/tasks-command.spec.ts',
-                'exec build': 'cli/build/tasks.spec.ts',
-            },
+            { 'exec build': 'cli/build/tasks.spec.ts' },
         ]);
     });
 

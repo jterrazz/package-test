@@ -189,7 +189,7 @@ describe('splitFiles', () => {
         }).toStrictEqual({ copies: [true, true], rewritten: false });
     });
 
-    test('the split files each test with what it reads: neutral tests, hooks, disk-building copies and shared helpers alike', () => {
+    test('the split files each test with what it reads: neutral tests, hooks, disk-building copies and shared helpers alike, the header in the file it opens on', () => {
         // Given - a spec of three subjects with every kind of shared code
         const root = specsTree({
             'api/api.specification.ts': RUNNER,

@@ -97,6 +97,28 @@ export function closingOf(text: string, open: number): number {
     return text.length;
 }
 
+/** The offsets of the brackets still open at `index`, outermost first; a literal's brackets are none. */
+export function openersAt(text: string, index: number): number[] {
+    const closers: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
+    const stack: number[] = [];
+    let at = 0;
+    while (at < index) {
+        const past = literalEnd(text, at);
+        if (past !== at) {
+            at = past;
+            continue;
+        }
+        const character = text[at] ?? '';
+        if (character === '(' || character === '[' || character === '{') {
+            stack.push(at);
+        } else if (character in closers && text[stack.at(-1) ?? -1] === closers[character]) {
+            stack.pop();
+        }
+        at += 1;
+    }
+    return stack;
+}
+
 /** Each comma-separated argument between `start` and `end`, trimmed, an empty one dropped. */
 export function argumentSpans(
     text: string,

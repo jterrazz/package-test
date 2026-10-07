@@ -106,4 +106,20 @@ describe('checkSpecInSubjectFolder', () => {
         // Then - this pass says nothing of it
         expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
     });
+
+    test('spec-in-subject-folder — a spec of one page has no standard folder: it stays where its author filed it', () => {
+        // Given - a website spec visiting one page
+        const root = specsTree({
+            'website/pages/pricing.spec.ts': [
+                "import { website } from '../website.specification.js';",
+                "test('shows the prices', async () => { await website.visit('/pricing', async () => {}); });",
+                '',
+            ].join('\n'),
+            'website/website.specification.ts':
+                'export const { cleanup, website } = await specification.website({});\n',
+        });
+
+        // Then - nothing reported
+        expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
+    });
 });

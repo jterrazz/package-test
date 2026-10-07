@@ -7,75 +7,24 @@ import { closingOf } from '../../kit/project/source-scan.js';
 import {
     aspectOf,
     lineEnd,
-    lineStart,
     openedSubjects,
-    TEST_CALL,
     withLeadingComments,
 } from '../../kit/project/spec-subjects.js';
-import type { Span, SpecRead } from '../../kit/project/spec-subjects.js';
+import type { SpecRead } from '../../kit/project/spec-subjects.js';
 import { lowestCommonFolder, reservedFolderOf } from '../../kit/project/tree.js';
+import { withoutEmptiedGroups, withoutLooseComments } from './spec-in-subject-folder.cut.js';
 import {
     codeOnly,
     declarationsOf,
     importsOf,
     isRead,
     isReadIn,
+    moduleExtensionOf,
     pruned,
     rebased,
     without,
 } from './spec-in-subject-folder.prune.js';
 import type { Declaration } from './spec-in-subject-folder.prune.js';
-
-const DESCRIBE_CALL = /^describe(?:\.\w+(?:\([^()]*\))?)*\s*\(/gmu;
-
-const TOP_DESCRIBE_TITLE = /^describe\(\s*(?<quote>['"`])(?:[^\\]|\\.)*?\k<quote>/mu;
-
-// invariant: `open` is the line after the callback's `{`, `close` the line of its `}`: a wrapped call closes on lines of its own.
-function describesOf(
-    text: string,
-): (Span & { close: number; holdsTests: boolean; open: number })[] {
-    const blank = blankComments(text);
-    return [...blank.matchAll(DESCRIBE_CALL)].map((found) => {
-        const open = found.index + found[0].length - 1;
-        const close = closingOf(blank, open);
-        const brace = blank.indexOf('{', open);
-        TEST_CALL.lastIndex = 0;
-        return {
-            close: lineStart(text, closingOf(blank, brace)),
-            end: lineEnd(text, close),
-            holdsTests: TEST_CALL.test(blank.slice(open, close)),
-            open: lineEnd(text, brace),
-            start: withLeadingComments(text, found.index),
-        };
-    });
-}
-
-// invariant: `one-describe-per-file`: a split would otherwise break the one-describe law on every file it writes.
-function oneDescribe(text: string, aspect: string): string {
-    let current = text;
-    for (const empty of describesOf(current)
-        .filter((describe) => !describe.holdsTests)
-        .toReversed()) {
-        current = current.slice(0, empty.start) + current.slice(empty.end);
-    }
-    const describes = describesOf(current);
-    const [first] = describes;
-    // Stryker disable next-line ConditionalExpression,BlockStatement: a file with no describe has none to merge or rename
-    if (first === undefined) {
-        return current;
-    }
-    for (const later of describes.slice(1).toReversed()) {
-        current =
-            current.slice(0, later.start) +
-            current.slice(later.open, later.close) +
-            current.slice(later.end);
-    }
-    if (describes.length > 1) {
-        const closing = current.slice(first.close, first.end);
-        current = `${current.slice(0, first.close)}${current.slice(first.end).trimEnd()}\n${closing.trimEnd()}\n`;
-    }
-    return current.replace(TOP_DESCRIBE_TITLE, `describe('${aspect}'`);
-}
 
 export type Draft = { target: string; text: string };
 
@@ -157,6 +106,7 @@ function withSharedHelpers(
     if (moved.length === 0) {
         return { drafts };
     }
+    const extension = moduleExtensionOf(spec.text);
     const names = new Set(moved.map((d) => d.name));
     const types = new Set(moved.filter((d) => d.type).map((d) => d.name));
     const holds = (draft: Draft): boolean =>
@@ -192,7 +142,7 @@ function withSharedHelpers(
             );
             const read = [...names].filter((name) => isReadIn(kept, name)).toSorted();
             // Stryker disable next-line Regex: a setup module is named <aspect>.ts, with no .ts before its end
-            const specifier = pathFrom(dirname(draft.target), module).replace(/\.ts$/u, '.js');
+            const specifier = pathFrom(dirname(draft.target), module).replace(/\.ts$/u, extension);
             return {
                 target: draft.target,
                 text: pruned(withImportLine(kept, importLine(read, types, specifier))),
@@ -275,7 +225,8 @@ function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
             spec.text,
             spec.tests.filter((test) => !kept.has(test)),
         );
-        const text = oneDescribe(withoutIdleHooks(cut), aspectOf(target));
+        const said = name === first ? cut : withoutLooseComments(cut);
+        const text = withoutEmptiedGroups(withoutIdleHooks(said));
         return { target, text: pruned(rebased(text, dirname(spec.file), dirname(target))) };
     });
 }

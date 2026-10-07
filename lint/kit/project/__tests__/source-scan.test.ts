@@ -6,6 +6,7 @@ import {
     HOLE,
     literalEnd,
     literalOf,
+    openersAt,
     skipString,
     stringsOf,
     withoutComments,
@@ -15,6 +16,18 @@ import {
 const spelled = (text: string): string => text.replaceAll('#{', ['$', '{'].join(''));
 
 describe('source-scan', () => {
+    test('openersAt — the brackets still open at an offset, outermost first, past closed ones and those inside literals or regexes', () => {
+        // Given - a block holding a closed call, a string and a regex that spell brackets, then a loop
+        const text = "f({ g(1); s = '{('; r = /[)}]/u; [a]; for (x of y) { ) ] HERE";
+
+        // Then - the call, its object and the loop's block are open, a stray closer closing none of them; the bracket at the offset is not before it
+        const loop = text.indexOf('{ )');
+        expect([openersAt(text, text.indexOf('HERE')), openersAt(text, loop)]).toStrictEqual([
+            [1, 2, loop],
+            [1, 2],
+        ]);
+    });
+
     test.each([
         ['f(a, "x)", b)', 12],
         [String.raw`f(a, /\)/u, b)`, 13],

@@ -5,6 +5,7 @@ import { dirname } from 'node:path';
 import { shown, silenced, splitPlan, subjectSpecs } from '../../kit/project/spec-subjects.js';
 import type { SpecRead } from '../../kit/project/spec-subjects.js';
 import { liftGround } from './spec-in-subject-folder.lift.js';
+import { splitRefusal } from './spec-in-subject-folder.refusal.js';
 import { splitFiles } from './spec-in-subject-folder.split.js';
 import type { Draft } from './spec-in-subject-folder.split.js';
 
@@ -33,7 +34,7 @@ function writeSplit(
         .map(({ target }) => `${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`);
 }
 
-/** A test reaching two subjects goes with the one its chain opens on; a file whose target is taken is left for its author. */
+/** A test reaching two subjects goes with the one its chain opens on; a file whose target is taken, or whose split `splitRefusal` refuses, is left for its author. */
 export function fixSpecInSubjectFolder(specsRoot: string): string[] {
     const done: string[] = [];
     for (const spec of subjectSpecs(specsRoot)) {
@@ -48,7 +49,10 @@ export function fixSpecInSubjectFolder(specsRoot: string): string[] {
         if (targets.every((target) => target === spec.file)) {
             continue;
         }
-        if (targets.some((target) => target !== spec.file && existsSync(target))) {
+        if (
+            targets.some((target) => target !== spec.file && existsSync(target)) ||
+            splitRefusal(specsRoot, spec, plan) !== undefined
+        ) {
             continue;
         }
         done.push(

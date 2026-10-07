@@ -7,6 +7,7 @@ import {
 } from '../../kit/project/spec-subjects.js';
 import type { SpecRead, TestOf } from '../../kit/project/spec-subjects.js';
 import type { Spotted } from './checker.js';
+import { splitRefusal } from './spec-in-subject-folder.refusal.js';
 
 function journeyOf(spec: SpecRead): TestOf | undefined {
     return spec.tests.find((test) => test.subjects.length > 1);
@@ -14,9 +15,15 @@ function journeyOf(spec: SpecRead): TestOf | undefined {
 
 function splitAdvice(specsRoot: string, spec: SpecRead): string {
     const journey = journeyOf(spec);
-    const targets = [...splitPlan(specsRoot, spec).values()].map((path) => shown(specsRoot, path));
+    const plan = splitPlan(specsRoot, spec);
+    const targets = [...new Set(plan.values())].map((path) => shown(specsRoot, path));
+    const refusal = splitRefusal(specsRoot, spec, plan);
     const advice: string[] = [];
-    if (targets.length >= 2) {
+    if (refusal !== undefined) {
+        advice.push(
+            `split it by hand, one file per subject — \`typescript fix\` refuses: ${refusal}`,
+        );
+    } else if (targets.length >= 2) {
         advice.push(
             `split it, one file per subject — ${targets.join(', ')} — \`typescript fix\` splits it`,
         );

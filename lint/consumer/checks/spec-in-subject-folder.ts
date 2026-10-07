@@ -52,9 +52,8 @@ export function checkSpecInSubjectFolder(specsRoot: string): Spotted[] {
         if (ambiguity !== undefined) {
             return [ambiguity];
         }
-        // Stryker disable next-line BooleanLiteral: a spec of no subject folder stays in its folder under either name
-        const target = targetOf(specsRoot, spec, only, true);
-        if (dirname(target) === dirname(spec.file)) {
+        const target = targetOf(specsRoot, spec, only);
+        if (target === undefined || dirname(target) === dirname(spec.file)) {
             return [];
         }
         return [

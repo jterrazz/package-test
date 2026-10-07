@@ -53,6 +53,12 @@ function importText(clause: ImportClause, keeps: (local: string) => boolean): st
         : `import ${clause.typeOnly ? 'type ' : ''}${parts.join(', ')} from '${clause.source}';\n`;
 }
 
+// invariant: an import of the setup module is written as the spec writes its own relative imports: `.js`, or bare when any of them is (a profile refusing extensions).
+export function moduleExtensionOf(text: string): string {
+    const relative = importsOf(text).filter(({ source }) => /^\.\.?\//u.test(source));
+    return relative.some(({ source }) => !/\.[cm]?js$/u.test(source)) ? '' : '.js';
+}
+
 /** A name written in a message is no read of it; a template stays whole, since its holes hold code. */
 export function codeOnly(text: string): string {
     const blank = blankComments(text);

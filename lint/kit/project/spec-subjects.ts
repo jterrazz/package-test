@@ -28,7 +28,17 @@ export type SpecRead = {
     text: string;
 };
 
-export const TEST_CALL = /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(/gu;
+// invariant: a pattern is built per scan: a shared global one would carry its `lastIndex` from one text into the next.
+const TEST_CALL = String.raw`(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(`;
+
+export function holdsTestCall(text: string): boolean {
+    // Stryker disable next-line StringLiteral: the pattern spells no character past ASCII, so it reads alike with or without the unicode flag
+    return new RegExp(TEST_CALL, 'u').test(text);
+}
+
+export function testCallCount(text: string): number {
+    return [...text.matchAll(new RegExp(TEST_CALL, 'gu'))].length;
+}
 
 const TITLE = /^\s*(?<quote>['"`])(?<title>(?:[^\\]|\\.)*?)\k<quote>/u;
 
@@ -59,16 +69,23 @@ export function withLeadingComments(text: string, start: number): number {
     return begin;
 }
 
-function testsOf(source: string): Omit<TestOf, 'subjects'>[] {
+// invariant: `test.each(rows)('title', …)` is one test: its span runs to the close of its last call, its title read from that call.
+function lastCallOf(text: string, open: number): { close: number; open: number } {
+    const close = closingOf(text, open);
+    const next = /^\s*\(/u.exec(text.slice(close + 1));
+    return next === null ? { close, open } : lastCallOf(text, close + next[0].length);
+}
+
+/** Each top-level test of a source: its span with the comments above it, and its literal title. */
+export function testsIn(source: string): Omit<TestOf, 'subjects'>[] {
     const text = blankComments(source);
     const tests: Omit<TestOf, 'subjects'>[] = [];
-    for (const found of text.matchAll(TEST_CALL)) {
+    for (const found of text.matchAll(new RegExp(TEST_CALL, 'gu'))) {
         // invariant: a call is found after every test already read, so it is inside one when before its end.
         if (tests.some((test) => found.index < test.end)) {
             continue;
         }
-        const open = found.index + found[0].length - 1;
-        const close = closingOf(text, open);
+        const { close, open } = lastCallOf(text, found.index + found[0].length - 1);
         const { title = '(a computed title)' } = TITLE.exec(text.slice(open + 1))?.groups ?? {};
         tests.push({
             end: lineEnd(text, close),
@@ -117,7 +134,7 @@ function readSpec(specsRoot: string, file: string): SpecRead {
             subjects.set(name, at);
         }
     }
-    const tests = testsOf(text).map(({ end, start, title }) => {
+    const tests = testsIn(text).map(({ end, start, title }) => {
         // Stryker disable next-line EqualityOperator: a call never sits on the first character of a test or its comments
         const inside = reached.filter(({ index }) => index >= start && index < end);
         return {
@@ -150,33 +167,14 @@ export function aspectOf(file: string): string {
     return basename(file, '.spec.ts');
 }
 
-// invariant: `/articles/:id` → `articles-id`.
-function slugOf(name: string): string {
-    return (
-        name
-            .toLowerCase()
-            .replaceAll(/[^a-z0-9]+/gu, '-')
-            .replaceAll(/^-|-$/gu, '') || 'root'
-    );
-}
-
-export function targetOf(
-    specsRoot: string,
-    spec: SpecRead,
-    name: string,
-    keepsName: boolean,
-): string {
+/** Where a spec of this subject is filed: `undefined` for a subject with no standard folder (a page, a journey, the root route), whose file name nobody but its author can choose. */
+export function targetOf(specsRoot: string, spec: SpecRead, name: string): string | undefined {
     const reached = spec.subjects.get(name);
     // Stryker disable next-line ConditionalExpression: a name a test opens on is a subject of its spec
     const folder = reached === undefined ? undefined : subjectFolder(reached.subject, spec.reading);
-    const aspect = aspectOf(spec.file);
-    if (folder === undefined) {
-        const lastWord = name.slice(name.lastIndexOf(' ') + 1);
-        return keepsName
-            ? spec.file
-            : join(dirname(spec.file), `${aspect}-${slugOf(lastWord)}.spec.ts`);
-    }
-    return join(specsRoot, spec.specification, folder, `${aspect}.spec.ts`);
+    return folder === undefined
+        ? undefined
+        : join(specsRoot, spec.specification, folder, `${aspectOf(spec.file)}.spec.ts`);
 }
 
 export function openedSubjects(spec: SpecRead): string[] {
@@ -189,11 +187,14 @@ export function openedSubjects(spec: SpecRead): string[] {
     ];
 }
 
-/** A journey goes with the subject its chain starts on. */
+/** A journey goes with the subject its chain starts on; the first subject keeps the file when no folder holds it, and a later one with no folder is left out — the split refuses to name its file. */
 export function splitPlan(specsRoot: string, spec: SpecRead): Map<string, string> {
     const plan = new Map<string, string>();
     for (const [position, name] of openedSubjects(spec).entries()) {
-        plan.set(name, targetOf(specsRoot, spec, name, position === 0));
+        const target = targetOf(specsRoot, spec, name) ?? (position === 0 ? spec.file : undefined);
+        if (target !== undefined) {
+            plan.set(name, target);
+        }
     }
     return plan;
 }

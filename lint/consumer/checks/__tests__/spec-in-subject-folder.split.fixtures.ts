@@ -1,5 +1,7 @@
-/** Three subjects, a neutral test, wrapped and split describes, hooks, a disk-building constant, a helper chain, an async helper, and types. */
+/** A header, three subjects, a neutral test, wrapped and split describes, hooks, a disk-building constant, a helper chain, an async helper, and types. */
 export const RICH_ORDERS = [
+    '/* The tickers reset after each test. */',
+    '',
     "import { file } from '@jterrazz/test';",
     "import { afterEach, beforeEach, describe, expect, test } from 'vitest';",
     "import { api } from '../api.specification.js';",
@@ -80,6 +82,8 @@ export const RICH_ORDERS = [
 /** What the split of RICH_ORDERS writes, by path. */
 export const RICH_SPLIT: Record<string, string> = {
     'api/orders/list/orders.spec.ts': [
+        '/* The tickers reset after each test. */',
+        '',
         "import { file } from '@jterrazz/test';",
         "import { afterEach, beforeEach, describe, expect, test } from 'vitest';",
         "import { api } from '../../api.specification.js';",
@@ -108,19 +112,22 @@ export const RICH_SPLIT: Record<string, string> = {
         '    cache.clear();',
         '});',
         '',
-        "describe('orders',",
+        'describe(',
+        "    'orders, read and written',",
         '    () => {',
         "        test('lists', async () => {",
         "            tickers.set('a', 1);",
         "            await answered(await api.get('/orders'));",
         "            await settled('a');",
         '        });',
+        '    },',
+        ');',
         '',
+        "describe('writing', () => {",
         "    test('neutral', () => {",
         '        expect(1).toBe(1);',
         '    });',
-        '    },',
-        ');',
+        '});',
         '',
     ].join('\n'),
     'api/orders/create/orders.spec.ts': [
@@ -145,7 +152,7 @@ export const RICH_SPLIT: Record<string, string> = {
         '    vi.useRealTimers();',
         '});',
         '',
-        "describe('orders', () => {",
+        "describe('writing', () => {",
         "    test('creates', async () => {",
         "        await answered(await api.post('/orders', {}));",
         "        await settled('b');",
@@ -162,7 +169,7 @@ export const RICH_SPLIT: Record<string, string> = {
         '    vi.useRealTimers();',
         '});',
         '',
-        "describe('orders', () => {",
+        "describe('writing', () => {",
         "    test('deletes', async () => {",
         "        const id: Id = 'c';",
         '        const name: Name = id;',
