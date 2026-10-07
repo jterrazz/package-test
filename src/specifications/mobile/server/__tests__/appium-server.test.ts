@@ -17,7 +17,7 @@ const run = {
     url: 'http://127.0.0.1:4723',
 };
 
-/** A project root whose appium spawns each named program — its path, then its arguments — in a group of its own, writes their pids to `spawned.json`, then answers on the port its flag names. */
+/** A project root whose appium spawns each named program — its path, then its arguments — in a group of its own, for a minute at most, writes their pids to `spawned.json`, then answers on the port its flag names. */
 function appiumSpawning(programs: Record<string, string[]>): string {
     const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
     mkdirSync(resolve(root, 'node_modules/.bin'), { recursive: true });
@@ -28,7 +28,7 @@ function appiumSpawning(programs: Record<string, string[]>): string {
             "import { writeFileSync } from 'node:fs';",
             "import { createServer } from 'node:http';",
             `const programs = ${JSON.stringify(programs)};`,
-            "const spawned = Object.fromEntries(Object.entries(programs).map(([name, [program, ...args]]) => [name, spawn(program, ['-e', 'setInterval(() => {}, 1000)', ...args], { detached: true, stdio: 'ignore' }).pid]));",
+            "const spawned = Object.fromEntries(Object.entries(programs).map(([name, [program, ...args]]) => [name, spawn(program, ['-e', 'setTimeout(() => {}, 60000)', ...args], { detached: true, stdio: 'ignore' }).pid]));",
             "writeFileSync('spawned.json', JSON.stringify(spawned));",
             "createServer((q, s) => s.end()).listen(Number(process.argv[process.argv.indexOf('--port') + 1]));",
         ].join('\n'),
