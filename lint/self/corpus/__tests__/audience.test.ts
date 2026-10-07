@@ -124,10 +124,19 @@ describe('audience', () => {
         ]);
     });
 
+    // invariant: the entries are loaded with the file, never inside a test: a mutation run reads a module first loaded during a test as code the test ran, where this test only reads what it exports.
+    const published = publishedEntries(manifestOf(installed).exports);
+    const load = createRequire(join(installed, 'package.json'));
+    const exposures = published
+        .filter(({ condition, target }) => condition !== 'browser' && MODULE_FILE.test(target))
+        .map(({ condition, subpath, target }) => {
+            const loaded: unknown = load(join(installed, target));
+            return selfExposures(loaded, self, `${subpath} (${condition})`);
+        });
+
     test('no module the exports map publishes exposes a self rule, at any depth', () => {
         // Given - every published entry of the extracted package, loaded by node itself as an install loads it — `require` takes a CommonJS build and an ES module alike, `.js`, `.cjs` or `.mjs`; a target of any other kind fails before a load
-        const entries = publishedEntries(manifestOf(installed).exports);
-        expect(entries.map(({ condition, subpath }) => `${subpath}:${condition}`)).toStrictEqual(
+        expect(published.map(({ condition, subpath }) => `${subpath}:${condition}`)).toStrictEqual(
             expect.arrayContaining([
                 '.:import',
                 '.:browser',
@@ -136,17 +145,10 @@ describe('audience', () => {
                 './oxlint:require',
             ]),
         );
-        expect(entries.filter(({ target }) => !MODULE_FILE.test(target))).toStrictEqual([]);
-        const load = createRequire(join(installed, 'package.json'));
-        const exposures = entries
-            .filter(({ condition }) => condition !== 'browser')
-            .map(({ condition, subpath, target }) => {
-                const loaded: unknown = load(join(installed, target));
-                return selfExposures(loaded, self, `${subpath} (${condition})`);
-            });
+        expect(published.filter(({ target }) => !MODULE_FILE.test(target))).toStrictEqual([]);
 
         // Then - every entry is a module node loads and is in the tarball, and no rule object, name nor rule map a consumer reaches is a self rule's — the browser build, which loads only inside Browser Mode, is held by the text above
-        expect(entries.filter(({ target }) => !packed.has(target))).toStrictEqual([]);
+        expect(published.filter(({ target }) => !packed.has(target))).toStrictEqual([]);
         expect(exposures.flat()).toStrictEqual([]);
     });
 

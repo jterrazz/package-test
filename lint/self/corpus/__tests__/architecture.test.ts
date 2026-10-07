@@ -39,6 +39,18 @@ const ACTION_MODULES = {
     visit: 'visit',
 };
 
+// invariant: the modules are loaded with the file, never inside a test: a mutation run reads a module first loaded during a test as code the test ran, where this test only reads what it exports.
+const definitions = await definitionsIn(ROOT, [
+    ...modulesOf(ROOT, '', '.capability.ts'),
+    ...modulesOf(ROOT, '', '.action.ts'),
+]);
+
+const named = (kind: string): string[] =>
+    definitions
+        .filter(({ definition }) => kind.includes(definition.kind))
+        .map(({ definition }) => definition.name)
+        .toSorted();
+
 /** Meta-tests `chain-loads-in-a-page` (`chain-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component specification composes a setup inside a page, so what the chain and a setup load must load there too. */
 describe('architecture', () => {
     test('the architecture a specification is composed in (meta-tests) — `chain-loads-in-a-page` — the chain and every setup load no node builtin and no package, at any depth', () => {
@@ -77,30 +89,15 @@ describe('architecture', () => {
         ]);
     });
 
-    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — the setups and the actions under src/ are exactly the ones the chain offers', async () => {
+    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — the setups and the actions under src/ are exactly the ones the chain offers', () => {
         // Given - every definition a setup or an action module exports
-        const definitions = await definitionsIn(ROOT, [
-            ...modulesOf(ROOT, '', '.capability.ts'),
-            ...modulesOf(ROOT, '', '.action.ts'),
-        ]);
-        const named = (kind: string): string[] =>
-            definitions
-                .filter(({ definition }) => kind.includes(definition.kind))
-                .map(({ definition }) => definition.name)
-                .toSorted();
-
         // Then - one module per setup, and every action is one the list places — a verb two specifications share (`run`) is each specification's own module
         expect(named('setup context')).toStrictEqual(SETUPS);
         expect([...new Set(named('action'))]).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
     });
 
-    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
+    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested in its folder’s __tests__/ or declared siblingless, and armed through a port of its own', () => {
         // Given - every definition a setup or an action module exports
-        const definitions = await definitionsIn(ROOT, [
-            ...modulesOf(ROOT, '', '.capability.ts'),
-            ...modulesOf(ROOT, '', '.action.ts'),
-        ]);
-
         // Then - each answers to its module, has its test, and names a port exactly when it arms an adapter
         expect(definitions.flatMap((found) => straysOf(ROOT, found, ACTION_MODULES))).toStrictEqual(
             [],
