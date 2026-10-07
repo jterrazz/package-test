@@ -155,4 +155,19 @@ describe('checkNoUnusedGround', () => {
             deadInPool(''),
         ]);
     });
+
+    test('a dead pool entry is named once, as the pool’s, never again as the specs root’s ground', () => {
+        // Given - a pool holding one entry a spec names and one nothing names
+        const found = findingsIn({
+            'specs/__expected__/dead.json': '{}\n',
+            'specs/__expected__/read.json': '{}\n',
+            'specs/api/users.spec.ts':
+                "it('runs', () => { file('../__expected__/read.json'); });\n",
+        });
+
+        // Then - the one finding the pool owes
+        expect(found).toStrictEqual([
+            'specs/__expected__/dead.json: the pool entry dead.json, which no spec under specs names — delete dead.json, or name it from the specs that share it',
+        ]);
+    });
 });

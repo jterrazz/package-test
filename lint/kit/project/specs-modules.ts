@@ -120,24 +120,21 @@ export function holdsASpec(folder: string): boolean {
     );
 }
 
-/** The special folder an earlier spelling names — `_setup/`, or a bare `setup/` holding no spec — or `undefined`. */
+/** The special folder a bare earlier spelling names — a `setup/` at the specs root or holding no spec — or `undefined`; a `_` name is refused before it is asked. */
 export function renamedSpecialOf(specsRoot: string, folder: string): string | undefined {
-    const name = basename(folder);
-    const renamed = RENAMED_FOLDERS[name];
+    const renamed = RENAMED_FOLDERS[basename(folder)];
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a name no release spelt is answered undefined either way; the guard spares the walk of its tree
     if (renamed === undefined) {
         return undefined;
     }
-    return name.startsWith('_') || dirname(folder) === specsRoot || !holdsASpec(folder)
-        ? renamed
-        : undefined;
+    return dirname(folder) === specsRoot || !holdsASpec(folder) ? renamed : undefined;
 }
 
-/** `_shared/` anywhere, or a bare `shared/` holding no spec: what specifications share sits at the specs root now. */
+/** A bare `shared/` at the specs root or holding no spec: what specifications share sits at the specs root now; a `_` name is refused before it is asked. */
 export function isRetiredShared(specsRoot: string, folder: string): boolean {
-    const name = basename(folder);
     return (
-        RETIRED_SHARED_FOLDERS.includes(name) &&
-        (name.startsWith('_') || dirname(folder) === specsRoot || !holdsASpec(folder))
+        RETIRED_SHARED_FOLDERS.includes(basename(folder)) &&
+        (dirname(folder) === specsRoot || !holdsASpec(folder))
     );
 }
 

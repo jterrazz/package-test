@@ -17,11 +17,11 @@ function tree(files: readonly string[]): string {
 
 describe('derivedProjects', () => {
     test('derived-projects — a project per specification folder, the unit project over each root holding a module test, the component one over each holding a rendered one', () => {
-        // Given - module tests in src/, lint/ and a folder of specs/ no specification names, tests in ground, setup, dot and install folders, two specification folders, rendered tests, a snapshot of one, and folders whose names only begin like an install or a build
+        // Given - module tests in the tests folders of src/ and lint/, one in a folder of specs/ no specification names, tests in ground, setup, dot and install folders, two specification folders, rendered tests, a snapshot of one, and folders whose names only begin like an install or a build
         const root = tree([
-            'src/orders.test.ts',
-            'src/button.test.tsx',
-            'lint/rule.test.ts',
+            'src/__tests__/orders.test.ts',
+            'src/__tests__/button.test.tsx',
+            'lint/__tests__/rule.test.ts',
             'specs/surface/exports.test.ts',
             'specs/__fixtures__/stray.test.ts',
             'src/__fixtures__/stray.test.ts',
@@ -31,10 +31,10 @@ describe('derivedProjects', () => {
             'specs/cli/run.spec.ts',
             'docs/guide.md',
             'docs/__fixtures__/example.test.ts',
-            'app/page.test.tsx',
+            'app/__tests__/page.test.tsx',
             'web/view.test.tsx.snap',
-            'distance/route.test.ts',
-            'node_modules.bak/stray.test.ts',
+            'distance/__tests__/route.test.ts',
+            'node_modules.bak/__tests__/stray.test.ts',
         ]);
 
         // Then - each project with the options the tree gives it

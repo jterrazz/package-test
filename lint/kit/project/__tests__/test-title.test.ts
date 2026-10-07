@@ -48,19 +48,25 @@ describe('testTitle', () => {
         expect(subjectOfSource('route-judge', source, 'route-judge.ts')).toBe('route-judge');
     });
 
-    test('reads the module beside the test, its own extension first', () => {
-        // Given - a rendered test beside its component, and a same-named plain module
+    test('reads the module of the folder above the test’s __tests__/, its own extension first, or the one beside a rendered unit of a specs tree', () => {
+        // Given - a component and a same-named plain module, a rendered unit of the component specimen, and a test naming no module
         const root = packageWith({
+            'specs/component/clock/dial.tsx': 'export function ClockDial() {}\n',
             'src/locale-note.ts': 'export const other = 1;\n',
             'src/locale-note.tsx': 'export function LocaleNote() {}\n',
         });
 
-        // Then - the .tsx answers for a .test.tsx; a test with no module beside it keeps its base name
-        expect(testTitle(join(root, 'src/locale-note.test.tsx'), 'component')).toStrictEqual({
+        // Then - the .tsx answers for a .test.tsx in the tests folder; the specimen's unit beside its test; a test with no module keeps its base name
+        expect(
+            testTitle(join(root, 'src/__tests__/locale-note.test.tsx'), 'component'),
+        ).toStrictEqual({
             named: 'LocaleNote',
             what: 'subject',
         });
-        expect(testTitle(join(root, 'src/alone.test.ts'), 'module').named).toBe('alone');
+        expect(
+            testTitle(join(root, 'specs/component/clock/dial.test.tsx'), 'component').named,
+        ).toBe('ClockDial');
+        expect(testTitle(join(root, 'src/__tests__/alone.test.ts'), 'module').named).toBe('alone');
     });
 
     test('names an index module by the folder it stands for, the package entry aside', () => {
@@ -71,10 +77,10 @@ describe('testTitle', () => {
         });
 
         // Then - the folder names the subject, not the word index
-        expect(testTitle(join(root, 'src/concurrency/index.test.ts'), 'module').named).toBe(
-            'concurrency',
-        );
-        expect(testTitle(join(root, 'src/index.test.ts'), 'module').named).toBe('index');
+        expect(
+            testTitle(join(root, 'src/concurrency/__tests__/index.test.ts'), 'module').named,
+        ).toBe('concurrency');
+        expect(testTitle(join(root, 'src/__tests__/index.test.ts'), 'module').named).toBe('index');
     });
 
     test.each([

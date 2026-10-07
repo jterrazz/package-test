@@ -4,7 +4,6 @@ import {
     GROUND_REQUESTS,
     GROUND_SEEDS,
     isGroundFolder,
-    isSpecialFolder,
     PRUNED,
     SETUP_FOLDER,
     SPECIAL_FOLDERS,
@@ -155,7 +154,7 @@ function refusedUnder(rootDir: string, specsRoot: string): Spotted[] {
                 found.push(refused);
             } else if (entry.name === SETUP_FOLDER) {
                 found.push(...refusedInsideSetup({ rootDir, specsRoot }, path));
-            } else if (!isSpecialFolder(entry.name)) {
+            } else {
                 visit(path);
             }
         }

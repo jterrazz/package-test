@@ -239,7 +239,7 @@ function loadedByName(section: Readonly<Record<string, unknown>>): string[] {
     return Object.values(recordOf(section.projects)).flatMap((project) => {
         const { root, wrap } = recordOf(project);
         return typeof wrap === 'string'
-            ? [posix.normalize(posix.join(typeof root === 'string' ? root : '.', wrap))]
+            ? [posix.normalize(typeof root === 'string' ? posix.join(root, wrap) : wrap)]
             : [];
     });
 }

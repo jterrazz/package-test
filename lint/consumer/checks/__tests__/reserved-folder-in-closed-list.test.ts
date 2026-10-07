@@ -71,6 +71,7 @@ describe('checkReservedFolderInClosedList', () => {
         // Given - setups at the root and below it, holding modules, declarations, ground, underscored folders, data and pruned output
         const found = checkReservedFolderInClosedList(
             packageWith({
+                'specs/__setup__/__seeds__/rows.sql': '\n',
                 'specs/__setup__/data.json': '{}\n',
                 'specs/__setup__/runner.ts': 'export {};\n',
                 'specs/api/__setup__/__fixtures__/a.json': '{}\n',
@@ -85,6 +86,7 @@ describe('checkReservedFolderInClosedList', () => {
 
         // Then - each thing that is no code, with where it goes
         expect(found).toStrictEqual([
+            'specs/__setup__/__seeds__/ `__seeds__/` inside a `__setup__/`, which holds code alone — move it beside that `__setup__/`, to `specs/__seeds__/`, and the paths that name what it holds',
             'specs/__setup__/data.json `data.json` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` — `specs/__fixtures__/data.json`, or `specs/__expected__/data.json` when a test compares against it — and the paths that import or name it',
             'specs/api/__setup__/__fixtures__/ `__fixtures__/` inside a `__setup__/`, which holds code alone — move it beside that `__setup__/`, to `specs/api/__fixtures__/`, and the paths that name what it holds',
             "specs/api/__setup__/_private/ `_private/` inside a `__setup__/`, where every folder is the code's own — drop the `_` and name it for what it holds — the special folders, `__setup__/`, `__expected__/`, `__fixtures__/`, `__requests__/`, `__seeds__/`, sit beside a `__setup__/`, never inside it",
