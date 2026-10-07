@@ -199,7 +199,8 @@ const NAMES: NamesRule[] = [
         fix: `move a file where it belongs — code into \`specs/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one specification that reads it, data into the ground folder of its role`,
         ls: {
             '**/specs': specsRootFiles(),
-            '**/specs/*': { '.dir': 'regex:.+' },
+            // invariant: below the specs root the root's file list no longer holds; any folder name is the closed-list rule's to judge.
+            '**/specs/*': {},
         },
         name: 'specs-root-holds-specifications-and-shared',
     },

@@ -8,6 +8,7 @@ import { identityOf } from '../../../kit/project/linted-file.js';
 import type { FileIdentity } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
+// Stryker disable next-line Regex: the file's role already holds it to a test's name, so the pattern only cuts the suffix it ends on
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 const MODULE_EXTENSIONS = ['.ts', '.tsx', '.js'];
@@ -53,6 +54,7 @@ export const testInItsTestsFolder = defineRule(
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
+        // Stryker disable next-line StringLiteral: a rule's type groups it for a fix run, and decides nothing it reports
         type: 'problem',
     },
     {

@@ -81,7 +81,9 @@ ruleTester().run('test-in-its-tests-folder', testInItsTestsFolder, {
         {
             name: 'A root-level tests/ dir (guarded by a real package.json at that root) is banned.',
             code: 'export {};',
-            errors: [{ column: 0, line: 1, messageId: 'rootTests' }],
+            errors: [
+                { column: 0, line: 1, message: /^found: a package-level `tests\/` directory · /u },
+            ],
             filename: `${REPO_ROOT}/tests/foo.test.ts`,
         },
         {
