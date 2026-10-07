@@ -12,10 +12,10 @@ export function aspectOf(filename: string): string {
     return basename(filename).replace(/\.spec\.ts$/u, '');
 }
 
-/** `route-judge.test.ts` → `route-judge`. */
-function testBaseOf(filename: string): string {
+/** `route-judge.test.ts` → `route-judge`, `pagination.spec.ts` → `pagination`. */
+export function testBaseOf(filename: string): string {
     // Stryker disable next-line Regex: a test's name ends on its suffix
-    return basename(filename).replace(/\.test\.tsx?$/u, '');
+    return basename(filename).replace(/\.(?:test\.tsx?|spec\.ts)$/u, '');
 }
 
 /** The folder of the module a test names: the one above its `__tests__/`, or its own for a rendered unit under `specs/`. */

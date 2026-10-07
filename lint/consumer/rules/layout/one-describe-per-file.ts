@@ -14,9 +14,10 @@ import {
     isGroup,
     isTest,
 } from '../../../kit/project/test-calls.js';
-import { testTitle } from '../../../kit/project/test-title.js';
+import { testBaseOf, testTitle } from '../../../kit/project/test-title.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { flattenedGroup, mergeFix } from './one-describe-per-file.merge.js';
+import type { FileSubject } from './one-describe-per-file.merge.js';
 
 function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
     const [only, second] = members.filter((statement) => isGroup(statement));
@@ -35,8 +36,9 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
 function titleFinding(
     source: string,
     group: AstNode,
-    named: string,
+    subject: FileSubject,
 ): undefined | { fix?: FixFn; messageId: string; node: AstNode } {
+    const { named } = subject;
     const title = firstArgumentOf(group);
     const said = stringValue(title);
     // Stryker disable next-line OptionalChaining: a group is a call, which has a callee
@@ -51,7 +53,7 @@ function titleFinding(
     const messageId = parametrised ? 'tableTitle' : 'wrongTitle';
     if (!parametrised) {
         const body = groupBodyOf(group);
-        const kept = flattenedGroup(source, group, named);
+        const kept = flattenedGroup(source, group, subject);
         const fix: FixFn = (fixer) => [
             fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${named}'`),
             // Stryker disable next-line ConditionalExpression: a group that holds tests alone always has a body
@@ -84,7 +86,7 @@ export const oneDescribePerFile = defineRule(
             },
             severalDescribes: {
                 found: 'a second top-level `describe` in a file about one {{what}}',
-                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` — `typescript fix` does it when every group holds tests alone — or move this one to a file of its own {{what}}",
+                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` unless the group named this {{what}} — `typescript fix` does it when every group holds tests alone — or move this one to a file of its own {{what}}",
             },
             tableTitle: {
                 found: 'the file’s `describe.each` is titled "{{title}}"',
@@ -96,7 +98,7 @@ export const oneDescribePerFile = defineRule(
             },
             wrongTitle: {
                 found: 'the file’s `describe` is titled "{{title}}"',
-                fix: "title it '{{named}}', the file's {{what}} — `typescript fix` renames it, keeping the title it said on each of its tests when it holds tests alone",
+                fix: "title it '{{named}}', the file's {{what}} — `typescript fix` renames it, keeping the title it said on each of its tests, unless it named this {{what}} in another spelling, when it holds tests alone",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
@@ -114,10 +116,11 @@ export const oneDescribePerFile = defineRule(
                         return;
                     }
                     const { named, what } = testTitle(context.filename, identityOf(context).role);
+                    const subject = { base: testBaseOf(context.filename), named };
                     const finding = runFinding(members);
                     if (finding !== undefined) {
                         const source = context.sourceCode.text;
-                        const fix = mergeFix(source, statements, members, named);
+                        const fix = mergeFix(source, statements, members, subject);
                         context.report({ ...finding, ...(fix && { fix }), data: { named, what } });
                         return;
                     }
@@ -126,7 +129,7 @@ export const oneDescribePerFile = defineRule(
                     const title =
                         only === undefined
                             ? undefined
-                            : titleFinding(context.sourceCode.text, only, named);
+                            : titleFinding(context.sourceCode.text, only, subject);
                     // Stryker restore ConditionalExpression
                     if (title !== undefined) {
                         // Stryker disable next-line LogicalOperator: a member is always there

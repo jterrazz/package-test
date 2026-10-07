@@ -19,8 +19,29 @@ import {
     isTestCallee,
 } from '../../../kit/project/test-calls.js';
 
+/** `<LocaleNote />`, `locale-note` and `LocaleNote` spell one subject: only letters and digits count, whatever their case. */
+function spelling(title: string): string {
+    // Stryker disable next-line MethodExpression: both sides of a comparison fold the same way, upper or lower
+    return title.replaceAll(/[^\p{L}\d]/gu, '').toLowerCase();
+}
+
+/** What the file is about: the title its `describe` takes, and its own base name. */
+export interface FileSubject {
+    readonly base: string;
+    readonly named: string;
+}
+
+/** A group titled with the file's subject, or with the file's own base name, in any spelling: its title adds nothing a test should carry. */
+function restatesSubject(title: string, { base, named }: FileSubject): boolean {
+    return spelling(title) === spelling(named) || spelling(title) === spelling(base);
+}
+
 /** `undefined` when the group holds anything but tests. */
-export function flattenedGroup(source: string, group: AstNode, named: string): string | undefined {
+export function flattenedGroup(
+    source: string,
+    group: AstNode,
+    subject: FileSubject,
+): string | undefined {
     const body = groupBodyOf(group);
     const title = stringValue(firstArgumentOf(group));
     const statements = childList(body, 'body');
@@ -42,7 +63,7 @@ export function flattenedGroup(source: string, group: AstNode, named: string): s
         if (!written) {
             return undefined;
         }
-        if (title !== named) {
+        if (!restatesSubject(title, subject)) {
             const at = nodeStart(its) + 1;
             text += `${source.slice(from, at)}${escapedFor(its, `${title} — `)}`;
             from = at;
@@ -56,7 +77,7 @@ function mergedText(
     source: string,
     statements: AstNode[],
     members: Set<AstNode>,
-    named: string,
+    subject: FileSubject,
 ): string | undefined {
     const inRun = statements.filter(
         (statement) =>
@@ -73,7 +94,7 @@ function mergedText(
         if (!members.has(statement)) {
             hoisted += `${lead.trimStart()}${own}\n`;
         } else if (isDescribeCallee(calleeOf(statement))) {
-            const flattened = flattenedGroup(source, statement, named);
+            const flattened = flattenedGroup(source, statement, subject);
             if (flattened === undefined) {
                 return undefined;
             }
@@ -83,7 +104,7 @@ function mergedText(
         }
     }
     const beforeDescribe = hoisted === '' ? '' : `${hoisted}\n`;
-    return `${beforeDescribe}describe('${named}', () => {\n${grouped.trim()}\n});`;
+    return `${beforeDescribe}describe('${subject.named}', () => {\n${grouped.trim()}\n});`;
 }
 
 function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
@@ -117,9 +138,9 @@ export function mergeFix(
     source: string,
     statements: AstNode[],
     members: AstNode[],
-    named: string,
+    subject: FileSubject,
 ): FixFn | undefined {
-    const text = mergedText(source, statements, new Set(members), named);
+    const text = mergedText(source, statements, new Set(members), subject);
     const [first] = members;
     const last = members.at(-1);
     // Stryker disable next-line ConditionalExpression: a merge always has a first and a last member
