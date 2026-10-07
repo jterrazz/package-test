@@ -355,8 +355,8 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.response`     | 25  | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.status`       | 1   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.table()`      | 7   | 4   | 1   | —    | 2           | —       | —      | —         | —      |
-| `.file()`       | 1   | —   | 15  | 6    | 4           | —       | —      | —         | —      |
-| `.directory()`  | 1   | —   | 4   | 6    | 1           | —       | —      | —         | —      |
+| `.file()`       | 1   | —   | 15  | 7    | 4           | —       | —      | —         | —      |
+| `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
 | `.stdout`       | —   | —   | 38  | —    | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —   | 14  | —    | —           | —       | —      | —         | —      |
 | `.exitCode`     | —   | —   | 44  | —    | —           | —       | —      | —         | —      |
@@ -390,7 +390,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability             | api | job | cli | lint | integration | website | mobile | component | module |
 | ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 2      |
-| `toMatch(directory())` | 1   | —   | 6   | 6    | 1           | —       | —      | —         | 1      |
+| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 7      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |

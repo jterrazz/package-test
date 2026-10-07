@@ -16,7 +16,7 @@ import {
 } from '../../../kit/project/test-calls.js';
 import { testBaseOf, testTitle } from '../../../kit/project/test-title.js';
 import { consumerRows } from '../../catalogue/manifest.js';
-import { flattenedGroup, mergeFix } from './one-describe-per-file.merge.js';
+import { flattenedGroup, mergeFix, restatesSubject } from './one-describe-per-file.merge.js';
 import type { FileSubject } from './one-describe-per-file.merge.js';
 
 function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
@@ -32,12 +32,37 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
     return stray === undefined ? undefined : { messageId: 'testOutside', node: stray };
 }
 
+type TitleFinding = { fix?: FixFn; messageId: string; node: AstNode };
+
+// invariant: a title its tests cannot carry is never renamed away: the author places it.
+function renameFinding(
+    source: string,
+    group: AstNode,
+    title: AstNode,
+    subject: FileSubject,
+): TitleFinding {
+    const said = stringValue(title);
+    const body = groupBodyOf(group);
+    const kept = flattenedGroup(source, group, subject);
+    if (kept === undefined && (said === undefined || !restatesSubject(said, subject))) {
+        return { messageId: 'wrongTitle', node: title };
+    }
+    const fix: FixFn = (fixer) => [
+        fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${subject.named}'`),
+        // Stryker disable next-line ConditionalExpression: a group that holds tests alone always has a body
+        ...(body === undefined || kept === undefined
+            ? []
+            : [fixer.replaceTextRange([nodeStart(body) + 1, nodeEnd(body) - 1], kept)]),
+    ];
+    return { fix, messageId: 'wrongTitle', node: title };
+}
+
 // invariant: a table's title is prefixed so what names its rows stays, unless it is computed.
 function titleFinding(
     source: string,
     group: AstNode,
     subject: FileSubject,
-): undefined | { fix?: FixFn; messageId: string; node: AstNode } {
+): TitleFinding | undefined {
     const { named } = subject;
     const title = firstArgumentOf(group);
     const said = stringValue(title);
@@ -50,26 +75,16 @@ function titleFinding(
     ) {
         return undefined;
     }
-    const messageId = parametrised ? 'tableTitle' : 'wrongTitle';
     if (!parametrised) {
-        const body = groupBodyOf(group);
-        const kept = flattenedGroup(source, group, subject);
-        const fix: FixFn = (fixer) => [
-            fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${named}'`),
-            // Stryker disable next-line ConditionalExpression: a group that holds tests alone always has a body
-            ...(body === undefined || kept === undefined
-                ? []
-                : [fixer.replaceTextRange([nodeStart(body) + 1, nodeEnd(body) - 1], kept)]),
-        ];
-        return { fix, messageId, node: title };
+        return renameFinding(source, group, title, subject);
     }
     if (title.type !== 'Literal' && title.type !== 'TemplateLiteral') {
-        return { messageId, node: title };
+        return { messageId: 'tableTitle', node: title };
     }
     const at = nodeStart(title) + 1;
     const fix: FixFn = (fixer) =>
         fixer.insertTextBeforeRange([at, at], escapedFor(title, `${named} — `));
-    return { fix, messageId, node: title };
+    return { fix, messageId: 'tableTitle', node: title };
 }
 
 const row = rowNamed(consumerRows, 'one-describe-per-file');
@@ -86,7 +101,7 @@ export const oneDescribePerFile = defineRule(
             },
             severalDescribes: {
                 found: 'a second top-level `describe` in a file about one {{what}}',
-                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` unless the group named this {{what}} — `typescript fix` does it when every group holds tests alone — or move this one to a file of its own {{what}}",
+                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` unless the group named this {{what}} — `typescript fix` does it when every group holds tests alone and no title it carries opens on a capital — or move this one to a file of its own {{what}}",
             },
             tableTitle: {
                 found: 'the file’s `describe.each` is titled "{{title}}"',
@@ -98,7 +113,7 @@ export const oneDescribePerFile = defineRule(
             },
             wrongTitle: {
                 found: 'the file’s `describe` is titled "{{title}}"',
-                fix: "title it '{{named}}', the file's {{what}} — `typescript fix` renames it, keeping the title it said on each of its tests, unless it named this {{what}} in another spelling, when it holds tests alone",
+                fix: "title it '{{named}}', the file's {{what}} — `typescript fix` renames it, keeping the title it said on each of its tests, unless it named this {{what}} in another spelling, when it holds tests alone and its title opens on no capital",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

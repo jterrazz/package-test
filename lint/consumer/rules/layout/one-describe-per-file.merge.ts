@@ -32,11 +32,30 @@ export interface FileSubject {
 }
 
 // invariant: a group titled with the file's subject, or with the file's own base name, in any spelling: its title adds nothing a test should carry.
-function restatesSubject(title: string, { base, named }: FileSubject): boolean {
+export function restatesSubject(title: string, { base, named }: FileSubject): boolean {
     return spelling(title) === spelling(named) || spelling(title) === spelling(base);
 }
 
-/** `undefined` when the group holds anything but tests. */
+const SEPARATOR = ' — ';
+
+// invariant: a test whose title already opens on the group's, in any spelling, carries it: a second merge adds nothing. Its quotes are no letter, so the title is read as written.
+function carriesGroup(test: string, group: string): boolean {
+    const [head = ''] = test.split(SEPARATOR);
+    return test.includes(SEPARATOR) && spelling(head) === spelling(group);
+}
+
+// invariant: `vitest/prefer-lowercase-title` lowers a test title's first letter, which turns a constant or a type (`ARTICLES_42`, `Article`) into a name nobody wrote: such a group is left to its author.
+function opensUppercase(title: string): boolean {
+    return /^\p{Lu}/u.test(title);
+}
+
+function literalTitleOf(statement: AstNode): AstNode | undefined {
+    const its = firstArgumentOf(statement);
+    const written = its?.type === 'Literal' || its?.type === 'TemplateLiteral';
+    return isTestCallee(calleeOf(statement)) && written ? its : undefined;
+}
+
+/** `undefined` when the group holds anything but tests titled by a literal, or when its title would not survive on them. */
 export function flattenedGroup(
     source: string,
     group: AstNode,
@@ -44,28 +63,22 @@ export function flattenedGroup(
 ): string | undefined {
     const body = groupBodyOf(group);
     const title = stringValue(firstArgumentOf(group));
-    const statements = childList(body, 'body');
     if (body === undefined || title === undefined) {
+        return undefined;
+    }
+    const prefixes = !restatesSubject(title, subject);
+    const titles = childList(body, 'body').map((statement) => literalTitleOf(statement));
+    const written = titles.filter((its) => its !== undefined);
+    if (written.length !== titles.length || (prefixes && opensUppercase(title))) {
         return undefined;
     }
     let text = '';
     let from = nodeStart(body) + 1;
-    for (const statement of statements) {
-        const its = firstArgumentOf(statement);
-        const written = its?.type === 'Literal' || its?.type === 'TemplateLiteral';
-        if (!isTestCallee(calleeOf(statement))) {
-            return undefined;
-        }
-        // Stryker disable next-line ConditionalExpression,BlockStatement: a test titled by nothing is titled by no literal, which the next check refuses
-        if (its === undefined) {
-            return undefined;
-        }
-        if (!written) {
-            return undefined;
-        }
-        if (!restatesSubject(title, subject)) {
+    for (const its of written) {
+        const said = source.slice(nodeStart(its), nodeEnd(its));
+        if (prefixes && !carriesGroup(said, title)) {
             const at = nodeStart(its) + 1;
-            text += `${source.slice(from, at)}${escapedFor(its, `${title} — `)}`;
+            text += `${source.slice(from, at)}${escapedFor(its, `${title}${SEPARATOR}`)}`;
             from = at;
         }
     }
