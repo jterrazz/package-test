@@ -9,18 +9,21 @@ import {
     groupEnded,
     KILL_GRACE_MS,
     reaped,
+    REAPER,
     signalGroup,
     SIGNALS_GROUPS,
     WATCHDOG,
 } from './process-group.js';
+import type { Strays } from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
 
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 
 // Stryker disable all: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
-function watchGroup(groupId: number): ChildProcess {
-    const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(groupId)], {
+function watchGroup(groupId: number, strays: Strays): ChildProcess {
+    const args = ['-e', WATCHDOG, JSON.stringify(strays), String(groupId)];
+    const watchdog = spawn(process.execPath, args, {
         detached: true,
         env: { ...process.env, NODE_OPTIONS: undefined },
         stdio: ['pipe', 'ignore', 'ignore'],
@@ -35,6 +38,12 @@ function watchGroup(groupId: number): ChildProcess {
     return watchdog;
 }
 // Stryker restore all
+
+async function reapStrays(strays: Strays): Promise<void> {
+    const args = ['-e', REAPER, JSON.stringify(strays)];
+    // Stryker disable next-line ConditionalExpression,EqualityOperator,ObjectLiteral,StringLiteral: a reaper handed no strays reaps nothing, and its output is read by no one
+    await (strays.length > 0 ? reaped(spawn(process.execPath, args, { stdio: 'ignore' })) : null);
+}
 
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     // Stryker disable next-line StringLiteral: an empty stdio reads as the default, piped
@@ -62,7 +71,7 @@ async function findFreePort(): Promise<number> {
 }
 // Stryker restore all
 
-/** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`. */
+/** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`; both reap the strays it declares, the processes it spawns outside its group. */
 export class ServedProcess {
     port: null | number = null;
     private child: ChildProcess | null = null;
@@ -73,15 +82,18 @@ export class ServedProcess {
     private exited = false;
     private output = '';
     private readonly root: string;
+    private readonly strays: Strays;
     private watchdog: ChildProcess | null = null;
 
     constructor(
-        options: ProcessOptions,
+        options: ProcessOptions & { strays?: Strays },
         root: string,
         specification = 'website',
         extraEnv: Record<string, string> = {},
     ) {
         this.extraEnv = extraEnv;
+        // Stryker disable next-line ArrayDeclaration: a stray of no shape is no process, and the reaper reaps nothing for it
+        this.strays = options.strays ?? [];
         this.specification = specification;
         this.options = options;
         this.root = root;
@@ -127,7 +139,7 @@ export class ServedProcess {
         this.exited = false;
         // Stryker disable next-line ConditionalExpression,LogicalOperator,BlockStatement,EqualityOperator: see watchGroup
         if (child.pid !== undefined && SIGNALS_GROUPS) {
-            this.watchdog = watchGroup(child.pid);
+            this.watchdog = watchGroup(child.pid, this.strays);
         }
         const collect = (data: unknown): void => {
             this.output += String(data);
@@ -252,11 +264,12 @@ export class ServedProcess {
             return;
         }
         this.child = null;
+        await endGroup(child);
+        await reapStrays(this.strays);
+        // hazard: the watchdog stands until the strays are gone: a run killed while it stops still reaps them.
         // Stryker disable next-line OptionalChaining: see watchGroup
         this.watchdog?.kill('SIGKILL');
         this.watchdog = null;
-
-        await endGroup(child);
     }
 }
 

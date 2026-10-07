@@ -6,7 +6,11 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { pause } from '../../../chain/pause.js';
-import { groupEnded, reaped, signalGroup, WATCHDOG } from '../process-group.js';
+import { groupEnded, reaped, REAPER, signalGroup, WATCHDOG } from '../process-group.js';
+import { alive, programNamed } from './serve.fixtures.js';
+
+/** Keeps the process up until it is signalled. */
+const KEEP = 'setInterval(() => {}, 1000)';
 
 async function outwaited(): Promise<string> {
     await pause(200);
@@ -85,7 +89,7 @@ describe('process-group', () => {
         // Given - a sleeper leading a group of its own, guarded by a watchdog reading its parent's pipe
         const sleeper = spawn('sleep', ['30'], { detached: true, stdio: 'ignore' });
         const group = -Number(sleeper.pid);
-        const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(sleeper.pid)], {
+        const watchdog = spawn(process.execPath, ['-e', WATCHDOG, '[]', String(sleeper.pid)], {
             stdio: ['pipe', 'ignore', 'ignore'],
         });
 
@@ -98,5 +102,71 @@ describe('process-group', () => {
 
         // Then - the group is gone, ended by the watchdog alone
         expect(ended).toBe(true);
+    });
+
+    test('the watchdog reaps the strays it is handed once its parent closes its stdin, their group gone already', async () => {
+        // Given - a stray xcodebuild naming a simulator in a group of its own, two bystanders each missing one of its marks, and a watchdog over a group already gone
+        const udid = 'PROCESS-GROUP-WATCHDOG-SIM';
+        const xcodebuild = programNamed('xcodebuild');
+        const stray = spawn(xcodebuild, ['-e', KEEP, 'WebDriverAgent', `id=${udid}`], {
+            detached: true,
+            stdio: 'ignore',
+        });
+        const bystanders = [
+            spawn(process.execPath, ['-e', KEEP, 'WebDriverAgent', `id=${udid}`], {
+                stdio: 'ignore',
+            }),
+            spawn(xcodebuild, ['-e', KEEP, 'WebDriverAgent'], { stdio: 'ignore' }),
+        ];
+        const gone = spawn('true', [], { detached: true, stdio: 'ignore' });
+        await once(gone, 'exit');
+        const strays = [{ holds: ['WebDriverAgent', `id=${udid}`], program: 'xcodebuild' }];
+        const watchdog = spawn(
+            process.execPath,
+            ['-e', WATCHDOG, JSON.stringify(strays), String(gone.pid)],
+            { stdio: ['pipe', 'ignore', 'ignore'] },
+        );
+        await pause(1500);
+        const watching = alive(Number(watchdog.pid));
+
+        // When - the parent's end of the pipe closes, as when the parent dies
+        watchdog.stdin.end();
+        await reaped(stray);
+        const survivors = bystanders.map((bystander) => alive(Number(bystander.pid)));
+        for (const bystander of bystanders) {
+            bystander.kill('SIGKILL');
+        }
+
+        // Then - the watchdog outlived the group to reap the stray, and only the stray
+        expect([watching, stray.signalCode, survivors]).toStrictEqual([
+            true,
+            'SIGTERM',
+            [true, true],
+        ]);
+    });
+
+    test('the reaper ends every stray it is handed, and only those', async () => {
+        // Given - a stray runner app inside a simulator, and a bystander of the same name inside another
+        const runner = 'WebDriverAgentRunner-Runner';
+        const stray = spawn(programNamed(runner), ['-e', KEEP, '/Devices/REAPER-SIM/'], {
+            stdio: 'ignore',
+        });
+        const bystander = spawn(programNamed(runner), ['-e', KEEP, '/Devices/OTHER-SIM/'], {
+            stdio: 'ignore',
+        });
+        await pause(300);
+
+        // When - the reaper runs over the strays of that simulator
+        const strays = [{ holds: ['/Devices/REAPER-SIM/'], program: runner }];
+        const reaper = spawn(process.execPath, ['-e', REAPER, JSON.stringify(strays)], {
+            stdio: 'ignore',
+        });
+        await reaped(reaper);
+        await reaped(stray);
+        const survived = alive(Number(bystander.pid));
+        bystander.kill('SIGKILL');
+
+        // Then - the stray was terminated, the bystander left alone
+        expect([stray.signalCode, survived]).toStrictEqual(['SIGTERM', true]);
     });
 });

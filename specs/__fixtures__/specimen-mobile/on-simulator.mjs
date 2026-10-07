@@ -144,6 +144,8 @@ const suite = spawnSync(
 );
 appium.child.kill('SIGTERM');
 // Appium keeps WebDriverAgent's xcodebuild alive across sessions, and past
-// Its own exit: the run stops it the way the driver does before a session.
-spawnSync('pkill', ['-f', `xcodebuild.*${udid}`]);
+// Its own exit, and the runner app on the simulator with it: the run ends
+// Both, as the specification ends the WebDriverAgent of a server it spawned.
+spawnSync('pkill', ['-f', `WebDriverAgent.*${udid}`]);
+spawnSync('pkill', ['-f', `${udid}.*WebDriverAgent`]);
 process.exitCode = suite.status ?? 1;

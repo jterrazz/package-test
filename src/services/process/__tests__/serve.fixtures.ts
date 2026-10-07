@@ -1,6 +1,9 @@
 import { once } from 'node:events';
+import { mkdirSync, mkdtempSync, symlinkSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 
 import type { ProcessOptions } from '../process.adapter.js';
 
@@ -44,6 +47,15 @@ export function refused(found: string, why: string, fix: string): string {
 }
 
 export const SILENT = `node -e "setInterval(() => {}, 1000)"`;
+
+/** Node under another executable's path, `name` below a fresh folder: a process whose program is that path, and whose script is its `-e` argument. */
+export function programNamed(name: string): string {
+    const folder = mkdtempSync(join(tmpdir(), 'program-'));
+    const program = join(folder, name);
+    mkdirSync(dirname(program), { recursive: true });
+    symlinkSync(process.execPath, program);
+    return program;
+}
 
 /** Each process shape refused before it is ready, and the refusal it gets, whole. */
 export const REFUSALS: [string, ProcessOptions, string][] = [

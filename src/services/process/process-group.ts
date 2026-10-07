@@ -11,17 +11,63 @@ export const SIGNALS_GROUPS = process.platform !== 'win32';
 const GROUP_POLL_MS = 1000;
 const GROUP_SETTLE_MS = 50;
 
-export const WATCHDOG = `
-const group = -Number(process.argv[1]);
+/** A process the served one spawned outside its group: its executable is `program`, or a path ending in it, and its command line holds every word of `holds`. */
+export type Stray = { holds: readonly string[]; program: string };
+
+export type Strays = readonly Stray[];
+
+// invariant: the strays are the script's first argument; a stray may lead a group of its own, which its signal reaches whole.
+const STRAYS_SOURCE = `
+const { execFileSync } = require('node:child_process');
+const strays = JSON.parse(process.argv[1] ?? '[]');
+const listed = (column) => {
+    let listing = '';
+    try { listing = execFileSync('ps', ['-A', '-o', 'pid=,' + column + '='], { encoding: 'utf8', maxBuffer: 67108864 }); } catch {}
+    return new Map(listing.split('\\n').flatMap((line) => {
+        const found = /^\\s*(\\d+)\\s(.*)$/u.exec(line);
+        return found === null ? [] : [[Number(found[1]), found[2]]];
+    }));
+};
+const strayPids = () => {
+    const commands = listed('command');
+    return [...listed('comm')]
+        .filter(([pid, program]) => pid !== process.pid && strays.some((stray) =>
+            (program === stray.program || program.endsWith('/' + stray.program)) && stray.holds.every((word) => (commands.get(pid) ?? '').includes(word))))
+        .map(([pid]) => pid);
+};
+const signalStrays = (signal) => {
+    for (const pid of strays.length === 0 ? [] : strayPids()) {
+        try { process.kill(-pid, signal); } catch {}
+        try { process.kill(pid, signal); } catch {}
+    }
+};
+`;
+
+/** Its arguments are the strays, then the group. With strays to reap, it outlives the group: a stray outlives the group that spawned it. */
+export const WATCHDOG = `${STRAYS_SOURCE}
+const group = -Number(process.argv[2]);
 const gone = () => { try { process.kill(group, 0); return false; } catch { return true; } };
 const end = () => {
-    try { process.kill(group, 'SIGTERM'); } catch { process.exit(0); }
-    setTimeout(() => { try { process.kill(group, 'SIGKILL'); } catch {} process.exit(0); }, ${KILL_GRACE_MS});
+    try { process.kill(group, 'SIGTERM'); } catch { if (strays.length === 0) process.exit(0); }
+    signalStrays('SIGTERM');
+    setTimeout(() => { try { process.kill(group, 'SIGKILL'); } catch {} signalStrays('SIGKILL'); process.exit(0); }, ${KILL_GRACE_MS});
 };
 process.stdin.on('end', end);
 process.stdin.on('error', end);
 process.stdin.resume();
-setInterval(() => { if (gone()) process.exit(0); }, ${GROUP_POLL_MS});
+setInterval(() => { if (strays.length === 0 && gone()) process.exit(0); }, ${GROUP_POLL_MS});
+`;
+
+/** Its argument is the strays: each gets SIGTERM, and SIGKILL when it outlives the grace. */
+export const REAPER = `${STRAYS_SOURCE}
+signalStrays('SIGTERM');
+const deadline = Date.now() + ${KILL_GRACE_MS};
+const settle = () => {
+    if (strayPids().length === 0) return;
+    if (Date.now() >= deadline) { signalStrays('SIGKILL'); return; }
+    setTimeout(settle, ${GROUP_SETTLE_MS});
+};
+settle();
 `;
 
 // Stryker disable BlockStatement: a catch emptied answers undefined, which reads as false all the same

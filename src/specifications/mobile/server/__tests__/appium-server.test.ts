@@ -1,8 +1,10 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { isRecord } from '../../../../../lint/kit/project/json-shape.js';
+import { alive, programNamed } from '../../../../services/process/__tests__/serve.fixtures.js';
 import {
     isListening,
     statusOf,
@@ -15,13 +17,44 @@ const run = {
     url: 'http://127.0.0.1:4723',
 };
 
+/** A project root whose appium spawns each named program — its path, then its arguments — in a group of its own, writes their pids to `spawned.json`, then answers on the port its flag names. */
+function appiumSpawning(programs: Record<string, string[]>): string {
+    const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
+    mkdirSync(resolve(root, 'node_modules/.bin'), { recursive: true });
+    writeFileSync(
+        resolve(root, 'appium.mjs'),
+        [
+            "import { spawn } from 'node:child_process';",
+            "import { writeFileSync } from 'node:fs';",
+            "import { createServer } from 'node:http';",
+            `const programs = ${JSON.stringify(programs)};`,
+            "const spawned = Object.fromEntries(Object.entries(programs).map(([name, [program, ...args]]) => [name, spawn(program, ['-e', 'setInterval(() => {}, 1000)', ...args], { detached: true, stdio: 'ignore' }).pid]));",
+            "writeFileSync('spawned.json', JSON.stringify(spawned));",
+            "createServer((q, s) => s.end()).listen(Number(process.argv[process.argv.indexOf('--port') + 1]));",
+        ].join('\n'),
+    );
+    writeFileSync(
+        resolve(root, 'node_modules/.bin/appium'),
+        `#!/bin/sh\nexec node "${resolve(root, 'appium.mjs')}" "$@"\n`,
+        { mode: 0o755 },
+    );
+    return root;
+}
+
+function spawnedBy(root: string): Record<string, number> {
+    const read: unknown = JSON.parse(readFileSync(resolve(root, 'spawned.json'), 'utf8'));
+    return isRecord(read)
+        ? Object.fromEntries(Object.entries(read).map(([name, pid]) => [name, Number(pid)]))
+        : {};
+}
+
 describe('appium-server', () => {
     test('startAppiumServer — refuses a root with no appium binary, naming the install command', async () => {
         // Given - a project root where appium was never installed (the run's temp root removes it)
         const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
 
         // Then - the refusal is the exact fix, and nothing is spawned
-        await expect(startAppiumServer(root)).rejects.toThrow(
+        await expect(startAppiumServer(root, 'SIM-17')).rejects.toThrow(
             new Error(
                 [
                     `found: specification.mobile() requires \`appium\`, and ${root}/node_modules/.bin/appium does not exist`,
@@ -156,15 +189,20 @@ describe('appium-server', () => {
         );
     });
 
-    test('startAppiumServer — serves the project’s appium on the port it picks, until stopped', async () => {
-        // Given - a root whose appium answers its status on the port its flag names, and one whose appium exits
-        const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
-        mkdirSync(resolve(root, 'node_modules/.bin'), { recursive: true });
-        writeFileSync(
-            resolve(root, 'node_modules/.bin/appium'),
-            `#!/bin/sh\nexec node -e "require('node:http').createServer((q, s) => s.end()).listen(Number(process.argv[1]))" "$2"\n`,
-            { mode: 0o755 },
-        );
+    test('startAppiumServer — serves the project’s appium on the port it picks, until stopped with the WebDriverAgent it spawned for its simulator', async () => {
+        // Given - a root whose appium spawns, each in a group of its own, the xcodebuild and runner app of its simulator's WebDriverAgent beside three it must leave alone, then answers its status on the port its flag names; and one whose appium exits
+        const udid = 'APPIUM-SERVER-STOP-SIM';
+        const xcodebuild = programNamed('xcodebuild');
+        const runner = `Devices/${udid}/data/WebDriverAgentRunner-Runner.app/WebDriverAgentRunner-Runner`;
+        const otherRunner =
+            'Devices/OTHER-SIM/data/WebDriverAgentRunner-Runner.app/WebDriverAgentRunner-Runner';
+        const root = appiumSpawning({
+            appXcodebuild: [xcodebuild, 'MyApp.xcodeproj', `id=${udid}`],
+            otherRunner: [programNamed(otherRunner)],
+            otherXcodebuild: [xcodebuild, 'WebDriverAgent.xcodeproj', 'id=OTHER-SIM'],
+            runner: [programNamed(runner)],
+            xcodebuild: [xcodebuild, 'WebDriverAgent.xcodeproj', `id=${udid}`],
+        });
 
         const failing = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
         mkdirSync(resolve(failing, 'node_modules/.bin'), { recursive: true });
@@ -177,20 +215,30 @@ describe('appium-server', () => {
         );
 
         // When - it is served, then stopped, and one that exits is served
-        const exited = await startAppiumServer(failing).catch((error: unknown) => error);
-        const server = await startAppiumServer(root);
+        const exited = await startAppiumServer(failing, udid).catch((error: unknown) => error);
+        const server = await startAppiumServer(root, udid);
         const answered = await statusOf(`${server.url}/status`);
+        const spawned = spawnedBy(root);
+        const served = Object.values(spawned).every((pid) => alive(pid));
         await server.stop();
         const listening = await isListening(server.url);
+        const left = Object.entries(spawned).filter(([, pid]) => alive(pid));
+        for (const [, pid] of left) {
+            process.kill(pid, 'SIGKILL');
+        }
 
-        // Then - it answered while served, and no longer listens; the one that exited is refused for the mobile runner
+        // Then - it answered while served, and neither it nor its simulator's WebDriverAgent outlives the stop, which leaves the others alone; the one that exited is refused for the mobile runner
         expect([
             answered,
+            served,
             listening,
+            left.map(([name]) => name).toSorted(),
             exited instanceof Error && exited.message.split('\n')[0],
         ]).toStrictEqual([
             200,
+            true,
             false,
+            ['appXcodebuild', 'otherRunner', 'otherXcodebuild'],
             'found: specification.mobile(): the server command exited before it was ready.',
         ]);
     });

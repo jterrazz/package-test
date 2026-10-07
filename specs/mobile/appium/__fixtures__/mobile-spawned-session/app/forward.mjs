@@ -1,10 +1,14 @@
 // Serves `--port <n>` by forwarding every request to the protocol double the
 // Run's global setup names in APPIUM_DOUBLE_URL. It writes the simulator each
 // New session asks for to `udid`, and `stopped` when it is terminated. It
-// Exits when the run that spawned it is gone.
-import { appendFileSync, writeFileSync } from 'node:fs';
+// Exits when the run that spawned it is gone. Each new session starts a
+// WebDriverAgent as the XCUITest driver does — an xcodebuild in a group of
+// Its own, and the runner app on the simulator — which outlive this server,
+// Their pids written to `webdriveragent`.
+import { spawn } from 'node:child_process';
+import { appendFileSync, existsSync, mkdirSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createServer, request } from 'node:http';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 const port = Number(process.argv[process.argv.indexOf('--port') + 1]);
 const target = new URL(process.env.APPIUM_DOUBLE_URL);
@@ -22,6 +26,20 @@ setInterval(() => {
     }
 }, 200).unref();
 
+/** Node under the program's name, exiting on its own two minutes on: a run that fails to reap it leaves it no longer. */
+function webDriverAgent(program, ...named) {
+    mkdirSync(dirname(program), { recursive: true });
+    if (!existsSync(program)) {
+        symlinkSync(process.execPath, program);
+    }
+    const started = spawn(program, ['-e', 'setTimeout(() => {}, 120000)', ...named], {
+        detached: true,
+        stdio: 'ignore',
+    });
+    started.unref();
+    appendFileSync(join(import.meta.dirname, 'webdriveragent'), `${started.pid}\n`);
+}
+
 createServer((incoming, outgoing) => {
     const chunks = [];
     incoming.on('data', (chunk) => chunks.push(chunk));
@@ -30,6 +48,8 @@ createServer((incoming, outgoing) => {
         if (incoming.method === 'POST' && incoming.url === '/session') {
             const asked = JSON.parse(body.toString()).capabilities.alwaysMatch['appium:udid'];
             appendFileSync(join(import.meta.dirname, 'udid'), `${asked}\n`);
+            webDriverAgent(join(import.meta.dirname, 'bin/xcodebuild'), 'build-for-testing', 'test-without-building', '-project', 'WebDriverAgent.xcodeproj', '-destination', `id=${asked}`);
+            webDriverAgent(join(import.meta.dirname, `Devices/${asked}/data/WebDriverAgentRunner-Runner.app/WebDriverAgentRunner-Runner`));
         }
         const forwarded = request(
             { headers: incoming.headers, host: target.hostname, method: incoming.method, path: incoming.url, port: target.port },

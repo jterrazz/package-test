@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { refusal } from '../../../chain/refusals/refusal.js';
+import type { Strays } from '../../../services/process/process-group.js';
 import { ServedProcess } from '../../../services/process/serve.js';
 import type { MobileDevice } from '../device/device.port.js';
 import { ensureBooted, resolveSimulatorUdid, sameRuntime } from './simulator.js';
@@ -17,8 +18,16 @@ export type AppiumServer = {
     url: string;
 };
 
-/** Appium is an optional peer resolved from `node_modules/.bin`; the served process owns port, readiness and the group kill. */
-export async function startAppiumServer(root: string): Promise<AppiumServer> {
+/** outside: the XCUITest driver runs WebDriverAgent's xcodebuild in a group of its own and keeps it past the session and past its own exit, beside the runner app it launches inside the simulator. */
+function webDriverAgentOf(udid: string): Strays {
+    return [
+        { holds: ['WebDriverAgent', `id=${udid}`], program: 'xcodebuild' },
+        { holds: [`/Devices/${udid}/`], program: 'WebDriverAgentRunner-Runner' },
+    ];
+}
+
+/** Appium is an optional peer resolved from `node_modules/.bin`; the served process owns port, readiness, the group kill, and the WebDriverAgent the server spawned for the simulator. */
+export async function startAppiumServer(root: string, udid: string): Promise<AppiumServer> {
     const bin = resolve(root, 'node_modules', '.bin', 'appium');
     if (!existsSync(bin)) {
         throw new Error(
@@ -34,6 +43,7 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
         {
             command: `"${bin}" --port "$PORT"`,
             ready: APPIUM_STATUS,
+            strays: webDriverAgentOf(udid),
             timeout: APPIUM_READY_TIMEOUT_MS,
         },
         root,
@@ -48,14 +58,14 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
     };
 }
 
-/** The booted simulator is the machine's and outlives the server. */
+/** The booted simulator is the machine's and outlives the server; its WebDriverAgent is the server's, and does not. */
 export async function serveAppium(
     device: MobileDevice,
     root: string,
 ): Promise<{ server: AppiumServer; udid: string }> {
     const udid = device.udid ?? (await resolveSimulatorUdid(device));
     await ensureBooted(udid);
-    return { server: await startAppiumServer(root), udid };
+    return { server: await startAppiumServer(root, udid), udid };
 }
 
 /** The run's Appium server, provided by a `mobile({ device })` project's setup. */
