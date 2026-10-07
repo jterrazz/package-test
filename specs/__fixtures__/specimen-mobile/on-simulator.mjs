@@ -17,7 +17,7 @@ const XCUITEST = 'xcuitest@12.13.2';
 const FIRST_SESSION_MS = 600_000;
 
 const here = import.meta.dirname;
-const root = resolve(here, '../../../..');
+const root = resolve(here, '../../..');
 const out = join(root, '.artifacts/mobile');
 const appiumDir = join(out, 'appium');
 const appiumHome = join(appiumDir, 'home');
