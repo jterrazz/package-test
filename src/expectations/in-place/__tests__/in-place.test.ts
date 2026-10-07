@@ -1,9 +1,11 @@
+import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, inject, onTestFinished, test } from 'vitest';
 
 import { dedent } from '../../../../lint/kit/project/dedent.js';
+import { registerMatchers } from '../../goldens/matchers.js';
 import {
     callSiteOf,
     deferRewritesTo,
@@ -263,5 +265,31 @@ describe('in-place', () => {
             'expect(three).toMatch(`third`);\n',
             false,
         ]);
+    });
+
+    test('deferRewritesTo — the folder update mode leaves a write in — read at each write, and the run’s own once the matchers are registered', async () => {
+        // Given - a scratch test, a folder of this test's own, then the matchers registered afresh
+        const file = scratchFile('expect(one).toMatch(``);\n');
+        const folder = join(file, '..', 'deferred');
+        const pending = `${createHash('sha256').update(file).digest('hex')}.json`;
+        const runs = join(inject('inPlaceRewrites') ?? folder, pending);
+        onTestFinished(() => {
+            rmSync(runs, { force: true });
+            deferRewritesTo(() => inject('inPlaceRewrites'));
+        });
+
+        // When - one write is deferred to the folder, then one after a fresh registration
+        deferRewritesTo(() => folder);
+        writeInPlace({ column: 13, file, line: 1 }, (indent) => renderText('first', indent));
+        Reflect.set(globalThis, Symbol.for('@jterrazz/test:matchers-registered'), false);
+        await registerMatchers();
+        writeInPlace({ column: 13, file, line: 1 }, (indent) => renderText('second', indent));
+
+        // Then - the test file is untouched, the first write waits in the folder, the second in the run’s
+        expect([
+            readFileSync(file, 'utf8'),
+            existsSync(join(folder, pending)),
+            existsSync(runs),
+        ]).toStrictEqual(['expect(one).toMatch(``);\n', true, true]);
     });
 });

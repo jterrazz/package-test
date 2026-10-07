@@ -221,10 +221,11 @@ const REGISTERED = Symbol.for('@jterrazz/test:matchers-registered');
 
 /** Idempotent; a missing vitest peer is tolerated. */
 export async function registerMatchers(): Promise<void> {
-    // Stryker disable next-line BlockStatement: registering again registers the same matchers
+    // Stryker disable next-line BlockStatement,ConditionalExpression,BooleanLiteral: registering again registers the same matchers
     if (Reflect.get(globalThis, REGISTERED) === true) {
         return;
     }
+    // Stryker disable next-line BooleanLiteral: registering again registers the same matchers
     Reflect.set(globalThis, REGISTERED, true);
 
     try {

@@ -178,7 +178,6 @@ export function fixGroundPlacement(rootDir: string): string[] {
             writeFileSync(file, text.replaceAll(`${climb}/${entry}`, `${down}/${entry}`));
         }
         removeIfEmpty(ground);
-        removeIfEmpty(dirname(ground));
         moved.push(`${relative(rootDir, join(ground, entry))} → ${relative(rootDir, destination)}`);
     }
     return moved;

@@ -48,13 +48,14 @@ describe('checkReservedFolderInClosedList', () => {
     });
 
     test('each refusal teaches its move', () => {
-        // Given - one folder of each kind
+        // Given - one folder of each kind, and a shared folder at the specs root holding a spec
         const fixes = checkReservedFolderInClosedList(
             packageWith({
                 'specs/api/shared/a.json': '{}\n',
                 'specs/api/users/__setup__/__fixtures__/a.json': '{}\n',
                 'specs/doubles/clock.ts': 'export {};\n',
                 'specs/fixtures/a.json': '{}\n',
+                'specs/shared/list.spec.ts': "test('a', () => {});\n",
             }),
         ).map(({ fix }) => fix);
 
@@ -64,6 +65,7 @@ describe('checkReservedFolderInClosedList', () => {
             'move it beside that `__setup__/`, to `specs/api/users/__fixtures__/`, and the paths that name what it holds',
             'move its modules into `__setup__/`, each test adapter named for the port it replaces (`<port>.adapter.ts`), and the paths that import them',
             'rename it `__fixtures__/`, and the paths that name it',
+            "move what it holds into the special folders of `specs/` itself — what the leaves of a folder share sits in that folder's `__setup__/` or ground, `specs/__setup__/` and the ground at the specs root for what specifications share",
         ]);
     });
 

@@ -115,6 +115,7 @@ type Chai = {
 };
 
 function directoryOf(location: string): string {
+    // Stryker disable next-line Regex,StringLiteral: a frame's file opens on file:// or holds none, and a query or a fragment holds no slash, so the folder reads the same
     const normalized = location.replace(/^file:\/\//u, '').replace(/[?#].*$/u, '');
     return normalized.slice(0, normalized.lastIndexOf('/'));
 }
