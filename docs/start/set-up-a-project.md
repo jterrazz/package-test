@@ -177,7 +177,7 @@ export default await oxlintConfig(import.meta.url);
 
 **Everything else is scratch, in one temp folder per run.** Before the first worker starts, the preset creates `jterrazz-test-runs-<uid>/<pid>-…` in the OS temp directory and points `TMPDIR`, `TMP` and `TEMP` at it, so every temp folder a worker, a spawned child or a tool it runs makes lands inside. That holds each CLI spec's working directory, the per-worker database copies and a browser's profile. The run removes the folder when it ends, and the next run removes the folder of any run that died first. A CLI spec's working directory goes sooner, once its test has finished — except under `test.concurrent`, where it waits for the run.
 
-**One environment variable is yours to set**: `TEST_UPDATE=1`, which turns on update mode ([Tokens § Update mode](../reference/tokens.md#update-mode-tokens-are-preserved)). The framework also reads `VITEST_POOL_ID`, which vitest sets, to isolate each worker's databases.
+**Two environment variables are yours to set**: `TEST_UPDATE=1`, which turns on update mode ([Tokens § Update mode](../reference/tokens.md#update-mode-tokens-are-preserved)), and `TEST_MOBILE_HEADED=1`, which shows a mobile run's simulator in a window instead of running it headless ([Mobile specs](../guides/mobile-specs.md#the-simulator-and-what-the-run-leaves-on-it)). The framework also reads `VITEST_POOL_ID`, which vitest sets, to isolate each worker's databases.
 
 ## Two rough edges of the toolchain's flow
 

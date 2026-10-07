@@ -51,12 +51,18 @@ async function loadWebdriverio(): Promise<Webdriverio> {
     }
 }
 
+/** `TEST_MOBILE_HEADED=1` shows the simulator; otherwise the driver runs it headless and closes a window already open, which it would otherwise open for every session it boots one for. */
+function headless(): boolean {
+    return process.env.TEST_MOBILE_HEADED !== '1';
+}
+
 function capabilitiesOf(request: SessionRequest): Record<string, unknown> {
     const { name, os, udid } = request.device;
     return {
         'appium:automationName': 'XCUITest',
         'appium:bundleId': request.bundleId,
         'appium:deviceName': name,
+        'appium:isHeadless': headless(),
         'appium:newCommandTimeout': IDLE_SESSION_BUDGET_S,
         'appium:noReset': true,
         ...(os === undefined ? {} : { 'appium:platformVersion': platformVersion(os) }),

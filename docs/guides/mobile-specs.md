@@ -63,6 +63,14 @@ Without a declared `appium`, and unless the run already serves one ([One session
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule `no-runner-alias`) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
 
+### The simulator, and what the run leaves on it
+
+A run leaves the machine as it found it, but for the booted simulator: it opens no window.
+
+**The simulator runs headless.** Every session asks the XCUITest driver for it (`appium:isHeadless: true`), so no Simulator or DeviceHub window opens — not for a run, not for the hundredth run of an agent's loop. The driver holds the simulator to the mode a session asks for: a window already showing it is closed. To watch a run, set `TEST_MOBILE_HEADED=1` on that run alone. It is an environment variable and not an option, so no committed config can make every run open a window.
+
+The booted simulator itself is the machine's: it is reused by the next run, and `xcrun simctl shutdown <udid>` ends it.
+
 ### A declared Appium server
 
 `appium: { url }` points the runner at a server someone else runs — a device farm, a Mac across the network, the protocol double this package specifies its own mobile specification against. The runner connects to it instead of spawning the project's own, and it hands the server the device by capabilities (`appium:deviceName`, `appium:platformVersion` from `os`, `appium:udid` when declared) instead of resolving and booting it through `simctl`: the machine the server runs on owns its simulators. `cleanup` stops nothing it did not start, and under `mobile()` the run's one session outlives it ([One session per run](#one-session-per-run)).

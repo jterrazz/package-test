@@ -15,7 +15,9 @@ export default async function setup(
     process.env.APPIUM_DOUBLE_URL = double.url;
     return async () => {
         await double.stop();
-        const { created, deleted } = double.sessions;
-        process.stdout.write(`appium double: ${created} session(s) created, ${deleted} deleted\n`);
+        const { created, deleted, windows } = double.sessions;
+        process.stdout.write(
+            `appium double: ${created} session(s) created, ${deleted} deleted, ${windows} simulator window(s) opened\n`,
+        );
     };
 }

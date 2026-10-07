@@ -27,7 +27,8 @@ import { StaleElementError } from './stale-element-error.js';
 const PIXEL =
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
-export type SessionCount = { created: number; deleted: number };
+/** `windows` counts the sessions that asked for no headless simulator: the XCUITest driver opens the simulator's window for each. */
+export type SessionCount = { created: number; deleted: number; windows: number };
 
 export type AppiumDouble = { sessions: SessionCount; stop: () => Promise<void>; url: string };
 
@@ -123,11 +124,7 @@ function refused(why: string): ProtocolError {
     );
 }
 
-async function createSession(
-    app: ScriptedApp,
-    sessions: Map<string, Session>,
-    body: Json,
-): Promise<Json> {
+async function createSession({ app, count, sessions }: Served, body: Json): Promise<Json> {
     const capabilities = requested(body);
     if (String(capabilities.platformName).toLowerCase() !== 'ios') {
         throw refused(`platformName must be iOS, got '${String(capabilities.platformName)}'`);
@@ -150,6 +147,8 @@ async function createSession(
     await session.app.launch();
     const sessionId = randomUUID();
     sessions.set(sessionId, session);
+    count.created += 1;
+    count.windows += capabilities['appium:isHeadless'] === true ? 0 : 1;
     return { capabilities, sessionId };
 }
 
@@ -163,9 +162,7 @@ async function route(
         return { message: 'The Appium protocol double is ready', ready: true };
     }
     if (method === 'POST' && path.length === 1 && path[0] === 'session') {
-        const created = await createSession(app, sessions, body);
-        count.created += 1;
-        return created;
+        return await createSession({ app, count, sessions }, body);
     }
     const [head, sessionId = '', ...rest] = path;
     const session = head === 'session' ? sessions.get(sessionId) : undefined;
@@ -203,7 +200,11 @@ function failureOf(error: unknown): ProtocolError {
 }
 
 export async function startAppiumDouble(app: ScriptedApp): Promise<AppiumDouble> {
-    const served: Served = { app, count: { created: 0, deleted: 0 }, sessions: new Map() };
+    const served: Served = {
+        app,
+        count: { created: 0, deleted: 0, windows: 0 },
+        sessions: new Map(),
+    };
     const server = createServer((request, response) => {
         void (async () => {
             try {

@@ -3,7 +3,7 @@ import { mkdtempSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, onTestFinished, test } from 'vitest';
+import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import type { MobileDevice } from '../../device/device.port.js';
 import { openSession } from '../driver-session.js';
@@ -197,7 +197,7 @@ describe('openSession', () => {
         expect(factories.calls).toMatchObject({ attached: [], created: 2 });
     });
 
-    test('openSession — the session it asks for — names the device by name, bare version and udid when given, with an idle budget that outlives the gap between two files', async () => {
+    test('openSession — the session it asks for — names the device by name, bare version and udid when given, with an idle budget that outlives the gap between two files, its simulator headless', async () => {
         // Given - a device named with its OS, spaced, and udid, one by name alone, and one whose OS only ends in the platform's name
         const serverUrl = await appiumHolding(new Set());
         const factories = stubFactories();
@@ -220,6 +220,7 @@ describe('openSession', () => {
             'appium:automationName': 'XCUITest',
             'appium:bundleId': 'com.example.app',
             'appium:deviceName': 'iPhone 17',
+            'appium:isHeadless': true,
             'appium:newCommandTimeout': 300,
             'appium:noReset': true,
             'appium:wdaLaunchTimeout': 240_000,
@@ -248,6 +249,27 @@ describe('openSession', () => {
                 logLevel: 'error',
                 port: Number(new URL(serverUrl).port),
             },
+        ]);
+    });
+
+    test('openSession — the session it asks for — shows the simulator under TEST_MOBILE_HEADED=1 alone', async () => {
+        // Given - a server, and the run's environment asking to watch, then naming another value
+        const serverUrl = await appiumHolding(new Set());
+        const factories = stubFactories();
+        onTestFinished(() => {
+            vi.unstubAllEnvs();
+        });
+
+        // When - a session is opened under each
+        vi.stubEnv('TEST_MOBILE_HEADED', '1');
+        await openSession(request(serverUrl, factories));
+        vi.stubEnv('TEST_MOBILE_HEADED', 'true');
+        await openSession(request(serverUrl, factories));
+
+        // Then - only the first asked for its simulator in a window
+        expect(factories.calls.asked.map((asked) => asked['appium:isHeadless'])).toStrictEqual([
+            false,
+            true,
         ]);
     });
 });
