@@ -17,7 +17,7 @@ const run = {
     url: 'http://127.0.0.1:4723',
 };
 
-/** A project root whose appium spawns each named program — its path, then its arguments — in a group of its own, for a minute at most, writes their pids to `spawned.json`, then answers on the port its flag names. */
+// invariant: a project root whose appium spawns each named program — its path, then its arguments — in a group of its own, for a minute at most, writes their pids to `spawned.json`, then answers on the port its flag names.
 function appiumSpawning(programs: Record<string, string[]>): string {
     const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
     mkdirSync(resolve(root, 'node_modules/.bin'), { recursive: true });

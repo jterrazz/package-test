@@ -14,7 +14,6 @@ function projectWith(lockfile?: string): string {
     return directory;
 }
 
-/** What a run of the peer's guard throws, or the empty text when it throws nothing. */
 function unbuilt(message: string, from: string, peer = 'better-sqlite3'): string {
     try {
         requireBuiltPeer(

@@ -24,7 +24,7 @@ export type ProcessOptions = {
     timeout?: number;
 };
 
-/** An external process declared as a service: started after its siblings, stopped with the specification. */
+// invariant: an external process declared as a service: started after its siblings, stopped with the specification.
 async function nothingToIsolate(): Promise<void> {
     // invariant: the minted id already tells this run's child apart, so no isolation step acts.
 }

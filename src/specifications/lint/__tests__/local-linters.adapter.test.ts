@@ -22,7 +22,6 @@ function lintersWith(overrides: Partial<Linters>): Linters {
     };
 }
 
-/** The message a lint run rejects with, or the empty text when it resolves. */
 async function rejectionOf(linted: Promise<unknown>): Promise<string> {
     try {
         await linted;

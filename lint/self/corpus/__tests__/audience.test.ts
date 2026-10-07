@@ -19,7 +19,7 @@ import {
     strandedBundles,
 } from '../audience.js';
 
-/** `rule-declares-its-audience` (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first. */
+// outside: `rule-declares-its-audience` (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first.
 const ROOT = resolve(import.meta.dirname, '../../../..');
 
 const TOOLCHAIN_CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');
@@ -40,7 +40,7 @@ type PublishedEntry = {
     target: string;
 };
 
-/** Every file the exports map resolves to, less what carries no code (a `types` target, a JSON schema). */
+// invariant: every file the exports map resolves to, less what carries no code (a `types` target, a JSON schema).
 function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
     const entries: PublishedEntry[] = [];
     const visit = (subpath: string, condition: string, node: unknown): void => {

@@ -5,7 +5,7 @@ import type { InterceptPort } from '../../intercept/intercept.port.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
 
-/** What the runner itself fetches, everything else being the subject's traffic (`network-strict-after-first-stub`); matched by prefix, never by extension: msw bypasses a "common asset" path before `onUnhandledRequest`, which would let `/api/posts.json` through. */
+// outside: what the runner itself fetches, everything else being the subject's traffic (`network-strict-after-first-stub`); matched by prefix, never by extension: msw bypasses a "common asset" path before `onUnhandledRequest`, which would let `/api/posts.json` through.
 const RUNNER_PREFIXES = ['/.artifacts/', '/@fs/', '/@id/', '/@vite', '/node_modules/', '/__vitest'];
 
 let workerInstance: null | SetupWorker = null;
@@ -15,7 +15,7 @@ export function isRunnerRequest(url: string): boolean {
     return RUNNER_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-/** Served at `/mockServiceWorker.js` by the plugin `component()` registers, from the package's own `msw`. */
+// outside: served at `/mockServiceWorker.js` by the plugin `component()` registers, from the package's own `msw`.
 async function ensureStubWorker(): Promise<void> {
     if (workerInstance !== null) {
         return;
@@ -48,7 +48,7 @@ export async function registerWorkerStubs(stubs: readonly Stub[]): Promise<StubR
     };
 }
 
-/** Drop every handler the page still carries — the per-test reset. */
+// invariant: drop every handler the page still carries — the per-test reset.
 function resetWorkerStubs(): void {
     if (workerInstance !== null) {
         workerInstance.resetHandlers();

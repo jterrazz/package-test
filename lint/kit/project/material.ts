@@ -9,7 +9,7 @@ const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures)\.[cm]?
 
 const STUBS_FACADE = /\.stubs\.[cm]?[jt]sx?$/u;
 
-/** The toolchain's, never shipped. */
+// invariant: the toolchain's, never shipped.
 const TOOL_CONFIG = /\.config\.[cm]?[jt]sx?$/u;
 
 const TEST_PACKAGES = new Set([

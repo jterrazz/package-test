@@ -19,7 +19,6 @@ const PAGE: BrowserPage = {
     url: 'http://site.test/',
 };
 
-/** What a visit asked the browser to open, and what it answered. */
 async function visited(
     config: WebsiteConfig,
     slices: Record<string, unknown> = {},

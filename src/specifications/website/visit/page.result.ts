@@ -133,7 +133,7 @@ export class PageResult extends BaseResult {
     }
 }
 
-/** Property wins the key. */
+// invariant: property wins the key.
 function namedMetas(metas: BrowserMetaElement[]): Record<string, string> {
     const named: Record<string, string> = {};
     for (const meta of metas) {

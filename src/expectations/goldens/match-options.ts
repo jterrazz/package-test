@@ -47,10 +47,10 @@ type WholeMatch<T, R> = T extends { readonly capturedInPage: true }
               ? (golden: DiskDirectoryType, options?: MatchFixtureOptions) => Promise<void>
               : unknown;
 
-/** Structural: the augmentation loads twice (src and dist), and CaptureScope's private state makes the two classes nominally distinct. */
+// invariant: structural: the augmentation loads twice (src and dist), and CaptureScope's private state makes the two classes nominally distinct.
 type StreamMarker = { readonly raw: string; readonly streamName: string };
 
-/** The refusal sits on `this`, since the augmented `toMatch` must stay assignable to vitest's own. */
+// outside: the refusal sits on `this`, since the augmented `toMatch` must stay assignable to vitest's own.
 type StreamIsNoValue = { readonly 'a stream is compared whole, or as its .text': never };
 
 type ResultSubject =

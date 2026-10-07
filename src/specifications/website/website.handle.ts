@@ -19,7 +19,7 @@ import type { BrowserPort } from './browser/browser.port.js';
 import type { WebsiteSpecification } from './website.composition.js';
 import { websiteDefinition } from './website.composition.js';
 
-/** Calling a factory would start the services twice: its shape is all the report needs. */
+// invariant: calling a factory would start the services twice: its shape is all the report needs.
 function commandOf(server: unknown): string | undefined {
     return typeof server === 'object' && server !== null && 'command' in server
         ? String(server.command)
@@ -32,7 +32,7 @@ export type ServerSpec<Services extends ServiceRecord> =
     | ProcessHandle
     | ProcessOptions;
 
-/** An `env` function is resolved against the services already up. */
+// invariant: an `env` function is resolved against the services already up.
 function resolveServer<Services extends ServiceRecord>(
     server: ServerSpec<Services>,
     services: Services,
@@ -95,7 +95,7 @@ type SiteContext<Services extends ServiceRecord> = {
     started: null | StartedServices;
 };
 
-/** A record that fails to come up must not orphan the stub started before it. */
+// invariant: a record that fails to come up must not orphan the stub started before it.
 async function startDeclared(
     services: ServiceRecord,
     root: string,
@@ -113,7 +113,7 @@ async function startDeclared(
     }
 }
 
-/** A server that never came up must not orphan the stub nor its services. */
+// invariant: a server that never came up must not orphan the stub nor its services.
 async function startSite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
     context: SiteContext<Services>,

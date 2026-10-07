@@ -12,7 +12,7 @@ import { ambiguousSegment } from '../../kit/project/subject.js';
 import type { Subject } from '../../kit/project/subject.js';
 import type { Spotted } from './checker.js';
 
-/** No folder is derived from a word that may be a value: the author writes the template that says which it is. */
+// invariant: no folder is derived from a word that may be a value: the author writes the template that says which it is.
 function ambiguityOf(
     specsRoot: string,
     spec: SpecRead,

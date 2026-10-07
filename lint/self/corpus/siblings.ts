@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import type { SiblinglessKind } from './siblingless-kinds.js';
 
-/** Every siblingless module falls into one declared kind, each naming where its proof is; the first match wins, so the narrower kind is listed first. */
+// invariant: every siblingless module falls into one declared kind, each naming where its proof is; the first match wins, so the narrower kind is listed first.
 
 const CODE_ROOTS = ['src', 'lint'];
 

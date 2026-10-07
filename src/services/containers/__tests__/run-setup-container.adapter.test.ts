@@ -18,7 +18,6 @@ async function twoLineReason(): Promise<void> {
     throw new Error('the daemon refused\nthe socket is closed');
 }
 
-/** A run whose every request is answered with this body. */
 async function answering(body: unknown): Promise<string> {
     const server = createServer((_, response) => {
         response.end(JSON.stringify(body));

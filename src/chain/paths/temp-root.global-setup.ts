@@ -27,7 +27,7 @@ export function tempRootSetup(): string {
     return setupEntry(import.meta.dirname, 'temp-root');
 }
 
-/** Each project loads this module anew: the run is recognised by the variable itself. */
+// invariant: each project loads this module anew: the run is recognised by the variable itself.
 function joinedRoot(): boolean {
     const current = tmpdir();
     return (

@@ -14,7 +14,7 @@ const isLedger = (value: unknown): value is Ledger =>
     Array.isArray(value.reached) &&
     (value.declared === undefined || Array.isArray(value.declared));
 
-/** A folder no run wrote holds nothing. */
+// invariant: a folder no run wrote holds nothing.
 function entriesOf(directory: string): Dirent[] {
     try {
         return readdirSync(directory, { withFileTypes: true });

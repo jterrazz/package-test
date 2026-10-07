@@ -30,7 +30,7 @@ const DESCRIBE_CALL = /^describe(?:\.\w+(?:\([^()]*\))?)*\s*\(/gmu;
 
 const TOP_DESCRIBE_TITLE = /^describe\(\s*(?<quote>['"`])(?:[^\\]|\\.)*?\k<quote>/mu;
 
-/** `open` is the line after the callback's `{`, `close` the line of its `}`: a wrapped call closes on lines of its own. */
+// invariant: `open` is the line after the callback's `{`, `close` the line of its `}`: a wrapped call closes on lines of its own.
 function describesOf(
     text: string,
 ): (Span & { close: number; holdsTests: boolean; open: number })[] {
@@ -50,7 +50,7 @@ function describesOf(
     });
 }
 
-/** `one-describe-per-file`: a split would otherwise break the one-describe law on every file it writes. */
+// invariant: `one-describe-per-file`: a split would otherwise break the one-describe law on every file it writes.
 function oneDescribe(text: string, aspect: string): string {
     let current = text;
     for (const empty of describesOf(current)
@@ -81,7 +81,7 @@ export type Draft = { target: string; text: string };
 
 const BUILDS_DISK = /(?<![\w$])(?<!(?<!\.\.)\.)(?:file|directory)\s*\(/u;
 
-/** A declaration building a `file()` or `directory()` (`paths-named-in-the-test`), or reading one, stays copied where it is read; a type only tests read stays in each file. */
+// invariant: a declaration building a `file()` or `directory()` (`paths-named-in-the-test`), or reading one, stays copied where it is read; a type only tests read stays in each file.
 function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaration[] {
     const declarations = declarationsOf(spec.text);
     const code = new Map(declarations.map((d) => [d.name, spec.text.slice(d.start, d.end)]));
@@ -138,7 +138,7 @@ function withImportLine(text: string, line: string): string {
         : `${text.slice(0, last.end)}${line}\n${text.slice(last.end)}`;
 }
 
-/** A `type` marks each type among values, so no type becomes a runtime import. */
+// invariant: a `type` marks each type among values, so no type becomes a runtime import.
 function importLine(read: readonly string[], types: ReadonlySet<string>, from: string): string {
     if (read.every((name) => types.has(name))) {
         return `import type { ${read.join(', ')} } from '${from}';`;
@@ -147,7 +147,7 @@ function importLine(read: readonly string[], types: ReadonlySet<string>, from: s
     return `import { ${names.join(', ')} } from '${from}';`;
 }
 
-/** A module already at `<folder>/__setup__/<aspect>.ts` is the author's: the copies stay. */
+// invariant: a module already at `<folder>/__setup__/<aspect>.ts` is the author's: the copies stay.
 function withSharedHelpers(
     specsRoot: string,
     spec: SpecRead,
@@ -236,7 +236,7 @@ function namesRead(code: string): Set<string> {
     );
 }
 
-/** A hook reading nothing but the runner's names is every test's, and stays. */
+// invariant: a hook reading nothing but the runner's names is every test's, and stays.
 function withoutIdleHooks(text: string): string {
     const blank = blankComments(text);
     const hooks = [...blank.matchAll(HOOK_CALL)].map((found) => {

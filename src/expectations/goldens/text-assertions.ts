@@ -120,7 +120,7 @@ function directoryOf(location: string): string {
     return normalized.slice(0, normalized.lastIndexOf('/'));
 }
 
-/** `dist/` under node, the deps bundle in a page, where a bundler co-locates vitest's matcher plumbing too. */
+// outside: `dist/` under node, the deps bundle in a page, where a bundler co-locates vitest's matcher plumbing too.
 const OWN_DIRECTORY = directoryOf(import.meta.url);
 
 const FRAME_LINE = /^\s*at\s/u;

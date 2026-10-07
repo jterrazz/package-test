@@ -12,7 +12,7 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-/** Captures are recorded in traversal order: arrays left to right, object keys in expected-key order. A subset allows the actual object keys the expected does not state; arrays need equal length either way. */
+// invariant: captures are recorded in traversal order: arrays left to right, object keys in expected-key order. A subset allows the actual object keys the expected does not state; arrays need equal length either way.
 function structurally(
     expected: unknown,
     actual: unknown,

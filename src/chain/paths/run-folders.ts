@@ -12,7 +12,7 @@ function isAlive(pid: number): boolean {
     }
 }
 
-/** The pid a run's folder is named for, `<pid>-…`, or null for a name no run gave. */
+// invariant: the pid a run's folder is named for, `<pid>-…`, or null for a name no run gave.
 function runOf(entry: string): null | number {
     const pid = Number(entry.split('-')[0]);
     return Number.isInteger(pid) && pid > 0 ? pid : null;

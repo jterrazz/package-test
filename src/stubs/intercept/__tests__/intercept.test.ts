@@ -31,7 +31,6 @@ async function reachAnUndeclaredHost(): Promise<void> {
     await fetch('https://analytics.test/collect');
 }
 
-/** A server on port 0 answering every request itself, closed with the test. */
 async function realServer(): Promise<string> {
     const server = createServer((_, response) => {
         response.end('the real forecast');

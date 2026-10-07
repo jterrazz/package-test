@@ -19,7 +19,7 @@ import {
     isTestCallee,
 } from '../../../kit/project/test-calls.js';
 
-/** `<LocaleNote />`, `locale-note` and `LocaleNote` spell one subject: only letters and digits count, whatever their case. */
+// invariant: `<LocaleNote />`, `locale-note` and `LocaleNote` spell one subject: only letters and digits count, whatever their case.
 function spelling(title: string): string {
     // Stryker disable next-line MethodExpression: both sides of a comparison fold the same way, upper or lower
     return title.replaceAll(/[^\p{L}\d]/gu, '').toLowerCase();
@@ -31,7 +31,7 @@ export interface FileSubject {
     readonly named: string;
 }
 
-/** A group titled with the file's subject, or with the file's own base name, in any spelling: its title adds nothing a test should carry. */
+// invariant: a group titled with the file's subject, or with the file's own base name, in any spelling: its title adds nothing a test should carry.
 function restatesSubject(title: string, { base, named }: FileSubject): boolean {
     return spelling(title) === spelling(named) || spelling(title) === spelling(base);
 }
@@ -72,7 +72,7 @@ export function flattenedGroup(
     return text + source.slice(from, nodeEnd(body) - 1);
 }
 
-/** The statements between the members stay at module scope above the one describe; `undefined` when a group cannot flatten. */
+// invariant: the statements between the members stay at module scope above the one describe; `undefined` when a group cannot flatten.
 function mergedText(
     source: string,
     statements: AstNode[],

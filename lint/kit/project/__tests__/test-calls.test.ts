@@ -32,7 +32,7 @@ function statementOf(source: string): AstNode {
     return statement;
 }
 
-/** A template hole, spelled so the templates of this file do not read it as one. */
+// invariant: a template hole, spelled so the templates of this file do not read it as one.
 const HOLE = ['$', '{x}'].join('');
 
 function callbackOf(statement: AstNode | undefined): string | undefined {

@@ -56,7 +56,7 @@ import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
 import { checkSpecificationFolderHasItsRunner } from './specification-folder-has-its-runner.js';
 import { checkSpecificationTestUsesItsRunner } from './specification-test-uses-its-runner.js';
 
-/** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
+// invariant: the CLI prints this list when a run is clean, so what the reader is told ran is the registry itself.
 const TREE_PASS_IDS = [
     'reserved-folder-in-closed-list',
     'spec-code-in-setup-folder',

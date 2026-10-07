@@ -1,4 +1,4 @@
-/** A tree with a `*.specification.ts` at its root is one specification's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
+// invariant: a tree with a `*.specification.ts` at its root is one specification's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product.
 
 import { isGroundFolder, moveKeepingHistory, PRUNED } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';

@@ -36,7 +36,7 @@ function shownFolder(specsRoot: string, folder: string): string {
     return owner === '' ? 'specs/' : `specs/${owner}/`;
 }
 
-/** A `_` name is the closed-list rule's; a bare name is judged here, where the tree tells a subject from a special folder spelt without its marks. */
+// invariant: a `_` name is the closed-list rule's; a bare name is judged here, where the tree tells a subject from a special folder spelt without its marks.
 function judged(
     rootDir: string,
     specsRoot: string,

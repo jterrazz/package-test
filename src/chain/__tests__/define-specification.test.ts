@@ -5,7 +5,6 @@ import { defineCapability } from '../capability.js';
 import { sharing } from '../context/with.capability.js';
 import { defineSpecification } from '../define-specification.js';
 
-/** A setup that logs its slice when it is armed, in the phase it states. */
 function logged(
     log: string[],
     name: 'clock' | 'env' | 'plain',

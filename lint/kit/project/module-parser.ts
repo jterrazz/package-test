@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import type { parseSync } from 'oxc-parser';
 
-/** Parsed into the ESTree shape oxlint hands a rule; the native binding loads on the first parse, never at import. */
+// outside: parsed into the ESTree shape oxlint hands a rule; the native binding loads on the first parse, never at import.
 
 let parse: typeof parseSync | undefined;
 

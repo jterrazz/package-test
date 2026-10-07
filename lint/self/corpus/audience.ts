@@ -18,7 +18,7 @@ export function extractTarball(root: string, into: string): string {
     return join(into, 'package');
 }
 
-/** `links-resolve` and never the start of `links-resolve-twice`. */
+// invariant: `links-resolve` and never the start of `links-resolve-twice`.
 function namePattern(name: string): RegExp {
     return new RegExp(String.raw`(?<![\w-])${name}(?![\w-])`, 'u');
 }
@@ -62,7 +62,7 @@ export function strandedBundles(root: string, packed: Set<string>): string[] {
         .toSorted();
 }
 
-/** Only the bundler's own spelling (a statement opening a line, `import(…)`, `require(…)`, double-quoted), never a path a comment or a message spells. */
+// invariant: only the bundler's own spelling (a statement opening a line, `import(…)`, `require(…)`, double-quoted), never a path a comment or a message spells.
 const BUNDLER_IMPORT =
     /(?:^(?:import|export)\b[^\n]*?\bfrom\s*|^import\s*|\bimport\(|\brequire\()"(?<target>\.{1,2}\/[^"]+)"/gmu;
 
@@ -93,7 +93,7 @@ function audienceOf(value: object): unknown {
     return isContainer(docs) ? (docs as { audience?: unknown }).audience : undefined;
 }
 
-/** A module namespace a loader wraps answers its exports as accessors, and a getter may refuse the receiver it is read on. */
+// hazard: a module namespace a loader wraps answers its exports as accessors, and a getter may refuse the receiver it is read on.
 function readOwn(node: object, key: string): unknown {
     try {
         return Reflect.get(node, key);

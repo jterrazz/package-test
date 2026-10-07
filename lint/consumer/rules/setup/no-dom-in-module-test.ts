@@ -19,7 +19,7 @@ const BINDINGS: Record<string, string> = {
     VariableDeclarator: 'id',
 };
 
-/** File-wide rather than a scope chain: it can only under-report, the right direction for a guard. */
+// invariant: file-wide rather than a scope chain: it can only under-report, the right direction for a guard.
 function declaredNames(root: AstNode): Set<string> {
     const names = new Set<string>();
     const add = (node: AstNode | undefined): void => {

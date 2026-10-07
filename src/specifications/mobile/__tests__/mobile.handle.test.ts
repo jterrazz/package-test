@@ -13,7 +13,7 @@ import { http } from '../../../stubs/kinds/http.js';
 import { startMobile } from '../mobile.handle.js';
 import { fakeAppium } from '../server/__tests__/fake-appium.fixtures.js';
 
-/** Names a device no machine has, with no appium binary in the root: a handle coming back proves neither `simctl` nor a spawn ran. */
+// invariant: names a device no machine has, with no appium binary in the root: a handle coming back proves neither `simctl` nor a spawn ran.
 const ABSENT_DEVICE = { name: 'No Such Phone', os: '1.0' };
 
 const bareRoot = (): string => mkdtempSync(join(tmpdir(), 'mobile-root-'));

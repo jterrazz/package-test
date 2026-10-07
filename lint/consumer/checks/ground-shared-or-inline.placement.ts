@@ -100,7 +100,7 @@ export function pathsModuleTestsName(member: string): string[] {
 
 const MAKEFILE_PATH = /(?<![\w./-])(?:\.\/)?specs\/[\w./@-]+/gu;
 
-/** A missing file reads as empty, and so names nothing. */
+// invariant: a missing file reads as empty, and so names nothing.
 function pathsMemberConfigsName(member: string): string[] {
     return [
         ...[...readText(join(member, 'Makefile')).matchAll(MAKEFILE_PATH)].map(([path]) =>

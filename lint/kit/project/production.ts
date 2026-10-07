@@ -86,7 +86,7 @@ function reachThrough(
     return undefined;
 }
 
-/** A test package in `allowed` is one the unit's production runs by design. */
+// invariant: a test package in `allowed` is one the unit's production runs by design.
 function reachFrom(
     from: string,
     specifier: string,
@@ -121,7 +121,7 @@ export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
     return new Set(Object.keys(allow ?? {}));
 }
 
-/** Per folder: a production module on the way ends the walk, so any module of one folder gets the same answer. A run ends when a file is linted again, a walked module is linted, or a folder's tree listing changes: that is how the editor's host is seen. */
+// outside: per folder: a production module on the way ends the walk, so any module of one folder gets the same answer. A run ends when a file is linted again, a walked module is linted, or a folder's tree listing changes: that is how the editor's host is seen.
 const reaches = new Map<string, Reach | undefined>();
 
 const linted = new Set<string>();

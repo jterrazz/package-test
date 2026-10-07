@@ -13,7 +13,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const DEFAULT_THRESHOLD = 3;
 
-/** Not `status` (`no-status-only-test`'s), nor `value` and `error`: single readings a golden would not improve. */
+// invariant: not `status` (`no-status-only-test`'s), nor `value` and `error`: single readings a golden would not improve.
 const GOLDENABLE = new Set([
     'alternates',
     'canonical',

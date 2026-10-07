@@ -10,14 +10,14 @@ import {
 import { tempRootSetup } from '../chain/paths/temp-root.global-setup.js';
 import { inPlaceSetup } from '../expectations/in-place/in-place.global-setup.js';
 
-/** Vitest's 5s default is outlived by a container boot or a `next build`; 30s is what the ecosystem converged on. */
+// invariant: vitest's 5s default is outlived by a container boot or a `next build`; 30s is what the ecosystem converged on.
 const TEST_TIMEOUT_MS = 30_000;
 const HOOK_TIMEOUT_MS = 30_000;
 
 /** Ground folders hold inputs and deliberately-wrong twins, never tests, and `.artifacts/` copies of the project (a mutation sandbox); vite concatenates, so a consumer's `exclude` adds to this. */
 export const EXCLUDE = [...configDefaults.exclude, `${ARTIFACTS_DIR}/**`, GROUND_GLOB];
 
-/** `retry: 0`: a flaky test is fixed or deleted, never re-rolled. The restores let `vi.stubEnv()` go without an `afterEach` (`given-in-the-test`). */
+// invariant: `retry: 0`: a flaky test is fixed or deleted, never re-rolled. The restores let `vi.stubEnv()` go without an `afterEach` (`given-in-the-test`).
 const HYGIENE = {
     restoreMocks: true,
     retry: 0,

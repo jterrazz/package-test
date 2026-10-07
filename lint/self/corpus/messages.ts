@@ -22,7 +22,7 @@ const REPORT_HEAD = /^\s*\S+:\d+:\d+ {2}jterrazz-check\([\w-]+\)$/u;
 
 const REPORT_PART = /^\s+(?:found|why|fix|read): /u;
 
-/** A lint specification's report states a finding on its head line, then its lesson a part per line: the parts are read back into one message. */
+// invariant: a lint specification's report states a finding on its head line, then its lesson a part per line: the parts are read back into one message.
 function reportMessages(lines: readonly string[]): string[] {
     const messages: string[] = [];
     for (const [index, line] of lines.entries()) {

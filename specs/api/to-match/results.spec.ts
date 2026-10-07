@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
-/** Awaited, so it serves the sync matchers and the SQL-backed table ones alike. */
+// invariant: awaited, so it serves the sync matchers and the SQL-backed table ones alike.
 async function catchMessage(assertion: () => unknown): Promise<string> {
     try {
         await assertion();

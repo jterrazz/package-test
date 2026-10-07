@@ -7,7 +7,6 @@ import { BaseResult } from '../result.js';
 import type { ResultConfig } from '../result.js';
 import type { TableSource } from '../table/table.js';
 
-/** A database whose every table holds one row naming it. */
 function database(name: string): TableSource {
     return {
         columns: async () => await Promise.resolve(['source']),
@@ -15,7 +14,6 @@ function database(name: string): TableSource {
     };
 }
 
-/** A folder holding `notes.txt` with the given text. */
 function folderWith(text: string): string {
     const folder = mkdtempSync(join(tmpdir(), 'result-'));
     mkdirSync(join(folder, 'out'));

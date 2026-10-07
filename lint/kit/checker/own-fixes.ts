@@ -9,7 +9,7 @@ import { join, relative } from 'node:path';
 
 import { PRUNED_WITH_OUTPUTS } from '../project/module-tests.js';
 
-/** Never one found above the root: a fixture project inside another repository would be linted with that repository's config. */
+// invariant: never one found above the root: a fixture project inside another repository would be linted with that repository's config.
 function oxlintOf(root: string): string | undefined {
     const candidate = join(root, 'node_modules', '.bin', 'oxlint');
     return existsSync(candidate) ? candidate : undefined;
@@ -18,7 +18,7 @@ function oxlintOf(root: string): string | undefined {
 /** The plugin's autofixes run before the ratchet counts, so a diagnostic a fix settles is never counted as debt. The wrapper arms this plugin's rules alone, so no other rulebook's fixer writes a byte; it sits beside the config it wraps, since oxlint resolves `jsPlugins` and globs against that directory. `-c` turns nested discovery off, so each nested config's subtree gets a run of its own. */
 export const OWN_FIXES_WRAPPER = 'oxlint.test-fix.config.mjs';
 
-/** A `.js`, `.mjs` or `.cjs` config governs only where it is the root's. */
+// invariant: a `.js`, `.mjs` or `.cjs` config governs only where it is the root's.
 const NESTED_CONFIG_NAMES = [
     'oxlint.config.ts',
     'oxlint.config.mts',
@@ -28,7 +28,7 @@ const NESTED_CONFIG_NAMES = [
 
 const UNWALKED = new Set<string>([...PRUNED_WITH_OUTPUTS, ...GROUND_FOLDERS]);
 
-/** A config that fails to load exits 1 too, which alone reads as diagnostics left. */
+// hazard: a config that fails to load exits 1 too, which alone reads as diagnostics left.
 const CONFIG_FAILURES = [
     'Failed to build configuration',
     'Failed to load config',
@@ -45,7 +45,7 @@ const CATEGORIES = [
     'suspicious',
 ] as const;
 
-/** As oxlint reads one: comments and trailing commas dropped, outside strings. */
+// outside: as oxlint reads one: comments and trailing commas dropped, outside strings.
 const JSONC_READER = [
     'const parseJsonc = (text) => {',
     "    let out = '';",

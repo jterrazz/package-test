@@ -38,7 +38,7 @@ export function runDocument(
     }));
 }
 
-/** The grammar refuses any key outside `order`, so every pair has its rank. */
+// invariant: the grammar refuses any key outside `order`, so every pair has its rank.
 function reorder(map: YAMLMap, order: readonly string[]): void {
     const rank = (pair: Pair<Node, Node>): number => order.indexOf(String(scalarString(pair.key)));
     map.items = nodePairs(map).toSorted((a, b) => rank(a) - rank(b));

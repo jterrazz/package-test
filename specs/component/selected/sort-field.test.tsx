@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { SortField } from './sort-field.js';
 
-/** Named: three targets inside a verb is one call too deep for `unicorn/max-nested-calls`. */
+// invariant: named: three targets inside a verb is one call too deep for `unicorn/max-nested-calls`.
 const sortedBy = (name: string): Target => within(field('Sort'), selected(option(name)));
 
 describe('SortField', () => {

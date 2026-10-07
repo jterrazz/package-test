@@ -22,7 +22,7 @@ export type YamlSource = {
     text: string;
 };
 
-/** A mapping key line or a flow list entry, never block-scalar text. */
+// invariant: a mapping key line or a flow list entry, never block-scalar text.
 const KEY_LINE = /^(?<indent> +)(?:(?:- )?[A-Za-z_$'"][^\n]*:|- [[{])/u;
 
 function detectIndent(text: string): number {
@@ -38,12 +38,12 @@ function detectIndent(text: string): number {
     return smallest === 0 ? 2 : smallest;
 }
 
-/** An indentation indicator is ONE digit, so nine spaces is the deepest step statable. */
+// invariant: an indentation indicator is ONE digit, so nine spaces is the deepest step statable.
 const DEEPEST_STATABLE_STEP = 9;
 
 type StringifyContext = Parameters<NonNullable<ScalarTag['stringify']>>[1];
 
-/** The `yaml` writer always writes `|2`, whatever the step; a four-space document then reads back two spaces short. */
+// outside: the `yaml` writer always writes
 function stateIndentation(written: string, ctx: StringifyContext): string {
     if (!/^[|>][1-9]/u.test(written)) {
         return written;
@@ -108,7 +108,7 @@ export function blockScalar(text: string): Scalar<string> {
     return scalar;
 }
 
-/** Its span starts at the whitespace before it: a spelling broken over lines begins with a newline the writer would not write. */
+// invariant: its span starts at the whitespace before it: a spelling broken over lines begins with a newline the writer would not write.
 type FlowCollection = {
     ownerIndent: number;
     range: [number, number];
@@ -129,7 +129,7 @@ function indentOf(text: string, offset: number): number {
     return line.length - line.trimStart().length;
 }
 
-/** Outermost only: a nested one is restored with its parent, and descending would splice it twice. */
+// invariant: outermost only: a nested one is restored with its parent, and descending would splice it twice.
 function flowCollections(text: string): FlowCollection[] {
     const found: FlowCollection[] = [];
     const take = (node: {
@@ -162,7 +162,7 @@ function flowCollections(text: string): FlowCollection[] {
     return found;
 }
 
-/** The `yaml` writer's flow style is not oxfmt's: re-emitting an untouched collection makes `check --fix` and `oxfmt` rewrite each other for ever. */
+// outside: the `yaml` writer's flow style is not oxfmt's: re-emitting an untouched collection makes `check --fix` and `oxfmt` rewrite each other for ever.
 function restoreUntouchedFlow(rendered: string, text: string): string {
     const sources = flowCollections(text);
     const taken = new Set<number>();

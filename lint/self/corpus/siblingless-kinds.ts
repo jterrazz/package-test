@@ -7,7 +7,7 @@ export type SiblinglessKind = {
     why: string;
 };
 
-/** Listed, so adding a module never joins it by accident. */
+// invariant: listed, so adding a module never joins it by accident.
 const oneOf =
     (...paths: string[]) =>
     (path: string): boolean =>

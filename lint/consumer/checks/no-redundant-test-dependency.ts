@@ -18,14 +18,14 @@ export const CARRIED = new Set(['msw', 'vitest-mock-extended']);
 /** Only as a dev dependency: a member parsing YAML at runtime declares `yaml` rightly, and the framework never ships it to a product. */
 export const CARRIED_IN_DEV = new Set(['yaml']);
 
-/** `no-redundant-test-dependency` never reads the manifest of the package that carries the dependencies. */
+// invariant: `no-redundant-test-dependency` never reads the manifest of the package that carries the dependencies.
 const FRAMEWORK = '@jterrazz/test';
 
 const REPLACED_SEAMS = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
 
 const REPLACED_SCOPE = '@testing-library/';
 
-/** React Native renders under jest until the react-native-web answer lands, and `@testing-library/react-native` is the only vocabulary there; the allowance lapses the day jest stops running the member's tests. */
+// outside: React Native renders under jest until the react-native-web answer lands, and `@testing-library/react-native` is the only vocabulary there; the allowance lapses the day jest stops running the member's tests.
 const JEST_ONLY_SEAM = '@testing-library/react-native';
 
 function declaresJest(manifest: Manifest): boolean {
@@ -57,7 +57,7 @@ function declaresWorkspace(dir: string): boolean {
     return manifest !== null && workspacePatterns(manifest).length > 0;
 }
 
-/** Walked up from the member, so a run started inside it reads the jest the root run reads; it stops at the first workspace declaration and never leaves the checkout (a `.git` directory or worktree file). */
+// outside: walked up from the member, so a run started inside it reads the jest the root run reads; it stops at the first workspace declaration and never leaves the checkout (a `.git` directory or worktree file).
 function workspaceRootOf(memberDir: string): string {
     let current = memberDir;
     for (;;) {
@@ -102,7 +102,7 @@ function jestConfigsUnder(dir: string, depth = 0): JestConfig[] {
     });
 }
 
-/** `<rootDir>` is jest's token for its config's directory: a path resolves against it, and the member is reached when the result lands inside it. */
+// outside: `<rootDir>` is jest's token for its config's directory: a path resolves against it, and the member is reached when the result lands inside it.
 function jestReachesMember(memberDir: string, rootDir: string): boolean {
     return jestConfigsUnder(rootDir).some(({ from, text }) =>
         [...text.matchAll(JEST_REACH)].some((list) =>
@@ -143,7 +143,7 @@ function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
     }));
 }
 
-/** A finding points at the declaration, not at `{`. */
+// invariant: a finding points at the declaration, not at `{`.
 function lineOfKey(dir: string, key: string): number {
     try {
         const lines = readFileSync(join(dir, 'package.json'), 'utf8').split('\n');

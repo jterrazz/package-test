@@ -35,7 +35,7 @@ function isOptions(value: unknown): value is InterceptOptions {
     return isRecord(value) && 'origin' in value;
 }
 
-/** Every string request resolves against the origin, as a page resolves it; an absolute one is left where it points. Validated before anything starts, installed only once the network double listens: it sits on top of the double's `fetch` and comes off first. */
+// outside: every string request resolves against the origin, as a page resolves it; an absolute one is left where it points. Validated before anything starts, installed only once the network double listens: it sits on top of the double's `fetch` and comes off first.
 function resolveRelativeAgainst(origin: string): () => () => void {
     let base: URL;
     try {

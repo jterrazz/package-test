@@ -28,7 +28,7 @@ function documentReferences(specsRoot: string): { file: string; target: string }
     });
 }
 
-/** A document reads its ground by its `fixture:` lines as a spec does by its literals: both follow a lifted entry. */
+// invariant: a document reads its ground by its `fixture:` lines as a spec does by its literals: both follow a lifted entry.
 function diskReferences(specsRoot: string): { file: string; target: string }[] {
     return [...sourceReferences(specsRoot), ...documentReferences(specsRoot)];
 }

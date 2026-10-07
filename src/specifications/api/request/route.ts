@@ -31,7 +31,7 @@ export type RouteRequest = { path: string; template?: string | undefined };
 
 const IDENTIFIER = /^[A-Za-z_$][\w$]*$/u;
 
-/** The name a `:name` segment states, none for any other segment. */
+// invariant: the name a `:name` segment states, none for any other segment.
 function parameterOf(segment: string): string | undefined {
     const name = segment.slice(1);
     return segment.startsWith(':') && IDENTIFIER.test(name) ? name : undefined;

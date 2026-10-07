@@ -48,7 +48,7 @@ type SameMembers<Self, C extends Composition> = [keyof Self] extends [MemberName
     : { readonly onTheChainButNotComposed: Exclude<keyof Self, MemberNames<C>> };
 
 type Wiring<C extends Composition, Config extends ChainConfig> = {
-    /** Typed as written: a parameter left to context makes the specification context-sensitive, and the composition is then not inferred. */
+    // invariant: typed as written: a parameter left to context makes the specification context-sensitive, and the composition is then not inferred.
     readonly adapters: (config: Config) => AdaptersOf<C> & object;
     readonly locate: () => string;
 };
@@ -64,7 +64,7 @@ type SpecificationDefiner<Self, Config extends ChainConfig> = <const C extends C
 
 type Wired = Composition & Pick<Wiring<Composition, ChainConfig>, 'locate'>;
 
-/** Each setup a shared setting names, applied as if called with it; a setting no setup names is ignored. */
+// invariant: each setup a shared setting names, applied as if called with it; a setting no setup names is ignored.
 function withSharedSettings(
     setups: readonly AnyCapability[],
     state: ChainState,
@@ -82,7 +82,7 @@ function withSharedSettings(
     return next;
 }
 
-/** `with()` leaves the directory unfixed, so a context written in a helper file never anchors the paths of the test using it. */
+// invariant: `with()` leaves the directory unfixed, so a context written in a helper file never anchors the paths of the test using it.
 function chainOf(
     definition: Wired,
     setup: SetupContext<object>,

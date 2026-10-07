@@ -284,7 +284,7 @@ async function answers(url: string): Promise<boolean> {
 }
 // Stryker restore BlockStatement
 
-/** The group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it. */
+// invariant: the group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it.
 async function endGroup(child: ChildProcess): Promise<void> {
     // Stryker disable next-line all: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
     if (child.pid === undefined) {

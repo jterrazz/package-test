@@ -58,7 +58,7 @@ function pluginPath(plugin: string, callerDir: string, root: string): string {
     }
 }
 
-/** The oxlint bin a manifest names, as its one bin or under its own name. */
+// outside: the oxlint bin a manifest names, as its one bin or under its own name.
 function binOf(manifest: string): null | string {
     // Stryker disable next-line StringLiteral: a manifest read as a Buffer parses as the same text
     const parsed: unknown = JSON.parse(readFileSync(manifest, 'utf8'));
@@ -67,7 +67,7 @@ function binOf(manifest: string): null | string {
     return typeof named === 'string' ? join(dirname(manifest), named) : null;
 }
 
-/** The oxlint bin an anchor resolves, or none when no oxlint resolves from it. */
+// outside: the oxlint bin an anchor resolves, or none when no oxlint resolves from it.
 function binFrom(anchor: string): null | string {
     let manifest: string;
     try {

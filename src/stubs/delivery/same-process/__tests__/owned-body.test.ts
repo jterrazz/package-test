@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { owningBodies, withOwnedBody } from '../owned-body.js';
 
-/** Its sibling branch is held and never cancelled: msw's shape. */
+// outside: its sibling branch is held and never cancelled: msw's shape.
 function teedReply(): Response {
     const source = new Response('{"celsius":21}', {
         headers: { 'x-station': 'north' },

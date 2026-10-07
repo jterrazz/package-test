@@ -47,7 +47,7 @@ export type AnthropicStreamInit = {
     delay?: number;
 };
 
-/** Named events: message and text block opened, `ping`, one `text_delta` per piece, block closed, stop reason, `message_stop`. */
+// invariant: named events: message and text block opened, `ping`, one `text_delta` per piece, block closed, stop reason, `message_stop`.
 function streamEvents(pieces: readonly string[]): SseEvent[] {
     const bodies: { [field: string]: unknown; type: string }[] = [
         {

@@ -13,14 +13,14 @@ const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
 const MODULE_EXTENSIONS = ['.ts', '.tsx', '.js'];
 
-/** The modules a test may name: `dir/__tests__/a.test.ts` names `dir/a.ts`, `dir/a.tsx` or `dir/a.js`; a component test under `specs/` names its neighbour. */
+// invariant: the modules a test may name: `dir/__tests__/a.test.ts` names `dir/a.ts`, `dir/a.tsx` or `dir/a.js`; a component test under `specs/` names its neighbour.
 function modulesNamedBy(file: string, inTestsFolder: boolean): string[] {
     const folder = inTestsFolder ? dirname(dirname(file)) : dirname(file);
     const stem = basename(file).replace(TEST_FILE, '');
     return MODULE_EXTENSIONS.map((extension) => join(folder, `${stem}${extension}`));
 }
 
-/** A module or rendered test outside `specs/` lives in a `__tests__/`; a rendered unit under `specs/` keeps its neighbour, as a specs tree holds no `__tests__/`. A repository suite covers a tree and names no module. */
+// invariant: a module or rendered test outside `specs/` lives in a `__tests__/`; a rendered unit under `specs/` keeps its neighbour, as a specs tree holds no `__tests__/`. A repository suite covers a tree and names no module.
 function isJudged({ inSpecs, role, strayTestRoot }: FileIdentity): boolean {
     // Stryker disable next-line ConditionalExpression: a stray root is reported before any module is asked for
     if (strayTestRoot !== null) {

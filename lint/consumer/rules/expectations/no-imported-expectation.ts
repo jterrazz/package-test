@@ -14,7 +14,7 @@ function isRunnerOrStub(source: string): boolean {
     return /\.specification(?:\.[jt]s)?$/u.test(source) || /(?:^|\/)stubs\//u.test(source);
 }
 
-/** A module outside the specs tree is the subject's data, not an expectation someone wrote for the test. */
+// invariant: a module outside the specs tree is the subject's data, not an expectation someone wrote for the test.
 function foreignNames(program: AstNode, filename: string, specs: string): Map<string, string> {
     const names = new Map<string, string>();
     for (const statement of childList(program, 'body')) {

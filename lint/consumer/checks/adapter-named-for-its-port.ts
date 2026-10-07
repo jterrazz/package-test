@@ -20,7 +20,7 @@ const ADAPTER_SUFFIX = '.adapter.ts';
 
 type Implementer = { at: number; name: string; port: string };
 
-/** `TickerSourcePort` → `ticker-source`, `HTTPClientPort` → `http-client`: a word opens on a capital after a lower case letter or a digit, or on the last capital of a run before a lower case letter. */
+// invariant: `TickerSourcePort` → `ticker-source`, `HTTPClientPort` → `http-client`: a word opens on a capital after a lower case letter or a digit, or on the last capital of a run before a lower case letter.
 const WORD_START = /(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/gu;
 
 const PORT_SUFFIX = /Port$/u;

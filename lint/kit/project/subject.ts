@@ -1,4 +1,4 @@
-/** The standard name is derived, never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST` create, `PUT|PATCH` update, `DELETE` delete; a route under an item takes its literal segments; a job is its name, a cli command its first word. `jterrazz.config.ts` corrects the irregular collections and the method-less routes, a cli runner its command words. */
+// invariant: the standard name is derived, never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST` create, `P
 
 import { blankComments } from '@jterrazz/typescript/rules';
 
@@ -49,7 +49,7 @@ export function pathTemplate(path: string): string {
     return `/${segments.join('/')}`;
 }
 
-/** A plural noun (`events`, never `status`), or one the repository declares. */
+// invariant: a plural noun (`events`, never `status`), or one the repository declares.
 function isCollection(word: string, collections: readonly string[]): boolean {
     return collections.includes(word) || (word.endsWith('s') && !/(?:ss|us|is)$/u.test(word));
 }
@@ -210,7 +210,7 @@ const TERMINALS: Record<string, TerminalReader> = {
     visit: pageOf,
 };
 
-/** `{ params }` comes second to `get`/`delete`, third to `post`/`put`, after the body. */
+// invariant: `{ params }` comes second to `get`/`delete`, third to `post`/`put`, after the body.
 function routeOf(method: Method, args: readonly string[]): Subject[] {
     const path = literalOf(args[0]);
     if (path?.startsWith('/') !== true) {

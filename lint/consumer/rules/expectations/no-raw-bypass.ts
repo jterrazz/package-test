@@ -18,7 +18,7 @@ function isRegExp(node: AstNode | undefined): boolean {
     return node.type === 'NewExpression' && identifierName(child(node, 'callee')) === 'RegExp';
 }
 
-/** A RegExp argument is exempt: a pattern carries no token grammar to lose. */
+// invariant: a RegExp argument is exempt: a pattern carries no token grammar to lose.
 function unnegated(node: AstNode | undefined): AstNode | undefined {
     // Stryker disable next-line ConditionalExpression: a member always has an object
     return node !== undefined && memberPropertyName(node) === 'not' ? child(node, 'object') : node;

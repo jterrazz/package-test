@@ -5,11 +5,10 @@ import { VITEST_ARTIFACTS_DIR } from '../../../../lint/kit/project/artifacts.js'
 import { isRecord } from '../../../../lint/kit/project/json-shape.js';
 
 type RecordedSession = {
-    /** The capabilities the server answered with — what a runner attaching to it hands the driver. */
+    // invariant: the capabilities the server answered with — what a runner attaching to it hands the driver.
     capabilities: Record<string, unknown>;
-    /** The Appium server's base URL. */
+    // outside: the Appium server's base URL.
     serverUrl: string;
-    /** The W3C session id. */
     sessionId: string;
 };
 
@@ -40,7 +39,7 @@ function isEntry(value: unknown): value is LedgerEntry {
     );
 }
 
-/** A run that recorded nothing has no folder. */
+// invariant: a run that recorded nothing has no folder.
 function entryFiles(directory: string): string[] {
     try {
         return readdirSync(directory).filter((name) => name.endsWith('.json'));

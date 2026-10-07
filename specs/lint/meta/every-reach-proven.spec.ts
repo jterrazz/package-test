@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { lint } from '../lint.specification.js';
 
-/** `every-reach-proven` — the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable. */
+// outside: `every-reach-proven` — the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable.
 async function reachRun(): Promise<string> {
     const result = await lint
         .rules({ 'jterrazz/specs-at-declared-depth': ['error', { depth: 'specification' }] })
@@ -12,7 +12,7 @@ async function reachRun(): Promise<string> {
     return result.report.text;
 }
 
-/** A diagnostic's head line, `<path>:<line>:<col>  <plugin>(<rule>)`; its message lines are indented. */
+// invariant: a diagnostic's head line, `<path>:<line>:<col>  <plugin>(<rule>)`; its message lines are indented.
 function about(output: string, path: string): string[] {
     return output
         .split('\n')

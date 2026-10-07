@@ -19,7 +19,7 @@ const KNOWN_TOKEN_LITERAL = new RegExp(
     'u',
 );
 
-/** The expression a function returns: its concise body, or the one `return` of a block. */
+// invariant: the expression a function returns: its concise body, or the one `return` of a block.
 function returned(fn: AstNode): AstNode | undefined {
     const body = child(fn, 'body');
     // Stryker disable next-line OptionalChaining: a function always has a body
@@ -34,7 +34,6 @@ function returned(fn: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** The receiver of a `.replace(…, '{{token}}')` call, or undefined when the call is anything else. */
 function tokenReplaceReceiver(call: AstNode): AstNode | undefined {
     const callee = child(call, 'callee');
     // Stryker disable next-line ConditionalExpression,LogicalOperator: a call always has a callee
@@ -48,7 +47,7 @@ function tokenReplaceReceiver(call: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** Every replacement must be a string literal that is exactly a known `{{token}}`. */
+// invariant: every replacement must be a string literal that is exactly a known `{{token}}`.
 function isTokenEquivalentTransform(fn: AstNode): boolean {
     // Stryker disable next-line ConditionalExpression: a value that is no function returns nothing to read
     if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') {

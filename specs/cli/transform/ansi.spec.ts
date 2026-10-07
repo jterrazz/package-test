@@ -16,7 +16,7 @@ import { cli as transformCli } from '../transform-cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, '__expected__');
 
-/** Git keeps no empty folder, so `__expected__/` goes with its last golden. */
+// outside: Git keeps no empty folder, so `__expected__/` goes with its last golden.
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {

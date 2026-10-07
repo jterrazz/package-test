@@ -11,7 +11,7 @@ import {
 import { element } from './appium.adapter.fixtures.js';
 import type { DeviceLog } from './appium.adapter.fixtures.js';
 
-/** Cast at the seam: a fake implements the calls a query makes, never webdriverio's whole types. */
+// outside: cast at the seam: a fake implements the calls a query makes, never webdriverio's whole types.
 function asList(elements: unknown): never {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a fake list implements the reads a capture makes
     return elements as never;
@@ -19,7 +19,6 @@ function asList(elements: unknown): never {
 
 const asDriver = asList;
 
-/** What scrolling to the Pay button sent a screen holding the found elements. */
 async function scrolled(found: string[], refusing = false): Promise<DeviceLog> {
     const log: DeviceLog = [];
     const screen = {

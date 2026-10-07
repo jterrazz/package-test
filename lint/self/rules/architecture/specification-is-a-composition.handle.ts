@@ -43,7 +43,6 @@ function bare(node: AstNode | undefined): AstNode | undefined {
         : node;
 }
 
-/** `seed.reduce`, `seed['reduce']`. */
 function readName(member: AstNode): string | undefined {
     return memberPropertyName(member) ?? stringValue(child(member, 'property'));
 }
@@ -61,7 +60,6 @@ function rootName(node: AstNode | undefined): string | undefined {
         : identifierName(read);
 }
 
-/** `seed`, `jobDefinition.composition`. */
 function ownerOf(node: AstNode | undefined, bindings: Bindings): string | undefined {
     const root = rootName(node);
     const layer = root === undefined ? undefined : bindings.layers.get(root);
@@ -99,7 +97,7 @@ function isRead(node: AstNode | undefined): boolean {
     );
 }
 
-/** `{ reduce: run = undefined }` → reduce, run. */
+// invariant: `{ reduce: run = undefined }` → reduce, run.
 function destructured(pattern: AstNode): [string, string][] {
     return childList(pattern, 'properties').flatMap((property): [string, string][] => {
         const key = propertyKeyName(property) ?? stringValue(child(property, 'key'));

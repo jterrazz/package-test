@@ -147,7 +147,6 @@ describe('setup', () => {
     });
 });
 
-/** A project over a fresh root, or the root an earlier shard of the same split used. */
 function stubProject({
     ran,
     root: shared = '',

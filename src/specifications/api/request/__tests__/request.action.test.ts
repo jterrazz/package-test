@@ -8,7 +8,6 @@ import { params } from '../route.js';
 
 type Asked = { body: unknown; headers: unknown; method: string; path: string; template: unknown };
 
-/** A server that records what it is asked, and answers 200. */
 function recording(asked: Asked[]): { server: ServerPort } {
     return {
         server: {

@@ -6,7 +6,6 @@ import { describe, expect, test } from 'vitest';
 import type { DatabasePort } from '../../database.port.js';
 import { databaseSet } from '../database-set.adapter.js';
 
-/** A database that logs its resets under its name. */
 function database(log: string[], name: string): DatabasePort {
     return {
         columns: async () => await Promise.resolve([]),

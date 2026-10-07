@@ -13,7 +13,7 @@ const COLLECTION = /\b(?:include|exclude)\s*:\s*\[(?<entries>[^\]]*)\]/gu;
 
 const ENTRY = /['"`][^'"`\n]*['"`]/gu;
 
-/** A glob reaches what its literal prefix (everything before the first `*`) contains, resolved against the config's own directory, as vitest does. */
+// outside: a glob reaches what its literal prefix (everything before the first `*`) contains, resolved against the config's own directory, as vitest does.
 function reaches(dir: string, entry: string, file: string): boolean {
     const star = entry.indexOf('*');
     if (star === -1) {

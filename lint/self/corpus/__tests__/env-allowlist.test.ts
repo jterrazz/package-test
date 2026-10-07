@@ -4,10 +4,10 @@ import { describe, expect, test } from 'vitest';
 
 import { findEnvOffenders, findUnsanctionedDynamicReads, sourceFiles } from '../env-allowlist.js';
 
-/** rule `environment-read-allow-listed` (meta-test) — the framework reads only its own generic-prefixed env vars. */
+// invariant: rule `environment-read-allow-listed` (meta-test) — the framework reads only its own generic-prefixed env vars.
 const files = sourceFiles(originalOf(resolve(import.meta.dirname, '../../../../src')));
 
-/** A `.txt`, so it never enters the real sweep. */
+// invariant: a `.txt`, so it never enters the real sweep.
 const OFFENDER_FIXTURE = resolve(import.meta.dirname, 'env-allowlist.offenders.txt');
 
 describe('env-allowlist', () => {

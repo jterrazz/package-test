@@ -196,7 +196,7 @@ function rowLabel(n: number): string {
     return n === 1 ? '1 row' : `${n} rows`;
 }
 
-/** A cell as a reader reads it: text and big numbers bare, a date in ISO, anything else as JSON, and a cell with no JSON as null. */
+// invariant: a cell as a reader reads it: text and big numbers bare, a date in ISO, anything else as JSON, and a cell with no JSON as null.
 function cellText(value: unknown): string {
     if (value instanceof Date) {
         return value.toISOString();

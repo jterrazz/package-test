@@ -11,7 +11,7 @@ const RELATIVE_BASE = 'http://stub.invalid';
 // Stryker disable next-line StringLiteral: the pattern a URL compiles to escapes no character the unicode flag reads otherwise
 const UNICODE = 'u';
 
-/** Never through `new URL()`, which would percent-encode `{{token}}` braces. */
+// invariant: never through `new URL()`, which would percent-encode `{{token}}` braces.
 function splitDeclared(url: string): { base: string; query: URLSearchParams } {
     const separator = url.indexOf('?');
     if (separator === -1) {
@@ -30,7 +30,7 @@ function safeDecode(text: string): string {
 }
 // Stryker restore BlockStatement
 
-/** A URL from its start, its query and fragment free. */
+// invariant: a URL from its start, its query and fragment free.
 function wholeUrl(prefix: string, base: string): RegExp {
     return new RegExp(
         String.raw`^${prefix}${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`,

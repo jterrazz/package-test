@@ -11,7 +11,6 @@ import {
 
 const UUID_A = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 
-/** A matcher from code, or a string written with `{{token}}` placeholders. */
 const tokenMatches = (expected: unknown, actual: unknown, scope: CaptureScope): boolean =>
     expected instanceof Matcher
         ? matcherMatches(expected, actual, scope)

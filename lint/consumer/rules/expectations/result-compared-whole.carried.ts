@@ -9,11 +9,11 @@ import {
 } from '../../../kit/project/ast.js';
 import type { AstNode } from '../../../kit/project/ast.js';
 
-/** `result-compared-whole` exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison. */
+// invariant: `result-compared-whole` exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison.
 
 const CARRY_DEPTH = 4;
 
-/** `await api.params({ cursor }).get('/facts')`, or held whole in a name the test awaits; a result's own members and `expect(…)` are never one. */
+// invariant: `await api.params({ cursor }).get('/facts')`, or held whole in a name the test awaits; a result's own members and `expect(…)` are never one.
 function isRequestLink(call: AstNode, test: AstNode, results: ReadonlySet<string>): boolean {
     const root = chainRootName(call);
     // Stryker disable next-line OptionalChaining: a call always has a callee
@@ -55,7 +55,7 @@ function holderOfChain(link: AstNode): AstNode | undefined {
     return linked ? holderOfChain(parent) : parent;
 }
 
-/** A member's property and an object's key are names, not reads, unless computed; a declaration's own name is none either. */
+// invariant: a member's property and an object's key are names, not reads, unless computed; a declaration's own name is none either.
 function isReference(node: AstNode): boolean {
     const parent = child(node, 'parent');
     if (child(parent, 'property') === node || child(parent, 'key') === node) {

@@ -24,11 +24,8 @@ import {
 
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');
 
-/** `__setup__/stubs/<kebab>.stubs.ts`. */
 const COMPOSITE_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.stubs\.[cm]?ts$/u;
-/** `__setup__/stubs/<kind>/<kebab>.ts`. */
 const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
-/** `__setup__/stubs/<kind>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
 
 function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
@@ -93,7 +90,6 @@ function entryBindings(program: AstNode): EntryBindings {
     return bindings;
 }
 
-/** `http.get` through a named import, `t.http` through a namespace. */
 function kindReached(node: AstNode, bindings: EntryBindings): string | undefined {
     // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no member has no object, and '' binds nothing
     if (node.type !== 'MemberExpression') {

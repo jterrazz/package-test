@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-/** Named: three targets inside a verb is one call too deep for `unicorn/max-nested-calls`. */
+// invariant: named: three targets inside a verb is one call too deep for `unicorn/max-nested-calls`.
 const channelIs = (name: string): Target => within(field('Channel'), selected(option(name)));
 
 const topicIs = (name: string): Target => within(field('Topic'), selected(option(name)));

@@ -6,7 +6,6 @@ import { describe, expect, test } from 'vitest';
 import { CaptureScope } from '../../tokens/capture-scope.js';
 import { diffDirectories, DirectoryAccessor, walkDirectory } from '../directory.js';
 
-/** A tree holding the given files, each written with its parent folders. */
 function treeOf(files: Record<string, string>): string {
     const root = mkdtempSync(join(tmpdir(), 'directory-'));
     for (const [path, content] of Object.entries(files)) {

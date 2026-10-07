@@ -54,7 +54,7 @@ export function entryFor(text: string, file: string): string {
     return '@jterrazz/test';
 }
 
-/** Sorted as a reader scans them: case aside. */
+// invariant: sorted as a reader scans them: case aside.
 function byName(a: string, b: string): number {
     // Stryker disable next-line EqualityOperator: the names are distinct
     return a.toLowerCase() < b.toLowerCase() ? -1 : 1;

@@ -5,7 +5,6 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 import { readerOf } from '../../../../chain/state.js';
 import { rawFetch } from '../fetch.action.js';
 
-/** A site whose `/old` redirects and whose every other path echoes the header it was sent. */
 async function site(): Promise<string> {
     const server = createServer((request, response) => {
         if (request.url === '/old') {

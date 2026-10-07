@@ -5,7 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { useModalDialog } from './use-modal-dialog.js';
 
-/** A hook has no surface, so its Host is written in the test; the dialog is its own component because the hook's effect runs when the ref's holder mounts. */
+// invariant: a hook has no surface, so its Host is written in the test; the dialog is its own component because the hook's effect runs when the ref's holder mounts.
 function Modal({
     fallback,
     onClose,

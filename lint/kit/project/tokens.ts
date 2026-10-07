@@ -34,7 +34,7 @@ type TokenSite = { line: number; token: string };
 
 type Verdict = 'known' | 'malformed' | 'unknown';
 
-/** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored; a known kind followed by junk is malformed, never arbitrary noise. */
+// invariant: template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored; a known kind followed by junk is malformed, never arbitrary noise.
 function verdictOf(inner: string): undefined | Verdict {
     if (VALID_TOKEN.test(inner)) {
         const [kind = ''] = inner.split('#');

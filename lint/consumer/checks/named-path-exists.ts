@@ -9,7 +9,7 @@ import { suppressedLines } from '../../kit/project/suppression.js';
 import { DISK_CALL, findSpecsRoots, listReaders, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-/** Inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout. */
+// outside: inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout.
 function missingTarget(named: string, target: string, onDisk: boolean): Teaching {
     return onDisk
         ? {
@@ -22,7 +22,7 @@ function missingTarget(named: string, target: string, onDisk: boolean): Teaching
           };
 }
 
-/** A document's `fixture:` entry is a bare path; a call names its kind. */
+// invariant: a document's `fixture:` entry is a bare path; a call names its kind.
 function crossedTarget(
     named: string,
     { found, key, path }: { found: 'directory' | 'file'; key: string | undefined; path: string },

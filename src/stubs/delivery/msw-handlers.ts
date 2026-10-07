@@ -14,7 +14,7 @@ export type Msw = {
     readonly passthrough: typeof passthrough;
 };
 
-/** In a page, a real service worker and HTTP cache could serve an earlier test's answer and never reach the queue. */
+// invariant: in a page, a real service worker and HTTP cache could serve an earlier test's answer and never reach the queue.
 const NEVER_CACHED = { 'cache-control': 'no-store' };
 
 function toMswResponse(msw: Msw, response: StubResponse): Response {
@@ -42,7 +42,7 @@ function toMswResponse(msw: Msw, response: StubResponse): Response {
     return msw.HttpResponse.json(body, { headers: { ...NEVER_CACHED, ...headers }, status });
 }
 
-/** An empty stub list is still a guard: the catch-all alone says the subject has no network. `bypass` is the runner's own traffic in a page. */
+// invariant: an empty stub list is still a guard: the catch-all alone says the subject has no network. `bypass` is the runner's own traffic in a page.
 function handlerOf(msw: Msw, method: string): typeof http.all | undefined {
     const handlers: Readonly<Record<string, typeof http.all>> = {
         '*': msw.http.all,

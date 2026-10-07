@@ -23,7 +23,7 @@ function hasFrozenOption(args: AstNode[]): boolean {
     return value?.type === 'Literal' && value.value === true;
 }
 
-/** The walk stops at the first statement boundary or non-`expect` call, so a `toMatch` written inside `inUpdateMode(() => …)` is not flagged. */
+// invariant: the walk stops at the first statement boundary or non-`expect` call, so a `toMatch` written inside `inUpdateMode(() => …)` is not flagged.
 const TRANSPARENT_ANCESTORS = new Set([
     'ArrowFunctionExpression',
     'AwaitExpression',
@@ -50,7 +50,7 @@ function isWrappedInExpect(node: AstNode): boolean {
     return false;
 }
 
-/** Under `TEST_UPDATE=1` an unfrozen fixture is rewritten instead of throwing, which destroys the negative case. */
+// hazard: under `TEST_UPDATE=1` an unfrozen fixture is rewritten instead of throwing, which destroys the negative case.
 const FUNCTION_NODES = new Set([
     'ArrowFunctionExpression',
     'FunctionDeclaration',
@@ -90,7 +90,7 @@ function isTestCallback(fn: AstNode): boolean {
     return name === 'it' || name === 'test';
 }
 
-/** The enclosing function must not be the test callback itself: a test writing a fixture under `TEST_UPDATE` and later asserting a diff holds both halves unrelated. */
+// invariant: the enclosing function must not be the test callback itself: a test writing a fixture under `TEST_UPDATE` and later asserting a diff holds both halves unrelated.
 function inAThrowingHelper(node: AstNode): boolean {
     let current = child(node, 'parent');
     while (current !== undefined) {
@@ -138,7 +138,7 @@ function isResultSubject(subject: AstNode | undefined): boolean {
     return name !== undefined && RESULT_SUBJECTS.has(name);
 }
 
-/** Update mode rewrites a value in place as it rewrites a golden file; a RegExp is a part, and vitest's. */
+// outside: update mode rewrites a value in place as it rewrites a golden file; a RegExp is a part, and vitest's.
 function inPlaceOf(node: AstNode): boolean {
     const callee = child(node, 'callee');
     if (memberPropertyName(callee ?? node) !== 'toMatch') {

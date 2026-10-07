@@ -37,7 +37,7 @@ export function comparable(raw: string, transform?: (text: string) => string): s
     return transform ? transform(stripped) : stripped;
 }
 
-/** Each line on a fresh scope: a ref captured by an earlier line must not decide how a later one displays. */
+// invariant: each line on a fresh scope: a ref captured by an earlier line must not decide how a later one displays.
 function tokenAwareEquals(scope: CaptureScope): (expected: string, actual: string) => boolean {
     return (expected, actual) => textEquals(expected, actual, new CaptureScope(scope.workdir));
 }
@@ -105,7 +105,7 @@ function checkFile(assertion: SpecFileAssertion, context: Judgement): null | str
     return null;
 }
 
-/** The stack is replaced by the run's own line: the runner's frames end in the plugin's generated module. */
+// invariant: the stack is replaced by the run's own line: the runner's frames end in the plugin's generated module.
 function failure(run: SpecRun, context: Judgement, details: string[]): Error {
     const error = new Error(
         refusal({

@@ -15,7 +15,6 @@ const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
 const OTHER =
     '  • other element  a heading(), button() or field() may name one thing where this does not';
 
-/** The fixes a refusal offers, one line each. */
 function fixesOf(target: Target, matches: ElementMatch[]): string[] {
     const lines = ambiguousTargetError({ matches, target, url: 'http://site.test/' }).message.split(
         '\n',

@@ -11,7 +11,7 @@ import type { Target } from '../../../visitor/targets/target.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
-/** By accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour). */
+// invariant: by accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour).
 const FIELD_ROLES = [
     'checkbox',
     'combobox',
@@ -23,7 +23,7 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/** Browser Mode's role driver gives `<search>` no role, while the ARIA tree and playwright call it `search`. */
+// invariant: browser Mode's role driver gives `<search>` no role, while the ARIA tree and playwright call it `search`.
 const SEARCH_ELEMENT = 'css=search:not([role])';
 
 type SearchScope = LocatorSelectors & { getBySearchElement: () => Locator };
@@ -37,7 +37,7 @@ function answersSearch(scope: LocatorSelectors): scope is SearchScope {
     return 'getBySearchElement' in scope;
 }
 
-/** A `<search>` takes its accessible name from its author alone. */
+// outside: a `<search>` takes its accessible name from its author alone.
 function locateSearch(scope: LocatorSelectors, target: Target, exact: boolean): Locator {
     const byRole =
         target.name === undefined
@@ -108,7 +108,7 @@ export async function act<T>(target: Target, action: (locator: Locator) => Promi
     }
 }
 
-/** A collapsed select's options have no box: visibility would answer "no" for every one. */
+// invariant: a collapsed select's options have no box: visibility would answer "no" for every one.
 function byPresence(target: Target): boolean {
     return target.kind === 'option';
 }
@@ -138,7 +138,7 @@ function isGone(locator: Locator, target: Target): boolean {
     return node === null || (byPresence(target) ? false : !node.checkVisibility());
 }
 
-/** What is left of the test's budget: a bare `expect.poll` falls back to one second. The 100ms margin is vitest's own, so the poll fails before the test times out. Read on `performance`: `Date` may be the page's pinned clock, months away, and a poll timer past 2^31 ms fires at once. */
+// outside: what is left of the test's budget: a bare `expect.poll` falls back to one second. The 100ms margin is vitest's own, so the poll fails before the test times out. Read on `performance`: `Date` may be the page's pinned clock, months away, and a poll timer past 2^31 ms fires at once.
 function remainingBudget(): number | undefined {
     const current = TestRunner.getCurrentTest();
     const started = (current?.result?.startTime ?? Number.NaN) - performance.timeOrigin;
@@ -157,7 +157,7 @@ function keystroke(key: string): string {
     return key.length > 1 ? `{${key}}` : key;
 }
 
-/** The one matcher a target's stated condition answers to; a bare target is seen once visible. */
+// invariant: the one matcher a target's stated condition answers to; a bare target is seen once visible.
 async function seen(locator: Locator, target: Target): Promise<void> {
     if (target.focused === true) {
         await expect.element(locator).toHaveFocus();

@@ -16,9 +16,9 @@ import { findSpecsRoots, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 import { TEST_FILE } from './ground-shared-or-inline.forms.js';
 
-/** The seed name is the first `--` comment of the SQL, else the first four meaningful words of the test's title, else `seed`; a name taken by other bytes gains `-2`, `-3`, … */
+// invariant: the seed name is the first `--` comment of the SQL, else the first four meaningful words of the test's title, else `seed`; a name taken by other bytes gains `-2`, `-3`, …
 
-/** Never a member (`db.sql`) nor a longer name. */
+// invariant: never a member (`db.sql`) nor a longer name.
 const SQL_TAG = /(?<![.\w$])sql\s*(?=`)/gu;
 
 type InlineSeed = {
@@ -28,7 +28,7 @@ type InlineSeed = {
     line: number;
     name: string;
     start: number;
-    /** `undefined` when a hole makes them no literal. */
+    // invariant: `undefined` when a hole makes them no literal.
     statements: string | undefined;
 };
 

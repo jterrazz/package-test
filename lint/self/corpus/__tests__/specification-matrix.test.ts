@@ -32,7 +32,7 @@ import {
 } from '../specification-matrix.js';
 import type { CapabilityGroup, Column } from '../specification-matrix.js';
 
-/** Each record is pinned to its interface's `keyof` with `satisfies`: a member added or removed fails the build, and the tests below hold the matrix rows equal to the records. */
+// invariant: each record is pinned to its interface's `keyof` with `satisfies`: a member added or removed fails the build, and the tests below hold the matrix rows equal to the records.
 
 const SPECIFICATION_COLUMNS = [
     'api',
@@ -47,7 +47,6 @@ const SPECIFICATION_COLUMNS = [
 
 type Published = string | true;
 
-/** An XOR option bag keeps its keys. */
 type KeysOf<T> = T extends unknown ? keyof T : never;
 
 function published(record: Record<string, Published>): string[] {
@@ -169,7 +168,6 @@ const componentResult = {
     tree: true,
 } satisfies Record<keyof RenderResult, Published>;
 
-/** Website answers through two results. */
 const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = {
     api: [apiResult],
     cli: [cliResult],
@@ -212,10 +210,9 @@ const componentVisitor = {
     unmount: true,
 } satisfies Record<keyof ComponentVisitor, Published>;
 
-/** No kind of its own: the appium adapter translates it. */
+// invariant: no kind of its own: the appium adapter translates it.
 const MOBILE_SCOPES = ['within'];
 
-/** `text` is `content()`. */
 const MOBILE_TARGETS: Record<MobileElementKind, string> = {
     button: 'button',
     field: 'field',

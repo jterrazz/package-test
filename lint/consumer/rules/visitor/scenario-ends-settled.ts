@@ -17,10 +17,10 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);
 
-/** `unmount` ends it too: after it there is no screen to see. */
+// invariant: `unmount` ends it too: after it there is no screen to see.
 const TERMINALS = new Set(['gone', 'see', 'unmount']);
 
-/** A block's last statement, both branches of an `if`, a loop body, what a `return` returns. */
+// invariant: a block's last statement, both branches of an `if`, a loop body, what a `return` returns.
 const INSIDE: Record<string, string[]> = {
     AwaitExpression: ['argument'],
     DoWhileStatement: ['body'],
@@ -65,7 +65,7 @@ function verbOn(node: AstNode | undefined, visitor: string): string | undefined 
     return memberPropertyName(callee);
 }
 
-/** A promise chain settles where its last continuation does: the wait is in the tail. */
+// invariant: a promise chain settles where its last continuation does: the wait is in the tail.
 function settles(node: AstNode, visitor: string): boolean {
     const callee = child(node, 'callee');
     // Stryker disable next-line ConditionalExpression: only a call has a callee

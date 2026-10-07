@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
-/** It prints the sessions it saw, and the simulator windows they would have opened, when the run is over. */
+// outside: it prints the sessions it saw, and the simulator windows they would have opened, when the run is over.
 const DOUBLE_SETUP = resolve(import.meta.dirname, '../../__setup__/appium/per-run.ts');
 
 const ON_THE_DOUBLE = { DOUBLE_SETUP, TEST_MOBILE_APPIUM_URL: null };

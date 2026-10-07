@@ -6,7 +6,7 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { discoverRoot, installRootOf, resolveRoot } from '../resolve.js';
 
-/** `<base>/project` with a manifest and a nested tests dir, and `<base>/plain` with only a package.json. */
+// invariant: `<base>/project` with a manifest and a nested tests dir, and `<base>/plain` with only a package.json.
 function givenTrees(): string {
     const base = mkdtempSync(resolve(tmpdir(), 'root-discovery-'));
     onTestFinished(() => {

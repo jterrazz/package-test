@@ -72,7 +72,7 @@ export type CliHandle<DatabaseKey extends string = string> = {
     orchestrator: null | Orchestrator;
 };
 
-/** One per runner, never per spec: a world spawned in one chain is its own in the next. */
+// invariant: one per runner, never per spec: a world spawned in one chain is its own in the next.
 function dockerTestRunId(): string {
     return `t-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
 }

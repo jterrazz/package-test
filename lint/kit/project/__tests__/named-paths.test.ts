@@ -5,7 +5,7 @@ import { packageWith } from '../../testing/package-tree.fixtures.js';
 import { anchoredPaths, collectFixtureReferences } from '../named-paths.js';
 import { DISK_CALL } from '../tree.js';
 
-/** A template hole, spelled so the templates of this file do not read it as one. */
+// invariant: a template hole, spelled so the templates of this file do not read it as one.
 const HOLE = ['$', '{name}'].join('');
 
 const SPEC = [

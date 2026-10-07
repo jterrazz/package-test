@@ -5,7 +5,7 @@ import type { RunContainers } from '../cli.result.js';
 
 const DOCKER = { envVar: 'TEST_RUN_ID', nameLabel: 'test.name', testRunLabel: 'test.run' };
 
-/** Five containers carry the run's label: `c1` named api, `c2` named web in docker's lowercase, `c3` gone before it is inspected, `c4` with no labels, `c5` named nothing. */
+// invariant: five containers carry the run's label: `c1` named api, `c2` named web in docker's lowercase, `c3` gone before it is inspected, `c4` with no labels, `c5` named nothing.
 const INSPECTED: Record<string, unknown> = {
     c1: { Config: { Labels: { 'test.name': 'api' } } },
     c2: { config: { labels: { 'test.name': 'web' } } },

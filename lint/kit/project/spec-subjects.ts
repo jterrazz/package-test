@@ -150,7 +150,7 @@ export function aspectOf(file: string): string {
     return basename(file, '.spec.ts');
 }
 
-/** `/articles/:id` → `articles-id`. */
+// invariant: `/articles/:id` → `articles-id`.
 function slugOf(name: string): string {
     return (
         name

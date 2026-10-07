@@ -35,7 +35,6 @@ function isRow(value: unknown): value is Row {
     );
 }
 
-/** The `consumer` rows of one channel, read from the data file and checked for the shape a row owes. */
 function rowsOf(channel: keyof typeof MANIFEST): Row[] {
     return MANIFEST[channel].map((entry) => {
         const row: unknown = Object.assign(structuredClone(entry), {

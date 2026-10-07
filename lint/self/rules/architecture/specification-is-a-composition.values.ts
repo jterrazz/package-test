@@ -9,7 +9,6 @@ import {
 } from '../../../kit/project/ast.js';
 import type { AstNode } from '../../../kit/project/ast.js';
 
-/** `config.jobs ?? []` counts. */
 function isPlainValue(node: AstNode | undefined): boolean {
     const value = unwrapped(node);
     return (

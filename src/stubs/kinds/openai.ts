@@ -109,7 +109,7 @@ export type OpenAIStreamInit = {
     delay?: number;
 };
 
-/** One unnamed `chat.completion.chunk` per event: role, one delta per piece, finish reason, then `[DONE]`. */
+// invariant: one unnamed `chat.completion.chunk` per event: role, one delta per piece, finish reason, then `[DONE]`.
 function chatStreamEvents(pieces: readonly string[]): SseEvent[] {
     const created = Math.floor(Date.now() / 1000);
     const chunk = (delta: object, finishReason: null | string): SseEvent => ({
@@ -129,7 +129,7 @@ function chatStreamEvents(pieces: readonly string[]): SseEvent[] {
     ];
 }
 
-/** Named, numbered events: response and message opened, one `response.output_text.delta` per piece, parts closed, `response.completed`. */
+// invariant: named, numbered events: response and message opened, one `response.output_text.delta` per piece, parts closed, `response.completed`.
 function responsesStreamEvents(pieces: readonly string[]): SseEvent[] {
     const text = pieces.join('');
     const part = { type: 'output_text', text, annotations: [] };

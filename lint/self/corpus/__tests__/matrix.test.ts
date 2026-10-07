@@ -17,7 +17,7 @@ const ROOT = resolve(import.meta.dirname, '../../../..');
 
 const read = (relative: string): string => readFileSync(resolve(ROOT, relative), 'utf8');
 
-/** Meta-test `every-capability-exercised` (`every-capability-exercised`) — a capability a specification declares with no test file exercising it fails, unless its row names the reason. */
+// invariant: Meta-test `every-capability-exercised` (`every-capability-exercised`) — a capability a specification declares with no test file exercising it fails, unless its row names the reason.
 describe('matrix', () => {
     test('capability matrix (meta-test `every-capability-exercised`) — every declared capability is exercised, or says why it is not', () => {
         // Given - the matrix derived from the declaration and the package's own trees

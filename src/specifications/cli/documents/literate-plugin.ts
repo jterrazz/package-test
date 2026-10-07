@@ -7,7 +7,7 @@ import type { SpecFile } from '../../../../lint/kit/project/spec-grammar.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { DISK_KEY } from '../../../disk/spec-path.js';
 
-/** Makes a `<case>.spec.yaml` a test file: the runner shows the document's path and its `description:`. */
+// outside: makes a `<case>.spec.yaml` a test file: the runner shows the document's path and its `description:`.
 
 const SPEC_FILE = /\.spec\.yaml(?:\?.*)?$/u;
 
@@ -48,7 +48,7 @@ function readDocument(content: string, displayPath: string): SpecFile {
     }
 }
 
-/** The document is handed to `cli.run()` spelled by its brand, so the module imports the runner alone. */
+// invariant: the document is handed to `cli.run()` spelled by its brand, so the module imports the runner alone.
 function literateModule(content: string, filePath: string, runnerPath: string): string {
     const { description } = readDocument(content, filePath).document;
     return [

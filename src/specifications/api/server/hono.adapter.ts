@@ -10,7 +10,7 @@ export type HonoApp = {
     routes?: readonly TableEntry[];
 };
 
-/** Where Hono keeps the handler a wrapper composes (`route()` under an error handler). */
+// outside: where Hono keeps the handler a wrapper composes (`route()` under an error handler).
 const COMPOSED_HANDLER = '__COMPOSED_HANDLER';
 
 function targetOf(handler: unknown): unknown {
@@ -19,7 +19,7 @@ function targetOf(handler: unknown): unknown {
     return composed === undefined ? handler : targetOf(composed);
 }
 
-/** Hono's own `isMiddleware` rule: a handler taking `next` is middleware. */
+// invariant: hono's own `isMiddleware` rule: a handler taking `next` is middleware.
 function isMiddleware(entry: TableEntry): boolean {
     const handler = targetOf(entry.handler);
     return typeof handler === 'function' && handler.length > 1;

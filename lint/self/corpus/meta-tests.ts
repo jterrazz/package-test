@@ -32,7 +32,7 @@ function describesOf(source: string): string[] {
     );
 }
 
-/** Anchored on the line's indentation: `.test(` is also a regular expression's method. */
+// invariant: anchored on the line's indentation: `.test(` is also a regular expression's method.
 function testCountOf(source: string): number {
     return [...source.matchAll(/^[^\S\n]*test(?:\.each)?[\s(]/gmu)].length;
 }

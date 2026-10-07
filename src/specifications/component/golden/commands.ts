@@ -6,7 +6,7 @@ import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { resolveSpecPath } from '../../../disk/resolved-spec-path.js';
 import { renderText, writeInPlace } from '../../../expectations/in-place/in-place.js';
 
-/** `context.page` is the orchestrator frame and answers `- iframe`: the ARIA tree is read on the tester frame. A golden resolves against `context.testPath`, not the project root. */
+// invariant: `context.page` is the orchestrator frame and answers `- iframe`: the ARIA tree is read on the tester frame. A golden resolves against `context.testPath`, not the project root.
 
 type PlaywrightCommandContext = {
     frame: () => Promise<{
@@ -43,7 +43,7 @@ const goldenWrite: BrowserCommand<[string, string], string> = (context, name, co
     return path;
 };
 
-/** The browser server maps the page's stack back to the test's source. */
+// outside: the browser server maps the page's stack back to the test's source.
 const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, text) => {
     const file = testFile(context.testPath);
     const frame = context.project.browser

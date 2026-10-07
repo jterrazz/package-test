@@ -5,7 +5,7 @@ import { collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { DISK_CALL, findSpecsRoots, isWithin, listReaders } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-/** `map/pois/` holds the ground `map/pois/detail/` shares with it, and the specs root the ground its specifications share. */
+// invariant: `map/pois/` holds the ground `map/pois/detail/` shares with it, and the specs root the ground its specifications share.
 function inEnclosingGround(specsRoot: string, leaf: string, target: string): boolean {
     const enclosing = [specsRoot];
     for (let folder = dirname(leaf); isWithin(specsRoot, folder); folder = dirname(folder)) {

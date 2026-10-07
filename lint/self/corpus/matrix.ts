@@ -13,7 +13,7 @@ import {
 } from './specification-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './specification-matrix.js';
 
-/** A cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more. */
+// invariant: a cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more.
 
 const WRITTEN_IN_CODE = new Set<Capability['group']>([
     'Constructor option',
@@ -51,7 +51,7 @@ const SPECIFICATION_GROUPS: readonly CapabilityGroup[] = [
     'Result accessor',
 ];
 
-/** A row two specifications state is one row. */
+// invariant: a row two specifications state is one row.
 function declaredCapabilities(): Capability[] {
     const rows: Capability[] = [];
     for (const column of SPECIFICATION_MATRIX_COLUMNS) {
@@ -121,7 +121,7 @@ export function matrixCapabilityFolders(column: Column): Set<string> {
 
 const ESCAPE = /[$()*+.?[\\\]^{|}]/gu;
 
-/** Anchored on a word boundary that refuses a leading dot, so `result.json` is not found inside `myresult.json`; a probe opening on a dot is anchored by it. */
+// invariant: anchored on a word boundary that refuses a leading dot, so `result.json` is not found inside `myresult.json`; a probe opening on a dot is anchored by it.
 function matcherOf(probe: string): RegExp {
     const lead = /^[$A-Z_a-z]/u.test(probe) ? String.raw`(?<![$.\w])` : '';
     return new RegExp(lead + probe.replaceAll(ESCAPE, String.raw`\$&`), 'u');

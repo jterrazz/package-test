@@ -33,7 +33,7 @@ function isStatusLiteral(node: AstNode | undefined): boolean {
     return Number.isInteger(value) && value >= MIN_STATUS && value <= MAX_STATUS;
 }
 
-/** The numeric gate keeps container-status strings (`expect(neo.status).toBe('running')`) out. */
+// invariant: the numeric gate keeps container-status strings (`expect(neo.status).toBe('running')`) out.
 function isStatusProbe(node: AstNode): boolean {
     // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no call has no callee below
     if (node.type !== 'CallExpression') {

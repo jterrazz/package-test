@@ -32,7 +32,7 @@ export type FakeScreen = {
 /** Every call a session receives, in order, as one line each. */
 export type DeviceLog = string[];
 
-/** Cast at the seam: only the handful of calls below are exercised. */
+// invariant: cast at the seam: only the handful of calls below are exercised.
 function asSeam(stub: unknown): never {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the handful of calls these tests drive, never webdriverio's whole session type
     return stub as never;

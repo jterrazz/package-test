@@ -77,7 +77,7 @@ function isChainType(statement: AstNode): boolean {
     return declared?.type === 'TSInterfaceDeclaration';
 }
 
-/** Only when written as an arrow whose every parameter is a bare name, typed or not. */
+// invariant: only when written as an arrow whose every parameter is a bare name, typed or not.
 function adaptersOf(definition: AstNode): AstNode | undefined {
     const arrow = child(findProperty(definition, 'adapters'), 'value');
     const body = unwrapped(child(arrow, 'body'));
@@ -88,7 +88,6 @@ function adaptersOf(definition: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** `FunctionDeclaration` → `function declaration`. */
 function kindOf(node: AstNode | undefined): string {
     return (node?.type ?? 'nothing')
         .replaceAll(/(?<lower>[a-z])(?<upper>[A-Z])/gu, '$<lower> $<upper>')

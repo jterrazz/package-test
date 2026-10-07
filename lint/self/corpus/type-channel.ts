@@ -12,7 +12,7 @@ export type TypeRow = {
     reason: string;
 };
 
-/** `// @ts-expect-error <row name> — <reason> [`<words>`]`. */
+// invariant: `// @ts-expect-error <row name> — <reason> [`<words>`]`.
 const ROW = /\/\/ @ts-expect-error (?<id>[a-z][a-z-]+) — (?<reason>.+?) \[`(?<expected>.+)`\]\s*$/u;
 
 const MARKER = /\/\/ @ts-expect-error\b/u;
@@ -47,7 +47,7 @@ export type Refusal = { code: string; line: number; message: string };
 
 const ERROR_LINE = /^(?<file>.+)\((?<line>\d+),\d+\): error (?<code>TS\d+): (?<message>.*)$/u;
 
-/** The indented lines below an error are joined into its message, so a row may name the reason the compiler gives below its first sentence. */
+// invariant: the indented lines below an error are joined into its message, so a row may name the reason the compiler gives below its first sentence.
 function readRefusals(output: string): Refusal[] {
     const refusals: Refusal[] = [];
     let current: Refusal | undefined;

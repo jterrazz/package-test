@@ -21,7 +21,7 @@ function captured(
     });
 }
 
-/** What a test reads first of a container: whether it exists, runs, and its status. */
+// invariant: what a test reads first of a container: whether it exists, runs, and its status.
 function stateOf(container: ContainerAccessor): unknown {
     return {
         exists: container.exists,

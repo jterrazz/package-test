@@ -43,7 +43,7 @@ function pairInOrder(expected: Rows, actual: unknown[][], scope: CaptureScope): 
     return { pairs, pass: pairs.every((pair) => pair.matched) };
 }
 
-/** Kuhn's augmenting paths: each stated row holds an actual row it fits, as many as can at once. */
+// invariant: kuhn's augmenting paths: each stated row holds an actual row it fits, as many as can at once.
 function maximumMatching(fits: readonly (readonly boolean[])[]): Map<number, number> {
     const taken = new Map<number, number>();
     const augment = (row: number, seen: Set<number>): boolean => {
@@ -67,7 +67,7 @@ function maximumMatching(fits: readonly (readonly boolean[])[]): Map<number, num
     return taken;
 }
 
-/** The pairing that holds with the captures shared across rows, searched in stated order; the fits each row holds alone bound nothing a shared capture can widen. */
+// invariant: the pairing that holds with the captures shared across rows, searched in stated order; the fits each row holds alone bound nothing a shared capture can widen.
 function consistentPairing(
     expected: Rows,
     actual: unknown[][],
@@ -105,7 +105,7 @@ function consistentPairing(
 
 type Leftovers = { rows: number[]; stated: number[] };
 
-/** Each stated row no actual row fits is shown against the free row it resembles most, the first on a tie; one resembling none stands alone. */
+// invariant: each stated row no actual row fits is shown against the free row it resembles most, the first on a tie; one resembling none stands alone.
 function pairLeftovers(
     expected: Rows,
     actual: unknown[][],

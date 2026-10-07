@@ -12,7 +12,7 @@ import { basename, dirname, isAbsolute, join, relative } from 'node:path';
 import { isTestFileName } from './role.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
 
-/** A ground folder at the specs root holds what several specifications share. */
+// invariant: a ground folder at the specs root holds what several specifications share.
 function isPool(dir: string): boolean {
     return isGroundFolder(basename(dir)) && basename(dirname(dir)) === 'specs';
 }
@@ -21,7 +21,7 @@ export function specsRootOfPool(pool: string): string {
     return dirname(pool);
 }
 
-/** A fixture project with a `specs/` tree of its own is an input, judged where a spec runs the checker over it. */
+// invariant: a fixture project with a `specs/` tree of its own is an input, judged where a spec runs the checker over it.
 function isPruned(dir: string): boolean {
     return PRUNED.has(basename(dir)) || isGroundFolder(basename(dir));
 }

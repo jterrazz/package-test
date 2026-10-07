@@ -6,7 +6,7 @@ import { instantOf } from './instant.js';
 /** A pinned clock — released when the `using` scope that declared it ends. */
 export type PinnedClock = Disposable;
 
-/** One clock per test: vitest's fake timers restore only the real clock, so a nested scope ending would end the outer one too. */
+// outside: one clock per test: vitest's fake timers restore only the real clock, so a nested scope ending would end the outer one too.
 function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): PinnedClock {
     if (vi.isFakeTimers()) {
         throw new Error(

@@ -2,9 +2,9 @@ import { treeEntries } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
-/** Meta-test `server-binds-port-zero`: a picked-then-bound port is a window another server can take, so a server binds 0 and announces; nothing on the host reads `PORT`. A folder holding a `Dockerfile` is a container's, whose ports are its own. */
+// invariant: Meta-test `server-binds-port-zero`: a picked-then-bound port is a window another server can take, so a server binds 0 and announces; nothing on the host reads `PORT`. A folder holding a `Dockerfile` is a container's, whose ports are its own.
 
-/** The proof of the PORT form itself: its children report the port they were handed and never bind it. */
+// invariant: the proof of the PORT form itself: its children report the port they were handed and never bind it.
 const PORT_FORM_PROOF = 'src/services/process/__tests__/serve.test.ts';
 
 const HANDED_PORT = /process\.env\.PORT\b|\$PORT\b|\$\{PORT\}/u;

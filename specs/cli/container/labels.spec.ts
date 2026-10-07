@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli as dockerCli } from '../docker-cli.specification.js';
 
-/** Asked of `docker` directly, a second opinion: reading it through the dispose path's helper would agree with the code by construction. */
+// invariant: asked of `docker` directly, a second opinion: reading it through the dispose path's helper would agree with the code by construction.
 function containersLabelled(key: string, value: string): string[] {
     try {
         return execSync(`docker ps -aq -f label=${key}=${value}`, {

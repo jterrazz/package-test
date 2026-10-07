@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-/** Only blocks importing the framework plus resolvable neighbours are checked: a block importing app code illustrates the consumer's code and cannot resolve. */
+// invariant: only blocks importing the framework plus resolvable neighbours are checked: a block importing app code illustrates the consumer's code and cannot resolve.
 
 const ALLOWED_NEIGHBOURS = new Set(['react', 'vitest', 'vitest/config']);
 

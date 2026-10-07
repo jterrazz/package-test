@@ -34,7 +34,7 @@ function facadeImports(node: AstNode): string[] {
     );
 }
 
-/** `function world(): Stubs` and `const world = (): Stubs => …` alike. */
+// invariant: `function world(): Stubs` and `const world = (): Stubs => …` alike.
 function compositionBuilder(node: AstNode): string | undefined {
     const fn = node.type === 'VariableDeclarator' ? child(node, 'init') : node;
     return returnsComposition(fn) ? identifierName(child(node, 'id')) : undefined;

@@ -9,7 +9,7 @@ import { COMPONENT_COMMANDS } from '../commands.js';
 
 type Frame = { column: number; file: string; line: number };
 
-/** A command context over a test path, whose browser maps any stack to these frames; `null` frames, a project with no browser. */
+// invariant: a command context over a test path, whose browser maps any stack to these frames; `null` frames, a project with no browser.
 function contextOf(testPath?: string, frames: Frame[] | null = []): BrowserCommandContext {
     const context = {
         project: {

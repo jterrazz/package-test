@@ -3,7 +3,7 @@ import { relative } from 'node:path';
 import { lineAt, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-/** The same pair the static `no-simulated-dom-in-config` refuses. */
+// invariant: the same pair the static `no-simulated-dom-in-config` refuses.
 const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
 
 export function checkNoSimulatedDomInConfig(config: string, rootDir: string): Spotted[] {

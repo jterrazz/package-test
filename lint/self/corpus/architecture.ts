@@ -18,7 +18,7 @@ export function modulesOf(root: string, tree: string, suffix: string): string[] 
         .toSorted();
 }
 
-/** Only `import type`/`export type` is erased: under `verbatimModuleSyntax` an all-inline-typed import still compiles to `import {} from '…'`, which loads its module. */
+// invariant: only `import type`/`export type` is erased: under `verbatimModuleSyntax` an all-inline-typed import still compiles to `import {} from '…'`, which loads its module.
 function typeOnly(declaration: AstNode): boolean {
     return declaration.importKind === 'type' || declaration.exportKind === 'type';
 }
@@ -42,7 +42,7 @@ function loadedBy(path: string): string[] {
     return loaded;
 }
 
-/** The rules kit serves a page the half that reads no disk, under its `browser` condition, and the browser build bundles it. */
+// invariant: the rules kit serves a page the half that reads no disk, under its `browser` condition, and the browser build bundles it.
 const LOADS_IN_A_PAGE: ReadonlySet<string> = new Set(['@jterrazz/typescript/rules']);
 
 export function outsideLoadsReached(root: string, starts: string[]): string[] {

@@ -5,7 +5,7 @@ import { afterAll, describe, expect, test } from 'vitest';
 
 import { isUnderSpecs, specsAnchor } from '../specs-anchor.js';
 
-/** The anchor probes the real filesystem for `package.json`, so the fixtures are real directories. */
+// invariant: the anchor probes the real filesystem for `package.json`, so the fixtures are real directories.
 const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
 
 const project = join(root, 'project');

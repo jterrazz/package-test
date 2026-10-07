@@ -29,7 +29,7 @@ function namesNotReads(node: AstNode, key: string): boolean {
     return key === 'parent' || (NAMING_KEYS[node.type] === key && node.computed !== true);
 }
 
-/** Never a member's name, an object key, or its own declaration. */
+// invariant: never a member's name, an object key, or its own declaration.
 function readsOf(node: AstNode, name: string, reads: AstNode[] = []): AstNode[] {
     if (node.type === 'Identifier') {
         if (identifierName(node) === name) {
@@ -86,7 +86,7 @@ function testOf(read: AstNode, tests: Span[]): Span | undefined {
     return tests.find((span) => nodeStart(read) >= span.start && nodeEnd(read) <= span.end);
 }
 
-/** An exported constant is not listed: it has readers elsewhere. */
+// invariant: an exported constant is not listed: it has readers elsewhere.
 function fileConstants(program: AstNode): { declarator: AstNode; statement: AstNode }[] {
     return childList(program, 'body').flatMap((statement) => {
         // Stryker disable next-line ConditionalExpression: only a declaration has a `kind`

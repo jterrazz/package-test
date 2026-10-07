@@ -26,7 +26,6 @@ function chainAt(text: string, handle: string, start: number): Chain {
 const SPECIFICATION_DOOR =
     /import\s*\{(?<names>[^}]*)\}\s*from\s*['"](?<from>[^'"]*\.specification(?:\.[jt]s)?)['"]/gu;
 
-/** `const events = api.with({ … })`. */
 const VIEW = /const\s+(?<view>[A-Za-z_$][\w$]*)\s*=\s*(?<from>[A-Za-z_$][\w$]*)\s*\.\s*with\s*\(/gu;
 
 function importedDoors(text: string, wanted: (imported: string) => boolean): Map<string, string> {
@@ -44,7 +43,7 @@ function importedDoors(text: string, wanted: (imported: string) => boolean): Map
     return doors;
 }
 
-/** A view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle. */
+// invariant: a view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle.
 function doorsWanted(text: string, wanted: (imported: string) => boolean): Map<string, string> {
     const doors = importedDoors(text, wanted);
     const views = [...text.matchAll(VIEW)];

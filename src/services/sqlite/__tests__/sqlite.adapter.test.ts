@@ -16,7 +16,6 @@ const workdir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-key-'));
 const guardDir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-guard-'));
 const lockDir = mkdtempSync(resolve(tmpdir(), 'sqlite-lock-'));
 
-/** A handle started over a schema in a root of its own. */
 async function started(schema: string): Promise<{ db: SqliteHandle; templatePath: string }> {
     const root = mkdtempSync(resolve(tmpdir(), 'sqlite-started-'));
     const init = resolve(root, 'init.sql');

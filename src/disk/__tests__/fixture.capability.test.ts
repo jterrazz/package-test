@@ -4,7 +4,6 @@ import { fixture } from '../fixture.capability.js';
 import type { FixturePort } from '../fixture.port.js';
 import { directory, file } from '../spec-path.js';
 
-/** A port that logs each fixture it lays. */
 function layingInto(log: string[]): { workdir: FixturePort } {
     return {
         workdir: {

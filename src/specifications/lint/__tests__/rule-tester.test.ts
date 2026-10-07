@@ -5,7 +5,6 @@ import type { PositionedCases } from '../rule-tester.js';
 
 const RULE = { create: () => ({}), meta: { messages: { found: 'found' } } };
 
-/** The refusal a run of one invalid case with these errors meets, past the compiler. */
 function refusalFor(errors: unknown, index = 0): string {
     const invalid = { code: 'x', errors };
     const cases: unknown = {

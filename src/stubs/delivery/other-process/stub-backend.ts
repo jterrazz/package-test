@@ -11,7 +11,7 @@ import type { Stub } from '../../stub.js';
 import { toReadableStream } from '../stream-body.js';
 
 type StubBackendOptions = {
-    /** Fixed port: a bundler inlining the URL at serve time survives warm. */
+    // invariant: fixed port: a bundler inlining the URL at serve time survives warm.
     port?: number | undefined;
 };
 
@@ -166,7 +166,7 @@ export class StubBackend {
     }
 }
 
-/** Node names every header in lower case; a header sent twice as a list is no single value to match. */
+// outside: Node names every header in lower case; a header sent twice as a list is no single value to match.
 function stringHeaders(request: IncomingMessage): Record<string, string> {
     return Object.fromEntries(
         Object.entries(request.headers).filter(

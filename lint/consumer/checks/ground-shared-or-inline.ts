@@ -47,7 +47,6 @@ type Reference = {
     line: number;
     start: number;
     target: string;
-    /** `undefined` for a reference outside every test. */
     test: string | undefined;
 };
 
@@ -63,7 +62,6 @@ function positionOf(text: string, index: number): { column: number; line: number
     return { column: index - before.lastIndexOf('\n'), line: before.split('\n').length };
 }
 
-/** `verb-reads-its-ground-folder`'s reading. */
 function roleOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundFolder(segment));
 }
@@ -97,7 +95,7 @@ function referencesIn(file: string): Reference[] {
     return references;
 }
 
-/** A JSON file counts as the fixer writes its value. */
+// invariant: a JSON file counts as the fixer writes its value.
 function inPlaceLines(path: string, content: string): number {
     const parsed = path.endsWith('.json') ? jsonOf(content) : undefined;
     return valueLines(parsed === undefined ? content : JSON.stringify(parsed, null, 4));
@@ -113,7 +111,7 @@ function staysAFile(path: string, cap: number): boolean {
 
 type SingleUse = { reference: Reference; references: number; target: string };
 
-/** A reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers. */
+// invariant: a reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers.
 function oneTestReads(named: readonly Reference[]): Reference | undefined {
     const [only] = named;
     const tests = new Set(named.map((reference) => reference.test));

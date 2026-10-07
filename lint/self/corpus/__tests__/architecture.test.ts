@@ -7,7 +7,6 @@ import { definitionsIn, modulesOf, outsideLoadsReached, straysOf } from '../arch
 
 const ROOT = resolve(import.meta.dirname, '../../../..');
 
-/** The setups a chain can offer, each in its own `<name>.capability.ts`. */
 const SETUPS = [
     'clock',
     'env',
@@ -51,7 +50,7 @@ const named = (kind: string): string[] =>
         .map(({ definition }) => definition.name)
         .toSorted();
 
-/** Meta-tests `chain-loads-in-a-page` (`chain-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component specification composes a setup inside a page, so what the chain and a setup load must load there too. */
+// invariant: Meta-tests `chain-loads-in-a-page` (`chain-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component specification composes a setup inside a page, so what the chain and a setup load must load there too.
 describe('architecture', () => {
     test('the architecture a specification is composed in (meta-tests) — `chain-loads-in-a-page` — the chain and every setup load no node builtin and no package, at any depth', () => {
         // Given - every module of the chain machinery, and every setup module

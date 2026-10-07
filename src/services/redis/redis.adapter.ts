@@ -14,12 +14,12 @@ export type RedisOptions = {
     image?: string;
 };
 
-/** Index 0 is the container's own; every other is one (worker, service) pair's. */
+// invariant: index 0 is the container's own; every other is one (worker, service) pair's.
 const DATABASES = 256;
 
 const SERVICES_PER_WORKER = 4;
 
-/** Pool id `w` holds indexes `4w − 3` to `4w`; worker 0 (outside a pool) shares pool id 1's. */
+// invariant: pool id `w` holds indexes `4w − 3` to `4w`; worker 0 (outside a pool) shares pool id 1's.
 const WORKERS = Math.floor((DATABASES - 1) / SERVICES_PER_WORKER);
 
 const PAIR_INDEXES: ContainerOptions = {
@@ -28,7 +28,7 @@ const PAIR_INDEXES: ContainerOptions = {
 
 type Held = { holders: number; slot: number };
 
-/** One worker id per process, so the pairs of every other worker are theirs. */
+// invariant: one worker id per process, so the pairs of every other worker are theirs.
 const slots = new Map<string, Map<string, Held>>();
 
 function slotsOf(worker: string): Map<string, Held> {
@@ -37,7 +37,7 @@ function slotsOf(worker: string): Map<string, Held> {
     return held;
 }
 
-/** The slot of a service in its worker, shared by every handle of that service; the callback gives this handle's hold back. */
+// invariant: the slot of a service in its worker, shared by every handle of that service; the callback gives this handle's hold back.
 function takeSlot(held: Map<string, Held>, service: string): { free: () => void; slot: number } {
     const own = held.get(service);
     const pair = own ?? { holders: 0, slot: lowestFree(held) };

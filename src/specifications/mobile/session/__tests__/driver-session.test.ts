@@ -44,7 +44,7 @@ function session(sessionId: string): { capabilities: Record<string, unknown>; se
     return { capabilities: { platformName: 'iOS' }, sessionId };
 }
 
-/** Cast at the seam: a stub session carries only id and capabilities. */
+// invariant: cast at the seam: a stub session carries only id and capabilities.
 function stubFactories(): { calls: Calls; webdriverio: never } {
     const calls: Calls = { asked: [], attached: [], created: 0, options: [] };
     const remote = async (options: Options) => {

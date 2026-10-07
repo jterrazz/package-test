@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 /** Past it, the skill is restating a page. */
 export const SKILL_MAX_LINES = 120;
 
-/** `toMatch` included: the golden rides on it. */
+// invariant: `toMatch` included: the golden rides on it.
 const VITEST = [
     'afterAll',
     'afterEach',
@@ -39,7 +39,6 @@ function namesOf(list: string): string[] {
         .filter((name): name is string => name !== undefined && name !== '');
 }
 
-/** Following its `export * from` lines. */
 function exportedNames(file: string): Set<string> {
     const text = readFileSync(file, 'utf8');
     const names = new Set<string>();

@@ -15,7 +15,7 @@ type MatchScope = Locator | Page;
 const VALUE_TIMEOUT_MS = 30_000;
 const VALUE_POLL_MS = 100;
 
-/** By accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour). */
+// invariant: by accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour).
 const FIELD_ROLES = [
     'checkbox',
     'combobox',
@@ -27,7 +27,7 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/** No `.first()`: playwright's strict mode is the mechanism behind `target-matches-one-element`. */
+// invariant: no `.first()`: playwright's strict mode is the mechanism behind `target-matches-one-element`.
 function locate(root: MatchScope, target: Target): Locator {
     const scope: MatchScope = target.scope ? locate(root, target.scope) : root;
     // invariant: `exact` is the framework's default, not playwright's.
@@ -53,12 +53,12 @@ function locate(root: MatchScope, target: Target): Locator {
     );
 }
 
-/** Playwright signals "more than one match" through this error text. */
+// outside: Playwright signals "more than one match" through this error text.
 function isStrictViolation(error: unknown): boolean {
     return error instanceof Error && error.message.includes('strict mode violation');
 }
 
-/** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
+// invariant: the ambiguous level is found first: a scope matching several landmarks is the real fault.
 async function act<T>(
     page: Page,
     target: Target,
@@ -85,7 +85,7 @@ async function findAmbiguousLevel(page: Page, target: Target): Promise<Target> {
     return target;
 }
 
-/** A second locator condition keeps playwright's retry; `toBeFocused()` lives in `@playwright/test`, which this package does not carry. */
+// invariant: a second locator condition keeps playwright's retry; `toBeFocused()` lives in `@playwright/test`, which this package does not carry.
 function stateOnly(page: Page, locator: Locator, target: Target): Locator | null {
     if (target.focused === true) {
         return locator.and(page.locator(':focus'));
@@ -99,7 +99,7 @@ function stateOnly(page: Page, locator: Locator, target: Target): Locator | null
     return null;
 }
 
-/** A collapsed select's options have no box until opened. */
+// invariant: a collapsed select's options have no box until opened.
 function byPresence(target: Target): boolean {
     return target.kind === 'option';
 }
@@ -116,7 +116,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
     }
 }
 
-/** A poll: a value is a property, and a locator's CSS reads the attribute, which a controlled input never moves. */
+// invariant: a poll: a value is a property, and a locator's CSS reads the attribute, which a controlled input never moves.
 async function waitForValue(locator: Locator, target: Target, wanted: boolean): Promise<void> {
     const value = target.value ?? '';
     const deadline = Date.now() + VALUE_TIMEOUT_MS;
@@ -139,7 +139,7 @@ async function waitForValue(locator: Locator, target: Target, wanted: boolean): 
     }
 }
 
-/** `see()` waits for the target to be there, `gone()` for it to leave: by value, by state, or by presence. */
+// invariant: `see()` waits for the target to be there, `gone()` for it to leave: by value, by state, or by presence.
 async function settle(
     page: Page,
     locator: Locator,

@@ -17,7 +17,6 @@ const OTHER_ELEMENT =
 
 const SCOPE_BOOKMARK = `  • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any target works as the scope`;
 
-/** The fixes a refusal offers, one line each. */
 function fixesOf(target: Target, matches: MobileElementMatch[]): string[] {
     const { message } = ambiguousScreenElementError({ matches, target });
     const lines = message.split('\n');

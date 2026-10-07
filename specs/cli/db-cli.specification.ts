@@ -1,5 +1,5 @@
 import { specification, sqlite } from '@jterrazz/test';
-/** Declares the commands its specs run, so the checker files each spec under them (`spec-in-subject-folder`). */
+// invariant: declares the commands its specs run, so the checker files each spec under them (`spec-in-subject-folder`).
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
 

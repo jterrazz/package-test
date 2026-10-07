@@ -22,7 +22,7 @@ function canonical(value: unknown): unknown {
         : value;
 }
 
-/** The same request spelled in any key order is one key. */
+// invariant: the same request spelled in any key order is one key.
 function keyOf(request: ContainerRequest): string {
     return JSON.stringify(canonical(request));
 }

@@ -47,7 +47,7 @@ export type SpecModel = {
     sqlDatabaseCount: null | number;
 };
 
-/** `null` when the services record is not one the count can read: a value no call opens, or a brace never closed. */
+// invariant: `null` when the services record is not one the count can read: a value no call opens, or a brace never closed.
 function sqlDatabaseCount(text: string): null | number {
     const record = SERVICES_RECORD.exec(text);
     if (record === null) {

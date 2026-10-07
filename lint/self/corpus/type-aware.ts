@@ -6,10 +6,10 @@ import { join, resolve } from 'node:path';
 
 export type TypeAwareFinding = { line: number; rule: string };
 
-/** oxlint's `unix` line. */
+// outside: oxlint's `unix` line.
 const UNIX_LINE = /^[^:]+:(?<line>\d+):\d+: .* \[\w+\/(?<plugin>[\w-]+)\((?<rule>[\w-]+)\)\]$/u;
 
-/** Hoisted to the repository's `.bin`, or nested under the toolchain. */
+// outside: hoisted to the repository's `.bin`, or nested under the toolchain.
 function oxlintBinary(root: string): string {
     const hoisted = resolve(root, 'node_modules/.bin/oxlint');
     return existsSync(hoisted)

@@ -20,7 +20,7 @@ import { TextAccessor } from '../../../expectations/text/text.js';
 import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/update-merge.js';
 import { readGolden, writeGolden, writeInPlaceText } from '../page/vitest-browser-dom.js';
 
-/** The comparison is `goldens/text-assertions.ts`'s in both builds; only the transport differs: two server commands and one `provide`. */
+// invariant: the comparison is `goldens/text-assertions.ts`'s in both builds; only the transport differs: two server commands and one `provide`.
 
 type MatcherResult = { message: () => string; pass: boolean };
 

@@ -22,7 +22,6 @@ function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     return current?.type === 'CallExpression' ? current : undefined;
 }
 
-/** The local name a destructured property binds, past any default value. */
 function aliasOf(property: AstNode): string | undefined {
     const value = child(property, 'value');
     const bound = value?.type === 'AssignmentPattern' ? child(value, 'left') : value;

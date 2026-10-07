@@ -47,7 +47,7 @@ function onlyOf(handles: ServiceHandle[]): ServiceHandle | undefined {
     return others.length === 0 ? only : undefined;
 }
 
-/** `service-urls-injected`: `<KEY>_URL` each, `DATABASE_URL` / `REDIS_URL` when exactly one of that kind. */
+// invariant: `service-urls-injected`: `<KEY>_URL` each, `DATABASE_URL` / `REDIS_URL` when exactly one of that kind.
 function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefined): CliEnv {
     const injected: CliEnv = {};
     const sql: ServiceHandle[] = [];

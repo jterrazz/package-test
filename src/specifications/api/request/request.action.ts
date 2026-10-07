@@ -19,9 +19,7 @@ import type { RouteArguments, RouteOptionsAny } from './route.js';
 type Needs = { server: ServerPort };
 
 type Sent = {
-    /** A value (objects JSON-serialised, strings raw), or a `file()` whose content is sent. */
     body?: unknown;
-    /** The headers the request was written with, under the chain's own. */
     headers?: Record<string, string>;
     method: string;
     path: string;
@@ -38,7 +36,7 @@ const ACCESSORS: readonly MatrixRow[] = [
 
 const NO_WORKDIR = { workDir: null } as const;
 
-/** A `.json` file is sent as the value it holds, any other as its text. */
+// invariant: a `.json` file is sent as the value it holds, any other as its text.
 function bodyOf(body: DiskFile, testDir: string): unknown {
     const content = readFileSync(resolve(testDir, body.path), 'utf8');
     return body.path.endsWith('.json') ? JSON.parse(content) : content;

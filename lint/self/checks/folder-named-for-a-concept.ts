@@ -12,7 +12,7 @@ import {
 import type { Listed } from '../../kit/project/source.js';
 import type { SelfPassId } from './checker.js';
 
-/** A role rides on the file suffix, never on a folder name. */
+// invariant: a role rides on the file suffix, never on a folder name.
 const ROLE_NAMES = new Set([
     'actions',
     'adapters',

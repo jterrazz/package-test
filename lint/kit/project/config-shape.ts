@@ -119,7 +119,7 @@ const GLOB_SYNTAX: Readonly<Record<string, string>> = {
     '}': ')',
 };
 
-/** `**` crosses separators, `*` and `?` do not, `{a,b}` alternates. */
+// outside: `**` crosses separators, `*` and `?` do not, `{a,b}` alternates.
 function globMatcher(glob: string): RegExp {
     const source = glob.replaceAll(
         /\*\*|[*?{},]|[.+^$()|[\]\\]/gu,

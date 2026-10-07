@@ -13,10 +13,10 @@ const VOLATILE = [
     { pattern: /(?:^|[\s"'(=])\/(?:Users|home)\/[^\s"'/]+\//u, token: '{{workdir}} or {{path}}' },
 ] as const;
 
-/** The character a path pattern reads before the path, which is no part of it. */
+// invariant: the character a path pattern reads before the path, which is no part of it.
 const LEAD = /^[\s"'(=]/u;
 
-/** A pattern matches the shape that makes a value volatile, so the carve-out looks up the whole word, or one pinned `/tmp/` would exempt every temp path. */
+// invariant: a pattern matches the shape that makes a value volatile, so the carve-out looks up the whole word, or one pinned `/tmp/` would exempt every temp path.
 function wordAround(text: string, index: number): string {
     let start = index;
     let end = index;

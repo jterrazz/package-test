@@ -25,7 +25,7 @@ type PageExtraction = {
     title: string;
 };
 
-/** The headless shell, named so the lighter binary is used whatever playwright's default becomes. */
+// outside: the headless shell, named so the lighter binary is used whatever playwright's default becomes.
 const LAUNCH_OPTIONS = { channel: 'chromium-headless-shell', headless: true } as const;
 
 async function launchChromium(): Promise<Browser> {
@@ -43,7 +43,7 @@ async function launchChromium(): Promise<Browser> {
     return await chromium.launch(LAUNCH_OPTIONS);
 }
 
-/** Runs in the page: what a visit reads off the rendered document. */
+// invariant: runs in the page: what a visit reads off the rendered document.
 function extractPage(): PageExtraction {
     const links = [...document.querySelectorAll('link')].map((link) => ({
         href: link.href,
@@ -99,7 +99,7 @@ function recordConsole(page: Page): BrowserConsoleMessage[] {
     return consoleMessages;
 }
 
-/** Kept until the worker exits: playwright ends the browsers it launched with the process. */
+// invariant: kept until the worker exits: playwright ends the browsers it launched with the process.
 const workerBrowsers = new Map<() => Promise<Browser>, () => Promise<Browser>>();
 
 function workerBrowser(launch: () => Promise<Browser>): () => Promise<Browser> {

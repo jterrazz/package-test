@@ -21,7 +21,7 @@ import {
 } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-/** A tree compares by the listing git keeps, so an ignored file is no difference. */
+// outside: a tree compares by the listing git keeps, so an ignored file is no difference.
 function fingerprintOf(path: string): string {
     const hash = createHash('sha256');
     const visit = (current: string, below: string): void => {
@@ -49,11 +49,11 @@ function fingerprintOf(path: string): string {
 }
 
 type CopiedGround = {
-    /** Sorted: the first is the one a fix moves. */
+    // invariant: sorted: the first is the one a fix moves.
     copies: string[];
     fingerprint: string;
     specsRoot: string;
-    /** `null` when the copies go by several names: none of them is the one to keep. */
+    // invariant: `null` when the copies go by several names: none of them is the one to keep.
     target: null | string;
 };
 

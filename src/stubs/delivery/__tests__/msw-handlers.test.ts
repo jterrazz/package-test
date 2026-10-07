@@ -14,7 +14,6 @@ const API = 'http://api.test';
 
 const MSW = { http: mswHttp, HttpResponse, passthrough };
 
-/** The stubs served in this process for the test, and the violation they record. */
 function served(stubs: Stub[], bypass?: (url: string) => boolean): () => Error | null {
     const { handlers, violation } = buildStubHandlers(MSW, stubs, bypass);
     const server = setupServer(...handlers);

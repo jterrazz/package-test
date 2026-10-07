@@ -11,7 +11,7 @@ import {
     withoutComments,
 } from '../source-scan.js';
 
-/** `#{` spells an interpolation, which a plain string cannot hold. */
+// invariant: `#{` spells an interpolation, which a plain string cannot hold.
 const spelled = (text: string): string => text.replaceAll('#{', ['$', '{'].join(''));
 
 describe('source-scan', () => {

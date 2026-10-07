@@ -4,10 +4,9 @@ import { dirname, join, resolve } from 'node:path';
 import { isRecord, parsedJson } from './json-shape.js';
 import { packageRootOf, projectRootOf } from './role.js';
 
-/** In the order a resolver tries them. */
+// outside: in the order a resolver tries them.
 const EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json'];
 
-/** `./x.js` → `./x.ts`. */
 const COMPILED: Record<string, string[]> = {
     '.cjs': ['.cts'],
     '.js': ['.ts', '.tsx'],
@@ -99,7 +98,7 @@ type PathsMap = { base: string; paths: Record<string, unknown> };
 
 type Resolution = { baseUrl?: string; paths?: PathsMap };
 
-/** In the compiler's order. */
+// outside: in the compiler's order.
 function configCandidates(base: string): string[] {
     return [base, `${base}.json`, join(base, 'tsconfig.json')];
 }
@@ -119,7 +118,7 @@ function extendedConfig(from: string, entry: string): string | undefined {
     }
 }
 
-/** Folded the compiler's way: a later base overrides an earlier one, and `baseUrl` and `paths` resolve relative to the file stating them. */
+// invariant: folded the compiler's way: a later base overrides an earlier one, and `baseUrl` and `paths` resolve relative to the file stating them.
 function resolutionOf(tsconfig: string, seen: Set<string>): Resolution {
     if (seen.has(tsconfig)) {
         return {};

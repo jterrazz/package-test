@@ -8,7 +8,6 @@ type Linked = Parameters<typeof link.reduce>[0];
 
 const CHAPTER = 'read: docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves';
 
-/** A port that logs each link it lays. */
 function linksInto(log: string[]): LinkPort {
     return {
         link: (name, path, testDir, workDir) => {
@@ -19,7 +18,7 @@ function linksInto(log: string[]): LinkPort {
 
 const SETUP = { adapters: { links: linksInto([]) }, config: {} };
 
-/** The slice the chain holds after each `.link()` call, in order. */
+// invariant: the slice the chain holds after each `.link()` call, in order.
 function linked(...calls: [unknown, unknown?][]): Linked {
     let slice = link.initial;
     for (const args of calls) {

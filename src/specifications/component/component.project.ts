@@ -53,7 +53,7 @@ const PIPELINE_KEYS = [
     'resolve',
 ] as const;
 
-/** Pre-bundled so a cold cache never reloads mid-run. `msw` is left out: `@vitest/browser` already excludes it, and an entry both included and excluded is fatal to Vite's optimizer. */
+// outside: pre-bundled so a cold cache never reloads mid-run. `msw` is left out: `@vitest/browser` already excludes it, and an entry both included and excluded is fatal to Vite's optimizer.
 const PAGE_DEPENDENCIES = [
     'react',
     'react-dom/client',
@@ -66,7 +66,7 @@ const PAGE_DEPENDENCIES = [
 const requireFrom = createRequire(import.meta.url);
 const HELPERS_FILE = import.meta.filename;
 
-/** A config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`. */
+// invariant: a config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`.
 const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
 
 function callerFile(): string | undefined {
@@ -88,7 +88,7 @@ function nearestHolding(name: string): string | undefined {
     }
 }
 
-/** Never `process.cwd()`: knip and `typescript check` load configs from the repository root. Read off the stack; Vite's own loader bundles the config into `node_modules/.vite-temp/`, keeping only its name, looked for upward from the cwd. */
+// outside: never `process.cwd()`: knip and `typescript check` load configs from the repository root. Read off the stack; Vite's own loader bundles the config into `node_modules/.vite-temp/`, keeping only its name, looked for upward from the cwd.
 function callerDirectory(): string {
     const file = callerFile();
     // Stryker disable next-line ConditionalExpression: a frame outside this file always calls it
@@ -104,7 +104,7 @@ function callerDirectory(): string {
     return nearestHolding(bundled) ?? process.cwd();
 }
 
-/** An absent optional peer is simply not pre-bundled. */
+// invariant: an absent optional peer is simply not pre-bundled.
 function resolves(specifier: string): boolean {
     try {
         // Stryker disable next-line CallExpression: every page dependency resolves on this package's own install, so its tests never meet an absent one
@@ -115,7 +115,7 @@ function resolves(specifier: string): boolean {
     }
 }
 
-/** With the scope header a worker registered at `/` needs. */
+// outside: with the scope header a worker registered at `/` needs.
 function mswWorkerPlugin(): Plugin {
     return {
         configureServer(server) {
@@ -132,7 +132,7 @@ function mswWorkerPlugin(): Plugin {
 
 const isPluginList = (plugins: unknown): plugins is PluginOption[] => Array.isArray(plugins);
 
-/** An allow-list: an unknown key (`environments`, `ssr`, …) could re-root the run. The consumer's `plugins` are concatenated after the project's. */
+// invariant: an allow-list: an unknown key (`environments`, `ssr`, …) could re-root the run. The consumer's `plugins` are concatenated after the project's.
 async function reroot(
     source: NonNullable<ComponentProjectOptions['vite']>,
     root: string,
@@ -205,7 +205,7 @@ function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include:
     };
 }
 
-/** A consumer's `jsxImportSource` or classic runtime wins. */
+// invariant: a consumer's `jsxImportSource` or classic runtime wins.
 function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown> {
     const key = transformKey();
     const stated = pipeline[key];
@@ -216,7 +216,7 @@ function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown>
     return { esbuild: stated ?? { jsx: 'automatic' } };
 }
 
-/** A static import: a dependency discovered mid-run makes the optimizer rewrite its cache and every held module 404s. Written to disk because vitest resolves `setupFiles` as paths; handed over on a shared `globalThis` symbol, the two graphs sharing no module. */
+// outside: a static import: a dependency discovered mid-run makes the optimizer rewrite its cache and every held module 404s. Written to disk because vitest resolves `setupFiles` as paths; handed over on a shared `globalThis` symbol, the two graphs sharing no module.
 function writeSetupFile(wrap: string, root: string): string {
     const absolute = resolve(root, wrap);
     const path = resolve(root, VITEST_ARTIFACTS_DIR, 'component-setup.mjs');
@@ -234,7 +234,7 @@ function writeSetupFile(wrap: string, root: string): string {
     return path;
 }
 
-/** Update mode is a `process.env`/`argv` read the page cannot make. */
+// invariant: update mode is a `process.env`/`argv` read the page cannot make.
 function providedToPage(options: ComponentProjectOptions): {
     componentClock?: string;
     componentViewport: { height: number; width: number };

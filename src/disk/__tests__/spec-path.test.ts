@@ -11,7 +11,6 @@ import {
     requireRelativePath,
 } from '../spec-path.js';
 
-/** The found, fix and read lines of what the call throws, or nothing when it throws nothing. */
 function refusalOf(call: () => unknown): string[] {
     try {
         call();
@@ -26,7 +25,6 @@ function refusalOf(call: () => unknown): string[] {
     }
 }
 
-/** Past the compiler, as a caller without types writes it. */
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a caller without types hands any value, which the compiler would refuse
 const untyped = (value: unknown): never => value as never;
 

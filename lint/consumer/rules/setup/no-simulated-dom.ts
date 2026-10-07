@@ -11,7 +11,7 @@ const PRAGMA = /@vitest-environment\s+(?<environment>[\w-]+)/u;
 
 const SIMULATED = new Set(['happy-dom', 'jsdom']);
 
-/** Only a role that runs a test file is steered by a pragma. */
+// invariant: only a role that runs a test file is steered by a pragma.
 const REACHED = new Set<FileRole>(['component', 'module', 'specification']);
 
 const row = rowNamed(consumerRows, 'no-simulated-dom');

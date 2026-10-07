@@ -32,7 +32,7 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
     return stray === undefined ? undefined : { messageId: 'testOutside', node: stray };
 }
 
-/** A table's title is prefixed so what names its rows stays, unless it is computed. */
+// invariant: a table's title is prefixed so what names its rows stays, unless it is computed.
 function titleFinding(
     source: string,
     group: AstNode,

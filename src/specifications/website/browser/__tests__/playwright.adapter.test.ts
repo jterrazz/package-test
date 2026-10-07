@@ -20,7 +20,6 @@ async function messageOf(work: Promise<unknown>): Promise<string> {
     }
 }
 
-/** Goes to a second page, then fails there. */
 async function failingScenario(visitor: { goto: (path: string) => Promise<void> }): Promise<void> {
     await visitor.goto('/about');
     throw new Error('the button is gone');

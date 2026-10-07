@@ -28,7 +28,7 @@ export function finding<PassId extends string>(
     return { fix, found, line, rule };
 }
 
-/** `__fixtures__/` holds inputs, never scenarios. */
+// invariant: `__fixtures__/` holds inputs, never scenarios.
 const UNLISTED: ReadonlySet<string> = new Set([...PRUNED, GROUND_FIXTURES]);
 
 export function listSpecFiles(dir: string): string[] {

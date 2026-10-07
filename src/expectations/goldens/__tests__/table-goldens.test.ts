@@ -6,7 +6,7 @@ import { registerMatchers } from '../matchers.js';
 import { matchTableValue, tableExpectation } from '../table-goldens.js';
 import { scratchTest, wholeOf } from './response-goldens.fixtures.js';
 
-/** A fixed sequence of uuids in an order no test predicts from their names. */
+// invariant: a fixed sequence of uuids in an order no test predicts from their names.
 function uuidDraw(): () => string {
     let state = 7;
     return () => {

@@ -11,7 +11,7 @@ import {
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 
-/** A call probe is read as a shape in a closed grammar — `name(`, `.name(`, `object.name(`, then what the first argument opens on (`inner(`, `'`, `'/`, `{`, `[`), and a leading `))` for a call whose object ends on a call — so a formatter splitting a call changes nothing. A probe outside the grammar throws where it is read. */
+// invariant: a call probe is read as a shape in a closed grammar — `name(`, `.name(`, `object.name(`, then what the first argument opens on (`inner(`, `'`, `'/`, `{`, `[`), and a leading `))` for a call whose object ends on a call — so a formatter splitting a call changes nothing. A probe outside the grammar throws where it is read.
 
 type Argument =
     | { callee: string; kind: 'call' }
@@ -88,7 +88,7 @@ export function callsOf(filename: string, source: string): AstNode[] {
     return calls;
 }
 
-/** A template is read by the text before its first hole: `/users/${id}` opens on `/users/`. */
+// invariant: a template is read by the text before its first hole: `/users/${id}` opens on `/users/`.
 function openingOf(node: AstNode): string | undefined {
     if (node.type === 'TemplateLiteral') {
         const [first] = childList(node, 'quasis');
@@ -105,7 +105,6 @@ const TRANSPARENT = new Set([
     'TSTypeAssertion',
 ]);
 
-/** `file('x') as never` is `file('x')`. */
 function unwrapped(node: AstNode | undefined): AstNode | undefined {
     return node !== undefined && TRANSPARENT.has(node.type)
         ? unwrapped(child(node, 'expression'))
@@ -133,7 +132,7 @@ function argumentMatches(call: AstNode, argument: Argument): boolean {
     return first.type === (argument.kind === 'object' ? 'ObjectExpression' : 'ArrayExpression');
 }
 
-/** Only a call has arguments to end on. */
+// invariant: only a call has arguments to end on.
 function wrapsACall(node: AstNode | undefined): boolean {
     return unwrapped(childList(node, 'arguments').at(-1))?.type === 'CallExpression';
 }

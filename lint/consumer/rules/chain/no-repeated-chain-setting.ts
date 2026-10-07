@@ -52,7 +52,7 @@ function handlesOf(program: AstNode): Set<string> {
     return handles;
 }
 
-/** Setup calls outermost last. */
+// invariant: setup calls outermost last.
 function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | undefined {
     // Stryker disable next-line ArrayDeclaration: an entry that is no setting is no allowed one
     const settings: Setting[] = [];
@@ -125,14 +125,13 @@ function sharedSettings(chains: Chain[]): Setting[] {
 
 const ACTIONS = new Set(['create', 'delete', 'get', 'list', 'update']);
 
-/** `report-refresh` → `reportRefresh`. */
 function camelOf(word: string): string {
     return word.replaceAll(/[-_.](?<letter>[a-z0-9])/gu, (_, letter: string) =>
         letter.toUpperCase(),
     );
 }
 
-/** `events/list/` → `events`, `indicators/chart/` → `chart`; `undefined` for a subject with no standard name. */
+// invariant: `events/list/` → `events`, `indicators/chart/` → `chart`; `undefined` for a subject with no standard name.
 function subjectWord(subject: Subject): string | undefined {
     if (subject.specification === 'job') {
         return subject.job;
@@ -145,7 +144,7 @@ function subjectWord(subject: Subject): string | undefined {
     return folder.findLast((segment) => !ACTIONS.has(segment));
 }
 
-/** Every file of one folder names its view alike: `<subject>View` when the file already holds that name, `<handle>InFile` when no subject a name can be made of is reached. */
+// invariant: every file of one folder names its view alike: `<subject>View` when the file already holds that name, `<handle>InFile` when no subject a name can be made of is reached.
 function viewName(handle: string, text: string, program: AstNode): string {
     const taken = new Set<string>();
     walk(program, (node) => {
@@ -168,7 +167,7 @@ function viewName(handle: string, text: string, program: AstNode): string {
     return taken.has(name) ? `${name}View` : name;
 }
 
-/** Only a variable declaration holds `declarations`: any other statement declares no name a setting reads. */
+// invariant: only a variable declaration holds `declarations`: any other statement declares no name a setting reads.
 function declaredNames(statement: AstNode): string[] {
     const declaration =
         statement.type === 'ExportNamedDeclaration' ? child(statement, 'declaration') : statement;
@@ -177,7 +176,7 @@ function declaredNames(statement: AstNode): string[] {
     );
 }
 
-/** After the imports, and after every top-level declaration a shared setting reads: a view declared above a constant it reads is read before it exists. */
+// invariant: after the imports, and after every top-level declaration a shared setting reads: a view declared above a constant it reads is read before it exists.
 function viewPosition(program: AstNode, shared: Setting[]): number {
     const read = new Set(
         shared.flatMap((setting) => setting.argument.match(/[A-Za-z_$][\w$]*/gu) ?? []),

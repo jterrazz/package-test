@@ -2,7 +2,7 @@ import { CaptureScope } from './capture-scope.js';
 import { hasPlaceholders, placeholderStringMatches } from './placeholders.js';
 import { isPlainObject, textEquals } from './structural.js';
 
-/** So a golden written under `TEST_UPDATE=1` stores the token, not a temp path (`no-volatile-literal`). */
+// invariant: so a golden written under `TEST_UPDATE=1` stores the token, not a temp path (`no-volatile-literal`).
 function substituteWorkdirDeep(value: unknown, workdir: string): unknown {
     if (typeof value === 'string') {
         return value.replaceAll(workdir, '{{workdir}}');
@@ -47,7 +47,7 @@ export function mergePreservingPlaceholders(
     return merge(previous, actual);
 }
 
-/** Paired by pattern, not line index: a mid-file insertion keeps the shifted token lines. Each previous line is used once. */
+// invariant: paired by pattern, not line index: a mid-file insertion keeps the shifted token lines. Each previous line is used once.
 const ANY_LINE = /^\s*\{\{any\}\}\s*$/u;
 
 type Anchor = { line: string; offset: number };
@@ -145,7 +145,7 @@ function mergedLines(previous: null | string, actual: string, scope: CaptureScop
     const rawLines = actual.split('\n');
     const consumed = new Set<number>();
 
-    /** A previous token line covers an actual line it matches, read with the workdir as the token or as the path. */
+    // invariant: a previous token line covers an actual line it matches, read with the workdir as the token or as the path.
     const covers = (prevIndex: number, actualIndex: number): boolean => {
         const prev = String(prevLines[prevIndex]);
         return (
@@ -155,7 +155,6 @@ function mergedLines(previous: null | string, actual: string, scope: CaptureScop
         );
     };
 
-    // oxlint-disable-next-line unicorn/no-useless-undefined -- the hole IS the value: dropping it makes the callback return void and the array `void[]`
     const merged: (string | undefined)[] = actualLines.map(() => undefined);
     for (const [index] of actualLines.entries()) {
         if (covers(index, index)) {

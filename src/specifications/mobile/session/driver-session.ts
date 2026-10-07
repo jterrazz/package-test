@@ -21,10 +21,10 @@ type SessionRequest = {
     bundleId: string;
     device: MobileDevice;
     launchTimeoutMs: number;
-    /** The run's ledger — absent when the run shares no session. */
+    // invariant: the run's ledger — absent when the run shares no session.
     ledger?: SessionLedger | undefined;
     serverUrl: string;
-    /** Injected by the adapter's own tests; loaded from the optional peer otherwise. */
+    // invariant: injected by the adapter's own tests; loaded from the optional peer otherwise.
     webdriverio?: undefined | Webdriverio;
 };
 
@@ -36,7 +36,7 @@ function platformVersion(os: string): string {
     return os.replace(IOS_PREFIX, '');
 }
 
-/** Lazy: only a spec that opens the app requires the optional peer. */
+// invariant: lazy: only a spec that opens the app requires the optional peer.
 async function loadWebdriverio(): Promise<Webdriverio> {
     try {
         const { attach: attachFn, remote: remoteFn } = await import('webdriverio');
@@ -51,7 +51,7 @@ async function loadWebdriverio(): Promise<Webdriverio> {
     }
 }
 
-/** `TEST_MOBILE_HEADED=1` shows the simulator; otherwise the driver runs it headless and closes a window already open, which it would otherwise open for every session it boots one for. */
+// outside: `TEST_MOBILE_HEADED=1` shows the simulator; otherwise the driver runs it headless and closes a window already open, which it would otherwise open for every session it boots one for.
 function headless(): boolean {
     return process.env.TEST_MOBILE_HEADED !== '1';
 }
@@ -72,7 +72,7 @@ function capabilitiesOf(request: SessionRequest): Record<string, unknown> {
     };
 }
 
-/** Whether the server answered the call with success; a server that does not answer did not. */
+// invariant: whether the server answered the call with success; a server that does not answer did not.
 async function succeeded(url: string, method: 'DELETE' | 'GET'): Promise<boolean> {
     try {
         const response = await fetch(url, {
@@ -89,7 +89,7 @@ async function succeeded(url: string, method: 'DELETE' | 'GET'): Promise<boolean
 
 type Recorded = ReturnType<SessionLedger['lookup']>[number];
 
-/** Appium answers `timeouts` without a WebDriverAgent round trip, and any command restarts the session's idle clock. */
+// outside: Appium answers `timeouts` without a WebDriverAgent round trip, and any command restarts the session's idle clock.
 async function firstHeld(
     serverUrl: string,
     ledger: SessionLedger,

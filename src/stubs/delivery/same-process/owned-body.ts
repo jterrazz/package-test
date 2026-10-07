@@ -1,4 +1,4 @@
-/** msw holds a second tee branch it never cancels, so the caller's branch could never settle a cancel; this stream settles at once. */
+// outside: msw holds a second tee branch it never cancels, so the caller's branch could never settle a cancel; this stream settles at once.
 
 async function release(
     reader: ReadableStreamDefaultReader<Uint8Array>,

@@ -55,7 +55,7 @@ function treeOf(layer: string): string {
     return layer === 'lint' ? 'lint/' : `src/${layer}/`;
 }
 
-/** A declared path as the map writes it: `chain/` a folder, `chain/refusals/rows` one module, relative to `src/` unless it opens on `lint/`. */
+// invariant: a declared path as the map writes it: `chain/` a folder, `chain/refusals/rows` one module, relative to `src/` unless it opens on `lint/`.
 function targetOf(path: string): string {
     const rooted = path.startsWith('lint/') ? path : `src/${path}`;
 
@@ -68,7 +68,7 @@ function packageOf(name: string): string {
     return `node_modules/${escaped(name)}/`;
 }
 
-/** A grant names the package a subpath belongs to: its `exports` land every subpath in the package's own folder, wherever the file sits. */
+// invariant: a grant names the package a subpath belongs to: its `exports` land every subpath in the package's own folder, wherever the file sits.
 function grantOf(name: string): string {
     const segments = name.split('/');
 
@@ -165,7 +165,7 @@ const RUNNER_CONFIG_ENTRY = 'src/index.vitest.ts';
 
 type Reader = { granted: string[]; path: string };
 
-/** Who, outside a specification, reaches which file of one: every edge `FRAMEWORK_LAYERS` grants into `specifications/`, keyed by the reader. */
+// invariant: who, outside a specification, reaches which file of one: every edge `FRAMEWORK_LAYERS` grants into `specifications/`, keyed by the reader.
 function specificationReaders(): Map<string, Reader> {
     const readers = new Map<string, Reader>();
     const grant = (reader: string, path: string, granted: string): void => {

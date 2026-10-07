@@ -4,12 +4,12 @@ import { join, relative, sep } from 'node:path';
 import { PRUNED_WITH_OUTPUTS } from '../../kit/project/module-tests.js';
 import type { Spotted } from './checker.js';
 
-/** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
+// invariant: `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run.
 const GROUND_SYNONYMS = new Set(['__snapshots__', 'golden', 'goldens', 'snapshots']);
 
 const CODE_MODULE = /\.[cm]?[jt]sx?$/u;
 
-/** Under the member's `specs/` tree always; elsewhere only when it holds no code: a `goldens/` folder of matcher source is named for what its code does. */
+// invariant: under the member's `specs/` tree always; elsewhere only when it holds no code: a `goldens/` folder of matcher source is named for what its code does.
 function holdsGround(path: string, memberDir: string): boolean {
     if (relative(memberDir, path).split(sep).includes('specs')) {
         return true;

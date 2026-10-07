@@ -21,7 +21,7 @@ import {
 } from './sqlite-template.js';
 import type { SqliteOptions } from './sqlite-template.js';
 
-/** An optional peer, a native module to compile. */
+// outside: an optional peer, a native module to compile.
 let databaseConstructor: null | typeof Database = null;
 
 // Stryker disable all: the driver is installed and built here and loads once per process; the refusals of a missing or unbuilt peer are peer.ts's, tested there
@@ -41,7 +41,7 @@ async function loadDatabase(): Promise<typeof Database> {
     return databaseConstructor;
 }
 
-/** The read accessors run only after `initialize()` opened a database, which keeps them sync. */
+// invariant: the read accessors run only after `initialize()` opened a database, which keeps them sync.
 function database(): typeof Database {
     if (databaseConstructor === null) {
         throw invariant('sqlite() was read before `initialize()` loaded its driver');
@@ -60,14 +60,14 @@ const LOCK_POLL_MS = 50;
 
 const SIDECARS = ['', '-wal', '-shm'];
 
-/** Remove a file and the WAL sidecars SQLite may have left beside it. */
+// outside: remove a file and the WAL sidecars SQLite may have left beside it.
 function removeDatabaseFiles(path: string): void {
     for (const suffix of SIDECARS) {
         rmSync(`${path}${suffix}`, { force: true });
     }
 }
 
-/** Opens the database file for one use, and closes it whatever happens. */
+// invariant: opens the database file for one use, and closes it whatever happens.
 // Stryker disable all: a handle left open on a file nobody writes again answers nothing a test reads
 function withDatabase(path: string, use: (db: Database.Database) => void): void {
     const db = new (database())(path);

@@ -3,12 +3,12 @@ import { fileURLToPath } from 'node:url';
 
 import { safeRealpath } from '../../../lint/kit/project/resolve.js';
 
-/** Module tests are callers, not internals (rule `test-in-its-tests-folder`). */
+// invariant: module tests are callers, not internals (rule `test-in-its-tests-folder`).
 const TEST_FILE = /\.test\.[cm]?[jt]s$/u;
 
 export type StackFrame = { column: number; file: string; line: number };
 
-/** A frame's location, in either shape V8 prints it in: `at fn (<location>)` or `at <location>`. */
+// invariant: a frame's location, in either shape V8 prints it in: `at fn (<location>)` or `at <location>`.
 const FRAME_LOCATION = /^at (?:.*? \((?<wrapped>[^()]+)\)|(?:async )?(?<bare>[^()\s]+))$/u;
 
 const POSITION = /^(?<file>.+):(?<line>\d+):(?<column>\d+)$/u;
@@ -38,7 +38,7 @@ export function callerFrames(): StackFrame[] {
 
 const SOURCE_LOCATION = join('chain', 'paths');
 
-/** Real path, so a `file:`-linked install is still recognised as the framework. */
+// invariant: real path, so a `file:`-linked install is still recognised as the framework.
 const FRAMEWORK_DIR = safeRealpath(import.meta.dirname);
 
 /** From a build, `dist/` plus the `src/` its source maps point back to: a mapped frame is still the framework's. */

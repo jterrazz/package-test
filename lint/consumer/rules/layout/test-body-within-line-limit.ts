@@ -18,7 +18,7 @@ function lineAt(text: string, offset: number): number {
     return text.slice(0, offset).split('\n').length - 1;
 }
 
-/** A `toMatch(<value>)` argument past its first line is no gesture: `ground-shared-or-inline` caps it. */
+// invariant: a `toMatch(<value>)` argument past its first line is no gesture: `ground-shared-or-inline` caps it.
 function gestureLines(text: string, body: AstNode): number {
     const first = lineAt(text, nodeStart(body));
     const last = lineAt(text, nodeEnd(body));

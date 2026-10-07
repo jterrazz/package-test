@@ -31,7 +31,7 @@ export type StartedServices = {
     stopProcesses: () => Promise<void>;
 };
 
-/** The specification starts processes after the rest, so an `env` function reads connection strings that already exist. */
+// invariant: the specification starts processes after the rest, so an `env` function reads connection strings that already exist.
 function splitProcesses(services: ServiceRecord): {
     infrastructure: ServiceRecord;
     processes: [string, ProcessHandle][];

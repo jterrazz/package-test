@@ -17,7 +17,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const DOUBLE_FACTORIES = new Set(['fn', 'mockImplementation', 'mockImplementationOnce', 'mockOf']);
 
-/** Member forms are read by their property alone: the object is whatever the test called its double. */
+// invariant: member forms are read by their property alone: the object is whatever the test called its double.
 function isDoubleImplementation(node: AstNode): boolean {
     const callee = child(node, 'callee');
     // Stryker disable next-line ConditionalExpression: a call always has a callee
@@ -29,7 +29,7 @@ function isDoubleImplementation(node: AstNode): boolean {
     return name !== undefined && DOUBLE_FACTORIES.has(name);
 }
 
-/** An object literal of a port's methods is a double too. */
+// invariant: an object literal of a port's methods is a double too.
 function implementationOf(node: AstNode): AstNode | undefined {
     const value = child(node, 'value');
     // Stryker disable next-line OptionalChaining: a property always has a value

@@ -19,7 +19,7 @@ function isParameter(segment: string): boolean {
     return segment.startsWith(':') || BRACED_PARAMETER.test(segment);
 }
 
-/** A parameter takes any value and, from a template, only a parameter; a literal takes itself. */
+// invariant: a parameter takes any value and, from a template, only a parameter; a literal takes itself.
 function takesSegment(declared: string, sent: string | undefined, template: boolean): boolean {
     if (sent === undefined) {
         return false;

@@ -47,7 +47,6 @@ export function memberPropertyName(node: AstNode | undefined): string | undefine
     return property?.type === 'Identifier' ? (stringField(property, 'name') ?? '') : undefined;
 }
 
-/** `dockerCli.fixture(x).exec(y)` → `dockerCli`. */
 const CHAIN_LINKS: Readonly<Record<string, string>> = {
     AwaitExpression: 'argument',
     CallExpression: 'callee',

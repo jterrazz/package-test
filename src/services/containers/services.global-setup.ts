@@ -80,7 +80,7 @@ function packageVersion(): string {
     return String(field(manifest, 'version'));
 }
 
-/** On globalThis: vitest evaluates each project's setup in a module runner of its own, and the realm is what every runner shares. Versioned: two copies of the package in one run each open their own, never a registry whose protocol may differ. */
+// outside: on globalThis: vitest evaluates each project's setup in a module runner of its own, and the realm is what every runner shares. Versioned: two copies of the package in one run each open their own, never a registry whose protocol may differ.
 const RUN_SERVICES = Symbol.for(`@jterrazz/test.run-services@${packageVersion()}`);
 
 function settled(prepare: () => Promise<void>): () => Promise<void> {
@@ -110,7 +110,7 @@ function settled(prepare: () => Promise<void>): () => Promise<void> {
     };
 }
 
-/** What the run is made of: Docker's, unless a test hands its own. */
+// outside: what the run is made of: Docker's, unless a test hands its own.
 type RunSeams = {
     create: (request: ContainerRequest) => ContainerPort;
     prepare: () => Promise<void>;

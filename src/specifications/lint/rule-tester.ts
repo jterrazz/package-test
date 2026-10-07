@@ -8,7 +8,7 @@ import { refusal } from '../../chain/refusals/refusal.js';
 
 type Tester = typeof RuleTester;
 
-/** `column` is 0-based, as oxlint's RuleTester reads it; the report a lint spec compares prints it 1-based, as the compiler does. */
+// outside: `column` is 0-based, as oxlint's RuleTester reads it; the report a lint spec compares prints it 1-based, as the compiler does.
 type PositionedError = RuleTester.Error & { column: number; line: number };
 
 /** oxlint's test cases, each invalid one stating where every error it expects is reported. */

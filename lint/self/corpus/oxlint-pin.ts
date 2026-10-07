@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 
 import { stringsAt } from '../../kit/project/json-shape.js';
 
-/** `RuleTester` comes from `oxlint/plugins-dev`, so oxlint must be a declared devDependency; `@jterrazz/typescript` owns the pin, and `oxlint-pin.test.ts` fails on any divergence. */
+// outside: `RuleTester` comes from `oxlint/plugins-dev`, so oxlint must be a declared devDependency; `@jterrazz/typescript` owns the pin, and `oxlint-pin.test.ts` fails on any divergence.
 
-/** An unreadable or malformed one states no range at all. */
+// invariant: an unreadable or malformed one states no range at all.
 function manifestAt(path: string): unknown {
     try {
         return JSON.parse(readFileSync(path, 'utf8'));

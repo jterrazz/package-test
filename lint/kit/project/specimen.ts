@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { closingOf } from './source-scan.js';
 import { literalSpans } from './spec-values.js';
 
-/** Read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground. */
+// invariant: read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground.
 
 const INTO_FIXTURES = new RegExp(
     String.raw`(?:^|[/'"\x60\s])${GROUND_FIXTURES}/(?<name>[\w.-]+)(?<inside>/[\w.-])?`,

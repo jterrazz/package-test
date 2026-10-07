@@ -36,7 +36,7 @@ export type FileIdentity = {
 
 const GROUND = new Set<string>(GROUND_FOLDERS);
 
-/** `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name. */
+// invariant: `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name.
 function strayTestRootOf(filename: string): StrayTestRoot {
     const parts = projectSegments(filename);
     // Stryker disable next-line ConditionalExpression,EqualityOperator: no source file at the root is named test or tests

@@ -17,7 +17,7 @@ import { SQLITE_TEMPLATE_DIR } from '../../../lint/kit/project/artifacts.js';
 // outside: the SQLite file-format header: a crash can leave a 0-byte or partial template behind.
 const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 
-/** Runs on the file opened, and closes it whatever happens. */
+// invariant: runs on the file opened, and closes it whatever happens.
 // Stryker disable all: a descriptor left open answers nothing a test reads
 function withDescriptor<T>(path: string, flags: string, use: (fd: number) => T): T {
     const fd = openSync(path, flags);
@@ -61,10 +61,10 @@ export type SqliteOptions = {
 
 const TEMPLATE_PREFIX = 'template';
 
-/** A crashed holder would wedge the suite; a cold `prisma db push` finishes far inside this. */
+// invariant: a crashed holder would wedge the suite; a cold `prisma db push` finishes far inside this.
 const LOCK_STALE_MS = 120_000;
 
-/** Each entry carries its path, so moving a schema changes the fingerprint; unreadable degrades to a marker, the path already in the key. */
+// invariant: each entry carries its path, so moving a schema changes the fingerprint; unreadable degrades to a marker, the path already in the key.
 function schemaBytes(path: string): string {
     try {
         if (statSync(path).isDirectory()) {

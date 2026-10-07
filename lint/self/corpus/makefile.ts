@@ -7,7 +7,7 @@ export const MAKE_TARGETS = ['install', 'build', 'lint', 'fix', 'test', 'check']
 
 export type MakeTarget = { prerequisites: string[]; recipe: string[] };
 
-/** Never a variable assignment (`:=`). */
+// invariant: never a variable assignment (`:=`).
 const RULE = /^(?<name>[^\s:#=]+):(?!=)(?<prerequisites>[^#]*)/u;
 
 export function makeTargets(text: string): Map<string, MakeTarget> {

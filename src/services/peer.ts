@@ -4,7 +4,6 @@ import { resolve } from 'node:path';
 import { installRootOf } from '../../lint/kit/project/resolve.js';
 import { refusal } from '../chain/refusals/refusal.js';
 
-/** The lockfile each package manager leaves, and the install command its user types. */
 const INSTALLERS = [
     { command: 'bun add -d', lockfile: 'bun.lock', name: 'bun' },
     { command: 'bun add -d', lockfile: 'bun.lockb', name: 'bun' },
@@ -17,7 +16,7 @@ const DEFAULT_INSTALLER = { command: 'npm install -D', name: 'npm' } as const;
 
 type Installer = { command: string; name: (typeof INSTALLERS)[number]['name'] };
 
-/** Every manager withholds install scripts by default (npm 11, pnpm 10, bun 1.2): installing the package does not build it. */
+// outside: every manager withholds install scripts by default (npm 11, pnpm 10, bun 1.2): installing the package does not build it.
 const BUILDERS: Record<Installer['name'], (peer: string) => string> = {
     bun: (peer) => `bun pm trust ${peer}`,
     npm: (peer) => `npm install-scripts approve ${peer} && npm rebuild ${peer}`,
@@ -27,7 +26,7 @@ const BUILDERS: Record<Installer['name'], (peer: string) => string> = {
     yarn: (peer) => `yarn rebuild ${peer}`,
 };
 
-/** Node's message for a missing `.node`, the `bindings` package's, and the two shapes a binding built elsewhere produces. */
+// outside: node's message for a missing `.node`, the `bindings` package's, and the two shapes a binding built elsewhere produces.
 const UNBUILT =
     /could not locate the bindings file|\.node['"]?$|invalid elf header|was compiled against a different node/iu;
 

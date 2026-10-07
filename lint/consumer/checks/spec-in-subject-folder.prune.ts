@@ -82,7 +82,7 @@ export type Declaration = Span & { name: string; type: boolean };
 const DECLARATION =
     /^(?:(?:const|let)\s+(?<variable>[\w$]+)|(?:async\s+)?function\s*\*?\s*(?<fn>[\w$]+)|type\s+(?<alias>[\w$]+)|interface\s+(?<shape>[\w$]+))/gmu;
 
-/** A body closing at the end of its line ends the statement: oxfmt closes every other braced value with `;` or `,`. */
+// outside: a body closing at the end of its line ends the statement: oxfmt closes every other braced value with `;` or `,`.
 function statementEnd(blank: string, start: number): number {
     let index = start;
     // Stryker disable next-line EqualityOperator: past the text's end no character opens a bracket or ends a statement
@@ -168,7 +168,7 @@ export function pruned(text: string): string {
 export const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
-/** `from '…'` and `import('…')` name a module; every other lead names a path on disk. */
+// invariant: `from '…'` and `import('…')` name a module; every other lead names a path on disk.
 function isModuleLead(lead: string): boolean {
     return /^(?:from\b|import\()/u.test(lead);
 }

@@ -11,7 +11,7 @@ import {
     TYPED_ORDERS,
 } from './spec-in-subject-folder.split.fixtures.js';
 
-/** What the split of the one spec under `root` would write, by path; nothing is written. */
+// invariant: what the split of the one spec under `root` would write, by path; nothing is written.
 function filesOf(root: string): (path: string) => string {
     const files = subjectSpecs(root).flatMap((spec) =>
         splitFiles(root, spec, splitPlan(root, spec)),
@@ -19,7 +19,6 @@ function filesOf(root: string): (path: string) => string {
     return (path) => files.find(({ target }) => target === join(root, path))?.text ?? '';
 }
 
-/** Every file the split of the one spec under `root` writes, by its path under `root`. */
 function splitByPath(root: string): Record<string, string> {
     const files = subjectSpecs(root).flatMap((spec) =>
         splitFiles(root, spec, splitPlan(root, spec)),

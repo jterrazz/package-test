@@ -23,9 +23,7 @@ type Route = (route: RoutedRequest) => void;
 /** `hold` makes every visit a load that never finishes; `requests` are what the page asks once loading; `status` what the navigation answers, none when absent. */
 export type StubPage = { hold?: boolean; requests?: string[]; status?: number };
 
-/** Every call the adapter makes, one line each, and the state a test reads back. */
 type Recorder = {
-    /** Each context the browser opened, by how many times it was closed. */
     closes: number[];
     launches: number;
     loads: number;

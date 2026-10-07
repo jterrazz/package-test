@@ -7,7 +7,6 @@ import { readerOf } from '../../../chain/state.js';
 import type { LintPort, LintRun } from '../lint.port.js';
 import { run } from '../run.action.js';
 
-/** Linters that record each tree and run they are handed, and report nothing. */
 function recording(asked: [string, LintRun][]): { linters: LintPort } {
     return {
         linters: {

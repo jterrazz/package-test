@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.project.js';
 
-/** The include each documents plugin of a project adds, and how many there are. */
 function documentsOf(project: ReturnType<typeof cli>): unknown[] {
     return (project.plugins ?? []).flat().map((plugin) => {
         const config: unknown =

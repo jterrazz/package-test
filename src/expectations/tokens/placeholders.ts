@@ -66,7 +66,7 @@ export function hasPlaceholders(value: string): boolean {
     return PLACEHOLDER_RE.test(value);
 }
 
-/** Its keys sorted at every depth, so two captures of one object read alike whatever their key order. */
+// invariant: its keys sorted at every depth, so two captures of one object read alike whatever their key order.
 function canonical(value: unknown): unknown {
     if (Array.isArray(value)) {
         return value.map((item) => canonical(item));
@@ -165,7 +165,7 @@ export function matcherMatches(matcher: Matcher, actual: unknown, scope: Capture
 }
 
 type ParsedPlaceholderString = {
-    /** The literal text around each token, when every token is an unnamed `{{any}}`; null otherwise. */
+    // invariant: the literal text around each token, when every token is an unnamed `{{any}}`; null otherwise.
     pieces: null | string[];
     single: null | { kind: MatcherKind; ref?: string | undefined };
     pattern: RegExp;

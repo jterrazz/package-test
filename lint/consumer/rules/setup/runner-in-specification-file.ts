@@ -7,10 +7,10 @@ import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** A `wrap` written in JSX needs the `x`. */
+// invariant: a `wrap` written in JSX needs the `x`.
 const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
 
-/** A file whose source never says it cannot hold the call the visitor looks for. */
+// invariant: a file whose source never says it cannot hold the call the visitor looks for.
 const MEMBER_CALL = 'specification.';
 
 const row = rowNamed(consumerRows, 'runner-in-specification-file');

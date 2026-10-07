@@ -25,7 +25,7 @@ const SUBJECT_FOLDER_SPECIFICATIONS = new Set(['api', 'cli', 'job']);
 
 const GROUND = new Set<string>(GROUND_FOLDERS);
 
-/** Such a test reads every golden of its leaf though its source names none. */
+// invariant: such a test reads every golden of its leaf though its source names none.
 const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;
 
 /** Not where the folder is the subject's standard name (`spec-in-subject-folder`): there the leaf is the subject, and its aspect files share it by design. */

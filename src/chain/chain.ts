@@ -4,7 +4,7 @@ import type { Composition } from './define-specification.js';
 
 type Names<List extends readonly { readonly name: string }[]> = List[number]['name'];
 
-/** Read off the type parameter: the optional `context` read by shape infers every key under a consumer's options (no `exactOptionalPropertyTypes`). */
+// invariant: read off the type parameter: the optional `context` read by shape infers every key under a consumer's options (no `exactOptionalPropertyTypes`).
 type ContextOf<C extends Composition> = C['capabilities'][number] extends infer Member
     ? Member extends Capability<
           string,

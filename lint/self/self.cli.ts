@@ -18,7 +18,7 @@ import { MATRIX_MARKERS, renderMatrixBody } from './corpus/matrix.js';
 import { META_TESTS_MARKERS, renderMetaTests } from './corpus/meta-tests.js';
 import { renderSiblings, SIBLINGS_MARKERS } from './corpus/siblings.js';
 
-/** Each page is named from the root it is regenerated under, so a projection writes where the run points. */
+// invariant: each page is named from the root it is regenerated under, so a projection writes where the run points.
 function projectionsAt(root: string): Projection[] {
     const at = (page: string): string => resolve(root, page);
 

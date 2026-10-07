@@ -1,13 +1,13 @@
 import { decodeText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-/** Only spellings decidable on sight: the bare word `now` is a column name as often as a clock read. */
+// invariant: only spellings decidable on sight: the bare word `now` is a column name as often as a clock read.
 const CLOCK_READ = /'now'|\bCURRENT_(?:TIMESTAMP|DATE|TIME)\b|\bNOW\s*\(\s*\)/iu;
 
 const SQL_LINE_COMMENT = /--[^\n]*/gu;
 const SQL_BLOCK_COMMENT = /\/\*[\s\S]*?\*\//gu;
 
-/** Line for line, so a finding still points. */
+// invariant: line for line, so a finding still points.
 function withoutComments(text: string): string {
     return text
         .replaceAll(SQL_BLOCK_COMMENT, (block) => block.replaceAll(/[^\n]/gu, ' '))

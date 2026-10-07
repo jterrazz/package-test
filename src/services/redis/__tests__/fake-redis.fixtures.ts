@@ -12,7 +12,7 @@ export type FakeRedis = {
 
 const HANDSHAKE = new Set(['CLIENT', 'HELLO']);
 
-/** The commands of one chunk, each its words: `*<n>` then `$<length>` and the word, n times. */
+// invariant: the commands of one chunk, each its words: `*<n>` then `$<length>` and the word, n times.
 function commandsIn(chunk: string): string[][] {
     const lines = chunk.split('\r\n');
     const commands: string[][] = [];

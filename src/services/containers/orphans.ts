@@ -2,7 +2,7 @@ import { hostname } from 'node:os';
 
 import { OWNER_LABEL, REUSED_LABEL } from './testcontainers.adapter.js';
 
-/** Ryuk removes a session's containers only while it runs, and every process shares one session while any holds it: an owner label naming a dead local process marks an orphan. */
+// invariant: ryuk removes a session's containers only while it runs, and every process shares one session while any holds it: an owner label naming a dead local process marks an orphan.
 
 const SESSION_LABEL = 'org.testcontainers.session-id';
 

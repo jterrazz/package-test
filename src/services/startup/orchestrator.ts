@@ -19,7 +19,7 @@ export type OrchestratorOptions = {
 
 const DOCKER_DIR = 'docker';
 
-/** How far before a start its failure report reads logs, for a runtime clock behind the host's. */
+// invariant: how far before a start its failure report reads logs, for a runtime clock behind the host's.
 const LOG_CLOCK_MARGIN_MS = 500;
 
 function containerFor(handle: ServiceHandle): ContainerPort {
@@ -31,7 +31,7 @@ function containerFor(handle: ServiceHandle): ContainerPort {
     });
 }
 
-/** The report of a container that failed to come up, with its logs since this start; the container is stopped. */
+// invariant: the report of a container that failed to come up, with its logs since this start; the container is stopped.
 async function abandoned(failed: {
     container: ContainerPort;
     error: unknown;

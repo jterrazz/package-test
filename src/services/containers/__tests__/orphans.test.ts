@@ -22,7 +22,7 @@ function listed(
     };
 }
 
-/** Answers as `kill(pid, 0)` would: 6 runs, 8 is another user's, every other pid is gone. */
+// invariant: answers as `kill(pid, 0)` would: 6 runs, 8 is another user's, every other pid is gone.
 function probe(pid: number): void {
     if (pid === 8) {
         throw Object.assign(new Error('not permitted'), { code: 'EPERM' });

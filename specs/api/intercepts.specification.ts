@@ -1,5 +1,5 @@
 import { specification } from '@jterrazz/test';
-/** Intercepts are in-process (MSW), so the specimen runs in this process: `specimen-api-outbound`, whose routes only call out. */
+// invariant: Intercepts are in-process (MSW), so the specimen runs in this process: `specimen-api-outbound`, whose routes only call out.
 import { afterAll } from 'vitest';
 
 import { outboundApp } from './__fixtures__/specimen-api-outbound/app.js';

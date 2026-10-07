@@ -30,14 +30,14 @@ type Oversized = {
     column: number;
     end: number;
     file: string;
-    /** `undefined` when no file form holds it. */
+    // invariant: `undefined` when no file form holds it.
     form: FileForm | undefined;
     line: number;
     lines: number;
     name: string;
     role: string;
     start: number;
-    /** A string has no golden, so the value stays in place. */
+    // invariant: a string has no golden, so the value stays in place.
     subject: string | undefined;
 };
 
@@ -47,7 +47,7 @@ const VALUE_START = /^[`'"{[]/u;
 
 const STRING_SUBJECT = /\.(?:text|raw)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
-/** vitest's own `toMatch` takes no file: its long value is reported, never written to one. */
+// outside: vitest's own `toMatch` takes no file: its long value is reported, never written to one.
 const RESPONSE_SUBJECT = /\.response\)\s*\.(?:not\.)?toMatch\($/u;
 
 const PLAIN_SUBJECT =
@@ -150,7 +150,7 @@ export function oversizedValues(rootDir: string): Oversized[] {
     );
 }
 
-/** Its own bytes are reused; another's are skipped past with a suffix. */
+// invariant: its own bytes are reused; another's are skipped past with a suffix.
 function freePath(file: string, role: string, name: string, form: FileForm): string {
     const folder = join(dirname(file), role);
     for (let suffix = 1; ; suffix += 1) {

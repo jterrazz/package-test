@@ -32,7 +32,7 @@ function schemaValidator(): (data: unknown) => string[] {
               );
 }
 
-/** The parser holds these; an editor validating against the schema does not see them. */
+// outside: the parser holds these; an editor validating against the schema does not see them.
 const BEYOND_A_SCHEMA = new Map<string, string>();
 
 const validate = schemaValidator();

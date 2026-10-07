@@ -1,4 +1,4 @@
-/** `raised` is the message of an `Error` logged alone: how vitest's browser client relays a window `error` event. */
+// outside: `raised` is the message of an `Error` logged alone: how vitest's browser client relays a window `error` event.
 type ConsoleEntry = { raised?: string; text: string; type: string };
 
 const CONSOLE_METHODS = ['debug', 'error', 'info', 'log', 'warn'] as const;

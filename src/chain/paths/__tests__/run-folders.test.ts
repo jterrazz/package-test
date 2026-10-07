@@ -5,7 +5,7 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { sweepFinishedEvidence, sweepOrphanRoots } from '../run-folders.js';
 
-/** A run that cannot be alive: above the pid range of every system the suite runs on. */
+// invariant: a run that cannot be alive: above the pid range of every system the suite runs on.
 const DEAD = '2147483646';
 
 function folderHolding(entries: readonly string[]): string {

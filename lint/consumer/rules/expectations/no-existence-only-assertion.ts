@@ -14,7 +14,7 @@ const EXISTENCE_MATCHERS = new Set(['toBeDefined']);
 
 const NEGATED_EXISTENCE = new Set(['toBeNull', 'toBeUndefined']);
 
-/** Only affirmative: `expect(onClose).not.toHaveBeenCalled()` states that nothing happened, which nothing else can. */
+// invariant: only affirmative: `expect(onClose).not.toHaveBeenCalled()` states that nothing happened, which nothing else can.
 const BARE_ONLY = new Set(['toHaveBeenCalled']);
 
 const row = rowNamed(consumerRows, 'no-existence-only-assertion');

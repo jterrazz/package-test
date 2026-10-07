@@ -4,7 +4,7 @@ import type { Target } from '../targets/target.js';
 import type { ElementMatch } from './candidates.js';
 import { landmarkOfTagOrRole } from './landmark-of-tag.js';
 
-/** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
+// invariant: a region is a landmark only when named, and a page holds several, so it is offered by name alone.
 function landmarkOf(match: ElementMatch): string | undefined {
     // Stryker disable next-line StringLiteral: no landmark is named by any text a mutant writes here either
     const kind = landmarkOfTagOrRole(match.context ?? '');

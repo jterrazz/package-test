@@ -8,7 +8,7 @@ export type RelativePath<Extension extends string = string> =
 
 export const DISK_KEY = '@jterrazz/test:disk';
 
-/** A registry symbol, so every build of the package reads the same brand. */
+// invariant: a registry symbol, so every build of the package reads the same brand.
 const DISK: unique symbol = Symbol.for(DISK_KEY);
 
 /** A file the spec names, at `Path`. */
@@ -46,7 +46,7 @@ export function file<const Path extends RelativePath>(
     return diskValue('file', path);
 }
 
-/** Refuses when read as a pattern: a plain object would match `[object Object]` against any text. */
+// invariant: refuses when read as a pattern: a plain object would match `[object Object]` against any text.
 function diskValue<Brand extends 'directory' | 'file', Path extends string>(
     brand: Brand,
     path: Path,

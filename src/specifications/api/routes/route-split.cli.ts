@@ -6,7 +6,7 @@ import { refusal } from '../../../chain/refusals/refusal.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { judgeSplit } from './route-split.js';
 
-/** Runs after `vitest --merge-reports`, which runs no global setup; a failed merge stops before it. */
+// outside: runs after `vitest --merge-reports`, which runs no global setup; a failed merge stops before it.
 const { failure, line } = await judgeSplit(resolve('.'), {
     failed: 0,
     update: shouldUpdateSnapshots(),

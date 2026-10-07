@@ -14,7 +14,7 @@ import { describe, expect, test } from 'vitest';
 import { SurfacePanel } from './page-surface.js';
 import type { SurfacePort } from './page-surface.js';
 
-/** Run on the page's own runtime rather than compared by name with the node build. `intercept()` serves a test with no chain: a render declares its network on the chain. */
+// invariant: run on the page's own runtime rather than compared by name with the node build. `intercept()` serves a test with no chain: a render declares its network on the chain.
 
 const nodeOnly = (binding: string): Error =>
     new Error(

@@ -9,7 +9,7 @@ import { pause } from '../../../chain/pause.js';
 import { groupEnded, reaped, REAPER, signalGroup, WATCHDOG } from '../process-group.js';
 import { alive, programNamed } from './serve.fixtures.js';
 
-/** Keeps the process up until it is signalled, a minute at most: a test that fails before its cleanup leaves it no longer. */
+// invariant: keeps the process up until it is signalled, a minute at most: a test that fails before its cleanup leaves it no longer.
 const KEEP = 'setTimeout(() => {}, 60000)';
 
 async function outwaited(): Promise<string> {

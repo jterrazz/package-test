@@ -10,7 +10,7 @@ function formatMatch(match: MobileElementMatch, index: number): string {
     return `  ${index + 1}. ${match.type}${label}${value}${identifier}`;
 }
 
-/** `exact` is offered only to a target that opted out; distinct identifiers make `testId()` a concrete rewrite. */
+// invariant: `exact` is offered only to a target that opted out; distinct identifiers make `testId()` a concrete rewrite.
 function formatFixes(target: Target, matches: MobileElementMatch[]): string[] {
     const fixes: string[] = [];
 

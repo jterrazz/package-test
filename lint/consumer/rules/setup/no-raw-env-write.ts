@@ -8,7 +8,7 @@ import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** A replacement of the whole object outlasts the test exactly as a variable does. */
+// invariant: a replacement of the whole object outlasts the test exactly as a variable does.
 function isEnvTarget(node: AstNode | undefined): boolean {
     if (memberPath(node) === 'process.env') {
         return true;

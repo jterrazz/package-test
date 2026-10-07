@@ -5,7 +5,7 @@ import type { Testcontainers } from '../testcontainers.adapter.js';
 /** Every call the builder and the started container receive, in order, as one line each. */
 export type BuildLog = string[];
 
-/** Cast at the seam: only the handful of builder calls the adapter makes are implemented. */
+// invariant: cast at the seam: only the handful of builder calls the adapter makes are implemented.
 function asPeer(stub: unknown): Testcontainers {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the calls the adapter makes, never testcontainers' whole builder
     return stub as Testcontainers;

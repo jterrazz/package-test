@@ -11,7 +11,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
-/** An allowlist, never "has a dot": `../entities/dashboard.post` is ordinary code. */
+// invariant: an allowlist, never "has a dot": `../entities/dashboard.post` is ordinary code.
 const DATA_EXTENSIONS = [
     'avif',
     'bin',
@@ -66,7 +66,7 @@ function isModuleDouble(node: AstNode): boolean {
     );
 }
 
-/** `vi.mock(import('../../../rules/mocks/x.js'), …)` too: `vitest/prefer-import-in-mock` requires that form, so reading only the string left no green spelling. */
+// outside: `vi.mock(import('../../../rules/mocks/x.js'), …)` too: `vitest/prefer-import-in-mock` requires that form, so reading only the string left no green spelling.
 function mockedSpecifier(argument: AstNode | undefined): string | undefined {
     const literal = stringValue(argument);
     if (literal !== undefined) {
@@ -79,7 +79,6 @@ function mockedSpecifier(argument: AstNode | undefined): string | undefined {
     return stringValue(child(argument, 'source'));
 }
 
-/** `./payload.json?raw`, `./doc.md#frag`. */
 function withoutSuffix(source: string): string {
     // Stryker disable next-line Regex: `.*` runs to the end of the specifier anyway
     return source.replace(/[?#].*$/u, '');

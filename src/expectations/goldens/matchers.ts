@@ -1,4 +1,4 @@
-/** Registered on the first `specification.*` call, through a dynamic `import('vitest')`: the library never imports vitest at load. */
+// outside: registered on the first `specification.*` call, through a dynamic `import('vitest')`: the library never imports vitest at load.
 
 import { refusal } from '../../chain/refusals/refusal.js';
 import { isDiskDirectory, isDiskFile } from '../../disk/spec-path.js';

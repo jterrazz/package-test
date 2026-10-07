@@ -11,7 +11,6 @@ afterAll(async () => {
     await stopStubServer();
 });
 
-/** A server on port 0 answering every path with its name, closed with the test. */
 async function realServer(): Promise<string> {
     const server = createServer((request, response) => {
         response.end(`real ${request.url}`);

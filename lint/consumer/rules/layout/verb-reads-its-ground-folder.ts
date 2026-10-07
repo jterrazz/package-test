@@ -19,7 +19,7 @@ import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `__fixtures__/`. */
+// invariant: a document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `__fixtures__/`.
 const ROLES: Record<string, { argument: number; grounds: readonly (string | undefined)[] }> = {
     fixture: { argument: 0, grounds: [GROUND_FIXTURES] },
     post: { argument: 1, grounds: [GROUND_REQUESTS] },
@@ -35,7 +35,7 @@ function blockOf(declarator: AstNode): AstNode | undefined {
     return child(declaration, 'parent');
 }
 
-/** An identifier resolves to the nearest `const` of that name whose block encloses the call, as the language resolves it. */
+// invariant: an identifier resolves to the nearest `const` of that name whose block encloses the call, as the language resolves it.
 function diskArgument(
     argument: AstNode | undefined,
     bindings: ReadonlyMap<string, readonly AstNode[]>,

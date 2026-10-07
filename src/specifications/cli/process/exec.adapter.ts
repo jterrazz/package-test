@@ -4,7 +4,7 @@ import { signalGroup, SIGNALS_GROUPS } from '../../../services/process/process-g
 import type { CliEnv, CliInput, CliOutput, CliPort, WatchOptions } from './cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
-/** Grace period between SIGTERM and the SIGKILL escalation. */
+// value: grace period between SIGTERM and the SIGKILL escalation.
 const KILL_GRACE_MS = 2000;
 
 /** `null` overrides delete keys (`INIT_CWD: null`). */
@@ -28,7 +28,7 @@ export type ObservableProcess = {
     stdout: null | { on: (event: 'data', listener: (data: Buffer | string) => void) => unknown };
 };
 
-/** SIGTERM, then SIGKILL once the grace has passed: the child's exit clears the timer before then. */
+// invariant: SIGTERM, then SIGKILL once the grace has passed: the child's exit clears the timer before then.
 function terminate(child: ObservableProcess): NodeJS.Timeout {
     child.kill('SIGTERM');
     return setTimeout(() => {

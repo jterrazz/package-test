@@ -3,7 +3,7 @@ import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import { stubsOf } from '../stub.js';
 import type { Stub, StubInput } from '../stub.js';
 
-/** Only a request carries the adapter that speaks for it; a stub, a list and a composite never do. */
+// invariant: only a request carries the adapter that speaks for it; a stub, a list and a composite never do.
 function isRequest(value: StubInput | StubRequest): value is StubRequest {
     return 'adapter' in value;
 }

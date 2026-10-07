@@ -15,7 +15,7 @@ export type HttpStubFilter = {
     without?: { headers?: readonly string[] };
 };
 
-/** The raw body a string or RegExp filter reads: a text as it is, any other value as its JSON. */
+// invariant: the raw body a string or RegExp filter reads: a text as it is, any other value as its JSON.
 function rawOf(body: unknown): string {
     return typeof body === 'string' ? body : JSON.stringify(body ?? '');
 }

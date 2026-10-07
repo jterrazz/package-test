@@ -40,7 +40,7 @@ const rulesUnder = async (
     }
 };
 
-/** Where a project's installed oxlint keeps a bin, as the resolver reaches it. */
+// outside: where a project's installed oxlint keeps a bin, as the resolver reaches it.
 function installedBin(anchor: string, bin: string): string {
     const installed = realpathSync(join(anchor, '../node_modules/oxlint'));
     return join(installed, bin);

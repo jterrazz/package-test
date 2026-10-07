@@ -10,7 +10,7 @@ export const SPECIFICATIONS: ReadonlySet<string> = new Set([
     'website',
 ]);
 
-/** The source, not a substring: `../website.specification` carries no extension. */
+// invariant: the source, not a substring: `../website.specification` carries no extension.
 const IMPORT_SOURCE = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"](?<source>[^'"]+)['"]/gu;
 
 const CONSTRUCTS = /\bspecification\.[a-z]+\s*\(/u;

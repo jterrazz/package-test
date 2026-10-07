@@ -22,7 +22,6 @@ const UPDATE_HINT = 'Run with TEST_UPDATE=1 (or vitest -u) to create it.';
 const FROZEN_HINT =
     'This golden is `{ frozen }`: update mode never writes it. Write the file by hand, or drop `{ frozen }` for one TEST_UPDATE=1 run and put it back.';
 
-/** A scratch test folder holding the given goldens under `__expected__/`. */
 function scratchWith(goldens: Record<string, string> = {}): string {
     const scratch = mkdtempSync(join(tmpdir(), 'file-goldens-'));
     for (const [name, content] of Object.entries(goldens)) {
@@ -34,7 +33,6 @@ function scratchWith(goldens: Record<string, string> = {}): string {
 
 const read = (result: MatcherResult): [boolean, string] => [result.pass, result.message()];
 
-/** The verdict on a tree, as `read` gives it. */
 async function treeVerdict(
     subject: unknown,
     path: string,

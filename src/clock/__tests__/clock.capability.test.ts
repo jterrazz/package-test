@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { clock } from '../clock.capability.js';
 import type { ClockPort } from '../clock.port.js';
 
-/** A port that logs each instant it is handed. */
 function pinning(log: (null | string)[]): { clock: ClockPort } {
     return {
         clock: {

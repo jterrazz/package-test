@@ -1,4 +1,4 @@
-/** The page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name. */
+// invariant: the page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name.
 
 import { nodeOnlyClass, refuse } from './chain/refusals/node-only.js';
 import type { postgres as postgresFn } from './services/postgres/postgres.adapter.js';

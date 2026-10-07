@@ -3,7 +3,7 @@ import { execFile } from 'node:child_process';
 import { isRecord } from '../../../../lint/kit/project/json-shape.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 
-/** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
+// outside: zero or several matches refuse with the full listing: the framework never guesses the simulator.
 
 // Stryker disable all: simctl answers only on a Mac with Xcode; the mobile specs judge what it is asked and how its answer reads
 async function run(
@@ -46,7 +46,7 @@ const RUNTIME_KEY = /^.*SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/u
 
 const WORDS = /\s+/u;
 
-/** `com.apple.CoreSimulator.SimRuntime.iOS-26-5` reads `iOS 26.5`; a key of another shape reads as itself. */
+// outside: `com.apple.CoreSimulator.SimRuntime.iOS-26-5` reads `iOS 26.5`; a key of another shape reads as itself.
 function runtimeLabel(runtime: string): string {
     return runtime.replace(
         RUNTIME_KEY,

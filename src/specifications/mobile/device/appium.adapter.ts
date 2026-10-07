@@ -27,7 +27,7 @@ import type { DriverElement, MatchScope } from './xcui-query.js';
 /* outside: 30s absorbs a cold app boot, as playwright's actionability default; a slower app raises `timeouts`. */
 const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
-/** WebDriverAgent builds once per simulator: the first session is the slow one. */
+// outside: WebDriverAgent builds once per simulator: the first session is the slow one.
 const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 
 /** One driver session, opened lazily and reused: WebDriverAgent startup is the expensive part. Every `open()` relaunches the app. */

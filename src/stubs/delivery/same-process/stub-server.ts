@@ -13,10 +13,10 @@ async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> 
 
 let serverInstance: null | SetupServer = null;
 
-/** The `fetch` msw installed, which the owning wrapper sits on while it listens. */
+// outside: the `fetch` msw installed, which the owning wrapper sits on while it listens.
 let installedFetch: null | typeof fetch = null;
 
-/** Once per process; reply bodies are handed over as owned streams, so a cancel settles. */
+// invariant: once per process; reply bodies are handed over as owned streams, so a cancel settles.
 async function ensureStubServer(): Promise<SetupServer> {
     if (serverInstance !== null) {
         return serverInstance;

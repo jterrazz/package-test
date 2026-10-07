@@ -20,7 +20,6 @@ import { isCarried } from './result-compared-whole.carried.js';
 
 const WHOLE_SUBJECTS = new Set(['json', 'response']);
 
-/** `const result = await api.get('/users')`. */
 function resultNames(body: AstNode): Set<string> {
     const names = new Set<string>();
     const collect = (node: AstNode): void => {
@@ -37,7 +36,7 @@ function resultNames(body: AstNode): Set<string> {
     return names;
 }
 
-/** A refusal whose throw is the subject (`expect(() => result.json.value).toThrow(…)`) never compares what it reads. */
+// invariant: a refusal whose throw is the subject (`expect(() => result.json.value).toThrow(…)`) never compares what it reads.
 function inRefusal(node: AstNode): boolean {
     let current = child(node, 'parent');
     while (current !== undefined) {
@@ -65,7 +64,7 @@ function accessorOf(node: AstNode, results: ReadonlySet<string>): string | undef
         : undefined;
 }
 
-/** A computed name is out of reach. */
+// invariant: a computed name is out of reach.
 function tableOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     const callee = child(node, 'callee');
     // Stryker disable next-line ConditionalExpression,OptionalChaining: memberPropertyName reads no name from a non-member
@@ -88,7 +87,7 @@ function subjectOf(node: AstNode, results: ReadonlySet<string>): string | undefi
     return node.type === 'CallExpression' ? tableOf(node, results) : undefined;
 }
 
-/** A RegExp matches a part. */
+// invariant: a RegExp matches a part.
 function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     const assertion = assertionOf(node);
     if (assertion?.subject === undefined || assertion.modifiers.includes('not')) {

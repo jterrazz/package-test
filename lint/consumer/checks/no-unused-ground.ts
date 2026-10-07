@@ -21,7 +21,7 @@ import {
 } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-/** Read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`document-follows-its-grammar` reports it). */
+// invariant: read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`document-follows-its-grammar` reports it).
 function collectSpecLiterals(path: string): Set<string> {
     try {
         const document = parseSpecDocument(readText(path), path);
@@ -31,14 +31,14 @@ function collectSpecLiterals(path: string): Set<string> {
     }
 }
 
-/** Over-collection only ever hides a dead-fixture finding, so a greedy regex is safe as the fallback for a source the parser refuses. */
+// invariant: over-collection only ever hides a dead-fixture finding, so a greedy regex is safe as the fallback for a source the parser refuses.
 const STRING_LITERAL = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`$\\]|\\.)*`/gu;
 
 function scannedLiterals(text: string): Set<string> {
     return new Set([...text.matchAll(STRING_LITERAL)].map(([literal]) => literal.slice(1, -1)));
 }
 
-/** Read from the syntax tree: a scan of quotes can pair a quote inside a template's hole with one far below it, and lose every literal in between. */
+// invariant: read from the syntax tree: a scan of quotes can pair a quote inside a template's hole with one far below it, and lose every literal in between.
 function collectLiterals(file: string, text: string): Set<string> {
     const program = parseProgram(file, text);
     if (!isNode(program)) {
@@ -75,10 +75,10 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
         .filter(({ prefix, suffix }) => prefix !== '' || suffix !== '');
 }
 
-/** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
+// invariant: an entry is referenced by the path that reaches it, never by a literal that merely spells its name.
 type References = { paths: Set<string>; patterns: LiteralPattern[] };
 
-/** A source's literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/__fixtures__/app/server.mjs`). */
+// invariant: a source's literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/__fixtures__/app/server.mjs`).
 function pathsNamedBy(file: string): string[] {
     const from = dirname(file);
     if (file.endsWith(SPEC_EXTENSION)) {

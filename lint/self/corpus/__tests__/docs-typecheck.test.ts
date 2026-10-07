@@ -19,7 +19,7 @@ const INDEX_MODULE = resolve(ROOT, 'src/index.js');
 const TSC_BIN = resolve(ROOT, 'node_modules/typescript/bin/tsc');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 
-/** The skill ships samples too, so it is guarded with the pages and the README. */
+// invariant: the skill ships samples too, so it is guarded with the pages and the README.
 function frameworkBlocks(): DocBlock[] {
     const markdowns: string[] = [readFileSync(README, 'utf8'), readFileSync(SKILL, 'utf8')];
     for (const entry of readdirSync(DOCS, { recursive: true })) {
@@ -33,7 +33,7 @@ function frameworkBlocks(): DocBlock[] {
     );
 }
 
-/** Awaiting a non-promise is legal for `tsc`, but the toolchain's `await-thenable` refuses it in every consumer. A component's accessors are absent: their capture crosses the browser seam. */
+// outside: awaiting a non-promise is legal for `tsc`, but the toolchain's `await-thenable` refuses it in every consumer. A component's accessors are absent: their capture crosses the browser seam.
 const SYNC_SUBJECTS = ['error', 'json', 'response', 'stderr', 'stdout', 'value'];
 describe('docs-typecheck', () => {
     test('docs-typecheck — block selection — keeps a framework block, drops an app-code block', () => {
@@ -100,7 +100,7 @@ describe('docs-typecheck', () => {
         expect(result.output).not.toBe('');
     }, 60_000);
 
-    /** `toBeEmpty()` is a table's matcher, and a table's is async. */
+    // invariant: `toBeEmpty()` is a table's matcher, and a table's is async.
 
     test('docs-typecheck — the corpus does not await a sync matcher — no page writes `await expect(result.<sync>).toMatch(file(`', () => {
         // Given - every page a consumer is routed to

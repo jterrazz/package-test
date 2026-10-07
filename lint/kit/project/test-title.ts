@@ -18,7 +18,7 @@ export function testBaseOf(filename: string): string {
     return basename(filename).replace(/\.(?:test\.tsx?|spec\.ts)$/u, '');
 }
 
-/** The folder of the module a test names: the one above its `__tests__/`, or its own for a rendered unit under `specs/`. */
+// invariant: the folder of the module a test names: the one above its `__tests__/`, or its own for a rendered unit under `specs/`.
 function moduleFolderOf(filename: string): string {
     const folder = dirname(filename);
     return basename(folder) === TESTS_FOLDER ? dirname(folder) : folder;
@@ -45,7 +45,7 @@ function namesOf(node: AstNode | undefined): string[] {
     return name === undefined ? [] : [name];
 }
 
-/** A type, an interface and an ambient declaration are exported as types: no value a test calls. Any other statement names nothing it exports. */
+// invariant: a type, an interface and an ambient declaration are exported as types: no value a test calls. Any other statement names nothing it exports.
 function valueExportsOf(statement: AstNode): string[] {
     if (statement.exportKind === 'type') {
         return [];

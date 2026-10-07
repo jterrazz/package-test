@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { createSharedBrowser } from '../shared-browser.js';
 
 type StubBrowser = {
-    /** Fires the listeners of one event, as playwright's browser emits it. */
     emit: (event: string) => void;
     id: number;
     on: (event: string, listener: () => void) => void;

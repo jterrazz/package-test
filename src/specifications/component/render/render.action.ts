@@ -26,7 +26,7 @@ type Wrapper = NonNullable<ReturnType<PagePort['projectWrapper']>>;
 
 type Ui = Parameters<Wrapper>[0];
 
-/** The React adapter's auto-cleanup `beforeEach` is registered at load, inside the first render, so never covers it: the render unmounts itself. */
+// invariant: the React adapter's auto-cleanup `beforeEach` is registered at load, inside the first render, so never covers it: the render unmounts itself.
 let mounted: MountedSurface | null = null;
 
 async function unmountHeld(): Promise<void> {

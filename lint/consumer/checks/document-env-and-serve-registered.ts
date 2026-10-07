@@ -20,7 +20,7 @@ function quoteEnd(source: string, from: number): number {
     return index;
 }
 
-/** Read by depth, not by parsing. */
+// invariant: read by depth, not by parsing.
 function objectKeys(source: string, from: number): { end: number; keys: string[] } {
     const keys: string[] = [];
     let depth = 0;
@@ -80,7 +80,7 @@ function registerFrom(text: string, into: Registered): void {
     }
 }
 
-/** Nothing in a document says which neighbouring runner runs it, so their registries are read as a union. */
+// invariant: nothing in a document says which neighbouring runner runs it, so their registries are read as a union.
 function registeredNames(dir: string): null | Registered {
     let current = dir;
     let entries = specificationsIn(current);

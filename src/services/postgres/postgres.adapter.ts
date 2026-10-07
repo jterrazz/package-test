@@ -25,7 +25,7 @@ export type PostgresOptions = {
     env?: Record<string, string>;
 };
 
-/** Data lives on a memory disk, and postgres skips every write that only exists to survive a crash. */
+// outside: data lives on a memory disk, and postgres skips every write that only exists to survive a crash.
 const DISPOSABLE: ContainerOptions = {
     command: [
         'postgres',
@@ -53,7 +53,6 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
 
     private client: Client | null = null;
     private template: null | string = null;
-    /** The worker's clone, and the container's own string it replaced and is restored from. */
     private clone: null | { container: string; database: string } = null;
 
     constructor(options: PostgresOptions = {}) {

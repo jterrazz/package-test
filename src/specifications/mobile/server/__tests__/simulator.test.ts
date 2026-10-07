@@ -20,7 +20,6 @@ const LISTING = JSON.stringify({
 
 const WHY = 'why: Resolution refuses rather than guesses: a device names exactly one simulator.';
 
-/** The udid a selection answers, or the message of its refusal. */
 function refusalOf(criteria: { name: string; os?: string }): string {
     try {
         return selectSimulator(LISTING, criteria).udid;
