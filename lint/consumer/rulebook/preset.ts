@@ -9,10 +9,12 @@ import {
     whyOf,
 } from '@jterrazz/typescript/rules';
 import { createRequire } from 'node:module';
+import { posix } from 'node:path';
 
 import STANDARD from '../../../src/standard/standard.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
 import { derivedProjects } from '../../kit/project/derived-projects.js';
+import { isRecord } from '../../kit/project/json-shape.js';
 import { TEST_SECTION } from '../../kit/project/test-section.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
@@ -229,6 +231,19 @@ export const TEST_COMMENT_OPENINGS: readonly string[] = Object.freeze([
 // Stryker disable next-line LogicalOperator: the standard always states its test section; the type keeps every section optional
 const TEST_STANDARD = STANDARD.test ?? {};
 
+const recordOf = (value: unknown): Readonly<Record<string, unknown>> =>
+    isRecord(value) ? value : {};
+
+/** The files a project's test section names for vitest to load by their path — the component project's `wrap` — which no import reaches. */
+function loadedByName(section: Readonly<Record<string, unknown>>): string[] {
+    return Object.values(recordOf(section.projects)).flatMap((project) => {
+        const { root, wrap } = recordOf(project);
+        return typeof wrap === 'string'
+            ? [posix.normalize(posix.join(typeof root === 'string' ? root : '.', wrap))]
+            : [];
+    });
+}
+
 export function testPreset(): Preset {
     return {
         baseline: [TEST_SECTION],
@@ -251,6 +266,7 @@ export function testPreset(): Preset {
             module: createRequire(import.meta.url).resolve('#checker'),
         },
         derive: (root) => ({ projects: Object.fromEntries(derivedProjects(root)) }),
+        entries: loadedByName,
         files: {
             'vitest.config.ts': {
                 scope: 'unit',

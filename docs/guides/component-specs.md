@@ -57,7 +57,7 @@ const projects = {
 
 **A relative `vite` or `wrap` is the project's path.** Both are resolved against the component project's `root`, which is the directory holding `jterrazz.config.ts` unless the project states one, so the two paths above mean `apps/web/web/…`. A `root` the project states is read from that same directory.
 
-`wrap` is a MODULE PATH whose default export is `(ui) => ReactNode` — a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
+`wrap` is a MODULE PATH whose default export is `(ui) => ReactNode` — a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. Nothing imports the module itself, so `test()` names it to knip as an entry: the project declares none. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
 
 | Option                | Description                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------- |

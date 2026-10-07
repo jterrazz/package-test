@@ -78,4 +78,21 @@ describe('preset', () => {
         });
     });
 
+    test('testPreset — the test preset — names as knip entries the wrap files its projects load by path, each from its project root', () => {
+        // Given - a component project rooted in a member, one at the repository root, one wrapping nothing, a malformed one, and a section declaring no project
+        const section = {
+            projects: {
+                broken: 'component',
+                component: { root: 'apps/web', wrap: './src/frame.tsx' },
+                plain: { roots: ['src'] },
+                site: { wrap: 'src/../frame.tsx' },
+            },
+        };
+
+        // Then - each wrap file under its root, normalised, and nothing for the others
+        expect([testPreset().entries?.(section), testPreset().entries?.({})]).toStrictEqual([
+            ['apps/web/src/frame.tsx', 'frame.tsx'],
+            [],
+        ]);
+    });
 });
