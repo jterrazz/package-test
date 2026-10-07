@@ -1,4 +1,4 @@
-import { isFile, readFileCached } from '@jterrazz/typescript/rules';
+import { isFile, readFileCached, TESTS_FOLDER } from '@jterrazz/typescript/rules';
 import { basename, dirname, join } from 'node:path';
 
 import { child, childList, identifierName, isNode } from './ast.js';
@@ -18,8 +18,14 @@ function testBaseOf(filename: string): string {
     return basename(filename).replace(/\.test\.tsx?$/u, '');
 }
 
-function siblingsOf(filename: string): string[] {
-    const stem = join(dirname(filename), testBaseOf(filename));
+/** The folder of the module a test names: the one above its `__tests__/`, or its own for a rendered unit under `specs/`. */
+function moduleFolderOf(filename: string): string {
+    const folder = dirname(filename);
+    return basename(folder) === TESTS_FOLDER ? dirname(folder) : folder;
+}
+
+function modulesOf(filename: string): string[] {
+    const stem = join(moduleFolderOf(filename), testBaseOf(filename));
     return filename.endsWith('.tsx')
         ? [`${stem}.tsx`, `${stem}.ts`]
         : [`${stem}.ts`, `${stem}.tsx`];
@@ -87,13 +93,13 @@ export function subjectOfSource(base: string, source: string, filename: string):
 
 function subjectOf(filename: string): string {
     const stem = testBaseOf(filename);
-    const folder = dirname(filename);
+    const folder = moduleFolderOf(filename);
     const entry = isFile(join(dirname(folder), 'package.json'));
     const base = stem === 'index' && !entry ? basename(folder) : stem;
-    for (const sibling of siblingsOf(filename)) {
-        const source = readFileCached(sibling);
+    for (const module of modulesOf(filename)) {
+        const source = readFileCached(module);
         if (source !== null) {
-            return subjectOfSource(base, source, sibling);
+            return subjectOfSource(base, source, module);
         }
     }
     return base;

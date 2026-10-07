@@ -19,18 +19,18 @@ Five ideas cover everything else in the manual. They match the four families of 
 **2. A chain: setups, then one action.** Every test is one chain on that runner: zero or more setups (`.seed()`, `.intercept()`, `.clock()`, `.env()` …), then exactly one action (`.get()`, `.exec()`, `.visit()`, `.trigger()`, `.call()` …), which resolves to a result. The chain reads as the test's sentence — the setups are the Given, the action is the When.
 
 ```typescript
-const result = await api.seed(file('./_seeds/two-users.sql')).get('/users');
+const result = await api.seed(file('./__seeds__/two-users.sql')).get('/users');
 ```
 
 **3. What surrounds the subject.** A subject rarely runs alone. Real services (`postgres()`, `redis()`, `sqlite()`, `process()`) are started for you; the network is declared with stubs (`defineStub`, `.intercept()`); time is pinned with `clock`; a port your code injects is doubled with `mockOf()`. These have an order of preference, the doubles ladder: use the real thing first, a declared service next, then a stub, and a typed double last.
 
 **4. A visitor, for anything on a screen.** A page, a component or a native app is driven the way a person uses it: `visitor.click(button('Subscribe'))`, `visitor.see(content('Thanks'))`. Elements are found by role and accessible name, never by CSS selector.
 
-**5. Expectations on the whole result.** A result exposes what the action produced — `result.response`, `result.stdout`, `result.table('users')`, `result.tree` — and one matcher, `toMatch`, compares it whole: against a value written in the test, or `file('./_expected/…')` when several tests share it. Values that change between runs are written as tokens (`{{uuid}}`, `{{iso8601}}`), and `TEST_UPDATE=1` writes the expected values for you to review.
+**5. Expectations on the whole result.** A result exposes what the action produced — `result.response`, `result.stdout`, `result.table('users')`, `result.tree` — and one matcher, `toMatch`, compares it whole: against a value written in the test, or `file('./__expected__/…')` when several tests share it. Values that change between runs are written as tokens (`{{uuid}}`, `{{iso8601}}`), and `TEST_UPDATE=1` writes the expected values for you to review.
 
 The whole-value comparison is the framework's `toMatch` on a framework result (`result.response`, `result.stdout`). On a plain string such as `result.stdout.text`, `toMatch` is vitest's own substring or RegExp check ([Assertions § Common mistakes](../reference/assertions.md#common-mistakes)).
 
-Everything a test stands on sits in a folder next to it whose name starts with `_`: `_seeds/` (SQL), `_requests/` (what is sent), `_fixtures/` (files the program reads), `_expected/` (what is compared), `_setup/` (helper code). The `_` marks a folder that is not a subject of the tests.
+Everything a test stands on sits in a folder next to it whose name starts with `_`: `__seeds__/` (SQL), `__requests__/` (what is sent), `__fixtures__/` (files the program reads), `__expected__/` (what is compared), `__setup__/` (helper code). The `_` marks a folder that is not a subject of the tests.
 
 ## A first spec
 
@@ -97,7 +97,7 @@ import { api } from '../../api.specification.js';
 describe('shape', () => {
     test('lists the users the database holds', async () => {
         // Given - two users, from the seed beside the test
-        const result = await api.seed(file('./_seeds/two-users.sql')).get('/users');
+        const result = await api.seed(file('./__seeds__/two-users.sql')).get('/users');
 
         // Then - the whole response
         expect(result.response).toMatch(`
@@ -111,7 +111,7 @@ describe('shape', () => {
 ```
 
 ```sql
--- specs/api/users/list/_seeds/two-users.sql
+-- specs/api/users/list/__seeds__/two-users.sql
 INSERT INTO users (name) VALUES ('Alice'), ('Bob');
 ```
 
@@ -157,19 +157,19 @@ Ask the questions in order: the first yes is the kind, and the kind decides wher
 | Question                                                               | Kind             | Lives at                                         | Constructor                   | Project       | Read                                                                                         |
 | ---------------------------------------------------------------------- | ---------------- | ------------------------------------------------ | ----------------------------- | ------------- | -------------------------------------------------------------------------------------------- |
 | Does it render in a browser as a whole served page?                    | website          | `specs/website/<domain>/<aspect>.spec.ts`        | `specification.website()`     | `website`     | [Website specs](../guides/website-specs.md)                                                  |
-| Does it render as a component (React, a DOM function, a hook)?         | component        | `<file>.test.tsx` beside `<file>.tsx`            | none — the `component` chain  | `component`   | [Component specs](../guides/component-specs.md)                                              |
+| Does it render as a component (React, a DOM function, a hook)?         | component        | `__tests__/<file>.test.tsx` by `<file>.tsx`      | none — the `component` chain  | `component`   | [Component specs](../guides/component-specs.md)                                              |
 | Does it render on a simulator?                                         | mobile           | `specs/mobile/<domain>/<aspect>.spec.ts`         | `specification.mobile()`      | `mobile`      | [Mobile specs](../guides/mobile-specs.md)                                                    |
 | Does it answer HTTP?                                                   | api              | `specs/api/<resource>/<action>/<aspect>.spec.ts` | `specification.api()`         | `api`         | [API specs](../guides/api-specs.md)                                                          |
 | Is it triggered by name, in-process?                                   | job              | `specs/job/<job>/<aspect>.spec.ts`               | `specification.job()`         | `job`         | [Job specs](../guides/job-specs.md)                                                          |
 | Is it a binary?                                                        | cli              | `specs/cli/<command>/` (+ `<case>.spec.yaml`)    | `specification.cli(bin)`      | `cli`         | [CLI specs](../guides/cli-specs.md), [Spec documents](../guides/spec-documents.md)           |
 | Is it a rule the project ships — a plugin, a checker, a preset?        | lint             | `specs/lint/<rule>/<aspect>.spec.ts`             | `specification.lint()`        | `lint`        | [Lint specs](../guides/lint-specs.md)                                                        |
 | Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts`    | `specification.integration()` | `integration` | [Integration specs](../guides/integration-specs.md)                                          |
-| Is it a module alone?                                                  | module           | `<file>.test.ts` beside `<file>.ts`              | none                          | `unit`        | [Module tests](../guides/module-tests.md)                                                    |
+| Is it a module alone?                                                  | module           | `__tests__/<file>.test.ts` by `<file>.ts`        | none                          | `unit`        | [Module tests](../guides/module-tests.md)                                                    |
 | Is it the repository itself — a suite over several apps?               | repository suite | `specs/<suite>/<domain>/<aspect>.test.ts`        | none                          | any name      | [Conventions § The third door](../concepts/conventions.md#the-third-door-a-repository-suite) |
 
 <!-- /GENERATED:fork -->
 
-The order matters: a page served over HTTP is a website, not an API, because the first question already caught it. And the table is total — a folder under `specs/` is a kind's name, `_shared/`, or a repository suite; a probe of an adapter against a real database is an integration spec like any other.
+The order matters: a page served over HTTP is a website, not an API, because the first question already caught it. And the table is total — a folder under `specs/` is a kind's name, a special folder of what the kinds share, or a repository suite; a probe of an adapter against a real database is an integration spec like any other.
 
 The file suffix tells the kind apart: `.test.ts` or `.test.tsx` next to the code for a single unit, `.spec.ts` under `specs/<kind>/` for an assembled product, `<case>.spec.yaml` for a CLI session written as data, and `<kind>.specification.ts` for the file that builds a runner. The kind follows the subject, not the amount of machinery: a component needs a real browser and still sits next to its code, because it is one unit; a module that needs a real database sits under `specs/integration/`, because it is assembled with that database.
 

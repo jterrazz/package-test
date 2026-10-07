@@ -6,7 +6,7 @@ import { lint as selfPreset } from '../self-preset-lint.specification.js';
 describe('source-root-holds-known-entries', () => {
     test('the source root holding the entry and a tree passes', async () => {
         // Given - the rooted tree
-        const result = await selfPreset.fixture(directory('./_fixtures/rooted/')).run();
+        const result = await selfPreset.fixture(directory('./__fixtures__/rooted/')).run();
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
@@ -14,23 +14,23 @@ describe('source-root-holds-known-entries', () => {
 
     test('a module and a folder left at the source root are each refused at the entry, a folder whose name only begins with a tree name included', async () => {
         // Given - the stray tree
-        const result = await selfPreset.fixture(directory('./_fixtures/stray/')).run();
+        const result = await selfPreset.fixture(directory('./__fixtures__/stray/')).run();
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             src/model/:1:1  names(source-root-holds-known-entries)
-                found: \`src/model/\` breaks ls-lint's \`.dir: regex:(chain|clock|disk|expectations|specifications|mocks|services|standard|stubs|visitor|vitest)\`
-                why: The source root reads the sentence of a test: \`src/\` holds the node entry \`index.ts\`, the page entry \`index.browser.ts\`, the runner-config entry \`index.vitest.ts\`, and the trees of the sentence — \`specifications/\`, what is tested; \`visitor/\`, how a screen is touched; \`expectations/\`, how a result is judged; \`stubs/\`, \`services/\`, \`disk/\`, \`clock/\` and \`mocks/\`, what surrounds the subject; \`chain/\`, the machinery that composes them; \`vitest/\`, the runner config — and nothing else.
+                found: \`src/model/\` breaks ls-lint's \`.dir: regex:(chain|clock|disk|expectations|specifications|mocks|services|standard|stubs|visitor|vitest|__tests__)\`
+                why: The source root reads the sentence of a test: \`src/\` holds the node entry \`index.ts\`, the page entry \`index.browser.ts\`, the runner-config entry \`index.vitest.ts\`, and the trees of the sentence — \`specifications/\`, what is tested; \`visitor/\`, how a screen is touched; \`expectations/\`, how a result is judged; \`stubs/\`, \`services/\`, \`disk/\`, \`clock/\` and \`mocks/\`, what surrounds the subject; \`chain/\`, the machinery that composes them; \`vitest/\`, the runner config — and \`__tests__/\`, the entries’ tests, and nothing else.
                 fix: Move the module into the tree whose concept it is — what is tested (\`specifications/\`), how a screen is touched (\`visitor/\`), how a result is judged (\`expectations/\`), what surrounds the subject (\`stubs/\`, \`services/\`, \`disk/\`, \`clock/\`, \`mocks/\`), the machinery (\`chain/\`) or the runner config (\`vitest/\`).
                 read: docs/guides/test.md#source-root-holds-known-entries
             src/settings.ts:1:1  names(source-root-holds-known-entries)
                 found: \`src/settings.ts\` breaks ls-lint's \`.ts: regex:index\`
-                why: The source root reads the sentence of a test: \`src/\` holds the node entry \`index.ts\`, the page entry \`index.browser.ts\`, the runner-config entry \`index.vitest.ts\`, and the trees of the sentence — \`specifications/\`, what is tested; \`visitor/\`, how a screen is touched; \`expectations/\`, how a result is judged; \`stubs/\`, \`services/\`, \`disk/\`, \`clock/\` and \`mocks/\`, what surrounds the subject; \`chain/\`, the machinery that composes them; \`vitest/\`, the runner config — and nothing else.
+                why: The source root reads the sentence of a test: \`src/\` holds the node entry \`index.ts\`, the page entry \`index.browser.ts\`, the runner-config entry \`index.vitest.ts\`, and the trees of the sentence — \`specifications/\`, what is tested; \`visitor/\`, how a screen is touched; \`expectations/\`, how a result is judged; \`stubs/\`, \`services/\`, \`disk/\`, \`clock/\` and \`mocks/\`, what surrounds the subject; \`chain/\`, the machinery that composes them; \`vitest/\`, the runner config — and \`__tests__/\`, the entries’ tests, and nothing else.
                 fix: Move the module into the tree whose concept it is — what is tested (\`specifications/\`), how a screen is touched (\`visitor/\`), how a result is judged (\`expectations/\`), what surrounds the subject (\`stubs/\`, \`services/\`, \`disk/\`, \`clock/\`, \`mocks/\`), the machinery (\`chain/\`) or the runner config (\`vitest/\`).
                 read: docs/guides/test.md#source-root-holds-known-entries
             src/visitors/:1:1  names(source-root-holds-known-entries)
-                found: \`src/visitors/\` breaks ls-lint's \`.dir: regex:(chain|clock|disk|expectations|specifications|mocks|services|standard|stubs|visitor|vitest)\`
-                why: The source root reads the sentence of a test: \`src/\` holds the node entry \`index.ts\`, the page entry \`index.browser.ts\`, the runner-config entry \`index.vitest.ts\`, and the trees of the sentence — \`specifications/\`, what is tested; \`visitor/\`, how a screen is touched; \`expectations/\`, how a result is judged; \`stubs/\`, \`services/\`, \`disk/\`, \`clock/\` and \`mocks/\`, what surrounds the subject; \`chain/\`, the machinery that composes them; \`vitest/\`, the runner config — and nothing else.
+                found: \`src/visitors/\` breaks ls-lint's \`.dir: regex:(chain|clock|disk|expectations|specifications|mocks|services|standard|stubs|visitor|vitest|__tests__)\`
+                why: The source root reads the sentence of a test: \`src/\` holds the node entry \`index.ts\`, the page entry \`index.browser.ts\`, the runner-config entry \`index.vitest.ts\`, and the trees of the sentence — \`specifications/\`, what is tested; \`visitor/\`, how a screen is touched; \`expectations/\`, how a result is judged; \`stubs/\`, \`services/\`, \`disk/\`, \`clock/\` and \`mocks/\`, what surrounds the subject; \`chain/\`, the machinery that composes them; \`vitest/\`, the runner config — and \`__tests__/\`, the entries’ tests, and nothing else.
                 fix: Move the module into the tree whose concept it is — what is tested (\`specifications/\`), how a screen is touched (\`visitor/\`), how a result is judged (\`expectations/\`), what surrounds the subject (\`stubs/\`, \`services/\`, \`disk/\`, \`clock/\`, \`mocks/\`), the machinery (\`chain/\`) or the runner config (\`vitest/\`).
                 read: docs/guides/test.md#source-root-holds-known-entries
         `);

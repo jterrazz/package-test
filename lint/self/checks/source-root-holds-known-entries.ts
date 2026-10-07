@@ -1,5 +1,5 @@
 import type { NamesRule } from '@jterrazz/typescript/config';
-import { firstSentence, readAt, rowNamed } from '@jterrazz/typescript/rules';
+import { firstSentence, readAt, rowNamed, TESTS_FOLDER } from '@jterrazz/typescript/rules';
 
 import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 
@@ -20,7 +20,6 @@ const TREES = [
 const ENTRIES: Readonly<Record<string, string>> = {
     '.browser.ts': 'index',
     '.ts': 'index',
-    '.vitest.test.ts': 'index',
     '.vitest.ts': 'index',
 };
 
@@ -35,7 +34,7 @@ export const sourceRootHoldsKnownEntries: NamesRule = {
                 Object.entries(ENTRIES).map(([extension, name]) => [extension, `regex:${name}`]),
             ),
         },
-        'src/*': { '.dir': `regex:(${TREES.join('|')})` },
+        'src/*': { '.dir': `regex:(${[...TREES, TESTS_FOLDER].join('|')})` },
         'src/*/*': { '.dir': 'regex:.+' },
     },
     name: 'source-root-holds-known-entries',

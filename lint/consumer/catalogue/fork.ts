@@ -30,7 +30,7 @@ export const FORK: ForkRow[] = [
     {
         constructor: 'none — the `component` chain',
         kind: 'component',
-        livesAt: '`<file>.test.tsx` beside `<file>.tsx`',
+        livesAt: '`__tests__/<file>.test.tsx` by `<file>.tsx`',
         project: '`component`',
         question: 'Does it render as a component (React, a DOM function, a hook)?',
         read: '[Component specs](../guides/component-specs.md)',
@@ -86,7 +86,7 @@ export const FORK: ForkRow[] = [
     {
         constructor: 'none',
         kind: 'module',
-        livesAt: '`<file>.test.ts` beside `<file>.ts`',
+        livesAt: '`__tests__/<file>.test.ts` by `<file>.ts`',
         project: '`unit`',
         question: 'Is it a module alone?',
         read: '[Module tests](../guides/module-tests.md)',

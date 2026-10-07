@@ -1,0 +1,110 @@
+import { ruleTester } from '@jterrazz/test';
+
+import { noProbeCluster } from '../no-probe-cluster.js';
+
+const SPEC_FILE = '/repo/specs/cli/build/build.spec.ts';
+
+ruleTester().run('no-probe-cluster', noProbeCluster, {
+    invalid: [
+        {
+            name: 'Three greps where a golden would say the whole thing.',
+            code: `test('builds', async () => {
+                const result = await cli.exec('build');
+                expect(result.stdout).toContain('compiled');
+                expect(result.stdout).toContain('2 files');
+                expect(result.stdout).toContain('done');
+            });`,
+            errors: [{ column: 0, line: 1, messageId: 'cluster' }],
+            filename: SPEC_FILE,
+        },
+        {
+            name: 'Two subjects, each with its own cluster.',
+            code: `test('builds', async () => {
+                const result = await cli.exec('build');
+                expect(result.stdout).toContain('compiled');
+                expect(result.stdout).toContain('2 files');
+                expect(result.stdout).toMatch(/done/);
+                expect(result.stderr).toContain('warn: a');
+                expect(result.stderr).toContain('warn: b');
+                expect(result.stderr).toContain('warn: c');
+            });`,
+            errors: [
+                { column: 0, line: 1, messageId: 'cluster' },
+                { column: 0, line: 1, messageId: 'cluster' },
+            ],
+            filename: SPEC_FILE,
+        },
+    ],
+    valid: [
+        {
+            name: 'A call that is no test, a test with no callback, and production code hold no cluster.',
+            code: "run(async () => { expect(result.stdout).toContain('a'); expect(result.stdout).toContain('b'); expect(result.stdout).toContain('c'); });\ntest('t');",
+            filename: SPEC_FILE,
+        },
+        {
+            code: "test('t', async () => { expect(result.stdout).toContain('a'); expect(result.stdout).toContain('b'); expect(result.stdout).toContain('c'); });",
+            filename: '/repo/specs/cli/build/build.ts',
+        },
+        {
+            name: 'Two probes are a scalpel, not a cluster.',
+            code: `test('builds', async () => {
+                const result = await cli.exec('build');
+                expect(result.stdout).toContain('compiled');
+                expect(result.stdout).toContain('done');
+            });`,
+            filename: SPEC_FILE,
+        },
+        {
+            name: 'The golden on the same subject answers for all of it.',
+            code: `test('builds', async () => {
+                const result = await cli.exec('build');
+                expect(result.stdout).toMatch(file('./__expected__/build.txt'));
+                expect(result.stdout).toContain('compiled');
+                expect(result.stdout).toContain('2 files');
+                expect(result.stdout).toContain('done');
+            });`,
+            filename: SPEC_FILE,
+        },
+        {
+            name: 'A status is one value: `no-status-only-test` owns that test, not this one.',
+            code: `test('answers', async () => {
+                const result = await api.get('/health');
+                expect(result.status).toBe(200);
+                expect(result.status).toBe(200);
+                expect(result.status).toBe(200);
+            });`,
+            filename: SPEC_FILE,
+        },
+        {
+            name: 'Three absences: nothing a golden of what the output DOES carry states.',
+            code: `test('escapes', async () => {
+                const result = await render();
+                expect(result.html).not.toContain('<img src=x');
+                expect(result.html).not.toContain('<script');
+                expect(result.html).not.toContain('onerror=');
+            });`,
+            filename: SPEC_FILE,
+        },
+        {
+            name: 'A value is one reading, however many times it is read.',
+            code: `test('fills', async () => {
+                const input = field('Name');
+                expect(input.value).toBe('');
+                expect(input.value).toBe('a');
+                expect(input.value).toBe('ab');
+            });`,
+            filename: SPEC_FILE,
+        },
+        {
+            name: 'The threshold is an option.',
+            code: `test('builds', async () => {
+                const result = await cli.exec('build');
+                expect(result.stdout).toContain('compiled');
+                expect(result.stdout).toContain('2 files');
+                expect(result.stdout).toContain('done');
+            });`,
+            filename: SPEC_FILE,
+            options: [{ threshold: 4 }],
+        },
+    ],
+});

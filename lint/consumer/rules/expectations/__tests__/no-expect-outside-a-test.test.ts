@@ -1,0 +1,139 @@
+import { ruleTester } from '@jterrazz/test';
+
+import { noExpectOutsideATest } from '../no-expect-outside-a-test.js';
+
+const SETUP_MODULE = '/repo/specs/cli/__setup__/built.ts';
+
+ruleTester().run('no-expect-outside-a-test', noExpectOutsideATest, {
+    invalid: [
+        {
+            name: 'A destructured expect renamed, one imported without await, and an expect.soft are bound expects.',
+            code: `export async function expectBuilt(stdout: string): Promise<void> {
+    const { expect: check } = await import('vitest');
+    const later = import('vitest');
+    check(stdout).toContain('Built.');
+    later.expect(stdout);
+    check.soft(stdout);
+    check.a.b(stdout);
+}`,
+            errors: [
+                { column: 4, line: 4, messageId: 'expectOutsideATest' },
+                { column: 4, line: 5, messageId: 'expectOutsideATest' },
+                { column: 4, line: 6, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `import { expect } from 'vitest';
+export function expectBuilt(stdout: string): void {
+    expect(stdout).toContain('Built.');
+}`,
+            errors: [{ column: 4, line: 3, messageId: 'expectOutsideATest' }],
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `import { expect as check } from 'vitest';
+export async function settled(read: () => Promise<number>): Promise<void> {
+    check.soft(await read()).toBe(0);
+    await check.poll(read).toBe(0);
+}`,
+            errors: [
+                { column: 4, line: 3, messageId: 'expectOutsideATest' },
+                { column: 10, line: 4, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `import { expect } from 'vitest';
+export const { cli } = await specification.cli('./bin/cli.js');
+expect(cli).toBeDefined();`,
+            errors: [{ column: 0, line: 3, messageId: 'expectOutsideATest' }],
+            filename: '/repo/specs/cli/cli.specification.ts',
+        },
+        {
+            code: `import * as vitest from 'vitest';
+export function expectBuilt(stdout: string): void {
+    vitest.expect(stdout).toContain('Built.');
+    vitest.expect.soft(stdout).toContain('Done.');
+}`,
+            errors: [
+                { column: 4, line: 3, messageId: 'expectOutsideATest' },
+                { column: 4, line: 4, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `export async function expectBuilt(stdout: string): Promise<void> {
+    const { expect } = await import('vitest');
+    const runner = await import('vitest');
+    expect(stdout).toContain('Built.');
+    runner.expect(stdout).toContain('Done.');
+}`,
+            errors: [
+                { column: 4, line: 4, messageId: 'expectOutsideATest' },
+                { column: 4, line: 5, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
+    ],
+    valid: [
+        {
+            name: 'An expect of another module, another name from vitest, or an import of another module is none of vitest’s.',
+            code: `import { expect } from 'node:assert';
+import vitest from 'vitest';
+export async function probe(): Promise<void> {
+    const { test } = await import('vitest');
+    const mine = await import('./mine.js');
+    let pending;
+    expect(1);
+    vitest.expect(1);
+    test(1);
+    mine.expect(1);
+}`,
+            filename: SETUP_MODULE,
+        },
+        {
+            name: 'Ground is no module of this suite.',
+            code: `import { expect } from 'vitest';\nexpect(1);`,
+            filename: '/repo/specs/cli/__fixtures__/app/check.ts',
+        },
+        {
+            code: `import * as vitest from 'vitest';
+vitest.expectTypeOf(build).returns.toBeString();`,
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `import { expect, test } from 'vitest';
+test('builds', () => {
+    expect(build()).toBe('Built.');
+});`,
+            filename: '/repo/specs/cli/build/builds.spec.ts',
+        },
+        {
+            code: `import { expect, test } from 'vitest';
+test('builds', () => {
+    expect(build()).toBe('Built.');
+});`,
+            filename: '/repo/src/build.test.ts',
+        },
+        {
+            code: `import { expectTypeOf } from 'vitest';
+expectTypeOf(build).returns.toBeString();`,
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `class Probe {
+    expect(line: string): boolean {
+        return line.startsWith('Built');
+    }
+}
+new Probe().expect('Built.');`,
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `import { expect } from 'vitest';
+expect(1).toBe(1);`,
+            filename: '/repo/src/assertions.ts',
+        },
+    ],
+});

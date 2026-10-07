@@ -1,21 +1,22 @@
-# Module tests (`*.test.ts`, beside the module)
+# Module tests (`__tests__/*.test.ts`, in the module's folder)
 
-A module test is plain vitest: one source file, called through its own exports, with nothing started. It needs no constructor, no runner and no folder under `specs/` — it sits beside the module it covers, as `<file>.test.ts`.
+A module test is plain vitest: one source file, called through its own exports, with nothing started. It needs no constructor, no runner and no folder under `specs/` — it sits in the `__tests__/` of the folder of the module it covers, as `__tests__/<file>.test.ts`.
 
 It is also the exception. A behaviour a user relies on is tested end to end, through the surface the user meets; a module test is kept for a pure algorithm whose edge cases are cheaper at its own level, or for a failure no end-to-end path can provoke ([Conventions § Which test earns its place](../concepts/conventions.md#which-test-earns-its-place)).
 
 ## What it specifies
 
-A module test answers one question: **given these inputs and these ports, what does this module return, and what does it ask of its collaborators?** Its subject is a unit of code, so it sits beside that code:
+A module test answers one question: **given these inputs and these ports, what does this module return, and what does it ask of its collaborators?** Its subject is a unit of code, so it sits with that code, in the conventional folder of its folder (`test-in-its-tests-folder`):
 
 ```text
 src/domain/posts/
 ├── ranking.ts
-├── ranking.test.ts          # the module's spec — the `.test.ts` suffix IS the kind
-└── ranking.fixtures.ts      # the payloads it feeds itself, if any
+└── __tests__/
+    ├── ranking.test.ts      # the module's spec — the `.test.ts` suffix IS the kind
+    └── ranking.fixtures.ts  # the payloads it feeds itself, if any
 ```
 
-The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<specification>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([Component specs](component-specs.md)).
+A test in a `__tests__/` names a module of the folder above it, and imports it one folder up (`../ranking.js`); a module test anywhere else is refused, the fix naming the `__tests__/` it moves to. `__tests__/` is the one special folder a code root holds. The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<specification>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([Component specs](component-specs.md)).
 
 Nothing in this kind is slow, so the `unit` project is the one a developer runs on every save.
 
@@ -55,7 +56,7 @@ The table is the rule set, and every row names the rule that holds it, where one
 
 | May                                                                                                                                                                                                                  | May not                                                                                                                                                                              | Rule                                                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| import its module and pure helpers; a sibling `<file>.fixtures.ts`                                                                                                                                                   | import a data asset (`.json` / `.txt` / `.sql` / `.yaml`); keep a `__mocks__/` or `__fixtures__/` directory                                                                          | `no-module-mock`                                                                               |
+| import its module and pure helpers; a `<file>.fixtures.ts` beside it                                                                                                                                                 | import a data asset (`.json` / `.txt` / `.sql` / `.yaml`); keep a `__mocks__/` directory                                                                                             | `no-module-mock`                                                                               |
 | `mockOf<Port>()` / `mockOf<Port>({ deep: false })` for an injected interface; `vi.fn<Fn>()`; `vi.spyOn` on an object passed in                                                                                       | `vi.mock` / `vi.doMock`, except a specifier on the consumer's `modules` allow-list, written `{ module, reason }`                                                                     | `no-module-mock`                                                                               |
 | `await using _ = await intercept(http.get(url), http.json(…))`                                                                                                                                                       | `vi.stubGlobal('fetch')`, `msw/node`, `nock`                                                                                                                                         | `no-vitest-time-or-global-stub`, `no-second-test-runtime`                                      |
 | `using _ = clock.at('2026-03-04T09:30:00Z')`; `using _ = clock.run()`; `await clock.advance(ms)`                                                                                                                     | `Date.now()`, zero-argument `new Date()`, `Math.random()`, `randomUUID()` reaching an oracle; `vi.useFakeTimers` / `vi.setSystemTime`                                                | `no-sampled-value-in-expectation`, `no-sampled-value-in-test`, `no-vitest-time-or-global-stub` |
@@ -95,7 +96,7 @@ The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusa
 
 ### Fixtures
 
-A payload a module test feeds itself lives in a sibling `<file>.fixtures.ts` — TypeScript, type-checked with the test, reviewed in the same diff. A `.json` beside a module test is `no-module-mock`'s error: an asset the compiler never reads is a second source of truth, and the kind that legitimately owns assets is the one that has a folder for them.
+A payload a module test feeds itself lives in a `<file>.fixtures.ts` beside it in the `__tests__/` — TypeScript, type-checked with the test, reviewed in the same diff. A `.json` a module test imports is `no-module-mock`'s error: an asset the compiler never reads is a second source of truth, and the kind that legitimately owns assets is the one that has a folder for them.
 
 ### Tables
 
@@ -121,9 +122,9 @@ There is no result object here, because there is no chain to hand one back. The 
 
 ## Unique here
 
-- **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<specification>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is `specification-test-uses-its-runner`'s error in one direction and `file-suffix-matches-place`'s in the other.
+- **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<specification>/`); this one is collected by a suffix, in the `__tests__/` of what it specifies. Moving a module test away from its module is `specification-test-uses-its-runner`'s error in one direction and `file-suffix-matches-place`'s in the other.
 - **It is the only kind that may build its own double.** In every other kind a double is DECLARED — a stub, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
-- **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration specification is where that goes ([Integration specs](integration-specs.md#the-golden-half--a-pure-module-no-services-at-all)).
+- **It is the only kind with no golden.** A golden is a file, and a file a module test imports is an asset; a module whose answer deserves a golden is describing something assembled, and the integration specification is where that goes ([Integration specs](integration-specs.md#the-golden-half--a-pure-module-no-services-at-all)).
 
 ## Pitfalls
 

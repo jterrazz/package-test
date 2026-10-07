@@ -31,8 +31,8 @@ import { requestFileExtensionKnown } from './layout/request-file-extension-known
 import { specFileWithinLineLimit } from './layout/spec-file-within-line-limit.js';
 import { specNamedForItsAspect } from './layout/spec-named-for-its-aspect.js';
 import { specsAtDeclaredDepth } from './layout/specs-at-declared-depth.js';
-import { testBesideItsModule } from './layout/test-beside-its-module.js';
 import { testBodyWithinLineLimit } from './layout/test-body-within-line-limit.js';
+import { testInItsTestsFolder } from './layout/test-in-its-tests-folder.js';
 import { verbReadsItsGroundFolder } from './layout/verb-reads-its-ground-folder.js';
 import { noModuleMock } from './mocks/no-module-mock.js';
 import { seedsAreSql } from './services/seeds-are-sql.js';
@@ -103,7 +103,7 @@ const plugin: LintPlugin = {
         'no-raw-env-write': noRawEnvWrite,
         'no-test-code-in-production': noTestCodeInProduction,
         'no-dom-in-module-test': noDomInModuleTest,
-        'test-beside-its-module': testBesideItsModule,
+        'test-in-its-tests-folder': testInItsTestsFolder,
         'no-module-mock': noModuleMock,
         'no-sleep': noSleep,
         'given-in-the-test': givenInTheTest,

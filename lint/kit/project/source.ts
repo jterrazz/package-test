@@ -1,4 +1,4 @@
-import { GROUND_FOLDERS, treeEntries } from '@jterrazz/typescript/rules';
+import { GROUND_FOLDERS, TESTS_FOLDER, treeEntries } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, posix, resolve } from 'node:path';
 
@@ -29,6 +29,11 @@ export function listed(dir: string, at: string): Listed[] {
 
 export function inGround(path: string): boolean {
     return path.split('/').some((segment) => GROUND.has(segment));
+}
+
+/** A module's tests folder, or anything it holds: what proves the code, never the code's own tree. */
+export function inTestsFolder(path: string): boolean {
+    return path.split('/').includes(TESTS_FOLDER);
 }
 
 export function specificationOf(path: string): string | undefined {

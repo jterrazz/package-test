@@ -1,4 +1,4 @@
-import { cell, markdownTable, treeEntries } from '@jterrazz/typescript/rules';
+import { cell, markdownTable, moduleTestOf, treeEntries } from '@jterrazz/typescript/rules';
 import type { Markers } from '@jterrazz/typescript/rules';
 import { join, resolve } from 'node:path';
 
@@ -30,7 +30,8 @@ function sources(root: string): string[] {
         (path) =>
             /\.tsx?$/u.test(path) &&
             !/\.(?:test|test-d|fixtures)\.tsx?$/u.test(path) &&
-            !path.includes('/_fixtures/'),
+            !path.includes('/__fixtures__/') &&
+            !path.includes('/__tests__/'),
     );
 }
 
@@ -38,15 +39,12 @@ export function siblingless(root: string): string[] {
     const all = new Set(codeFiles(root));
     return sources(root)
         .filter(
-            (path) =>
-                !['test', 'test-d'].some((suffix) =>
-                    all.has(path.replace(/\.(?<extension>tsx?)$/u, `.${suffix}.$<extension>`)),
-                ),
+            (path) => !['.test', '.test-d'].some((suffix) => all.has(moduleTestOf(path, suffix))),
         )
         .toSorted();
 }
 
-/** Modules with their sibling test that a kind still lists: the claim outlived its reason. */
+/** Modules with their test that a kind still lists: the claim outlived its reason. */
 export function staleClaims(root: string): string[] {
     const without = new Set(siblingless(root));
     return sources(root)
@@ -74,7 +72,7 @@ export function renderSiblings(root: string): string {
         cell(kind.why),
     ]);
     return [
-        `Today **${total} modules** have no sibling test, and every one of them is claimed:`,
+        `Today **${total} modules** have no test of their own, and every one of them is claimed:`,
         '',
         markdownTable(['Kind', 'Proven instead by'], body),
     ].join('\n');

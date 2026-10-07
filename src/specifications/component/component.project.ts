@@ -37,7 +37,7 @@ export type ComponentOptions = {
     wrap?: string;
 };
 
-/** `component()` — rendered units, beside the components they cover. */
+/** `component()` — rendered units, in the `__tests__/` of the folder of the components they cover; under a specs tree, beside them. */
 export type ComponentProjectOptions = ComponentOptions & SpecificationProjectOptions;
 
 const PIPELINE_KEYS = [

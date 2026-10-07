@@ -70,7 +70,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/kit/project/rule.ts',
         ),
         name: 'type-only declaration',
-        why: 'it declares a shape and executes nothing; the compiler is its test, and the consumer module `specs/cli/tsc/_fixtures/consumer/consumer.ts` holds, against the installed declarations, what the compiler must refuse',
+        why: 'it declares a shape and executes nothing; the compiler is its test, and the consumer module `specs/cli/tsc/__fixtures__/consumer/consumer.ts` holds, against the installed declarations, what the compiler must refuse',
     },
     {
         claims: oneOf(

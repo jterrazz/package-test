@@ -1,0 +1,217 @@
+import { readManifest } from '@jterrazz/typescript/rules';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { describe, expect, test } from 'vitest';
+
+import { runMember, runMembers } from '../../../kit/checker/member-run.js';
+import { checkoutUnder, packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { CHECKER } from '../checker.js';
+
+const REPEATED_NAME = [
+    'description: names its directory again instead of naming the case',
+    'runs:',
+    '    - command: widget rm',
+    '      exit: 0',
+    '      stdout: |',
+    '          Removed.',
+    '',
+].join('\n');
+function repository(files: string[], add: string[], ignore = ''): string {
+    const root = mkdtempSync(join(tmpdir(), 'tree-'));
+    for (const path of files) {
+        mkdirSync(dirname(join(root, path)), { recursive: true });
+        writeFileSync(join(root, path), path.endsWith('.spec.yaml') ? REPEATED_NAME : `${path}\n`);
+    }
+    writeFileSync(join(root, '.gitignore'), ignore);
+    execFileSync('git', ['init', '--quiet'], { cwd: root });
+    if (add.length > 0) {
+        execFileSync('git', ['add', ...add], { cwd: root });
+    }
+    return root;
+}
+function findings(root: string, rule: string): string[] {
+    return CHECKER.tree
+        .flatMap((pass) => pass(join(root, 'specs')))
+        .filter((violation) => violation.rule === rule)
+        .map((violation) => `${violation.path}:${violation.line}: ${violation.found}`)
+        .toSorted();
+}
+const WORKSPACE = resolve(import.meta.dirname, '../../../../specs/__fixtures__/member-workspace');
+const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
+
+function codes(dir: string, root = WORKSPACE): string[] {
+    return runMember(dir, root, CHECKER).map((violation) => violation.rule);
+}
+
+describe('checker', () => {
+    test('the ground passes — an HTTP first line is judged at the top of its folder only, and a document in ground is read when it is text', () => {
+        // Given - malformed HTTP files at the top of each folder, below it, and spelled .txt, and two documents in ground, one of them binary
+        const root = packageWith({
+            'specs/widget/__expected__/bad.http': 'nope\n',
+            'specs/widget/__expected__/bad.txt': 'nope\n',
+            'specs/widget/__expected__/case.spec.yaml': 'runs: nope\n',
+            'specs/widget/__expected__/shot.spec.yaml': 'x\u0000y',
+            'specs/widget/__expected__/sub/bad.http': 'nope\n',
+            'specs/widget/__requests__/bad.http': 'nope\n',
+            'specs/widget/__requests__/bad.txt': 'nope\n',
+            'specs/widget/__requests__/sub/bad.http': 'nope\n',
+        });
+
+        // Then - the top HTTP files and both documents are found, the grammar read of the text one alone, and the ground no test reads
+        expect(
+            CHECKER.tree
+                .flatMap((pass) => pass(join(root, 'specs')))
+                .map(({ line, path, rule }) => `${rule} ${path}:${line}`),
+        ).toStrictEqual([
+            'http-first-line-follows-its-grammar widget/__expected__/bad.http:1',
+            'no-document-in-ground widget/__expected__/case.spec.yaml:1',
+            'document-follows-its-grammar widget/__expected__/case.spec.yaml:1',
+            'no-document-in-ground widget/__expected__/shot.spec.yaml:1',
+            'http-first-line-follows-its-grammar widget/__requests__/bad.http:1',
+            'no-unused-ground widget:1',
+        ]);
+    });
+
+    test('the tree the checker judges — what git does not ignore — judges an untracked document, and never an ignored one', () => {
+        // Given - three documents repeating their directory: tracked, new, and ignored
+        const root = repository(
+            ['specs/rm/rm.spec.yaml', 'specs/cp/cp.spec.yaml', 'specs/mv/mv.spec.yaml'],
+            ['specs/rm/rm.spec.yaml'],
+            'specs/mv/\n',
+        );
+
+        // Then - the tracked and the new one are reported, the ignored one is not
+        expect(
+            findings(root, 'file-suffix-matches-place').map((line) => line.split(':')[0]),
+        ).toStrictEqual(['cp/cp.spec.yaml', 'rm/rm.spec.yaml']);
+    });
+
+    test('the tree the checker judges — what git does not ignore — reads a `file()` whose target is new as existing, and an ignored one as not (`named-path-exists`)', () => {
+        // Given - a spec naming three goldens on disk: tracked, new, and ignored
+        const root = repository(
+            [
+                'specs/api/__expected__/added.txt',
+                'specs/api/__expected__/new.txt',
+                'specs/api/__expected__/local.txt',
+            ],
+            ['specs/api/__expected__/added.txt'],
+            'local.txt\n',
+        );
+        writeFileSync(
+            join(root, 'specs', 'api', 'boot.spec.ts'),
+            [
+                "expect(a).toMatch(file('./__expected__/added.txt'));",
+                "expect(b).toMatch(file('./__expected__/new.txt'));",
+                "expect(c).toMatch(file('./__expected__/local.txt'));",
+                '',
+            ].join('\n'),
+        );
+
+        // Then - only the ignored golden names nothing a checkout holds
+        expect(findings(root, 'named-path-exists')).toStrictEqual([
+            "api/boot.spec.ts:3: file('./__expected__/local.txt') names nothing — api/__expected__/local.txt is ignored by git",
+        ]);
+    });
+
+    test('the single paths the checker probes — through the same tree — an ignored pool directory is no fixture to move (`ground-shared-or-inline`)', () => {
+        // Given - a pool directory `.gitignore` names, reached from one leaf
+        const root = repository(
+            ['specs/__fixtures__/app/index.txt', 'specs/__fixtures__/kept.txt'],
+            [],
+            'specs/__fixtures__/app/\n',
+        );
+        mkdirSync(join(root, 'specs', 'api'));
+        writeFileSync(
+            join(root, 'specs', 'api', 'boot.spec.ts'),
+            "await api.fixture(directory('../__fixtures__/app/')).get('/');\n",
+        );
+
+        // Then - `named-path-exists` names the path, and `ground-shared-or-inline` has nothing to move
+        expect(findings(root, 'ground-shared-or-inline')).toStrictEqual([]);
+        expect(findings(root, 'named-path-exists')).toHaveLength(1);
+    });
+
+    test('the single paths the checker probes — through the same tree — a manifest `.gitignore` names is no package (the member pass)', () => {
+        // Given - one new manifest and one ignored one
+        const root = repository(['fresh/package.json', 'local/package.json'], [], 'local/\n');
+        writeFileSync(join(root, 'fresh', 'package.json'), '{}\n');
+        writeFileSync(join(root, 'local', 'package.json'), '{}\n');
+
+        // Then - only the new one declares a package
+        expect(readManifest(join(root, 'fresh'))).not.toBeNull();
+        expect(readManifest(join(root, 'local'))).toBeNull();
+    });
+
+    test('the single paths the checker probes — through the same tree — an ignored fixture fixes no value for the document beside it (`no-volatile-literal`)', () => {
+        // Given - two documents asserting a temp path their `fixture:` holds, one of the two fixtures ignored
+        const document = [
+            'description: prints where it wrote',
+            'fixture: ./__fixtures__/where.txt',
+            'runs:',
+            '    - command: widget where',
+            '      exit: 0',
+            '      stdout: |',
+            '          /tmp/widget/out',
+            '',
+        ].join('\n');
+        const root = repository(
+            [
+                'specs/kept/__fixtures__/where.txt',
+                'specs/local/__fixtures__/where.txt',
+                'specs/kept/prints-where.spec.yaml',
+                'specs/local/prints-where.spec.yaml',
+            ],
+            [],
+            'specs/local/__fixtures__/where.txt\n',
+        );
+        for (const leaf of ['kept', 'local']) {
+            writeFileSync(
+                join(root, 'specs', leaf, '__fixtures__', 'where.txt'),
+                '/tmp/widget/out\n',
+            );
+            writeFileSync(join(root, 'specs', leaf, 'prints-where.spec.yaml'), document);
+        }
+
+        // Then - the value the ignored fixture held is volatile again
+        expect(
+            findings(root, 'no-volatile-literal').map((line) => line.split(':')[0]),
+        ).toStrictEqual(['local/prints-where.spec.yaml']);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — a member that owes nothing produces nothing', () => {
+        // Given - a member with a config, a test script and only optional peers
+        // Then - the pass is silent
+        expect(codes(memberAt('clean'))).toStrictEqual([]);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — a member whose own root is the specs tree holds specs, not strays (`file-suffix-matches-place`)', () => {
+        // Given - `@fixture/specs-rooted`, a member declared as `specs` (spwn's shape), holding `cli/agent/agent-list.spec.ts`
+        // Then - the member pass reads the tree it IS: nothing is outside a specs tree here
+        expect(codes(resolve(WORKSPACE, 'specs'))).toStrictEqual([]);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — a folder of code named like ground is read below the member, never above it (`no-snapshot-folder`)', () => {
+        // Given - a package checked out under a folder named `specs/`, whose `src/goldens/` is matcher source
+        const member = checkoutUnder('specs', ['src/goldens']);
+        writeFileSync(join(member, 'src/goldens/matchers.ts'), 'export const golden = 1;\n');
+
+        // Then - the `specs` above the checkout is the machine's: the folder holds code, and stays
+        expect(codes(member, member)).toStrictEqual([]);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — every member is judged in one run', () => {
+        // Given - the whole fixture workspace
+        const found = runMembers(WORKSPACE, CHECKER).map((violation) => violation.rule);
+
+        // Then - one `no-simulated-dom-in-config`, three `no-redundant-test-dependency` and one `file-suffix-matches-place`, whatever the order they walk in
+        expect(found.toSorted()).toStrictEqual([
+            'file-suffix-matches-place',
+            'no-redundant-test-dependency',
+            'no-redundant-test-dependency',
+            'no-redundant-test-dependency',
+            'no-simulated-dom-in-config',
+        ]);
+    });
+});

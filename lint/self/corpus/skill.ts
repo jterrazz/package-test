@@ -23,7 +23,7 @@ const EXPORT_DECLARATION =
     /export\s+(?:declare\s+)?(?:async\s+)?(?:const|let|function|class|type|interface|enum)\s+(?<name>[A-Za-z_$][\w$]*)/gu;
 const EXPORT_ALL = /export\s+\*\s+from\s+'(?<from>\.[^']+)'/gu;
 const SAMPLE_IMPORT = /import\s+\{(?<names>[^}]*)\}\s+from\s+'(?<from>@jterrazz\/test[^']*)'/gu;
-const PROSE_CALL = /`(?<name>[A-Za-z_$][\w$]*)[(<.]/gu;
+const PROSE_CALL = /`(?<name>_*[A-Za-z$][\w$]*)[(<.]/gu;
 const PAGE_LINK = /\]\((?<target>[^)#]+\.md)(?:#[^)]*)?\)/gu;
 
 function namesOf(list: string): string[] {
