@@ -30,12 +30,21 @@ function isJudged({ inSpecs, role, strayTestRoot }: FileIdentity): boolean {
     return role === 'component' || (role === 'module' && !inSpecs);
 }
 
+// invariant: under `specs/` a `*.fixtures.ts` is another rule's; oxlint hands the rule module files alone, so the part before the extension names the kind.
+function isFixturesAstray({ inSpecs, inTests }: FileIdentity, file: string): boolean {
+    return !inSpecs && !inTests && basename(file).split('.').at(-2) === 'fixtures';
+}
+
 const row = rowNamed(consumerRows, 'test-in-its-tests-folder');
 
 export const testInItsTestsFolder = defineRule(
     {
         docs: row,
         messages: {
+            fixturesOutsideTests: {
+                found: 'typed test data outside every `__tests__/`',
+                fix: 'move it into the `__tests__/` of its module’s folder, or — when the module tests of several folders share it — into the `__tests__/` of the lowest folder they share, and the paths that import it',
+            },
             orphanComponent: {
                 found: 'a component test naming no "{{expected}}"',
                 fix: 'name it for what it renders — a hook or a DOM function is the `.ts` of the same basename, its Host in the test',
@@ -64,6 +73,7 @@ export const testInItsTestsFolder = defineRule(
                     const identity = identityOf(context);
                     return (
                         identity.strayTestRoot !== null ||
+                        isFixturesAstray(identity, context.physicalFilename) ||
                         (isJudged(identity) && TEST_FILE.test(context.physicalFilename))
                     );
                 },
@@ -76,6 +86,10 @@ export const testInItsTestsFolder = defineRule(
                             messageId: 'rootTests',
                             node,
                         });
+                        return;
+                    }
+                    if (isFixturesAstray(identity, file)) {
+                        context.report({ messageId: 'fixturesOutsideTests', node });
                         return;
                     }
                     const inTestsFolder = basename(dirname(file)) === TESTS_FOLDER;

@@ -96,7 +96,7 @@ The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusa
 
 ### Fixtures
 
-A payload a module test feeds itself lives in a `<file>.fixtures.ts` beside it in the `__tests__/` — TypeScript, type-checked with the test, reviewed in the same diff. A `.json` a module test imports is `no-module-mock`'s error: an asset the compiler never reads is a second source of truth, and the kind that legitimately owns assets is the one that has a folder for them.
+A payload a module test feeds itself lives in a `<file>.fixtures.ts` beside it in the `__tests__/` — TypeScript, type-checked with the test, reviewed in the same diff. What the module tests of several folders share — a builder of scratch trees, a common payload — is no module's and sits in the `__tests__/` of the lowest folder they share, named for what it prepares, as a `__setup__/` does under `specs/`; a `*.fixtures.ts` outside every `__tests__/` is `test-in-its-tests-folder`'s error. A `.json` a module test imports is `no-module-mock`'s error: an asset the compiler never reads is a second source of truth, and the kind that legitimately owns assets is the one that has a folder for them.
 
 ### Tables
 

@@ -38,4 +38,18 @@ describe('test-in-its-tests-folder', () => {
                 read: docs/reference/linting.md#test-in-its-tests-folder
         `);
     });
+
+    test('typed test data outside every __tests__ is refused, and in its module’s or the lowest shared one passes', async () => {
+        // Given - the stray-fixtures tree
+        const result = await lint.fixture(directory('./__fixtures__/stray-fixtures/')).run();
+
+        // Then - the one stray file, with its lesson
+        expect(result.report).toMatch(`
+            src/orders/orders.fixtures.ts:1:1  jterrazz(test-in-its-tests-folder)
+                found: typed test data outside every \`__tests__/\`
+                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\` — the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
+                fix: move it into the \`__tests__/\` of its module’s folder, or — when the module tests of several folders share it — into the \`__tests__/\` of the lowest folder they share, and the paths that import it
+                read: docs/reference/linting.md#test-in-its-tests-folder
+        `);
+    });
 });
