@@ -36,10 +36,8 @@ export function teacherOf({ chapter, rows }: Pick<CheckerRegistry, 'chapter' | '
 }
 
 export function underTree(spotted: Spotted[], prefix: string): Spotted[] {
-    if (prefix !== '') {
-        for (const one of spotted) {
-            one.path = join(prefix, one.path);
-        }
+    for (const one of spotted) {
+        one.path = join(prefix, one.path);
     }
 
     return spotted;
