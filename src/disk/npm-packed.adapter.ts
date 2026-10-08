@@ -25,24 +25,30 @@ function keysOf(value: unknown): string[] {
     return isRecord(value) ? Object.keys(value) : [];
 }
 
+// Stryker disable next-line Regex: a package name holds its scope at its start or nowhere
+const SCOPE = /^@[^/]+\//u;
+
+// outside: npm names a string `bin` after the package, its scope dropped; a manifest naming no package names no command.
+function binOf(name: unknown, bin: unknown): Record<string, string> {
+    if (typeof bin === 'string') {
+        return typeof name === 'string' ? { [name.replace(SCOPE, '')]: bin } : {};
+    }
+    return Object.fromEntries(
+        Object.entries(isRecord(bin) ? bin : {}).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string',
+        ),
+    );
+}
+
 function manifestAt(directory: string): Manifest {
     const parsed: unknown = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
     const field = (key: string): unknown => (isRecord(parsed) ? parsed[key] : undefined);
     const name = field('name');
-    const bin = field('bin');
     const meta = field('peerDependenciesMeta');
     const optional = (peer: string): boolean =>
         isRecord(meta) && isRecord(meta[peer]) && meta[peer].optional === true;
-    const bare = typeof name === 'string' ? (name.split('/').at(-1) ?? name) : '';
     return {
-        bin:
-            typeof bin === 'string'
-                ? { [bare]: bin }
-                : Object.fromEntries(
-                      Object.entries(isRecord(bin) ? bin : {}).filter(
-                          (entry): entry is [string, string] => typeof entry[1] === 'string',
-                      ),
-                  ),
+        bin: binOf(name, field('bin')),
         name: typeof name === 'string' ? name : undefined,
         runtime: [
             ...keysOf(field('dependencies')),
