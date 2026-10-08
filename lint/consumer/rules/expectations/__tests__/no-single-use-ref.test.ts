@@ -32,6 +32,12 @@ afterAll(() => {
 ruleTester().run('no-single-use-ref', noSingleUseRef, {
     invalid: [
         {
+            name: 'A ref a value written in place holds once is used once, reported where it is written.',
+            code: 'expect(result.stdout).toMatch(`\n    id {{uuid#once}}\n`);',
+            errors: [{ column: 30, line: 1, message: /once/u }],
+            filename: WIDGET,
+        },
+        {
             name: 'A ref a fixture tree holds once is used once.',
             code: 'await expect(result.directory("out")).toMatch(directory("./__expected__/single/"));',
             errors: [{ column: 6, line: 1, message: /solo/u }],
@@ -51,6 +57,11 @@ ruleTester().run('no-single-use-ref', noSingleUseRef, {
         },
     ],
     valid: [
+        {
+            name: 'A code ref beside a value written in place carrying the same ref twice earns its name: the id and the row it names agree.',
+            code: 'expect(result.response).toMatch(`\n    {"id": "{{string#post}}"}\n`);\nexpect(await table("posts")).toMatch([["{{string#post}}"]]);\nexpect(row.id).toEqual(match.ref("post"));',
+            filename: WIDGET,
+        },
         {
             name: 'A ref two files of one tree share is used twice; a ref named by no literal, and one through no `match`, count nothing.',
             code: 'await expect(result.directory("out")).toMatch(directory("./__expected__/tree/"));\nexpect(a).toEqual(match.ref(name));\nexpect(b).toEqual(other.ref("x"));\nexpect(c).toEqual(match.other("y"));\nexpect(d).toEqual(a.match.ref("z"));',

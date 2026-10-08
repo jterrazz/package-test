@@ -410,7 +410,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the golden files it references) is named for nothing → error.",
+            "sentence": "A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code — a `match.ref`, and every value written in place, a string or a template — plus the golden files it references) is named for nothing → error.",
             "specification": "model",
             "family": "expectations",
             "fix": "Drop the ref name and keep the bare token.",

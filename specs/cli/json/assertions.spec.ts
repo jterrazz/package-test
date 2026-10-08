@@ -154,7 +154,7 @@ describe('assertions', () => {
             writeFileSync(
                 fixturePath,
                 `${JSON.stringify(
-                    { features: '{{any}}', name: '{{string#n}}', version: '{{string}}' },
+                    { features: '{{any}}', name: '{{string}}', version: '{{semver}}' },
                     null,
                     4,
                 )}\n`,

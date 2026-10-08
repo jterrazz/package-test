@@ -14,6 +14,7 @@ import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
 import {
     child,
     childList,
+    cookedText,
     memberPropertyName,
     stringValue,
     walk,
@@ -23,6 +24,7 @@ import { goldenOf } from '../../../kit/project/framework-calls.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isRelativePath } from '../../../kit/project/relative-path.js';
 import { isTestRole } from '../../../kit/project/role.js';
+import { TOKEN_KINDS } from '../../../kit/project/tokens.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function goldenPathOf(node: AstNode): string | undefined {
@@ -31,7 +33,11 @@ function goldenPathOf(node: AstNode): string | undefined {
     return name !== undefined && isRelativePath(name) ? name : undefined;
 }
 
-const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
+// invariant: a ref rides a token of the grammar; `{{kind#ref}}` in a lesson's prose is no capture.
+const REF_TOKEN = new RegExp(
+    String.raw`\{\{(?:${TOKEN_KINDS.join('|')})#(?<ref>[\w.-]+)\}\}`,
+    'gu',
+);
 
 function isMatchRef(node: AstNode): boolean {
     const callee = child(node, 'callee');
@@ -42,6 +48,20 @@ function isMatchRef(node: AstNode): boolean {
     const object = child(callee, 'object');
     // Stryker disable next-line OptionalChaining,ConditionalExpression: a member always has an object, and only an identifier has a name
     return object?.type === 'Identifier' && object.name === 'match';
+}
+
+function refsIn(text: string): string[] {
+    // Stryker disable next-line OptionalChaining: a match of a pattern holding a named group always carries its groups
+    return [...text.matchAll(REF_TOKEN)].map((match) => match.groups?.ref ?? '');
+}
+
+// invariant: a value written in place holds its tokens in a string or a template's text, as a golden file holds them on disk.
+function inPlaceText(node: AstNode): string | undefined {
+    if (node.type === 'TemplateElement') {
+        return cookedText(node);
+    }
+    // invariant: a template is read through its elements, so its text is counted once.
+    return node.type === 'Literal' ? stringValue(node) : undefined;
 }
 
 function refsInFixture(target: string): string[] {
@@ -67,6 +87,20 @@ function refsInFixture(target: string): string[] {
         }
     }
     return refs;
+}
+
+function countInPlace(
+    node: AstNode,
+    bump: (ref: string) => void,
+    sites: Map<string, AstNode>,
+): void {
+    for (const ref of refsIn(inPlaceText(node) ?? '')) {
+        bump(ref);
+        // Stryker disable next-line ConditionalExpression: a site is reported only for a ref written once, which has one site
+        if (!sites.has(ref)) {
+            sites.set(ref, node);
+        }
+    }
 }
 
 const row = rowNamed(consumerRows, 'no-single-use-ref');
@@ -102,6 +136,7 @@ export const noSingleUseRef = defineRule(
                     };
 
                     walk(program, (node) => {
+                        countInPlace(node, bump, codeNodes);
                         // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no call is no matcher either
                         if (node.type !== 'CallExpression') {
                             return;
