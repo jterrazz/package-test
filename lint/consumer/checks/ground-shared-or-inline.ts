@@ -9,6 +9,7 @@ import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
 import { withoutEntryImport } from '../../kit/checker/entry-import.js';
+import { documentReferences, RELATIVE_LITERAL } from '../../kit/project/ground-readers.js';
 import { isTestsFolderGround, moduleTestsOf } from '../../kit/project/module-tests.js';
 import { isRelativePath } from '../../kit/project/relative-path.js';
 import { closingOf } from '../../kit/project/source-scan.js';
@@ -37,6 +38,8 @@ import { checkInlineSeeds, fixInlineSeeds } from './ground-shared-or-inline.seed
 
 const DISK_LITERAL =
     /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>\s*\)/gu;
+
+const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
 
 const TEST_CALL = /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(/gu;
 
@@ -131,20 +134,31 @@ function inlinable(reference: Reference, target: string): boolean {
     );
 }
 
+// invariant: a document's `fixture:` line, an import and a path joined to `import.meta.dirname` read a ground file as surely as `file()` does, and keep it a file.
+function readersBesidesDiskCalls(root: string): string[] {
+    // Stryker disable OptionalChaining: a match always carries its named groups
+    const sources = listFiles(root, (path) => SOURCE_FILE.test(path)).flatMap((file) =>
+        [...readFileSync(file, 'utf8').matchAll(RELATIVE_LITERAL)]
+            .filter((found) => !/(?:file|directory)\(/u.test(String(found.groups?.lead)))
+            .map((found) => resolve(dirname(file), String(found.groups?.path))),
+    );
+    // Stryker restore OptionalChaining
+    return [...sources, ...documentReferences(root).map(({ target }) => target)];
+}
+
 function singleUseFiles(rootDir: string): SingleUse[] {
     const roots = findSpecsRoots(rootDir);
     const references = roots.flatMap((root) => [
-        ...listFiles(root, (path) => /\.[cm]?[jt]sx?$/u.test(path)).flatMap((file) =>
-            referencesIn(file),
-        ),
+        ...listFiles(root, (path) => SOURCE_FILE.test(path)).flatMap((file) => referencesIn(file)),
         // invariant: a module test's ground stands inside its `__tests__/`, and is judged by the law a specification's is.
         ...moduleTestsOf(dirname(root))
             .flatMap((file) => referencesIn(file))
             .filter((reference) => isTestsFolderGround(reference.target)),
     ]);
-    const namedOutside = roots.flatMap((root) =>
-        pathsModuleTestsName(dirname(root)).filter((path) => isWithin(root, path)),
-    );
+    const namedOutside = roots.flatMap((root) => [
+        ...pathsModuleTestsName(dirname(root)).filter((path) => isWithin(root, path)),
+        ...readersBesidesDiskCalls(root),
+    ]);
     const byTarget = new Map<string, Reference[]>();
     for (const reference of references) {
         byTarget.set(reference.target, [...(byTarget.get(reference.target) ?? []), reference]);

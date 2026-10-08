@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { pathFrom } from '../../kit/checker/repoint.js';
+import { RELATIVE_LITERAL } from '../../kit/project/ground-readers.js';
 import { closingOf, literalEnd } from '../../kit/project/source-scan.js';
 import { lineEnd, withLeadingComments } from '../../kit/project/spec-subjects.js';
 import type { Span } from '../../kit/project/spec-subjects.js';
@@ -170,10 +171,6 @@ export function pruned(text: string): string {
         .replaceAll(/\n{3,}/gu, '\n\n')
         .replace(/(?:\n[ \t]*\/\/[^\n]*|\n[ \t]*)+$/u, '\n');
 }
-
-// outside: vitest's `vi.mock`, `vi.doMock`, `vi.unmock`, `vi.doUnmock`, `vi.importActual` and `vi.importMock` name a module as `import()` does, and `new URL('…', import.meta.url)` a path beside the file.
-export const RELATIVE_LITERAL =
-    /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*|(?<![.\w])vi\.(?:mock|doMock|unmock|doUnmock|importActual|importMock)\(\s*|\bnew\s+URL\(\s*(?=(?<base>['"])[^'"]*\k<base>\s*,\s*import\.meta\.url\b))(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
 // invariant: `from '…'`, `import('…')` and a `vi.` call name a module; every other lead names a path on disk.
 function isModuleLead(lead: string): boolean {

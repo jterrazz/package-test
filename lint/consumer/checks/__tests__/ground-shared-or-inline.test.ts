@@ -48,6 +48,18 @@ describe('ground-shared-or-inline', () => {
         ]);
     });
 
+    test('a file that is no module, naming the path in its text, reads nothing', () => {
+        // Given - the file read alone, and a JSON note quoting an import of it
+        const files = {
+            ...EXPECTED,
+            [SPEC]: testReading(USERS),
+            'specs/api/notes.json': `${JSON.stringify({ note: "import users from './__expected__/users.json'" })}\n`,
+        };
+
+        // Then - the file is still to be written in place
+        expect(findingsIn(files)).toStrictEqual(READ_ALONE);
+    });
+
     test.each(STAYS_A_FILE)('a ground file stays a file when %s', (_, files) => {
         // Given - a tree where the file is shared, unwritable in place, silenced or not a ground file
         // Then - nothing is to inline

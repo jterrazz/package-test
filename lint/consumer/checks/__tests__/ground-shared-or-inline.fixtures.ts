@@ -38,6 +38,42 @@ export const STAYS_A_FILE: [string, Record<string, string>][] = [
     ],
     ['a helper module reads it', { ...EXPECTED, 'specs/api/users.ts': testReading(USERS) }],
     [
+        "a document's fixture line reads it",
+        {
+            ...EXPECTED,
+            [SPEC]: testReading(USERS),
+            'specs/api/users-doc.spec.yaml':
+                'description: lists users\nfixture: ./__expected__/users.json\nruns:\n    - command: echo\n      exit: 0\n',
+        },
+    ],
+    [
+        'another spec imports it',
+        {
+            ...EXPECTED,
+            [SPEC]: testReading(USERS),
+            'specs/api/other.spec.ts':
+                "import users from './__expected__/users.json' with { type: 'json' };\ntest('x', () => { expect(users).toEqual([]); });\n",
+        },
+    ],
+    [
+        'a module helper imports it',
+        {
+            ...EXPECTED,
+            [SPEC]: testReading(USERS),
+            'specs/api/users.mjs':
+                "import users from './__expected__/users.json' with { type: 'json' };\nexport default users;\n",
+        },
+    ],
+    [
+        'another spec joins its path to its folder',
+        {
+            ...EXPECTED,
+            [SPEC]: testReading(USERS),
+            'specs/api/other.spec.ts':
+                "test('x', () => { expect(readFileSync(join(import.meta.dirname, './__expected__/users.json'), 'utf8')).toBe('[]\\n'); });\n",
+        },
+    ],
+    [
         'it is read as a directory',
         {
             'specs/api/__expected__/users/a.json': '[]\n',

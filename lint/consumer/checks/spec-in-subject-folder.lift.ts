@@ -9,24 +9,10 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'node:f
 import { basename, dirname, join, resolve, sep } from 'node:path';
 
 import { repointFiles, repointModuleTests } from '../../kit/checker/repoint.js';
+import { documentReferences, RELATIVE_LITERAL } from '../../kit/project/ground-readers.js';
 import { isTestFileName } from '../../kit/project/role.js';
-import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
-import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { shown } from '../../kit/project/spec-subjects.js';
 import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../kit/project/tree.js';
-import { RELATIVE_LITERAL } from './spec-in-subject-folder.prune.js';
-
-function documentReferences(specsRoot: string): { file: string; target: string }[] {
-    return listFiles(specsRoot, (path) => path.endsWith(SPEC_EXTENSION)).flatMap((file) => {
-        try {
-            return documentPaths(parseSpecDocument(readFileSync(file, 'utf8'), file)).map(
-                ({ path }) => ({ file, target: resolve(dirname(file), path) }),
-            );
-        } catch {
-            return [];
-        }
-    });
-}
 
 // invariant: a document reads its ground by its `fixture:` lines as a spec does by its literals: both follow a lifted entry.
 function diskReferences(specsRoot: string): { file: string; target: string }[] {
