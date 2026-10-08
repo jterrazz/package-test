@@ -120,7 +120,8 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
     return { basePath, collections, commands, methodless };
 }
 
-function readSpec(specsRoot: string, file: string): SpecRead {
+/** A spec as the disk holds it now: its text, its specification, its tests and the subjects they open. */
+export function readSpec(specsRoot: string, file: string): SpecRead {
     const text = readFileSync(file, 'utf8');
     const specification = specificationOf(specsRoot, file);
     const reading = readingOf(specsRoot, file, text);

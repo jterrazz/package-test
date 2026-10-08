@@ -2,7 +2,13 @@ import { forgetTree, moveKeepingHistory } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { shown, silenced, splitPlan, subjectSpecs } from '../../kit/project/spec-subjects.js';
+import {
+    readSpec,
+    shown,
+    silenced,
+    splitPlan,
+    subjectSpecs,
+} from '../../kit/project/spec-subjects.js';
 import type { SpecRead } from '../../kit/project/spec-subjects.js';
 import { liftGround } from './spec-in-subject-folder.lift.js';
 import { splitRefusal } from './spec-in-subject-folder.refusal.js';
@@ -37,7 +43,9 @@ function writeSplit(
 /** A test reaching two subjects goes with the one its chain opens on; a file whose target is taken, or whose split `splitRefusal` refuses, is left for its author. */
 export function fixSpecInSubjectFolder(specsRoot: string): string[] {
     const done: string[] = [];
-    for (const spec of subjectSpecs(specsRoot)) {
+    // invariant: each spec is read again before it is planned, so a lift an earlier move made to it is the text it moves.
+    for (const listed of subjectSpecs(specsRoot)) {
+        const spec = readSpec(specsRoot, listed.file);
         const rule = spec.subjects.size > 1 ? 'one-subject-per-spec' : 'spec-in-subject-folder';
         // Stryker disable next-line ConditionalExpression: a spec of no subject plans no target, and is skipped below
         if (spec.subjects.size === 0 || silenced(spec, rule)) {

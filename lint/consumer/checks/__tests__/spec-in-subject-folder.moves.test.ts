@@ -7,6 +7,7 @@ import { CHARTS, RUNNER, specsTree, TWO_ROUTES } from '../../../kit/testing/subj
 import { checkOneSubjectPerSpec } from '../one-subject-per-spec.js';
 import { checkSpecInSubjectFolder } from '../spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from '../spec-in-subject-folder.moves.js';
+import { readingGround, TWO_PAGES } from './spec-in-subject-folder.moves.fixtures.js';
 
 const listing = (rule: string): string =>
     `import { api } from '../api.specification.js'; // checker-disable-line ${rule} -- filed by its author\ntest('a', async () => { await api.get('/orders'); });\n`;
@@ -86,6 +87,29 @@ describe('fixSpecInSubjectFolder', () => {
         expect(readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8')).toContain(
             "from '../../api.specification.js'",
         );
+    });
+
+    test('subject-moves — a spec whose ground an earlier move lifted is moved from the text the lift repointed', () => {
+        // Given - two specs filed under misc/, of two collections, reading one expected file beside them
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/misc/__expected__/x.json': '[]\n',
+            'api/misc/a.spec.ts': readingGround('orders'),
+            'api/misc/b.spec.ts': readingGround('users'),
+        });
+
+        // When - the fix moves both
+        fixSpecInSubjectFolder(root);
+
+        // Then - the ground is lifted to the folder they share, and each moved spec reads it there
+        expect(
+            ['api/orders/list/a.spec.ts', 'api/users/list/b.spec.ts'].map(
+                (path) =>
+                    /file\('(?<to>[^']+)'\)/u.exec(readFileSync(join(root, path), 'utf8'))?.groups
+                        ?.to,
+            ),
+        ).toStrictEqual(['../../__expected__/x.json', '../../__expected__/x.json']);
+        expect(existsSync(join(root, 'api/__expected__/x.json'))).toBe(true);
     });
 
     test('subject-moves — a move removes the folders it empties, up to the first that still holds something', () => {
@@ -188,22 +212,8 @@ describe('fixSpecInSubjectFolder', () => {
 
     test('subject-moves — a file of two pages is left whole: no folder names the second page, and the split names no file its author did not', () => {
         // Given - one website file visiting the pricing page and an article page
-        const spec = [
-            "import { test } from 'vitest';",
-            '',
-            "import { website } from '../website.specification.js';",
-            '',
-            "test('shows the prices', async () => {",
-            "    await website.visit('/pricing', async () => {});",
-            '});',
-            '',
-            "test('shows an article', async () => {",
-            "    await website.visit('/articles/42', async () => {});",
-            '});',
-            '',
-        ].join('\n');
         const root = specsTree({
-            'website/pages/home.spec.ts': spec,
+            'website/pages/home.spec.ts': TWO_PAGES,
             'website/website.specification.ts':
                 'export const { cleanup, website } = await specification.website({});\n',
         });
@@ -215,7 +225,7 @@ describe('fixSpecInSubjectFolder', () => {
         expect({
             done,
             fix: checkOneSubjectPerSpec(root).map((spotted) => spotted.fix),
-            kept: readFileSync(join(root, 'website/pages/home.spec.ts'), 'utf8') === spec,
+            kept: readFileSync(join(root, 'website/pages/home.spec.ts'), 'utf8') === TWO_PAGES,
         }).toStrictEqual({
             done: [],
             fix: [
