@@ -240,12 +240,13 @@ A fixture tree sits beside the one leaf that reads it, `./__fixtures__/<name>/`,
 
 ### `.link()` — a package the working directory resolves
 
-A fixture tree carries no `node_modules`: git never tracks one. A binary whose subject imports a package — a checker that loads a plugin, a build that resolves a peer — needs that package where Node looks for it, and `.link(name, source?)` puts it there: `<cwd>/node_modules/<name>`, a symlink to the package, never a copy and never an install.
+A fixture tree carries no `node_modules`: git never tracks one. A binary whose subject imports a package — a checker that loads a plugin, a build that resolves a peer — needs that package where Node looks for it, and `.link(name, source?)` puts it there: `<cwd>/node_modules/<name>`, a symlink to the package, never a copy and never an install — but for a packed package, which is the install a consumer gets.
 
-| Call                                                   | Links                                                                              |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `.link('@acme/sdk')`                                   | the package the spec's own project installed, found as Node finds it from the spec |
-| `.link('@acme/sdk', directory('./__fixtures__/sdk/'))` | the package a directory holds — a stub install, a broken one, an older version     |
+| Call                                                   | Links                                                                                                                                 |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `.link('@acme/sdk')`                                   | the package the spec's own project installed, found as Node finds it from the spec                                                    |
+| `.link('@acme/sdk', directory('./__fixtures__/sdk/'))` | the package a directory holds — a stub install, a broken one, an older version                                                        |
+| `.link('@acme/sdk', packed())`                         | the tarball `npm pack` writes for the spec's own project, as a consumer installs it ([below](#a-package-specified-from-its-artefact)) |
 
 ```typescript
 test('loads the plugin the project installed', async () => {
@@ -261,6 +262,29 @@ test('loads the plugin the project installed', async () => {
 ```
 
 A link is armed after every fixture, so it replaces a package a fixture laid under the same name. The name is a package name — `@scope/name` or `name` — and one name is linked once per chain; a bare name no `node_modules` above the spec holds, or a `directory()` naming nothing, is refused before the binary runs. So is a working directory whose `node_modules` (or scope folder) is a symlink — a fixture can carry one, a binary can lay one: the link would replace the real install it points to — or a file, which leaves the link no folder to be laid in.
+
+### A package specified from its artefact
+
+A library is specified as its consumers receive it: from the tarball, never from its source tree. `packed()` names that tarball, and `.link(name, packed())` lays it — `npm pack` over the project the spec belongs to (its nearest `package.json`), unpacked and COPIED to `node_modules/<name>`, beside a link to each package its manifest requires at runtime (`dependencies`, `optionalDependencies`, every peer not marked optional), taken from where the package is developed, and its `bin` entries in `node_modules/.bin/`. What `files` leaves out is not there, a subpath the `exports` map forgets does not resolve, and a dependency left in `devDependencies` is missing — each the failure a consumer would meet.
+
+```typescript
+test('a consumer loads the published entry', async () => {
+    // Given - a consumer module importing the package by its published name
+    const result = await cli
+        .fixture(directory('./__fixtures__/consumer/'))
+        .link('@acme/telemetry', packed())
+        .exec('consumer.mjs');
+
+    // Then
+    expect(result.exitCode).toBe(0);
+});
+```
+
+The project is packed once per test process, from what its build left in `dist/` — so the spec runs after `make build`, as the Makefile's `test: build` orders it — and under a mutation run the sandbox's own build is what gets packed. `packed(directory('./__fixtures__/…/'))` packs another package the spec holds. The name is the one the package's manifest declares: linking it under another is refused before the binary runs.
+
+**The declarations a consumer compiles against** are checked the same way: a consumer fixture holding a `.ts` module and a `tsconfig.json`, the compiler and the Node types linked beside the packed package, and `tsc` run over it — `.link('@acme/telemetry', packed()).link('typescript').link('@types/node').exec('node_modules/typescript/bin/tsc -p .')`, an exit of `0` and an empty stdout.
+
+**`NODE_OPTIONS` reaches the binary on purpose.** A mutation run hands every spawned node its coverage reporter through it; a `defaults` that sets `NODE_OPTIONS: null` makes every mutant read as "no test runs". Clear what the product reads, never that.
 
 ### `.prepare()` — what no fixture can carry
 
@@ -513,7 +537,7 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **Writing into fixture folders from a test.** The cwd is a copy; feature-local `__fixtures__/` and the shared `specs/__fixtures__/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files, `.fixture()`, handed a `file()` or a `directory()`, and `.seed()` is SQL-only (rule `seeds-are-sql`).
 - **A bare fixture name.** `.fixture('shop/')` and `directory('shop/')` do not compile: the path is spelled from the spec — `./__fixtures__/shop/` beside it, `../../__fixtures__/shop/` in the ground at the specs root (rule `disk-named-by-relative-path`).
-- **Building a `node_modules` by hand.** `mkdirSync` and `symlinkSync` around a raw `spawnSync` is a chain the runner already is: `.link()` lays the package, and the spec stays one chain.
+- **Building a `node_modules` by hand.** `mkdirSync` and `symlinkSync` around a raw `spawnSync` is a chain the runner already is: `.link()` lays the package, `.link(name, packed())` the published tarball with what it requires, and the spec stays one chain.
 - **Forgetting the extension in `file('./__expected__/help')`.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./__expected__/help/')`.
 
 ## Related

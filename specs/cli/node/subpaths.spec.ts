@@ -15,7 +15,7 @@ describe('subpaths', () => {
         expect(result.stdout).toMatch(`
             @jterrazz/test (types) → ./dist/index.d.ts: held
             @jterrazz/test (browser) → ./dist/browser/index.js: reaches 1 module, imports @jterrazz/typescript/rules, msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
-            @jterrazz/test (import) → ./dist/index.js: loads, 49 names
+            @jterrazz/test (import) → ./dist/index.js: loads, 50 names
             @jterrazz/test/vitest (types) → ./dist/vitest.d.ts: held
             @jterrazz/test/vitest (import) → ./dist/vitest.js: loads, 12 names
             @jterrazz/test/config (types) → ./dist/config.d.ts: held

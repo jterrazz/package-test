@@ -1,0 +1,7 @@
+{
+    "name": "@acme/shipped",
+    "version": "2.0.0",
+    "main": "index.cjs",
+    "files": ["index.cjs"],
+    "dependencies": { "yaml": "^2.8.0" }
+}

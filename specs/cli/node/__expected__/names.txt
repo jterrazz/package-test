@@ -87,6 +87,7 @@
     MobileVisitor
     MockOfOptions
     MockPort
+    PackedPackage
     PageResult
     PinnedClock
     PositionedCases
@@ -169,6 +170,7 @@
     navigation
     openai
     option
+    packed
     postgres
     process
     redis
@@ -262,6 +264,7 @@
     navigation
     openai
     option
+    packed
     postgres
     process
     redis

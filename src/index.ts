@@ -18,6 +18,7 @@ export {
     type FileAt,
     type RelativePath,
 } from './disk/spec-path.js';
+export { packed, type PackedPackage } from './disk/packed.js';
 export { anthropic } from './stubs/kinds/anthropic.js';
 export {
     http,

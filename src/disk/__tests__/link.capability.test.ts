@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { link } from '../link.capability.js';
 import type { LinkPort } from '../link.port.js';
+import { packed } from '../packed.js';
 import { directory, file } from '../spec-path.js';
 
 type Linked = Parameters<typeof link.reduce>[0];
@@ -12,6 +13,9 @@ function linksInto(log: string[]): LinkPort {
     return {
         link: (name, path, testDir, workDir) => {
             log.push(`${name} ${String(path)} ${testDir} ${workDir}`);
+        },
+        packed: (name, path, testDir, workDir) => {
+            log.push(`packed ${name} ${String(path)} ${testDir} ${workDir}`);
         },
     };
 }
@@ -47,14 +51,22 @@ function noDirectory(name: string, handed: string): string {
 }
 
 describe('link', () => {
-    test('link.capability — .link() — gathers each package, from the project or from the directory named', () => {
-        // Given - a bare scoped name, and a plain name read from a fixture directory
+    test('link.capability — .link() — gathers each package, from the project, the directory named or the tarball packed', () => {
+        // Given - a bare scoped name, a plain name read from a fixture directory, and two packed packages
+        const greeter = directory('./__fixtures__/greeter/');
+        const slice = linked(
+            ['@acme/greeter'],
+            ['greeter-2', greeter],
+            ['@acme/own', packed()],
+            ['@acme/greeter-packed', packed(greeter)],
+        );
+
         // Then - each in the order stated
-        expect(
-            linked(['@acme/greeter'], ['greeter-2', directory('./__fixtures__/greeter/')]),
-        ).toStrictEqual([
-            { name: '@acme/greeter', path: null },
-            { name: 'greeter-2', path: './__fixtures__/greeter/' },
+        expect(slice).toStrictEqual([
+            { name: '@acme/greeter', packed: false, path: null },
+            { name: 'greeter-2', packed: false, path: './__fixtures__/greeter/' },
+            { name: '@acme/own', packed: true, path: null },
+            { name: '@acme/greeter-packed', packed: true, path: './__fixtures__/greeter/' },
         ]);
     });
 
@@ -114,6 +126,8 @@ describe('link', () => {
         const slice = linked(
             ['@acme/greeter'],
             ['greeter-2', directory('./__fixtures__/greeter/')],
+            ['@acme/own', packed()],
+            ['@acme/greeter-packed', packed(directory('./__fixtures__/greeter/'))],
         );
 
         // When - a chain with a working directory arms, then one without
@@ -132,6 +146,8 @@ describe('link', () => {
         expect(log).toStrictEqual([
             '@acme/greeter null /spec /work',
             'greeter-2 ./__fixtures__/greeter/ /spec /work',
+            'packed @acme/own null /spec /work',
+            'packed @acme/greeter-packed ./__fixtures__/greeter/ /spec /work',
         ]);
     });
 });

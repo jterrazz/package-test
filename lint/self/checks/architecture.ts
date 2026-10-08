@@ -10,6 +10,7 @@ import { OWNERS_OF_LIBRARIES } from './libraries.js';
 const READ_LAYERS: ChapterAnchor = 'docs/concepts/architecture.md#the-source-trees';
 
 const SPAWNING_SITES = [
+    'disk/npm-packed.adapter.ts',
     'expectations/command/docker-cli.ts',
     'expectations/in-place/formatter.ts',
     'specifications/cli/process/exec.adapter.ts',

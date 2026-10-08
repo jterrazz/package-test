@@ -202,6 +202,10 @@ case "$COMMAND" in
         echo "waiting on nothing"
         exec sleep 30
         ;;
+    load)
+        # What a consumer gets from the package, loaded as Node loads it from the working directory.
+        node -p "require('$2')"
+        ;;
     tracked)
         # What the repository around the working directory holds in its index.
         git ls-files

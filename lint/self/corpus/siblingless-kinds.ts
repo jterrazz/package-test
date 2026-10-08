@@ -168,6 +168,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/specifications/component/page/vitest-browser-dom.ts',
             'src/specifications/component/viewport/page-viewport.adapter.ts',
             'src/disk/in-process-steps.adapter.ts',
+            'src/disk/npm-packed.adapter.ts',
             'src/specifications/mobile/screen/appium-app.adapter.ts',
         ),
         name: 'an adapter',

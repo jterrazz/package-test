@@ -2,23 +2,10 @@ import { existsSync, lstatSync, mkdirSync, rmSync, statSync, symlinkSync } from 
 import { dirname, relative, resolve } from 'node:path';
 
 import { refusal } from '../chain/refusals/refusal.js';
+import { installedPackage } from './installed-package.js';
 import type { LinkPort } from './link.port.js';
+import { installPacked } from './npm-packed.adapter.js';
 import { resolveSpecPath } from './resolved-spec-path.js';
-
-export function installedPackage(name: string, testDir: string): null | string {
-    let dir = testDir;
-    for (;;) {
-        const candidate = resolve(dir, 'node_modules', name);
-        if (existsSync(candidate) && statSync(candidate).isDirectory()) {
-            return candidate;
-        }
-        const parent = dirname(dir);
-        if (parent === dir) {
-            return null;
-        }
-        dir = parent;
-    }
-}
 
 function sourceOf(name: string, path: null | string, testDir: string): string {
     if (path === null) {
@@ -87,6 +74,7 @@ function refuseUnusableAncestor(name: string, workDir: string, dest: string): vo
 }
 
 export const fsLinks: LinkPort = {
+    packed: installPacked,
     link: (name, path, testDir, workDir) => {
         const src = sourceOf(name, path, testDir);
         const dest = resolve(workDir, 'node_modules', name);

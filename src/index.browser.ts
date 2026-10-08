@@ -31,6 +31,7 @@ export const ProcessHandle: typeof ProcessHandleClass = nodeOnlyClass('ProcessHa
 export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
+export { packed, type PackedPackage } from './disk/packed.js';
 export { directory, file } from './disk/spec-path.js';
 export { anthropic } from './stubs/kinds/anthropic.js';
 export { http } from './stubs/kinds/http.js';

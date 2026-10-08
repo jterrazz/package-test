@@ -2,13 +2,15 @@ import { defineCapability } from '../chain/capability.js';
 import type { ChainSignature } from '../chain/capability.js';
 import { refusal } from '../chain/refusals/refusal.js';
 import type { LinkPort } from './link.port.js';
+import { isPackedPackage } from './packed.js';
+import type { PackedPackage } from './packed.js';
 import { isDiskDirectory, isDiskFile } from './spec-path.js';
 import type { DiskDirectory } from './spec-path.js';
 
-export type LinkMethod<Self> = (name: string, source?: DiskDirectory) => Self;
+export type LinkMethod<Self> = (name: string, source?: DiskDirectory | PackedPackage) => Self;
 
 export type LinkChain<Self> = {
-    /** Link a package into the working directory's `node_modules`: the one a `directory()` holds, else the one the spec's own project resolves. */
+    /** Link a package into the working directory's `node_modules`: the one a `directory()` holds, the tarball `packed()` packs, else the one the spec's own project resolves. */
     link: LinkMethod<Self>;
 };
 
@@ -16,7 +18,7 @@ export interface LinkSignature extends ChainSignature {
     readonly chain: LinkChain<this['self']>;
 }
 
-type Linked = { readonly name: string; readonly path: null | string };
+type Linked = { readonly name: string; readonly packed: boolean; readonly path: null | string };
 
 const PACKAGE_NAME = /^(?:@[a-z0-9~-][\w.~-]*\/)?[a-z0-9~-][\w.~-]*$/u;
 
@@ -48,6 +50,9 @@ function requireSource(name: string, source: unknown): null | string {
     if (source === undefined) {
         return null;
     }
+    if (isPackedPackage(source)) {
+        return source.path;
+    }
     if (isDiskDirectory(source)) {
         return source.path;
     }
@@ -64,14 +69,14 @@ function requireSource(name: string, source: unknown): null | string {
 export const link = defineCapability<
     'link',
     readonly Linked[],
-    [name: string, source?: DiskDirectory],
+    [name: string, source?: DiskDirectory | PackedPackage],
     LinkSignature,
     { links: LinkPort }
 >({
     arm: (linked, { links }, { testDir, workDir }) => {
         if (workDir !== null) {
-            for (const { name, path } of linked) {
-                links.link(name, path, testDir, workDir);
+            for (const { name, packed, path } of linked) {
+                (packed ? links.packed : links.link)(name, path, testDir, workDir);
             }
         }
         return {};
@@ -81,7 +86,14 @@ export const link = defineCapability<
     phase: 25,
     reduce: (linked, [name, source]) => {
         const checked = requirePackageName(name, linked);
-        return [...linked, { name: checked, path: requireSource(checked, source) }];
+        return [
+            ...linked,
+            {
+                name: checked,
+                packed: isPackedPackage(source),
+                path: requireSource(checked, source),
+            },
+        ];
     },
     row: { group: 'Setup', name: '.link()', probe: '.link(' },
 });

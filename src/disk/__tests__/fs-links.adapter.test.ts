@@ -10,7 +10,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { scratchDirectory } from '../../chain/paths/scratch.js';
-import { fsLinks, installedPackage } from '../fs-links.adapter.js';
+import { fsLinks } from '../fs-links.adapter.js';
 
 type Project = { readonly root: string; readonly testDir: string };
 
@@ -64,24 +64,6 @@ function symlinkRefusal(ancestor: string): string {
 }
 
 describe('fsLinks', () => {
-    test('installedPackage — a bare name — is found in the first node_modules above the spec that holds it', () => {
-        // Given - the spec's own folder holds no node_modules
-        const { root, testDir } = project();
-
-        // Then - the walk climbs to the project root's
-        expect(installedPackage('@acme/greeter', testDir)).toBe(
-            resolve(root, 'node_modules/@acme/greeter'),
-        );
-    });
-
-    test('installedPackage — a bare name — is null when no node_modules above the spec holds it', () => {
-        // Given - a name nothing installed
-        const { testDir } = project();
-
-        // Then - the walk ends at the filesystem root empty-handed
-        expect(installedPackage('@acme/absent', testDir)).toBeNull();
-    });
-
     test('fsLinks — a symlinked node_modules or scope folder — is refused, and the install it points to is kept', () => {
         // Given - one working directory whose node_modules links to the project's install, and one whose scope folder does
         const { root, testDir } = project();
