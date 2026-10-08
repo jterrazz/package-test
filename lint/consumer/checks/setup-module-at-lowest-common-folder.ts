@@ -133,12 +133,26 @@ function extensionOf(path: string): string {
     return MODULE_EXTENSION.exec(path)?.[0] ?? '';
 }
 
+// invariant: a path built from the module's own folder by pieces (`resolve(import.meta.dirname, '..', '..')`) names the same place after the move: the climb is recounted from the new folder.
+const CLIMB =
+    /(?<anchor>import\.meta\.dirname|__dirname)(?<pieces>(?:\s*,\s*(?<quote>['"])\.\.\k<quote>)+)/gu;
+
+function reclimbed(module: string, target: string, text: string): string {
+    return text.replaceAll(CLIMB, (_whole: string, anchor: string, pieces: string) => {
+        const climb = pieces.split(',').slice(1);
+        const reached = resolve(dirname(module), ...climb.map(() => '..'));
+        // invariant: the mover lays a module in another folder's __setup__/, never in a folder its own climb reaches, so a recounted climb is never empty.
+        const steps = relative(dirname(target), reached).split(sep);
+        return [anchor, ...steps.map((step) => `'${step}'`)].join(', ');
+    });
+}
+
 function rewriteOwnImports(module: string, target: string): void {
     const next = repointSource(module, (path) => {
         const reached = resolve(dirname(module), path);
         return pathFrom(dirname(target), reached);
     });
-    writeFileSync(module, next);
+    writeFileSync(module, reclimbed(module, target, next));
 }
 
 function repointImporter(file: string, module: string, target: string): void {

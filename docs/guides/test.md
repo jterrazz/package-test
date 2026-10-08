@@ -424,7 +424,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `{{number}}`   | 1   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{path}}`     | 1   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{port}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
-| `{{semver}}`   | 0   | —   | 3   | —    | 0           | 0       | —      | —         | 1      |
+| `{{semver}}`   | 0   | —   | 4   | —    | 0           | 0       | —      | —         | 1      |
 | `{{sha}}`      | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{string}}`   | 2   | —   | 1   | —    | 0           | 0       | —      | —         | 1      |
 | `{{time}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |

@@ -21,7 +21,7 @@ const TREE = {
     'specs/cli/__setup__/large.ts': `export const v0 = 1;\n${'\n'.repeat(400)}`,
     'specs/cli/__setup__/only.ts': 'export const v0 = 1;\n',
     'specs/cli/__setup__/stubs/news.ts':
-        "import { v0 as at } from '../../tasks/__setup__/sub/shared.ts';\nexport const v0 = at;\n",
+        'import { v0 as at } from \'../../tasks/__setup__/sub/shared.ts\';\nexport const v0 = at;\nexport const CLI = join(__dirname ,"..","..");\n',
     'specs/cli/__setup__/unread.ts': 'export const v0 = 1;\n',
     'specs/cli/cli.spec.ts': reading(
         '../__setup__/world.ts',
@@ -30,7 +30,7 @@ const TREE = {
     ),
     'specs/cli/orders/__setup__/aliased.ts': 'export const v0 = 1;\n',
     'specs/cli/orders/__setup__/rows.ts':
-        "import { v0 as at } from '../../__setup__/clock.ts';\nexport const v0 = at;\n",
+        "import { v0 as at } from '../../__setup__/clock.ts';\nexport const v0 = at;\nexport const SPECS = resolve(import.meta.dirname, '..', '..', '..');\n",
     'specs/cli/orders/listing.spec.ts': reading(
         '../__setup__/clock.ts',
         './__setup__/rows.ts',
@@ -111,8 +111,8 @@ describe('setup-module-at-lowest-common-folder', () => {
                 './__setup__/stubs/news.ts',
                 '#setup/aliased.ts',
             ),
-            "import { v0 as at } from './clock.ts';\nexport const v0 = at;\n",
-            "import { v0 as at } from '../../../__setup__/sub/shared.ts';\nexport const v0 = at;\n",
+            "import { v0 as at } from './clock.ts';\nexport const v0 = at;\nexport const SPECS = resolve(import.meta.dirname, '..', '..');\n",
+            "import { v0 as at } from '../../../__setup__/sub/shared.ts';\nexport const v0 = at;\nexport const CLI = join(__dirname, '..', '..', '..');\n",
             [false, false, false],
         ]);
     });
