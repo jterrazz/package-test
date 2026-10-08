@@ -898,7 +898,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `__fixtures__/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `__expected__/` the same class waits for `no-unseeded-value-in-golden`, whose criterion the Conventions page carries.",
+            "sentence": "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `__fixtures__/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `__expected__/` the same class waits for `no-unseeded-value-in-golden`, whose criterion the Conventions page carries. A value a document cannot show where it is pinned — a `serve:` stub's clock, the product's own wording — is declared above its stream, `# checker-disable-next-line pinned-value-from-the-input -- <reason>`: no comment can stand inside a block scalar, so the directive on the stream's key silences every line of it.",
             "specification": "cli",
             "family": "expectations",
             "fix": "Token it, or seed it — a value the document pins is a value it may assert.",

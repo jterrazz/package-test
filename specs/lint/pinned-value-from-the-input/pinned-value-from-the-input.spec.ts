@@ -20,6 +20,14 @@ describe('pinned-value-from-the-input', () => {
         `);
     });
 
+    test('takes a directive above the stream it silences, for every line of the stream', async () => {
+        // Given - the same timestamp, pinned by a stub the document cannot show, declared above its stream with the reason
+        const result = await checker.fixture(directory('./__fixtures__/declared/')).run();
+
+        // Then - nothing is reported
+        expect(result.report).toMatch('');
+    });
+
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await checker

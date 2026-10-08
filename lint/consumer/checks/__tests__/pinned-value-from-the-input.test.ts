@@ -16,28 +16,26 @@ describe('checkPinnedValueFromTheInput', () => {
         const root = packageWith({
             'specs/cli/build/__fixtures__/data.json': `{ "at": "${LAID}" }`,
         });
-        const document = parseSpecDocument(
-            [
-                'description: pins its values',
-                'runs:',
-                '  - command: a',
-                `    stdin: "${PIPED}"`,
-                '    exit: 0',
-                '    stdout: |',
-                `      id ${PIPED}`,
-                `      at ${LAID}`,
-                `      new ${LOOSE_ID} at ${LOOSE_TIME}`,
-                '    files:',
-                '      out.txt:',
-                `        equals: "${LOOSE_ID}"`,
-                '',
-            ].join('\n'),
-            'case.spec.yaml',
-        );
+        const source = [
+            'description: pins its values',
+            'runs:',
+            '  - command: a',
+            `    stdin: "${PIPED}"`,
+            '    exit: 0',
+            '    stdout: |',
+            `      id ${PIPED}`,
+            `      at ${LAID}`,
+            `      new ${LOOSE_ID} at ${LOOSE_TIME}`,
+            '    files:',
+            '      out.txt:',
+            `        equals: "${LOOSE_ID}"`,
+            '',
+        ].join('\n');
+        const document = parseSpecDocument(source, 'case.spec.yaml');
 
         // Then - each unpinned value on its line, a time and an id on the same line apart
         expect(
-            checkPinnedValueFromTheInput(document, join(root, 'specs/cli/build')).map(
+            checkPinnedValueFromTheInput(document, join(root, 'specs/cli/build'), source).map(
                 ({ fix, found, line, rule }) => `${rule} ${line} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
@@ -45,5 +43,31 @@ describe('checkPinnedValueFromTheInput', () => {
             `pinned-value-from-the-input 9 "${LOOSE_ID}", which no \`fixture:\` or \`stdin:\` of this document pins — write {{uuid}} where "${LOOSE_ID}" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document`,
             `pinned-value-from-the-input 12 "${LOOSE_ID}", which no \`fixture:\` or \`stdin:\` of this document pins — write {{uuid}} where "${LOOSE_ID}" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document`,
         ]);
+    });
+
+    test('a directive above a stream silences every line of it, inline or block, and nothing else', () => {
+        // Given - a block stream and an inline one, each declared, beside an undeclared one
+        const source = [
+            'description: pins by a stub',
+            'runs:',
+            '  - command: a',
+            '    exit: 0',
+            '    # checker-disable-next-line pinned-value-from-the-input -- the stub clock starts there',
+            '    stdout: |',
+            `      at ${LOOSE_TIME}`,
+            `      id ${LOOSE_ID}`,
+            '    # checker-disable-next-line pinned-value-from-the-input -- the stub names it',
+            `    stderr: "${LOOSE_ID}"`,
+            '    files:',
+            '      out.txt:',
+            `        equals: "${LOOSE_ID}"`,
+            '',
+        ].join('\n');
+        const document = parseSpecDocument(source, 'case.spec.yaml');
+
+        // Then - only the undeclared stream is reported
+        expect(
+            checkPinnedValueFromTheInput(document, packageWith({}), source).map(({ line }) => line),
+        ).toStrictEqual([13]);
     });
 });

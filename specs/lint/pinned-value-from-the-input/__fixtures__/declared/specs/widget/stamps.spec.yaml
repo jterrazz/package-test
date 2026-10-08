@@ -1,0 +1,7 @@
+description: pins the instant the stub clock starts on
+runs:
+    - command: widget stamp
+      exit: 0
+      # checker-disable-next-line pinned-value-from-the-input -- the stub server's clock starts on this instant, which no fixture of the document holds
+      stdout: |
+          built at 2026-07-17T10:00:00.000Z

@@ -130,7 +130,7 @@ const GROUND: GroundPasses = {
         ...checkFileSuffixMatchesPlaceOfDocument(rel),
         ...checkDocumentDescriptionReadsAsATitle(file.document),
         ...checkNoVolatileLiteral(file.document, dir),
-        ...checkPinnedValueFromTheInput(file.document, dir),
+        ...checkPinnedValueFromTheInput(file.document, dir, file.source.text),
         ...checkNoEmptyExpectedStream(file.document),
         ...checkNoSilentRefusal(file.document),
         ...checkDocumentEnvAndServeRegistered(file.document, dir),
