@@ -28,8 +28,8 @@ function splitByPath(root: string): Record<string, string> {
     );
 }
 
-describe('splitFiles', () => {
-    test('the split copies a hook only into the files whose tests read what it sets', () => {
+describe('spec-in-subject-folder.split', () => {
+    test('splitFiles — the split copies a hook only into the files whose tests read what it sets', () => {
         // Given - two routes, a ticker source only the list test sets, and the hook that clears it
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -79,7 +79,51 @@ describe('splitFiles', () => {
         }).toStrictEqual({ createdHook: false, createdSource: false, listedHook: true });
     });
 
-    test('the types a moved helper reads move with it, and a type only the tests read stays', () => {
+    test.each([
+        ['moved whole', ''],
+        [
+            'split in two',
+            "    test('creates an order', async () => { await api.post('/orders', {}); });\n",
+        ],
+    ])(
+        'splitFiles — a hook reading an import stays in every file of a spec %s, with its import',
+        (_case, more) => {
+            // Given - a spec filed under misc/, a hook starting a server it imports, one cleaning up through an imported function
+            const root = specsTree({
+                'api/api.specification.ts': RUNNER,
+                'api/misc/orders.spec.ts': [
+                    "import { afterEach, beforeAll, describe, expect, test } from 'vitest';",
+                    "import { cleanup } from '@testing-library/react';",
+                    "import { server } from '../server.js';",
+                    '',
+                    "import { api } from '../api.specification.js';",
+                    '',
+                    'beforeAll(() => server.listen());',
+                    'afterEach(cleanup);',
+                    '',
+                    "describe('orders', () => {",
+                    "    test('lists the orders', async () => { expect((await api.get('/orders')).status).toBe(200); });",
+                    `${more}});`,
+                    '',
+                ].join('\n'),
+            });
+
+            // When - the files are drafted
+            const files = Object.values(splitByPath(root));
+
+            // Then - each holds both hooks and the imports they read
+            expect(
+                files.map((text) => [
+                    text.includes('beforeAll(() => server.listen());'),
+                    text.includes('afterEach(cleanup);'),
+                    text.includes("import { server } from '../../server.js';"),
+                    text.includes("import { cleanup } from '@testing-library/react';"),
+                ]),
+            ).toStrictEqual(files.map(() => [true, true, true, true]));
+        },
+    );
+
+    test('splitFiles — the types a moved helper reads move with it, and a type only the tests read stays', () => {
         // Given - three routes: two share a helper typed by an alias and an interface and a type they read themselves, one reads only the interface
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -118,7 +162,7 @@ describe('splitFiles', () => {
         });
     });
 
-    test('a helper the split leaves to several files moves once into the __setup__ module of the folder they share', () => {
+    test('splitFiles — a helper the split leaves to several files moves once into the __setup__ module of the folder they share', () => {
         // Given - two routes sharing a helper and the constant it reads, and a helper that builds a file()
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -151,7 +195,7 @@ describe('splitFiles', () => {
         }).toStrictEqual({ copy: true, imported: true, moved: false });
     });
 
-    test("the split leaves an author's __setup__ module as written, and each file keeps its own copy", () => {
+    test("splitFiles — the split leaves an author's __setup__ module as written, and each file keeps its own copy", () => {
         // Given - two routes sharing a helper, beside a __setup__ module the author wrote
         const authored = "export const SEEDED = 'the author wrote this';\n";
         const root = specsTree({
@@ -189,7 +233,7 @@ describe('splitFiles', () => {
         }).toStrictEqual({ copies: [true, true], rewritten: false });
     });
 
-    test('the split files each test with what it reads: neutral tests, hooks, disk-building copies and shared helpers alike, the header in the file it opens on', () => {
+    test('splitFiles — the split files each test with what it reads: neutral tests, hooks, disk-building copies and shared helpers alike, the header in the file it opens on', () => {
         // Given - a spec of three subjects with every kind of shared code
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -200,7 +244,7 @@ describe('splitFiles', () => {
         expect(splitByPath(root)).toStrictEqual(RICH_SPLIT);
     });
 
-    test('a helper shared from a spec filed elsewhere moves to the folder its holders share, and a file holding none is left as cut', () => {
+    test('splitFiles — a helper shared from a spec filed elsewhere moves to the folder its holders share, and a file holding none is left as cut', () => {
         // Given - a spec filed under api/misc, whose list and create tests share a constant
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -228,7 +272,7 @@ describe('splitFiles', () => {
         });
     });
 
-    test('a helper reading one that reads a disk-building constant is copied with it, whichever is declared first', () => {
+    test('splitFiles — a helper reading one that reads a disk-building constant is copied with it, whichever is declared first', () => {
         // Given - two routes sharing a helper that reaches a file through another declared after it
         const root = specsTree({
             'api/api.specification.ts': RUNNER,

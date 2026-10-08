@@ -10,7 +10,7 @@ import {
     openedSubjects,
     withLeadingComments,
 } from '../../kit/project/spec-subjects.js';
-import type { SpecRead } from '../../kit/project/spec-subjects.js';
+import type { Span, SpecRead } from '../../kit/project/spec-subjects.js';
 import { lowestCommonFolder, reservedFolderOf } from '../../kit/project/tree.js';
 import { withoutEmptiedGroups, withoutLooseComments } from './spec-in-subject-folder.cut.js';
 import {
@@ -186,10 +186,10 @@ function namesRead(code: string): Set<string> {
     );
 }
 
-// invariant: a hook reading nothing but the runner's names is every test's, and stays.
-function withoutIdleHooks(text: string): string {
+/** Each hook call of a spec — `beforeAll`, `afterEach` and their kin — from its leading comments to the end of its line. */
+export function hooksOf(text: string): Span[] {
     const blank = blankComments(text);
-    const hooks = [...blank.matchAll(HOOK_CALL)].map((found) => {
+    return [...blank.matchAll(HOOK_CALL)].map((found) => {
         // Stryker disable next-line ArithmeticOperator: read from the arrow's own parentheses, the scan still closes on the hook's body
         const open = found.index + found[0].length - 1;
         return {
@@ -197,16 +197,24 @@ function withoutIdleHooks(text: string): string {
             start: withLeadingComments(text, found.index),
         };
     });
-    const idle = hooks.filter((hook) => {
+}
+
+function isReadBesides(text: string, name: string, spans: readonly Span[]): boolean {
+    const rest = without(text, [...spans, ...importsOf(text)]);
+    const own = declarationsOf(rest).find((d) => d.name === name);
+    // Stryker disable next-line ConditionalExpression: a name read here is declared in the file, so its declaration is found
+    return own !== undefined && isRead(rest, name, own);
+}
+
+// invariant: a hook is cut only when every name it reads is a declaration the draft no longer reads, one of them read by a test the cut removed; a hook reading an import, a global, or serving no test the cut removed is every test's, and stays.
+function withoutIdleHooks(text: string, source: string): string {
+    const declared = new Set(declarationsOf(text).map((d) => d.name));
+    const sourceHooks = hooksOf(source);
+    const idle = hooksOf(text).filter((hook) => {
         const names = [...namesRead(text.slice(hook.start, hook.end))];
-        const rest = without(text, [hook, ...importsOf(text)]);
-        const declared = declarationsOf(rest);
         return (
-            names.length > 0 &&
-            names.every((name) => {
-                const own = declared.find((d) => d.name === name) ?? { end: 0, start: 0 };
-                return !isRead(rest, name, own);
-            })
+            names.every((name) => declared.has(name) && !isReadBesides(text, name, [hook])) &&
+            names.some((name) => isReadBesides(source, name, sourceHooks))
         );
     });
     return without(text, idle);
@@ -226,7 +234,7 @@ function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
             spec.tests.filter((test) => !kept.has(test)),
         );
         const said = name === first ? cut : withoutLooseComments(cut);
-        const text = withoutEmptiedGroups(withoutIdleHooks(said));
+        const text = withoutEmptiedGroups(withoutIdleHooks(said, spec.text));
         return { target, text: pruned(rebased(text, dirname(spec.file), dirname(target))) };
     });
 }

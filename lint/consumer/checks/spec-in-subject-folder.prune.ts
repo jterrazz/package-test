@@ -171,12 +171,13 @@ export function pruned(text: string): string {
         .replace(/(?:\n[ \t]*\/\/[^\n]*|\n[ \t]*)+$/u, '\n');
 }
 
+// outside: vitest's `vi.mock`, `vi.doMock`, `vi.unmock`, `vi.doUnmock`, `vi.importActual` and `vi.importMock` name a module as `import()` does, and `new URL('…', import.meta.url)` a path beside the file.
 export const RELATIVE_LITERAL =
-    /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
+    /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*|(?<![.\w])vi\.(?:mock|doMock|unmock|doUnmock|importActual|importMock)\(\s*|\bnew\s+URL\(\s*(?=(?<base>['"])[^'"]*\k<base>\s*,\s*import\.meta\.url\b))(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
-// invariant: `from '…'` and `import('…')` name a module; every other lead names a path on disk.
+// invariant: `from '…'`, `import('…')` and a `vi.` call name a module; every other lead names a path on disk.
 function isModuleLead(lead: string): boolean {
-    return /^(?:from\b|import\()/u.test(lead);
+    return /^(?:from\b|import\(|vi\.)/u.test(lead);
 }
 
 /** A path naming nothing, a negative spec's missing file, says the same from anywhere. */

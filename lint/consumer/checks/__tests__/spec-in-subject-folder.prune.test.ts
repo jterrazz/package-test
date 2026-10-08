@@ -168,6 +168,39 @@ describe('spec-in-subject-folder.prune', () => {
         );
     });
 
+    test('a module a vitest mock names is rebased as an import is, and a path a URL builds beside the file as a disk path is; a URL on another base is left', () => {
+        // Given - a file moving from specs/a to specs/b/c, mocking modules every way, and building URLs
+        const root = packageWith({ 'specs/a/x.json': '' });
+        const text = lines(
+            "vi.mock('../clock.js', () => ({ now: () => 0 }));",
+            "vi.doMock('./db.js');",
+            "vi.unmock('../clock.js');",
+            "vi.doUnmock('../clock.js');",
+            "await vi.importActual('../clock.js');",
+            "await vi.importMock('../clock.js');",
+            "new URL('./x.json', import.meta.url);",
+            "new URL('./x.json', base);",
+            "other.vi.mock('../clock.js');",
+            '',
+        );
+
+        // Then - each module and the URL beside the file are named from the new folder
+        expect(rebased(text, join(root, 'specs/a'), join(root, 'specs/b/c'))).toBe(
+            lines(
+                "vi.mock('../../clock.js', () => ({ now: () => 0 }));",
+                "vi.doMock('../../a/db.js');",
+                "vi.unmock('../../clock.js');",
+                "vi.doUnmock('../../clock.js');",
+                "await vi.importActual('../../clock.js');",
+                "await vi.importMock('../../clock.js');",
+                "new URL('../../a/x.json', import.meta.url);",
+                "new URL('./x.json', base);",
+                "other.vi.mock('../clock.js');",
+                '',
+            ),
+        );
+    });
+
     test('moduleExtensionOf — a relative module is imported as the spec imports its own: `.js` unless one of them is bare; a package import says nothing', () => {
         // Given - specs importing their relative modules with an extension, bare, both, or only packages
         const specs = [

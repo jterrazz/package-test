@@ -8,39 +8,13 @@ import { NO_READING } from '../../../kit/project/subject.js';
 import { RUNNER, specsTree } from '../../../kit/testing/subject.fixtures.js';
 import { fixSpecInSubjectFolder } from '../spec-in-subject-folder.moves.js';
 import { lostInSplit, splitRefusal } from '../spec-in-subject-folder.refusal.js';
+import { besideData, CONSOLE_POSTS } from './spec-in-subject-folder.refusal.fixtures.js';
 
 function refusalOf(files: Record<string, string>): string | undefined {
     const root = specsTree({ 'api/api.specification.ts': RUNNER, ...files });
     const [spec] = subjectSpecs(root);
     return spec === undefined ? 'no spec' : splitRefusal(root, spec, splitPlan(root, spec));
 }
-
-const CONSOLE_POSTS = [
-    "import { file } from '@jterrazz/test';",
-    "import { describe, expect, test } from 'vitest';",
-    '',
-    "import { api } from '../api.specification.js';",
-    '',
-    "describe('posts', () => {",
-    "    test('lists the collection newest first', async () => {",
-    "        const result = await api.seed(file('./__seeds__/posts.sql')).get('/api/posts');",
-    '        expect(result.status).toBe(200);',
-    '    });',
-    '',
-    "    test('creates a post', async () => {",
-    "        const result = await api.post('/api/posts', {});",
-    '        expect(result.status).toBe(201);',
-    '    });',
-    '',
-    "    test('deletes a post', async () => {",
-    '        const result = await api',
-    "            .seed(file('./__seeds__/posts.sql'))",
-    "            .delete('/api/posts/:id', { params: { id: 'post-recap' } });",
-    '        expect(result.status).toBe(204);',
-    '    });',
-    '});',
-    '',
-].join('\n');
 
 // invariant: the list test held by a construct `open` starts and `close` ends, a create test after it.
 function held(open: string, close: string): string | undefined {
@@ -175,6 +149,20 @@ describe('spec-in-subject-folder.refusal', () => {
         expect(refusal).toBeUndefined();
     });
 
+    test('splitRefusal — a move leaving a relative path no rebase carries is refused, naming it; one it carries, or naming nothing beside the spec, is not', () => {
+        // Given - one route filed under misc/, beside a data file, read through a URL on another base, then through one the rebase carries
+        // Then - the stranded path alone is refused
+        expect([
+            refusalOf(besideData("new URL('./data.json', base)")),
+            refusalOf(besideData("new URL('./data.json', import.meta.url)")),
+            refusalOf(besideData("new URL('./absent.json', base)")),
+        ]).toStrictEqual([
+            '`./data.json` names a path beside the spec that no rebase carries to api/orders/list/orders.spec.ts: its author writes it from there',
+            undefined,
+            undefined,
+        ]);
+    });
+
     test('splitRefusal — two later subjects with no folder are both named, in the plural', () => {
         // Given - a cli spec whose second and third tests run no command word
         const root = specsTree({
@@ -247,6 +235,34 @@ describe('spec-in-subject-folder.refusal', () => {
         ]).toStrictEqual([
             'the split would write 3 test calls of the 2 it read',
             'the split would write 3 test calls of the 2 it read',
+        ]);
+    });
+
+    test('lostInSplit — a hook no draft holds is named, and one any draft holds, its paths rebased, is kept', () => {
+        // Given - a spec of two tests and two hooks, drafts keeping each hook somewhere, then drafts dropping one
+        const spec = specOf(
+            `beforeAll(() => server.listen());\nafterEach(() => { reset(file('./a.json')); });\n${TWO_TESTS}`,
+        );
+
+        // Then - only the dropped hook is named
+        expect([
+            lostInSplit(spec, [
+                { target: 'x', text: "beforeAll(() => server.listen());\ntest('a', () => {});\n" },
+                {
+                    target: 'y',
+                    text: "afterEach(() => {\n    reset(file('../a.json'));\n});\ntest('b', () => {});\n",
+                },
+            ]),
+            lostInSplit(spec, [
+                {
+                    target: 'x',
+                    text: "afterEach(() => { reset(file('./a.json')); });\ntest('a', () => {});\n",
+                },
+                { target: 'y', text: "test('b', () => {});\n" },
+            ]),
+        ]).toStrictEqual([
+            undefined,
+            'the split would lose the hook `beforeAll` the tests it keeps may need',
         ]);
     });
 
