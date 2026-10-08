@@ -140,6 +140,9 @@ describe('test-section', () => {
             { production: { allow: { playwright: '   ' } } },
             { production: { allow: { playwright: true } } },
             { production: null },
+            { basePath: 'api' },
+            { basePath: '/api/' },
+            { basePath: 42 },
             ['collections'],
             null,
         ];
@@ -148,5 +151,15 @@ describe('test-section', () => {
         expect(sections.map((section) => testSettingsOf(section))).toStrictEqual(
             sections.map(() => DEFAULTS),
         );
+    });
+
+    test('the test section — a base path is read where it is a path of segments, from the root', () => {
+        // Given - a mount of one segment, and one of two
+        // Then - each is read as written
+        expect(
+            [{ basePath: '/api' }, { basePath: '/v1/public' }].map(
+                (section) => testSettingsOf(section).basePath,
+            ),
+        ).toStrictEqual(['/api', '/v1/public']);
     });
 });

@@ -55,6 +55,20 @@ describe('one-subject-per-spec', () => {
         `);
     });
 
+    test('a mobile test opening the app again proves what the first open left, and only two tests opening two journeys reach two subjects', async () => {
+        // Given - the mobile-relaunch tree: a bookmark journey relaunching into the library, and a feed spec whose two tests open two journeys
+        const result = await checker.fixture(directory('./__fixtures__/mobile-relaunch/')).run();
+
+        // Then - only the feed spec is reported
+        expect(result.report).toMatch(`
+            specs/mobile/events/feed.spec.ts:14:30  jterrazz-check(one-subject-per-spec)
+                found: a spec reaching 2 subjects — open acme://events, open acme://dossier/42
+                why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
+                fix: split it by hand, one file per subject — \`typescript fix\` refuses: open acme://dossier/42 has no standard folder: the file it goes to is its author's to name
+                read: docs/reference/linting.md#one-subject-per-spec
+        `);
+    });
+
     test('a cli spec whose chains run two commands names each by its words', async () => {
         // Given - the two-commands tree, a runner whose `commands` list holds `db migrate` and `db seed`
         const result = await checker.fixture(directory('./__fixtures__/two-commands/')).run();

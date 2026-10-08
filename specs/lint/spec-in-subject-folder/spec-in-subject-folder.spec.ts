@@ -40,6 +40,20 @@ describe('spec-in-subject-folder', () => {
         );
     });
 
+    test('--fix files a route under the folder of its path past the base path jterrazz.config.ts declares', async () => {
+        // Given - the declared-base-path tree: an app mounted under /api, its spec of GET /api/posts filed under api/api/posts/list/
+        const result = await checker
+            .fixture(directory('./__fixtures__/declared-base-path/'))
+            .run({ fix: true });
+
+        // Then - nothing is reported, and the spec sits in posts/list/, its import rewritten
+        expect(result.report).toMatch('');
+        expect(result.file('specs/api/api/posts/list/listing.spec.ts').exists).toBe(false);
+        expect(result.file('specs/api/posts/list/listing.spec.ts').content).toContain(
+            "import { api } from '../../api.specification.js';",
+        );
+    });
+
     test("--fix moves the spec to its subject's folder, and the ground it stands on with it", async () => {
         // Given - the moved tree
         const result = await checker.fixture(directory('./__fixtures__/moved/')).run({ fix: true });

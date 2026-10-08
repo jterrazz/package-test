@@ -286,4 +286,15 @@ describe('subject', () => {
             }).map(({ subject }) => subjectName(subject)),
         ).toStrictEqual(['ALL /mcp/:id', 'exec mcp', 'exec db migrate']);
     });
+
+    test('subjectFolder — an app mounted under a base path — files each route by its path past the mount, and a route outside it as written', () => {
+        // Given - routes of an app mounted under /api, the mount itself, and one route outside it
+        const reading = { basePath: '/api', collections: [], methodless: [] };
+        // Then - the mount names no subject
+        expect(
+            ['/api/posts', '/api', '/apis/status'].map((path) =>
+                subjectFolder({ method: 'GET', path, specification: 'api' }, reading),
+            ),
+        ).toStrictEqual(['posts/list', undefined, 'apis/status']);
+    });
 });

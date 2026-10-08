@@ -8,6 +8,7 @@ import { chainsOf, handlesOf } from './spec-chains.js';
 import type { Chain } from './spec-chains.js';
 
 export type SubjectReading = {
+    basePath?: string | undefined;
     collections: readonly string[];
     commands?: Readonly<Record<string, readonly string[]>> | undefined;
     methodless: readonly string[];
@@ -116,14 +117,28 @@ function routeFolder(
     return `${resource}/${actionOf(method, resource, segments.at(-1) === ':id', collections)}`;
 }
 
+// invariant: the mount every route shares names no subject: `/api/posts` files under `posts/`, as `/posts` would.
+function underBase(path: string, basePath: string | undefined): string {
+    // Stryker disable next-line ConditionalExpression,BlockStatement: no path starts with the text an absent base spells, so the path is returned as written either way
+    if (basePath === undefined) {
+        return path;
+    }
+    if (path === basePath) {
+        // Stryker disable next-line StringLiteral: the mount and an empty path both hold no segment, so both name no subject
+        return '/';
+    }
+    return path.startsWith(`${basePath}/`) ? path.slice(basePath.length) : path;
+}
+
 /** Nothing for a subject with no standard name: the root route, a cli run with no command word, a page, a journey. */
 export function subjectFolder(
     subject: Subject,
     reading: SubjectReading = NO_READING,
 ): string | undefined {
     if (subject.specification === 'api') {
-        return ambiguousSegment(subject, reading) === undefined
-            ? routeFolder(subject.method, subject.path, reading.collections)
+        const mounted = { ...subject, path: underBase(subject.path, reading.basePath) };
+        return ambiguousSegment(mounted, reading) === undefined
+            ? routeFolder(subject.method, mounted.path, reading.collections)
             : undefined;
     }
     if (subject.specification === 'cli') {

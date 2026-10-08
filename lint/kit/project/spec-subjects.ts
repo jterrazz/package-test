@@ -106,7 +106,7 @@ function readBeside(file: string, path: string): string | undefined {
 }
 
 function readingOf(specsRoot: string, file: string, text: string): SubjectReading {
-    const { collections, methodless } = testSettingsAtSync(
+    const { basePath, collections, methodless } = testSettingsAtSync(
         projectRootOf(specsRoot) ?? dirname(specsRoot),
     );
     const commands: Record<string, readonly string[]> = {};
@@ -117,16 +117,31 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
             commands[handle] = declared;
         }
     }
-    return { collections, commands, methodless };
+    return { basePath, collections, commands, methodless };
 }
 
 function readSpec(specsRoot: string, file: string): SpecRead {
     const text = readFileSync(file, 'utf8');
     const specification = specificationOf(specsRoot, file);
     const reading = readingOf(specsRoot, file, text);
-    const reached = subjectsOf(text, (path) => readBeside(file, path), reading).filter(
+    const spans = testsIn(text);
+    const opened = subjectsOf(text, (path) => readBeside(file, path), reading).filter(
         ({ subject }) => subject.specification === specification,
     );
+    // invariant: a mobile test that opens the app again proves what the first open left behind: its later opens are the relaunch, never a second subject.
+    const reached =
+        specification === 'mobile'
+            ? opened.filter(({ index }) => {
+                  // Stryker disable next-line EqualityOperator: a chain never starts on a test's first character nor on its last
+                  const span = spans.find((test) => index >= test.start && index < test.end);
+                  return (
+                      span === undefined ||
+                      // Stryker disable next-line OptionalChaining,EqualityOperator,ConditionalExpression: the chains are in source order and this one is in the span, so the first at or past its start is the span's first
+                      opened.find((other) => other.index >= span.start && other.index < span.end)
+                          ?.index === index
+                  );
+              })
+            : opened;
     const subjects = new Map<string, { index: number; subject: Subject }>();
     for (const at of reached) {
         const name = subjectName(at.subject);
@@ -134,7 +149,7 @@ function readSpec(specsRoot: string, file: string): SpecRead {
             subjects.set(name, at);
         }
     }
-    const tests = testsIn(text).map(({ end, start, title }) => {
+    const tests = spans.map(({ end, start, title }) => {
         // Stryker disable next-line EqualityOperator: a call never sits on the first character of a test or its comments
         const inside = reached.filter(({ index }) => index >= start && index < end);
         return {
