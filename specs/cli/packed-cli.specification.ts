@@ -1,24 +1,7 @@
 import { specification } from '@jterrazz/test';
-import { resolve } from 'node:path';
-import { afterAll, inject } from 'vitest';
+import { afterAll } from 'vitest';
 
-const CONSUMER = resolve(import.meta.dirname, './__setup__/packed/consumer.ts');
-
-const packedPackage = inject('packedPackage');
-if (packedPackage === undefined) {
-    throw new Error(
-        'no tarball was packed: the project running a packed spec takes specs/cli/__setup__/packed/per-run.ts as its global setup, which packs it',
-    );
-}
-
-export const { cleanup, cli } = await specification.cli(`node ${CONSUMER}`, {
-    defaults: { PACKED_PACKAGE: packedPackage },
-});
+// invariant: a consumer spec meets this package as its consumers install it: each chain links `@jterrazz/test` packed, from its own spec file, where `packed()` finds the project.
+export const { cleanup, cli } = await specification.cli('node');
 
 afterAll(cleanup);
-
-declare module 'vitest' {
-    interface ProvidedContext {
-        packedPackage?: string;
-    }
-}

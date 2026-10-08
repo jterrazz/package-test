@@ -33,7 +33,6 @@ export default defineConfig({
                     runner: './specs/cli/literate-cli.specification.ts',
                 },
                 reason: 'the documents under run/ drive the literate specimen through its own runner, and those under env/ and fixture/ are the input of the specs proving those keys',
-                setup: ['specs/cli/__setup__/packed/per-run.ts'],
             },
             component: {
                 clock: '2026-01-02T03:04:05.000Z',
@@ -59,12 +58,6 @@ export default defineConfig({
         },
     },
     typescript: {
-        knip: {
-            entry: {
-                'specs/cli/__setup__/packed/consumer.ts':
-                    'specs/cli/packed-cli.specification.ts spawns it by its path',
-            },
-        },
         mutation: {
             exclude: {
                 'src/chain/paths/__tests__/temp-root.global-setup.test.ts':

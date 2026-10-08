@@ -1,4 +1,4 @@
-import { directory } from '@jterrazz/test';
+import { directory, packed } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../packed-cli.specification.js';
@@ -7,8 +7,9 @@ describe('projects', () => {
     test('each project helper collects its own tree under its own name, a document titled by its description, and never ground', async () => {
         // Given - a consumer's config building every node project from the installed helpers, stated by nobody
         const result = await cli
+            .link('@jterrazz/test', packed())
             .fixture(directory('./__fixtures__/projects/'))
-            .exec('node projects.mjs');
+            .exec('projects.mjs');
 
         // Then - a specification takes its specs, the cli its documents too, and the unit project every module test but a rendered one
         expect(result.exitCode).toBe(0);
@@ -33,8 +34,9 @@ describe('projects', () => {
     test('a helper collects the trees a project states instead of its own', async () => {
         // Given - the same project, its helpers handed roots, globs, an exclusion and no literate door
         const result = await cli
+            .link('@jterrazz/test', packed())
             .fixture(directory('./__fixtures__/projects/'))
-            .exec('node projects.mjs vitest.stated.config.mjs');
+            .exec('projects.mjs vitest.stated.config.mjs');
 
         // Then - each collects what was stated: the unit project its roots, the api its globs less the excluded tree, the cli no document
         expect(result.exitCode).toBe(0);
@@ -51,8 +53,9 @@ describe('projects', () => {
     test('a document the literate door collects that breaks its grammar fails the collection, its line and key named', async () => {
         // Given - the cli's documents narrowed to a folder holding one with a key outside the closed set
         const result = await cli
+            .link('@jterrazz/test', packed())
             .fixture(directory('./__fixtures__/projects/'))
-            .exec('node projects.mjs vitest.documents.config.mjs');
+            .exec('projects.mjs vitest.documents.config.mjs');
 
         // Then - the run is refused at collection, in the grammar's words
         expect(result.exitCode).toBe(1);

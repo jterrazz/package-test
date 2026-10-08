@@ -235,7 +235,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `services`  | 2   | 1   | 1   | —    | 2           | 1       | 1      | —         | —      |
 | `jobs`      | —   | 3   | —   | —    | —           | —       | —      | —         | —      |
 | `commands`  | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
-| `defaults`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
+| `defaults`  | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `docker`    | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
 | `env`       | —   | —   | 5   | —    | —           | —       | —      | —         | —      |
 | `serve`     | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
@@ -270,7 +270,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
 | `.fixture()`   | —   | —   | 47  | 110  | —           | —       | —      | —         | —      |
-| `.link()`      | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
+| `.link()`      | —   | —   | 11  | —    | —           | —       | —      | —         | —      |
 | `.prepare()`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
 | `.viewport()`  | —   | —   | —   | —    | —           | —       | —      | 2         | —      |

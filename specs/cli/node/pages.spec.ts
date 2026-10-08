@@ -1,4 +1,4 @@
-import { directory } from '@jterrazz/test';
+import { directory, packed } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../packed-cli.specification.js';
@@ -7,8 +7,14 @@ describe('pages', () => {
     test('every page the install points a reader at is one the install holds', async () => {
         // Given - a consumer's project, reading the README and every installed module for the pages they cite
         const result = await cli
+            .link('@jterrazz/test', packed())
+            .link('@vitest/browser-playwright')
+            .link('playwright')
+            .link('react')
+            .link('react-dom')
+            .link('vitest-browser-react')
             .fixture(directory('./__fixtures__/consumer/'))
-            .exec('node pages.mjs');
+            .exec('pages.mjs');
 
         // Then - a diagnostic's `read:` and a README link resolve inside node_modules, where the consumer reads them
         expect(result.exitCode).toBe(0);
