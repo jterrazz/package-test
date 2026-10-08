@@ -45,7 +45,7 @@ describe('in-place', () => {
         // Then - the failure's code frame is the failing expect, not the lines the recorded value pushed down
         expect(result.exitCode).toBe(1);
         expect(result.stderr.text).toMatch(/13\|\s+expect\(marker\)\.toBe\('another line'\);/u);
-        // And - the value is written in place all the same
-        expect(result.file('recorded.test.mjs').content).toContain('"lines": 2');
+        // And - the value is written in place all the same, laid out by the formatter the project installs
+        expect(result.file('recorded.test.mjs').content).toContain('lines: 2');
     });
 });

@@ -2,12 +2,12 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
-import { dedent } from '../../../lint/kit/project/dedent.js';
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { argumentSpans, closingOf } from '../../../lint/kit/project/source-scan.js';
 import { isFrameworkFrame, stackFrames } from '../../chain/paths/caller.js';
 import type { StackFrame } from '../../chain/paths/caller.js';
 import { refusal } from '../../chain/refusals/refusal.js';
+import { formatRewritten } from './formatter.js';
 
 /** Every rewrite of a file is laid on the source the run loaded. The file is written when the run ends: vitest frames a failure by reading the file on disk. */
 
@@ -53,40 +53,6 @@ export function locateArgument(source: string, site: CallSite): ArgumentSpan | u
     return undefined;
 }
 
-function escapeTemplate(text: string): string {
-    return text
-        .replaceAll('\\', String.raw`\\`)
-        .replaceAll('`', '\\`')
-        .replaceAll('${', '\\${');
-}
-
-export function renderText(text: string, indent: string): string {
-    if (!text.includes('\n')) {
-        return `\`${escapeTemplate(text)}\``;
-    }
-    const inner = `${indent}    `;
-    const lines = text.split('\n');
-    const last = String(lines.pop());
-    const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
-    const block = `\n${body}\n${last === '' ? indent : `${inner}${last}`}`;
-    return dedent(block) === text ? `\`${escapeTemplate(block)}\`` : JSON.stringify(text);
-}
-
-export function renderValue(value: unknown, indent: string): string {
-    const json = JSON.stringify(value, null, 4) ?? 'undefined';
-    return json.split('\n').join(`\n${indent}`);
-}
-
-export function renderRows(rows: readonly (readonly unknown[])[], indent: string): string {
-    if (rows.length === 0) {
-        return '[]';
-    }
-    const lines = rows.map(
-        (row) => `${indent}    [${row.map((cell) => JSON.stringify(cell) ?? 'null').join(', ')}],`,
-    );
-    return `[\n${lines.join('\n')}\n${indent}]`;
-}
-
 type Ledger = { edits: Map<number, { end: number; text: string }>; original: string };
 
 const LEDGERS = new Map<string, Ledger>();
@@ -119,14 +85,17 @@ export function writePendingRewrites(folder: string): void {
     if (!existsSync(folder)) {
         return;
     }
+    const written: string[] = [];
     for (const name of readdirSync(folder).filter((entry) => entry.endsWith('.json'))) {
         // Stryker disable next-line StringLiteral: a Buffer parses as the same JSON
         const pending: unknown = JSON.parse(readFileSync(join(folder, name), 'utf8'));
         if (isPending(pending)) {
             writeFileSync(pending.file, pending.source);
+            written.push(pending.file);
         }
     }
     rmSync(folder, { recursive: true });
+    formatRewritten(written);
 }
 
 export function writeInPlace(

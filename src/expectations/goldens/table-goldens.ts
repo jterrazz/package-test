@@ -1,4 +1,4 @@
-import { renderRows } from '../in-place/in-place.js';
+import { renderRows } from '../in-place/render.js';
 import { pairRows } from '../table/rows.js';
 import type { Rows } from '../table/rows.js';
 import type { TableAccessor } from '../table/table.js';

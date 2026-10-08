@@ -1,21 +1,26 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readFileSync,
+    rmSync,
+    symlinkSync,
+    writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, inject, onTestFinished, test } from 'vitest';
 
-import { dedent } from '../../../../lint/kit/project/dedent.js';
 import { registerMatchers } from '../../goldens/matchers.js';
 import {
     callSiteOf,
     deferRewritesTo,
     locateArgument,
-    renderRows,
-    renderText,
-    renderValue,
     writeInPlace,
     writePendingRewrites,
 } from '../in-place.js';
+import { renderText, renderValue } from '../render.js';
 
 function scratchFile(source: string): string {
     const directory = mkdtempSync(join(tmpdir(), 'in-place-'));
@@ -25,14 +30,6 @@ function scratchFile(source: string): string {
         rmSync(directory, { force: true, recursive: true });
     });
     return file;
-}
-
-function readRendered(rendered: string): string {
-    const quoted: unknown = rendered.startsWith('"') ? JSON.parse(rendered) : undefined;
-    if (typeof quoted === 'string') {
-        return quoted;
-    }
-    return rendered.slice(1, -1).replaceAll(/\\(?<escaped>[\\`$])/gu, '$<escaped>');
 }
 
 // invariant: a worker's files share the module graph, so a file that registered the matchers left the writes deferred: a test reading its file back writes at once.
@@ -102,49 +99,6 @@ describe('in-place', () => {
         const span = locateArgument(source, { column: 1, file: 'x', line: 1 });
         expect(span?.start).toBe(source.indexOf('()') + 1);
         expect(span?.end).toBe(span?.start);
-    });
-
-    test.each([
-        ['a line', 'built'],
-        ['lines ending on a break', 'HTTP/1.1 200 OK\n\n{"ok": true}\n'],
-        ['lines with no final break', 'first\nlast'],
-        ['a text opening on a break', '\nafter a blank line\n'],
-        ['a backtick, a backslash and a hole', `a \`b\` \\n \${c}\n`],
-        ['every line indented', '  a\n  b\n'],
-    ])('the value written in place reads back as the value — %s', (_name, text) => {
-        // Given - the text rendered at an indentation, and read as a test would
-        const read = readRendered(renderText(text, '        '));
-
-        // Then - dedented, it is the text again
-        expect(dedent(read)).toBe(text);
-    });
-
-    test('the value written in place reads back as the value — a text of one line is one template, of several a block indented under the call', () => {
-        // Given - texts of one line, of lines ending on a break, and of lines with none
-        // Then - each rendering, whole
-        expect(['one', 'a\nb\n', 'a\n\nb'].map((text) => renderText(text, '    '))).toStrictEqual([
-            '`one`',
-            '`\n        a\n        b\n    `',
-            '`\n        a\n\n        b`',
-        ]);
-    });
-
-    test('the value written in place reads back as the value — a json value and rows are written as code indented with the call', () => {
-        // Given - a value and rows at an indentation
-        // Then - one line per row, the closing bracket on the call's column
-        expect(renderValue({ id: '{{uuid}}', tags: ['a'] }, '    ')).toBe(
-            '{\n        "id": "{{uuid}}",\n        "tags": [\n            "a"\n        ]\n    }',
-        );
-        expect(
-            renderRows(
-                [
-                    [1, 'Ada', null],
-                    [2, undefined],
-                ],
-                '    ',
-            ),
-        ).toBe('[\n        [1, "Ada", null],\n        [2, null],\n    ]');
-        expect(renderRows([], '    ')).toBe('[]');
     });
 
     test('writeInPlace — the test file rewritten where its toMatch stands — two rewrites of one file land where each stack says, the first moving the lines of the second', () => {
@@ -265,6 +219,29 @@ describe('in-place', () => {
             'expect(three).toMatch(`third`);\n',
             false,
         ]);
+    });
+
+    test('writePendingRewrites — the pending rewrites of a run — lays each rewritten file out by the oxfmt its project installs', () => {
+        // Given - a value written as JSON into a test of a project holding this repository's oxfmt
+        const file = scratchFile('expect(one).toMatch(``);\n');
+        const binaries = join(file, '..', 'node_modules', '.bin');
+        mkdirSync(binaries, { recursive: true });
+        symlinkSync(
+            resolve(import.meta.dirname, '../../../../node_modules/.bin/oxfmt'),
+            join(binaries, 'oxfmt'),
+        );
+        const folder = join(file, '..', 'pending');
+        writeInPlace(
+            { column: 13, file, line: 1 },
+            (indent) => renderValue({ id: 'x' }, indent),
+            folder,
+        );
+
+        // When - the run ends
+        writePendingRewrites(folder);
+
+        // Then - the value reads as the formatter writes it, its keys bare and its statement closed
+        expect(readFileSync(file, 'utf8')).toBe('expect(one).toMatch({\n  id: "x",\n});\n');
     });
 
     test('deferRewritesTo — the folder update mode leaves a write in — read at each write, and the run’s own once the matchers are registered', async () => {

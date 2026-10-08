@@ -4,7 +4,8 @@ import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import setup from '../in-place.global-setup.js';
-import { renderText, writeInPlace } from '../in-place.js';
+import { writeInPlace } from '../in-place.js';
+import { renderText } from '../render.js';
 
 describe('setup', () => {
     test('the in-place setup — each run stages its rewrites in a folder of its own under the vitest artifacts, never among the project files', () => {

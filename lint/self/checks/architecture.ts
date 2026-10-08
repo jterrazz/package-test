@@ -11,6 +11,7 @@ const READ_LAYERS: ChapterAnchor = 'docs/concepts/architecture.md#the-source-tre
 
 const SPAWNING_SITES = [
     'expectations/command/docker-cli.ts',
+    'expectations/in-place/formatter.ts',
     'specifications/cli/process/exec.adapter.ts',
     'specifications/lint/local-linters.adapter.ts',
     'specifications/mobile/server/simulator.ts',
