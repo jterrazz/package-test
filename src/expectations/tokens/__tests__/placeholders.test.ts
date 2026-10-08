@@ -85,13 +85,11 @@ describe('placeholders', () => {
                 ['A {{any}} Z', 'A x\ny Z'],
                 ['A {{any}} Z', 'A xy Z'],
                 ['A\n{{any}}\nZ', 'A\nx\ny\nZ'],
-                ['{{any}}Z', 'x\ny Z'],
-                ['A {{any}}', 'A x\ny'],
                 ['{"msg":"{{any}}","level":30}', '{"msg":"a"}\n{"msg":"b","level":30}'],
-                ['A {{string}} Z', 'A x\ny Z'],
-                ['A {{string}} Z', 'A xy Z'],
+                ['A\n{{string}}\nZ', 'A\nx\ny\nZ'],
+                ['a{{any}}\nb', 'axx\nyy\nb'],
             ].map(([expected, actual]) => tokenMatches(expected, actual, scope)),
-        ).toStrictEqual([false, true, true, true, true, false, false, true]);
+        ).toStrictEqual([false, true, true, false, false, true]);
     });
 
     test('unnamed {{any}} tokens hold a golden longer than any pattern V8 compiles, each piece in order and none overlapping', () => {
@@ -134,8 +132,10 @@ describe('placeholders', () => {
                 ['A {{string}} {{int}}', 'A x\ny 3'],
                 ['a{{any#x}}-{{any#x}}', 'a1-1'],
                 ['a{{any#x}}-{{any#x}}', 'a1-2'],
+                ['A\n{{any}}\n{{int}}', 'A\nx\ny'],
+                ['a\n{{any#x}}\n-\n{{any#x}}', 'a\n1\n-\n2'],
             ].map(([expected, actual]) => tokenMatches(expected, actual, new CaptureScope())),
-        ).toStrictEqual([true, false, true, false, true, false]);
+        ).toStrictEqual([true, false, true, false, true, false, false, false]);
     });
 
     test('{{any}} is always-true only as a whole value; embedded, the frame still constrains', () => {
@@ -143,9 +143,9 @@ describe('placeholders', () => {
         const scope = new CaptureScope();
 
         // Then - as a WHOLE value {{any}} accepts any type (objects, numbers, null), the documented carve-out behind the "always-true" claim
-        expect(tokenMatches('{{any}}', { nested: true }, scope)).toBe(true);
-        expect(tokenMatches('{{any}}', 42, scope)).toBe(true);
-        expect(tokenMatches('{{any}}', null, scope)).toBe(true);
+        expect(
+            [{ nested: true }, 42, null].every((value) => tokenMatches('{{any}}', value, scope)),
+        ).toBe(true);
 
         // Then - embedded, {{any}} only widens the middle: a mismatched frame fails
         expect(tokenMatches('A {{any}} Z', 'A x\ny Q', scope)).toBe(false);

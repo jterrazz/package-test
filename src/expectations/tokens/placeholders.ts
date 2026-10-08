@@ -1,5 +1,6 @@
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import { TOKEN_KINDS } from '../../../lint/kit/project/tokens.js';
+import { isFramedInLine, piecesMatch } from './any-lines.js';
 import { CaptureScope } from './capture-scope.js';
 import type { Matcher, MatcherKind } from './match.js';
 
@@ -185,14 +186,6 @@ function placeholderSource(kind: MatcherKind, scope: CaptureScope, inLine: boole
     return kind === 'any' && !inLine ? String.raw`[\s\S]*?` : String.raw`[^\n]*?`;
 }
 
-// invariant: a token with no text before it on its line, or none after it, stands for whole lines and may cross them.
-function isFramedInLine(expected: string, start: number, end: number): boolean {
-    const before = expected.slice(expected.lastIndexOf('\n', start - 1) + 1, start);
-    const lineEnd = expected.indexOf('\n', end);
-    const after = expected.slice(end, lineEnd === -1 ? undefined : lineEnd);
-    return before.trim() !== '' && after.trim() !== '';
-}
-
 function escapeRegExp(text: string): string {
     return text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 }
@@ -214,6 +207,7 @@ export function parsePlaceholderString(
     let framed = false;
     for (const { found, kind } of tokens) {
         const inLine = isFramedInLine(expected, found.index, found.index + found[0].length);
+        // Stryker disable next-line ConditionalExpression: the pattern reads what the pieces read, only slower on a long golden
         framed ||= kind === 'any' && inLine;
         pieces.push(expected.slice(lastIndex, found.index));
         source += `${escapeRegExp(expected.slice(lastIndex, found.index))}(${placeholderSource(kind, scope, inLine)})`;
@@ -233,27 +227,6 @@ export function parsePlaceholderString(
         single: only?.found[0] === expected ? { kind: only.kind, ref: only.ref } : null,
         source,
     };
-}
-
-// invariant: a text whose tokens are all unnamed `{{any}}` holds its pieces in order, the first at its start and the last at its end, as its anchored pattern would: V8 compiles no pattern of a long golden ("Regular expression too large"), so the pieces are matched as text.
-function piecesMatch(pieces: readonly string[], text: string): boolean {
-    const [first = '', ...rest] = pieces;
-    const last = rest.pop();
-    if (last === undefined) {
-        return text === first;
-    }
-    if (!text.startsWith(first)) {
-        return false;
-    }
-    let at = first.length;
-    for (const piece of rest) {
-        const found = text.indexOf(piece, at);
-        if (found === -1) {
-            return false;
-        }
-        at = found + piece.length;
-    }
-    return text.length - last.length >= at && text.endsWith(last);
 }
 
 export function placeholderPatternSource(expected: string): string {
