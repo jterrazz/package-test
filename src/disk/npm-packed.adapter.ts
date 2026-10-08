@@ -86,7 +86,6 @@ function packInto(packageRoot: string, into: string): string {
 
 function linkInto(workDir: string, name: string, source: string): void {
     const destination = join(workDir, 'node_modules', name);
-    refuseUnusableAncestor(name, workDir, destination);
     if (existsSync(destination)) {
         return;
     }
@@ -102,12 +101,12 @@ export function installPacked(
     workDir: string,
 ): void {
     const packageRoot = path === null ? projectOf(testDir) : packageDirectory(name, path, testDir);
-    const declared = manifestAt(packageRoot).name;
-    if (declared !== name) {
+    const declared = manifestAt(packageRoot);
+    if (declared.name !== name) {
         throw new Error(
             refusal({
-                fix: `link it under the name its package.json declares: link('${declared ?? '<no name>'}', packed(…))`,
-                found: `link('${name}', packed()) packs ${relative(testDir, packageRoot) || '.'}, whose package.json names ${declared ?? 'no package'}`,
+                fix: `link it under the name its package.json declares: link('${declared.name ?? '<no name>'}', packed(…))`,
+                found: `link('${name}', packed()) packs ${relative(testDir, packageRoot) || '.'}, whose package.json names ${declared.name ?? 'no package'}`,
                 read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
                 why: 'A consumer imports a package by the name it is published under, so the install lays it there.',
             }),
@@ -115,7 +114,14 @@ export function installPacked(
     }
     const modules = join(workDir, 'node_modules');
     const destination = join(modules, name);
-    refuseUnusableAncestor(name, workDir, destination);
+    // invariant: every path the install writes is checked before anything is packed or deleted — the package, each package it requires, each command it lays.
+    for (const written of [
+        destination,
+        ...declared.runtime.map((dependency) => join(modules, dependency)),
+        ...Object.keys(declared.bin).map((command) => join(modules, '.bin', command)),
+    ]) {
+        refuseUnusableAncestor(name, workDir, written);
+    }
     const unpacked = unpackedOf(packageRoot);
     rmSync(destination, { force: true, recursive: true });
     mkdirSync(dirname(destination), { recursive: true });
@@ -138,7 +144,6 @@ export function installPacked(
     mkdirSync(join(modules, '.bin'), { recursive: true });
     for (const [command, target] of Object.entries(manifest.bin)) {
         const link = join(modules, '.bin', command);
-        refuseUnusableAncestor(name, workDir, link);
         rmSync(link, { force: true });
         symlinkSync(relative(join(modules, '.bin'), join(destination, target)), link);
     }

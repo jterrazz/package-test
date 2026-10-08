@@ -148,4 +148,35 @@ describe('installPacked', () => {
             ],
         );
     });
+
+    test('npm-packed — installPacked — a symlinked folder only a required package or a command crosses — is refused before anything is packed', () => {
+        // Given - a library requiring a scoped package and laying a command, in working directories whose scope folder or .bin points elsewhere
+        const root = checkout({
+            'tool/package.json': {
+                bin: { tool: 'cli.cjs' },
+                dependencies: { '@dep/one': '*' },
+                name: '@acme/tool',
+                version: '1.0.0',
+            },
+        });
+        const elsewhere = realpathSync(scratchDirectory('packed-elsewhere-'));
+        const crossing = (folder: string): string => {
+            const work = realpathSync(scratchDirectory('packed-work-'));
+            mkdirSync(join(work, 'node_modules'));
+            symlinkSync(elsewhere, join(work, 'node_modules', folder), 'dir');
+            return (
+                refusalOf(() => {
+                    installPacked('@acme/tool', './tool/', root, work);
+                })
+                    .split('\n')[0]
+                    ?.replace(work, '<work>') ?? ''
+            );
+        };
+
+        // Then - each is refused at the folder it would reach through, with nothing laid
+        expect([crossing('@dep'), crossing('.bin')]).toStrictEqual([
+            "found: link('@acme/tool'): <work>/node_modules/@dep is a symlink, so the link would replace @acme/tool wherever it points",
+            "found: link('@acme/tool'): <work>/node_modules/.bin is a symlink, so the link would replace @acme/tool wherever it points",
+        ]);
+    });
 });
