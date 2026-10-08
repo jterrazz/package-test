@@ -202,6 +202,14 @@ case "$COMMAND" in
         echo "waiting on nothing"
         exec sleep 30
         ;;
+    hang-forked)
+        # A shell that ignores SIGTERM and waits on a child holding its stdout, as an npx wrapper does:
+        # only a signal to the whole group, escalated to SIGKILL, ends both and lets the run close.
+        trap '' TERM
+        echo "waiting on a child"
+        sleep 30 &
+        wait
+        ;;
     command)
         # What a consumer's script runs: a command the install laid in node_modules/.bin.
         "node_modules/.bin/$2"

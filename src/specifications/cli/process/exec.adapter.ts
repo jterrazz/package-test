@@ -1,13 +1,16 @@
 import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 
-import { signalGroup, SIGNALS_GROUPS } from '../../../services/process/process-group.js';
+import {
+    KILL_GRACE_MS,
+    signalGroup,
+    SIGNALS_GROUPS,
+} from '../../../services/process/process-group.js';
 import type { CliEnv, CliInput, CliOutput, CliPort, WatchOptions } from './cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
 // invariant: one exit code for a run killed at its timeout, whichever path ran it.
 const TIMED_OUT = 124;
-// value: grace period between SIGTERM and the SIGKILL escalation.
-const KILL_GRACE_MS = 2000;
 
 /** `null` overrides delete keys (`INIT_CWD: null`). */
 export function buildEnv(extra?: CliEnv): NodeJS.ProcessEnv {
@@ -97,6 +100,14 @@ export async function observeProcess(
     });
 }
 
+// invariant: SIGTERM to the run's whole group, then SIGKILL once the grace has passed, to whatever of it ignored the first.
+function endGroup(child: ChildProcess): void {
+    signalGroup(child, 'SIGTERM');
+    setTimeout(() => {
+        signalGroup(child, 'SIGKILL');
+    }, KILL_GRACE_MS).unref();
+}
+
 /** Spawned, never `spawnSync`: the test's event loop keeps running while the binary does, so a server the test started — a collector, a stub — answers it. stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
 export class ExecAdapter implements CliPort {
     private readonly command: string;
@@ -108,7 +119,13 @@ export class ExecAdapter implements CliPort {
     async exec(args: string, cwd: string, extraEnv?: CliEnv, input?: CliInput): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
         // outside: a spawned child's three streams are pipes unless told otherwise.
-        const child = spawn(`${this.command} ${args}`, [], { cwd, env, shell: true });
+        // hazard: `detached` gives the run its own process group: a grandchild still holding stdout dies with the shell, or 'close' never fires.
+        const child = spawn(`${this.command} ${args}`, [], {
+            cwd,
+            detached: SIGNALS_GROUPS,
+            env,
+            shell: true,
+        });
         return await new Promise((resolve) => {
             const output = { stderr: '', stdout: '' };
             let timedOut = false;
@@ -117,7 +134,7 @@ export class ExecAdapter implements CliPort {
                     ? undefined
                     : setTimeout(() => {
                           timedOut = true;
-                          child.kill();
+                          endGroup(child);
                       }, input.timeout);
             // Stryker disable next-line StringLiteral: utf8 is the default a stream decodes to
             child.stdout.setEncoding('utf8').on('data', (data: string) => {

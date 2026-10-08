@@ -232,4 +232,15 @@ describe('ExecAdapter', () => {
             stdout: 'piped in',
         });
     });
+
+    test('exec adapter — ExecAdapter.exec — ends a run at its timeout with SIGTERM first, so a process that heeds it ends before any escalation', async () => {
+        // Given - a command that sleeps far past its timeout and ends on SIGTERM
+        const adapter = new ExecAdapter('sleep');
+
+        // When - it runs with a timeout of a tenth of a second
+        const result = await adapter.exec('30', process.cwd(), {}, { timeout: 100 });
+
+        // Then - it reports 124, within a test timeout shorter than the two-second SIGKILL grace
+        expect(result.exitCode).toBe(124);
+    }, 1500);
 });
