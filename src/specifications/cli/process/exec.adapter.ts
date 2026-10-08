@@ -102,7 +102,7 @@ export async function observeProcess(
 
 // invariant: SIGTERM to the run's whole group, then SIGKILL once the grace has passed, to whatever of it ignored the first.
 function endGroup(child: ChildProcess): void {
-    signalGroup(child, 'SIGTERM');
+    signalGroup(child);
     setTimeout(() => {
         signalGroup(child, 'SIGKILL');
     }, KILL_GRACE_MS).unref();

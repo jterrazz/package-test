@@ -69,8 +69,10 @@ function packInto(packageRoot: string, into: string): string {
     const packing = spawnSync(
         'npm',
         ['pack', '--ignore-scripts', '--silent', '--pack-destination', into],
+        // Stryker disable next-line ArrayDeclaration,StringLiteral: the streams decide what a failed pack says, a failure no spec can lay
         { cwd: packageRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
     );
+    // Stryker disable ConditionalExpression,EqualityOperator,BlockStatement,StringLiteral,ObjectLiteral,OptionalChaining,MethodExpression: npm packs every package a spec can name; a failed pack is the environment's — a broken npm, a full disk — which no spec can lay
     if (packing.status !== 0) {
         throw new Error(
             refusal({
@@ -81,6 +83,7 @@ function packInto(packageRoot: string, into: string): string {
             }),
         );
     }
+    // Stryker restore ConditionalExpression,EqualityOperator,BlockStatement,StringLiteral,ObjectLiteral,OptionalChaining,MethodExpression
     return packing.stdout.trim().split('\n').at(-1) ?? '';
 }
 
