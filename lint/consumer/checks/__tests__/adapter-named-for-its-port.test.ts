@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { checkAdapterNamedForItsPort } from '../adapter-named-for-its-port.js';
 
 const PORTS = '../../../src/ports.js';

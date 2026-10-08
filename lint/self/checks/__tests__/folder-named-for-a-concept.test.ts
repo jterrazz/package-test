@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { located, ROOT, treeOf } from '../../../kit/testing/source.fixtures.js';
 import { checkFolderNamedForAConcept } from '../folder-named-for-a-concept.js';
+import { located, ROOT, treeOf } from './source.fixtures.js';
 
 describe('checkFolderNamedForAConcept', () => {
     test('folder-named-for-a-concept — a folder is named for a concept, holds two entries or more, and a specification root holds its face', () => {

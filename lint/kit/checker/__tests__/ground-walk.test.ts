@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { specsTree } from '../../testing/subject.fixtures.js';
+import { specsTree } from '../../../__tests__/subject.fixtures.js';
 import { walkGround } from '../ground-walk.js';
 import type { GroundPasses, Spotted } from '../registry.js';
 

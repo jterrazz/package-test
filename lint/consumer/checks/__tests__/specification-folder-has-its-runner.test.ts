@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { specsTree } from '../../../kit/testing/subject.fixtures.js';
+import { specsTree } from '../../../__tests__/subject.fixtures.js';
 import { checkSpecificationFolderHasItsRunner } from '../specification-folder-has-its-runner.js';
 
 describe('checkSpecificationFolderHasItsRunner', () => {

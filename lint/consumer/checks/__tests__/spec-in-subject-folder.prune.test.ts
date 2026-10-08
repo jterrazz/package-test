@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { moduleExtensionOf, pruned, rebased } from '../spec-in-subject-folder.prune.js';
 
 const lines = (...text: string[]): string => text.join('\n');

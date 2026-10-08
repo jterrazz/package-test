@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { located, ROOT, treeOf } from '../../../kit/testing/source.fixtures.js';
 import { checkStubsReachedByTheirSurface } from '../stubs-reached-by-their-surface.js';
+import { located, ROOT, treeOf } from './source.fixtures.js';
 
 describe('checkStubsReachedByTheirSurface', () => {
     test('stubs-reached-by-their-surface — the stubs are entered by what they publish, a delivery by the specification that wires it', () => {

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { parseSpecDocument } from '../../../kit/project/spec-document.js';
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
 import {
     checkNoVolatileLiteral,
     noVolatileLiteralsInGround,

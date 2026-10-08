@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { RUNNER, specsTree, TWO_ROUTES } from '../../../kit/testing/subject.fixtures.js';
+import { RUNNER, specsTree, TWO_ROUTES } from '../../../__tests__/subject.fixtures.js';
 import { checkOneSubjectPerSpec } from '../one-subject-per-spec.js';
 
 const IMPORT = "import { api } from '../api.specification.js';";

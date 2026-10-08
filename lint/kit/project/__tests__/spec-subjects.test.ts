@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { RUNNER, specsTree, TWO_ROUTES } from '../../testing/subject.fixtures.js';
+import { RUNNER, specsTree, TWO_ROUTES } from '../../../__tests__/subject.fixtures.js';
 import {
     aspectOf,
     lineEnd,

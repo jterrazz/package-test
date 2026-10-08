@@ -3,9 +3,9 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { runMember } from '../../../kit/checker/member-run.js';
 import { teacherOf } from '../../../kit/checker/teacher.js';
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
 import { CHECKER } from '../checker.js';
 import type { Spotted } from '../checker.js';
 import {

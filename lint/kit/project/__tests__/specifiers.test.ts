@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { resolveSpecifier } from '../specifiers.js';
 
 const ROOT = packageWith({

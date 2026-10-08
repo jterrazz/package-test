@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { located, ROOT, treeOf } from '../../../kit/testing/source.fixtures.js';
 import { checkErrorIsARefusalOrAnInvariant } from '../error-is-a-refusal-or-an-invariant.js';
+import { located, ROOT, treeOf } from './source.fixtures.js';
 
 const CHAPTER = '# 19\n\n## The clock\n';
 

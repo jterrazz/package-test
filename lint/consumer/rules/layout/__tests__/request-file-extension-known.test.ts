@@ -2,7 +2,7 @@ import { ruleTester } from '@jterrazz/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { checkoutUnder } from '../../../../kit/testing/package-tree.fixtures.js';
+import { checkoutUnder } from '../../../../__tests__/package-tree.fixtures.js';
 import { requestFileExtensionKnown } from '../request-file-extension-known.js';
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../../specs/lint');

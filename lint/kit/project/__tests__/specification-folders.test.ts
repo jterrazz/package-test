@@ -1,7 +1,7 @@
 import { relative } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { specsTree } from '../../testing/subject.fixtures.js';
+import { specsTree } from '../../../__tests__/subject.fixtures.js';
 import { walkFiles } from '../specification-folders.js';
 
 describe('specification-folders', () => {

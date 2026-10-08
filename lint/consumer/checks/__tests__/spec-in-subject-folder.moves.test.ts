@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { CHARTS, RUNNER, specsTree, TWO_ROUTES } from '../../../kit/testing/subject.fixtures.js';
+import { CHARTS, RUNNER, specsTree, TWO_ROUTES } from '../../../__tests__/subject.fixtures.js';
 import { checkOneSubjectPerSpec } from '../one-subject-per-spec.js';
 import { checkSpecInSubjectFolder } from '../spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from '../spec-in-subject-folder.moves.js';

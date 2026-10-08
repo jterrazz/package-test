@@ -5,8 +5,8 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { checkoutUnder } from '../../../../__tests__/package-tree.fixtures.js';
 import type { AstNode } from '../../../../kit/project/ast.js';
-import { checkoutUnder } from '../../../../kit/testing/package-tree.fixtures.js';
 import { seedsAreSql } from '../seeds-are-sql.js';
 
 // invariant: the fs-anchored cases run against the shared E2E fixture trees.

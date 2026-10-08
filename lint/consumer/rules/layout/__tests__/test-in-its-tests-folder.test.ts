@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { checkoutUnder } from '../../../../kit/testing/package-tree.fixtures.js';
+import { checkoutUnder } from '../../../../__tests__/package-tree.fixtures.js';
 import { testInItsTestsFolder } from '../test-in-its-tests-folder.js';
 
 // invariant: each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.

@@ -8,7 +8,7 @@ import {
     RUNNER,
     specsTree,
     TWO_ROUTES,
-} from '../../../kit/testing/subject.fixtures.js';
+} from '../../../__tests__/subject.fixtures.js';
 import { checkSpecInSubjectFolder } from '../spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from '../spec-in-subject-folder.moves.js';
 

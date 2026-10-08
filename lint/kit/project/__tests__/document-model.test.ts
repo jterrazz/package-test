@@ -1,7 +1,7 @@
 import { join, relative } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { fixedData, isBlock, listSpecFiles, runMaps, streamScalars } from '../document-model.js';
 import { parseSpecDocument, readSpecFile } from '../spec-document.js';
 

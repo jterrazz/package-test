@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { checkCheckerSuppressionNamesAPass } from '../checker-suppression-names-a-pass.js';
 
 describe('checkCheckerSuppressionNamesAPass', () => {

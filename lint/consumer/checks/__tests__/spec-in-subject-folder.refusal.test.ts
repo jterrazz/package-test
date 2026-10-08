@@ -2,10 +2,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { RUNNER, specsTree } from '../../../__tests__/subject.fixtures.js';
 import { splitPlan, subjectSpecs } from '../../../kit/project/spec-subjects.js';
 import type { SpecRead } from '../../../kit/project/spec-subjects.js';
 import { NO_READING } from '../../../kit/project/subject.js';
-import { RUNNER, specsTree } from '../../../kit/testing/subject.fixtures.js';
 import { fixSpecInSubjectFolder } from '../spec-in-subject-folder.moves.js';
 import { lostInSplit, splitRefusal } from '../spec-in-subject-folder.refusal.js';
 import { besideData, CONSOLE_POSTS } from './spec-in-subject-folder.refusal.fixtures.js';

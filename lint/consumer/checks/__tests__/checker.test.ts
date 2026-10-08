@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { checkoutUnder, packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { runMember, runMembers } from '../../../kit/checker/member-run.js';
-import { checkoutUnder, packageWith } from '../../../kit/testing/package-tree.fixtures.js';
 import { CHECKER } from '../checker.js';
 
 const REPEATED_NAME = [

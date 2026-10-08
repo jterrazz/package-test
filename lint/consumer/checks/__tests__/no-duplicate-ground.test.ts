@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { checkNoDuplicateGround, fixNoDuplicateGround } from '../no-duplicate-ground.js';
 
 function foundIn(files: Record<string, string>): string[] {

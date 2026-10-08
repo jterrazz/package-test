@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { parseSpecDocument } from '../../../kit/project/spec-document.js';
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
 import { checkPinnedValueFromTheInput } from '../pinned-value-from-the-input.js';
 
 const PIPED = '0b3d4f6a-1c2e-4a5b-8c9d-0e1f2a3b4c5d';

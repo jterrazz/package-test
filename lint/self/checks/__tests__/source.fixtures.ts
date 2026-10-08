@@ -3,9 +3,9 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
-import type { Spotted } from '../checker/registry.js';
+import type { Spotted } from '../../../kit/checker/registry.js';
 
-export const ROOT = originalOf(resolve(import.meta.dirname, '../../..'));
+export const ROOT = originalOf(resolve(import.meta.dirname, '../../../..'));
 
 export function treeOf(files: Record<string, string>): string {
     const root = mkdtempSync(join(tmpdir(), 'self-source-'));

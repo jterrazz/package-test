@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { RUNNER, specsTree } from '../../../__tests__/subject.fixtures.js';
 import { splitPlan, subjectSpecs } from '../../../kit/project/spec-subjects.js';
-import { RUNNER, specsTree } from '../../../kit/testing/subject.fixtures.js';
 import { splitFiles } from '../spec-in-subject-folder.split.js';
 import {
     RICH_ORDERS,

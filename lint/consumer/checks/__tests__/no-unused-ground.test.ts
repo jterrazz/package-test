@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { checkNoUnusedGround } from '../no-unused-ground.js';
 
 const DEAD = {

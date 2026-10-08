@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../../../kit/testing/package-tree.fixtures.js';
+import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { checkGroundBesideItsOnlyReader } from '../ground-beside-its-only-reader.js';
 
 const reads = (what: string): string => `test('a', () => { read(${what}); });\n`;

@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkoutUnder, repositoryUnder } from '../../testing/package-tree.fixtures.js';
+import { checkoutUnder, repositoryUnder } from '../../../__tests__/package-tree.fixtures.js';
 import type { FileRole, StrayTestRoot } from '../role.js';
 import {
     isNodeTestFileName,
