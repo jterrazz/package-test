@@ -14,6 +14,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { isRecord } from '../../lint/kit/project/json-shape.js';
 import { refusal } from '../chain/refusals/refusal.js';
 import { installedPackage } from './installed-package.js';
+import { refuseUnusableAncestor } from './link-destination.js';
 
 type Manifest = {
     bin: Readonly<Record<string, string>>;
@@ -107,8 +108,9 @@ function unpackedOf(packageRoot: string): string {
     return unpacked;
 }
 
-function linkInto(modules: string, name: string, source: string): void {
-    const destination = join(modules, name);
+function linkInto(workDir: string, name: string, source: string): void {
+    const destination = join(workDir, 'node_modules', name);
+    refuseUnusableAncestor(name, workDir, destination);
     if (existsSync(destination)) {
         return;
     }
@@ -135,9 +137,10 @@ export function installPacked(
             }),
         );
     }
-    const unpacked = unpackedOf(packageRoot);
     const modules = join(workDir, 'node_modules');
     const destination = join(modules, name);
+    refuseUnusableAncestor(name, workDir, destination);
+    const unpacked = unpackedOf(packageRoot);
     rmSync(destination, { force: true, recursive: true });
     mkdirSync(dirname(destination), { recursive: true });
     cpSync(unpacked, destination, { recursive: true });
@@ -154,11 +157,12 @@ export function installPacked(
                 }),
             );
         }
-        linkInto(modules, dependency, installed);
+        linkInto(workDir, dependency, installed);
     }
     mkdirSync(join(modules, '.bin'), { recursive: true });
     for (const [command, target] of Object.entries(manifest.bin)) {
         const link = join(modules, '.bin', command);
+        refuseUnusableAncestor(name, workDir, link);
         rmSync(link, { force: true });
         symlinkSync(relative(join(modules, '.bin'), join(destination, target)), link);
     }
