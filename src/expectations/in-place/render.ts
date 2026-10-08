@@ -25,6 +25,7 @@ const GROUPED_FROM = 10_000;
 
 // invariant: an integer of five digits or more is written in groups of three, as the linter's numeric-separators-style spells it.
 function grouped(value: unknown): unknown {
+    // Stryker disable next-line ConditionalExpression: no value but a number is a safe integer; the test narrows the type the call below reads
     return typeof value === 'number' &&
         Number.isSafeInteger(value) &&
         Math.abs(value) >= GROUPED_FROM

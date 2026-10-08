@@ -94,6 +94,7 @@ function countInPlace(
     bump: (ref: string) => void,
     sites: Map<string, AstNode>,
 ): void {
+    // Stryker disable next-line StringLiteral: a node holding no text holds no token, as no text does
     for (const ref of refsIn(inPlaceText(node) ?? '')) {
         bump(ref);
         // Stryker disable next-line ConditionalExpression: a site is reported only for a ref written once, which has one site

@@ -32,6 +32,22 @@ describe('ground-shared-or-inline', () => {
         ).toStrictEqual(READ_ALONE);
     });
 
+    test("a module test's golden inside its __tests__/ is judged as a spec's, and one beside a module test of the old layout is not this rule's", () => {
+        // Given - a module test reading a golden of its __tests__/, and a test beside its module reading a golden beside it
+        const found = findingsIn({
+            [SPEC]: "test('lists', () => {});\n",
+            'src/legacy/__expected__/old.txt': 'old\n',
+            'src/legacy/legacy.test.ts': testReading("file('./__expected__/old.txt')"),
+            'src/render/__tests__/__expected__/notes.txt': 'notes\n',
+            'src/render/__tests__/heading.test.ts': testReading("file('./__expected__/notes.txt')"),
+        });
+
+        // Then - the golden of the __tests__/ alone is to be written in place
+        expect(found.map((line) => line.split(' — ')[0])).toStrictEqual([
+            'src/render/__tests__/heading.test.ts:2:39 src/render/__tests__/__expected__/notes.txt, read by this test alone',
+        ]);
+    });
+
     test.each(STAYS_A_FILE)('a ground file stays a file when %s', (_, files) => {
         // Given - a tree where the file is shared, unwritable in place, silenced or not a ground file
         // Then - nothing is to inline

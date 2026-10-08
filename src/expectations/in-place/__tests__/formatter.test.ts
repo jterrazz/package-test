@@ -29,11 +29,17 @@ describe('formatRewritten', () => {
             join(binaries, 'oxfmt'),
         );
 
+        const untouched = join(project, 'other.ts');
+        writeFileSync(untouched, "export const other = { 'a': 1 }\n");
+
         // When - the run's rewrites are formatted
         formatRewritten([file]);
 
-        // Then - the file reads in the style the project's formatter config asks
-        expect(readFileSync(file, 'utf8')).toBe('expect(one).toMatch({ id: "x", n: 1 });\n');
+        // Then - the file reads in the style the project's formatter config asks, and no other file of the project moved
+        expect([readFileSync(file, 'utf8'), readFileSync(untouched, 'utf8')]).toStrictEqual([
+            'expect(one).toMatch({ id: "x", n: 1 });\n',
+            "export const other = { 'a': 1 }\n",
+        ]);
     });
 
     test('formatRewritten — a project with no oxfmt installed — leaves the file as written', () => {

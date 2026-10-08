@@ -147,6 +147,7 @@ describe('test-section', () => {
             { production: null },
             { basePath: 'api' },
             { basePath: 'api/v1' },
+            { basePath: ['/api'] },
             { basePath: '/api/' },
             { basePath: 42 },
             ['collections'],

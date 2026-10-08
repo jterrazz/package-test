@@ -41,7 +41,7 @@ function binOf(name: unknown, bin: unknown): Record<string, string> {
 }
 
 function manifestAt(directory: string): Manifest {
-    const parsed: unknown = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
+    const parsed: unknown = JSON.parse(readFileSync(join(directory, 'package.json')).toString());
     const field = (key: string): unknown => (isRecord(parsed) ? parsed[key] : undefined);
     const name = field('name');
     const meta = field('peerDependenciesMeta');
@@ -81,9 +81,11 @@ const UNPACKED = new Map<string, string>();
 // invariant: one pack per package and process — the tarball is what the checkout's build holds when the first spec asks for it.
 function unpackedOf(packageRoot: string): string {
     const known = UNPACKED.get(packageRoot);
+    // Stryker disable next-line ConditionalExpression,BlockStatement: packing again lays the same files, only slower
     if (known !== undefined) {
         return known;
     }
+    // Stryker disable StringLiteral: the folder's prefix, the event that clears it and what npm prints on stderr are no part of what is laid
     const into = mkdtempSync(join(tmpdir(), 'jterrazz-packed-'));
     process.once('exit', () => {
         rmSync(into, { force: true, recursive: true });
@@ -91,13 +93,16 @@ function unpackedOf(packageRoot: string): string {
     const filename = execFileSync(
         'npm',
         ['pack', '--ignore-scripts', '--silent', '--pack-destination', into],
+        // Stryker disable next-line ArrayDeclaration: as above, the streams npm is handed decide nothing it writes
         { cwd: packageRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     )
         .trim()
         .split('\n')
         .at(-1);
+    // Stryker restore StringLiteral
     execFileSync('tar', ['-xzf', join(into, filename ?? ''), '-C', into]);
     const unpacked = join(into, 'package');
+    // Stryker disable next-line CallExpression: as above, a package packed again is the same package
     UNPACKED.set(packageRoot, unpacked);
     return unpacked;
 }

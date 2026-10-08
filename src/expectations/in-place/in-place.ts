@@ -85,6 +85,7 @@ export function writePendingRewrites(folder: string): void {
     if (!existsSync(folder)) {
         return;
     }
+    // Stryker disable next-line ArrayDeclaration: a path that names no file is one the formatter cannot read, and leaves every file as it was
     const written: string[] = [];
     for (const name of readdirSync(folder).filter((entry) => entry.endsWith('.json'))) {
         // Stryker disable next-line StringLiteral: a Buffer parses as the same JSON

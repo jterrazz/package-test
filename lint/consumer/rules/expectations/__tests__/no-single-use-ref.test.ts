@@ -58,6 +58,11 @@ ruleTester().run('no-single-use-ref', noSingleUseRef, {
     ],
     valid: [
         {
+            name: 'A code ref beside a string written in place carrying the same ref earns its name.',
+            code: 'expect(row.id).toEqual(match.ref("id"));\nexpect(result.stdout.text).toMatch("id {{uuid#id}}");',
+            filename: WIDGET,
+        },
+        {
             name: 'A code ref beside a value written in place carrying the same ref twice earns its name: the id and the row it names agree.',
             code: 'expect(result.response).toMatch(`\n    {"id": "{{string#post}}"}\n`);\nexpect(await table("posts")).toMatch([["{{string#post}}"]]);\nexpect(row.id).toEqual(match.ref("post"));',
             filename: WIDGET,
