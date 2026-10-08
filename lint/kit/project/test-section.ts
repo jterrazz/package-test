@@ -1,4 +1,4 @@
-import { readSettings, readSettingsSync } from '@jterrazz/typescript/rules';
+import { readSettings, readSettingsSync, refusalBlock } from '@jterrazz/typescript/rules';
 
 import { isRecord } from './json-shape.js';
 import type { TestSettings } from './settings.js';
@@ -39,18 +39,37 @@ function reasonsOf(value: unknown): Record<string, string> | undefined {
 
 const BASE_PATH = /^(?:\/[a-z0-9][\w.~-]*)+$/u;
 
-/** A key of the wrong shape is read as its default, never half-used. */
+// invariant: a base path the type lets through but no route can be mounted under is refused, never read as no base path: every route would be filed under it again, silently.
+const isMountPath = (value: string): value is `/${string}` => BASE_PATH.test(value);
+
+function basePathOf(value: unknown): `/${string}` | undefined {
+    if (typeof value !== 'string') {
+        return undefined;
+    }
+    if (!isMountPath(value)) {
+        throw new Error(
+            refusalBlock({
+                fix: "write the path the routes are mounted under from the root, with no slash at its end: test: { basePath: '/api' }",
+                found: `jterrazz.config.ts: test.basePath ${JSON.stringify(value)} is no mount path`,
+                read: 'docs/reference/linting.md#test-settings-section',
+                why: 'The base path is cut from every route before its subject folder is derived, so it is read as a route prefix is written: one leading slash, lowercase segments, no trailing slash.',
+            }),
+        );
+    }
+    return value;
+}
+
+/** A key of the wrong shape is read as its default, never half-used — the type check refuses it first; a base path the type lets through and no route can carry is refused here. */
 export function testSettingsOf(test: unknown): ReadTestSettings {
     const section = isRecord(test) ? test : {};
     const allow = isRecord(section.production) ? reasonsOf(section.production.allow) : undefined;
+    const basePath = basePathOf(section.basePath);
     return {
         collections: wordsOf(section.collections) ?? UNREAD.collections,
         methodless: Object.keys(reasonsOf(section.methodless) ?? {}),
         production: allow === undefined ? UNREAD.production : { allow },
         ...(typeof section.routes === 'string' ? { routes: section.routes } : {}),
-        ...(typeof section.basePath === 'string' && BASE_PATH.test(section.basePath)
-            ? { basePath: section.basePath }
-            : {}),
+        ...(basePath === undefined ? {} : { basePath }),
     };
 }
 

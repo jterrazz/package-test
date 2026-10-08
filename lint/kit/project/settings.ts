@@ -4,7 +4,7 @@ import type {} from '@jterrazz/typescript/config';
 /** The `test` section of `jterrazz.config.ts`. */
 export type TestSettings = {
     /** The path every api route is mounted under (`'/api'`), left out of the folder each route's subject derives. */
-    basePath?: string;
+    basePath?: `/${string}`;
     /** Api collections no English plural names (`data`, `people`), by route segment. */
     collections?: readonly string[];
     /** Routes the api takes on any method (`app.all('/mcp', …)`), each path mapped to why it takes any. */

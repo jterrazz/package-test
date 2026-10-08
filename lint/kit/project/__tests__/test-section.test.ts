@@ -145,10 +145,7 @@ describe('test-section', () => {
             { production: { allow: { playwright: '   ' } } },
             { production: { allow: { playwright: true } } },
             { production: null },
-            { basePath: 'api' },
-            { basePath: 'api/v1' },
             { basePath: ['/api'] },
-            { basePath: '/api/' },
             { basePath: 42 },
             ['collections'],
             null,
@@ -168,6 +165,33 @@ describe('test-section', () => {
                 (section) => testSettingsOf(section).basePath,
             ),
         ).toStrictEqual(['/api', '/v1/public']);
+    });
+
+    test('the test section — a base path no route can be mounted under is refused, naming the shape it takes', () => {
+        // Given - a mount with no leading slash, one of two such segments, one ending in a slash, and one in capitals
+        const refused = ['api', 'api/v1', '/api/', '/API'].map((basePath) => {
+            try {
+                return testSettingsOf({ basePath }).basePath;
+            } catch (error) {
+                return error instanceof Error ? error.message : String(error);
+            }
+        });
+
+        // Then - each is refused as written, never read as no base path, with the shape it takes
+        expect(refused.map((message) => message?.split('\n')[0])).toStrictEqual([
+            'found: jterrazz.config.ts: test.basePath "api" is no mount path',
+            'found: jterrazz.config.ts: test.basePath "api/v1" is no mount path',
+            'found: jterrazz.config.ts: test.basePath "/api/" is no mount path',
+            'found: jterrazz.config.ts: test.basePath "/API" is no mount path',
+        ]);
+        expect(refused[2]).toBe(
+            [
+                'found: jterrazz.config.ts: test.basePath "/api/" is no mount path',
+                'why: The base path is cut from every route before its subject folder is derived, so it is read as a route prefix is written: one leading slash, lowercase segments, no trailing slash.',
+                "fix: write the path the routes are mounted under from the root, with no slash at its end: test: { basePath: '/api' }",
+                'read: docs/reference/linting.md#test-settings-section',
+            ].join('\n'),
+        );
     });
 
     test("listsTestPreset — whether a unit's checker judges its trees — is the unit listing this package's preset, beside others or alone", () => {
