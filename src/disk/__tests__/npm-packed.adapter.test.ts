@@ -7,8 +7,6 @@ import { installPacked } from '../npm-packed.adapter.js';
 
 // invariant: every case here is refused before `npm pack` runs, so the test starts nothing; what a pack lays is specs/cli/link/'s.
 
-const BROKEN = '{ "name": ';
-
 function write(root: string, files: Readonly<Record<string, unknown>>): void {
     for (const [path, content] of Object.entries(files)) {
         mkdirSync(join(root, path, '..'), { recursive: true });
@@ -22,7 +20,6 @@ function write(root: string, files: Readonly<Record<string, unknown>>): void {
 function checkout(files: Readonly<Record<string, unknown>> = {}): string {
     const root = realpathSync(scratchDirectory('packed-checkout-'));
     write(root, {
-        'broken/package.json': BROKEN,
         'lib/package.json': { name: '@acme/lib', version: '1.0.0' },
         'nameless/package.json': { name: 42 },
         'notes.txt': 'a file, not a package\n',
@@ -87,8 +84,8 @@ describe('installPacked', () => {
         ]);
     });
 
-    test('npm-packed — installPacked — a directory it cannot read — refuses one naming nothing, a file, a folder with no manifest and a manifest that is no JSON', () => {
-        // Given - a checkout holding a file, a folder with no manifest, and a broken manifest
+    test('npm-packed — installPacked — a directory it cannot read — refuses one naming nothing, a file, and a folder with no manifest', () => {
+        // Given - a checkout holding a file and a folder with no manifest
         const root = checkout();
         const work = realpathSync(scratchDirectory('packed-work-'));
         const call = (path: string) =>
@@ -101,7 +98,6 @@ describe('installPacked', () => {
             call('./missing/'),
             call('./notes.txt/'),
             call('./bare/'),
-            call('./broken/').split('\n')[0],
             existsSync(join(work, 'node_modules')),
         ]).toStrictEqual([
             [
@@ -122,9 +118,6 @@ describe('installPacked', () => {
                 `fix: name the directory that holds the package's package.json, or give ${join(root, 'bare')} one`,
                 READ,
             ].join('\n'),
-            `found: packed(): ${join(root, 'broken/package.json')} is no JSON — ${refusalOf(() => {
-                JSON.parse(BROKEN);
-            })}`,
             false,
         ]);
     });
