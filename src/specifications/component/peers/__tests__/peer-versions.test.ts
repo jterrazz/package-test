@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { assertProviderPin, versionOf } from '../peer-versions.js';
 
-const peer = (name: string): string => resolve(import.meta.dirname, '__fixtures__', name);
+const peer = (path: string): string => resolve(import.meta.dirname, path);
 
 describe('peer-versions', () => {
     test('refuses a provider on another version than its runner, naming both and the one-change bump', () => {
@@ -52,27 +52,28 @@ describe('peer-versions', () => {
 
     test('reads the version an installed manifest states', () => {
         // Given - a peer whose manifest states its version
-        const specifier = peer('versioned');
+        const specifier = peer('./__fixtures__/versioned');
 
         // Then - the version, as stated
         expect(versionOf(specifier)).toBe('1.2.3');
     });
 
-    test.each(['no-version', 'null-manifest', 'text-manifest'])(
-        'refuses an installed manifest that carries no version: %s',
-        (name) => {
-            // Given - a peer whose manifest is no object holding a version
-            const specifier = peer(name);
+    test.each([
+        './__fixtures__/no-version',
+        './__fixtures__/null-manifest',
+        './__fixtures__/text-manifest',
+    ])('refuses an installed manifest that carries no version: %s', (path) => {
+        // Given - a peer whose manifest is no object holding a version
+        const specifier = peer(path);
 
-            // Then - the refusal names the peer and the reinstall
-            expect(() => versionOf(specifier)).toThrow(
-                [
-                    `found: the installed ${specifier} manifest carries no version`,
-                    'why: The component project reads the version of the peers it configures from their installed manifests.',
-                    `fix: reinstall ${specifier}: \`npm install ${specifier}\``,
-                    'read: docs/start/set-up-a-project.md#what-to-install',
-                ].join('\n'),
-            );
-        },
-    );
+        // Then - the refusal names the peer and the reinstall
+        expect(() => versionOf(specifier)).toThrow(
+            [
+                `found: the installed ${specifier} manifest carries no version`,
+                'why: The component project reads the version of the peers it configures from their installed manifests.',
+                `fix: reinstall ${specifier}: \`npm install ${specifier}\``,
+                'read: docs/start/set-up-a-project.md#what-to-install',
+            ].join('\n'),
+        );
+    });
 });

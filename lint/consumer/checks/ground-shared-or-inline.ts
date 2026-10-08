@@ -9,6 +9,7 @@ import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
 import { withoutEntryImport } from '../../kit/checker/entry-import.js';
+import { isTestsFolderGround, moduleTestsOf } from '../../kit/project/module-tests.js';
 import { isRelativePath } from '../../kit/project/relative-path.js';
 import { closingOf } from '../../kit/project/source-scan.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
@@ -132,11 +133,15 @@ function inlinable(reference: Reference, target: string): boolean {
 
 function singleUseFiles(rootDir: string): SingleUse[] {
     const roots = findSpecsRoots(rootDir);
-    const references = roots.flatMap((root) =>
-        listFiles(root, (path) => /\.[cm]?[jt]sx?$/u.test(path)).flatMap((file) =>
+    const references = roots.flatMap((root) => [
+        ...listFiles(root, (path) => /\.[cm]?[jt]sx?$/u.test(path)).flatMap((file) =>
             referencesIn(file),
         ),
-    );
+        // invariant: a module test's ground stands inside its `__tests__/`, and is judged by the law a specification's is.
+        ...moduleTestsOf(dirname(root))
+            .flatMap((file) => referencesIn(file))
+            .filter((reference) => isTestsFolderGround(reference.target)),
+    ]);
     const namedOutside = roots.flatMap((root) =>
         pathsModuleTestsName(dirname(root)).filter((path) => isWithin(root, path)),
     );
@@ -172,7 +177,7 @@ export function checkGroundSharedOrInline(rootDir: string): Spotted[] {
         path: relative(rootDir, reference.file),
         line: reference.line,
         fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`typescript fix\` inlines it`,
-        found: `${relative(rootDir, target)}, read by this test alone`,
+        found: `${relative(isWithin(rootDir, target) ? rootDir : dirname(rootDir), target)}, read by this test alone`,
         rule: 'ground-shared-or-inline' as const,
     }));
     const inlined = new Set(singleUseFiles(rootDir).map(({ target }) => relative(rootDir, target)));

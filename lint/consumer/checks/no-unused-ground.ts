@@ -3,6 +3,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 
 import { isNode, stringValue, walk } from '../../kit/project/ast.js';
 import { parseProgram } from '../../kit/project/module-parser.js';
+import { testsFoldersOf } from '../../kit/project/module-tests.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
 import { specsAnchor } from '../../kit/project/specs-anchor.js';
@@ -185,6 +186,8 @@ function checkDomain(rootDir: string, dir: string): Spotted[] {
 export function checkNoUnusedGround(rootDir: string): Spotted[] {
     return [
         ...listDirs(rootDir).flatMap((dir) => checkDomain(rootDir, dir)),
+        // invariant: the ground of a module test's `__tests__/` is dead like a specification's when no test of that folder names it.
+        ...testsFoldersOf(dirname(rootDir)).flatMap((dir) => checkDomain(rootDir, dir)),
         ...checkPoolFixtures(rootDir),
     ];
 }

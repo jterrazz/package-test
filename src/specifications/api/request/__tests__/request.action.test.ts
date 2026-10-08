@@ -61,12 +61,14 @@ describe('request', () => {
         // When - each verb is sent
         await get.perform(['/users/:id', { params: { id: 7 } }], carrying, adapters, run(testDir));
         await post.perform(
+            // checker-disable-next-line ground-shared-or-inline -- the file form is the subject: a JSON body read from its file
             ['/orders', file('./__requests__/order.json')],
             bare,
             adapters,
             run(testDir),
         );
         await put.perform(
+            // checker-disable-next-line ground-shared-or-inline -- the file form is the subject: a text body read from its file
             ['/notes/1', file('./__requests__/note.txt')],
             bare,
             adapters,
@@ -123,6 +125,7 @@ describe('request', () => {
             run(testDir),
         );
         await request.perform(
+            // checker-disable-next-line ground-shared-or-inline -- the file form is the subject: a complete request read from its .http file
             [file('./__requests__/create.http')],
             carrying,
             recording(asked),

@@ -1,5 +1,6 @@
 import { defineCheck, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { DefinedCheck, Finding } from '@jterrazz/typescript/rules';
+import { join } from 'node:path';
 
 import type { Row } from '../catalogue/row.js';
 import type { CheckerRegistry, Spotted } from './registry.js';
@@ -37,7 +38,7 @@ export function teacherOf({ chapter, rows }: Pick<CheckerRegistry, 'chapter' | '
 export function underTree(spotted: Spotted[], prefix: string): Spotted[] {
     if (prefix !== '') {
         for (const one of spotted) {
-            one.path = `${prefix}/${one.path}`;
+            one.path = join(prefix, one.path);
         }
     }
 

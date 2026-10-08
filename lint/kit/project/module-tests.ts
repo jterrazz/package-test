@@ -1,5 +1,11 @@
-import { isGroundFolder, PRUNED, treeEntries, treeKind } from '@jterrazz/typescript/rules';
-import { join } from 'node:path';
+import {
+    isGroundFolder,
+    PRUNED,
+    TESTS_FOLDER,
+    treeEntries,
+    treeKind,
+} from '@jterrazz/typescript/rules';
+import { basename, dirname, join } from 'node:path';
 
 import { isTestFileName } from './role.js';
 
@@ -36,4 +42,23 @@ export function moduleTestsOf(member: string): string[] {
     };
     walk(member);
     return found;
+}
+
+/** The `__tests__/` folders a member's module tests sit in: the only place outside `specs/` where ground may stand. */
+export function testsFoldersOf(member: string): string[] {
+    return [
+        ...new Set(
+            moduleTestsOf(member)
+                .map((file) => dirname(file))
+                .filter((folder) => basename(folder) === TESTS_FOLDER),
+        ),
+    ];
+}
+
+/** A path inside the ground of a `__tests__/` folder: `<dir>/__tests__/__expected__/…`. */
+export function isTestsFolderGround(path: string): boolean {
+    const segments = path.split(/[/\\]/u);
+    return segments.some(
+        (segment, index) => segment === TESTS_FOLDER && isGroundFolder(segments[index + 1] ?? ''),
+    );
 }
