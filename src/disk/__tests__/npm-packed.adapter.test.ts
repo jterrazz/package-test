@@ -179,4 +179,43 @@ describe('installPacked', () => {
             "found: link('@acme/tool'): <work>/node_modules/.bin is a symlink, so the link would replace @acme/tool wherever it points",
         ]);
     });
+
+    test('npm-packed — installPacked — a required package no checkout above it installed — is refused before anything is packed or laid', () => {
+        // Given - a library requiring a package never installed where it is developed, and an install of it left by an earlier run
+        const root = checkout({
+            'needy/package.json': {
+                dependencies: { '@dep/never': '*' },
+                name: '@acme/needy',
+                version: '1.0.0',
+            },
+        });
+        const work = realpathSync(scratchDirectory('packed-work-'));
+        write(work, { 'node_modules/@acme/needy/kept.txt': 'an earlier install\n' });
+
+        // When - the install is asked
+        const refused = refusalOf(() => {
+            installPacked('@acme/needy', './needy/', root, work);
+        });
+
+        const fromItself = refusalOf(() => {
+            installPacked('@acme/needy', './', join(root, 'needy'), work);
+        });
+
+        // Then - the dependency is named, from the package's own folder too, and the earlier install stands as it was
+        expect(fromItself.split('\n')[0]).toBe(
+            "found: link('@acme/needy', packed()): @acme/needy requires @dep/never, which no node_modules above . holds",
+        );
+        expect([
+            refused,
+            existsSync(join(work, 'node_modules/@acme/needy/kept.txt')),
+        ]).toStrictEqual([
+            [
+                "found: link('@acme/needy', packed()): @acme/needy requires @dep/never, which no node_modules above needy holds",
+                'why: The packed package is laid beside what its manifest requires at runtime, taken from where it is developed.',
+                "fix: install @dep/never where @acme/needy is developed, as its consumers' install would",
+                READ,
+            ].join('\n'),
+            true,
+        ]);
+    });
 });

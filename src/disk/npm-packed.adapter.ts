@@ -96,6 +96,27 @@ function linkInto(workDir: string, name: string, source: string): void {
     symlinkSync(source, destination, 'dir');
 }
 
+function requiredPackages(
+    name: string,
+    runtime: readonly string[],
+    { packageRoot, testDir }: { packageRoot: string; testDir: string },
+): { dependency: string; installed: string }[] {
+    return runtime.map((dependency) => {
+        const installed = installedPackage(dependency, packageRoot);
+        if (installed === null) {
+            throw new Error(
+                refusal({
+                    fix: `install ${dependency} where ${name} is developed, as its consumers' install would`,
+                    found: `link('${name}', packed()): ${name} requires ${dependency}, which no node_modules above ${relative(testDir, packageRoot) || '.'} holds`,
+                    read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
+                    why: 'The packed package is laid beside what its manifest requires at runtime, taken from where it is developed.',
+                }),
+            );
+        }
+        return { dependency, installed };
+    });
+}
+
 /** Lays the packed package at `node_modules/<name>` as a copy, beside a link to each package its manifest requires at runtime, resolved from where the package is developed. */
 export function installPacked(
     name: string,
@@ -117,7 +138,7 @@ export function installPacked(
     }
     const modules = join(workDir, 'node_modules');
     const destination = join(modules, name);
-    // invariant: every path the install writes is checked before anything is packed or deleted — the package, each package it requires, each command it lays.
+    // invariant: nothing is packed or deleted before every path the install writes is checked — the package, each package it requires, each command it lays — and every package it requires is found.
     for (const written of [
         destination,
         ...declared.runtime.map((dependency) => join(modules, dependency)),
@@ -125,23 +146,13 @@ export function installPacked(
     ]) {
         refuseUnusableAncestor(name, workDir, written);
     }
+    const required = requiredPackages(name, declared.runtime, { packageRoot, testDir });
     const unpacked = unpackedOf(packageRoot);
     rmSync(destination, { force: true, recursive: true });
     mkdirSync(dirname(destination), { recursive: true });
     cpSync(unpacked, destination, { recursive: true });
     const manifest = manifestAt(unpacked);
-    for (const dependency of manifest.runtime) {
-        const installed = installedPackage(dependency, packageRoot);
-        if (installed === null) {
-            throw new Error(
-                refusal({
-                    fix: `install ${dependency} where ${name} is developed, as its consumers' install would`,
-                    found: `link('${name}', packed()): ${name} requires ${dependency}, which no node_modules above ${relative(testDir, packageRoot) || '.'} holds`,
-                    read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
-                    why: 'The packed package is laid beside what its manifest requires at runtime, taken from where it is developed.',
-                }),
-            );
-        }
+    for (const { dependency, installed } of required) {
         linkInto(workDir, dependency, installed);
     }
     mkdirSync(join(modules, '.bin'), { recursive: true });
