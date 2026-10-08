@@ -75,14 +75,23 @@ describe('placeholders', () => {
         expect(tokenMatches('{{uuid}}', '{{uuid}}', scope)).toBe(false);
     });
 
-    test('{{any}} crosses lines, {{string}} stays on one line', () => {
+    test('{{any}} crosses lines where its line holds no text on one side of it, stays on its line where text frames it, and {{string}} never crosses', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
-        // Then - embedded {{any}} spans a newline, {{string}} does not
-        expect(tokenMatches('A {{any}} Z', 'A x\ny Z', scope)).toBe(true);
-        expect(tokenMatches('A {{string}} Z', 'A x\ny Z', scope)).toBe(false);
-        expect(tokenMatches('A {{string}} Z', 'A xy Z', scope)).toBe(true);
+        // Then - a token opening or closing its line, or alone on it, spans lines; one with text on both sides is held to its line
+        expect(
+            [
+                ['A {{any}} Z', 'A x\ny Z'],
+                ['A {{any}} Z', 'A xy Z'],
+                ['A\n{{any}}\nZ', 'A\nx\ny\nZ'],
+                ['{{any}}Z', 'x\ny Z'],
+                ['A {{any}}', 'A x\ny'],
+                ['{"msg":"{{any}}","level":30}', '{"msg":"a"}\n{"msg":"b","level":30}'],
+                ['A {{string}} Z', 'A x\ny Z'],
+                ['A {{string}} Z', 'A xy Z'],
+            ].map(([expected, actual]) => tokenMatches(expected, actual, scope)),
+        ).toStrictEqual([false, true, true, true, true, false, false, true]);
     });
 
     test('unnamed {{any}} tokens hold a golden longer than any pattern V8 compiles, each piece in order and none overlapping', () => {
@@ -114,12 +123,12 @@ describe('placeholders', () => {
         ).toStrictEqual([false, true, false, true, false, false, true]);
     });
 
-    test('{{any}} beside another token, or named, is matched by its pattern: it crosses lines, {{string}} does not, and a name holds one value', () => {
+    test('{{any}} beside another token, or named, is matched by its pattern: it crosses lines where no text frames it, {{string}} does not, and a name holds one value', () => {
         // Given - a fresh capture scope for each comparison
         // Then - the pattern holds what each token holds
         expect(
             [
-                ['A {{any}} {{int}}', 'A x\ny 3'],
+                ['A\n{{any}} {{int}}', 'A\nx\ny 3'],
                 ['A {{any}} {{int}}', 'A x y'],
                 ['A {{string}} {{int}}', 'A xy 3'],
                 ['A {{string}} {{int}}', 'A x\ny 3'],

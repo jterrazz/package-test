@@ -173,7 +173,7 @@ type ParsedPlaceholderString = {
     source: string;
 };
 
-function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
+function placeholderSource(kind: MatcherKind, scope: CaptureScope, inLine: boolean): string {
     if (kind === 'workdir') {
         return scope.workdir === undefined ? '(?!)' : escapeRegExp(scope.workdir);
     }
@@ -181,8 +181,16 @@ function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
     if (source !== undefined) {
         return source;
     }
-    // invariant: string: stays on one line; any: crosses lines.
-    return kind === 'any' ? String.raw`[\s\S]*?` : String.raw`[^\n]*?`;
+    // invariant: string stays on one line; any crosses lines, but where its line holds text on both sides of it, the line is its frame.
+    return kind === 'any' && !inLine ? String.raw`[\s\S]*?` : String.raw`[^\n]*?`;
+}
+
+// invariant: a token with no text before it on its line, or none after it, stands for whole lines and may cross them.
+function isFramedInLine(expected: string, start: number, end: number): boolean {
+    const before = expected.slice(expected.lastIndexOf('\n', start - 1) + 1, start);
+    const lineEnd = expected.indexOf('\n', end);
+    const after = expected.slice(end, lineEnd === -1 ? undefined : lineEnd);
+    return before.trim() !== '' && after.trim() !== '';
 }
 
 function escapeRegExp(text: string): string {
@@ -203,18 +211,22 @@ export function parsePlaceholderString(
     let source = '';
     let lastIndex = 0;
     const pieces: string[] = [];
+    let framed = false;
     for (const { found, kind } of tokens) {
+        const inLine = isFramedInLine(expected, found.index, found.index + found[0].length);
+        framed ||= kind === 'any' && inLine;
         pieces.push(expected.slice(lastIndex, found.index));
-        source += `${escapeRegExp(expected.slice(lastIndex, found.index))}(${placeholderSource(kind, scope)})`;
+        source += `${escapeRegExp(expected.slice(lastIndex, found.index))}(${placeholderSource(kind, scope, inLine)})`;
         lastIndex = found.index + found[0].length;
     }
     pieces.push(expected.slice(lastIndex));
     source += escapeRegExp(expected.slice(lastIndex));
     const [only] = tokens;
     return {
-        pieces: tokens.every(({ kind, ref }) => kind === 'any' && ref === undefined)
-            ? pieces
-            : null,
+        pieces:
+            !framed && tokens.every(({ kind, ref }) => kind === 'any' && ref === undefined)
+                ? pieces
+                : null,
         // Stryker disable next-line StringLiteral: the token patterns are ASCII, read alike without the unicode flag
         pattern: new RegExp(`^${source}$`, 'u'),
         refs: tokens.map(({ kind, ref }, index) => ({ index, kind, ref })),
