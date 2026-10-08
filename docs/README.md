@@ -15,18 +15,18 @@ The pages follow the package's four export families — what is tested, what sur
 
 ### What is tested — one guide per kind
 
-| Guide                                            | The subject                                                                            |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| [Module tests](guides/module-tests.md)           | One module, beside its code, nothing started — `<file>.test.ts`                        |
-| [Integration specs](guides/integration-specs.md) | A module against real services, or against a golden — `specification.integration()`    |
-| [Component specs](guides/component-specs.md)     | A rendered unit in a real Chromium, beside its code — the `component` chain            |
-| [Website specs](guides/website-specs.md)         | A served page, fetched or driven in a browser — `specification.website()`              |
-| [Mobile specs](guides/mobile-specs.md)           | A native app on an iOS simulator — `specification.mobile()`                            |
-| [API specs](guides/api-specs.md)                 | An HTTP app, in-process, through complete requests — `specification.api()`             |
-| [Job specs](guides/job-specs.md)                 | A pipeline triggered by name — `specification.job()`                                   |
-| [CLI specs](guides/cli-specs.md)                 | A binary in a fresh working directory — `specification.cli()`                          |
-| [Spec documents](guides/spec-documents.md)       | A CLI session written as data — the `<case>.spec.yaml` format                          |
-| [Lint specs](guides/lint-specs.md)               | The rules a project ships, over fixture trees — `specification.lint()`, `ruleTester()` |
+| Guide                                            | The subject                                                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| [Module tests](guides/module-tests.md)           | One module, in its folder's `__tests__/`, nothing started — `<file>.test.ts`             |
+| [Integration specs](guides/integration-specs.md) | A module against real services, or against a golden — `specification.integration()`      |
+| [Component specs](guides/component-specs.md)     | A rendered unit in a real Chromium, in its folder's `__tests__/` — the `component` chain |
+| [Website specs](guides/website-specs.md)         | A served page, fetched or driven in a browser — `specification.website()`                |
+| [Mobile specs](guides/mobile-specs.md)           | A native app on an iOS simulator — `specification.mobile()`                              |
+| [API specs](guides/api-specs.md)                 | An HTTP app, in-process, through complete requests — `specification.api()`               |
+| [Job specs](guides/job-specs.md)                 | A pipeline triggered by name — `specification.job()`                                     |
+| [CLI specs](guides/cli-specs.md)                 | A binary in a fresh working directory — `specification.cli()`                            |
+| [Spec documents](guides/spec-documents.md)       | A CLI session written as data — the `<case>.spec.yaml` format                            |
+| [Lint specs](guides/lint-specs.md)               | The rules a project ships, over fixture trees — `specification.lint()`, `ruleTester()`   |
 
 ### Developing this repository
 

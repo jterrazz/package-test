@@ -171,7 +171,7 @@ specs/integration/
 ## Pitfalls
 
 - **Reaching for `try`/`catch`.** A thrown error is `result.error`. A `try` around `.call()` brings back the shape where a spec passes because nothing threw.
-- **Writing a module test here.** A module alone, with no service and no golden, belongs beside its code as `<file>.test.ts` (rule `test-in-its-tests-folder`). The folder is not a home for tests that were hard to place.
+- **Writing a module test here.** A module alone, with no service and no golden, belongs in the `__tests__/` of its folder as `<file>.test.ts` (rule `test-in-its-tests-folder`). The folder is not a home for tests that were hard to place.
 - **Goldening a volatile value.** An id, a timestamp or a duration inside `result.value` is tokened (`{{int}}`, `{{iso8601}}`), or pinned with `.clock()`. A literal that moves is a test that fails tomorrow (rule `no-volatile-literal`).
 - **Asserting on a double.** The specification exists so the subject meets the real thing. A `mockOf<T>()` inside `.call()` is a module test that started a container for nothing.
 

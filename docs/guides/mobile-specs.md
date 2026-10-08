@@ -302,6 +302,7 @@ No `__seeds__/` or `__requests__/` — a mobile chain has no `.seed()` and no re
 
 - **Using `expect()` inside a scenario callback.** Forbidden (rule `no-expect-in-scenario`) — the scenario is the When; assertions belong on the result the `.open()` promise resolves to.
 - **The first session builds WebDriverAgent (~40 s, once per simulator).** A later server starts it again without building it, and later sessions on the same server are seconds. Budget the first run; do not "fix" it with retries.
+- **Ordering spec files by name.** Vitest schedules the files of a project in no name order — signews-mobile's `z-language.spec.ts` ran second, not last — so a `z-` prefix orders nothing. A file stands on what it opens and seeds itself, never on a file that ran before it; a journey that proves state across a relaunch is one test, its relaunch the second `.open()` of its chain.
 - **Passing a landmark (`main()`, `navigation()`) to a mobile verb.** They are website concepts — iOS has no ARIA regions; the runtime refusal points at `within(testId('…'), …)` as the scoping tool.
 - **Reaching for `testId()` first.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks — [The visitor § `testId()`](../reference/visitor.md#testid--the-one-escape-hatch).
 - **Expecting `.open()` to preserve app state between specs.** It never does — every open terminates and relaunches the app; a flow that spans screens belongs in ONE scenario.

@@ -373,6 +373,14 @@ specs/website/
 
 No `__seeds__/` or `__requests__/` — a website chain has no `.seed()` setup and no request-file format, whatever its runner declares under `services`; `.fetch()`/`.visit()` calls are inline, and the golden is always `__expected__/<name>`.
 
+**Where a page's golden goes.** A website spec reads its subject page by page, one spec file per page, and a golden read by one file is that file's: written in place while it is short (`ground-shared-or-inline`), else beside its one reader. A domain folder may not nest (`specs-at-declared-depth`), so a domain that would hold one page's golden among many pages' specs becomes a domain of its own — jterrazz-web's `metadata/`, `sitemap/`, `feed/` and `not-found/` sit beside `journeys/` and `redirects/` — and a domain of one spec per surface keeps each golden with its one reader, in place up to the cap and in the domain's `__expected__/` past it.
+
+**A subject and its oracle are derived together, or pinned together.** A spec that visits a path a helper computes ("the newest article", "a school project") and compares it with a golden pinning that page's literal values fails against a page nobody chose the day the corpus moves the helper's pick. Either derive both — the path and the expectation from the same subject — or pin both: a literal path and its golden. A derived subject with a pinned golden is the one pairing to refuse in review.
+
+**A table of pages is the one sanctioned exception, and the checker cannot see it.** `one-subject-per-spec` refuses a spec visiting several pages by literal paths; a `test.each` whose rows feed `visit()` computed paths passes both it and `no-unused-ground` unseen — the checker reads literals, not tables. A site that keeps one such table (every redirect rule, every legacy slug) declares it in its own test guide, prints each row as a line (`status source -> destination`) and compares the whole table with a value written in place — never a mapping of the source's own table into the expectation, which restates the code and lets a wrong row pass.
+
+**The production build belongs to the site's gate, not to each spec.** `server.command` starts what the build left (`astro preview`, `next start`); the Makefile's `test: build` (or a stamp file the build touches, rebuilt when a source is newer) owns rebuilding it, so no website spec walks the source tree for mtimes before it starts.
+
 ## Pitfalls
 
 - **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.

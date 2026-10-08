@@ -8,14 +8,15 @@ For a whole served page, use [Website specs](website-specs.md); for a module tha
 
 A component test answers one question: **given this network and this parent, what does the component put on the screen, and what does it report back?** Everything it reads is what a user or a parent can see — the accessibility tree, the rendered text, the markup, the console — and everything it does is what a user or a parent can do: click, fill, press, change the props, take it off the screen.
 
-It is a UNIT, so it lives beside its subject:
+It is a UNIT, so it lives with its subject, in the `__tests__/` of the subject's folder (`test-in-its-tests-folder`):
 
 ```text
 src/presentation/posts/
 ├── post-table.tsx
-├── post-table.test.tsx        # the component's spec — the `.tsx` suffix IS the kind
 ├── use-modal-dialog.ts
-└── use-modal-dialog.test.tsx  # a hook's spec: its Host is written in the test file
+└── __tests__/
+    ├── post-table.test.tsx        # the component's spec — the `.tsx` suffix IS the kind
+    └── use-modal-dialog.test.tsx  # a hook's spec: its Host is written in the test file
 ```
 
 The suffix decides which project collects the file and therefore which rules judge it: `unit()` takes `**/*.test.ts` and excludes `**/*.test.tsx`; `component()` takes the `.tsx`. A rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s error, and it names the move.
