@@ -3,7 +3,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { testSettingsAt, testSettingsAtSync, testSettingsOf } from '../test-section.js';
+import {
+    listsTestPreset,
+    testSettingsAt,
+    testSettingsAtSync,
+    testSettingsOf,
+} from '../test-section.js';
 
 function unit(config?: string): string {
     const root = mkdtempSync(join(tmpdir(), 'test-section-'));
@@ -141,6 +146,7 @@ describe('test-section', () => {
             { production: { allow: { playwright: true } } },
             { production: null },
             { basePath: 'api' },
+            { basePath: 'api/v1' },
             { basePath: '/api/' },
             { basePath: 42 },
             ['collections'],
@@ -161,5 +167,22 @@ describe('test-section', () => {
                 (section) => testSettingsOf(section).basePath,
             ),
         ).toStrictEqual(['/api', '/v1/public']);
+    });
+
+    test("listsTestPreset — whether a unit's checker judges its trees — is the unit listing this package's preset, beside others or alone", () => {
+        // Given - a unit listing this package's preset beside another, one listing another package's, and one listing none
+        const listing = unit(
+            "export default { presets: [{ name: 'other', package: '@acme/other' }, { name: 'test', package: '@jterrazz/test' }] };\n",
+        );
+        const foreign = unit(
+            "export default { presets: [{ name: 'test', package: '@acme/test' }] };\n",
+        );
+
+        // Then - only the first lists it
+        expect([listing, foreign, unit()].map((root) => listsTestPreset(root))).toStrictEqual([
+            true,
+            false,
+            false,
+        ]);
     });
 });

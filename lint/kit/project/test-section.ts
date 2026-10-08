@@ -58,6 +58,10 @@ export function testSettingsOf(test: unknown): ReadTestSettings {
 export const testSettingsAtSync = (root: string): ReadTestSettings =>
     testSettingsOf(readSettingsSync(root).resolved.sections[TEST_SECTION]);
 
+/** Whether the unit's settings list this package's preset, the one whose checker judges every specs tree under it. */
+export const listsTestPreset = (root: string): boolean =>
+    readSettingsSync(root).resolved.presets.some((preset) => preset.package === '@jterrazz/test');
+
 export async function testSettingsAt(root: string): Promise<ReadTestSettings> {
     const { resolved } = await readSettings(root);
     return testSettingsOf(resolved.sections[TEST_SECTION]);
