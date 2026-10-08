@@ -71,7 +71,7 @@ export type SpecificationProjectOptions = {
     include?: string[];
     /** Run files one at a time, for specifications sharing a served app, a database file or a browser profile. */
     serial?: boolean;
-    /** Raise (or lower) the 30s budget for this project alone. */
+    /** Raise (or lower) the 30s budget for this project alone: each test's, and each hook's, which tears down what the test stood on. */
     timeout?: number;
 };
 
@@ -92,7 +92,9 @@ export function projectTest(
         ...(options.serial === true ? { fileParallelism: false } : {}),
         name,
         sequence: { groupOrder: 0 },
-        ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
+        ...(options.timeout === undefined
+            ? {}
+            : { hookTimeout: options.timeout, testTimeout: options.timeout }),
     };
 }
 

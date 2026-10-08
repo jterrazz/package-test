@@ -44,9 +44,12 @@ describe('project', () => {
         // Given - a specification project that shares one app and needs a minute
         const project = testOf(specificationProject('api', { serial: true, timeout: 60_000 }));
 
-        // Then - no file parallelism, and the stated budget
-        expect(project.fileParallelism).toBe(false);
-        expect(project.testTimeout).toBe(60_000);
+        // Then - no file parallelism, and the stated budget for its tests and its hooks alike
+        expect([project.fileParallelism, project.testTimeout, project.hookTimeout]).toStrictEqual([
+            false,
+            60_000,
+            60_000,
+        ]);
     });
 
     test('inProcessProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {
