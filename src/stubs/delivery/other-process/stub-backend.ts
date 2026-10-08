@@ -57,7 +57,7 @@ export class StubBackend {
         });
 
         const address = server.address();
-        // Stryker disable all: a server listening on a TCP port always answers it
+        // Stryker disable BlockStatement,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on a TCP port always answers it
         if (address === null || typeof address === 'string') {
             throw invariant('the stub backend listens on no port');
         }

@@ -112,7 +112,7 @@ export function signalGroup(
     signal: NodeJS.Signals | number = 'SIGTERM',
 ): boolean {
     // hazard: a child whose spawn failed has no pid, and killing it signals this very process: a mutant of this guard would kill the run measuring it.
-    // Stryker disable next-line all: see above
+    // Stryker disable next-line BlockStatement,ConditionalExpression,EqualityOperator: see above
     if (child.pid === undefined) {
         return false;
     }

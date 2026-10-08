@@ -82,7 +82,7 @@ export function measure(ledgers: readonly Ledger[]): Ledger {
     };
 }
 
-// Stryker disable all: only the api project's setup provides it, which no module test runs, so every read answers undefined; the api specs judge it
+// Stryker disable BlockStatement,StringLiteral: only the api project's setup provides it, which no module test runs, so every read answers undefined; the api specs judge it
 export async function routesLedger(): Promise<string | undefined> {
     try {
         const { inject } = await import('vitest');

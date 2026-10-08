@@ -20,9 +20,9 @@ function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly s
 /** The YAML document is edited, not re-emitted, so everything but exit codes and streams comes back byte-identical. */
 export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string {
     const root = file.source.document.contents;
-    // Stryker disable next-line all: readSpecFile refused any document whose runs is not a list
+    // Stryker disable next-line BooleanLiteral,StringLiteral: readSpecFile refused any document whose runs is not a list
     const runs = isMap(root) ? root.get('runs', true) : undefined;
-    // Stryker disable next-line all: readSpecFile refused any document whose runs is not a list
+    // Stryker disable next-line BlockStatement,BooleanLiteral,ConditionalExpression: readSpecFile refused any document whose runs is not a list
     if (!isSeq(runs)) {
         return renderYamlSource(file.source);
     }

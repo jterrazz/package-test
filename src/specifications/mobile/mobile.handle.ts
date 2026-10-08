@@ -59,7 +59,7 @@ export type MobileHandle = {
     udid: string | undefined;
 };
 
-// Stryker disable all: only a mobile project's setup provides the run's ledger folder, which no module test runs; the mobile specs judge it
+// Stryker disable BlockStatement,ConditionalExpression,EqualityOperator: only a mobile project's setup provides the run's ledger folder, which no module test runs; the mobile specs judge it
 async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefined> {
     const directory = outlivesFile ? await mobileSessions() : undefined;
     return directory === undefined ? undefined : sessionLedger(directory);

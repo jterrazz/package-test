@@ -20,7 +20,7 @@ import type { ProcessOptions } from './process.adapter.js';
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 
-// Stryker disable all: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
+// Stryker disable ArrayDeclaration,BlockStatement,BooleanLiteral,CallExpression,ConditionalExpression,ObjectLiteral,OptionalChaining,StringLiteral: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
 function watchGroup(groupId: number, strays: Strays): ChildProcess {
     const args = ['-e', WATCHDOG, JSON.stringify(strays), String(groupId)];
     const watchdog = spawn(process.execPath, args, {
@@ -50,7 +50,7 @@ export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
 
-// Stryker disable all: a server listening on port 0 always answers the port it got, and never errors
+// Stryker disable BlockStatement,CallExpression,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on port 0 always answers the port it got, and never errors
 async function findFreePort(): Promise<number> {
     return await new Promise((resolve, reject) => {
         const server = createServer();
@@ -286,7 +286,7 @@ async function answers(url: string): Promise<boolean> {
 
 // invariant: the group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it.
 async function endGroup(child: ChildProcess): Promise<void> {
-    // Stryker disable next-line all: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
+    // Stryker disable next-line BlockStatement,ConditionalExpression,EqualityOperator: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
     if (child.pid === undefined) {
         return;
     }

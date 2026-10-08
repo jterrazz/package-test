@@ -18,7 +18,7 @@ import { SQLITE_TEMPLATE_DIR } from '../../../lint/kit/project/artifacts.js';
 const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 
 // invariant: runs on the file opened, and closes it whatever happens.
-// Stryker disable all: a descriptor left open answers nothing a test reads
+// Stryker disable BlockStatement,CallExpression: a descriptor left open answers nothing a test reads
 function withDescriptor<T>(path: string, flags: string, use: (fd: number) => T): T {
     const fd = openSync(path, flags);
     try {

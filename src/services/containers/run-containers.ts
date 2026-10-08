@@ -147,7 +147,7 @@ export async function serveContainers(containers: RunContainers): Promise<Served
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
     const address = server.address();
-    // Stryker disable all: a server listening on a TCP port always answers it
+    // Stryker disable BlockStatement,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on a TCP port always answers it
     if (address === null || typeof address === 'string') {
         throw invariant('the run containers are served on no port');
     }

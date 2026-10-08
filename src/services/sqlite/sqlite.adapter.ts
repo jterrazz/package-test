@@ -24,7 +24,7 @@ import type { SqliteOptions } from './sqlite-template.js';
 // outside: an optional peer, a native module to compile.
 let databaseConstructor: null | typeof Database = null;
 
-// Stryker disable all: the driver is installed and built here and loads once per process; the refusals of a missing or unbuilt peer are peer.ts's, tested there
+// Stryker disable BlockStatement,CallExpression,ConditionalExpression,EqualityOperator,StringLiteral: the driver is installed and built here and loads once per process; the refusals of a missing or unbuilt peer are peer.ts's, tested there
 async function loadDatabase(): Promise<typeof Database> {
     if (databaseConstructor === null) {
         const constructor = await loadPeer('better-sqlite3', 'sqlite()', async () => {
@@ -68,7 +68,7 @@ function removeDatabaseFiles(path: string): void {
 }
 
 // invariant: opens the database file for one use, and closes it whatever happens.
-// Stryker disable all: a handle left open on a file nobody writes again answers nothing a test reads
+// Stryker disable BlockStatement,CallExpression: a handle left open on a file nobody writes again answers nothing a test reads
 function withDatabase(path: string, use: (db: Database.Database) => void): void {
     const db = new (database())(path);
     try {

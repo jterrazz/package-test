@@ -61,7 +61,7 @@ export function documentMap(file: SpecFile): null | YAMLMap {
 }
 
 /** readSpecFile refused a document whose runs are not a list of maps: these checks only narrow. */
-// Stryker disable OptionalChaining,BooleanLiteral,ConditionalExpression,MethodExpression,ArrayDeclaration
+// Stryker disable OptionalChaining,BooleanLiteral,ConditionalExpression,MethodExpression,ArrayDeclaration: readSpecFile refused a document whose runs are not a list of maps, so these checks only narrow
 export function runMaps(file: SpecFile): YAMLMap[] {
     const items = documentMap(file)?.get('runs', true);
     return isSeq(items) ? nodeItems(items).filter((item) => isMap(item)) : [];
