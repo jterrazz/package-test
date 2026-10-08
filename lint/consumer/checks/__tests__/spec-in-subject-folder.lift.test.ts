@@ -26,7 +26,41 @@ const LISTING = [
 ].join('\n');
 
 describe('liftGround', () => {
-    test('lifts the ground only readers that left read, repoints them and the module tests, and keeps the rest', () => {
+    test('liftGround — repoints a lifted entry alone, never a sibling whose name it begins', () => {
+        // Given - a listing moved below its leaf reading an app it alone reads, and two siblings named from it that a staying spec reads too
+        const root = specsTree({
+            'api/orders/__fixtures__/app-v2/index.txt': 'two\n',
+            'api/orders/__fixtures__/app.json': '{}\n',
+            'api/orders/__fixtures__/app/index.txt': 'app\n',
+            'api/orders/list/listing.spec.ts': [
+                "test('a', () => {",
+                "    read(directory('../__fixtures__/app/'));",
+                "    read(file('../__fixtures__/app-v2/index.txt'));",
+                "    read(file('../__fixtures__/app.json'));",
+                '});',
+                '',
+            ].join('\n'),
+            'api/orders/notes.spec.ts':
+                "test('n', () => { read(file('./__fixtures__/app-v2/index.txt')); read(file('./__fixtures__/app.json')); });\n",
+        });
+
+        // When - the leaf's ground is lifted
+        liftGround(root, join(root, 'api/orders'));
+
+        // Then - the app follows the listing, and the siblings it shares stay named where they stand
+        expect(readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8')).toBe(
+            [
+                "test('a', () => {",
+                "    read(directory('./__fixtures__/app/'));",
+                "    read(file('../__fixtures__/app-v2/index.txt'));",
+                "    read(file('../__fixtures__/app.json'));",
+                '});',
+                '',
+            ].join('\n'),
+        );
+    });
+
+    test('liftGround — lifts the ground only readers that left read, repoints them and the module tests, and keeps the rest', () => {
         // Given - a listing moved below its leaf, its ground read by it alone, an unread golden, and an app a staying spec reads
         const root = specsTree({
             'api/orders/__expected__/listed.http': 'HTTP/1.1 200 OK\n',
@@ -82,7 +116,7 @@ describe('liftGround', () => {
         ]);
     });
 
-    test('leaves an entry whose new place is taken', () => {
+    test('liftGround — leaves an entry whose new place is taken', () => {
         // Given - a moved listing whose golden's new place holds another
         const root = specsTree({
             'api/orders/__expected__/listed.http': 'HTTP/1.1 200 OK\n',
@@ -96,7 +130,7 @@ describe('liftGround', () => {
         expect(liftGround(root, join(root, 'api/orders'))).toStrictEqual([]);
     });
 
-    test('repoints the document that reads the ground it lifts', () => {
+    test('liftGround — repoints the document that reads the ground it lifts', () => {
         // Given - a check document, and a spec of the fix command moved under its command, both standing on the project
         const root = specsTree({
             'cli/check/__fixtures__/project/index.ts': 'export {};\n',

@@ -1,8 +1,8 @@
 import { isGroundFolder, moveKeepingHistory, treeKind } from '@jterrazz/typescript/rules';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { pathFrom, quotedLiterals, relativeLiterals } from '../../kit/checker/repoint.js';
+import { quotedLiterals, relativeLiterals, repointFiles } from '../../kit/checker/repoint.js';
 import { moduleTestsOf } from '../../kit/project/module-tests.js';
 import { anchoredPaths, collectFixtureReferences } from '../../kit/project/named-paths.js';
 import { SETTINGS_FILE } from '../../kit/project/settings-file.js';
@@ -171,12 +171,7 @@ export function fixGroundPlacement(rootDir: string): string[] {
         }
         mkdirSync(dirname(destination), { recursive: true });
         moveKeepingHistory(join(ground, entry), destination);
-        for (const file of referrers) {
-            const text = readText(file);
-            const climb = relative(dirname(file), ground).split(sep).join('/');
-            const down = pathFrom(dirname(file), join(lowest, role));
-            writeFileSync(file, text.replaceAll(`${climb}/${entry}`, `${down}/${entry}`));
-        }
+        repointFiles(referrers, [{ copy: join(ground, entry), target: destination }]);
         removeIfEmpty(ground);
         moved.push(`${relative(rootDir, join(ground, entry))} → ${relative(rootDir, destination)}`);
     }

@@ -5,10 +5,10 @@ import {
     treeEntries,
     treeKind,
 } from '@jterrazz/typescript/rules';
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { basename, dirname, join, resolve, sep } from 'node:path';
 
-import { pathFrom, repointModuleTests } from '../../kit/checker/repoint.js';
+import { repointFiles, repointModuleTests } from '../../kit/checker/repoint.js';
 import { isTestFileName } from '../../kit/project/role.js';
 import { documentPaths, parseSpecDocument } from '../../kit/project/spec-document.js';
 import { SPEC_EXTENSION } from '../../kit/project/spec-grammar.js';
@@ -73,15 +73,9 @@ export function liftGround(specsRoot: string, leaf: string): string[] {
             }
             mkdirSync(dirname(destination), { recursive: true });
             moveKeepingHistory(path, destination);
-            repointModuleTests(specsRoot, [{ copy: path, target: destination }]);
-            for (const file of new Set(readers.map((reader) => reader.file))) {
-                const from = dirname(file);
-                const text = readFileSync(file, 'utf8');
-                writeFileSync(
-                    file,
-                    text.replaceAll(pathFrom(from, path), pathFrom(from, destination)),
-                );
-            }
+            const moves = [{ copy: path, target: destination }];
+            repointModuleTests(specsRoot, moves);
+            repointFiles([...new Set(readers.map((reader) => reader.file))], moves);
             lifted.push(`${shown(specsRoot, path)} → ${shown(specsRoot, destination)}`);
         }
         if (readdirSync(folder).length === 0) {
