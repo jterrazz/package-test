@@ -1,5 +1,5 @@
 // The own-fixes project's config in cap01's web shape: the plugin armed only
-// Through a config the root extends, beside another rulebook's fixer.
+// through a config the root extends, beside another rulebook's fixer.
 export default {
     extends: [
         {

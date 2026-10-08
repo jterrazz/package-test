@@ -63,7 +63,7 @@ export class Session {
             }
             case 'mobile: scroll': {
                 // outside: what WebDriverAgent answers `toVisible` with on a SwiftUI
-                // Scroll view, as a simulator run met it.
+                // scroll view, as a simulator run met it.
                 throw new ProtocolError(
                     'unknown error',
                     500,

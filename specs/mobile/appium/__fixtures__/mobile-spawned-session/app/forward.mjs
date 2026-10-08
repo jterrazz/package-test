@@ -1,10 +1,10 @@
 // Serves `--port <n>` by forwarding every request to the protocol double the
-// Run's global setup names in APPIUM_DOUBLE_URL. It writes the simulator each
-// New session asks for to `udid`, and `stopped` when it is terminated. It
-// Exits when the run that spawned it is gone. Each new session starts a
+// run's global setup names in APPIUM_DOUBLE_URL. It writes the simulator each
+// new session asks for to `udid`, and `stopped` when it is terminated. It
+// exits when the run that spawned it is gone. Each new session starts a
 // WebDriverAgent as the XCUITest driver does — an xcodebuild in a group of
-// Its own, and the runner app on the simulator — which outlive this server,
-// Their pids written to `webdriveragent`.
+// its own, and the runner app on the simulator — which outlive this server,
+// their pids written to `webdriveragent`.
 import { spawn } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createServer, request } from 'node:http';

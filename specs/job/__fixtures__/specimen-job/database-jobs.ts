@@ -42,7 +42,7 @@ async function insertOneEvent(analyticsUrl: string, type: string): Promise<void>
 }
 
 // A job that reaches OUT to an HTTP API and stores what it learns — the vehicle
-// For the intercept (`network-strict-after-first-stub`) specs: its outgoing request is what `.intercept()` mocks.
+// for the intercept (`network-strict-after-first-stub`) specs: its outgoing request is what `.intercept()` mocks.
 async function enrichFromApi(analyticsUrl: string): Promise<void> {
     const response = await fetch('https://enrich.example.test/label');
     const data = (await response.json()) as { label: string };
@@ -67,7 +67,7 @@ export function databaseJobs({
         {
             execute: async () => {
                 // Write one row, then crash — specs assert both the rejection
-                // And the pre-crash database state.
+                // and the pre-crash database state.
                 await insertOneEvent(analyticsDb.connectionString, 'pre_crash');
                 throw new Error('crash-after-insert: boom');
             },

@@ -14,7 +14,7 @@ const server = createServer((request, response) => {
 });
 
 // It binds the port the OS hands it and announces it, which is how the runner
-// Reads it (`ready: /listening on port (\d+)/`).
+// reads it (`ready: /listening on port (\d+)/`).
 server.listen(0, '127.0.0.1', () => {
     process.stdout.write(`listening on port ${server.address().port}\n`);
 });

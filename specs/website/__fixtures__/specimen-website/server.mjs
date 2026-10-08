@@ -1,8 +1,8 @@
 // The website fixture — a deliberately representative mini-site for the
-// Website specification specs: full head surface (canonical, hreflang, OG,
+// website specification specs: full head surface (canonical, hreflang, OG,
 // JSON-LD), a form with client behavior, a permanent redirect, robots.txt,
-// And a console-noisy page. Zero dependencies; it binds port 0 and prints the
-// Port it got.
+// and a console-noisy page. Zero dependencies; it binds port 0 and prints the
+// port it got.
 import { createServer } from 'node:http';
 
 const head = (title, path) => `
@@ -50,21 +50,21 @@ const pages = {
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"All articles"}</script>
     </head><body><h1>All articles</h1><a href="/">Home</a></body></html>`,
     // The page whose content IS the moment it was opened: a site's own script
-    // Reading `Date` is what `.clock()` pins, and only the page's clock can.
+    // reading `Date` is what `.clock()` pins, and only the page's clock can.
     '/clock': `<!doctype html><html lang="en"><head>${head('Fixture — Clock', '/clock')}
     </head><body><h1>Clock</h1><p id="now">unset</p>
     <script>document.getElementById('now').textContent = new Date().toISOString();</script>
     </body></html>`,
     // What the site was STARTED with: the URL of the process declared beside
-    // It, and the run id the specification minted — neither of them sampled here.
+    // it, and the run id the specification minted — neither of them sampled here.
     '/services': `<!doctype html><html lang="en"><head>${head('Fixture — Services', '/services')}
     </head><body><h1>Services</h1>
     <p id="api">${process.env.API_URL ?? 'unset'}</p>
     <p id="run">${process.env.TEST_RUN_ID ?? 'unset'}</p>
     </body></html>`,
     // The FRAMEWORK's own page: the two metas a view-transitions router writes
-    // Into every head, which no spec ever asked for and no token can name — the
-    // Runner's `transform` is the door that drops them before a comparison.
+    // into every head, which no spec ever asked for and no token can name — the
+    // runner's `transform` is the door that drops them before a comparison.
     '/framework': `<!doctype html><html lang="en"><head>${head('Fixture — Framework', '/framework')}
     <meta name="framework-transitions-enabled" content="">
     <meta name="framework-transitions-fallback" content="animate">
@@ -74,7 +74,7 @@ const pages = {
     // The ambiguity fixture: "Articles" appears three times — twice as the
     // WHOLE accessible name in two landmarks, once only as a substring ("Read
     // Articles"). The first pair is what target-matches-one-element refuses to guess between; the third
-    // Is what a substring match would fold in silently.
+    // is what a substring match would fold in silently.
     '/ambiguous': `<!doctype html><html lang="en"><head>${head('Fixture — Ambiguous', '/ambiguous')}
     </head><body>
     <nav aria-label="Main"><a href="/articles">Articles</a></nav>
@@ -88,8 +88,8 @@ const pages = {
     <footer><a href="/articles">Articles</a></footer>
     </body></html>`,
     // Every landmark and container the element vocabulary names, and the
-    // Controls the four remaining verbs drive: a checkbox, a field answered
-    // By a key, a button that explains itself on hover.
+    // controls the four remaining verbs drive: a checkbox, a field answered
+    // by a key, a button that explains itself on hover.
     '/landmarks': `<!doctype html><html lang="en"><head>${head('Fixture — Landmarks', '/landmarks')}
     </head><body>
     <header><h1>Landmarks</h1></header>
@@ -136,7 +136,7 @@ const pages = {
     </script>
     </body></html>`,
     // A search landmark the HTML `<search>` element carries, with no `role`
-    // Attribute to spell it — and a "Go" button inside it and outside it.
+    // attribute to spell it — and a "Go" button inside it and outside it.
     '/search': `<!doctype html><html lang="en"><head>${head('Fixture — Search', '/search')}
     </head><body>
     <h1>Search</h1>
@@ -144,7 +144,7 @@ const pages = {
     <main><button type="button">Go</button></main>
     </body></html>`,
     // Three "Remove" buttons, each in a `<section>`: one named by its label,
-    // One by the heading it points at, one unnamed — no region at all.
+    // one by the heading it points at, one unnamed — no region at all.
     '/regions': `<!doctype html><html lang="en"><head>${head('Fixture — Regions', '/regions')}
     </head><body>
     <main>
@@ -155,7 +155,7 @@ const pages = {
     </main>
     </body></html>`,
     // A "Home" link in a list the nav holds, the list carrying a role of its
-    // Own, and another "Home" in the footer.
+    // own, and another "Home" in the footer.
     '/listed': `<!doctype html><html lang="en"><head>${head('Fixture — Listed', '/listed')}
     </head><body>
     <nav><ul role="list"><li><a href="/">Home</a></li></ul></nav>
@@ -166,14 +166,14 @@ const pages = {
     '/thrown': `<!doctype html><html lang="en"><head><title>Fixture — Thrown</title></head>
     <body><h1>Thrown</h1><script>throw new Error('the page broke');</script></body></html>`,
     // A page that stamps its build in every surface a result reads — the text,
-    // The markup, the title, the console and its errors — for a runner's
+    // the markup, the title, the console and its errors — for a runner's
     // `transform` to normalise before any comparison.
     '/stamped': `<!doctype html><html lang="en"><head><title>Stamped — build 7f3a</title></head>
     <body><h1>Stamped</h1><p>build 7f3a</p>
     <script>console.log('build 7f3a'); console.error('build 7f3a failed');</script>
     </body></html>`,
     // A page asking for a resource on ANOTHER origin — the same server, named
-    // By its other host — and saying whether the request left the site.
+    // by its other host — and saying whether the request left the site.
     '/external': `<!doctype html><html lang="en"><head><title>Fixture — External</title></head>
     <body><h1>External</h1><p id="external">pending</p>
     <script>
@@ -230,7 +230,7 @@ const server = createServer(async (request, response) => {
 });
 
 // It binds the port the OS hands it and announces it: the spec reads it off
-// That line (`ready: /listening on port (\d+)/`) and never picks one.
+// that line (`ready: /listening on port (\d+)/`) and never picks one.
 server.listen(0, '127.0.0.1', () => {
     process.stdout.write(`listening on port ${server.address().port}\n`);
 });

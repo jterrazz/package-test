@@ -12,7 +12,7 @@ case "$COMMAND" in
         ;;
     clean)
         # The inverse of build — the second half of "what this run left on
-        # Disk", where the file a previous run wrote is gone again.
+        # disk", where the file a previous run wrote is gone again.
         rm -rf dist
         echo "Cleaned"
         ;;
@@ -137,7 +137,7 @@ case "$COMMAND" in
     json-cwd)
         # JSON whose values embed the run cwd — exercises workdir-token
         # substitution on the JSON update path (the cwd is the only value that
-        # Differs across runs, so a substituted golden must match the next run).
+        # differs across runs, so a substituted golden must match the next run).
         printf '{"cwd":"%s","log":"wrote %s/out.txt","name":"cli-app"}\n' "$PWD" "$PWD"
         ;;
     ansi)
@@ -185,12 +185,12 @@ case "$COMMAND" in
         ;;
     no-newline)
         # Output that does NOT end with a newline — the `|-` half of a
-        # Block scalar's byte-exactness.
+        # block scalar's byte-exactness.
         printf 'ends here'
         ;;
     upper)
         # Reads stdin to EOF and shouts it back. With no `stdin:` the pipe is
-        # Closed immediately, so this prints an empty line either way.
+        # closed immediately, so this prints an empty line either way.
         tr '[:lower:]' '[:upper:]'
         ;;
     package)
@@ -198,7 +198,7 @@ case "$COMMAND" in
         ;;
     hang)
         # Never answers on its own: the process becomes the sleep, so the
-        # Signal a timeout sends ends it, and nothing outlives the run.
+        # signal a timeout sends ends it, and nothing outlives the run.
         echo "waiting on nothing"
         exec sleep 30
         ;;

@@ -8,7 +8,7 @@ const seed = file('./__seeds__/users.sql');
 describe('widget', () => {
     test('seeds from a bound file', async () => {
         // Given - a seed handed to the verb through a binding: the call site
-        // Names no path, so the checker's reference set is incomplete
+        // names no path, so the checker's reference set is incomplete
         const result = await api.seed(seed).get('/');
 
         // Then - the response is defined

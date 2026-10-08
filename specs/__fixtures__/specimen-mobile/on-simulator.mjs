@@ -1,7 +1,7 @@
 // `make test-mobile` — the mobile specs on a real iOS simulator.
 //
 // Builds Specimen from `ios/` (swiftc and the simulator SDK, no Xcode
-// Project), installs it on the simulator `specimen.ts` names, starts an
+// project), installs it on the simulator `specimen.ts` names, starts an
 // Appium server with the XCUITest driver (installed once under
 // `.artifacts/mobile/appium/`, pinned), then runs the `mobile` project with
 // `TEST_MOBILE_APPIUM_URL` pointing at that server — the same specs `make
@@ -132,8 +132,8 @@ async function startAppium(bin) {
 }
 
 // Each process is matched by its program's own name and the words its
-// Command line holds, never by a pattern over every command line: a shell
-// Whose command merely mentions WebDriverAgent and the UDID is left alone.
+// command line holds, never by a pattern over every command line: a shell
+// whose command merely mentions WebDriverAgent and the UDID is left alone.
 function endWebDriverAgent(udid) {
     const listed = (column) =>
         new Map(
@@ -178,7 +178,7 @@ const suite = spawnSync(
 );
 appium.child.kill('SIGTERM');
 // Appium keeps WebDriverAgent's xcodebuild alive across sessions, and past
-// Its own exit, and the runner app on the simulator with it: the run ends
-// Both, as the specification ends the WebDriverAgent of a server it spawned.
+// its own exit, and the runner app on the simulator with it: the run ends
+// both, as the specification ends the WebDriverAgent of a server it spawned.
 endWebDriverAgent(udid);
 process.exitCode = suite.status ?? 1;

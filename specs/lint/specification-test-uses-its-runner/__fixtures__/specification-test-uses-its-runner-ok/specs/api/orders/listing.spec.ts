@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'; // checker-disable-line spec-in-subject-folder -- an input of specification-test-uses-its-runner: this folder is the case the rule reads, not a subject's standard name
 
 // The import states no extension: the runner is reached by the MODULE it
-// Names, and a scan for `.specification.js` read this spec as a module test.
+// names, and a scan for `.specification.js` read this spec as a module test.
 import { api } from '../api.specification';
 
 describe('listing', () => {

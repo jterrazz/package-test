@@ -1,6 +1,6 @@
 // The API Specimen's notes screen reads — started as a `process()` service
-// Beside the app. Zero dependencies; it binds port 0 and prints the port it
-// Got.
+// beside the app. Zero dependencies; it binds port 0 and prints the port it
+// got.
 import { createServer } from 'node:http';
 
 const notes = [{ title: 'Buy oat milk' }, { title: 'Call the plumber' }];

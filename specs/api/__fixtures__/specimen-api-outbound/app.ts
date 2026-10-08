@@ -102,7 +102,7 @@ const routes: Record<string, () => Promise<Response>> = {
     },
     '/cancel': async () => {
         // The subject drops the body it did not need — what an SDK client does
-        // Before a retry.
+        // before a retry.
         const response = await fetch(QUOTES_URL);
         await response.body?.cancel();
         return Response.json({ status: response.status });
@@ -158,7 +158,7 @@ const routes: Record<string, () => Promise<Response>> = {
     },
     '/submit': async () => {
         // A POST that carries a JSON body, a custom header, and a query
-        // String — the surface an http trigger filter narrows on.
+        // string — the surface an http trigger filter narrows on.
         const response = await fetch(`${QUOTES_URL}?lang=en`, {
             body: JSON.stringify({ action: 'quote', user: { role: 'admin' } }),
             headers: { 'content-type': 'application/json', 'x-tenant': 'acme' },
@@ -168,8 +168,8 @@ const routes: Record<string, () => Promise<Response>> = {
     },
     '/tokens': async () => {
         // A provider that answers in PIECES: the app reads them as they land,
-        // Which is the whole of what a stream stub states — the chunks and
-        // Their order.
+        // which is the whole of what a stream stub states — the chunks and
+        // their order.
         const response = await fetch(STREAM_URL);
         const decoder = new TextDecoder();
         const chunks = await readChunks(response, decoder);
