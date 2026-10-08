@@ -1,0 +1,10 @@
+{
+    "name": "@acme/commanded",
+    "version": "1.0.0",
+    "bin": "cli.cjs",
+    "files": ["cli.cjs"],
+    "dependencies": { "yaml": "^2.8.0" },
+    "optionalDependencies": { "typescript": "*" },
+    "peerDependencies": { "vitest": "*", "@acme/absent-peer": "*" },
+    "peerDependenciesMeta": { "@acme/absent-peer": { "optional": true } }
+}

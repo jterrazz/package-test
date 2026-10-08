@@ -202,6 +202,10 @@ case "$COMMAND" in
         echo "waiting on nothing"
         exec sleep 30
         ;;
+    command)
+        # What a consumer's script runs: a command the install laid in node_modules/.bin.
+        "node_modules/.bin/$2"
+        ;;
     load)
         # What a consumer gets from the package, loaded as Node loads it from the working directory.
         node -p "require('$2')"
