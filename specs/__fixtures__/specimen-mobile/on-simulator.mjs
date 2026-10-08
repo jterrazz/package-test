@@ -131,6 +131,40 @@ async function startAppium(bin) {
     throw new Error(`test-mobile: appium did not answer on ${url} — see ${join(out, 'appium.log')}`);
 }
 
+// Each process is matched by its program's own name and the words its
+// Command line holds, never by a pattern over every command line: a shell
+// Whose command merely mentions WebDriverAgent and the UDID is left alone.
+function endWebDriverAgent(udid) {
+    const listed = (column) =>
+        new Map(
+            spawnSync('ps', ['-A', '-o', `pid=,${column}=`], { encoding: 'utf8' })
+                .stdout.split('\n')
+                .flatMap((line) => {
+                    const found = /^\s*(\d+)\s(.*)$/u.exec(line);
+                    return found === null ? [] : [[Number(found[1]), found[2]]];
+                }),
+        );
+    const commands = listed('command');
+    const strays = [
+        { holds: ['WebDriverAgent', `id=${udid}`], program: 'xcodebuild' },
+        { holds: [`/Devices/${udid}/`], program: 'WebDriverAgentRunner-Runner' },
+    ];
+    for (const [pid, program] of listed('comm')) {
+        const stray = strays.some(
+            (one) =>
+                (program === one.program || program.endsWith(`/${one.program}`)) &&
+                one.holds.every((word) => (commands.get(pid) ?? '').includes(word)),
+        );
+        if (stray) {
+            try {
+                process.kill(pid, 'SIGTERM');
+            } catch {
+                // Already gone.
+            }
+        }
+    }
+}
+
 mkdirSync(out, { recursive: true });
 const app = buildApp();
 const udid = bootSimulator();
@@ -146,6 +180,5 @@ appium.child.kill('SIGTERM');
 // Appium keeps WebDriverAgent's xcodebuild alive across sessions, and past
 // Its own exit, and the runner app on the simulator with it: the run ends
 // Both, as the specification ends the WebDriverAgent of a server it spawned.
-spawnSync('pkill', ['-f', `WebDriverAgent.*${udid}`]);
-spawnSync('pkill', ['-f', `${udid}.*WebDriverAgent`]);
+endWebDriverAgent(udid);
 process.exitCode = suite.status ?? 1;
