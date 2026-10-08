@@ -1,4 +1,11 @@
-import { BASELINE, keepsSection, labelOf, refusal, sectionOf } from '@jterrazz/typescript/rules';
+import {
+    BASELINE,
+    keepsSection,
+    labelOf,
+    readSettingsSync,
+    refusal,
+    sectionOf,
+} from '@jterrazz/typescript/rules';
 import type { Context, Finding, Pass, PassResult } from '@jterrazz/typescript/rules';
 import { existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
@@ -120,6 +127,12 @@ function judgedWhere({ context }: Run, judged: Judged, deferring: boolean): Pass
     };
 }
 
+const OWN_PACKAGE = '@jterrazz/test';
+
+// invariant: a root listing the preset judges every specs tree of the workspace itself, so a member's run judges its own trees only where the root does not.
+const rootJudgesTrees = (root: string): boolean =>
+    readSettingsSync(root).resolved.presets.some((preset) => preset.package === OWN_PACKAGE);
+
 function memberRun(run: Run, member: string): PassResult {
     const { context, registry, teach } = run;
     const { root } = context;
@@ -133,9 +146,22 @@ function memberRun(run: Run, member: string): PassResult {
         what: `for member ${relative(root, dir) || '.'}`,
     };
     if (dir !== root) {
+        const trees = rootJudgesTrees(root) ? [] : discoverSpecRoots(dir);
+
         return judgedWhere(
             run,
-            { ...judged, findings: teach(runMember(dir, root, registry)) },
+            {
+                findings: teach([
+                    ...runMember(dir, root, registry),
+                    ...trees.flatMap((tree) => treeSpotted(registry, tree, root)),
+                ]),
+                fixes: context.fix ? fixesOf(registry, trees) : [],
+                passes:
+                    trees.length === 0
+                        ? registry.memberPassIds
+                        : [...new Set([...registry.treePassIds, ...registry.memberPassIds])],
+                what: judged.what,
+            },
             true,
         );
     }

@@ -110,7 +110,7 @@ A rule is specified in `specs/lint/<rule-id>/<rule-id>.spec.ts` — a folder gro
 The conventions checker is the toolchain's checker program handed this package's `#checker` contribution, and its command line is no consumer's surface: `typescript check`, `fix` and `baseline` drive it, and so do the specs — `specs/cli/checker/` and `specs/cli/baseline/`, on `specs/cli/checker-cli.specification.ts`, whose goldens are the exact streams it prints. What it reads, for whoever maintains it:
 
 - **A path is read for what it is.** A directory with a `specs` segment below the project root that holds it is a tree, walked as one. Anything else is a project root, and takes the run over the whole project anchored there — every `specs/` tree the workspaces declare below it, plus every member. A named root holding no `specs/` tree at all is refused with a non-zero exit, because the run asked for had nothing to walk.
-- **`--member <dir>`** runs the member pass over one member — the run the toolchain makes again in a member that declares presets of its own.
+- **`--member <dir>`** runs the member pass over one member — the run the toolchain makes again in a member that declares presets of its own — and, where the root lists no `test()` preset, the tree passes over the member's own spec trees ([Linting § The member pass](../reference/linting.md#the-member-pass)).
 - **`--format json`** prints the kit's findings, `[{ column, line, message, path, rule }]`, on stdout and nothing else, whatever the verdict, and the exit is still the verdict; `rule` is the key the ratchet counts, `jterrazz-check/<name>`.
 - **`--verbose`** adds, above the held line, where the run stood and what ran.
 
@@ -394,7 +394,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 7      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
-| `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 19     |
+| `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 20     |
 | `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 18     |
 | `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 8      |
 

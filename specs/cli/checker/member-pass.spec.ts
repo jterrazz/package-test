@@ -26,16 +26,29 @@ describe('member-pass', () => {
     });
 
     test('checker CLI — the member pass — `--verbose` names the member it judged and the passes that ran', async () => {
-        // Given - the same clean member, judged verbosely
+        // Given - the same clean member, which keeps a specs tree under web/, judged verbosely under a root that lists no preset
         const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE} --verbose`);
 
-        // Then - the member, and the passes that actually ran — from the registry itself, and never the tree ones, which walked nothing
+        // Then - the member, and the passes that actually ran: its own tree's, then the member's
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toContain('packages/clean');
         expect(result.stdout.text).toContain(
-            'file-suffix-matches-place, named-path-exists, no-snapshot-folder, no-simulated-dom-in-config, no-redundant-test-dependency',
+            'conventions checker for member packages/clean (reserved-folder-in-closed-list, ',
         );
-        expect(result.stdout.text).not.toContain('no-unused-ground');
+        expect(result.stdout.text).toContain(
+            'no-snapshot-folder, no-simulated-dom-in-config, no-redundant-test-dependency)',
+        );
+    });
+
+    test('checker CLI — the member pass — runs no tree pass for a member that keeps no specs tree', async () => {
+        // Given - a member with no spec tree, judged verbosely
+        const result = await cli.exec(
+            `--member ${member('seam-dependency')} ${WORKSPACE} --verbose`,
+        );
+
+        // Then - only the member passes are named
+        expect(result.stdout.text).toContain(
+            'conventions checker for member packages/seam-dependency (file-suffix-matches-place, named-path-exists, no-snapshot-folder, no-simulated-dom-in-config, no-redundant-test-dependency)',
+        );
     });
 
     test("checker CLI — the member pass — a root whose only tests are its members' owes no config", async () => {
@@ -110,5 +123,17 @@ describe('member-pass', () => {
         // Then - the run fails loudly rather than reporting a clean member
         expect(result.exitCode).toBe(1);
         expect(result.stdout.text).toContain('no such member directory');
+    });
+
+    test("checker CLI — the member pass — judges the member's own specs trees where the root lists no preset", async () => {
+        // Given - a workspace whose root declares nothing, and a member whose spec reads a short golden alone
+        const trees = resolve(import.meta.dirname, '__fixtures__/member-trees');
+        const result = await cli.exec(`--member ${trees}/packages/site ${trees}`);
+
+        // Then - the tree pass ran for the member: the golden is refused where the test names it
+        expect(result.exitCode).toBe(1);
+        expect(result.stdout.text).toContain(
+            'packages/site/specs/widget/widget.test.ts:6:33: error jterrazz-check(ground-shared-or-inline): found: widget/__expected__/ready.txt, read by this test alone · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: write it here, the value `toMatch` compares, and delete the file — `typescript fix` inlines it · read: docs/reference/linting.md#ground-shared-or-inline',
+        );
     });
 });

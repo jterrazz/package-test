@@ -1,0 +1,5 @@
+{
+    "name": "member-trees-fixture",
+    "private": true,
+    "workspaces": ["packages/*"]
+}
