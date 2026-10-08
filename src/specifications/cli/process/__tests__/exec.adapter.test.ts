@@ -1,7 +1,7 @@
 /* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
 import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
-import { buildEnv, observeProcess } from '../exec.adapter.js';
+import { buildEnv, ExecAdapter, observeProcess } from '../exec.adapter.js';
 import type { ObservableProcess } from '../exec.adapter.js';
 
 class FakeChild implements ObservableProcess {
@@ -217,5 +217,19 @@ describe('ExecAdapter', () => {
         // Then - one resolution, one SIGTERM
         await expect(promise).resolves.toMatchObject({ exitCode: 0 });
         expect(child.killed).toStrictEqual(['SIGTERM']);
+    });
+
+    test('exec adapter — ExecAdapter.exec — hands the command what is piped in and closes it, so a reader of stdin ends', async () => {
+        // Given - a command that echoes its stdin until it closes
+        const adapter = new ExecAdapter('cat');
+
+        // Then - the piped text comes back, and the run ends on its own exit
+        await expect(
+            adapter.exec('', process.cwd(), {}, { stdin: 'piped in' }),
+        ).resolves.toStrictEqual({
+            exitCode: 0,
+            stderr: '',
+            stdout: 'piped in',
+        });
     });
 });

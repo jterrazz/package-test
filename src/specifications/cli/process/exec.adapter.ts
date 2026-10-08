@@ -107,12 +107,8 @@ export class ExecAdapter implements CliPort {
 
     async exec(args: string, cwd: string, extraEnv?: CliEnv, input?: CliInput): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
-        const child = spawn(`${this.command} ${args}`, [], {
-            cwd,
-            env,
-            shell: true,
-            stdio: ['pipe', 'pipe', 'pipe'],
-        });
+        // outside: a spawned child's three streams are pipes unless told otherwise.
+        const child = spawn(`${this.command} ${args}`, [], { cwd, env, shell: true });
         return await new Promise((resolve) => {
             const output = { stderr: '', stdout: '' };
             let timedOut = false;
@@ -137,7 +133,7 @@ export class ExecAdapter implements CliPort {
                 resolve({ exitCode: timedOut ? TIMED_OUT : (code ?? 1), ...output });
             });
             // hazard: a binary that exits before reading stdin closes the pipe under the write; the run is judged by its exit, not by that error.
-            // Stryker disable next-line StringLiteral,ArrowFunction: the pipe holds what a run pipes in before the child reads it, so the error fires only past its buffer, which no spec pipes
+            // Stryker disable next-line StringLiteral,ArrowFunction,CallExpression: the pipe holds what a run pipes in before the child reads it, so the error fires only past its buffer, which no spec pipes
             child.stdin.on('error', () => undefined);
             // outside: absent `input` still closes stdin: the child reads EOF, never a TTY.
             child.stdin.end(input?.stdin);
