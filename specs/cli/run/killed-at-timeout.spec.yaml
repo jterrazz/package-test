@@ -1,0 +1,7 @@
+description: ends a one-shot run at its timeout and reports 124
+runs:
+    - command: hang
+      timeout: 500
+      exit: 124
+      stdout: |
+          waiting on nothing

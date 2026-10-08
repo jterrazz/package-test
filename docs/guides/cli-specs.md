@@ -48,6 +48,8 @@ afterAll(cleanup);
 const result = await cli.exec(); // invoke the binary with no arguments
 ```
 
+The binary is spawned, never run with `spawnSync`: the test's event loop keeps turning while it runs, so a server the test itself started — an OTLP collector, a stub API on an ephemeral port — answers the binary, one-shot or long-running alike.
+
 Note the asymmetry with the array form: `.exec()` (no args) is a bare invocation, but `.exec([])` (empty array) throws — a command _sequence_ must name at least one command.
 
 ```typescript

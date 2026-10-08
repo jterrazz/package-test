@@ -196,6 +196,12 @@ case "$COMMAND" in
     package)
         node -p "const manifest = require('$2/package.json'); manifest.name + '@' + manifest.version"
         ;;
+    hang)
+        # Never answers on its own: the process becomes the sleep, so the
+        # Signal a timeout sends ends it, and nothing outlives the run.
+        echo "waiting on nothing"
+        exec sleep 30
+        ;;
     tracked)
         # What the repository around the working directory holds in its index.
         git ls-files

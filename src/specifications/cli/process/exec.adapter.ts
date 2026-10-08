@@ -1,9 +1,11 @@
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 
 import { signalGroup, SIGNALS_GROUPS } from '../../../services/process/process-group.js';
 import type { CliEnv, CliInput, CliOutput, CliPort, WatchOptions } from './cli.port.js';
 
 const DEFAULT_WATCH_TIMEOUT = 10_000;
+// invariant: one exit code for a run killed at its timeout, whichever path ran it.
+const TIMED_OUT = 124;
 // value: grace period between SIGTERM and the SIGKILL escalation.
 const KILL_GRACE_MS = 2000;
 
@@ -57,7 +59,7 @@ export async function observeProcess(
         let killTimer: NodeJS.Timeout | undefined;
 
         const timeoutTimer = setTimeout(() => {
-            finish(124);
+            finish(TIMED_OUT);
         }, options.timeout ?? DEFAULT_WATCH_TIMEOUT);
         // Stryker disable next-line CallExpression: unref'd, the timer never holds the run open, which no test inside it can see
         timeoutTimer.unref();
@@ -95,7 +97,7 @@ export async function observeProcess(
     });
 }
 
-/** `spawnSync` over `execSync`: stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
+/** Spawned, never `spawnSync`: the test's event loop keeps running while the binary does, so a server the test started — a collector, a stub — answers it. stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
 export class ExecAdapter implements CliPort {
     private readonly command: string;
 
@@ -105,24 +107,41 @@ export class ExecAdapter implements CliPort {
 
     async exec(args: string, cwd: string, extraEnv?: CliEnv, input?: CliInput): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
-        const result = spawnSync(`${this.command} ${args}`, [], {
+        const child = spawn(`${this.command} ${args}`, [], {
             cwd,
-            encoding: 'utf8',
             env,
-            // outside: absent `input` still closes stdin: the child reads EOF, never a TTY.
-            input: input?.stdin,
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
-            timeout: input?.timeout,
         });
-        // invariant: a killed run reports 124, as the long-running path does for a timeout.
-        // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- `spawnSync` types `error` as `Error`, which carries no `code`; the assertion is what reaches it
-        const timedOut = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT';
-        return {
-            exitCode: timedOut ? 124 : (result.status ?? 1),
-            stderr: result.stderr ?? '',
-            stdout: result.stdout ?? '',
-        };
+        return await new Promise((resolve) => {
+            const output = { stderr: '', stdout: '' };
+            let timedOut = false;
+            const timer =
+                input?.timeout === undefined
+                    ? undefined
+                    : setTimeout(() => {
+                          timedOut = true;
+                          child.kill();
+                      }, input.timeout);
+            // Stryker disable next-line StringLiteral: utf8 is the default a stream decodes to
+            child.stdout.setEncoding('utf8').on('data', (data: string) => {
+                output.stdout += data;
+            });
+            // Stryker disable next-line StringLiteral: utf8 is the default a stream decodes to
+            child.stderr.setEncoding('utf8').on('data', (data: string) => {
+                output.stderr += data;
+            });
+            child.on('close', (code) => {
+                // Stryker disable next-line CallExpression: a timer left to fire kills a process already gone and marks a run already resolved
+                clearTimeout(timer);
+                resolve({ exitCode: timedOut ? TIMED_OUT : (code ?? 1), ...output });
+            });
+            // hazard: a binary that exits before reading stdin closes the pipe under the write; the run is judged by its exit, not by that error.
+            // Stryker disable next-line StringLiteral,ArrowFunction: the pipe holds what a run pipes in before the child reads it, so the error fires only past its buffer, which no spec pipes
+            child.stdin.on('error', () => undefined);
+            // outside: absent `input` still closes stdin: the child reads EOF, never a TTY.
+            child.stdin.end(input?.stdin);
+        });
     }
 
     async watch(
