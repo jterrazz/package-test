@@ -1,12 +1,11 @@
-import { existsSync, mkdirSync, rmSync, statSync, symlinkSync } from 'node:fs';
+import { mkdirSync, rmSync, symlinkSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 import { refusal } from '../chain/refusals/refusal.js';
 import { installedPackage } from './installed-package.js';
-import { refuseUnusableAncestor } from './link-destination.js';
+import { linkedDirectory, refuseUnusableAncestor } from './link-destination.js';
 import type { LinkPort } from './link.port.js';
 import { installPacked } from './npm-packed.adapter.js';
-import { resolveSpecPath } from './resolved-spec-path.js';
 
 function sourceOf(name: string, path: null | string, testDir: string): string {
     if (path === null) {
@@ -23,24 +22,7 @@ function sourceOf(name: string, path: null | string, testDir: string): string {
         }
         return installed;
     }
-    const src = resolveSpecPath('link', path, testDir);
-    if (!existsSync(src)) {
-        throw new Error(
-            refusal('disk-named-by-relative-path-at-runtime', {
-                fix: `create ${src}, or correct the path`,
-                found: `link('${name}', directory(${JSON.stringify(path)})) names nothing — ${src} does not exist`,
-            }),
-        );
-    }
-    if (!statSync(src).isDirectory()) {
-        throw new Error(
-            refusal('disk-named-by-relative-path-at-runtime', {
-                fix: `name the directory that holds the package's package.json: directory('${dirname(path)}/')`,
-                found: `link('${name}', directory(${JSON.stringify(path)})) names a file`,
-            }),
-        );
-    }
-    return src;
+    return linkedDirectory(`link('${name}', directory(${JSON.stringify(path)}))`, path, testDir);
 }
 
 export const fsLinks: LinkPort = {

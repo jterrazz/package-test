@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import {
     cpSync,
     existsSync,
@@ -9,12 +9,12 @@ import {
     symlinkSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 
 import { isRecord } from '../../lint/kit/project/json-shape.js';
 import { refusal } from '../chain/refusals/refusal.js';
 import { installedPackage } from './installed-package.js';
-import { refuseUnusableAncestor } from './link-destination.js';
+import { linkedDirectory, refuseUnusableAncestor } from './link-destination.js';
 
 type Manifest = {
     bin: Readonly<Record<string, string>>;
@@ -41,8 +41,25 @@ function binOf(name: unknown, bin: unknown): Record<string, string> {
     );
 }
 
+function parsedManifest(directory: string): unknown {
+    const path = join(directory, 'package.json');
+    try {
+        return JSON.parse(readFileSync(path).toString());
+    } catch (error) {
+        throw new Error(
+            refusal({
+                fix: `correct ${path}, so npm and Node read the package it describes`,
+                found: `packed(): ${path} is no JSON — ${error instanceof Error ? error.message : String(error)}`,
+                read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
+                why: 'packed() reads the name, the bin and the runtime closure the package declares in its package.json.',
+            }),
+            { cause: error },
+        );
+    }
+}
+
 function manifestAt(directory: string): Manifest {
-    const parsed: unknown = JSON.parse(readFileSync(join(directory, 'package.json')).toString());
+    const parsed = parsedManifest(directory);
     const field = (key: string): unknown => (isRecord(parsed) ? parsed[key] : undefined);
     const name = field('name');
     const meta = field('peerDependenciesMeta');
@@ -77,6 +94,22 @@ function projectOf(testDir: string): string {
     }
 }
 
+function packageDirectory(name: string, path: string, testDir: string): string {
+    const call = `link('${name}', packed(directory(${JSON.stringify(path)})))`;
+    const directory = linkedDirectory(call, path, testDir);
+    if (!existsSync(join(directory, 'package.json'))) {
+        throw new Error(
+            refusal({
+                fix: `name the directory that holds the package's package.json, or give ${directory} one`,
+                found: `${call}: ${directory} holds no package.json`,
+                read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
+                why: 'packed() packs a package, and a package is the directory its package.json describes.',
+            }),
+        );
+    }
+    return directory;
+}
+
 const UNPACKED = new Map<string, string>();
 
 // invariant: one pack per package and process — the tarball is what the checkout's build holds when the first spec asks for it.
@@ -86,26 +119,37 @@ function unpackedOf(packageRoot: string): string {
     if (known !== undefined) {
         return known;
     }
-    // Stryker disable StringLiteral: the folder's prefix, the event that clears it and what npm prints on stderr are no part of what is laid
+    // Stryker disable StringLiteral: the folder's prefix and the event that clears it are no part of what is laid
     const into = mkdtempSync(join(tmpdir(), 'jterrazz-packed-'));
     process.once('exit', () => {
         rmSync(into, { force: true, recursive: true });
     });
-    const filename = execFileSync(
-        'npm',
-        ['pack', '--ignore-scripts', '--silent', '--pack-destination', into],
-        // Stryker disable next-line ArrayDeclaration: as above, the streams npm is handed decide nothing it writes
-        { cwd: packageRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
-    )
-        .trim()
-        .split('\n')
-        .at(-1);
     // Stryker restore StringLiteral
-    execFileSync('tar', ['-xzf', join(into, filename ?? ''), '-C', into]);
+    const filename = packInto(packageRoot, into);
+    execFileSync('tar', ['-xzf', join(into, filename), '-C', into]);
     const unpacked = join(into, 'package');
     // Stryker disable next-line CallExpression: as above, a package packed again is the same package
     UNPACKED.set(packageRoot, unpacked);
     return unpacked;
+}
+
+function packInto(packageRoot: string, into: string): string {
+    const packing = spawnSync(
+        'npm',
+        ['pack', '--ignore-scripts', '--silent', '--pack-destination', into],
+        { cwd: packageRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+    );
+    if (packing.status !== 0) {
+        throw new Error(
+            refusal({
+                fix: `run \`npm pack\` in ${packageRoot} and settle what npm says, so the package packs as it would be published`,
+                found: `packed(): \`npm pack\` failed in ${packageRoot}${packing.error === undefined ? '' : ` (${packing.error.message})`}:\n${packing.stderr.trim()}`,
+                read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
+                why: 'packed() lays the tarball npm writes for the package, so a package npm cannot pack gives it nothing to lay.',
+            }),
+        );
+    }
+    return packing.stdout.trim().split('\n').at(-1) ?? '';
 }
 
 function linkInto(workDir: string, name: string, source: string): void {
@@ -125,7 +169,7 @@ export function installPacked(
     testDir: string,
     workDir: string,
 ): void {
-    const packageRoot = path === null ? projectOf(testDir) : resolve(testDir, path);
+    const packageRoot = path === null ? projectOf(testDir) : packageDirectory(name, path, testDir);
     const declared = manifestAt(packageRoot).name;
     if (declared !== name) {
         throw new Error(

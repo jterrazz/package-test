@@ -1,7 +1,30 @@
-import { existsSync, lstatSync } from 'node:fs';
+import { existsSync, lstatSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
 import { refusal } from '../chain/refusals/refusal.js';
+import { resolveSpecPath } from './resolved-spec-path.js';
+
+/** The directory a `directory()` names for a link, refused when it names nothing or a file; `call` is the gesture as the spec wrote it. */
+export function linkedDirectory(call: string, path: string, testDir: string): string {
+    const src = resolveSpecPath('link', path, testDir);
+    if (!existsSync(src)) {
+        throw new Error(
+            refusal('disk-named-by-relative-path-at-runtime', {
+                fix: `create ${src}, or correct the path`,
+                found: `${call} names nothing — ${src} does not exist`,
+            }),
+        );
+    }
+    if (!statSync(src).isDirectory()) {
+        throw new Error(
+            refusal('disk-named-by-relative-path-at-runtime', {
+                fix: `name the directory that holds the package's package.json: directory('${dirname(path)}/')`,
+                found: `${call} names a file`,
+            }),
+        );
+    }
+    return src;
+}
 
 /** Refuses a destination under the working directory whose path crosses a file or a symlink: through a symlinked folder, the delete before the lay would reach a real install outside it. */
 export function refuseUnusableAncestor(name: string, workDir: string, dest: string): void {

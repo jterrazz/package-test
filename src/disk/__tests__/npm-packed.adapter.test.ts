@@ -7,6 +7,8 @@ import { installPacked } from '../npm-packed.adapter.js';
 
 // invariant: every case here is refused before `npm pack` runs, so the test starts nothing; what a pack lays is specs/cli/link/'s.
 
+const BROKEN = '{ "name": ';
+
 function write(root: string, files: Readonly<Record<string, unknown>>): void {
     for (const [path, content] of Object.entries(files)) {
         mkdirSync(join(root, path, '..'), { recursive: true });
@@ -20,11 +22,14 @@ function write(root: string, files: Readonly<Record<string, unknown>>): void {
 function checkout(files: Readonly<Record<string, unknown>> = {}): string {
     const root = realpathSync(scratchDirectory('packed-checkout-'));
     write(root, {
+        'broken/package.json': BROKEN,
         'lib/package.json': { name: '@acme/lib', version: '1.0.0' },
         'nameless/package.json': { name: 42 },
+        'notes.txt': 'a file, not a package\n',
         'package.json': { name: '@acme/dev', private: true },
         ...files,
     });
+    mkdirSync(join(root, 'bare'));
     return root;
 }
 
@@ -38,6 +43,9 @@ const refusalOf = (work: () => void): string => {
 };
 
 const READ = 'read: docs/guides/cli-specs.md#a-package-specified-from-its-artefact';
+
+const DISK_WHY =
+    'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.';
 
 describe('installPacked', () => {
     test('npm-packed — installPacked — what it cannot pack — refuses another name, a nameless manifest and a spec under no package', () => {
@@ -75,6 +83,48 @@ describe('installPacked', () => {
                 "fix: run the spec inside the package it specifies, or name the package: packed(directory('./…/'))",
                 READ,
             ].join('\n'),
+            false,
+        ]);
+    });
+
+    test('npm-packed — installPacked — a directory it cannot read — refuses one naming nothing, a file, a folder with no manifest and a manifest that is no JSON', () => {
+        // Given - a checkout holding a file, a folder with no manifest, and a broken manifest
+        const root = checkout();
+        const work = realpathSync(scratchDirectory('packed-work-'));
+        const call = (path: string) =>
+            refusalOf(() => {
+                installPacked('@acme/lib', path, root, work);
+            });
+
+        // Then - each refusal, whole, and nothing laid
+        expect([
+            call('./missing/'),
+            call('./notes.txt/'),
+            call('./bare/'),
+            call('./broken/').split('\n')[0],
+            existsSync(join(work, 'node_modules')),
+        ]).toStrictEqual([
+            [
+                `found: link('@acme/lib', packed(directory("./missing/"))) names nothing — ${join(root, 'missing')} does not exist`,
+                DISK_WHY,
+                `fix: create ${join(root, 'missing')}, or correct the path`,
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
+            ].join('\n'),
+            [
+                `found: link('@acme/lib', packed(directory("./notes.txt/"))) names a file`,
+                DISK_WHY,
+                "fix: name the directory that holds the package's package.json: directory('./')",
+                'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
+            ].join('\n'),
+            [
+                `found: link('@acme/lib', packed(directory("./bare/"))): ${join(root, 'bare')} holds no package.json`,
+                'why: packed() packs a package, and a package is the directory its package.json describes.',
+                `fix: name the directory that holds the package's package.json, or give ${join(root, 'bare')} one`,
+                READ,
+            ].join('\n'),
+            `found: packed(): ${join(root, 'broken/package.json')} is no JSON — ${refusalOf(() => {
+                JSON.parse(BROKEN);
+            })}`,
             false,
         ]);
     });
