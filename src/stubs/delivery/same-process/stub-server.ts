@@ -4,6 +4,7 @@ import type { StubRegistration } from '../../intercept/intercept.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
 import type { Msw } from '../msw-handlers.js';
+import { refusingWhatFetchRefuses } from './fetch-refusals.js';
 import { owningBodies } from './owned-body.js';
 
 async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> {
@@ -26,7 +27,7 @@ async function ensureStubServer(): Promise<SetupServer> {
     server.listen({ onUnhandledRequest: 'bypass' });
     serverInstance = server;
     installedFetch = globalThis.fetch;
-    globalThis.fetch = owningBodies(installedFetch);
+    globalThis.fetch = owningBodies(refusingWhatFetchRefuses(installedFetch));
     return server;
 }
 

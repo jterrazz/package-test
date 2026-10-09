@@ -91,7 +91,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 147   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
-| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 198   |
+| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 199   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 112   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -167,7 +167,7 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **154 modules** have no test of their own, and every one of them is claimed:
+Today **155 modules** have no test of their own, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -177,7 +177,7 @@ Today **154 modules** have no test of their own, and every one of them is claime
 | a module that runs only in a page (2)                     | it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof                                                                                                                                                                                                              |
 | a specification module (21)                               | the specification is proven end to end by its own tree under `specs/<specification>/`, which is what the constructor exists to make possible                                                                                                                                                                                                                                                                                                                                                 |
 | a result accessor (16)                                    | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result                                                                                                                                                                                                                                                                                                                                                                                     |
-| an adapter (14)                                           | an adapter, and what only an adapter reads, is proven through the specification that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)                                                                                                                                                                                                                                                                         |
+| an adapter (15)                                           | an adapter, and what only an adapter reads, is proven through the specification that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)                                                                                                                                                                                                                                                                         |
 | a bundled CLI entry (7)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                                      |
 | a lint-layer module (14)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint specification                                                                                                                                                                                                                                                         |
 | a chain or runner internal (6)                            | it is reached through the chain, so its proof is the specification specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                  |
@@ -265,7 +265,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 2   | —   | —    | 2           | 1       | —      | 1         | —      |
 | `.headers()`   | 5   | —   | —   | —    | —           | 2       | —      | —         | —      |
-| `.intercept()` | 12  | 1   | —   | —    | 2           | 2       | 1      | 6         | —      |
+| `.intercept()` | 12  | 1   | —   | —    | 3           | 2       | 1      | 6         | —      |
 | `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
@@ -288,7 +288,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
 | `.exec()`    | —   | —   | 61  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 111  | —           | —       | —      | —         | —      |
-| `.call()`    | —   | —   | —   | —    | 10          | —       | —      | —         | —      |
+| `.call()`    | —   | —   | —   | —    | 11          | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —    | —           | 22      | —      | —         | —      |
 | `.fetch()`   | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.open()`    | —   | —   | —   | —    | —           | —       | 7      | —         | —      |
@@ -365,8 +365,8 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
 | `.report`       | —   | —   | —   | 110  | —           | —       | —      | —         | —      |
-| `.value`        | —   | —   | —   | —    | 8           | —       | —      | —         | —      |
-| `.error`        | —   | —   | —   | —    | 6           | —       | —      | —         | —      |
+| `.value`        | —   | —   | —   | —    | 9           | —       | —      | —         | —      |
+| `.error`        | —   | —   | —   | —    | 7           | —       | —      | —         | —      |
 | `.tree`         | —   | —   | —   | —    | —           | 5       | —      | 6         | —      |
 | `.content`      | —   | —   | —   | —    | —           | 10      | 5      | 18        | —      |
 | `.console`      | —   | —   | —   | —    | —           | 4       | —      | 4         | —      |
