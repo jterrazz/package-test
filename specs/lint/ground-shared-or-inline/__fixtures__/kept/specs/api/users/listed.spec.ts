@@ -18,8 +18,9 @@ test('the same seed, again', async () => {
     // Given - the shared seed, and a body past the requests cap
     const result = await api.seed(file('./__seeds__/shared.sql')).post('/users', file('./__requests__/long.json')); // checker-disable-line one-subject-per-spec -- an input of ground-shared-or-inline: its tests reach two subjects on purpose
 
-    // Then - a tree and a fixture stay files
+    // Then - a tree, a fixture and a banner no literal survives stay files
     await expect(result.directory('out')).toMatch(directory('./__expected__/tree/'));
+    expect(result.response).toMatch(file('./__expected__/banner.txt'));
     expect(file('./__fixtures__/config.txt')).toBeDefined();
 });
 });

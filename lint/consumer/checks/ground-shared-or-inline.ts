@@ -20,6 +20,7 @@ import {
     INLINE_CAPS,
     jsonOf,
     replacementOf,
+    survivesInPlace,
     TEST_FILE,
     valueLines,
     written,
@@ -105,12 +106,15 @@ function inPlaceLines(path: string, content: string): number {
     return valueLines(parsed === undefined ? content : JSON.stringify(parsed, null, 4));
 }
 
+// invariant: a text no literal survives in place — one opening on a line break whose lines share an indentation, which the comparison's dedent strips from either form — keeps its file.
 function staysAFile(path: string, cap: number): boolean {
     const bytes = readFileSync(path);
     if (bytes.subarray(0, 8000).includes(0)) {
         return true;
     }
-    return inPlaceLines(path, bytes.toString('utf8')) > cap;
+    const content = bytes.toString('utf8');
+    const valued = path.endsWith('.json') && jsonOf(content) !== undefined;
+    return inPlaceLines(path, content) > cap || (!valued && !survivesInPlace(content));
 }
 
 type SingleUse = { reference: Reference; references: number; target: string };

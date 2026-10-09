@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { replacementOf, valueLines } from '../ground-shared-or-inline.forms.js';
+import { replacementOf, survivesInPlace, valueLines } from '../ground-shared-or-inline.forms.js';
 
 const HOLE = ['$', '{d}'].join('');
 
@@ -34,6 +34,17 @@ describe('ground-shared-or-inline.forms', () => {
         );
         expect(replacementOf('expect(result.text).toMatch(', '[1]', '/x/a.json', '')).toBe('`[1]`');
         expect(replacementOf('await other(', 'x', '/x/a.txt', '')).toBeUndefined();
+    });
+
+    test('a text survives in place unless it opens on a line break its lines share an indentation after', () => {
+        // Given - one line, lines a template keeps, a text opening on a break flush left, and a cobra banner opening on a break, indented
+        // Then - only the banner has no literal the comparison's dedent leaves equal
+        expect([
+            survivesInPlace('done'),
+            survivesInPlace('a\n  b\n'),
+            survivesInPlace('\nDone\n'),
+            survivesInPlace('\n  ✓ Created\n  ✓ Started\n'),
+        ]).toStrictEqual([true, true, true, false]);
     });
 
     test('a value counts its lines without its closing newline', () => {

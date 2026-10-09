@@ -33,15 +33,28 @@ function escapeTemplate(text: string): string {
         .replaceAll('${', '\\${');
 }
 
-function block(text: string, indent: string): string {
+function templated(text: string, indent: string): { body: string; closing: string } {
     const lines = text.split('\n');
-    if (lines.length === 1) {
-        return `\`${escapeTemplate(text)}\``;
-    }
     const inner = `${indent}    `;
     const last = lines.pop() ?? '';
     const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
-    const closing = last === '' ? indent : `${inner}${last}`;
+    return { body, closing: last === '' ? indent : `${inner}${last}` };
+}
+
+/** Whether a literal written in place compares equal to `text` once the comparison's dedent read it: the template form, or else the quoted one. */
+export function survivesInPlace(text: string): boolean {
+    if (!text.includes('\n')) {
+        return true;
+    }
+    const { body, closing } = templated(text, '');
+    return dedent(`\n${body}\n${closing}`) === text || dedent(text) === text;
+}
+
+function block(text: string, indent: string): string {
+    if (!text.includes('\n')) {
+        return `\`${escapeTemplate(text)}\``;
+    }
+    const { body, closing } = templated(text, indent);
     // invariant: the literal is read back through the runtime's own dedent: a candidate that does not come back unchanged is written as one quoted line.
     return dedent(`\n${body}\n${closing}`) === text
         ? `\`\n${escapeTemplate(body)}\n${escapeTemplate(closing)}\``

@@ -36,7 +36,7 @@ describe('passes', () => {
         expect(result.report).toMatch('');
     });
 
-    test('seeds, a body past its cap, a tree, a fixture and a golden named outside a test stay files', async () => {
+    test('seeds, a body past its cap, a tree, a fixture, a golden named outside a test and a banner no literal survives stay files', async () => {
         // Given - the kept tree
         const result = await checker.fixture(directory('./__fixtures__/kept/')).run();
 
