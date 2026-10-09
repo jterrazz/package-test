@@ -16,11 +16,13 @@ describe('no-simulated-dom', () => {
         // Given - the violation tree
         const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
+        // hazard: the pragma's `@` is spelled `\u0040` below — vitest takes the environment pragma from
+        // anywhere in a test file's text, and would start this spec under happy-dom
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             src/__tests__/widget.test.ts:2:1  jterrazz(no-simulated-dom)
-                found: \`@vitest-environment happy-dom\` simulates a browser
-                why: A test file declares no simulated DOM: the \`@vitest-environment happy-dom|jsdom\` pragma is an error.
+                found: \`\u0040vitest-environment happy-dom\` simulates a browser
+                why: A test file declares no simulated DOM: the \`\u0040vitest-environment happy-dom|jsdom\` pragma is an error.
                 fix: delete the pragma, and write the rendered test as a \`.test.tsx\` in the \`__tests__/\` of its component’s folder, collected by the \`component()\` project
                 read: docs/reference/linting.md#no-simulated-dom
         `);
