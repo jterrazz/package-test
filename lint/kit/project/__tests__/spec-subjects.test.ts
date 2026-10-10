@@ -56,6 +56,18 @@ describe('spec-subjects', () => {
         expect(withLeadingComments(text, text.indexOf('test'))).toBe(text.indexOf('// one'));
     });
 
+    test('withLeadingComments — two blocks one under the other, each closing at the start of the next, are climbed through to the first, and the climb ends', () => {
+        // Given - a statement under two block comments, the second opening on the line the first closes above, and code before them
+        const text =
+            'code();\n/* one\n */\n/* two\n */\ntest();\n/* three */\n/* four */\ntest();\n';
+
+        // Then - the first reaches the first block's opening, the second the opening of the first of its two one-line blocks
+        expect([
+            withLeadingComments(text, text.indexOf('test')),
+            withLeadingComments(text, text.lastIndexOf('test')),
+        ]).toStrictEqual([text.indexOf('/* one'), text.indexOf('/* three')]);
+    });
+
     test('subjectSpecs — each spec of a subject specification, its tests with their spans, titles and the subjects of its own specification', () => {
         // Given - a cli spec reading its runners' commands, one runner imported without extension, an api call it does not own, and a module test beside it
         const root = specsTree({

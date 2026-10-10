@@ -60,8 +60,16 @@ export function withLeadingComments(text: string, start: number): number {
         if (line.startsWith('//')) {
             begin = previous;
         } else if (line.endsWith('*/')) {
-            // invariant: the doc comment a declaration opens on goes with it, and a block comment holds no other opening.
-            begin = lineStart(text, text.lastIndexOf('/*', begin));
+            // hazard: the opening is searched before this block's own close, never from the line below it: a block opening on that line (two adjacent blocks) is found again and again, and the climb never ends.
+            const opened = lineStart(
+                text,
+                text.lastIndexOf('/*', text.lastIndexOf('*/', begin - 1)),
+            );
+            // invariant: the doc comment a declaration opens on goes with it, and the climb stops where it no longer moves.
+            if (opened >= begin) {
+                break;
+            }
+            begin = opened;
         } else {
             break;
         }
