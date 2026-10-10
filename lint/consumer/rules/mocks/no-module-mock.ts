@@ -189,8 +189,14 @@ export const noModuleMock = defineRule(
             let scope: Scope | undefined;
             return {
                 // Stryker disable OptionalChaining: `before` runs no visitor where it found no scope
-                ...importSourceVisitor(({ node, source }) => {
-                    if (scope?.isTest === true && DATA_ASSET.test(withoutSuffix(source))) {
+                ...importSourceVisitor(({ json, node, source }) => {
+                    const path = withoutSuffix(source);
+                    // invariant: a JSON file imported `with { type: 'json' }` is data a runtime parses, never a mock: a guard test reads it as the product does.
+                    if (
+                        scope?.isTest === true &&
+                        DATA_ASSET.test(path) &&
+                        !(json && path.endsWith('.json'))
+                    ) {
                         context.report({ data: { source }, messageId: 'assetImport', node });
                     }
                 }),

@@ -520,7 +520,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
+            "sentence": "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors, a JSON file imported `with { type: 'json' }` excepted: it is data the product reads as it does, not a mock. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
             "specification": "model",
             "family": "mocks",
             "fix": "Double the port with `mockOf<Port>()`, keep a module test's payload in a `__tests__/<file>.fixtures.ts` beside it and a spec's in `__fixtures__/`, and allow-list a native module as `{ module, reason }` (Module tests § Doubles).",

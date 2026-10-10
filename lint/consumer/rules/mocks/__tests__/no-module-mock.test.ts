@@ -55,6 +55,20 @@ ruleTester().run('no-module-mock', noModuleMock, {
             filename: SRC_TEST,
         },
         {
+            name: 'A JSON import with no attribute, or with an attribute that is not json, is still a data asset.',
+            code: [
+                'import one from "./one.json" with { type: "css" };',
+                'import two from "./two.json" with { kind: "json" };',
+                'import three from "./three.sql" with { type: "json" };',
+            ].join('\n'),
+            errors: [
+                { column: 16, line: 1, messageId: 'assetImport' },
+                { column: 16, line: 2, messageId: 'assetImport' },
+                { column: 18, line: 3, messageId: 'assetImport' },
+            ],
+            filename: SRC_TEST,
+        },
+        {
             name: 'A bundler suffix does not launder a data asset.',
             code: 'import raw from "./payload.json?raw";',
             errors: [{ column: 16, line: 1, messageId: 'assetImport' }],
@@ -98,6 +112,14 @@ ruleTester().run('no-module-mock', noModuleMock, {
         },
     ],
     valid: [
+        {
+            name: 'A JSON file imported as JSON is data the product itself reads: a guard test may import it.',
+            code: [
+                'import messages from "./messages.json" with { type: "json" };',
+                'import other from "./other.json?raw" with { "type": "json" };',
+            ].join('\n'),
+            filename: SRC_TEST,
+        },
         {
             name: 'A computed `vi[…]`, another object, another method, a bare `mock()`, or production code, double nothing here.',
             code: 'vi[mock]("./x.js");\nvi["mock"]("./x.js");\njest.mock("./x.js");\nvi.spyOn(a, "b");\nmock("./x.js");',
