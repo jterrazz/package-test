@@ -9,6 +9,12 @@ import { suppressedLines } from '../../kit/project/suppression.js';
 import { DISK_CALL, findSpecsRoots, listReaders, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
+// invariant: a path under a unit's build output, `dist/` or `.artifacts/<tool>/`, is made by the build the spec runs after: it exists once the kind's test has built, and in no clean checkout before.
+const BUILD_OUTPUT = /(?:^|\/)(?:dist|\.artifacts\/[^/]+)\//u;
+
+const isBuilt = (rootDir: string, target: string): boolean =>
+    BUILD_OUTPUT.test(relative(rootDir, target));
+
 // outside: inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout.
 function missingTarget(named: string, target: string, onDisk: boolean): Teaching {
     return onDisk
@@ -41,7 +47,7 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[]
     // Stryker disable next-line ConditionalExpression,MethodExpression: a spec document parses as no module, so it names no anchored path either way
     const anchored = file.endsWith(SPEC_EXTENSION) ? [] : anchoredPaths(file);
     for (const { column, line, named, target } of anchored) {
-        if (treeKind(target) !== undefined || suppressed.has(line)) {
+        if (treeKind(target) !== undefined || suppressed.has(line) || isBuilt(rootDir, target)) {
             continue;
         }
         violations.push({
@@ -59,7 +65,11 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[]
     )) {
         const target = resolve(dirname(file), path);
         const found = treeKind(target);
-        if (found === kind || suppressed.has(line)) {
+        if (
+            found === kind ||
+            suppressed.has(line) ||
+            (found === undefined && isBuilt(rootDir, target))
+        ) {
             continue;
         }
         const named = key === undefined ? `${kind}('${path}')` : `${key}: "${path}"`;

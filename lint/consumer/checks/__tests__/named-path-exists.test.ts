@@ -68,4 +68,29 @@ describe('named-path-exists', () => {
             "named-path-exists specs/api/users.spec.ts:14:28 file('./__fixtures__/ignored.json') names nothing — specs/api/__fixtures__/ignored.json is ignored by git — track specs/api/__fixtures__/ignored.json (it is ignored by git), or name a file that is",
         ]);
     });
+
+    test('a path under the build output of the unit is named without existing yet, in a spec and in its specification, and a path beside it is not', () => {
+        // Given - a spec and a specification naming the built binary, the bundled entry, another tool's artefact, a look-alike folder and a missing source
+        const root = packageWith({
+            'specs/cli/cli.specification.ts': [
+                "const built = resolve(import.meta.dirname, '../../dist', 'index.js');",
+                "const binary = resolve(import.meta.dirname, '../../.artifacts/go', 'spwn');",
+                "const lookalike = resolve(import.meta.dirname, '../../distribution', 'index.js');",
+                '',
+            ].join('\n'),
+            'specs/cli/run.spec.ts': [
+                "test('runs', async () => {",
+                "    await cli.fixture(file('../../dist/index.js'));",
+                "    await cli.fixture(file('../../.artifacts/go/spwn'));",
+                "    await cli.fixture(file('../../.artifacts/spwn'));",
+                '});',
+                '',
+            ].join('\n'),
+        });
+
+        // Then - the look-alike folder and an artefact with no tool folder are the only paths that name nothing
+        expect(
+            checkNamedPathExists(root).map(({ line, path }) => `${path}:${String(line)}`),
+        ).toStrictEqual(['specs/cli/cli.specification.ts:3', 'specs/cli/run.spec.ts:4']);
+    });
 });
