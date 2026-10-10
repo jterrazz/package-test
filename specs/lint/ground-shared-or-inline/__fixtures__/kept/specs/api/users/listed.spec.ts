@@ -21,6 +21,8 @@ test('the same seed, again', async () => {
     // Then - a tree, a fixture and a banner no literal survives stay files
     await expect(result.directory('out')).toMatch(directory('./__expected__/tree/'));
     expect(result.response).toMatch(file('./__expected__/banner.txt'));
+    expect(result.response).toMatch(file('./__expected__/banner-data.txt'));
+    expect(result.response).toMatch(file('./__expected__/banner-broken.json'));
     expect(file('./__fixtures__/config.txt')).toBeDefined();
 });
 });

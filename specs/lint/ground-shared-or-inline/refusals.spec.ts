@@ -18,6 +18,20 @@ describe('refusals', () => {
         `);
     });
 
+    test('a JSON golden opening on an indented line break is refused like any other, its value being what is written', async () => {
+        // Given - the indented-json tree
+        const result = await checker.fixture(directory('./__fixtures__/indented-json/')).run();
+
+        // Then - each finding at its line and column, with its lesson
+        expect(result.report).toMatch(`
+            specs/widget/widget.test.ts:6:32  jterrazz-check(ground-shared-or-inline)
+                found: widget/__expected__/state.json, read by this test alone
+                why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
+                fix: write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it
+                read: docs/reference/linting.md#ground-shared-or-inline
+        `);
+    });
+
     test('a seed of the specs root only one leaf reaches for, from two tests, is refused where it sits', async () => {
         // Given - the lonely-seed tree
         const result = await checker.fixture(directory('./__fixtures__/lonely-seed/')).run();
