@@ -103,7 +103,7 @@ test('build then start chain stops at first failure', async () => {
 });
 ```
 
-Commands run sequentially in the same cwd; the sequence stops at the first failure. This is still one terminal action — one spec, one `.exec()` (rule `one-terminal-action-per-chain`). An empty array throws (`exec([]) requires at least one command`), and `{ waitFor, timeout }` cannot be combined with the array form.
+Commands run sequentially in the same cwd; the sequence stops at the first failure. Its subject, the folder the spec files under, is its LAST command: that is the one the Then reads, and the commands before it are the Given, which name no subject — a docker session opens with `up` and is not filed under it. This is still one terminal action — one spec, one `.exec()` (rule `one-terminal-action-per-chain`). An empty array throws (`exec([]) requires at least one command`), and `{ waitFor, timeout }` cannot be combined with the array form.
 
 ### Working-directory semantics
 

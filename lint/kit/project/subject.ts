@@ -201,10 +201,10 @@ const pageOf: TerminalReader = (first) => {
 
 const TERMINALS: Record<string, TerminalReader> = {
     exec: (first, _readRequest, commands) => {
-        // invariant: a sequence is one session of the binary, opened by its first command.
+        // invariant: a sequence is one session of the binary, and its subject is its LAST command: what the Then reads. The runs before it are the Given, and name no subject.
         const line =
             first?.startsWith('[') === true
-                ? literalOf(argumentsOf(first.slice(1, -1))[0])
+                ? literalOf(argumentsOf(first.slice(1, -1)).at(-1))
                 : literalOf(first);
         return line === undefined
             ? []
