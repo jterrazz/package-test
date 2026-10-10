@@ -410,6 +410,17 @@
         {
             "audience": "consumer",
             "channel": "static",
+            "sentence": "`toMatch('')` or ``toMatch(``)`` on a plain string — a stream's `.text`, `.raw` or a file's `.content` — is vitest's substring match, which holds for any text → error. The empty value is the \"not recorded yet\" mark of an accessor handed to `toMatch`, which update mode fills; on a string it only passes.",
+            "specification": "model",
+            "family": "expectations",
+            "fix": "Compare the string whole with `toBe('')`, or hand the accessor itself to `toMatch`.",
+            "name": "no-empty-substring-match",
+            "rationale": "`'abc'.includes('')` is true: the assertion cannot fail, and a stub the author meant to fill later stays green.",
+            "reach": "tests"
+        },
+        {
+            "audience": "consumer",
+            "channel": "static",
             "sentence": "A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code — a `match.ref`, and every value written in place, a string or a template — plus the golden files it references) is named for nothing → error.",
             "specification": "model",
             "family": "expectations",

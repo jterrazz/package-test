@@ -12,6 +12,7 @@ import { noSleep } from './clock/no-sleep.js';
 import { expectedConstantShared } from './expectations/expected-constant-shared.js';
 import { negativeGoldenFrozen } from './expectations/negative-golden-frozen.js';
 import { noDoubleOnlyAssertion } from './expectations/no-double-only-assertion.js';
+import { noEmptySubstringMatch } from './expectations/no-empty-substring-match.js';
 import { noExistenceOnlyAssertion } from './expectations/no-existence-only-assertion.js';
 import { noExpectInALoop } from './expectations/no-expect-in-a-loop.js';
 import { noExpectOutsideATest } from './expectations/no-expect-outside-a-test.js';
@@ -93,6 +94,7 @@ const plugin: LintPlugin = {
         'expected-constant-shared': expectedConstantShared,
         'no-imported-expectation': noImportedExpectation,
         'no-transform-duplicating-tokens': noTransformDuplicatingTokens,
+        'no-empty-substring-match': noEmptySubstringMatch,
         'no-raw-bypass': noRawBypass,
         'no-single-use-ref': noSingleUseRef,
         'negative-golden-frozen': negativeGoldenFrozen,

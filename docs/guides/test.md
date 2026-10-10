@@ -90,9 +90,9 @@ The package proves itself in five layers, and they are meant to be read from the
 | Layer                   | Where                                                                              | What it judges                                                           | Files |
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 147   |
-| Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 55    |
+| Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
 | The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 199   |
-| The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 112   |
+| The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 113   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
 <!-- /GENERATED:layers -->
@@ -269,7 +269,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —   | 47  | 110  | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —   | 47  | 111  | —           | —       | —      | —         | —      |
 | `.link()`      | —   | —   | 11  | —    | —           | —       | —      | —         | —      |
 | `.prepare()`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
@@ -287,7 +287,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
 | `.exec()`    | —   | —   | 61  | —    | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —   | 5   | 111  | —           | —       | —      | —         | —      |
+| `.run()`     | —   | —   | 5   | 112  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 11          | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —    | —           | 22      | —      | —         | —      |
 | `.fetch()`   | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
@@ -364,7 +364,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.filesystem`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
-| `.report`       | —   | —   | —   | 110  | —           | —       | —      | —         | —      |
+| `.report`       | —   | —   | —   | 111  | —           | —       | —      | —         | —      |
 | `.value`        | —   | —   | —   | —    | 9           | —       | —      | —         | —      |
 | `.error`        | —   | —   | —   | —    | 7           | —       | —      | —         | —      |
 | `.tree`         | —   | —   | —   | —    | —           | 5       | —      | 6         | —      |
