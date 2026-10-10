@@ -1,22 +1,15 @@
 import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
-import type { Context, FixFn } from '@oxlint/plugins';
+import type { Context } from '@oxlint/plugins';
 
 import { CATALOGUE_CHAPTER } from '../../../kit/catalogue/chapter.js';
-import { childList, nodeEnd, nodeStart, stringValue } from '../../../kit/project/ast.js';
+import { childList, stringValue } from '../../../kit/project/ast.js';
 import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
-import {
-    calleeOf,
-    escapedFor,
-    firstArgumentOf,
-    groupBodyOf,
-    isGroup,
-    isTest,
-} from '../../../kit/project/test-calls.js';
+import { calleeOf, firstArgumentOf, isGroup, isTest } from '../../../kit/project/test-calls.js';
 import { testBaseOf, testTitle } from '../../../kit/project/test-title.js';
 import { consumerRows } from '../../catalogue/manifest.js';
-import { flattenedGroup, mergeFix, restatesSubject } from './one-describe-per-file.merge.js';
+import { mergeFix, restatesSubject } from './one-describe-per-file.merge.js';
 import type { FileSubject } from './one-describe-per-file.merge.js';
 
 function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
@@ -32,37 +25,10 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
     return stray === undefined ? undefined : { messageId: 'testOutside', node: stray };
 }
 
-type TitleFinding = { fix?: FixFn; messageId: string; node: AstNode };
+type TitleFinding = { messageId: string; node: AstNode };
 
-// invariant: a title its tests cannot carry is never renamed away: the author places it.
-function renameFinding(
-    source: string,
-    group: AstNode,
-    title: AstNode,
-    subject: FileSubject,
-): TitleFinding {
-    const said = stringValue(title);
-    const body = groupBodyOf(group);
-    const kept = flattenedGroup(source, group, subject);
-    if (kept === undefined && (said === undefined || !restatesSubject(said, subject))) {
-        return { messageId: 'wrongTitle', node: title };
-    }
-    const fix: FixFn = (fixer) => [
-        fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${subject.named}'`),
-        // Stryker disable next-line ConditionalExpression: a group that holds tests alone always has a body
-        ...(body === undefined || kept === undefined
-            ? []
-            : [fixer.replaceTextRange([nodeStart(body) + 1, nodeEnd(body) - 1], kept)]),
-    ];
-    return { fix, messageId: 'wrongTitle', node: title };
-}
-
-// invariant: a table's title is prefixed so what names its rows stays, unless it is computed.
-function titleFinding(
-    source: string,
-    group: AstNode,
-    subject: FileSubject,
-): TitleFinding | undefined {
+// invariant: a title the author wrote is never rewritten: it is reported, and the author retitles it. A title that states the file's subject in other words — its name read with spaces, 'cli reference' for `cli-reference.spec.ts` — is the subject all the same.
+function titleFinding(group: AstNode, subject: FileSubject): TitleFinding | undefined {
     const { named } = subject;
     const title = firstArgumentOf(group);
     const said = stringValue(title);
@@ -71,20 +37,13 @@ function titleFinding(
     if (
         title === undefined ||
         said === named ||
+        (said !== undefined && restatesSubject(said, subject)) ||
         (parametrised && said?.startsWith(`${named} — `) === true)
     ) {
         return undefined;
     }
-    if (!parametrised) {
-        return renameFinding(source, group, title, subject);
-    }
-    if (title.type !== 'Literal' && title.type !== 'TemplateLiteral') {
-        return { messageId: 'tableTitle', node: title };
-    }
-    const at = nodeStart(title) + 1;
-    const fix: FixFn = (fixer) =>
-        fixer.insertTextBeforeRange([at, at], escapedFor(title, `${named} — `));
-    return { fix, messageId: 'tableTitle', node: title };
+
+    return { messageId: parametrised ? 'tableTitle' : 'wrongTitle', node: title };
 }
 
 const row = rowNamed(consumerRows, 'one-describe-per-file');
@@ -101,11 +60,11 @@ export const oneDescribePerFile = defineRule(
             },
             severalDescribes: {
                 found: 'a second top-level `describe` in a file about one {{what}}',
-                fix: "merge the groups under `describe('{{named}}', …)`, each test titled `<group> — <test>` unless the group named this {{what}} — `typescript fix` does it when every group holds tests alone and no title it carries opens on a capital — or move this one to a file of its own {{what}}",
+                fix: "merge the groups under `describe('{{named}}', …)`, every test keeping its title — `typescript fix` does it when every group holds tests alone and no two tests share a title — or move this one to a file of its own {{what}}",
             },
             tableTitle: {
                 found: 'the file’s `describe.each` is titled "{{title}}"',
-                fix: "start its title with the file's {{what}}, '{{named}} — …', keeping what names its rows — `typescript fix` prefixes it",
+                fix: "start its title with the file's {{what}}, '{{named}} — …', keeping what names its rows",
             },
             testOutside: {
                 found: 'a test beside the `describe` of the file',
@@ -113,7 +72,7 @@ export const oneDescribePerFile = defineRule(
             },
             wrongTitle: {
                 found: 'the file’s `describe` is titled "{{title}}"',
-                fix: "title it '{{named}}', the file's {{what}} — `typescript fix` renames it, keeping the title it said on each of its tests, unless it named this {{what}} in another spelling, when it holds tests alone and its title opens on no capital",
+                fix: "title it '{{named}}', the file's {{what}}, or in the words of the file's name — 'cli reference' for `cli-reference.spec.ts`",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
@@ -141,10 +100,7 @@ export const oneDescribePerFile = defineRule(
                     }
                     const [only] = members;
                     // Stryker disable ConditionalExpression: a member is always there
-                    const title =
-                        only === undefined
-                            ? undefined
-                            : titleFinding(context.sourceCode.text, only, subject);
+                    const title = only === undefined ? undefined : titleFinding(only, subject);
                     // Stryker restore ConditionalExpression
                     if (title !== undefined) {
                         // Stryker disable next-line LogicalOperator: a member is always there

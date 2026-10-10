@@ -40,15 +40,15 @@ function writeSplit(
         .map(({ target }) => `${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`);
 }
 
-/** A test reaching two subjects goes with the one its chain opens on; a file whose target is taken, or whose split `splitRefusal` refuses, is left for its author. */
+/** A spec of one subject moves whole to the folder its subject names; a spec of several is reported with its plan and split by its author, and a file whose target is taken is left alone. */
 export function fixSpecInSubjectFolder(specsRoot: string): string[] {
     const done: string[] = [];
     // invariant: each spec is read again before it is planned, so a lift an earlier move made to it is the text it moves.
     for (const listed of subjectSpecs(specsRoot)) {
         const spec = readSpec(specsRoot, listed.file);
-        const rule = spec.subjects.size > 1 ? 'one-subject-per-spec' : 'spec-in-subject-folder';
+        // invariant: a spec of several subjects is split by its author, who names each file; only a spec of one subject is moved, whole, to the folder its subject names.
         // Stryker disable next-line ConditionalExpression: a spec of no subject plans no target, and is skipped below
-        if (spec.subjects.size === 0 || silenced(spec, rule)) {
+        if (spec.subjects.size !== 1 || silenced(spec, 'spec-in-subject-folder')) {
             continue;
         }
         const plan = splitPlan(specsRoot, spec);

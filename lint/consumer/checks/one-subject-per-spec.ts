@@ -1,3 +1,5 @@
+import { dirname } from 'node:path';
+
 import {
     secondSubjectAt,
     shown,
@@ -13,20 +15,29 @@ function journeyOf(spec: SpecRead): TestOf | undefined {
     return spec.tests.find((test) => test.subjects.length > 1);
 }
 
+// invariant: the plan names the tests each subject takes and the folder it files under, never the file: naming a file is its author's, and \`typescript fix\` writes no split.
+function planLines(specsRoot: string, spec: SpecRead, plan: ReadonlyMap<string, string>): string[] {
+    return [...plan].map(([name, target]) => {
+        const titles = spec.tests
+            .filter((test) => test.subjects[0] === name)
+            .map(({ title }) => `"${title}"`);
+
+        return `${name} → ${shown(specsRoot, dirname(target))}/ (${titles.join(', ')})`;
+    });
+}
+
 function splitAdvice(specsRoot: string, spec: SpecRead): string {
     const journey = journeyOf(spec);
     const plan = splitPlan(specsRoot, spec);
-    const targets = [...new Set(plan.values())].map((path) => shown(specsRoot, path));
     const refusal = splitRefusal(specsRoot, spec, plan);
     const advice: string[] = [];
-    if (refusal !== undefined) {
-        advice.push(
-            `split it by hand, one file per subject — \`typescript fix\` refuses: ${refusal}`,
-        );
-    } else if (targets.length >= 2) {
-        advice.push(
-            `split it, one file per subject — ${targets.join(', ')} — \`typescript fix\` splits it`,
-        );
+    if (plan.size >= 2 || refusal !== undefined) {
+        const parts = [
+            'split it by hand, one file per subject, each file named by you',
+            ...(plan.size >= 2 ? [planLines(specsRoot, spec, plan).join('; ')] : []),
+            ...(refusal === undefined ? [] : [`beware: ${refusal}`]),
+        ];
+        advice.push(parts.join(' — '));
     }
     if (journey !== undefined) {
         advice.push(

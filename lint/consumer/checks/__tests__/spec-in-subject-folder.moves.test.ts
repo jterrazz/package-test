@@ -13,8 +13,8 @@ const listing = (rule: string): string =>
     `import { api } from '../api.specification.js'; // checker-disable-line ${rule} -- filed by its author\ntest('a', async () => { await api.get('/orders'); });\n`;
 
 describe('fixSpecInSubjectFolder', () => {
-    test('subject-moves — the split keeps each test with the imports, constants and helpers it reads, under the group it stood in', () => {
-        // Given - the same file, and the golden its GET test reads through a helper
+    test('subject-moves — a spec of two routes is reported with the plan of its split and left whole: naming a file is its author’s', () => {
+        // Given - one file of a GET test and a POST test, and the golden its GET test reads through a helper
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
             'api/orders/__expected__/listed.http': 'HTTP/1.1 200 OK\n',
@@ -22,38 +22,20 @@ describe('fixSpecInSubjectFolder', () => {
         });
 
         // When - the fix runs
-        fixSpecInSubjectFolder(root);
+        const done = fixSpecInSubjectFolder(root);
 
-        // Then - the create file holds its test, its constant, and nothing the list test read
-        expect(existsSync(join(root, 'api/orders/orders.spec.ts'))).toBe(false);
-        expect(readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8')).toBe(
-            [
-                "import { describe, expect, test } from 'vitest';",
-                '',
-                "import { api } from '../../api.specification.js';",
-                '',
-                "const ORDER = { item: 'book' };",
-                '',
-                "describe('writing', () => {",
-                "    test('creates an order', async () => {",
-                '        // Given - an empty table',
-                "        const result = await api.post('/orders', ORDER);",
-                '',
-                '        // Then - the whole response',
-                "        expect(result.response).toMatch('HTTP/1.1 201 Created');",
-                '    });',
-                '});',
-                '',
-            ].join('\n'),
-        );
-        // Then - the list file keeps its helper, and its golden moves beside it, its one reader
-        const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
+        // Then - nothing is written, the file stands as it was, and the finding names each subject's tests and folder, never a file
         expect({
-            golden: existsSync(join(root, 'api/orders/list/__expected__/listed.http')),
-            helper: listed.includes('function listed(result)'),
-            path: listed.includes("file('./__expected__/listed.http')"),
-            unread: listed.includes('ORDER'),
-        }).toStrictEqual({ golden: true, helper: true, path: true, unread: false });
+            done,
+            fix: checkOneSubjectPerSpec(root).map((spotted) => spotted.fix),
+            kept: readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8') === TWO_ROUTES,
+        }).toStrictEqual({
+            done: [],
+            fix: [
+                'split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
+            ],
+            kept: true,
+        });
     });
 
     test('subject-moves — the fix moves a templated route to its folder and never a path that reads two ways', () => {
@@ -141,7 +123,7 @@ describe('fixSpecInSubjectFolder', () => {
         ).toStrictEqual([false, false, false, true]);
     });
 
-    test('subject-moves — a test reaching two subjects is reported with its title, and filed with the subject it opens on', () => {
+    test('subject-moves — a test reaching two subjects is reported with its title, and its file is left where it is', () => {
         // Given - one test that creates, then lists
         const source = [
             "import { api } from '../api.specification.js';",
@@ -153,40 +135,40 @@ describe('fixSpecInSubjectFolder', () => {
             'api/orders/orders.spec.ts': source,
         });
 
-        // Then - the finding says why no split is offered, and the fix only files the journey
-        expect(checkOneSubjectPerSpec(root)[0]?.fix).toBe(
+        // When - the fix runs
+        const done = fixSpecInSubjectFolder(root);
+
+        // Then - the finding says what the test stands on, and the file is left whole in its place
+        expect(checkOneSubjectPerSpec(root)[0]?.fix).toContain(
             'the test "creates then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
         );
-        fixSpecInSubjectFolder(root);
-        expect(readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8')).toContain(
-            "test('creates then lists'",
+        expect([done, readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')]).toStrictEqual(
+            [[], source],
         );
     });
 
-    test('subject-moves — a journey goes with the subject it opens on, and the rest of the file is still cut', () => {
+    test('subject-moves — a journey stays in its file with the rest, which no fix cuts', () => {
         // Given - one test on GET, one journey opening on POST and reading GET back
+        const source = [
+            "import { api } from '../api.specification.js';",
+            "test('lists', async () => { await api.get('/orders'); });",
+            "test('creates then lists', async () => { await api.post('/orders', {}); await api.get('/orders'); });",
+            '',
+        ].join('\n');
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
-            'api/orders/orders.spec.ts': [
-                "import { api } from '../api.specification.js';",
-                "test('lists', async () => { await api.get('/orders'); });",
-                "test('creates then lists', async () => { await api.post('/orders', {}); await api.get('/orders'); });",
-                '',
-            ].join('\n'),
+            'api/orders/orders.spec.ts': source,
         });
 
         // When - the fix runs
-        fixSpecInSubjectFolder(root);
+        const done = fixSpecInSubjectFolder(root);
 
-        // Then - two files, the journey with its opening subject, which `one-subject-per-spec` keeps naming
-        const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
-        expect({
-            journey: created.includes("test('creates then lists'"),
-            listed: existsSync(join(root, 'api/orders/list/orders.spec.ts')),
-        }).toStrictEqual({ journey: true, listed: true });
-        expect(checkOneSubjectPerSpec(root).map(({ path }) => path)).toStrictEqual([
-            'api/orders/create/orders.spec.ts',
-        ]);
+        // Then - nothing is written, and the finding stays at the file
+        expect([
+            done,
+            readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8'),
+            checkOneSubjectPerSpec(root).map(({ path }) => path),
+        ]).toStrictEqual([[], source, ['api/orders/orders.spec.ts']]);
     });
 
     test('subject-moves — a spec of a specimen is no subject: its routes are neither split nor filed', () => {
@@ -221,7 +203,7 @@ describe('fixSpecInSubjectFolder', () => {
         // When - the fix runs
         const done = fixSpecInSubjectFolder(root);
 
-        // Then - nothing written, the file as it was, and the check says why the fixer left it
+        // Then - nothing written, the file as it was, and the check says why no plan can be drawn
         expect({
             done,
             fix: checkOneSubjectPerSpec(root).map((spotted) => spotted.fix),
@@ -229,7 +211,7 @@ describe('fixSpecInSubjectFolder', () => {
         }).toStrictEqual({
             done: [],
             fix: [
-                "split it by hand, one file per subject — `typescript fix` refuses: visit /articles/:id has no standard folder: the file it goes to is its author's to name",
+                "split it by hand, one file per subject, each file named by you — beware: visit /articles/:id has no standard folder: the file it goes to is its author's to name",
             ],
             kept: true,
         });
@@ -271,8 +253,8 @@ describe('fixSpecInSubjectFolder', () => {
         ]);
     });
 
-    test('subject-moves — a split keeping the file in the folder of its second subject rewrites it there, and git sees the new file beside it, no rename', () => {
-        // Given - a two-subject spec already in its second subject's folder, committed
+    test('subject-moves — a two-subject spec already in the folder of its second subject is left as it is, and git sees nothing', () => {
+        // Given - a two-subject spec in its second subject's folder, committed
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
             'api/orders/create/orders.spec.ts': TWO_ROUTES.replace("'../api", "'../../api"),
@@ -287,13 +269,7 @@ describe('fixSpecInSubjectFolder', () => {
         // When - the fix runs
         const done = fixSpecInSubjectFolder(root);
 
-        // Then - only the written file is reported, and the kept file is modified in place
-        expect([
-            done,
-            git('status', '--porcelain').split('\n').filter(Boolean).toSorted(),
-        ]).toStrictEqual([
-            ['api/orders/create/orders.spec.ts → api/orders/list/orders.spec.ts'],
-            [' M specs/api/orders/create/orders.spec.ts', '?? specs/api/orders/list/'],
-        ]);
+        // Then - nothing is written, and the working tree stays clean
+        expect([done, git('status', '--porcelain')]).toStrictEqual([[], '']);
     });
 });

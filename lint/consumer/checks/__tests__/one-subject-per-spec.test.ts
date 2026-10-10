@@ -28,7 +28,7 @@ describe('checkOneSubjectPerSpec', () => {
             ),
         });
 
-        // Then - each spec of two subjects, the split it takes, and the seed a journey owes
+        // Then - each spec of two subjects, the plan of its split by folder, and the seed a journey owes
         expect(
             checkOneSubjectPerSpec(root).map(
                 ({ column, fix, found, line, path, rule }) =>
@@ -36,8 +36,8 @@ describe('checkOneSubjectPerSpec', () => {
             ),
         ).toStrictEqual([
             'one-subject-per-spec api/orders/alone.spec.ts:2:78 a spec reaching 2 subjects — POST /orders, GET /orders — the test "orders then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
-            'one-subject-per-spec api/orders/journey.spec.ts:2:78 a spec reaching 2 subjects — POST /orders, GET /orders — split it, one file per subject — api/orders/create/journey.spec.ts, api/orders/list/journey.spec.ts — `typescript fix` splits it; the test "orders then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
-            'one-subject-per-spec api/orders/orders.spec.ts:25:30 a spec reaching 2 subjects — GET /orders, POST /orders — split it, one file per subject — api/orders/list/orders.spec.ts, api/orders/create/orders.spec.ts — `typescript fix` splits it',
+            'one-subject-per-spec api/orders/journey.spec.ts:2:78 a spec reaching 2 subjects — POST /orders, GET /orders — split it by hand, one file per subject, each file named by you — POST /orders → api/orders/create/ ("orders then lists"); GET /orders → api/orders/list/ ("lists"); the test "orders then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
+            'one-subject-per-spec api/orders/orders.spec.ts:25:30 a spec reaching 2 subjects — GET /orders, POST /orders — split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
         ]);
     });
 });

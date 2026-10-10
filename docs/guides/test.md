@@ -89,9 +89,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                                              | What it judges                                                           | Files |
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 147   |
+| Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 148   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 199   |
+| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 200   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 113   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -269,7 +269,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —   | 47  | 111  | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —   | 48  | 111  | —           | —       | —      | —         | —      |
 | `.link()`      | —   | —   | 11  | —    | —           | —       | —      | —         | —      |
 | `.prepare()`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
@@ -286,7 +286,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.put()`     | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 61  | —    | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 62  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 112  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 11          | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —    | —           | 22      | —      | —         | —      |
@@ -355,11 +355,11 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.response`     | 25  | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.status`       | 1   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.table()`      | 7   | 4   | 1   | —    | 2           | —       | —      | —         | —      |
-| `.file()`       | 1   | —   | 16  | 8    | 4           | —       | —      | —         | —      |
-| `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
+| `.file()`       | 1   | —   | 17  | 8    | 4           | —       | —      | —         | —      |
+| `.directory()`  | 1   | —   | 4   | 6    | 1           | —       | —      | —         | —      |
 | `.stdout`       | —   | —   | 40  | —    | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —   | 14  | —    | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —   | 46  | —    | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —   | 47  | —    | —           | —       | —      | —         | —      |
 | `.json`         | —   | —   | 6   | —    | —           | 2       | —      | —         | —      |
 | `.filesystem`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
@@ -390,11 +390,11 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability             | api | job | cli | lint | integration | website | mobile | component | module |
 | ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 2      |
-| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 1      |
+| `toMatch(directory())` | 1   | —   | 6   | 6    | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 7      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
-| `.json body`           | 3   | —   | 10  | —    | 3           | 0       | —      | —         | 23     |
+| `.json body`           | 3   | —   | 11  | —    | 3           | 0       | —      | —         | 23     |
 | `.txt stream`          | 1   | —   | 12  | —    | 1           | 1       | —      | —         | 19     |
 | `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 8      |
 

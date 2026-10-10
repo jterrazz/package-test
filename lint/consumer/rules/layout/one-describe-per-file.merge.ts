@@ -11,7 +11,6 @@ import {
 import type { AstNode } from '../../../kit/project/ast.js';
 import {
     calleeOf,
-    escapedFor,
     firstArgumentOf,
     groupBodyOf,
     isDescribeCallee,
@@ -36,53 +35,37 @@ export function restatesSubject(title: string, { base, named }: FileSubject): bo
     return spelling(title) === spelling(named) || spelling(title) === spelling(base);
 }
 
-const SEPARATOR = ' — ';
-
-// invariant: a test whose title already opens on the group's, in any spelling, carries it: a second merge adds nothing. Its quotes are no letter, so the title is read as written.
-function carriesGroup(test: string, group: string): boolean {
-    const [head = ''] = test.split(SEPARATOR);
-    return test.includes(SEPARATOR) && spelling(head) === spelling(group);
-}
-
-// invariant: `vitest/prefer-lowercase-title` lowers a test title's first letter, which turns a constant or a type (`ARTICLES_42`, `Article`) into a name nobody wrote: such a group is left to its author.
-function opensUppercase(title: string): boolean {
-    return /^\p{Lu}/u.test(title);
-}
-
 function literalTitleOf(statement: AstNode): AstNode | undefined {
     const its = firstArgumentOf(statement);
     const written = its?.type === 'Literal' || its?.type === 'TemplateLiteral';
     return isTestCallee(calleeOf(statement)) && written ? its : undefined;
 }
 
-/** `undefined` when the group holds anything but tests titled by a literal, or when its title would not survive on them. */
-export function flattenedGroup(
-    source: string,
-    group: AstNode,
-    subject: FileSubject,
-): string | undefined {
+/** The tests of a group, `undefined` when it holds anything but tests titled by a literal: a merge keeps each test's own title and moves nothing else. */
+export function flattenedGroup(source: string, group: AstNode): string | undefined {
     const body = groupBodyOf(group);
-    const title = stringValue(firstArgumentOf(group));
-    if (body === undefined || title === undefined) {
+    if (body === undefined) {
         return undefined;
     }
-    const prefixes = !restatesSubject(title, subject);
     const titles = childList(body, 'body').map((statement) => literalTitleOf(statement));
-    const written = titles.filter((its) => its !== undefined);
-    if (written.length !== titles.length || (prefixes && opensUppercase(title))) {
-        return undefined;
-    }
-    let text = '';
-    let from = nodeStart(body) + 1;
-    for (const its of written) {
-        const said = source.slice(nodeStart(its), nodeEnd(its));
-        if (prefixes && !carriesGroup(said, title)) {
-            const at = nodeStart(its) + 1;
-            text += `${source.slice(from, at)}${escapedFor(its, `${title}${SEPARATOR}`)}`;
-            from = at;
-        }
-    }
-    return text + source.slice(from, nodeEnd(body) - 1);
+
+    return titles.some((its) => its === undefined)
+        ? undefined
+        : source.slice(nodeStart(body) + 1, nodeEnd(body) - 1);
+}
+
+function titlesOf(statement: AstNode): (string | undefined)[] {
+    const body = isDescribeCallee(calleeOf(statement)) ? groupBodyOf(statement) : undefined;
+    const tests = body === undefined ? [statement] : childList(body, 'body');
+
+    return tests.map((test) => stringValue(literalTitleOf(test)));
+}
+
+// invariant: two tests of one title stay two groups: a merge never makes a failure's name ambiguous.
+function collides(members: ReadonlySet<AstNode>): boolean {
+    const titles = [...members].flatMap((statement) => titlesOf(statement));
+
+    return new Set(titles).size !== titles.length;
 }
 
 // invariant: the statements between the members stay at module scope above the one describe; `undefined` when a group cannot flatten.
@@ -92,6 +75,9 @@ function mergedText(
     members: Set<AstNode>,
     subject: FileSubject,
 ): string | undefined {
+    if (collides(members)) {
+        return undefined;
+    }
     const inRun = statements.filter(
         (statement) =>
             nodeStart(statement) >= nodeStart([...members][0]) &&
@@ -107,7 +93,7 @@ function mergedText(
         if (!members.has(statement)) {
             hoisted += `${lead.trimStart()}${own}\n`;
         } else if (isDescribeCallee(calleeOf(statement))) {
-            const flattened = flattenedGroup(source, statement, subject);
+            const flattened = flattenedGroup(source, statement);
             if (flattened === undefined) {
                 return undefined;
             }

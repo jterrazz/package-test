@@ -4,41 +4,19 @@ import { describe, expect, test } from 'vitest';
 import { lint as checker } from '../checker-lint.specification.js';
 
 describe('one-subject-per-spec', () => {
-    test('--fix splits a file of two routes; the seed one route reads moves beside it, a module test following', async () => {
+    test('--fix leaves a file of two routes whole, and reports the plan of its split: the folders and the tests each route takes', async () => {
         // Given - the split tree
         const result = await checker.fixture(directory('./__fixtures__/split/')).run({ fix: true });
 
-        // Then - nothing is left to report, and the fixed tree is its golden
-        expect(result.report).toMatch('');
-        await expect(result.directory()).toMatch(directory('./__expected__/split/'));
-    });
-
-    test('--fix moves a helper two of the split files read into the __setup__/ of the folder they share', async () => {
-        // Given - the shared-helper tree
-        const result = await checker
-            .fixture(directory('./__fixtures__/shared-helper/'))
-            .run({ fix: true });
-
-        // Then - nothing is reported
-        expect(result.report).toMatch('');
-        expect(result.file('specs/api/orders/orders.spec.ts').exists).toBe(false);
-        expect(result.file('specs/api/orders/__setup__/orders.ts').content).toBe(
-            [
-                "export const ITEM = 'book';",
-                '',
-                '/** An order of the one item the catalogue sells. */',
-                'export function order(): { item: string } {',
-                '    return { item: ITEM };',
-                '}',
-                '',
-            ].join('\n'),
-        );
-        expect(result.file('specs/api/orders/create/orders.spec.ts').content).toContain(
-            "import { order } from '../__setup__/orders.js';",
-        );
-        expect(result.file('specs/api/orders/update/orders.spec.ts').content).toContain(
-            "import { order } from '../__setup__/orders.js';",
-        );
+        // Then - the finding stands with the plan, and the tree is the one it was given
+        expect(result.report).toMatch(`
+            specs/api/orders/orders.spec.ts:19:30  jterrazz-check(one-subject-per-spec)
+                found: a spec reaching 2 subjects — GET /orders, POST /orders
+                why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
+                fix: split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")
+                read: docs/reference/linting.md#one-subject-per-spec
+        `);
+        expect(result.file('specs/api/orders/orders.spec.ts').exists).toBe(true);
     });
 
     test('a spec whose chains reach two routes is refused at the chain that reaches the second', async () => {
@@ -50,7 +28,7 @@ describe('one-subject-per-spec', () => {
             specs/api/orders/orders.spec.ts:19:30  jterrazz-check(one-subject-per-spec)
                 found: a spec reaching 2 subjects — GET /orders, POST /orders
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
-                fix: split it, one file per subject — api/orders/list/orders.spec.ts, api/orders/create/orders.spec.ts — \`typescript fix\` splits it
+                fix: split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")
                 read: docs/reference/linting.md#one-subject-per-spec
         `);
     });
@@ -64,7 +42,7 @@ describe('one-subject-per-spec', () => {
             specs/mobile/events/feed.spec.ts:14:30  jterrazz-check(one-subject-per-spec)
                 found: a spec reaching 2 subjects — open acme://events, open acme://dossier/42
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
-                fix: split it by hand, one file per subject — \`typescript fix\` refuses: open acme://dossier/42 has no standard folder: the file it goes to is its author's to name
+                fix: split it by hand, one file per subject, each file named by you — beware: open acme://dossier/42 has no standard folder: the file it goes to is its author's to name
                 read: docs/reference/linting.md#one-subject-per-spec
         `);
     });
@@ -78,7 +56,7 @@ describe('one-subject-per-spec', () => {
             specs/cli/db/db.spec.ts:16:30  jterrazz-check(one-subject-per-spec)
                 found: a spec reaching 2 subjects — exec db migrate, exec db seed
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
-                fix: split it, one file per subject — cli/db/migrate/db.spec.ts, cli/db/seed/db.spec.ts — \`typescript fix\` splits it
+                fix: split it by hand, one file per subject, each file named by you — exec db migrate → cli/db/migrate/ ("migrates the database"); exec db seed → cli/db/seed/ ("seeds the database")
                 read: docs/reference/linting.md#one-subject-per-spec
         `);
     });
@@ -101,7 +79,7 @@ describe('one-subject-per-spec', () => {
             specs/api/posts/posts.spec.ts:19:30  jterrazz-check(one-subject-per-spec)
                 found: a spec reaching 5 subjects — POST /api/posts, GET /api/posts, GET /api/posts/:id, PUT /api/posts/:id, DELETE /api/posts/:id
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
-                fix: split it by hand, one file per subject — \`typescript fix\` refuses: POST /api/posts and GET /api/posts are both filed at api/api/posts/posts.spec.ts: the split cannot tell them apart
+                fix: split it by hand, one file per subject, each file named by you — POST /api/posts → api/api/posts/ ("creates a post and points at it"); GET /api/posts → api/api/posts/ ("lists the collection newest first"); GET /api/posts/:id → api/api/posts/ ("reads one post by id"); PUT /api/posts/:id → api/api/posts/ ("replaces a post whole"); DELETE /api/posts/:id → api/api/posts/ ("deletes a post") — beware: POST /api/posts and GET /api/posts are both filed at api/api/posts/posts.spec.ts: the split cannot tell them apart
                 read: docs/reference/linting.md#one-subject-per-spec
         `);
     });
@@ -123,19 +101,8 @@ describe('one-subject-per-spec', () => {
             specs/api/redirects/registry.spec.ts:19:34  jterrazz-check(one-subject-per-spec)
                 found: a spec reaching 2 subjects — GET /redirects, GET /articles/:id
                 why: Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (\`GET /events/:id\`, the request line of a \`.http\` a \`.request(file())\` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens.
-                fix: split it by hand, one file per subject — \`typescript fix\` refuses: the test "moves \${slug} for good" stands inside a loop or a block that is no \`describe\`: a cut cannot tell how many tests it moves, nor leave the block whole
+                fix: split it by hand, one file per subject, each file named by you — GET /redirects → api/redirects/list/ ("lists every rule"); GET /articles/:id → api/articles/get/ ("moves \${slug} for good") — beware: the test "moves \${slug} for good" stands inside a loop or a block that is no \`describe\`: a cut cannot tell how many tests it moves, nor leave the block whole
                 read: docs/reference/linting.md#one-subject-per-spec
         `);
-    });
-
-    test('--fix says a loose comment once, in the file it opens on, and imports a moved helper as the spec writes its own imports', async () => {
-        // Given - a header above the imports, a runner imported bare, a constant both routes read
-        const result = await checker
-            .fixture(directory('./__fixtures__/loose-comment/'))
-            .run({ fix: true });
-
-        // Then - nothing is left to report, and the fixed tree is its golden
-        expect(result.report).toMatch('');
-        await expect(result.directory()).toMatch(directory('./__expected__/loose-comment/'));
     });
 });
