@@ -105,7 +105,7 @@ A module test is held to the same one `describe`, titled with its SUBJECT rather
 
 A file holds at most 400 lines (`spec-file-within-line-limit`); past it, the tests usually group by a prefix of their titles, and that is where the file is cut.
 
-A test's body spans at most 60 lines of gestures (`test-body-within-line-limit`), in a module test as in a spec; the value a `toMatch` compares is the claim, not a gesture, and `ground-shared-or-inline` caps it instead. The toolchain's function cap leaves a test file alone, because the file's one `describe` is a function as long as the file; the cap it would have put on each test is this one.
+A test's body spans at most 60 lines of gestures (`test-body-within-line-limit`), in a module test as in a spec; the value a `toMatch`, a `toStrictEqual` or a `toEqual` compares is the claim, not a gesture, and `ground-shared-or-inline` caps a `toMatch` one instead. The toolchain's function cap leaves a test file alone, because the file's one `describe` is a function as long as the file; the cap it would have put on each test is this one.
 
 ### A specimen's spec
 

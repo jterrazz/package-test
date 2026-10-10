@@ -18,13 +18,16 @@ function lineAt(text: string, offset: number): number {
     return text.slice(0, offset).split('\n').length - 1;
 }
 
-// invariant: a `toMatch(<value>)` argument past its first line is no gesture: `ground-shared-or-inline` caps it.
+const VALUE_MATCHERS: ReadonlySet<string> = new Set(['toEqual', 'toMatch', 'toStrictEqual']);
+
+// invariant: the expected value of a whole comparison, `toMatch`, `toStrictEqual` or `toEqual`, past its first line is no gesture: it is the claim the test makes.
 function gestureLines(text: string, body: AstNode): number {
     const first = lineAt(text, nodeStart(body));
     const last = lineAt(text, nodeEnd(body));
     const claim = new Set<number>();
     walk(body, (node) => {
-        if (assertionOf(node)?.matcher !== 'toMatch') {
+        const matcher = assertionOf(node)?.matcher;
+        if (matcher === undefined || !VALUE_MATCHERS.has(matcher)) {
             return;
         }
         const value = childList(node, 'arguments')[0];
@@ -57,7 +60,7 @@ export const testBodyWithinLineLimit = defineRule(
         docs: row,
         messages: {
             tooLong: {
-                found: 'a test body of {{lines}} lines of gestures, over {{max}} — the lines of a `toMatch(<value>)` argument are not counted',
+                found: 'a test body of {{lines}} lines of gestures, over {{max}} — the lines of a `toMatch`, `toStrictEqual` or `toEqual` expected value are not counted',
                 fix: 'split it into one test per behaviour, or move a long Given into a function the test calls',
             },
         },

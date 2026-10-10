@@ -267,7 +267,7 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "A test body spans at most 60 lines of gestures — the function a `test(…)`/`it(…)` runs, from the line it opens on to the line it closes on, blank lines and comments included, less the lines a `toMatch(<value>)` argument holds past the one it opens on: the claim is capped by `ground-shared-or-inline`, not here; a longer one is refused at the function. A body already past it is recorded on the ratchet and may only shrink.",
+            "sentence": "A test body spans at most 60 lines of gestures — the function a `test(…)`/`it(…)` runs, from the line it opens on to the line it closes on, blank lines and comments included, less the lines the expected value of a `toMatch`, `toStrictEqual` or `toEqual` holds past the one it opens on: it is the claim the test makes, and `ground-shared-or-inline` caps a `toMatch` one, not this rule; a longer one is refused at the function. A body already past it is recorded on the ratchet and may only shrink.",
             "specification": "model",
             "family": "layout",
             "fix": "Split it into one test per behaviour, or move a long Given into a function the test calls.",

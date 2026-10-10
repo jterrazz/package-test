@@ -38,6 +38,12 @@ ruleTester().run('test-body-within-line-limit', testBodyWithinLineLimit, {
             filename: SPEC,
         },
         {
+            name: 'A value another matcher compares, `toBe` or `toContain`, claims no line either.',
+            code: claimedTestOf(20, 50, 'toContain'),
+            errors: [{ column: 10, line: 1, messageId: 'tooLong' }],
+            filename: SPEC,
+        },
+        {
             name: 'A `toMatch` value spares its own lines, never the gestures around it.',
             code: claimedTestOf(MAX_TEST_LINES + 1, 5),
             errors: [
@@ -85,6 +91,13 @@ ruleTester().run('test-body-within-line-limit', testBodyWithinLineLimit, {
             filename: SPEC,
         },
         { code: claimedTestOf(MAX_TEST_LINES, 90), filename: SPEC },
+        {
+            name: 'A whole literal compared by `toStrictEqual` or `toEqual` is the claim as well.',
+            code: [claimedTestOf(20, 90, 'toStrictEqual'), claimedTestOf(20, 90, 'toEqual')].join(
+                '\n',
+            ),
+            filename: SPEC,
+        },
         {
             name: "The file's describe is as long as the file: only the test is capped.",
             code: `describe('pagination', () => {\n${testOf(MAX_TEST_LINES)}\n${testOf(MAX_TEST_LINES)}\n});`,
