@@ -14,7 +14,7 @@ import type { CliConfig } from '../cli.handle.js';
 import type { CliEnv, CliOutput, CliPort } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
 import { documentEnv, startServers } from './literate-env.js';
-import { assertRun, atLine, comparable, updates } from './literate-judge.js';
+import { assertFiles, assertRun, atLine, comparable, updates } from './literate-judge.js';
 import type { Judgement, RunOutcome } from './literate-judge.js';
 import { grammarRefusal } from './literate-plugin.js';
 
@@ -126,7 +126,9 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
             const outcome = await execute(run, session);
             outcomes.push(outcome);
             // invariant: judged here, before the next command: a run's `files:` describes the directory as this run left it.
-            if (!rewriting) {
+            if (rewriting) {
+                assertFiles(outcome, judgement);
+            } else {
                 assertRun(outcome, judgement);
             }
         }

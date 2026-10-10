@@ -14,6 +14,8 @@ export class JsonAccessor<Value = unknown> {
     readonly testDir: string;
     /** @internal */
     private readonly transform?: ((text: string) => string) | undefined;
+    /** What the producer threw when it left no value: update mode records nothing over it. @internal */
+    readonly thrown: string | undefined;
 
     constructor(
         rawText: string,
@@ -21,6 +23,7 @@ export class JsonAccessor<Value = unknown> {
         testDir: string,
         options: {
             captures?: CaptureScope | undefined;
+            thrown?: string | undefined;
             transform?: ((text: string) => string) | undefined;
         } = {},
     ) {
@@ -28,6 +31,7 @@ export class JsonAccessor<Value = unknown> {
         this.streamName = streamName;
         this.testDir = testDir;
         this.transform = options.transform;
+        this.thrown = options.thrown;
         this.captures = options.captures ?? new CaptureScope();
     }
 

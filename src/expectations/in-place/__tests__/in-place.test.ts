@@ -153,6 +153,53 @@ describe('in-place', () => {
         expect(readFileSync(file, 'utf8')).toBe('const x = 1;\n');
     });
 
+    test('writeInPlace — the test file rewritten where its toMatch stands — a name or a call is refused, a literal of any shape written', () => {
+        // Given - a scratch test whose calls hold a variable, a call, and every literal shape
+        writeImmediately();
+        const file = scratchFile(
+            [
+                'expect(a).toMatch(row.expected);',
+                'expect(b).toMatch(expected());',
+                'expect(c).toMatch({ id: 1 });',
+                'expect(d).toMatch([1]);',
+                "expect(e).toMatch('text');",
+                'expect(f).toMatch(`text`);',
+                'expect(g).toMatch(-1);',
+                'expect(h).toMatch(null);',
+                'expect(i).toMatch(true);',
+                'expect(j).toMatch(undefined);',
+                'expect(k).toMatch(nullable);',
+                '',
+            ].join('\n'),
+        );
+        const attempt = (line: number): string | undefined => {
+            try {
+                writeInPlace({ column: 14, file, line }, () => '0');
+            } catch (error) {
+                return error instanceof Error ? error.message.split('\n')[0] : undefined;
+            }
+            return undefined;
+        };
+
+        // When - each line is written
+        const outcomes = Array.from({ length: 11 }, (_, index) => attempt(index + 1));
+
+        // Then - a variable, a call and a name that only starts like a keyword are refused, naming what they hold; every literal is rewritten
+        expect(outcomes).toStrictEqual([
+            `found: update mode: toMatch(row.expected) at ${file}:1:14 holds a name or a call, not a literal`,
+            `found: update mode: toMatch(expected()) at ${file}:2:14 holds a name or a call, not a literal`,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            `found: update mode: toMatch(nullable) at ${file}:11:14 holds a name or a call, not a literal`,
+        ]);
+    });
+
     test('writeInPlace — the test file rewritten where its toMatch stands — with a pending folder the file waits for the run to end, then is written', () => {
         // Given - a scratch test, and a pending folder for the run
         const file = scratchFile('expect(one).toMatch(``);\n');

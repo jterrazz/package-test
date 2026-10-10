@@ -48,6 +48,7 @@ export class CallResult<Returned = unknown> extends BaseResult {
         // Stryker disable next-line StringLiteral: a JSON accessor names its stream only when its text is no JSON, and a stringified value always is
         const json = new JsonAccessor(JSON.stringify(produced ?? null), 'value', testDir, {
             captures,
+            thrown: this.outcome.threw ? describeError(this.outcome) : undefined,
         });
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- this branch IS the conditional type, chosen on the same runtime shape the type reads
         return json as CallValue<Returned>;

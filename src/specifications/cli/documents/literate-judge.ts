@@ -160,15 +160,28 @@ export function assertRun(outcome: RunOutcome, context: Judgement): void {
         }
     }
 
-    const fileFailures = run.files
-        .map((assertion) => checkFile(assertion, context))
-        .filter((line): line is string => line !== null);
-    if (fileFailures.length > 0) {
-        details.push(['files mismatch', '', ...fileFailures.map((line) => `  ${line}`)].join('\n'));
-    }
+    details.push(...filesDetail(outcome, context));
 
     if (details.length > 0) {
         throw failure(run, context, details);
+    }
+}
+
+function filesDetail({ run }: RunOutcome, context: Judgement): string[] {
+    const fileFailures = run.files
+        .map((assertion) => checkFile(assertion, context))
+        .filter((line): line is string => line !== null);
+
+    return fileFailures.length === 0
+        ? []
+        : [['files mismatch', '', ...fileFailures.map((line) => `  ${line}`)].join('\n')];
+}
+
+/** The `files:` of a run, judged alone: update mode rewrites a run's exit code and streams, never what the run was asked to leave on disk. */
+export function assertFiles(outcome: RunOutcome, context: Judgement): void {
+    const details = filesDetail(outcome, context);
+    if (details.length > 0) {
+        throw failure(outcome.run, context, details);
     }
 }
 

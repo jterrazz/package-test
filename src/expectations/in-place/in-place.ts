@@ -17,6 +17,9 @@ type ArgumentSpan = { end: number; indent: string; start: number };
 
 const TO_MATCH = /\btoMatch\s*\(/gu;
 
+// invariant: update mode rewrites a literal, which is the value itself; a name or a call stands for values it cannot rewrite — a table's rows, a shared constant.
+const LITERAL = /^(?:['"`{[]|-?\d|(?:null|true|false|undefined)$)/u;
+
 export function callSiteOf(stack: string): CallSite | undefined {
     return stackFrames(stack).find(
         ({ file }) => !file.includes(`${sep}node_modules${sep}`) && !isFrameworkFrame(file),
@@ -117,6 +120,17 @@ export function writeInPlace(
                 found: `update mode: no toMatch( stands at ${site.file}:${site.line}:${site.column} — the value in place cannot be written`,
                 read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A value written in place is rewritten where its `toMatch(` stands.',
+            }),
+        );
+    }
+    const written = ledger.original.slice(span.start, span.end);
+    if (written !== '' && !LITERAL.test(written)) {
+        throw new Error(
+            refusal({
+                fix: 'write the expectation as a literal in `toMatch(`, or record it by hand: a table’s rows are recorded one by one, never from the last row',
+                found: `update mode: toMatch(${written}) at ${site.file}:${site.line}:${site.column} holds a name or a call, not a literal`,
+                read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                why: 'Update mode rewrites the literal a `toMatch(` holds; a variable stands for values the rewrite would replace by the last one it saw.',
             }),
         );
     }

@@ -144,30 +144,34 @@ describe('update-mode', () => {
         expect(written).not.toContain('cwd /');
     });
 
-    test('files:, the command and the run order are never rewritten', async () => {
-        // Given - a document whose files: assertion is deliberately wrong
-        const path = scratchFile(
-            [
-                'description: leaves everything but the streams alone',
-                'runs:',
-                '  - command: scaffold',
-                '    exit: 0',
-                '    files:',
-                '      out/main.go: { contains: package rust }',
-                '',
-            ].join('\n'),
-        );
+    test('files: stays judged under update, a wrong one refusing the run and the document staying as written', async () => {
+        // Given - a document whose files: assertion is deliberately wrong, beside a stale stdout an update would rewrite
+        const source = [
+            'description: leaves everything but the streams alone',
+            'runs:',
+            '  - command: scaffold',
+            '    exit: 0',
+            '    stdout: |',
+            '      stale stdout',
+            '    files:',
+            '      out/main.go: { contains: package rust }',
+            '',
+        ].join('\n');
+        const path = scratchFile(source);
 
-        // Given - one update run
+        // When - one update run
         vi.stubEnv('TEST_UPDATE', '1');
+        let message: string;
         try {
-            await cli.run(documentAt(path));
+            message = await failureOf(cli.run(documentAt(path)));
         } finally {
             vi.unstubAllEnvs();
         }
 
-        // Then - the wrong assertion is still there: an update refreshes the streams and the exit code, and nothing a human decided
-        expect(readFileSync(path, 'utf8')).toContain('out/main.go: { contains: package rust }');
+        // Then - the run is refused on the file it was asked to leave, and the document keeps its assertion and its stale stream: a recorded document must be one a normal run passes
+        expect(message).toContain('files mismatch');
+        expect(message).toContain('out/main.go');
+        expect(readFileSync(path, 'utf8')).toBe(source);
     });
 
     test('an update that changes nothing gives the file back byte for byte', async () => {

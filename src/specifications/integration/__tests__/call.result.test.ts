@@ -78,6 +78,19 @@ describe('CallResult', () => {
         ]).toStrictEqual(['error', 'value', true, true, true]);
     });
 
+    test('callResult — the accessor the value is read through — a call that threw hands update mode its error, a call that returned nothing to refuse', () => {
+        // Given - a call that threw, a call that threw a bare value, and one that returned
+        const read = (outcome: CallOutcome): unknown =>
+            Reflect.get(new CallResult({ config: {}, outcome, testDir: '/spec' }).value, 'thrown');
+
+        // Then - the message of the first, the text of the second, nothing for the third
+        expect([
+            read({ error: new Error('nope'), threw: true, value: null }),
+            read({ error: 'declined', threw: true, value: null }),
+            read(returned({})),
+        ]).toStrictEqual(['nope', 'declined', undefined]);
+    });
+
     test('callResult — the accessor the value is read through — reads a call that threw as the empty value, its refusal on `error`', () => {
         // Given - a call that refused with an error, and one that threw a bare value
         // Then - there was no value to choose an accessor on, so it is the JSON reading of nothing; what the call produced is the refusal

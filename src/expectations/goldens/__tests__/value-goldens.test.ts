@@ -153,6 +153,26 @@ describe('value-goldens', () => {
         );
     });
 
+    test('valueGoldens — toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a call that threw records nothing, and its error is named', () => {
+        // Given - the value of a call that threw, null as JSON, beside the call recorded in place, under update mode
+        vi.stubEnv('TEST_UPDATE', '1');
+        const scratch = scratchTest('expect(result.value).toMatch(``);');
+        const threw = new JsonAccessor('null', 'value', '/tmp', { thrown: 'connection refused' });
+
+        // Then - update mode refuses to write a null over it, and the test file is untouched
+        expect(() => {
+            void wholeOf(threw)('', undefined, scratch.stack);
+        }).toThrow(
+            [
+                'found: update mode: the call threw "connection refused", so its value is null',
+                'why: A null recorded over a call that failed is an expectation no failure can break: every call could fail and the test would stay green.',
+                'fix: assert the error — `expect(result.error).toMatch(…)` — or fix the call so it returns',
+                'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+            ].join('\n'),
+        );
+        expect(scratch.read()).toContain('toMatch(``);');
+    });
+
     test('valueGoldens — toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a value that matches, a frozen one and a negation are never written', () => {
         // Given - three calls in place, under update mode
         vi.stubEnv('TEST_UPDATE', '1');

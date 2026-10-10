@@ -110,6 +110,16 @@ export function matchJsonValue(
                 : formatResponseDiff(IN_PLACE, renderExpected(expected), actual),
         );
     }
+    if (accessor.thrown !== undefined) {
+        throw new Error(
+            refusal({
+                fix: 'assert the error — `expect(result.error).toMatch(…)` — or fix the call so it returns',
+                found: `update mode: the call threw "${accessor.thrown}", so its value is null`,
+                read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                why: 'A null recorded over a call that failed is an expectation no failure can break: every call could fail and the test would stay green.',
+            }),
+        );
+    }
     const merged = mergePreservingPlaceholders(
         empty ? null : renderExpected(expected),
         actual,
