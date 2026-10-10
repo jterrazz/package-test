@@ -6,7 +6,7 @@ import {
     nearestRoot,
     TESTS_FOLDER,
 } from '@jterrazz/typescript/rules';
-import { dirname, relative } from 'node:path';
+import { basename, dirname, relative } from 'node:path';
 
 import { SETTINGS_FILE } from './settings-file.js';
 import { isUnderSpecs, segments } from './specs-anchor.js';
@@ -126,8 +126,15 @@ export function projectRootOf(directory: string): string | undefined {
     return root;
 }
 
-/** A path no package and no repository holds (a rule's test case, `/repo/…`) is read whole. */
+/** A path no package and no repository holds (a rule's test case, `/repo/…`) is read whole. A workspace member named `specs` is the specs tree itself, so its folder name stays the first segment of what it holds. */
 export function projectSegments(filename: string): string[] {
     const root = projectRootOf(dirname(filename));
-    return segments(root === undefined ? filename : relative(root, filename));
+    if (root === undefined) {
+        return segments(filename);
+    }
+
+    return [
+        ...(basename(root) === 'specs' ? ['specs'] : []),
+        ...segments(relative(root, filename)),
+    ];
 }

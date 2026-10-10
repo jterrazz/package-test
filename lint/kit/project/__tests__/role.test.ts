@@ -1,8 +1,10 @@
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { checkoutUnder, repositoryUnder } from '../../../__tests__/package-tree.fixtures.js';
+import { materialAt } from '../material.js';
 import type { FileRole, StrayTestRoot } from '../role.js';
 import {
     isNodeTestFileName,
@@ -140,6 +142,27 @@ describe('role', () => {
         expect(roleOf(join(underGround, 'src/widget.ts')).role).toBe('other');
         expect(roleOf(join(underSpecs, 'src/widget.test.ts')).inSpecs).toBe(false);
         expect(strayTestRootOf(join(underGround, 'tests/widget.test.ts'))).toBe('tests');
+    });
+
+    test('roleOf — read below the project root — a workspace member named specs keeps its folder as the first segment, so what it holds is the specs tree', () => {
+        // Given - a repository whose `specs/` is a workspace member of its own, and a package of another name beside it
+        const repository = mkdtempSync(join(tmpdir(), 'specs-member-'));
+        for (const member of ['specs', 'app']) {
+            mkdirSync(join(repository, member, '__setup__'), { recursive: true });
+            writeFileSync(join(repository, member, 'package.json'), '{}\n');
+        }
+        const inSpecs = join(repository, 'specs/__setup__/helper.ts');
+        const inApp = join(repository, 'app/__setup__/helper.ts');
+
+        // Then - the member's folder leads its segments and the other package's does not, and the member's helper is the specs tree, which production may not reach, where the other package's is nothing of the sort
+        expect([projectSegments(inSpecs), projectSegments(inApp)]).toStrictEqual([
+            ['specs', '__setup__', 'helper.ts'],
+            ['__setup__', 'helper.ts'],
+        ]);
+        expect([materialAt(inSpecs), materialAt(inApp)]).toStrictEqual([
+            'the specs tree',
+            undefined,
+        ]);
     });
 
     test('roleOf — read below the project root — a path no package and no repository holds is read whole', () => {

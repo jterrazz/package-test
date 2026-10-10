@@ -1,6 +1,6 @@
 import { TESTS_FOLDER } from '@jterrazz/typescript/rules';
 import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 import { SPECIFICATIONS } from './specifications.js';
 
@@ -46,11 +46,10 @@ const foldersIn = (path: string): string[] =>
         : [];
 
 // invariant: the runner is derived only where the folder's one specification module is named for it: in a shared module graph, a second specification module would load once per worker, and its files would share the first one's subject.
-function runnerOf(root: string, specification: string): Record<string, unknown> {
+function runnerOf(root: string, folder: string, specification: string): Record<string, unknown> {
     if (!IN_PROCESS.has(specification)) {
         return {};
     }
-    const folder = `${SPECS}/${specification}`;
     const modules = readdirSync(join(root, folder)).filter((name) =>
         name.endsWith(SPECIFICATION_MODULE),
     );
@@ -59,18 +58,24 @@ function runnerOf(root: string, specification: string): Record<string, unknown> 
     return modules.length === 1 && modules[0] === own ? { runner: `./${folder}/${own}` } : {};
 }
 
+// invariant: a workspace member named `specs` is the specs root itself, with no `specs/` folder beneath it: its folders are the specifications.
+const isSpecsMember = (root: string): boolean =>
+    basename(root) === SPECS && existsSync(join(root, 'package.json'));
+
 /** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder — an in-process one handed as its `runner` the folder's one specification module, `<specification>.specification.ts` —, `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
 export function derivedProjects(root: string): Map<string, Record<string, unknown>> {
-    const specs = foldersIn(join(root, SPECS));
+    const member = isSpecsMember(root);
+    const prefix = member ? '' : `${SPECS}/`;
+    const specs = foldersIn(member ? root : join(root, SPECS));
     const named = specs.filter((folder) => FOLDERED.has(folder));
     const roots = [
-        ...foldersIn(root).filter((folder) => folder !== SPECS),
-        ...specs.filter((folder) => !named.includes(folder)).map((folder) => `${SPECS}/${folder}`),
+        ...(member ? [] : foldersIn(root).filter((folder) => folder !== SPECS)),
+        ...specs.filter((folder) => !named.includes(folder)).map((folder) => `${prefix}${folder}`),
     ];
     const holding = (pattern: RegExp): string[] =>
         roots.filter((folder) => holds(join(root, folder), pattern));
     const rendered = [
-        ...(named.includes('component') ? [`${SPECS}/component/**/*.test.tsx`] : []),
+        ...(named.includes('component') ? [`${prefix}component/**/*.test.tsx`] : []),
         ...holding(RENDERED_TEST).map((folder) => `${folder}/**/*.test.tsx`),
     ];
     const unitRoots = holding(MODULE_TEST);
@@ -79,7 +84,7 @@ export function derivedProjects(root: string): Map<string, Record<string, unknow
         projects.set(UNIT, { roots: unitRoots });
     }
     for (const specification of named) {
-        projects.set(specification, runnerOf(root, specification));
+        projects.set(specification, runnerOf(root, `${prefix}${specification}`, specification));
     }
     if (rendered.length > 0) {
         projects.set('component', { include: rendered });

@@ -87,4 +87,35 @@ describe('derivedProjects', () => {
             job: {},
         });
     });
+
+    test('derived-projects — a workspace member named specs is the specs root itself: its folders are the specifications, and a project beside them holds the tests it names', () => {
+        // Given - a member `specs` with a package manifest, a cli folder, an api folder with its one specification module, a rendered test folder of its own and module tests in a helper folder
+        const parent = tree([
+            'specs/package.json',
+            'specs/cli/run.spec.ts',
+            'specs/api/api.specification.ts',
+            'specs/api/orders.spec.ts',
+            'specs/__setup__/helper.ts',
+            'specs/views/__tests__/page.test.tsx',
+            'specs/helpers/__tests__/format.test.ts',
+        ]);
+
+        // Then - the cli and api projects at the member's root, the api one with its runner, and the unit and component ones over the member's own folders
+        expect(Object.fromEntries(derivedProjects(join(parent, 'specs')))).toStrictEqual({
+            api: { runner: './api/api.specification.ts' },
+            cli: {},
+            component: { include: ['views/**/*.test.tsx'] },
+            unit: { roots: ['helpers'] },
+        });
+    });
+
+    test('derived-projects — a folder named specs with no manifest of its own is the specs folder of the project around it, and one holding specs beneath is read as before', () => {
+        // Given - a project root named `specs` with no package manifest, and a nested specs folder inside it
+        const parent = tree(['specs/specs/cli/run.spec.ts']);
+
+        // Then - the cli project, found beneath the nested folder only
+        expect(Object.fromEntries(derivedProjects(join(parent, 'specs')))).toStrictEqual({
+            cli: {},
+        });
+    });
 });
