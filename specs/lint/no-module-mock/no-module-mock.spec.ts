@@ -55,7 +55,7 @@ describe('no-module-mock', () => {
         expect(result.report).toMatch(`
             src/__tests__/storage.test.ts:5:1  jterrazz(no-module-mock)
                 found: "@react-native-async-storage/async-storage" is on the \`modules\` allow-list with no reason
-                why: A test doubles a PORT, never a module: \`vi.mock\`/\`vi.doMock\` of a specifier outside the \`modules\` allow-list — each entry \`{ module, reason }\`, and an entry with no reason clears nothing — a \`__mocks__/\` directory, and — in a \`module\`-role test — importing a data asset (\`.json\`, \`.sql\`, \`.yaml\`, …) are all errors.
+                why: A test doubles a PORT, never a module: \`vi.mock\`/\`vi.doMock\` of a specifier outside the \`modules\` allow-list — each entry \`{ module, reason }\`, and an entry with no reason clears nothing — a \`__mocks__/\` directory, and — in a \`module\`-role test — importing a data asset (\`.json\`, \`.sql\`, \`.yaml\`, …) are all errors, a JSON file imported \`with { type: 'json' }\` excepted: it is data the product reads as it does, not a mock.
                 fix: state why no consumer can inject it: \`{ module: '@react-native-async-storage/async-storage', reason: '<why>' }\`
                 read: docs/reference/linting.md#no-module-mock
         `);
@@ -69,12 +69,12 @@ describe('no-module-mock', () => {
         expect(result.report).toMatch(`
             src/__tests__/util.test.ts:3:21  jterrazz(no-module-mock)
                 found: a module test imports the data asset "../payload.json"
-                why: A test doubles a PORT, never a module: \`vi.mock\`/\`vi.doMock\` of a specifier outside the \`modules\` allow-list — each entry \`{ module, reason }\`, and an entry with no reason clears nothing — a \`__mocks__/\` directory, and — in a \`module\`-role test — importing a data asset (\`.json\`, \`.sql\`, \`.yaml\`, …) are all errors.
+                why: A test doubles a PORT, never a module: \`vi.mock\`/\`vi.doMock\` of a specifier outside the \`modules\` allow-list — each entry \`{ module, reason }\`, and an entry with no reason clears nothing — a \`__mocks__/\` directory, and — in a \`module\`-role test — importing a data asset (\`.json\`, \`.sql\`, \`.yaml\`, …) are all errors, a JSON file imported \`with { type: 'json' }\` excepted: it is data the product reads as it does, not a mock.
                 fix: write the data as code in a \`<file>.fixtures.ts\` beside the test, or move the test under \`specs/\` as a \`.spec.ts\`
                 read: docs/reference/linting.md#no-module-mock
             src/__tests__/util.test.ts:5:1  jterrazz(no-module-mock)
                 found: \`vi.mock\` doubles a module for every importer
-                why: A test doubles a PORT, never a module: \`vi.mock\`/\`vi.doMock\` of a specifier outside the \`modules\` allow-list — each entry \`{ module, reason }\`, and an entry with no reason clears nothing — a \`__mocks__/\` directory, and — in a \`module\`-role test — importing a data asset (\`.json\`, \`.sql\`, \`.yaml\`, …) are all errors.
+                why: A test doubles a PORT, never a module: \`vi.mock\`/\`vi.doMock\` of a specifier outside the \`modules\` allow-list — each entry \`{ module, reason }\`, and an entry with no reason clears nothing — a \`__mocks__/\` directory, and — in a \`module\`-role test — importing a data asset (\`.json\`, \`.sql\`, \`.yaml\`, …) are all errors, a JSON file imported \`with { type: 'json' }\` excepted: it is data the product reads as it does, not a mock.
                 fix: double the port instead — \`mockOf<Port>()\`, \`vi.fn()\`, \`vi.spyOn\` — or put a native module no consumer can inject on the \`modules\` allow-list: \`{ module, reason }\`
                 read: docs/reference/linting.md#no-module-mock
             src/__tests__/util.test.ts:8:1  jterrazz(no-existence-only-assertion)
