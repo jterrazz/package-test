@@ -339,7 +339,7 @@ The optional `filter` narrows beyond method + URL, and these are **filters**, so
 
 | Builder                             | Targets                                                         | Filters                                           |
 | ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------- |
-| `openai.chat(filter?)`              | Chat Completions API                                            | `model`, `system`, `user`, `tools`, `temperature` |
+| `openai.chat(filter?, url?)`        | Chat Completions API; `url` overrides the endpoint              | `model`, `system`, `user`, `tools`, `temperature` |
 | `openai.responses(filter?, url?)`   | Responses API (AI-SDK style); `url` overrides the endpoint      | `model`, `system`, `user`, `tools`                |
 | `anthropic.messages(filter?, url?)` | Messages API; `url` overrides the endpoint for a custom gateway | `model`, `system`, `user`, `tools`                |
 
@@ -430,7 +430,7 @@ A provider's streamed reply is its provider's stub, not an `http` one: `openai.s
 | `openai.stream(pieces, { api: 'responses' })` | Responses: named, numbered events, one `response.output_text.delta` per piece, `response.completed` last          |
 | `anthropic.stream(pieces)`                    | Messages: `message_start`, a text block, a `ping`, one `text_delta` per piece, `message_stop` last                |
 
-Both take `delay`, the milliseconds between two events. Any other server-sent stream is an `http.sse()` stub.
+Both take `delay`, the milliseconds between two events, and `openai.stream` takes `usage: { promptTokens, completionTokens }`: a Chat Completions stream then ends on the usage chunk (no choice, the tokens) before `[DONE]`, as `stream_options.include_usage` asks, and a Responses stream states them in its completed response. Any other server-sent stream is an `http.sse()` stub.
 
 ```typescript
 // specs/api/assistant/__setup__/stubs/openai/greeting.ts

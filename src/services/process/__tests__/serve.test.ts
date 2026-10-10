@@ -190,6 +190,50 @@ describe('serve', () => {
         ]);
     });
 
+    test('a served process — the before step reads the env the server reads, and the server stays attached where Astro would detach it', async () => {
+        // Given - a before step that exits 0 only with the declared env, and a server that reports the two Astro flags on stderr
+        const reports = `node -e "console.error(JSON.stringify([process.env.ASTRO_DEV_BACKGROUND, process.env.ASTRO_PREVIEW_BACKGROUND, process.env.SERVED_MODE]))"`;
+        adapter = new ServedProcess(
+            {
+                before: `node -e "process.exit(process.env.SERVED_MODE === 'set' ? 0 : 3)"`,
+                command: reports,
+                env: { SERVED_MODE: 'set' },
+                ready: /never (?<port>\d+)/u,
+            },
+            process.cwd(),
+        );
+
+        // When - it starts
+        const failure = await adapter.start().then(() => '', String);
+
+        // Then - the before step passed (the server ran), and the server was handed the flags that keep Astro attached, beside its env
+        expect(/Output:\n(?<output>.*)\n/mu.exec(failure)?.groups?.output).toBe(
+            JSON.stringify(['1', '1', 'set']),
+        );
+    });
+
+    test('a served process — a server listening on ::1 alone is ready, and its address is the one that answered', async () => {
+        // Given - a server that listens on the IPv6 loopback only, on the port it is handed
+        adapter = new ServedProcess(
+            {
+                command: `node -e "require('http').createServer((_, response) => response.end('ok')).listen(Number(process.env.PORT), '::1')"`,
+                timeout: 10_000,
+            },
+            process.cwd(),
+        );
+
+        // When - it starts
+        const baseUrl = await adapter.start();
+
+        const answer = await fetch(baseUrl);
+
+        // Then - the site's address is the IPv6 one, and it answers
+        expect([baseUrl, await answer.text()]).toStrictEqual([
+            `http://[::1]:${adapter.port}`,
+            'ok',
+        ]);
+    });
+
     test('a served process — a command that cannot start in its folder is refused as one that exited, and leaves this process alive', async () => {
         // Given - a folder that is not there
         adapter = new ServedProcess(

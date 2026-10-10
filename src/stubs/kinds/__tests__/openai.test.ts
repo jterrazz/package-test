@@ -105,6 +105,45 @@ describe('openai', () => {
         });
     });
 
+    test('intercept — openai chat completions — a client reaching another host is served at the url the trigger names', () => {
+        // Given - a trigger for a compatible gateway, and one for the default host
+        const gateway = openai.chat(undefined, 'https://gateway.internal/v1/chat/completions');
+        const hosted = openai.chat();
+
+        // Then - the gateway's url is the trigger's, and OpenAI's the default
+        expect([gateway.url, hosted.url]).toStrictEqual([
+            'https://gateway.internal/v1/chat/completions',
+            CHAT_URL,
+        ]);
+    });
+
+    test('intercept — openai streamed replies — stream() ends a Chat Completions stream on the usage chunk when tokens are stated, and carries them in the Responses envelope', () => {
+        // Given - the same two pieces with 7 prompt and 3 completion tokens, on each API
+        using _ = clock.at('2026-03-04T09:30:00Z');
+        const usage = { completionTokens: 3, promptTokens: 7 };
+        const chat = openai.stream(['Hel', 'lo'], { usage });
+        const responses = openai.stream(['Hel', 'lo'], { api: 'responses', usage });
+
+        // Then - the chat stream holds a chunk with no choice and the usage before [DONE], the responses stream its completed event's usage
+        expect(isStreamBody(chat.body) && chat.body.chunks.slice(-2)).toStrictEqual([
+            `data: ${JSON.stringify({
+                id: 'chatcmpl-test',
+                object: 'chat.completion.chunk',
+                created: 1_772_616_600,
+                model: 'gpt-4o-test',
+                choices: [],
+                usage: { prompt_tokens: 7, completion_tokens: 3, total_tokens: 10 },
+            })}\n\n`,
+            'data: [DONE]\n\n',
+        ]);
+        expect(framesOf(responses.body).at(-1)).toMatchObject({
+            data: {
+                response: { usage: { input_tokens: 7, output_tokens: 3, total_tokens: 10 } },
+                type: 'response.completed',
+            },
+        });
+    });
+
     test('intercept — openai streamed replies — stream() on the Responses API serves named, numbered events, one text delta per piece, completed last', () => {
         // Given - two pieces on the Responses wire, spaced 5 ms apart, at a pinned instant
         using _ = clock.at('2026-03-04T09:30:00Z');

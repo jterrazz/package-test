@@ -199,7 +199,9 @@ The round-trip is not a step the suite performs for you, and deliberately so: up
 
 **The frozen two-pass.** A frozen fixture is never written, so changing one on purpose is two deliberate passes: drop `{ frozen: true }`, run once under `TEST_UPDATE=1`, read the diff, and put the option back in the same commit. The friction is the feature — a negative fixture should cost something to change.
 
-**What update mode never touches.** The ground of a `<case>.spec.yaml` — its `description:`, its commands, its `env:`/`serve:`/`fixture:` and its `files:` — is authored, never rewritten; only the expected streams move. A `__requests__/*.http` is an input, not an expectation, and is never written either.
+**What update mode never touches.** The ground of a `<case>.spec.yaml` — its `description:`, its commands, its `env:`/`serve:`/`fixture:` and its `files:` — is authored, never rewritten; only the expected streams move. Its `files:` are still judged under update, so a document that passes a recorded run is one a normal run passes.
+
+**What update mode refuses to record.** An expectation that cannot fail is no expectation. Update mode writes nothing over a result whose call threw — the value of a `.call()` that failed is `null`, and a recorded `toMatch(null)` stays green while every call fails: assert the error, or fix the call. It rewrites a literal only: a `toMatch(` handed a name or a call stands for values the rewrite would replace by the last one it saw (a table's rows are recorded by hand, one by one). And `toMatch('')` on a string — a stream's `.text`, a file's `.content` — is vitest's substring match, true of any text; the rule `no-empty-substring-match` refuses it. A `__requests__/*.http` is an input, not an expectation, and is never written either.
 
 ## Known limitations
 

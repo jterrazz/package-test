@@ -105,7 +105,7 @@ export const REFUSALS: [string, ProcessOptions, string][] = [
         'a stated port never answered',
         { command: SILENT, port: 9, ready: '/health', timeout: 600 },
         refused(
-            `the server did not answer on http://127.0.0.1:9/health within 600ms.\nCommand: ${SILENT}\nOutput:\n`,
+            `the server did not answer on http://127.0.0.1:9/health or http://[::1]:9/health within 600ms, whatever address it printed above.\nCommand: ${SILENT}\nOutput:\n`,
             'A process is ready once its `ready` path answers, within `timeout`.',
             'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
         ),

@@ -12,7 +12,7 @@ async function site(): Promise<string> {
             return;
         }
         response.writeHead(200, { 'x-echo': String(request.headers['x-key']) });
-        response.end(`page ${request.url}`);
+        response.end(`${request.method ?? ''} ${request.url}`);
     });
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
@@ -51,7 +51,31 @@ describe('rawFetch', () => {
             page.headers['x-echo'],
             moved.status,
             moved.location,
-        ]).toStrictEqual([200, 'page /home', 'k', 302, '/new']);
+        ]).toStrictEqual([200, 'GET /home', 'k', 302, '/new']);
+    });
+
+    test('fetch.action — one raw exchange — sends the method it is asked for, a GET when it is asked none', async () => {
+        // Given - a site answering with the method it received
+        const baseUrl = await site();
+
+        // When - the same page is fetched by POST, by DELETE and with an options object stating no method
+        const bodies = await Promise.all(
+            [{ method: 'POST' as const }, { method: 'DELETE' as const }, {}].map(
+                async (options) => {
+                    const exchange = await rawFetch.perform(
+                        ['/items', options],
+                        READ,
+                        {},
+                        run(baseUrl),
+                    );
+
+                    return exchange.body.text;
+                },
+            ),
+        );
+
+        // Then - each answer names the method the site saw
+        expect(bodies).toStrictEqual(['POST /items', 'DELETE /items', 'GET /items']);
     });
 
     test('fetch.action — one raw exchange — a chain with no website under test is a framework fault', async () => {

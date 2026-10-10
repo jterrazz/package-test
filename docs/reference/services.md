@@ -49,15 +49,15 @@ A site's dev server, an API the site calls, the bundler a simulator loads from: 
 
 The options type is `ProcessOptions` — one shape for the one external process every specification starts.
 
-| Option    | Means                                                                                                                                                                                   |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `command` | the shell command that starts it, receiving the chosen port as `PORT`                                                                                                                   |
-| `ready`   | a **path** polled until it answers (default `/`), or a **RegExp** over the child's output whose one capture group is the port                                                           |
-| `port`    | a fixed port instead of a free one the OS assigns                                                                                                                                       |
-| `cwd`     | a working directory relative to the project root                                                                                                                                        |
-| `env`     | the child's environment — an object, or a function of the services started beside it                                                                                                    |
-| `before`  | a one-shot command run ONCE per evaluation of the specification module — under vitest's default isolation, once per test file — which must exit 0: a build, a migration, a fixture load |
-| `timeout` | the readiness budget, in milliseconds (default 30 000)                                                                                                                                  |
+| Option    | Means                                                                                                                                                                                                                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `command` | the shell command that starts it, receiving the chosen port as `PORT`                                                                                                                                                                                                                   |
+| `ready`   | a **path** polled until it answers (default `/`), or a **RegExp** over the child's output whose one capture group is the port                                                                                                                                                           |
+| `port`    | a fixed port instead of a free one the OS assigns                                                                                                                                                                                                                                       |
+| `cwd`     | a working directory relative to the project root                                                                                                                                                                                                                                        |
+| `env`     | the child's environment — an object, or a function of the services started beside it                                                                                                                                                                                                    |
+| `before`  | a one-shot command run ONCE per evaluation of the specification module — under vitest's default isolation, once per test file — which must exit 0: a build, a migration, a fixture load; it runs with the same `env` as the command, so a build that reads a variable reads it here too |
+| `timeout` | the readiness budget, in milliseconds (default 30 000)                                                                                                                                                                                                                                  |
 
 It sits in a `services` record like any other service, so it starts after the databases and can be handed their connection strings, and it is stopped with the specification:
 

@@ -6,17 +6,22 @@ import { clock } from '../../../clock/clock.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';
 
+export type FetchOptions = {
+    /** The HTTP method of the exchange; a GET when none is given. */
+    method?: 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
+};
+
 export type FetchSignature = ChainSignature & {
     readonly chain: {
-        /** Perform one raw HTTP GET — redirects surface as 3xx results, never followed. */
-        fetch: (path: string) => Promise<FetchResult>;
+        /** Perform one raw HTTP exchange, a GET unless `method` says otherwise — redirects surface as 3xx results, never followed. */
+        fetch: (path: string, options?: FetchOptions) => Promise<FetchResult>;
     };
 };
 
 /** Redirects are never followed; it opens no page, so a chain that pinned a page's clock is refused. */
 export const rawFetch = defineAction<
     'fetch',
-    [path: string],
+    [path: string, options?: FetchOptions],
     FetchResult,
     FetchSignature,
     Record<never, never>,
@@ -30,13 +35,14 @@ export const rawFetch = defineAction<
         { group: 'Result accessor', name: '.location', probe: 'result.location' },
     ],
     name: 'fetch',
-    perform: async ([path], read, _adapters, { config, testDir }) => {
+    perform: async ([path, options], read, _adapters, { config, testDir }) => {
         const { baseUrl } = config;
         if (baseUrl === undefined || baseUrl === '') {
             throw invariant('.fetch() reached a chain with no website under test');
         }
         const response = await fetch(`${baseUrl}${path}`, {
             headers: read(headers),
+            method: options?.method ?? 'GET',
             redirect: 'manual',
         });
         const body = await response.text();

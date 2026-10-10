@@ -63,9 +63,9 @@ A declared database is not seeded by the chain — a website chain has no `.seed
 
 ### Two terminal actions: `.fetch()` and `.visit()`
 
-#### `.fetch(path)` — one raw HTTP exchange
+#### `.fetch(path, { method })` — one raw HTTP exchange
 
-`.fetch(path)` performs a single request and never follows redirects — the redirect itself is the result, not something to chase:
+`.fetch(path)` performs a single GET, and `.fetch(path, { method: 'POST' })` another method (`DELETE`, `HEAD`, `OPTIONS`, `PATCH`, `PUT`), and never follows redirects — the redirect itself is the result, not something to chase:
 
 ```typescript
 test('surfaces a permanent redirect without following it', async () => {

@@ -77,7 +77,9 @@ function buildChatReply(data: unknown): StubResponse {
     };
 }
 
-function responsesEnvelope(text: string): Record<string, unknown> {
+type Usage = NonNullable<OpenAIStreamInit['usage']>;
+
+function responsesEnvelope(text: string, usage: Usage = DEFAULT_USAGE): Record<string, unknown> {
     return {
         id: 'resp-test',
         object: 'response',
@@ -91,7 +93,11 @@ function responsesEnvelope(text: string): Record<string, unknown> {
                 content: [{ type: 'output_text', text, annotations: [] }],
             },
         ],
-        usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+        usage: {
+            input_tokens: usage.promptTokens,
+            output_tokens: usage.completionTokens,
+            total_tokens: usage.promptTokens + usage.completionTokens,
+        },
     };
 }
 
@@ -107,10 +113,14 @@ export type OpenAIStreamInit = {
     api?: 'chat' | 'responses';
     /** Milliseconds between two events. Default 0 — every event at once. */
     delay?: number;
+    /** The tokens the stream reports it spent: a Chat Completions stream ends on a usage chunk, as `stream_options.include_usage` asks, and a Responses stream carries them in its completed response. Default 10 and 10. */
+    usage?: { completionTokens: number; promptTokens: number };
 };
 
-// invariant: one unnamed `chat.completion.chunk` per event: role, one delta per piece, finish reason, then `[DONE]`.
-function chatStreamEvents(pieces: readonly string[]): SseEvent[] {
+const DEFAULT_USAGE = { completionTokens: 10, promptTokens: 10 };
+
+// invariant: one unnamed `chat.completion.chunk` per event: role, one delta per piece, finish reason, the usage chunk where tokens are stated, then `[DONE]`.
+function chatStreamEvents(pieces: readonly string[], usage: undefined | Usage): SseEvent[] {
     const created = Math.floor(Date.now() / 1000);
     const chunk = (delta: object, finishReason: null | string): SseEvent => ({
         data: {
@@ -125,17 +135,35 @@ function chatStreamEvents(pieces: readonly string[]): SseEvent[] {
         chunk({ role: 'assistant', content: '' }, null),
         ...pieces.map((piece) => chunk({ content: piece }, null)),
         chunk({}, 'stop'),
+        ...(usage === undefined
+            ? []
+            : [
+                  {
+                      data: {
+                          id: 'chatcmpl-test',
+                          object: 'chat.completion.chunk',
+                          created,
+                          model: 'gpt-4o-test',
+                          choices: [],
+                          usage: {
+                              prompt_tokens: usage.promptTokens,
+                              completion_tokens: usage.completionTokens,
+                              total_tokens: usage.promptTokens + usage.completionTokens,
+                          },
+                      },
+                  },
+              ]),
         { data: '[DONE]' },
     ];
 }
 
 // invariant: named, numbered events: response and message opened, one `response.output_text.delta` per piece, parts closed, `response.completed`.
-function responsesStreamEvents(pieces: readonly string[]): SseEvent[] {
+function responsesStreamEvents(pieces: readonly string[], usage: undefined | Usage): SseEvent[] {
     const text = pieces.join('');
     const part = { type: 'output_text', text, annotations: [] };
     const item = { id: 'msg-test', type: 'message', role: 'assistant' };
     const done = { ...item, status: 'completed', content: [part] };
-    const completed = { ...responsesEnvelope(text), status: 'completed' };
+    const completed = { ...responsesEnvelope(text, usage), status: 'completed' };
     const at = { item_id: 'msg-test', output_index: 0, content_index: 0 };
     const bodies: { [field: string]: unknown; type: string }[] = [
         {
@@ -162,12 +190,12 @@ function responsesStreamEvents(pieces: readonly string[]): SseEvent[] {
 
 /** OpenAI API stub helpers. */
 export const openai = {
-    /** Match Chat Completions calls; a string filter is exact equality, a RegExp or `match.includes` loosens it. */
-    chat(filter?: OpenAIChatFilter): StubRequest {
+    /** Match Chat Completions calls, at `url` where the client reaches another host; a string filter is exact equality, a RegExp or `match.includes` loosens it. */
+    chat(filter?: OpenAIChatFilter, url?: string): StubRequest {
         return {
             adapter: 'openai',
             method: 'POST',
-            url: OPENAI_CHAT_URL,
+            url: url ?? OPENAI_CHAT_URL,
             match: filter ? ({ body }) => matchesChatFilter(body, filter) : undefined,
             wrap: buildChatReply,
         };
@@ -197,7 +225,9 @@ export const openai = {
     /** Response: the text streamed as server-sent events; `api` picks Chat Completions (default) or Responses. */
     stream(pieces: readonly string[], init?: OpenAIStreamInit): StubResponse {
         const events =
-            init?.api === 'responses' ? responsesStreamEvents(pieces) : chatStreamEvents(pieces);
+            init?.api === 'responses'
+                ? responsesStreamEvents(pieces, init.usage)
+                : chatStreamEvents(pieces, init?.usage);
         return http.sse(events, { delay: init?.delay ?? 0 });
     },
 

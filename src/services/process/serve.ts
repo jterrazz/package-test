@@ -1,10 +1,11 @@
 import { execSync, spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
-import { createServer, Socket } from 'node:net';
+import { Socket } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
 import { pause } from '../../chain/pause.js';
-import { invariant, refusal } from '../../chain/refusals/refusal.js';
+import { refusal } from '../../chain/refusals/refusal.js';
+import { findFreePort, firstAnswering } from './listening.js';
 import {
     groupEnded,
     KILL_GRACE_MS,
@@ -49,27 +50,6 @@ export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     // Stryker disable next-line StringLiteral: an empty stdio reads as the default, piped
     execSync(command, { env, stdio: 'pipe' });
 }
-
-// Stryker disable BlockStatement,CallExpression,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on port 0 always answers the port it got, and never errors
-async function findFreePort(): Promise<number> {
-    return await new Promise((resolve, reject) => {
-        const server = createServer();
-        server.listen(0, () => {
-            const address = server.address();
-            if (address === null || typeof address === 'string') {
-                server.close();
-                reject(invariant('a server listening on port 0 answered no port'));
-                return;
-            }
-            const { port } = address;
-            server.close(() => {
-                resolve(port);
-            });
-        });
-        server.on('error', reject);
-    });
-}
-// Stryker restore all
 
 /** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`; both reap the strays it declares, the processes it spawns outside its group. */
 export class ServedProcess {
@@ -120,17 +100,25 @@ export class ServedProcess {
         );
     }
 
+    // invariant: `before` and the server read one environment, the declared `env` included; the server's carries its port beside it.
+    private environment(port: null | number): NodeJS.ProcessEnv {
+        return {
+            ...process.env,
+            // hazard: Astro 7 detaches `astro preview` and `astro dev` under an agent — the command exits 0 and the server outlives the run — unless it is told to stay attached.
+            ASTRO_DEV_BACKGROUND: '1',
+            ASTRO_PREVIEW_BACKGROUND: '1',
+            // Stryker disable next-line ConditionalExpression,EqualityOperator,StringLiteral: an env written as a function, which the specification reads into extraEnv, spreads to nothing either way
+            ...(typeof this.options.env === 'function' ? {} : this.options.env),
+            ...this.extraEnv,
+            ...(port === null ? {} : { PORT: String(port) }),
+        };
+    }
+
     private spawnServer(port: null | number): void {
         const child = spawn(this.options.command, [], {
             cwd: this.workingDirectory(),
             detached: SIGNALS_GROUPS,
-            env: {
-                ...process.env,
-                // Stryker disable next-line ConditionalExpression,EqualityOperator,StringLiteral: an env written as a function, which the specification reads into extraEnv, spreads to nothing either way
-                ...(typeof this.options.env === 'function' ? {} : this.options.env),
-                ...this.extraEnv,
-                ...(port === null ? {} : { PORT: String(port) }),
-            },
+            env: this.environment(port),
             shell: true,
             // Stryker disable next-line ArrayDeclaration: no server reads its input, ignored or piped
             stdio: ['ignore', 'pipe', 'pipe'],
@@ -192,19 +180,21 @@ export class ServedProcess {
     }
 
     private async awaitAnswer(port: number, deadline: number): Promise<null | string> {
-        const baseUrl = `http://127.0.0.1:${port}`;
+        // invariant: a server may listen on either family (Astro listens on ::1), so both are asked, and the one that answers is the site's address.
+        const baseUrls = [`http://127.0.0.1:${port}`, `http://[::1]:${port}`];
         // Stryker disable next-line StringLiteral: a URL with no path asks for the root all the same
-        const readyUrl = `${baseUrl}${typeof this.options.ready === 'string' ? this.options.ready : '/'}`;
+        const path = typeof this.options.ready === 'string' ? this.options.ready : '/';
         while (!this.exited) {
-            if (await answers(readyUrl)) {
+            const answering = await firstAnswering(baseUrls.map((baseUrl) => `${baseUrl}${path}`));
+            if (answering !== undefined) {
                 this.port = port;
-                return baseUrl;
+                return answering.slice(0, answering.length - path.length);
             }
             // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
             if (Date.now() >= deadline) {
                 return await this.refuse({
                     fix: 'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
-                    found: `the server did not answer on ${readyUrl} within ${this.timeout()}ms`,
+                    found: `the server did not answer on ${baseUrls.map((baseUrl) => `${baseUrl}${path}`).join(' or ')} within ${this.timeout()}ms, whatever address it printed above`,
                     why: 'A process is ready once its `ready` path answers, within `timeout`.',
                 });
             }
@@ -242,6 +232,7 @@ export class ServedProcess {
         }
         const outcome = spawnSync(before, [], {
             cwd: this.workingDirectory(),
+            env: this.environment(null),
             // Stryker disable next-line StringLiteral: output read as a Buffer joins into the same text
             encoding: 'utf8',
             shell: true,
@@ -272,17 +263,6 @@ export class ServedProcess {
         this.watchdog = null;
     }
 }
-
-// Stryker disable BlockStatement: a catch emptied answers undefined, which reads as no answer all the same
-async function answers(url: string): Promise<boolean> {
-    try {
-        await fetch(url, { redirect: 'manual' });
-        return true;
-    } catch {
-        return false;
-    }
-}
-// Stryker restore BlockStatement
 
 // invariant: the group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it.
 async function endGroup(child: ChildProcess): Promise<void> {
