@@ -22,6 +22,9 @@ function readOf(outcome: CallOutcome): Read {
 
 const returned = (value: unknown): CallOutcome => ({ error: undefined, threw: false, value });
 
+const read = (outcome: CallOutcome): unknown =>
+    Reflect.get(new CallResult({ config: {}, outcome, testDir: '/spec' }).value, 'thrown');
+
 describe('CallResult', () => {
     test('callResult — the accessor the value is read through — reads a string as a stream, and no error', () => {
         // Given - a call that returned text
@@ -80,8 +83,6 @@ describe('CallResult', () => {
 
     test('callResult — the accessor the value is read through — a call that threw hands update mode its error, a call that returned nothing to refuse', () => {
         // Given - a call that threw, a call that threw a bare value, and one that returned
-        const read = (outcome: CallOutcome): unknown =>
-            Reflect.get(new CallResult({ config: {}, outcome, testDir: '/spec' }).value, 'thrown');
 
         // Then - the message of the first, the text of the second, nothing for the third
         expect([

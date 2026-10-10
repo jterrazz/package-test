@@ -101,7 +101,8 @@ describe('derivedProjects', () => {
         ]);
 
         // Then - the cli and api projects at the member's root, the api one with its runner, and the unit and component ones over the member's own folders
-        expect(Object.fromEntries(derivedProjects(join(parent, 'specs')))).toStrictEqual({
+        const projects = Object.fromEntries(derivedProjects(join(parent, 'specs')));
+        expect(projects).toStrictEqual({
             api: { runner: './api/api.specification.ts' },
             cli: {},
             component: { include: ['views/**/*.test.tsx'] },
@@ -114,7 +115,8 @@ describe('derivedProjects', () => {
         const parent = tree(['specs/specs/cli/run.spec.ts']);
 
         // Then - the cli project, found beneath the nested folder only
-        expect(Object.fromEntries(derivedProjects(join(parent, 'specs')))).toStrictEqual({
+        const projects = Object.fromEntries(derivedProjects(join(parent, 'specs')));
+        expect(projects).toStrictEqual({
             cli: {},
         });
     });

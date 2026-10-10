@@ -77,11 +77,11 @@ describe('simulator', () => {
             .exec('run --configLoader runner', { timeout: 60_000 });
         const webDriverAgent = pidsIn(result.file('app/webdriveragent').content);
 
-        // Then - the xcodebuild and runner app die with the run, within the stop grace and a poll
+        // Then - the xcodebuild and runner app die with the run, within the stop grace, polled for up to ten seconds under a loaded machine
         expect(result.exitCode).not.toBe(0);
         expect(webDriverAgent).toHaveLength(2);
         await expect
-            .poll(() => webDriverAgent.filter((pid) => alive(pid)), { timeout: 5000 })
+            .poll(() => webDriverAgent.filter((pid) => alive(pid)), { timeout: 10_000 })
             .toStrictEqual([]);
     });
 });

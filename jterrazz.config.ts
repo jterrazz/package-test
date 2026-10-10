@@ -64,8 +64,11 @@ export default defineConfig({
                     'the temp root is the run’s own, and cannot judge a mutant',
             },
         },
-        generated: {
-            schema: 'the JSON Schema of a `<case>.spec.yaml` document, published as `@jterrazz/test/schema` and written byte for byte by `npm run docs`',
+        roots: {
+            schema: {
+                reason: 'the JSON Schema of a `<case>.spec.yaml` document, published as `@jterrazz/test/schema` and written byte for byte by `npm run docs`',
+                verbatim: true,
+            },
         },
         tsconfig: {
             compilerOptions: {

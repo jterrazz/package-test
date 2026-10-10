@@ -170,7 +170,7 @@ function sourceAt(node: AstNode | undefined): ImportSource | undefined {
     if (node === undefined) {
         return undefined;
     }
-    return { node, source };
+    return { json: false, node, source };
 }
 
 function isRequireLike(callee: AstNode | undefined): boolean {

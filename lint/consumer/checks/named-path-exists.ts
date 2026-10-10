@@ -41,23 +41,12 @@ function crossedTarget(
     };
 }
 
-export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[] {
+function fixtureViolations(
+    file: string,
+    rootDir: string,
+    suppressed: ReadonlySet<number>,
+): Spotted[] {
     const violations: Spotted[] = [];
-    const suppressed = suppressedLines(readText(file), 'named-path-exists');
-    // Stryker disable next-line ConditionalExpression,MethodExpression: a spec document parses as no module, so it names no anchored path either way
-    const anchored = file.endsWith(SPEC_EXTENSION) ? [] : anchoredPaths(file);
-    for (const { column, line, named, target } of anchored) {
-        if (treeKind(target) !== undefined || suppressed.has(line) || isBuilt(rootDir, target)) {
-            continue;
-        }
-        violations.push({
-            column,
-            path: relative(rootDir, file),
-            line,
-            ...missingTarget(named, relative(rootDir, target), existsSync(target)),
-            rule: 'named-path-exists',
-        });
-    }
     for (const { column, key, kind, line, path } of collectFixtureReferences(
         file,
         DISK_CALL,
@@ -83,6 +72,27 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[]
             rule: 'named-path-exists',
         });
     }
+    return violations;
+}
+
+export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
+    const suppressed = suppressedLines(readText(file), 'named-path-exists');
+    // Stryker disable next-line ConditionalExpression,MethodExpression: a spec document parses as no module, so it names no anchored path either way
+    const anchored = file.endsWith(SPEC_EXTENSION) ? [] : anchoredPaths(file);
+    for (const { column, line, named, target } of anchored) {
+        if (treeKind(target) !== undefined || suppressed.has(line) || isBuilt(rootDir, target)) {
+            continue;
+        }
+        violations.push({
+            column,
+            path: relative(rootDir, file),
+            line,
+            ...missingTarget(named, relative(rootDir, target), existsSync(target)),
+            rule: 'named-path-exists',
+        });
+    }
+    violations.push(...fixtureViolations(file, rootDir, suppressed));
     return violations;
 }
 

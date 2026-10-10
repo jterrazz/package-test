@@ -16,8 +16,15 @@ function isEmptyText(node: AstNode | undefined): boolean {
         return false;
     }
     const [quasi] = childList(node, 'quasis');
+    const value: unknown = quasi?.value;
 
-    return childList(node, 'expressions').length === 0 && quasi?.value?.cooked === '';
+    return (
+        childList(node, 'expressions').length === 0 &&
+        typeof value === 'object' &&
+        value !== null &&
+        'cooked' in value &&
+        value.cooked === ''
+    );
 }
 
 const row = rowNamed(consumerRows, 'no-empty-substring-match');

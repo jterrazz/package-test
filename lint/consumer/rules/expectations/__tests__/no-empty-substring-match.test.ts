@@ -28,7 +28,7 @@ ruleTester().run('no-empty-substring-match', noEmptySubstringMatch, {
                 "test('t', () => { expect(result.stdout).toMatch(''); });",
                 "test('t', () => { expect(result.value).toMatch(``); });",
                 "test('t', () => { expect(result.stdout.text).toMatch('built'); });",
-                "test('t', () => { expect(result.stdout.text).toMatch(`a ${name}`); });",
+                `test('t', () => { expect(result.stdout.text).toMatch(\`a \${name}\`); });`,
                 "test('t', () => { expect(result.stdout.text).toMatch(/^$/u); });",
                 "test('t', () => { expect(result.stdout.text).toMatch(); });",
                 "test('t', () => { expect(result.stdout.text).toBe(''); });",
