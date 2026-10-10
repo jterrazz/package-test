@@ -43,9 +43,6 @@ function templated(text: string, indent: string): { body: string; closing: strin
 
 /** Whether a literal written in place compares equal to `text` once the comparison's dedent read it: the template form, or else the quoted one. */
 export function survivesInPlace(text: string): boolean {
-    if (!text.includes('\n')) {
-        return true;
-    }
     const { body, closing } = templated(text, '');
     return dedent(`\n${body}\n${closing}`) === text || dedent(text) === text;
 }

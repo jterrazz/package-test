@@ -37,14 +37,16 @@ describe('ground-shared-or-inline.forms', () => {
     });
 
     test('a text survives in place unless it opens on a line break its lines share an indentation after', () => {
-        // Given - one line, lines a template keeps, a text opening on a break flush left, and a cobra banner opening on a break, indented
+        // Given - one line, lines a template keeps, lines only the quoted form keeps, a text opening on a break flush left, and a cobra banner opening on a break, indented
         // Then - only the banner has no literal the comparison's dedent leaves equal
         expect([
             survivesInPlace('done'),
             survivesInPlace('a\n  b\n'),
+            survivesInPlace('  a\n  b'),
+            survivesInPlace('  indented'),
             survivesInPlace('\nDone\n'),
             survivesInPlace('\n  ✓ Created\n  ✓ Started\n'),
-        ]).toStrictEqual([true, true, true, false]);
+        ]).toStrictEqual([true, true, true, true, true, false]);
     });
 
     test('a value counts its lines without its closing newline', () => {
