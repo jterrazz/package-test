@@ -394,6 +394,7 @@ No `__seeds__/` or `__requests__/` — a website chain has no `.seed()` setup an
 - **Reading `result.head` field-by-field instead of snapshotting it.** It is designed as the one golden per page (`toMatch(file('./__expected__/home.head.json'))`) — use the direct accessors (`canonical`, `alternates`, `meta()`) only for a single targeted probe.
 - **Calling `.intercept()` without the `backend` option.** It throws immediately, naming the fix: add `backend: { env: '…' }` to the `specification.website()` options — a chain's `.http` exchanges need a stub to serve them.
 - **Combining `backend` with `url` mode.** The type forbids it and the runtime refuses: a deployed site reads its API URL at its own deploy time — there is nothing a local stub could inject into.
+- **A site that loads `next/font/google`.** Its build downloads the fonts: the suite becomes network-bound, and fails offline or behind a proxy. Load the family from a file in the repository (`next/font/local`) so the suite needs no network.
 
 ## Related
 

@@ -541,6 +541,13 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **A bare fixture name.** `.fixture('shop/')` and `directory('shop/')` do not compile: the path is spelled from the spec — `./__fixtures__/shop/` beside it, `../../__fixtures__/shop/` in the ground at the specs root (rule `disk-named-by-relative-path`).
 - **Building a `node_modules` by hand.** `mkdirSync` and `symlinkSync` around a raw `spawnSync` is a chain the runner already is: `.link()` lays the package, `.link(name, packed())` the published tarball with what it requires, and the spec stays one chain.
 - **Forgetting the extension in `file('./__expected__/help')`.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./__expected__/help/')`.
+- **Reading a sequence's first command.** A sequence's result is the LAST command's — its streams and exit code are what the Then reads — and its subject is the last command as well; the commands before it are the Given. A spec that must read an earlier step runs it as its own spec.
+- **A serve-and-read consumer.** A spec that starts a server in one command and reads it in the next races the server's start: serve with `waitFor`, or give the reader a stand-in that fails loudly when nothing answers.
+- **Opening a browser, or reaching a client's network.** Put a stand-in opener on `PATH` and set `$BROWSER` to it so a command that opens a page writes the URL it was handed to a file; give a client that reaches the network a proxy that refuses every request and names it.
+- **Specifying an application through its built entry.** A spec that runs `dist/index.js` needs the build first: the Makefile of every kind whose specs run `dist/` reads `test: build`, and the path is named in the spec as the build leaves it (`named-path-exists` accepts a path under `dist/` or `.artifacts/<tool>/`).
+- **Confusing `text()` with `content`.** `text(value)` promotes a string — a message, a report — to a golden-comparable subject (ANSI stripped, tokens read); `result.file(path).content` is the UTF-8 text of a file the run left, to be read or compared as a file.
+- **A resource shared across spec files.** Files run in worker processes of their own: a port, a docker name or a database two files take at once needs a lock taken in `__setup__/` (a file under `.artifacts/` created exclusively), not a project made serial by name.
+- **`@types/node` in a package that reads no Node.** A library that does not read `node:` modules declares no `@types/node`; one that reads Node declares it, and a spec project follows its package.
 
 ## Related
 

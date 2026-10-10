@@ -134,6 +134,10 @@ A preset's own `oxlint` — its plugin, its rulebook — is not run by `presets`
 
 A linter that fails and reports no diagnostic is refused in four parts rather than read as a clean tree — a plugin that does not load, a config oxlint cannot build, a checker that cannot start.
 
+### A rule pack: a nested Vitest and a reporter fixture
+
+A package that ships lint rules for other projects proves them by running the real binary on a tree: the spec starts a nested `vitest` over a fixture project (`.fixture(directory(…))`) with a reporter fixture that prints one line per finding, and compares that output whole. A rule alone is `ruleTester()`.
+
 ### A rule alone: `ruleTester()`
 
 A rule's visitor, on snippets, is a module test in the `__tests__/` of the rule's folder. `ruleTester()` is oxlint's `RuleTester` (`oxlint/plugins-dev`) bound to vitest — its suites and cases are vitest's — and it requires a position on every invalid case: each expected error is an object stating its `line` and `column`. A count, an empty list, or an error with no position, is refused before the case runs, since it passes for a report on any node.
