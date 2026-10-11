@@ -1,9 +1,9 @@
 import { once } from 'node:events';
-import { existsSync, mkdtempSync } from 'node:fs';
+import { existsSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import { runToCompletion, ServedProcess } from '../serve.js';
 import {
@@ -37,6 +37,35 @@ describe('serve', () => {
         expect(baseUrl).toBe(`http://127.0.0.1:${adapter.port}`);
         const response = await fetch(baseUrl);
         expect(response.status).toBe(200);
+    });
+
+    test('a served process — a working directory given as a function is read when the process starts', async () => {
+        // Given - a server that answers the folder it runs in, and a cwd function counting its calls
+        const folder = mkdtempSync(join(tmpdir(), 'serve-cwd-'));
+        onTestFinished(() => {
+            rmSync(folder, { force: true, recursive: true });
+        });
+        const calls: string[] = [];
+        adapter = new ServedProcess(
+            {
+                command: `node -e "const s=require('node:http').createServer((q,r)=>r.end(process.cwd()));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`,
+                cwd: () => {
+                    calls.push(folder);
+                    return folder;
+                },
+                ready: READY,
+            },
+            process.cwd(),
+        );
+
+        // When - it starts
+        const baseUrl = await adapter.start();
+
+        // Then - the function was called once, and the server ran in the folder it returned
+        expect([calls.length, await (await fetch(baseUrl)).text()]).toStrictEqual([
+            1,
+            realpathSync(folder),
+        ]);
     });
 
     test('a served process — fails fast with the captured output when the command dies', async () => {

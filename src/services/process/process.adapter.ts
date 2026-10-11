@@ -10,8 +10,8 @@ export type ProcessOptions = {
     before?: string;
     /** Shell command that starts the process. Receives the chosen port as `PORT`. */
     command: string;
-    /** Working directory, relative to the project root. Default: the root itself. */
-    cwd?: string;
+    /** Working directory, relative to the project root. Default: the root itself. A function is called when the process starts, once per file: a spec that lays a fresh project for each file returns the path it laid. */
+    cwd?: (() => string) | string;
     /** Environment on top of the runner's; a function receives the services already started. */
     env?:
         | ((services: Record<string, { connectionString: string }>) => Record<string, string>)

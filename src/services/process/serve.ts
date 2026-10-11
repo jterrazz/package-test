@@ -220,8 +220,9 @@ export class ServedProcess {
     }
 
     private workingDirectory(): string {
+        const { cwd = '.' } = this.options;
         // Stryker disable next-line StringLiteral: an empty path resolves to the root as `.` does
-        return resolvePath(this.root, this.options.cwd ?? '.');
+        return resolvePath(this.root, typeof cwd === 'function' ? cwd() : cwd);
     }
 
     /** Must exit 0: a failed build is reported as such, not as a later missing file. */
