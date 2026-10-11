@@ -15,6 +15,7 @@ import STANDARD from '../../../src/standard/standard.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
 import { derivedProjects, specificationModules } from '../../kit/project/derived-projects.js';
 import { isRecord } from '../../kit/project/json-shape.js';
+import { packagesLoadedFor } from '../../kit/project/loaded-packages.js';
 import { TEST_SECTION } from '../../kit/project/test-section.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
@@ -249,21 +250,6 @@ function loadedByName(section: Readonly<Record<string, unknown>>): string[] {
             ? [posix.normalize(typeof root === 'string' ? posix.join(root, wrap) : wrap)]
             : [];
     });
-}
-
-// outside: a website project drives its browser through playwright and the vitest provider, a component project renders through them and vitest-browser-react, a mobile project drives its simulator through webdriverio and appium: this package loads each by name, so the project that declares them imports none.
-const LOADED_BY = {
-    component: ['@vitest/browser-playwright', 'playwright', 'vitest-browser-react'],
-    mobile: ['appium', 'webdriverio'],
-    website: ['@vitest/browser-playwright', 'playwright'],
-};
-
-function packagesLoadedFor(root: string): string[] {
-    const projects = derivedProjects(root);
-
-    return Object.entries(LOADED_BY).flatMap(([project, names]) =>
-        projects.has(project) ? names : [],
-    );
 }
 
 export function testPreset(): Preset {

@@ -1,10 +1,8 @@
 type Drawn = { style: { visibility: string } };
 
 type Page<Element extends Drawn> = {
-    /** Every element of the body. */
     elements: readonly Element[];
     opacityOf: (element: Element) => number;
-    /** The rendered text of the body, as the page reads it now. */
     text: () => string;
 };
 

@@ -5,7 +5,7 @@ import {
     isGroundFolder,
     treeKind,
 } from '@jterrazz/typescript/rules';
-import { readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
 import { withoutEntryImport } from '../../kit/checker/entry-import.js';
@@ -16,8 +16,10 @@ import { closingOf } from '../../kit/project/source-scan.js';
 import { suppressedLines } from '../../kit/project/suppression.js';
 import { findSpecsRoots, isWithin, listFiles } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
+import { sourceCopiedBy } from './ground-shared-or-inline.copies.js';
 import {
     INLINE_CAPS,
+    isFrozen,
     jsonOf,
     replacementOf,
     survivesInPlace,
@@ -44,13 +46,11 @@ const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
 
 const TEST_CALL = /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(/gu;
 
-/** How much of the text around a reference the form it is written in is read from. */
+// invariant: a form is read from the text around its reference, as far as this many characters.
 const AROUND = 300;
 
 type Reference = {
-    /** The text that follows the reference, as far as its form reads. */
     after: string;
-    /** The text that precedes the reference, as far as its form reads. */
     before: string;
     column: number;
     end: number;
@@ -129,22 +129,6 @@ function staysAFile(path: string, cap: number): boolean {
 
 type SingleUse = { copyOf?: string; reference: Reference; references: number; target: string };
 
-// invariant: a golden that is a byte copy of a file the repository keeps (not ground, not a test) is the author's copy of a source the test could read: it is compared with the source, not written in place, where it would be a second copy to keep in step.
-function sourceCopiedBy(rootDir: string, target: string): string | undefined {
-    const bytes = readFileSync(target);
-    return listFiles(rootDir, (path) => {
-        try {
-            return (
-                path !== target &&
-                statSync(path).size === bytes.length &&
-                readFileSync(path).equals(bytes)
-            );
-        } catch {
-            return false;
-        }
-    })[0];
-}
-
 // invariant: a reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers.
 function oneTestReads(named: readonly Reference[]): Reference | undefined {
     const [only] = named;
@@ -162,13 +146,8 @@ function inlinable(reference: Reference, target: string): boolean {
         treeKind(target) === 'file' &&
         !staysAFile(target, cap) &&
         // invariant: the checker asks only what the fixer writes: a golden whose form the fixer leaves is left by both.
-        replacementOf(
-            reference.before,
-            readFileSync(target, 'utf8'),
-            target,
-            '',
-            reference.after,
-        ) !== undefined
+        !isFrozen(reference.after) &&
+        replacementOf(reference.before, readFileSync(target, 'utf8'), target, '') !== undefined
     );
 }
 
@@ -289,13 +268,14 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
         )) {
             const line = text.slice(text.lastIndexOf('\n', reference.start) + 1);
             const indent = line.slice(0, line.length - line.trimStart().length);
-            const replacement = replacementOf(
-                text.slice(0, reference.start),
-                readFileSync(target, 'utf8'),
-                target,
-                indent,
-                text.slice(reference.end, reference.end + AROUND),
-            );
+            const replacement = isFrozen(text.slice(reference.end, reference.end + AROUND))
+                ? undefined
+                : replacementOf(
+                      text.slice(0, reference.start),
+                      readFileSync(target, 'utf8'),
+                      target,
+                      indent,
+                  );
             if (replacement === undefined) {
                 continue;
             }

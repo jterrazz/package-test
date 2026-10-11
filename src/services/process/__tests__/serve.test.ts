@@ -62,10 +62,8 @@ describe('serve', () => {
         const baseUrl = await adapter.start();
 
         // Then - the function was called once, and the server ran in the folder it returned
-        expect([calls.length, await (await fetch(baseUrl)).text()]).toStrictEqual([
-            1,
-            realpathSync(folder),
-        ]);
+        const answer = await fetch(baseUrl);
+        expect([calls.length, await answer.text()]).toStrictEqual([1, realpathSync(folder)]);
     });
 
     test('a served process — fails fast with the captured output when the command dies', async () => {

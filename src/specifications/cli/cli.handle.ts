@@ -90,6 +90,26 @@ function dockerTestRunId(): string {
     return `t-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
 }
 
+type StartedBackend = { backend: null | StubBackend; defaults: CliEnv | undefined };
+
+// invariant: a backend that cannot start must not orphan the services started before it; its URL joins the defaults under the env var named, under the defaults the spec states itself.
+async function startedBackend(
+    declared: CliBackendOptions | undefined,
+    defaults: CliEnv | undefined,
+    started: null | StartedServices,
+): Promise<StartedBackend> {
+    if (declared === undefined) {
+        return { backend: null, defaults };
+    }
+    const backend = new StubBackend({ port: declared.port });
+    try {
+        return { backend, defaults: { [declared.env]: await backend.start(), ...defaults } };
+    } catch (error) {
+        await started?.orchestrator.stop();
+        throw error;
+    }
+}
+
 export async function startCli<Services extends ServiceRecord>(
     bin: string,
     options: CliSpecificationOptions<Services> = {},
@@ -108,18 +128,7 @@ export async function startCli<Services extends ServiceRecord>(
     if (Object.keys(services).length > 0) {
         started = await startServices(services, root, { type: 'none' });
     }
-    // invariant: a backend that cannot start must not orphan the services started before it.
-    let backend: null | StubBackend = null;
-    let backendUrl: string | undefined;
-    if (options.backend !== undefined) {
-        backend = new StubBackend({ port: options.backend.port });
-        try {
-            backendUrl = await backend.start();
-        } catch (error) {
-            await started?.orchestrator.stop();
-            throw error;
-        }
-    }
+    const { backend, defaults } = await startedBackend(options.backend, options.defaults, started);
 
     const config: Started<CliConfig, 'command'> = {
         backend: backend ?? undefined,
@@ -129,15 +138,7 @@ export async function startCli<Services extends ServiceRecord>(
         databases: started?.databases,
         dockerConfig: options.docker,
         dockerTestRunId: options.docker === undefined ? undefined : dockerTestRunId(),
-        defaultEnv:
-            options.backend === undefined || backendUrl === undefined
-                ? options.defaults
-                : {
-                      ...(options.backend.env === undefined
-                          ? {}
-                          : { [options.backend.env]: backendUrl }),
-                      ...options.defaults,
-                  },
+        defaultEnv: defaults,
         envSets: options.env,
         root,
         serveRegistry: options.serve,

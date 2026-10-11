@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { replacementOf, survivesInPlace, valueLines } from '../ground-shared-or-inline.forms.js';
+import {
+    isFrozen,
+    replacementOf,
+    survivesInPlace,
+    valueLines,
+} from '../ground-shared-or-inline.forms.js';
 
 const HOLE = ['$', '{d}'].join('');
 
@@ -167,15 +172,19 @@ describe('ground-shared-or-inline.forms', () => {
         ]);
     });
 
-    test('a golden compared frozen is never written in place, whatever its form', () => {
-        // Given - the same text golden matched plainly and with the bytes stated as the contract
-        const before = 'expect(result.text).toMatch(';
-
-        // Then - a template for the plain call, nothing for the frozen one
-        expect([
-            replacementOf(before, 'a\nb\n', '/x/s.txt', '', ')'),
-            replacementOf(before, 'a\nb\n', '/x/s.txt', '', ', { frozen: true })'),
-            replacementOf(before, 'a\nb\n', '/x/s.txt', '', ' , {\n frozen : true,\n })'),
-        ]).toStrictEqual(['`\n    a\n    b\n`', undefined, undefined]);
+    test('a golden compared frozen is recognised by the call it is read by, whatever the spacing', () => {
+        // Given - the tail of a call that states the bytes as the contract, in three spacings, and tails that do not
+        // Then - the first are frozen, the others are not
+        expect(
+            [
+                ', { frozen: true })',
+                ' , {\n frozen : true,\n })',
+                ',{frozen:true}',
+                ')',
+                ', { frozen: false })',
+                ', { other: true })',
+                ', frozen: true })',
+            ].map((tail) => isFrozen(tail)),
+        ).toStrictEqual([true, true, true, false, false, false, false]);
     });
 });
