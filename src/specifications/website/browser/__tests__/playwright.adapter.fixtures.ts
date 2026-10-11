@@ -21,7 +21,13 @@ type RoutedRequest = {
 type Route = (route: RoutedRequest) => void;
 
 /** `hold` makes every visit a load that never finishes; `requests` are what the page asks once loading; `status` what the navigation answers, none when absent. */
-export type StubPage = { hold?: boolean; requests?: string[]; status?: number };
+export type StubPage = {
+    /** The addresses the browser's console reports a failed load of, as an error. */
+    failedLoads?: string[];
+    hold?: boolean;
+    requests?: string[];
+    status?: number;
+};
 
 type Recorder = {
     closes: number[];
@@ -72,7 +78,7 @@ function navigation(
     routes: Route[],
     handlers: Map<string, Handler>,
 ): (url: string, settings: object) => Promise<null | { status: () => number }> {
-    const { hold = false, requests = [], status } = page;
+    const { failedLoads = [], hold = false, requests = [], status } = page;
     return async (url, settings) => {
         recorder.log.push(`goto ${url} ${JSON.stringify(settings)}`);
         for (const route of routes) {
@@ -80,7 +86,18 @@ function navigation(
                 route(routedRequest(recorder.log, request));
             }
         }
-        handlers.get('console')?.({ text: () => 'hello', type: () => 'warning' });
+        handlers.get('console')?.({
+            location: () => ({ url }),
+            text: () => 'hello',
+            type: () => 'warning',
+        });
+        for (const failed of failedLoads) {
+            handlers.get('console')?.({
+                location: () => ({ url: failed }),
+                text: () => `Failed to load resource: ${failed}`,
+                type: () => 'error',
+            });
+        }
         handlers.get('pageerror')?.(new TypeError('boom'));
         loaded(recorder);
         if (hold) {

@@ -342,6 +342,8 @@ Two pieces of plumbing are handled for you:
 
 The default follows the mode: `'block'` with `server` (you own the deployment, third-party noise is not the point), `'allow'` with `url` (a deployed site legitimately loads third-party assets). Override with the top-level `external` option when a spec needs the opposite of its mode's default.
 
+A request the policy aborts is the runner's doing, not the site's: the browser's console error for it (`Failed to load resource`) stays out of `.errors`, and one for a request the policy let through stays in.
+
 ### Evidence on failure
 
 When a scenario throws — an element never becomes visible, a `see()` times out — the error carries a full-page screenshot of the state the scenario died in, referenced by its path in the error message. It is written under `.artifacts/vitest/evidence/`, in the folder of the run that took it, so it outlives the run and its temp root — until the next run starts, which sweeps every run's evidence but a living one's. The original error is never masked; the screenshot is attached evidence, not a replacement.

@@ -106,6 +106,25 @@ describe('PlaywrightAdapter', () => {
         ]);
     });
 
+    test('the PlaywrightAdapter — a visit — the console error of a request the runner aborted is no error of the site, and one of a request it let through is', async () => {
+        // Given - a page whose CDN request the block policy aborts, whose console reports a failed load of the CDN and of its own script
+        const chromium = stubChromium({
+            failedLoads: ['https://cdn.test/x.js', 'http://site.test/app.js'],
+            requests: REQUESTS,
+        });
+        const adapter = new PlaywrightAdapter({ launch: chromium.launch });
+
+        // When - it is visited with external requests blocked
+        const page = await adapter.open('http://site.test/', { ...VISIT, external: 'block' });
+
+        // Then - the abort's own message is left out, the site's own failure stays
+        expect(page.consoleMessages.map(({ text }) => text)).toStrictEqual([
+            'hello',
+            'Failed to load resource: http://site.test/app.js',
+            'Uncaught TypeError: boom',
+        ]);
+    });
+
     test('the PlaywrightAdapter — the runners of a worker share its browser — two runners visiting pages launch the one browser once', async () => {
         // Given - two runners of one worker, over the same launcher
         const chromium = stubChromium();
