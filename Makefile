@@ -4,7 +4,10 @@ node_modules/.install: package-lock.json
 	npm ci
 	@touch node_modules/.install
 
-install: node_modules/.install
+# invariant: an install replaces the dependencies a running gate reads; `check` holds `.artifacts/gate.lock` with its own pid, and an install while that process lives is refused.
+install:
+	@if [ -f .artifacts/gate.lock ] && kill -0 "$$(cat .artifacts/gate.lock)" 2> /dev/null; then echo "install: the gate of pid $$(cat .artifacts/gate.lock) holds this checkout - wait for it to end, or install in a worktree of its own"; exit 1; fi
+	@$(MAKE) --no-print-directory node_modules/.install
 
 build: node_modules/.install
 	npm run build
@@ -39,10 +42,8 @@ MUTATION = npx typescript mutation
 
 # invariant: the four targets CI runs, in its order.
 check: node_modules/.install
-	$(MAKE) build
-	npm run lint
-	$(MAKE) test
-	$(MUTATION)
+	@mkdir -p .artifacts && echo $$PPID > .artifacts/gate.lock
+	@status=0; { $(MAKE) build && npm run lint && $(MAKE) test && $(MUTATION); } || status=$$?; rm -f .artifacts/gate.lock; exit $$status
 
 # outside: needs Xcode and a simulator — `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
 test-mobile: build
