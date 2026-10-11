@@ -55,6 +55,20 @@ const pages = {
     </head><body><h1>Clock</h1><p id="now">unset</p>
     <script>document.getElementById('now').textContent = new Date().toISOString();</script>
     </body></html>`,
+    // A page that reads web storage when its first script runs: what the chain
+    // seeded, nothing, or the error name when the browser refuses the read.
+    '/storage': `<!doctype html><html lang="en"><head>${head('Fixture — Storage', '/storage')}
+    </head><body><h1>Storage</h1><p id="theme">unset</p><p id="draft">unset</p>
+    <script>
+    try {
+        document.getElementById('theme').textContent = localStorage.getItem('theme') ?? 'none';
+        document.getElementById('draft').textContent = sessionStorage.getItem('draft') ?? 'none';
+    } catch (error) {
+        document.getElementById('theme').textContent = error.name;
+        document.getElementById('draft').textContent = error.name;
+    }
+    </script>
+    </body></html>`,
     // What the site was STARTED with: the URL of the process declared beside
     // it, and the run id the specification minted — neither of them sampled here.
     '/services': `<!doctype html><html lang="en"><head>${head('Fixture — Services', '/services')}

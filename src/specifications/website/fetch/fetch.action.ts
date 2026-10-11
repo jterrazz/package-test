@@ -3,6 +3,7 @@ import type { ChainSignature } from '../../../chain/capability.js';
 import { headers } from '../../../chain/context/headers.capability.js';
 import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { clock } from '../../../clock/clock.capability.js';
+import { storage } from '../browser/storage.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';
 
@@ -61,6 +62,16 @@ export const rawFetch = defineAction<
                     found: '.clock() on a chain ending in .fetch(), which opens no page',
                     read: 'docs/guides/website-specs.md#setup-clock',
                     why: '.clock() pins the clock of a page, and .fetch() is one raw HTTP exchange.',
+                }),
+            );
+        }
+        if (read(storage) !== null) {
+            throw new Error(
+                refusal({
+                    fix: 'visit the page, or drop .storage()',
+                    found: '.storage() on a chain ending in .fetch(), which opens no page',
+                    read: 'docs/guides/website-specs.md#storage',
+                    why: '.storage() seeds or blocks the web storage of a page, and .fetch() is one raw HTTP exchange.',
                 }),
             );
         }

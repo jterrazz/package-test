@@ -336,6 +336,14 @@ Two pieces of plumbing are handled for you:
 - **CORS** — the stub answers the `OPTIONS` preflight and stamps permissive `Access-Control-Allow-*` headers on every response, so client-side fetches from the site's origin just work.
 - **`external: 'block'`** — the stub's origin is allow-listed automatically; declared-backend fetches are never aborted as third-party noise.
 
+### Storage
+
+`.storage({ local, session })` fills `localStorage` and `sessionStorage` before the page's first script runs, so a page that reads a preference on load sees it; `.storage('throws')` makes every read of either store throw the `SecurityError` a browser that blocks site data throws. A later call replaces the earlier, and a key the page already holds is kept, since the script runs again on each navigation. A chain ending in `.fetch()` is refused: no page opens, so nothing could read the storage.
+
+```ts
+const result = await website.storage({ local: { theme: 'dark' } }).visit('/settings');
+```
+
 ### Cross-origin policy (`external`)
 
 `external: 'block'` aborts every request leaving the site under test during a `.visit()` — analytics beacons, third-party CDNs, ad scripts never fire, so a visit stays deterministic. `'allow'` lets them through.

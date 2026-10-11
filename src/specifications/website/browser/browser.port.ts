@@ -1,4 +1,5 @@
 import type { VisitorVerbs } from '../../../visitor/verbs.js';
+import type { StorageState } from './storage.capability.js';
 
 /** A `<link>` element captured from the rendered document's head. */
 export type BrowserLinkElement = {
@@ -44,6 +45,8 @@ export type BrowserOpenOptions = {
     headers?: Record<string, string> | undefined;
     /** The interaction scenario to run after load; the capture reflects the final state. */
     scenario?: undefined | VisitScenario;
+    /** What web storage holds before the page's first script, or `'throws'` to refuse every read of it. */
+    storage?: StorageState | undefined;
 };
 
 /** The rendered page a visit captured, final state. */

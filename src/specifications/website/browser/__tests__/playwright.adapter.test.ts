@@ -125,6 +125,29 @@ describe('PlaywrightAdapter', () => {
         ]);
     });
 
+    test('the PlaywrightAdapter — a visit — the storage a chain states is seeded into the context before the page loads, and a visit stating none adds no script', async () => {
+        // Given - a visit seeding local storage, a visit blocking storage, and one stating none
+        const chromium = stubChromium();
+        const adapter = new PlaywrightAdapter({ launch: chromium.launch });
+
+        // When - each visits
+        await adapter.open('http://site.test/', {
+            ...VISIT,
+            storage: { local: { theme: 'dark' } },
+        });
+        await adapter.open('http://site.test/', { ...VISIT, storage: 'throws' });
+        await adapter.open('http://site.test/', VISIT);
+
+        // Then - the script is added right after the context opens and before the page goes, once per stated visit
+        expect(chromium.log.filter((line) => !line.startsWith('newContext'))).toStrictEqual([
+            'init seedStorage {"local":{"theme":"dark"}}',
+            'goto http://site.test/ {"waitUntil":"load"}',
+            'init seedStorage "throws"',
+            'goto http://site.test/ {"waitUntil":"load"}',
+            'goto http://site.test/ {"waitUntil":"load"}',
+        ]);
+    });
+
     test('the PlaywrightAdapter — the runners of a worker share its browser — two runners visiting pages launch the one browser once', async () => {
         // Given - two runners of one worker, over the same launcher
         const chromium = stubChromium();

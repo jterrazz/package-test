@@ -17,6 +17,7 @@ const SETUPS = [
     'prepare',
     'rules',
     'seed',
+    'storage',
     'viewport',
     'with',
     'wrap',

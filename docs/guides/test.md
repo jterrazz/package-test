@@ -89,9 +89,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                                              | What it judges                                                           | Files |
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 149   |
+| Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 150   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 201   |
+| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 202   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 113   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -273,6 +273,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.link()`      | —   | —   | 11  | —    | —           | —       | —      | —         | —      |
 | `.prepare()`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
+| `.storage()`   | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
 | `.viewport()`  | —   | —   | —   | —    | —           | —       | —      | 2         | —      |
 | `.wrap()`      | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
 
@@ -289,8 +290,8 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.exec()`    | —   | —   | 62  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 112  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 11          | —       | —      | —         | —      |
-| `.visit()`   | —   | —   | —   | —    | —           | 22      | —      | —         | —      |
-| `.fetch()`   | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
+| `.visit()`   | —   | —   | —   | —    | —           | 23      | —      | —         | —      |
+| `.fetch()`   | —   | —   | —   | —    | —           | 4       | —      | —         | —      |
 | `.open()`    | —   | —   | —   | —    | —           | —       | 7      | —         | —      |
 | `.render()`  | —   | —   | —   | —    | —           | —       | —      | 31        | —      |
 
@@ -368,7 +369,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.value`          | —   | —   | —   | —    | 9           | —       | —      | —         | —      |
 | `.error`          | —   | —   | —   | —    | 7           | —       | —      | —         | —      |
 | `.tree`           | —   | —   | —   | —    | —           | 5       | —      | 6         | —      |
-| `.content`        | —   | —   | —   | —    | —           | 10      | 5      | 19        | —      |
+| `.content`        | —   | —   | —   | —    | —           | 11      | 5      | 19        | —      |
 | `.console`        | —   | —   | —   | —    | —           | 4       | —      | 4         | —      |
 | `.errors`         | —   | —   | —   | —    | —           | 8       | —      | 8         | —      |
 | `.html`           | —   | —   | —   | —    | —           | 3       | —      | 5         | —      |

@@ -10,13 +10,14 @@ import { clock } from '../../clock/clock.capability.js';
 import { stubBackend } from '../../stubs/delivery/other-process/stub-backend.adapter.js';
 import { intercept } from '../../stubs/intercept/intercept.capability.js';
 import { pageClock } from './browser/page-clock.adapter.js';
+import { storage } from './browser/storage.capability.js';
 import { rawFetch } from './fetch/fetch.action.js';
 import { visit } from './visit/visit.action.js';
 import type { WebsiteConfig, WebsiteSpecificationOptions } from './website.handle.js';
 
 const composition = {
     actions: [visit, rawFetch],
-    capabilities: [clock, headers, intercept, sharing],
+    capabilities: [clock, headers, intercept, sharing, storage],
     options: {
         backend: { group: 'Constructor option', name: 'backend', probe: 'backend:' },
         external: { group: 'Constructor option', name: 'external', probe: 'external:' },

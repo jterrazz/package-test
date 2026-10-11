@@ -14,6 +14,7 @@ import type {
     BrowserPort,
 } from './browser.port.js';
 import { createSharedBrowser } from './shared-browser.js';
+import type { StorageState } from './storage.capability.js';
 import { createVisitor } from './website-visitor.js';
 
 type PageExtraction = {
@@ -68,6 +69,36 @@ function extractPage(): PageExtraction {
         text: document.body?.innerText ?? '',
         title: document.title,
     };
+}
+
+// invariant: runs in the page before its first script, so it closes over nothing: the state it is handed is all it knows; a store a frame cannot reach (an opaque origin) is left as it is.
+function seedStorage(state: StorageState): void {
+    if (state === 'throws') {
+        for (const store of ['localStorage', 'sessionStorage']) {
+            Object.defineProperty(globalThis, store, {
+                configurable: true,
+                get: () => {
+                    throw new DOMException('The operation is insecure.', 'SecurityError');
+                },
+            });
+        }
+        return;
+    }
+    for (const [store, entries] of [
+        ['localStorage', state.local],
+        ['sessionStorage', state.session],
+    ] as const) {
+        for (const [key, value] of Object.entries(entries ?? {})) {
+            try {
+                // invariant: a key the page already holds is kept: the script runs again on each navigation, and a seed is the state a visit starts from, not one it returns to.
+                if (globalThis[store].getItem(key) === null) {
+                    globalThis[store].setItem(key, value);
+                }
+            } catch {
+                // invariant: an origin that holds no storage keeps none.
+            }
+        }
+    }
 }
 
 /** invariant: with `'block'`, requests leaving the site are aborted; the stub backend stays reachable through `allowedOrigins`. */
@@ -150,6 +181,9 @@ export class PlaywrightAdapter implements BrowserPort {
         this.contexts.add(context);
         try {
             const aborted = await blockExternal(context, options);
+            if (options.storage !== undefined) {
+                await context.addInitScript(seedStorage, options.storage);
+            }
             const page = await context.newPage();
             // invariant: pinned before the first byte: a script reading `Date.now()` on load must see the stated instant.
             if (options.clock !== undefined) {

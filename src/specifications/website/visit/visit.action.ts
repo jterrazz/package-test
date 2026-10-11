@@ -12,6 +12,7 @@ import {
     WITHIN,
 } from '../../../visitor/matrix.js';
 import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
+import { storage } from '../browser/storage.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { PageResult } from './page.result.js';
 
@@ -59,6 +60,7 @@ export const visit = defineAction<
         }
         const carried = read(headers);
         const pinned = read(clock);
+        const stored = read(storage);
         const opened = await browser();
         const page = await opened.open(`${baseUrl}${path}`, {
             allowedOrigins: backendUrl === undefined ? undefined : [new URL(backendUrl).origin],
@@ -67,6 +69,7 @@ export const visit = defineAction<
             external: config.external ?? 'allow',
             headers: Object.keys(carried).length > 0 ? carried : undefined,
             scenario,
+            ...(stored === null ? {} : { storage: stored }),
         });
         return new PageResult({ config, page, testDir });
     },

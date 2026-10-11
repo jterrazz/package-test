@@ -146,6 +146,10 @@ function stubContext(recorder: Recorder, page: StubPage, settings: object): obje
     const at = recorder.closes.push(0) - 1;
     const routes: Route[] = [];
     return {
+        addInitScript: async (script: (state: unknown) => void, state: unknown) => {
+            recorder.log.push(`init ${script.name} ${JSON.stringify(state)}`);
+            await Promise.resolve();
+        },
         close: async () => {
             recorder.closes[at] = (recorder.closes[at] ?? 0) + 1;
             await Promise.resolve();
