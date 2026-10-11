@@ -12,8 +12,24 @@ const DEFAULT_WATCH_TIMEOUT = 10_000;
 // invariant: one exit code for a run killed at its timeout, whichever path ran it.
 const TIMED_OUT = 124;
 
-/** `null` overrides delete keys (`INIT_CWD: null`). */
-export function buildEnv(extra?: CliEnv): NodeJS.ProcessEnv {
+// outside: the mutation run hands every process a test spawns the coverage reporter in NODE_OPTIONS (`--require="…/child-coverage.cjs"`); a chain that states its own NODE_OPTIONS must not drop it.
+const COVERAGE_REPORTER = /--require="[^"]*child-coverage\.cjs"/u;
+
+function withCoverageReporter(extra: CliEnv | undefined): CliEnv | undefined {
+    const stated = extra?.NODE_OPTIONS;
+    const reporter = COVERAGE_REPORTER.exec(process.env.NODE_OPTIONS ?? '')?.[0];
+    if (extra === undefined || typeof stated !== 'string' || reporter === undefined) {
+        return extra;
+    }
+
+    return stated.includes(reporter)
+        ? extra
+        : { ...extra, NODE_OPTIONS: `${stated} ${reporter}`.trim() };
+}
+
+/** `null` overrides delete keys (`INIT_CWD: null`); a NODE_OPTIONS a chain states keeps the mutation reporter the run asked for. */
+export function buildEnv(stated?: CliEnv): NodeJS.ProcessEnv {
+    const extra = withCoverageReporter(stated);
     const unset = new Set(
         Object.entries(extra ?? {})
             .filter(([, value]) => value === null)

@@ -71,6 +71,24 @@ describe('ExecAdapter', () => {
         }).toStrictEqual({ added: 'yes', initCwd: undefined, unset: false });
     });
 
+    test('exec adapter — buildEnv — a NODE_OPTIONS the chain states keeps the coverage reporter of a mutation run, once', () => {
+        // Given - a mutation run's reporter in the parent's NODE_OPTIONS
+        const reporter = '--require="/project/.artifacts/stryker/child-coverage.cjs"';
+        vi.stubEnv('NODE_OPTIONS', `--max-old-space-size=512 ${reporter}`);
+
+        // When - a chain states its own NODE_OPTIONS, one already carrying the reporter, and none
+        const merged = buildEnv({ NODE_OPTIONS: '--enable-source-maps' });
+        const carrying = buildEnv({ NODE_OPTIONS: `--trace-warnings ${reporter}` });
+        const silent = buildEnv({ ADDED: 'yes' });
+
+        // Then - the reporter joins the stated options, is not doubled, and an env that states none is the parent's
+        expect([merged.NODE_OPTIONS, carrying.NODE_OPTIONS, silent.NODE_OPTIONS]).toStrictEqual([
+            `--enable-source-maps ${reporter}`,
+            `--trace-warnings ${reporter}`,
+            `--max-old-space-size=512 ${reporter}`,
+        ]);
+    });
+
     test('exec adapter — observeProcess — resolves 0 when the waitFor pattern appears, then terminates the child', async () => {
         const child = givenChild();
         // Given - a long-running observation
