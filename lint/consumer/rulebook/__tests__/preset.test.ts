@@ -90,8 +90,31 @@ describe('preset', () => {
         };
 
         // Then - each wrap file under its root, normalised, and nothing for the others
-        expect([testPreset().entries?.(section), testPreset().entries?.({})]).toStrictEqual([
-            ['apps/web/src/frame.tsx', 'frame.tsx'],
+        expect([
+            testPreset().entries?.(section, '/nowhere'),
+            testPreset().entries?.({}, '/nowhere'),
+        ]).toStrictEqual([['apps/web/src/frame.tsx', 'frame.tsx'], []]);
+    });
+
+    test('testPreset — the test preset — names as entries the specification modules only documents bind, and as loaded the peers its projects drive', () => {
+        // Given - a tree with a cli folder holding its specification module, an api folder without one, a website folder and a mobile folder
+        const root = mkdtempSync(join(tmpdir(), 'test-preset-loaded-'));
+        for (const folder of ['cli', 'api', 'website', 'mobile']) {
+            mkdirSync(join(root, 'specs', folder), { recursive: true });
+        }
+        writeFileSync(join(root, 'specs/cli/cli.specification.ts'), '');
+        const bare = mkdtempSync(join(tmpdir(), 'test-preset-bare-'));
+        mkdirSync(join(bare, 'src/__tests__'), { recursive: true });
+        writeFileSync(join(bare, 'src/__tests__/orders.test.ts'), '');
+
+        // Then - the module that exists is an entry, the mobile's and the website's peers are loaded, the component's are not asked for, and a tree of module tests loads none
+        expect([
+            testPreset().entries?.({}, root),
+            testPreset().loadedPackages?.(root),
+            testPreset().loadedPackages?.(bare),
+        ]).toStrictEqual([
+            ['specs/cli/cli.specification.ts'],
+            ['appium', 'webdriverio', '@vitest/browser-playwright', 'playwright'],
             [],
         ]);
     });

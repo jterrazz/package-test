@@ -50,6 +50,7 @@ read: docs/start/set-up-a-project.md#what-to-install
 
 Three more constraints come from the peers themselves:
 
+- **One Playwright for the whole family.** This package's `playwright` peer is the exact version it is gated on, and a project declares that version: two revisions on one machine each need their own Chromium build, and `typescript doctor` names the build a project's Playwright wants and the machine lacks. `npx playwright install chromium`, run in the project, provisions it.
 - **The browser provider moves with vitest.** `@vitest/browser-playwright@X` requires `vitest` at exactly `X`, so the two are upgraded together: `npm install -D vitest@5.0.1 @vitest/browser-playwright@5.0.1`. `component()` checks the two versions match and names both when they do not.
 - **Vite `^6.4 || ^7 || ^8`** for a component. `component()` reads the installed major and states the JSX transform on the key that version reads.
 - **The ARIA dialect of a `.aria.yaml` golden is Playwright's.** A Playwright major can reword a role line, and every committed tree golden then moves with it in one `TEST_UPDATE=1` run.

@@ -13,7 +13,7 @@ import { posix } from 'node:path';
 
 import STANDARD from '../../../src/standard/standard.js';
 import { CATALOGUE_CHAPTER } from '../../kit/catalogue/chapter.js';
-import { derivedProjects } from '../../kit/project/derived-projects.js';
+import { derivedProjects, specificationModules } from '../../kit/project/derived-projects.js';
 import { isRecord } from '../../kit/project/json-shape.js';
 import { TEST_SECTION } from '../../kit/project/test-section.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
@@ -251,6 +251,21 @@ function loadedByName(section: Readonly<Record<string, unknown>>): string[] {
     });
 }
 
+// outside: a website project drives its browser through playwright and the vitest provider, a component project renders through them and vitest-browser-react, a mobile project drives its simulator through webdriverio and appium: this package loads each by name, so the project that declares them imports none.
+const LOADED_BY = {
+    component: ['@vitest/browser-playwright', 'playwright', 'vitest-browser-react'],
+    mobile: ['appium', 'webdriverio'],
+    website: ['@vitest/browser-playwright', 'playwright'],
+};
+
+function packagesLoadedFor(root: string): string[] {
+    const projects = derivedProjects(root);
+
+    return Object.entries(LOADED_BY).flatMap(([project, names]) =>
+        projects.has(project) ? names : [],
+    );
+}
+
 export function testPreset(): Preset {
     return {
         baseline: [TEST_SECTION],
@@ -273,7 +288,8 @@ export function testPreset(): Preset {
             module: createRequire(import.meta.url).resolve('#checker'),
         },
         derive: (root) => ({ projects: Object.fromEntries(derivedProjects(root)) }),
-        entries: loadedByName,
+        entries: (section, root) => [...loadedByName(section), ...specificationModules(root)],
+        loadedPackages: packagesLoadedFor,
         files: {
             'vitest.config.ts': {
                 scope: 'unit',

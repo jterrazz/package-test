@@ -92,3 +92,14 @@ export function derivedProjects(root: string): Map<string, Record<string, unknow
 
     return projects;
 }
+
+/** The specification modules a tree holds, `specs/<specification>/<specification>.specification.ts`: documents bind one by name, and no import reaches it. */
+export function specificationModules(root: string): string[] {
+    const member = isSpecsMember(root);
+    const prefix = member ? '' : `${SPECS}/`;
+
+    return foldersIn(member ? root : join(root, SPECS))
+        .filter((folder) => FOLDERED.has(folder))
+        .map((folder) => `${prefix}${folder}/${folder}${SPECIFICATION_MODULE}`)
+        .filter((path) => existsSync(join(root, path)));
+}
