@@ -13,6 +13,7 @@ import { recordConsole } from './console-recorder.js';
 import type { PagePort } from './page.port.js';
 import { RenderResult } from './render.result.js';
 import type { ComponentScenario, RenderSubject } from './scenario.js';
+import { visibleTextOf } from './visible-text.js';
 import { wrap } from './wrap.capability.js';
 
 const PARENT_VERBS: readonly MatrixRow[] = [
@@ -85,6 +86,11 @@ export const render = defineAction<
     accessors: [
         { group: 'Result accessor', name: '.tree', probe: 'result.tree' },
         { group: 'Result accessor', name: '.content', probe: 'result.content' },
+        {
+            group: 'Result accessor',
+            name: '.visibleContent',
+            probe: 'result.visibleContent',
+        },
         { group: 'Result accessor', name: '.console', probe: 'result.console' },
         { group: 'Result accessor', name: '.errors', probe: 'result.errors' },
         { group: 'Result accessor', name: '.html', probe: 'result.html' },
@@ -117,6 +123,12 @@ export const render = defineAction<
             errors: errorsOf(entries),
             html: surface.container.innerHTML,
             tree: await page.ariaTree(),
+            visibleContent: visibleTextOf({
+                elements: [...document.body.querySelectorAll<HTMLElement>('*')],
+                opacityOf: (element) => Number(getComputedStyle(element).opacity),
+                // oxlint-disable-next-line unicorn/prefer-dom-node-text-content -- RENDERED text is the subject, as for `content`
+                text: () => document.body.innerText,
+            }),
         });
     },
     prepare: async () => {

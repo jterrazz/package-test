@@ -144,13 +144,14 @@ The scenario is the When, and assertions stay in the Then (rule `no-expect-in-sc
 
 ## The result
 
-| Member           | Type           | Description                                                                                                                                            |
-| ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result.tree`    | `RenderedText` | The ARIA snapshot of the rendered body — the outline a golden pins                                                                                     |
-| `result.content` | `RenderedText` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it |
-| `result.html`    | `RenderedText` | The mounted markup — the escape hatch for a class or an attribute                                                                                      |
-| `result.console` | `RenderedText` | Every console message, one `[type] text` line per message, and every uncaught exception as ONE `[error] Uncaught …` line                               |
-| `result.errors`  | `RenderedText` | Console errors only, plus any uncaught page error, once (`Uncaught Error: …`)                                                                          |
+| Member                  | Type           | Description                                                                                                                                                                                |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `result.tree`           | `RenderedText` | The ARIA snapshot of the rendered body — the outline a golden pins                                                                                                                         |
+| `result.content`        | `RenderedText` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it                                     |
+| `result.visibleContent` | `RenderedText` | The same text without the text of an element drawn at `opacity: 0` — `innerText` keeps it, a reader of an animation does not see it, so a golden of a reel frame pins what the frame shows |
+| `result.html`           | `RenderedText` | The mounted markup — the escape hatch for a class or an attribute                                                                                                                          |
+| `result.console`        | `RenderedText` | Every console message, one `[type] text` line per message, and every uncaught exception as ONE `[error] Uncaught …` line                                                                   |
+| `result.errors`         | `RenderedText` | Console errors only, plus any uncaught page error, once (`Uncaught Error: …`)                                                                                                              |
 
 `toMatch(file(…))` is **awaited** on all five, because each is a `RenderedText` — a `TextAccessor` whose golden lives on the node side: a golden captured inside a page is read back through a server command, so the file crosses from the page to the node side. Which matchers are IO — and therefore awaited — is [Assertions](../reference/assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 

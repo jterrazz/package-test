@@ -166,6 +166,7 @@ const componentResult = {
     errors: true,
     html: true,
     tree: true,
+    visibleContent: true,
 } satisfies Record<keyof RenderResult, Published>;
 
 const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = {
