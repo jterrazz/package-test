@@ -92,6 +92,7 @@ export const exec = defineAction<
             commandOutput: output,
             config,
             dockerConfig: config.dockerConfig ?? undefined,
+            requests: config.backend?.requests(),
             testDir,
             testRunId: config.dockerTestRunId ?? undefined,
             transform: config.transform,

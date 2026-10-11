@@ -13,6 +13,38 @@ import {
 } from './stub-backend.fixtures.js';
 
 describe('StubBackend', () => {
+    test('stub backend — received requests — lists what was sent in order, matched or not, with the body parsed, and begins again with the chain', async () => {
+        // Given - one route declared, and a preflight, a matched post and an unmatched get sent to it
+        const { backend, url } = await started([
+            { request: http.post('/ingest'), response: http.json({ ok: true }) },
+        ]);
+        await fetch(`${url}/ingest`, { method: 'OPTIONS' });
+        await fetch(`${url}/ingest`, {
+            body: JSON.stringify({ report: 'daily' }),
+            headers: { 'content-type': 'application/json' },
+            method: 'POST',
+        });
+        await fetch(`${url}/elsewhere`);
+
+        // Then - the two real requests, in order, with the parsed body and the lowercased headers; the preflight is none
+        const received = backend.requests();
+        expect(
+            received.map(({ body, method, url: sent }) => ({ body, method, sent })),
+        ).toStrictEqual([
+            { body: { report: 'daily' }, method: 'POST', sent: '/ingest' },
+            { body: null, method: 'GET', sent: '/elsewhere' },
+        ]);
+        expect(received[0]?.headers['content-type']).toBe('application/json');
+
+        // When - the list is changed by its reader, and the next chain begins
+        received.length = 0;
+        const kept = backend.requests().length;
+        backend.beginChain([]);
+
+        // Then - the reader's copy touched nothing, and the new chain starts empty
+        expect([kept, backend.requests()]).toStrictEqual([2, []]);
+    });
+
     test('stub backend — streamed replies — writes the pieces in order and closes after the last one', async () => {
         // Given - a route declared as three pieces of text
         const { url } = await started([

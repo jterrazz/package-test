@@ -2,6 +2,16 @@ import { defineStandard } from '@jterrazz/typescript/config';
 
 export default defineStandard({
     test: {
+        specifications: [
+            'api',
+            'cli',
+            'component',
+            'integration',
+            'job',
+            'lint',
+            'mobile',
+            'website',
+        ],
         projects: {
             unit: {
                 isolate: false,

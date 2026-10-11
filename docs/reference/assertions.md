@@ -75,6 +75,7 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 | `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                                               |
 | `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                                              |
 | `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                                            |
+| `result.requests`                           | `{ body, headers, method, url }[]` | `expect(result.requests.map(({ body }) => body)).toStrictEqual([{ report: 'daily' }])` — what the binary sent its declared backend, in order |
 | `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                                                       |
 | `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [Spec documents](../guides/spec-documents.md#the-three-doors-one-runner) |
 
@@ -318,7 +319,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 | `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                          | async                                          | the path it is given |
 | `toBeEmpty`             | `table(…)` — an empty stream is `expect(<stream>.text).toBe('')`                                                                                                                                      | async                                          | —                    |
 | `toBeRunning`           | `container(…)`                                                                                                                                                                                        | async                                          | —                    |
-| native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`) — and `toMatch` with a value, on a string | per vitest                                     | —                    |
+| native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`, `requests`) — and `toMatch` with a value, on a string | per vitest                                     | —                    |
 
 `.not` is supported on every framework matcher.
 

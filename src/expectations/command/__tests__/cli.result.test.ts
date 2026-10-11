@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { CliResult, createDockerReader } from '../cli.result.js';
 import type { RunContainers } from '../cli.result.js';
+import type { MatchableRequest } from '../../../stubs/exchange.js';
 
 const DOCKER = { envVar: 'TEST_RUN_ID', nameLabel: 'test.name', testRunLabel: 'test.run' };
 
@@ -36,6 +37,7 @@ function resultOf(
     stdout: string,
     options: {
         containers?: RunContainers;
+        requests?: MatchableRequest[];
         testRunId?: string;
         transform?: (text: string) => string;
         withDocker?: boolean;
@@ -46,6 +48,7 @@ function resultOf(
         config: {},
         containers: options.containers,
         dockerConfig: options.withDocker === true ? DOCKER : undefined,
+        requests: options.requests,
         testDir: '/spec',
         testRunId: options.testRunId,
         transform: options.transform,
@@ -63,6 +66,26 @@ function refusalOf(work: () => unknown): string {
 }
 
 describe('CliResult', () => {
+    test('requests — lists what the binary sent its backend, as copies, and none when no backend was declared', () => {
+        // Given - a result of a run that sent one request, and one of a run with no backend
+        const sent: MatchableRequest = {
+            body: { report: 'daily' },
+            headers: { 'content-type': 'application/json' },
+            method: 'POST',
+            url: '/ingest',
+        };
+        const result = resultOf('', { requests: [sent] });
+
+        // When - a reader empties what it was handed
+        result.requests.length = 0;
+        for (const request of result.requests) {
+            request.headers['content-type'] = 'text/plain';
+        }
+
+        // Then - the result still lists the request whole, and a run without a backend lists none
+        expect([result.requests, resultOf('').requests]).toStrictEqual([[sent], []]);
+    });
+
     test('cli.result — what a command left — its exit, each stream named for itself, its working directory, all in the result’s one capture scope', () => {
         // Given - a command that exited 3, printing on both streams
         const result = resultOf('{"id": 7}');

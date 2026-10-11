@@ -13,7 +13,7 @@ export function stubBackend(
                 const lesson = {
                     fix: `add \`backend\` to the specification options: specification.${specification}(${specification === 'cli' ? 'bin, ' : ''}{ …, backend: { env: 'API_URL' } })`,
                     found: '.intercept(), and this runner has no declared backend',
-                    why: 'A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
+                    why: 'A site, an app or a binary is served its stubs by a declared stub backend, the URL it reads in place of its API.',
                 };
                 throw new Error(
                     refusal(

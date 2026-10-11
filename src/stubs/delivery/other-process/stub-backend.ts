@@ -35,6 +35,7 @@ export class StubBackend {
     private guarded = false;
     private readonly options: StubBackendOptions;
     private queue = new StubQueue([]);
+    private readonly received: MatchableRequest[] = [];
     private server: null | Server = null;
     private readonly unmatchedRequests = new Map<string, UnmatchedStubRequest>();
 
@@ -84,6 +85,12 @@ export class StubBackend {
         this.guarded = stubs.length > 0;
         this.queue = new StubQueue(stubs);
         this.unmatchedRequests.clear();
+        this.received.length = 0;
+    }
+
+    /** Every request the backend was sent since the chain began, in arrival order, matched or not: what a binary SENT, to compare whole. A preflight is no request of the program's. */
+    requests(): MatchableRequest[] {
+        return this.received.map((request) => ({ ...request, headers: { ...request.headers } }));
     }
 
     /** Non-null when the chain declared a stub and a request went unmatched, a never stub was reached, or a `required` stub was never met. */
@@ -133,6 +140,7 @@ export class StubBackend {
             method,
             url,
         };
+        this.received.push(observed);
         const stub = this.queue.take(observed);
         if (!stub) {
             this.record(method, url);

@@ -1,3 +1,4 @@
+import type { MatchableRequest } from '../../stubs/exchange.js';
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import type { MatrixRow } from '../../chain/capability.js';
 import { refusal } from '../../chain/refusals/refusal.js';
@@ -44,6 +45,7 @@ export const CLI_RESULT_ROWS: readonly MatrixRow[] = [
         probe: 'result.container(',
     },
     { group: 'Result accessor', name: '.containerIds', probe: 'result.containerIds' },
+    { group: 'Result accessor', name: '.requests', probe: 'result.requests' },
     { group: 'Result accessor', member: 'table', name: '.table()', probe: 'result.table(' },
     { group: 'Result accessor', member: 'file', name: '.file()', probe: '.file(' },
     { group: 'Result accessor', member: 'directory', name: '.directory()', probe: '.directory(' },
@@ -75,6 +77,7 @@ export class CliResult extends BaseResult {
     private readonly cwd: string;
     private containersCache: Map<string, CapturedContainer> | null = null;
     private readonly dockerConfig?: DockerSpecConfig | undefined;
+    private readonly received: readonly MatchableRequest[];
     private readonly containers: RunContainers;
     private readonly testRunId?: string | undefined;
     private readonly transform?: ((text: string) => string) | undefined;
@@ -84,6 +87,7 @@ export class CliResult extends BaseResult {
         config: ResultConfig;
         containers?: RunContainers | undefined;
         dockerConfig?: DockerSpecConfig | undefined;
+        requests?: readonly MatchableRequest[] | undefined;
         testDir: string;
         testRunId?: string | undefined;
         transform?: ((text: string) => string) | undefined;
@@ -93,6 +97,7 @@ export class CliResult extends BaseResult {
         this.commandOutput = options.commandOutput;
         this.cwd = options.workDir;
         this.dockerConfig = options.dockerConfig;
+        this.received = options.requests ?? [];
         this.containers = options.containers ?? DOCKER_CLI;
         this.testRunId = options.testRunId;
         this.transform = options.transform;
@@ -129,6 +134,11 @@ export class CliResult extends BaseResult {
     /** Accessor for the temporary working directory the command ran in. */
     get filesystem(): FilesystemAccessor {
         return new FilesystemAccessor(this.cwd, this.testDir, this.captures);
+    }
+
+    /** The requests the binary sent the declared backend during the run, in order, each `{ body, headers, method, url }` — the body parsed when JSON; empty without a backend. */
+    get requests(): MatchableRequest[] {
+        return this.received.map((request) => ({ ...request, headers: { ...request.headers } }));
     }
 
     /** A container the command spawned, by its name-label; `.exists` is `false` when none carries it. */

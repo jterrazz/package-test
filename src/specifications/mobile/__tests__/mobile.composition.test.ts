@@ -66,7 +66,7 @@ describe('mobileDefinition', () => {
             new Error(
                 [
                     'found: .intercept(), and this runner has no declared backend',
-                    'why: A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
+                    'why: A site, an app or a binary is served its stubs by a declared stub backend, the URL it reads in place of its API.',
                     "fix: add `backend` to the specification options: specification.mobile({ …, backend: { env: 'API_URL' } })",
                     'read: docs/guides/mobile-specs.md#declared-backend',
                 ].join('\n'),

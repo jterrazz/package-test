@@ -365,6 +365,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.filesystem`     | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.container()`    | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
 | `.containerIds`   | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
+| `.requests`       | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
 | `.report`         | —   | —   | —   | 111  | —           | —       | —      | —         | —      |
 | `.value`          | —   | —   | —   | —    | 9           | —       | —      | —         | —      |
 | `.error`          | —   | —   | —   | —    | 7           | —       | —      | —         | —      |

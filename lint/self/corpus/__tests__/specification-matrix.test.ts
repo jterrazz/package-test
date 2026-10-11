@@ -96,6 +96,7 @@ const cliResult = {
     file: true,
     filesystem: true,
     json: true,
+    requests: true,
     stderr: true,
     stdout: true,
     table: true,
