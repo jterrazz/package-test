@@ -40,10 +40,14 @@ test-changed: node_modules/.install
 
 MUTATION = npx typescript mutation
 
-# invariant: the four targets CI runs, in its order.
+# invariant: the four targets CI runs, in its order; the lock names make's own pid, so a run that fails midway leaves a lock no live process holds, which `install` ignores.
 check: node_modules/.install
 	@mkdir -p .artifacts && echo $$PPID > .artifacts/gate.lock
-	@status=0; { $(MAKE) build && npm run lint && $(MAKE) test && $(MUTATION); } || status=$$?; rm -f .artifacts/gate.lock; exit $$status
+	$(MAKE) build
+	npm run lint
+	$(MAKE) test
+	$(MUTATION)
+	@rm -f .artifacts/gate.lock
 
 # outside: needs Xcode and a simulator — `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
 test-mobile: build
