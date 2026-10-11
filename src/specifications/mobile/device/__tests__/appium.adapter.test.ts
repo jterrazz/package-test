@@ -156,6 +156,27 @@ describe('AppiumAdapter', () => {
         });
     });
 
+    test('appium adapter — the verbs — a timeout on a screen showing only the launch label says the app is stalled on its splash', async () => {
+        // Given - a screen that shows the app's name and nothing else
+        const stalled = await scenarioOn(
+            () => ({ source: '<XCUIElementTypeApplication label="SigNews" />' }),
+            async (visitor) => {
+                await visitor.tap(button('Pay'));
+            },
+            1,
+        );
+
+        // Then - the timeout names the one label and says why the screen is empty
+        expect(stalled.error?.message).toBe(
+            [
+                'found: tap(button("Pay")) timed out after 1ms — no visible match.',
+                'Currently on screen: SigNews',
+                'The app is stalled on the splash: nothing but its launch screen is up.',
+                ...TIMEOUT_LESSON,
+            ].join('\n'),
+        );
+    });
+
     test('appium adapter — the verbs — a verb with no visible match times out naming what the screen shows, having scrolled once', async () => {
         // Given - a Pay button that never becomes visible, on a screen that cannot scroll, and an empty screen
         // When - each runs past a short action budget

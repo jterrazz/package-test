@@ -93,6 +93,18 @@ describe('xcui-query', () => {
         ]);
     });
 
+    test('a long label is listed shortened, not dropped', () => {
+        // Given - a page source carrying a label of seventy characters and one of sixty
+        const long = 'a'.repeat(70);
+        const exact = 'b'.repeat(60);
+
+        // Then - the long one ends in an ellipsis at sixty characters, the exact one is whole
+        expect(onScreenLabels(`label="${long}" label="${exact}"`)).toStrictEqual([
+            `${'a'.repeat(59)}…`,
+            exact,
+        ]);
+    });
+
     test('a match is reported by its bare type and what it carries beyond its label, the first ten of them', async () => {
         // Given - twelve elements: a button, one carrying nothing, a field whose value alone speaks, a cell echoing its label, a long label, then more
         const log: DeviceLog = [];

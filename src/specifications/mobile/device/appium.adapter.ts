@@ -181,6 +181,11 @@ export class AppiumAdapter implements DevicePort {
             if (labels.length > 0) {
                 excerpt = `\nCurrently on screen: ${labels.join(' | ')}`;
             }
+            // invariant: a screen that shows one label only is the launch screen, the app's name: the app has not rendered past its splash.
+            if (labels.length === 1) {
+                excerpt +=
+                    '\nThe app is stalled on the splash: nothing but its launch screen is up.';
+            }
         } catch {
             // invariant: the excerpt is best-effort evidence — never mask the timeout.
         }

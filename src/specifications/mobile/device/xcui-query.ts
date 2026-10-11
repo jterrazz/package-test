@@ -114,12 +114,18 @@ export async function scrollToOffscreen(
     }
 }
 
-/** The labels a page source shows, for a timeout's evidence. */
+const LABEL_WIDTH = 60;
+
+// invariant: a long accessible name is the evidence that matters most, so it is shortened where it would have been dropped.
+const labelShortened = (label: string): string =>
+    label.length > LABEL_WIDTH ? `${label.slice(0, LABEL_WIDTH - 1)}…` : label;
+
+/** The labels a page source shows, each at most 60 characters, for a timeout's evidence. */
 export function onScreenLabels(source: string): string[] {
     return [
         ...new Set(
-            [...source.matchAll(/label="(?<label>[^"]{2,60})"/gu)].map(([, label]) =>
-                String(label),
+            [...source.matchAll(/label="(?<label>[^"]{2,})"/gu)].map(([, label]) =>
+                labelShortened(String(label)),
             ),
         ),
     ].slice(0, 15);
