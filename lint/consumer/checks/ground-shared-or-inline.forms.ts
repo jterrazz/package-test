@@ -69,13 +69,20 @@ export function jsonOf(text: string): unknown {
     return parsed === NO_JSON ? undefined : parsed;
 }
 
-/** `undefined` for a shape the fixer does not rewrite. */
+// invariant: `{ frozen: true }` is the author's statement that the bytes are the contract: a golden compared so is never moved into a literal, which would compare a structure and pin no byte.
+const FROZEN = /^\s*,\s*\{[^}]*\bfrozen\s*:\s*true\b/u;
+
+/** `undefined` for a shape the fixer does not rewrite, which the checker then does not ask for: both read this one predicate. `after` is the text that follows the file's reference. */
 export function replacementOf(
     before: string,
     content: string,
     target: string,
     indent: string,
+    after = '',
 ): string | undefined {
+    if (FROZEN.test(after)) {
+        return undefined;
+    }
     const extension = extname(target);
     if (/\.request\s*\(\s*$/u.test(before)) {
         return block(content, indent);

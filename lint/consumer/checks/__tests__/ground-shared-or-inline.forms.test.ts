@@ -166,4 +166,16 @@ describe('ground-shared-or-inline.forms', () => {
             JSON.stringify('a\n  '),
         ]);
     });
+
+    test('a golden compared frozen is never written in place, whatever its form', () => {
+        // Given - the same text golden matched plainly and with the bytes stated as the contract
+        const before = 'expect(result.text).toMatch(';
+
+        // Then - a template for the plain call, nothing for the frozen one
+        expect([
+            replacementOf(before, 'a\nb\n', '/x/s.txt', '', ')'),
+            replacementOf(before, 'a\nb\n', '/x/s.txt', '', ', { frozen: true })'),
+            replacementOf(before, 'a\nb\n', '/x/s.txt', '', ' , {\n frozen : true,\n })'),
+        ]).toStrictEqual(['`\n    a\n    b\n`', undefined, undefined]);
+    });
 });

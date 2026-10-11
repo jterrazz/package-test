@@ -261,4 +261,21 @@ describe('ground-shared-or-inline', () => {
             true,
         ]);
     });
+
+    test('a golden compared frozen stays a file for the checker and the fixer alike', () => {
+        // Given - a text golden the one test compares with its bytes stated as the contract
+        const files = {
+            'specs/api/__expected__/serialized.txt': '{\n  "a": 1\n}\n',
+            [SPEC]: testReading("file('./__expected__/serialized.txt'), { frozen: true }"),
+        };
+
+        // Then - nothing to inline, and the fixer leaves the file where it is
+        const root = packageWith(files);
+        const moves = fixGroundSharedOrInline(root);
+        expect([
+            findingsIn(files),
+            moves,
+            existsSync(join(root, 'specs/api/__expected__/serialized.txt')),
+        ]).toStrictEqual([[], [], true]);
+    });
 });

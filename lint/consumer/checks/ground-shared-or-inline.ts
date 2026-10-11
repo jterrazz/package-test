@@ -44,7 +44,14 @@ const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
 
 const TEST_CALL = /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(/gu;
 
+/** How much of the text around a reference the form it is written in is read from. */
+const AROUND = 300;
+
 type Reference = {
+    /** The text that follows the reference, as far as its form reads. */
+    after: string;
+    /** The text that precedes the reference, as far as its form reads. */
+    before: string;
     column: number;
     end: number;
     file: string;
@@ -87,9 +94,12 @@ function referencesIn(file: string): Reference[] {
         const inside = spans.findLast((span) => span.start < match.index && match.index < span.end);
         // Stryker disable next-line OptionalChaining: a match always carries its named groups
         const namesAFile = match.groups?.kind === 'file';
+        const end = match.index + match[0].length;
         references.push({
             ...positionOf(text, match.index),
-            end: match.index + match[0].length,
+            after: text.slice(end, end + AROUND),
+            before: text.slice(Math.max(0, match.index - AROUND), match.index),
+            end,
             file,
             namesAFile,
             start: match.index,
@@ -134,7 +144,15 @@ function inlinable(reference: Reference, target: string): boolean {
         cap !== undefined &&
         reference.namesAFile &&
         treeKind(target) === 'file' &&
-        !staysAFile(target, cap)
+        !staysAFile(target, cap) &&
+        // invariant: the checker asks only what the fixer writes: a golden whose form the fixer leaves is left by both.
+        replacementOf(
+            reference.before,
+            readFileSync(target, 'utf8'),
+            target,
+            '',
+            reference.after,
+        ) !== undefined
     );
 }
 
@@ -249,6 +267,7 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
                 readFileSync(target, 'utf8'),
                 target,
                 indent,
+                text.slice(reference.end, reference.end + AROUND),
             );
             if (replacement === undefined) {
                 continue;
