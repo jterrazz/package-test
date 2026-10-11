@@ -13,6 +13,8 @@ import { link } from '../../disk/link.capability.js';
 import { prepare } from '../../disk/prepare.capability.js';
 import { databaseSet } from '../../services/seed/database-set.adapter.js';
 import { seed } from '../../services/seed/seed.capability.js';
+import { stubBackend } from '../../stubs/delivery/other-process/stub-backend.adapter.js';
+import { intercept } from '../../stubs/intercept/intercept.capability.js';
 import type { CliConfig, CliSpecificationOptions } from './cli.handle.js';
 import { run } from './documents/run.action.js';
 import { env } from './process/env.capability.js';
@@ -20,8 +22,9 @@ import { exec } from './process/exec.action.js';
 
 const composition = {
     actions: [exec, run],
-    capabilities: [env, fixture, link, prepare, seed, sharing],
+    capabilities: [env, fixture, intercept, link, prepare, seed, sharing],
     options: {
+        backend: { group: 'Constructor option', name: 'backend', probe: 'backend:' },
         commands: { group: 'Constructor option', name: 'commands', probe: 'commands:' },
         defaults: { group: 'Constructor option', name: 'defaults', probe: 'defaults:' },
         docker: { group: 'Constructor option', name: 'docker', probe: 'docker:' },
@@ -47,6 +50,7 @@ export const cliDefinition = defineSpecification<CliSpecification, Started<CliCo
             command: config.command,
             databases: databaseSet(config),
             links: fsLinks,
+            network: stubBackend(config.backend, 'cli'),
             steps: inProcessSteps,
             workdir: fsFixtures,
         }),

@@ -91,7 +91,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 150   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 56    |
-| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 202   |
+| The package’s own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 203   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 113   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -234,10 +234,11 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `server`    | 5   | —   | —   | —    | —           | 4       | —      | —         | —      |
 | `services`  | 2   | 1   | 1   | —    | 2           | 1       | 1      | —         | —      |
 | `jobs`      | —   | 3   | —   | —    | —           | —       | —      | —         | —      |
+| `backend`   | —   | —   | 1   | —    | —           | 2       | 1      | —         | —      |
 | `commands`  | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `defaults`  | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `docker`    | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
-| `env`       | —   | —   | 5   | —    | —           | —       | —      | —         | —      |
+| `env`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
 | `serve`     | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
 | `transform` | —   | —   | 2   | —    | —           | 1       | —      | —         | —      |
 | `checkers`  | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
@@ -245,7 +246,6 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `plugins`   | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
 | `presets`   | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
 | `settings`  | —   | —   | —   | 0    | —           | —       | —      | —         | —      |
-| `backend`   | —   | —   | —   | —    | —           | 2       | 1      | —         | —      |
 | `external`  | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
 | `url`       | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `app`       | —   | —   | —   | —    | —           | —       | 1      | —         | —      |
@@ -265,7 +265,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 2   | —   | —    | 2           | 1       | —      | 1         | —      |
 | `.headers()`   | 5   | —   | —   | —    | —           | 2       | —      | —         | —      |
-| `.intercept()` | 12  | 1   | —   | —    | 3           | 2       | 1      | 6         | —      |
+| `.intercept()` | 12  | 1   | 1   | —    | 3           | 2       | 1      | 6         | —      |
 | `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
@@ -287,7 +287,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.put()`     | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 62  | —    | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 63  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 112  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 11          | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —    | —           | 23      | —      | —         | —      |
@@ -358,7 +358,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.table()`        | 7   | 4   | 1   | —    | 2           | —       | —      | —         | —      |
 | `.file()`         | 1   | —   | 17  | 8    | 4           | —       | —      | —         | —      |
 | `.directory()`    | 1   | —   | 4   | 6    | 1           | —       | —      | —         | —      |
-| `.stdout`         | —   | —   | 40  | —    | —           | —       | —      | —         | —      |
+| `.stdout`         | —   | —   | 41  | —    | —           | —       | —      | —         | —      |
 | `.stderr`         | —   | —   | 14  | —    | —           | —       | —      | —         | —      |
 | `.exitCode`       | —   | —   | 47  | —    | —           | —       | —      | —         | —      |
 | `.json`           | —   | —   | 6   | —    | —           | 2       | —      | —         | —      |

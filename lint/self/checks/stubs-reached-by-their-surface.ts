@@ -26,10 +26,12 @@ const DELIVERY_READERS: DeliveryReaders = {
     ],
     'delivery/browser-page/worker-script.ts': ['src/specifications/component/component.project.ts'],
     'delivery/other-process/stub-backend.adapter.ts': [
+        'src/specifications/cli/cli.composition.ts',
         'src/specifications/mobile/mobile.composition.ts',
         'src/specifications/website/website.composition.ts',
     ],
     'delivery/other-process/stub-backend.ts': [
+        'src/specifications/cli/cli.handle.ts',
         'src/specifications/mobile/mobile.handle.ts',
         'src/specifications/website/website.handle.ts',
     ],

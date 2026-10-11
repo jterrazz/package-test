@@ -55,7 +55,7 @@ describe('checkSpecimenFiledByCapability', () => {
         expect(
             checkSpecimenFiledByCapability(root).map(({ fix, path }) => `${path} ${fix}`),
         ).toStrictEqual([
-            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its specification — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/guides/test.md § The capability matrix)',
+            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its specification — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `intercept`, `to-match`, `exec`, …; docs/guides/test.md § The capability matrix)',
         ]);
     });
 

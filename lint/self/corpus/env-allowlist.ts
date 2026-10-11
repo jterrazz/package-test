@@ -3,7 +3,13 @@ import { join } from 'node:path';
 
 import { isTestFileName } from '../../kit/project/role.js';
 
-const ENV_ALLOWLIST = new Set(['TEST_MOBILE_HEADED', 'TEST_UPDATE', 'VITEST_POOL_ID']);
+// outside: NODE_OPTIONS is the channel the mutation run hands a spawned process its coverage reporter through, which a chain stating its own options must keep.
+const ENV_ALLOWLIST = new Set([
+    'NODE_OPTIONS',
+    'TEST_MOBILE_HEADED',
+    'TEST_UPDATE',
+    'VITEST_POOL_ID',
+]);
 
 const STATIC_READ = /process\.env(?:\.(?<dot>[A-Za-z_]\w*)|\[\s*['"](?<bracket>[^'"]+)['"])/gu;
 const DYNAMIC_READ = /process\.env\[\s*(?!['"])/u;

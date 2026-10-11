@@ -233,6 +233,11 @@ case "$COMMAND" in
         echo "  build   Build the project"
         echo "  check   Check code quality"
         ;;
+    ingest)
+        # Sends one report to the origin named by INGEST_URL, as a binary that
+        # reports to a configurable collector does, and prints the status it got.
+        node -e "fetch(process.env.INGEST_URL + '/ingest', { method: 'POST', body: '{}' }).then((response) => console.log('ingest status ' + response.status))"
+        ;;
     status-on-stderr)
         # Simulates the Unix convention where status banners go to
         # stderr and exit code is zero. Used to verify the exec

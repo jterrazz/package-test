@@ -12,6 +12,7 @@ import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services
 import type { Orchestrator } from '../../services/startup/orchestrator.js';
 import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
+import { StubBackend } from '../../stubs/delivery/other-process/stub-backend.js';
 import type { CliSpecification } from './cli.composition.js';
 import { cliDefinition } from './cli.composition.js';
 import type { CliEnv, CliPort } from './process/cli.port.js';
@@ -30,8 +31,18 @@ export type LiterateServeRegistration = {
     url: (port: number) => string;
 };
 
+/** The stub backend: started before the first run, its URL handed to the binary under `env`. */
+export type CliBackendOptions = {
+    /** Env var receiving the stub's URL in the child (e.g. `'INGEST_URL'`). */
+    env: string;
+    /** Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port. */
+    port?: number;
+};
+
 export type CliConfig = Pick<ResultConfig, 'transform'> &
     ServicesConfig & {
+        /** The stub backend `.intercept()` declares its stubs on. */
+        backend?: StubBackend | undefined;
         command?: CliPort | undefined;
         /** Under a chain's own `.env()` and a document's `env:`, both of which win. */
         defaultEnv?: CliEnv | undefined;
@@ -43,6 +54,8 @@ export type CliConfig = Pick<ResultConfig, 'transform'> &
     };
 
 export type CliSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
+    /** Stub backend, started before the first run; its URL injected under `backend.env`, so a binary that sends its requests to a configurable origin can be served stubs. */
+    backend?: CliBackendOptions;
     /** The words the binary's commands are spelled with, read by the checker only (`one-subject-per-spec`, `spec-in-subject-folder`): `exec('db migrate --dry')` is `db migrate`. */
     commands?: readonly string[];
     /** Opt-in Docker awareness; declare results with `await using` so leaked containers are removed (`docker-exec-bound-with-await-using`). */
@@ -95,15 +108,36 @@ export async function startCli<Services extends ServiceRecord>(
     if (Object.keys(services).length > 0) {
         started = await startServices(services, root, { type: 'none' });
     }
+    // invariant: a backend that cannot start must not orphan the services started before it.
+    let backend: null | StubBackend = null;
+    let backendUrl: string | undefined;
+    if (options.backend !== undefined) {
+        backend = new StubBackend({ port: options.backend.port });
+        try {
+            backendUrl = await backend.start();
+        } catch (error) {
+            await started?.orchestrator.stop();
+            throw error;
+        }
+    }
 
     const config: Started<CliConfig, 'command'> = {
+        backend: backend ?? undefined,
         command: new ExecAdapter(resolvedBin),
         database: started?.database,
         databaseKeys,
         databases: started?.databases,
         dockerConfig: options.docker,
         dockerTestRunId: options.docker === undefined ? undefined : dockerTestRunId(),
-        defaultEnv: options.defaults,
+        defaultEnv:
+            options.backend === undefined || backendUrl === undefined
+                ? options.defaults
+                : {
+                      ...(options.backend.env === undefined
+                          ? {}
+                          : { [options.backend.env]: backendUrl }),
+                      ...options.defaults,
+                  },
         envSets: options.env,
         root,
         serveRegistry: options.serve,
@@ -113,6 +147,7 @@ export async function startCli<Services extends ServiceRecord>(
 
     return {
         cleanup: async () => {
+            await backend?.stop();
             await started?.stopProcesses();
             await releaseIsolation(services);
             if (started) {
