@@ -21,6 +21,16 @@ describe('preset', () => {
                     reason: 'a module test leaves no state behind in a module, so a worker runs its files in one module graph',
                 },
             },
+            specifications: [
+                'api',
+                'cli',
+                'component',
+                'integration',
+                'job',
+                'lint',
+                'mobile',
+                'website',
+            ],
         };
         expect([preset.name, preset.package, preset.settings, preset.origins]).toStrictEqual([
             'test',

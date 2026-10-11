@@ -14,6 +14,8 @@ export type TestSettings = {
     projects?: Readonly<Partial<Record<TestSpecification, TestProject>>>;
     /** Path to an OpenAPI document (JSON or YAML) declaring the routes, when the app carries no route table. */
     routes?: string;
+    /** The folders of `specs/` that hold specifications, each filing its specs under the subject they prove: `specs/<specification>/<subject>/`. */
+    specifications?: readonly string[];
 };
 
 /** The helpers a project is built by, named by their specification. */

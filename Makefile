@@ -1,13 +1,12 @@
 .PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation
 
+# invariant: an install replaces the dependencies a running gate reads; `check` holds `.artifacts/gate.lock` with its own pid, and every path that installs — `install`, and any target that depends on `node_modules/.install` — is refused while that process lives.
 node_modules/.install: package-lock.json
+	@if [ -f .artifacts/gate.lock ] && kill -0 "$$(cat .artifacts/gate.lock)" 2> /dev/null; then echo "install: the gate of pid $$(cat .artifacts/gate.lock) holds this checkout - wait for it to end, or install in a worktree of its own"; exit 1; fi
 	npm ci
 	@touch node_modules/.install
 
-# invariant: an install replaces the dependencies a running gate reads; `check` holds `.artifacts/gate.lock` with its own pid, and an install while that process lives is refused.
-install:
-	@if [ -f .artifacts/gate.lock ] && kill -0 "$$(cat .artifacts/gate.lock)" 2> /dev/null; then echo "install: the gate of pid $$(cat .artifacts/gate.lock) holds this checkout - wait for it to end, or install in a worktree of its own"; exit 1; fi
-	@$(MAKE) --no-print-directory node_modules/.install
+install: node_modules/.install
 
 build: node_modules/.install
 	npm run build
@@ -38,7 +37,8 @@ test-merge: node_modules/.install
 test-changed: node_modules/.install
 	npm test -- --changed
 
-MUTATION = npx typescript mutation
+# value: `check` passes `--cold`, so the whole suite's run starts from no incremental report and a gate never stands on a verdict an earlier tree earned.
+MUTATION = npx typescript mutation $(MUTATION_ARGS)
 
 # invariant: the four targets CI runs, in its order; the lock names make's own pid, so a run that fails midway leaves a lock no live process holds, which `install` ignores.
 check: node_modules/.install
@@ -46,7 +46,7 @@ check: node_modules/.install
 	$(MAKE) build
 	npm run lint
 	$(MAKE) test
-	$(MUTATION)
+	$(MAKE) mutation MUTATION_ARGS=--cold
 	@rm -f .artifacts/gate.lock
 
 # outside: needs Xcode and a simulator — `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
