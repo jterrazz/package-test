@@ -189,6 +189,8 @@ test('stamps the moment the page was opened', async () => {
 
 A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [Time and doubles § The clock](../reference/time-and-doubles.md#the-clock).
 
+`.clock()` pins the page, never the SERVER: a window the server computes with its own clock (a feed of the last hour, a token's expiry) is read off the real one. Declare the stub relative to now, so the window holds whenever the spec runs — `http.json({ publishedAt: new Date(Date.now() - 60_000).toISOString() })` — and assert the stamp the page renders by shape, capturing it with a token, `{{iso8601#published}}`, which every later occurrence in the spec must equal; the instant itself is never written.
+
 ## The result
 
 | Member              | Type                  | Description                                                                                                             |

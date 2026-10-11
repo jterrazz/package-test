@@ -81,6 +81,30 @@ export const REFUSALS: [string, ProcessOptions, string][] = [
         ),
     ],
     [
+        'a server that cannot bind the port `port` pins',
+        {
+            command: `node -e "console.error('Error: listen EADDRINUSE: address already in use 127.0.0.1:4321')"`,
+            port: 4321,
+        },
+        refused(
+            `the server could not bind its port, which another process already holds.\nCommand: node -e "console.error('Error: listen EADDRINUSE: address already in use 127.0.0.1:4321')"\nOutput:\nError: listen EADDRINUSE: address already in use 127.0.0.1:4321\n`,
+            'A process is handed a free port unless `port` pins one, and a port another process holds is not free.',
+            'stop the process holding port 4321, or drop the `port` option so a free one is picked',
+        ),
+    ],
+    [
+        'a server that cannot bind the port it is handed',
+        {
+            command: `node -e "console.error('listen EADDRINUSE');setTimeout(()=>{},4000)"`,
+            timeout: 800,
+        },
+        refused(
+            `the server could not bind its port, which another process already holds.\nCommand: node -e "console.error('listen EADDRINUSE');setTimeout(()=>{},4000)"\nOutput:\nlisten EADDRINUSE\n`,
+            'A process is handed a free port unless `port` pins one, and a port another process holds is not free.',
+            'have the command listen on the `PORT` it is handed, a free one, or stop the process holding the port it binds',
+        ),
+    ],
+    [
         'a ready pattern whose capture is no port',
         {
             command: `node -e "console.log('listening on x'); setInterval(() => {}, 1000)"`,

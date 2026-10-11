@@ -46,6 +46,11 @@ async function reapStrays(strays: Strays): Promise<void> {
     await (strays.length > 0 ? reaped(spawn(process.execPath, args, { stdio: 'ignore' })) : null);
 }
 
+type Lesson = { fix: string; found: string; why: string };
+
+// outside: Node names a bound port EADDRINUSE, and the frameworks word it as "address already in use" or "port is already in use".
+const PORT_IN_USE = /EADDRINUSE|address already in use|port \d+ is already in use/iu;
+
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     // Stryker disable next-line StringLiteral: an empty stdio reads as the default, piped
     execSync(command, { env, stdio: 'pipe' });
@@ -207,14 +212,32 @@ export class ServedProcess {
         return this.options.timeout ?? DEFAULT_READY_TIMEOUT;
     }
 
-    private async refuse(reason: { fix: string; found: string; why: string }): Promise<never> {
+    // invariant: a server that could not bind says so in its output whatever else it printed, and the lesson names the `port` option, the one place a port is chosen.
+    private lessonOf(reason: Lesson): Lesson {
+        if (!PORT_IN_USE.test(this.output)) {
+            return reason;
+        }
+        const { port } = this.options;
+
+        return {
+            fix:
+                port === undefined
+                    ? 'have the command listen on the `PORT` it is handed, a free one, or stop the process holding the port it binds'
+                    : `stop the process holding port ${String(port)}, or drop the \`port\` option so a free one is picked`,
+            found: 'the server could not bind its port, which another process already holds',
+            why: 'A process is handed a free port unless `port` pins one, and a port another process holds is not free.',
+        };
+    }
+
+    private async refuse(reason: Lesson): Promise<never> {
         await this.stop();
+        const lesson = this.lessonOf(reason);
         throw new Error(
             refusal({
-                fix: reason.fix,
-                found: `specification.${this.specification}(): ${reason.found}.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                fix: lesson.fix,
+                found: `specification.${this.specification}(): ${lesson.found}.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
                 read: 'docs/reference/services.md#process--the-one-shape-an-external-process-takes',
-                why: reason.why,
+                why: lesson.why,
             }),
         );
     }
