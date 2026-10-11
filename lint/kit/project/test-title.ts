@@ -5,6 +5,7 @@ import { child, childList, identifierName, isNode } from './ast.js';
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import type { FileRole } from './role.js';
+import { pathTemplate, subjectName, subjectsOf } from './subject.js';
 
 /** `pagination.spec.ts` → `pagination`. */
 export function aspectOf(filename: string): string {
@@ -109,4 +110,25 @@ export function testTitle(filename: string, role: FileRole): { named: string; wh
     return role === 'spec'
         ? { named: aspectOf(filename), what: 'aspect' }
         : { named: subjectOf(filename), what: 'subject' };
+}
+
+const REACHING = /(?:^|\/)specs\/(?:api|website)\//u;
+
+/** The pages a website spec visits and the routes an api spec requests, as it writes them (`/articles/:id`, `GET /articles/:id`): a title for the file's `describe` beside its name. */
+export function reachedBy(filename: string, source: string): string[] {
+    if (!REACHING.test(filename)) {
+        return [];
+    }
+
+    return [
+        ...new Set(
+            subjectsOf(source).flatMap(({ subject }) =>
+                subject.specification === 'website'
+                    ? [subject.page]
+                    : subject.specification === 'api'
+                      ? [pathTemplate(subject.path), subjectName(subject)]
+                      : [],
+            ),
+        ),
+    ];
 }

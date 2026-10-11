@@ -24,15 +24,19 @@ function spelling(title: string): string {
     return title.replaceAll(/[^\p{L}\d]/gu, '').toLowerCase();
 }
 
-/** What the file is about: the title its `describe` takes, and its own base name. */
+/** What the file is about: the title its `describe` takes, its own base name, and the pages or routes its chains reach — a website spec's `/articles/:id` is what it is about as much as its folder's name. */
 export interface FileSubject {
     readonly base: string;
     readonly named: string;
+    readonly reached?: readonly string[];
 }
 
-// invariant: a group titled with the file's subject, or with the file's own base name, in any spelling: its title adds nothing a test should carry.
-export function restatesSubject(title: string, { base, named }: FileSubject): boolean {
-    return spelling(title) === spelling(named) || spelling(title) === spelling(base);
+// invariant: a group titled with the file's subject, with the file's own base name, or with a page or a route the file reaches, in any spelling: its title adds nothing a test should carry.
+export function restatesSubject(
+    title: string,
+    { base, named, reached = [] }: FileSubject,
+): boolean {
+    return [named, base, ...reached].some((said) => spelling(title) === spelling(said));
 }
 
 function literalTitleOf(statement: AstNode): AstNode | undefined {

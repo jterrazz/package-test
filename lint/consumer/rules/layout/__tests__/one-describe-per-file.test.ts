@@ -14,8 +14,17 @@ const ROOT = packageWith({
 const MODULE_TEST = join(ROOT, 'src/route-judge.test.ts');
 const COMPONENT_TEST = join(ROOT, 'src/locale-note.test.tsx');
 
+const PAGE_SPEC = '/repo/specs/website/articles/[id]/reading.spec.ts';
+const PAGE_CHAIN = "import { website } from '../../website.specification.js';\n";
+
 ruleTester().run('one-describe-per-file', oneDescribePerFile, {
     invalid: [
+        {
+            name: 'A page the spec does not visit is no title for it.',
+            code: `${PAGE_CHAIN}describe('/articles/:slug', () => {\n    test('a', async () => {\n        await website.visit('/articles/42', async () => {});\n    });\n});`,
+            errors: [{ column: 9, line: 2, messageId: 'wrongTitle' }],
+            filename: PAGE_SPEC,
+        },
         {
             name: 'A table titled in a template is reported, its title left to its author.',
             code: 'describe.each([1, 2])(`page %s`, (n) => {});',
@@ -220,6 +229,16 @@ ruleTester().run('one-describe-per-file', oneDescribePerFile, {
         },
     ],
     valid: [
+        {
+            name: "A website spec's describe is titled with the page it visits.",
+            code: `${PAGE_CHAIN}describe('/articles/:id', () => {\n    test('a', async () => {\n        await website.visit('/articles/42', async () => {});\n    });\n});`,
+            filename: PAGE_SPEC,
+        },
+        {
+            name: "An api spec's describe is titled with the route it requests, as a path or with its method.",
+            code: "import { api } from '../../api.specification.js';\ndescribe('GET /events/:id', () => {\n    test('a', async () => {\n        await api.get('/events/42');\n    });\n});",
+            filename: '/repo/specs/api/events/get/by-id.spec.ts',
+        },
         {
             name: 'A group with no title names nothing to judge.',
             code: 'describe();',

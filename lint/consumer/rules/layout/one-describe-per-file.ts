@@ -7,7 +7,7 @@ import type { AstNode, Visitor } from '../../../kit/project/ast.js';
 import { identityOf } from '../../../kit/project/linted-file.js';
 import { isTestRole } from '../../../kit/project/role.js';
 import { calleeOf, firstArgumentOf, isGroup, isTest } from '../../../kit/project/test-calls.js';
-import { testBaseOf, testTitle } from '../../../kit/project/test-title.js';
+import { reachedBy, testBaseOf, testTitle } from '../../../kit/project/test-title.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { mergeFix, restatesSubject } from './one-describe-per-file.merge.js';
 import type { FileSubject } from './one-describe-per-file.merge.js';
@@ -90,7 +90,11 @@ export const oneDescribePerFile = defineRule(
                         return;
                     }
                     const { named, what } = testTitle(context.filename, identityOf(context).role);
-                    const subject = { base: testBaseOf(context.filename), named };
+                    const subject = {
+                        base: testBaseOf(context.filename),
+                        named,
+                        reached: reachedBy(context.filename, context.sourceCode.text),
+                    };
                     const finding = runFinding(members);
                     if (finding !== undefined) {
                         const source = context.sourceCode.text;
