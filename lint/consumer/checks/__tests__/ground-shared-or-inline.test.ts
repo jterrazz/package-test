@@ -278,4 +278,31 @@ describe('ground-shared-or-inline', () => {
             existsSync(join(root, 'specs/api/__expected__/serialized.txt')),
         ]).toStrictEqual([[], [], true]);
     });
+
+    test('a golden that is a byte copy of a source is compared with the source, and the fixer leaves it', () => {
+        // Given - a golden holding exactly the bytes of a file the repository keeps, read by one test
+        const files = {
+            'docs/sample.md': '# Sample\n\nA page.\n',
+            'specs/api/__expected__/sample.md': '# Sample\n\nA page.\n',
+            [SPEC]: testReading("file('./__expected__/sample.md')"),
+        };
+
+        // When - it is checked, then fixed
+        const found = findingsIn(files);
+        const root = packageWith(files);
+        const moves = fixGroundSharedOrInline(root);
+
+        // Then - the finding names the source to compare with, and nothing is inlined or deleted
+        expect([
+            found,
+            moves,
+            existsSync(join(root, 'specs/api/__expected__/sample.md')),
+        ]).toStrictEqual([
+            [
+                'specs/api/users.spec.ts:2:39 specs/api/__expected__/sample.md, a byte copy of docs/sample.md, read by this test alone — compare with the source: read docs/sample.md instead, and delete the copy — `typescript fix` leaves it to you',
+            ],
+            [],
+            true,
+        ]);
+    });
 });

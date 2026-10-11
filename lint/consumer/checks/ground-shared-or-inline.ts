@@ -5,7 +5,7 @@ import {
     isGroundFolder,
     treeKind,
 } from '@jterrazz/typescript/rules';
-import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
 import { withoutEntryImport } from '../../kit/checker/entry-import.js';
@@ -127,7 +127,23 @@ function staysAFile(path: string, cap: number): boolean {
     return inPlaceLines(path, content) > cap || (!valued && !survivesInPlace(content));
 }
 
-type SingleUse = { reference: Reference; references: number; target: string };
+type SingleUse = { copyOf?: string; reference: Reference; references: number; target: string };
+
+// invariant: a golden that is a byte copy of a file the repository keeps (not ground, not a test) is the author's copy of a source the test could read: it is compared with the source, not written in place, where it would be a second copy to keep in step.
+function sourceCopiedBy(rootDir: string, target: string): string | undefined {
+    const bytes = readFileSync(target);
+    return listFiles(rootDir, (path) => {
+        try {
+            return (
+                path !== target &&
+                statSync(path).size === bytes.length &&
+                readFileSync(path).equals(bytes)
+            );
+        } catch {
+            return false;
+        }
+    })[0];
+}
 
 // invariant: a reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers.
 function oneTestReads(named: readonly Reference[]): Reference | undefined {
@@ -190,7 +206,13 @@ function singleUseFiles(rootDir: string): SingleUse[] {
         const only = oneTestReads(named);
         const shared = namedOutside.some((path) => path === target || isWithin(path, target));
         if (only !== undefined && !shared && inlinable(only, target)) {
-            single.push({ reference: only, references: named.length, target });
+            const copy = sourceCopiedBy(rootDir, target);
+            single.push({
+                ...(copy === undefined ? {} : { copyOf: copy }),
+                reference: only,
+                references: named.length,
+                target,
+            });
         }
     }
     return single.filter(
@@ -208,12 +230,15 @@ function inPlaceForm(reference: Reference): string {
 }
 
 export function checkGroundSharedOrInline(rootDir: string): Spotted[] {
-    const single = singleUseFiles(rootDir).map(({ reference, target }) => ({
+    const single = singleUseFiles(rootDir).map(({ copyOf, reference, target }) => ({
         column: reference.column,
         path: relative(rootDir, reference.file),
         line: reference.line,
-        fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`typescript fix\` inlines it`,
-        found: `${relative(isWithin(rootDir, target) ? rootDir : dirname(rootDir), target)}, read by this test alone`,
+        fix:
+            copyOf === undefined
+                ? `write it here, ${inPlaceForm(reference)}, and delete the file — \`typescript fix\` inlines it`
+                : `compare with the source: read ${relative(rootDir, copyOf)} instead, and delete the copy — \`typescript fix\` leaves it to you`,
+        found: `${relative(isWithin(rootDir, target) ? rootDir : dirname(rootDir), target)}, ${copyOf === undefined ? '' : `a byte copy of ${relative(rootDir, copyOf)}, `}read by this test alone`,
         rule: 'ground-shared-or-inline' as const,
     }));
     const inlined = new Set(singleUseFiles(rootDir).map(({ target }) => relative(rootDir, target)));
@@ -252,7 +277,9 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
     const emptied = new Set<string>();
     const byFile = new Map<string, SingleUse[]>();
     // invariant: a file its one test names twice is the author's to write in place, once.
-    for (const use of singleUseFiles(rootDir).filter(({ references }) => references === 1)) {
+    for (const use of singleUseFiles(rootDir).filter(
+        ({ copyOf, references }) => references === 1 && copyOf === undefined,
+    )) {
         byFile.set(use.reference.file, [...(byFile.get(use.reference.file) ?? []), use]);
     }
     for (const [file, uses] of byFile) {
