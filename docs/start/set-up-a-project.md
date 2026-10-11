@@ -57,7 +57,7 @@ Three more constraints come from the peers themselves:
 
 Why vitest 5 alone, and why the native seams became optional peers: [ADR-008](https://github.com/jterrazz/package-test/blob/main/docs/decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md).
 
-To try an unreleased build of the framework, install the tarball `npm pack` writes, never a `file:` link: a link makes the project resolve vitest's types twice, and the matchers then type on one copy and not the other. The recipe — npm's `install-links`, the lockfile entries to drop, bun's packed tarball and its cache, the order a wave of projects takes the two packages in — is the toolchain's [Install an unreleased build](https://github.com/jterrazz/package-typescript/blob/main/docs/guides/install-an-unreleased-build.md), since this package is installed with it.
+To try an unreleased build of the framework, install the tarball `npm pack` writes, never a `file:` link: a link makes the project resolve vitest's types twice, and the matchers then type on one copy and not the other. The recipe — the tarball packed into `.artifacts/packages/`, the lockfile entries to drop, bun's cache, the order a wave of projects takes the two packages in — is the toolchain's [Install an unreleased build](https://github.com/jterrazz/package-typescript/blob/main/docs/guides/install-an-unreleased-build.md), since this package is installed with it.
 
 ## The vitest config
 

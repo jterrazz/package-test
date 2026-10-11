@@ -19,7 +19,7 @@ function describesOf(text: string): (Span & { holdsTests: boolean })[] {
     });
 }
 
-// invariant: a group the cut emptied goes; a group still holding tests keeps its title — merging groups is `one-describe-per-file`'s fixer, which carries each title onto its tests.
+// invariant: a group the cut emptied goes; a group still holding tests keeps its title — merging groups is `one-describe-per-file`'s fixer, which keeps each test's own title and refuses on a collision.
 export function withoutEmptiedGroups(text: string): string {
     return without(
         text,

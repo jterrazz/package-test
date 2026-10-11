@@ -87,7 +87,7 @@ function lastResult(outcomes: readonly RunOutcome[], options: LiterateRunOptions
     });
 }
 
-/** Resolves with the last run's result. Under `TEST_UPDATE=1` nothing is asserted: every run executes and is rewritten. */
+/** Resolves with the last run's result. Under `TEST_UPDATE=1` every run executes and is rewritten; its `files:` are still judged. */
 export async function runSpecDocument(options: LiterateRunOptions): Promise<CliResult> {
     const { config, displayPath, filePath, workDir } = options;
     const { command } = config;
