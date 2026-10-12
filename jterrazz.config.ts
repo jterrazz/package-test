@@ -63,6 +63,10 @@ export default defineConfig({
                 'src/chain/paths/__tests__/temp-root.global-setup.test.ts':
                     'the temp root is the run’s own, and cannot judge a mutant',
             },
+            ignore: {
+                'src/specifications/website/browser/page-scripts.ts':
+                    'the functions Playwright serialises into the page, where the helpers an instrumented copy calls do not exist: a mutated build throws before it reads or seeds anything; module test and specs/website judge them',
+            },
         },
         roots: {
             schema: {

@@ -7,24 +7,13 @@ import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import type {
     BrowserConsoleMessage,
-    BrowserLinkElement,
-    BrowserMetaElement,
     BrowserOpenOptions,
     BrowserPage,
     BrowserPort,
 } from './browser.port.js';
+import { extractPage, seedStorage } from './page-scripts.js';
 import { createSharedBrowser } from './shared-browser.js';
-import type { StorageState } from './storage.capability.js';
 import { createVisitor } from './website-visitor.js';
-
-type PageExtraction = {
-    html: string;
-    jsonLdBlocks: string[];
-    links: BrowserLinkElement[];
-    metas: BrowserMetaElement[];
-    text: string;
-    title: string;
-};
 
 // outside: the headless shell, named so the lighter binary is used whatever playwright's default becomes.
 const LAUNCH_OPTIONS = { channel: 'chromium-headless-shell', headless: true } as const;
@@ -43,65 +32,6 @@ async function launchChromium(): Promise<Browser> {
     }
     return await chromium.launch(LAUNCH_OPTIONS);
 }
-
-// invariant: runs in the page: what a visit reads off the rendered document.
-function extractPage(): PageExtraction {
-    const links = [...document.querySelectorAll('link')].map((link) => ({
-        href: link.href,
-        hreflang: link.hreflang || undefined,
-        rel: link.rel,
-        type: link.type || undefined,
-    }));
-    const metas = [...document.querySelectorAll('meta')].map((meta) => ({
-        content: meta.content,
-        name: meta.name || undefined,
-        property: meta.getAttribute('property') ?? undefined,
-    }));
-    const jsonLdBlocks = [...document.querySelectorAll('script[type="application/ld+json"]')].map(
-        (script) => script.textContent ?? '',
-    );
-    return {
-        html: document.documentElement.outerHTML,
-        jsonLdBlocks,
-        links,
-        metas,
-        // oxlint-disable-next-line unicorn/prefer-dom-node-text-content -- rendered text is the point; textContent would leak script bodies
-        text: document.body?.innerText ?? '',
-        title: document.title,
-    };
-}
-
-// Stryker disable ArrayDeclaration,ArrowFunction,BlockStatement,BooleanLiteral,CallExpression,ConditionalExpression,EqualityOperator,LogicalOperator,ObjectLiteral,StringLiteral: this function is serialised into the page, where the helpers an instrumented copy calls do not exist, so a mutated build throws before it seeds anything
-// invariant: runs in the page before its first script, so it closes over nothing: the state it is handed is all it knows; a store a frame cannot reach (an opaque origin) is left as it is.
-function seedStorage(state: StorageState): void {
-    if (state === 'throws') {
-        for (const store of ['localStorage', 'sessionStorage']) {
-            Object.defineProperty(globalThis, store, {
-                configurable: true,
-                get: () => {
-                    throw new DOMException('The operation is insecure.', 'SecurityError');
-                },
-            });
-        }
-        return;
-    }
-    for (const [store, entries] of [
-        ['localStorage', state.local],
-        ['sessionStorage', state.session],
-    ] as const) {
-        for (const [key, value] of Object.entries(entries ?? {})) {
-            try {
-                // invariant: a key the page already holds is kept: the script runs again on each navigation, and a seed is the state a visit starts from, not one it returns to.
-                if (globalThis[store].getItem(key) === null) {
-                    globalThis[store].setItem(key, value);
-                }
-            } catch {
-                // invariant: an origin that holds no storage keeps none.
-            }
-        }
-    }
-}
-// Stryker restore ArrayDeclaration,ArrowFunction,BlockStatement,BooleanLiteral,CallExpression,ConditionalExpression,EqualityOperator,LogicalOperator,ObjectLiteral,StringLiteral
 
 /** invariant: with `'block'`, requests leaving the site are aborted; the stub backend stays reachable through `allowedOrigins`. */
 async function blockExternal(
