@@ -71,6 +71,7 @@ function extractPage(): PageExtraction {
     };
 }
 
+// Stryker disable ArrayDeclaration,ArrowFunction,BlockStatement,BooleanLiteral,ConditionalExpression,EqualityOperator,LogicalOperator,ObjectLiteral,StringLiteral: this function is serialised into the page, where the helpers an instrumented copy calls do not exist, so a mutated build throws before it seeds anything
 // invariant: runs in the page before its first script, so it closes over nothing: the state it is handed is all it knows; a store a frame cannot reach (an opaque origin) is left as it is.
 function seedStorage(state: StorageState): void {
     if (state === 'throws') {
@@ -100,6 +101,7 @@ function seedStorage(state: StorageState): void {
         }
     }
 }
+// Stryker restore ArrayDeclaration,ArrowFunction,BlockStatement,BooleanLiteral,ConditionalExpression,EqualityOperator,LogicalOperator,ObjectLiteral,StringLiteral
 
 /** invariant: with `'block'`, requests leaving the site are aborted; the stub backend stays reachable through `allowedOrigins`. */
 async function blockExternal(
