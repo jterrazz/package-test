@@ -200,6 +200,33 @@ describe('in-place', () => {
         ]);
     });
 
+    test('writeInPlace — the test file rewritten where its toMatch stands — a name is refused whole, and an empty expectation is written like any other', () => {
+        // Given - a scratch test whose first call holds a variable and whose second holds nothing yet
+        writeImmediately();
+        const file = scratchFile('expect(a).toMatch(row.expected);\nexpect(b).toMatch();\n');
+
+        // When - each is written
+        const attempt = (line: number): string | undefined => {
+            try {
+                writeInPlace({ column: 14, file, line }, () => '0');
+            } catch (error) {
+                return error instanceof Error ? error.message : undefined;
+            }
+            return undefined;
+        };
+
+        // Then - the variable is refused with its four parts, the empty call is rewritten
+        expect([attempt(1), attempt(2)]).toStrictEqual([
+            [
+                `found: update mode: toMatch(row.expected) at ${file}:1:14 holds a name or a call, not a literal`,
+                'why: Update mode rewrites the literal a `toMatch(` holds; a variable stands for values the rewrite would replace by the last one it saw.',
+                'fix: write the expectation as a literal in `toMatch(`, or record it by hand: a table’s rows are recorded one by one, never from the last row',
+                'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+            ].join('\n'),
+            undefined,
+        ]);
+    });
+
     test('writeInPlace — the test file rewritten where its toMatch stands — with a pending folder the file waits for the run to end, then is written', () => {
         // Given - a scratch test, and a pending folder for the run
         const file = scratchFile('expect(one).toMatch(``);\n');

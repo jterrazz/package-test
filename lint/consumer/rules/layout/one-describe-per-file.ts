@@ -36,6 +36,7 @@ function titleFinding(group: AstNode, subject: FileSubject): TitleFinding | unde
     const parametrised = calleeOf(group)?.type === 'CallExpression';
     if (
         title === undefined ||
+        // Stryker disable next-line ConditionalExpression: a title equal to the subject restates it, which `restatesSubject` answers alike
         said === named ||
         (said !== undefined && restatesSubject(said, subject)) ||
         (parametrised && said?.startsWith(`${named} — `) === true)

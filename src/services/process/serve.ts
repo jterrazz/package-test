@@ -223,6 +223,7 @@ export class ServedProcess {
     }
 
     private workingDirectory(): string {
+        // Stryker disable next-line StringLiteral: an empty path resolves to the root as `.` does
         const { cwd = '.' } = this.options;
         // Stryker disable next-line StringLiteral: an empty path resolves to the root as `.` does
         return resolvePath(this.root, typeof cwd === 'function' ? cwd() : cwd);

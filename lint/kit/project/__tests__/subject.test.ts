@@ -121,6 +121,7 @@ describe('subject', () => {
             "await job.trigger('digest');",
             "await cli.exec('db migrate --dry-run');",
             "await cli.exec(['build', 'serve ./dist']);",
+            "await cli.exec(['build', 'test', 'deploy ./dist']);",
             "await website.visit('/articles/42', async () => {});",
             "await mobile.open('news://events');",
         ].join('\n');
@@ -130,6 +131,7 @@ describe('subject', () => {
             'trigger digest',
             'exec db',
             'exec serve',
+            'exec deploy',
             'visit /articles/:id',
             'open news://events',
         ]);

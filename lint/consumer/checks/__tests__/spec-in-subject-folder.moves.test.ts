@@ -8,6 +8,7 @@ import { checkOneSubjectPerSpec } from '../one-subject-per-spec.js';
 import { checkSpecInSubjectFolder } from '../spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from '../spec-in-subject-folder.moves.js';
 import { readingGround, TWO_PAGES } from './spec-in-subject-folder.moves.fixtures.js';
+import { besideData } from './spec-in-subject-folder.refusal.fixtures.js';
 
 const listing = (rule: string): string =>
     `import { api } from '../api.specification.js'; // checker-disable-line ${rule} -- filed by its author\ntest('a', async () => { await api.get('/orders'); });\n`;
@@ -69,6 +70,20 @@ describe('fixSpecInSubjectFolder', () => {
         expect(readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8')).toContain(
             "from '../../api.specification.js'",
         );
+    });
+
+    test('subject-moves — a spec of one route that reads a path beside it no rebase carries is left where it is, for its author to move', () => {
+        // Given - GET /orders filed outside its folder, reading a data file beside it through a URL on another base
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            ...besideData("new URL('./data.json', base)"),
+        });
+
+        // When - the fix runs
+        const done = fixSpecInSubjectFolder(root);
+
+        // Then - nothing moved
+        expect([done, existsSync(join(root, 'api/misc/orders.spec.ts'))]).toStrictEqual([[], true]);
     });
 
     test('subject-moves — a spec whose ground an earlier move lifted is moved from the text the lift repointed', () => {

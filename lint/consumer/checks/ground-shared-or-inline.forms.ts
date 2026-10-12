@@ -1,4 +1,5 @@
 import { GROUND_EXPECTED, GROUND_REQUESTS } from '@jterrazz/typescript/rules';
+import { readFileSync } from 'node:fs';
 import { dirname, extname, relative } from 'node:path';
 
 import { dedent } from '../../kit/project/dedent.js';
@@ -101,4 +102,10 @@ export function replacementOf(
     return extension === '.json' && !/\)\s*\.(?:not\s*\.)?toMatch\s*\($/u.test(before)
         ? undefined
         : block(content, indent);
+}
+
+/** Whether the fixer can write the golden at `target` where the call that reads it stands. */
+export function isWrittenInPlace(before: string, target: string): boolean {
+    // Stryker disable next-line StringLiteral: the indent a replacement is written at is no part of whether one exists
+    return replacementOf(before, readFileSync(target, 'utf8'), target, '') !== undefined;
 }

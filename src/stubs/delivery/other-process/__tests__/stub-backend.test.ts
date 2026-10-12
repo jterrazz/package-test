@@ -13,6 +13,12 @@ import {
 } from './stub-backend.fixtures.js';
 
 describe('StubBackend', () => {
+    test('stub backend — received requests — a backend that has served nothing lists none', () => {
+        // Given - a backend never started
+        // Then - no request
+        expect(new StubBackend().requests()).toStrictEqual([]);
+    });
+
     test('stub backend — received requests — lists what was sent in order, matched or not, with the body parsed, and begins again with the chain', async () => {
         // Given - one route declared, and a preflight, a matched post and an unmatched get sent to it
         const { backend, url } = await started([

@@ -170,6 +170,7 @@ function sourceAt(node: AstNode | undefined): ImportSource | undefined {
     if (node === undefined) {
         return undefined;
     }
+    // Stryker disable next-line BooleanLiteral: the flag says an import declaration carries the json attribute, and only the rule that reads import declarations looks at it; a reference by `require` is read by rules that ignore it
     return { json: false, node, source };
 }
 

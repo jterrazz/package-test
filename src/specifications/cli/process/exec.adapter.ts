@@ -18,7 +18,9 @@ const COVERAGE_REPORTER = /--require="[^"]*child-coverage\.cjs"/u;
 function withCoverageReporter(extra: CliEnv | undefined): CliEnv | undefined {
     const stated = extra?.NODE_OPTIONS;
     const reporter = COVERAGE_REPORTER.exec(process.env.NODE_OPTIONS ?? '')?.[0];
-    if (extra === undefined || typeof stated !== 'string' || reporter === undefined) {
+    // Stryker disable next-line ConditionalExpression: an env that is absent states no NODE_OPTIONS, which the type test beside it refuses all the same
+    const unstated = extra === undefined || typeof stated !== 'string';
+    if (unstated || reporter === undefined) {
         return extra;
     }
 

@@ -27,6 +27,7 @@ function writeSplit(
         return [];
     }
     // invariant: a split that keeps no file in place has no target equal to it.
+    // Stryker disable next-line ConditionalExpression: a spec of one subject whose target is its own file is skipped before it is written, so `keepsFile` never holds here
     if (!keepsFile) {
         mkdirSync(dirname(opening.target), { recursive: true });
         moveKeepingHistory(spec.file, opening.target);
@@ -35,9 +36,12 @@ function writeSplit(
         mkdirSync(dirname(target), { recursive: true });
         writeFileSync(target, text);
     }
-    return written
-        .filter(({ target }) => target !== spec.file)
-        .map(({ target }) => `${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`);
+    // Stryker disable next-line MethodExpression,ConditionalExpression: no draft of a spec moved whole is written to the file it came from, so the filter keeps every one
+    const moved = written.filter(({ target }) => target !== spec.file);
+
+    return moved.map(
+        ({ target }) => `${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`,
+    );
 }
 
 /** A spec of one subject moves whole to the folder its subject names; a spec of several is reported with its plan and split by its author, and a file whose target is taken is left alone. */
@@ -53,14 +57,14 @@ export function fixSpecInSubjectFolder(specsRoot: string): string[] {
         }
         const plan = splitPlan(specsRoot, spec);
         const targets = [...plan.values()];
-        // Stryker disable next-line ConditionalExpression,ArrowFunction,BlockStatement: a spec in its folder splits into itself, which the writes leave byte for byte
+        // Stryker disable next-line ConditionalExpression,ArrowFunction,BlockStatement,MethodExpression: a spec in its folder splits into itself, which the writes leave byte for byte, and a plan of one subject holds one target, which `every` and `some` read alike
         if (targets.every((target) => target === spec.file)) {
             continue;
         }
-        if (
-            targets.some((target) => target !== spec.file && existsSync(target)) ||
-            splitRefusal(specsRoot, spec, plan) !== undefined
-        ) {
+        // Stryker disable next-line MethodExpression: a plan of one subject holds one target, which `some` and `every` read alike
+        const taken = targets.some((target) => target !== spec.file && existsSync(target));
+        const refused = splitRefusal(specsRoot, spec, plan) !== undefined;
+        if (taken || refused) {
             continue;
         }
         done.push(

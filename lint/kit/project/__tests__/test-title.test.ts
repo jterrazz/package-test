@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
-import { subjectOfSource, testTitle } from '../test-title.js';
+import { reachedBy, subjectOfSource, testTitle } from '../test-title.js';
 
 describe('testTitle', () => {
     test('names the default export when it declares a name', () => {
@@ -139,6 +139,27 @@ describe('testTitle', () => {
             { named: 'alone', what: 'subject' },
             { named: 'fromPlain', what: 'subject' },
             { named: 'fromRendered', what: 'subject' },
+        ]);
+    });
+
+    test('reachedBy — the pages a website spec visits and the routes an api spec requests, from a path under specs/ at the root or below, and nothing from any other file or any other specification', () => {
+        // Given - one chain of each specification in a website spec, an api spec and a module test, and a cli chain in an api spec
+        const website =
+            "import { website } from '../x.specification.js';\nawait website.visit('/articles/42');\n";
+        const api = "import { api } from '../x.specification.js';\nawait api.get('/events/42');\n";
+        const mixed = `${api}import { cli } from '../y.specification.js';\nawait cli.exec('build');\n`;
+
+        // Then - the page, the route in two spellings, nothing under src/, and nothing for a cli chain beside a route
+        expect([
+            reachedBy('specs/website/articles/reading.spec.ts', website),
+            reachedBy('/repo/specs/api/events/get/by-id.spec.ts', api),
+            reachedBy('/repo/src/x/__tests__/x.test.ts', website),
+            reachedBy('/repo/specs/api/events/get/mixed.spec.ts', mixed),
+        ]).toStrictEqual([
+            ['/articles/:id'],
+            ['/events/:id', 'GET /events/:id'],
+            [],
+            ['/events/:id', 'GET /events/:id'],
         ]);
     });
 });

@@ -3,8 +3,10 @@ import type { AstNode } from './ast.js';
 
 export type ImportSource = { json: boolean; node: AstNode; source: string };
 
-const attributeText = (node: AstNode | undefined): string | undefined =>
-    stringValue(node) ?? (node?.type === 'Identifier' ? String(node.name) : undefined);
+function attributeText(node: AstNode | undefined): string | undefined {
+    // Stryker disable next-line ConditionalExpression,OptionalChaining: an attribute key that is neither a string nor an identifier names no attribute, and a node that is absent has no type to read
+    return stringValue(node) ?? (node?.type === 'Identifier' ? String(node.name) : undefined);
+}
 
 // invariant: `with { type: 'json' }` is the import attribute that says the module is data a runtime parses, which is how an import names a JSON file honestly.
 function isJsonImport(declaration: AstNode): boolean {

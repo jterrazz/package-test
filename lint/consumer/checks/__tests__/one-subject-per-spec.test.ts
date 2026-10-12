@@ -40,4 +40,23 @@ describe('checkOneSubjectPerSpec', () => {
             'one-subject-per-spec api/orders/orders.spec.ts:25:30 a spec reaching 2 subjects — GET /orders, POST /orders — split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
         ]);
     });
+
+    test('a subject holding several tests lists their titles, joined by a comma', () => {
+        // Given - two tests of one route and one of another, filed together
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/many.spec.ts': [
+                IMPORT,
+                "test('lists', async () => { await api.get('/orders'); });",
+                "test('pages', async () => { await api.get('/orders'); });",
+                "test('creates', async () => { await api.post('/orders', {}); });",
+                '',
+            ].join('\n'),
+        });
+
+        // Then - the plan names both titles of the first subject on one line
+        expect(checkOneSubjectPerSpec(root).map(({ fix }) => fix)).toStrictEqual([
+            'split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists", "pages"); POST /orders → api/orders/create/ ("creates")',
+        ]);
+    });
 });

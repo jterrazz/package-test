@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { derivedProjects } from '../derived-projects.js';
+import { derivedProjects, specificationModules } from '../derived-projects.js';
 
 function tree(files: readonly string[]): string {
     const root = mkdtempSync(join(tmpdir(), 'derived-projects-'));
@@ -119,5 +119,17 @@ describe('derivedProjects', () => {
         expect(projects).toStrictEqual({
             cli: {},
         });
+    });
+
+    test('specificationModules — the modules of the folders a specification names that hold theirs, and none of a folder that is no specification or holds no module', () => {
+        // Given - an api folder with its module, a job folder with none, and a folder named for no specification that holds one
+        const root = tree([
+            'specs/api/api.specification.ts',
+            'specs/job/jobs.spec.ts',
+            'specs/stray/stray.specification.ts',
+        ]);
+
+        // Then - the api module alone
+        expect(specificationModules(root)).toStrictEqual(['specs/api/api.specification.ts']);
     });
 });

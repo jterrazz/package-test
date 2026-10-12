@@ -27,6 +27,7 @@ function gestureLines(text: string, body: AstNode): number {
     const claim = new Set<number>();
     walk(body, (node) => {
         const matcher = assertionOf(node)?.matcher;
+        // Stryker disable next-line ConditionalExpression: a matcher that is absent is in no set of value matchers
         if (matcher === undefined || !VALUE_MATCHERS.has(matcher)) {
             return;
         }

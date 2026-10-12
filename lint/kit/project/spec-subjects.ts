@@ -61,11 +61,12 @@ export function withLeadingComments(text: string, start: number): number {
             begin = previous;
         } else if (line.endsWith('*/')) {
             // hazard: the opening is searched before this block's own close, never from the line below it: a block opening on that line (two adjacent blocks) is found again and again, and the climb never ends.
-            const opened = lineStart(
-                text,
-                text.lastIndexOf('/*', text.lastIndexOf('*/', begin - 1)),
-            );
+            // Stryker disable next-line StringLiteral,ArithmeticOperator: the closing is the last one before the line, and a search window two characters wider reads the same unless the declaration's own line opens on a closing mark
+            const closing = text.lastIndexOf('*/', begin - 1);
+            // Stryker disable next-line StringLiteral: an empty search reads the closing's own position, whose nearest opening mark is the block's own
+            const opened = lineStart(text, text.lastIndexOf('/*', closing));
             // invariant: the doc comment a declaration opens on goes with it, and the climb stops where it no longer moves.
+            // Stryker disable next-line ConditionalExpression,EqualityOperator: a block that opens where the climb already stands only guards against a climb that never moves
             if (opened >= begin) {
                 break;
             }

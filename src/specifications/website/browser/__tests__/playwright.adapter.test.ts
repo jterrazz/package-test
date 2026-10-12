@@ -111,16 +111,18 @@ describe('PlaywrightAdapter', () => {
         const chromium = stubChromium({
             failedLoads: ['https://cdn.test/x.js', 'http://site.test/app.js'],
             requests: REQUESTS,
+            warnedAt: ['https://cdn.test/x.js'],
         });
         const adapter = new PlaywrightAdapter({ launch: chromium.launch });
 
         // When - it is visited with external requests blocked
         const page = await adapter.open('http://site.test/', { ...VISIT, external: 'block' });
 
-        // Then - the abort's own message is left out, the site's own failure stays
+        // Then - the abort's own error is left out, a warning at the same address and the site's own failure stay
         expect(page.consoleMessages.map(({ text }) => text)).toStrictEqual([
             'hello',
             'Failed to load resource: http://site.test/app.js',
+            'Deprecated: https://cdn.test/x.js',
             'Uncaught TypeError: boom',
         ]);
     });

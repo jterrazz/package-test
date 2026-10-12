@@ -184,7 +184,8 @@ describe('ground-shared-or-inline.forms', () => {
                 ', { frozen: false })',
                 ', { other: true })',
                 ', frozen: true })',
+                'x, { frozen: true })',
             ].map((tail) => isFrozen(tail)),
-        ).toStrictEqual([true, true, true, false, false, false, false]);
+        ).toStrictEqual([true, true, true, false, false, false, false, false]);
     });
 });

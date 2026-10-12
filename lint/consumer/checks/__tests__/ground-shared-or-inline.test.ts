@@ -262,6 +262,22 @@ describe('ground-shared-or-inline', () => {
         ]);
     });
 
+    test('a golden no form can write in place is not asked for: a JSON accessor over text that parses as no JSON', () => {
+        // Given - a golden holding text, read by the one test that matches it under a JSON accessor
+        const files = {
+            'specs/api/__expected__/users.json': 'not json at all\n',
+            [SPEC]: [
+                "test('lists users', async () => {",
+                "    await expect(result.json).toMatch(file('./__expected__/users.json'));",
+                '});',
+                '',
+            ].join('\n'),
+        };
+
+        // Then - nothing to inline, so nothing is asked
+        expect(findingsIn(files)).toStrictEqual([]);
+    });
+
     test('a golden compared frozen stays a file for the checker and the fixer alike', () => {
         // Given - a text golden the one test compares with its bytes stated as the contract
         const files = {

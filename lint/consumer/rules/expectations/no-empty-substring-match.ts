@@ -8,23 +8,23 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const PLAIN_STRING_MEMBERS = new Set(['content', 'raw', 'text']);
 
+// Stryker disable next-line ConditionalExpression,LogicalOperator: the value of a quasi is always an object holding its cooked text
+const hasCooked = (value: unknown): value is { cooked: unknown } =>
+    typeof value === 'object' && value !== null && 'cooked' in value;
+
 function isEmptyText(node: AstNode | undefined): boolean {
     if (node?.type === 'Literal') {
         return node.value === '';
     }
+    // Stryker disable next-line ConditionalExpression,BlockStatement: a node that is no template has no quasis, so its cooked text is none and the answer is false all the same
     if (node?.type !== 'TemplateLiteral') {
         return false;
     }
     const [quasi] = childList(node, 'quasis');
+    // Stryker disable next-line OptionalChaining: a template always holds its first quasi
     const value: unknown = quasi?.value;
 
-    return (
-        childList(node, 'expressions').length === 0 &&
-        typeof value === 'object' &&
-        value !== null &&
-        'cooked' in value &&
-        value.cooked === ''
-    );
+    return childList(node, 'expressions').length === 0 && hasCooked(value) && value.cooked === '';
 }
 
 const row = rowNamed(consumerRows, 'no-empty-substring-match');
@@ -39,6 +39,7 @@ export const noEmptySubstringMatch = defineRule(
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
+        // Stryker disable next-line StringLiteral: the label the editor shows the rule under, which the linter does not read to run it
         type: 'suggestion',
     },
     {
@@ -46,6 +47,7 @@ export const noEmptySubstringMatch = defineRule(
             return {
                 CallExpression(node: AstNode) {
                     const callee = child(node, 'callee');
+                    // Stryker disable next-line ConditionalExpression: a call always has a callee, and `memberPropertyName` reads an absent one as no member
                     if (callee === undefined || memberPropertyName(callee) !== 'toMatch') {
                         return;
                     }
@@ -60,7 +62,9 @@ export const noEmptySubstringMatch = defineRule(
                         return;
                     }
                     const subject = childList(expectCall, 'arguments')[0];
+                    // Stryker disable next-line ConditionalExpression: `memberPropertyName` reads an absent subject as no member
                     const member = subject === undefined ? undefined : memberPropertyName(subject);
+                    // Stryker disable next-line ConditionalExpression: a member that is absent is in no set of members
                     if (
                         member !== undefined &&
                         PLAIN_STRING_MEMBERS.has(member) &&

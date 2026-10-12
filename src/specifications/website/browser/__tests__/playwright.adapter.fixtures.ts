@@ -27,6 +27,8 @@ export type StubPage = {
     hold?: boolean;
     requests?: string[];
     status?: number;
+    /** The addresses the browser's console reports a warning at, not an error. */
+    warnedAt?: string[];
 };
 
 type Recorder = {
@@ -78,7 +80,7 @@ function navigation(
     routes: Route[],
     handlers: Map<string, Handler>,
 ): (url: string, settings: object) => Promise<null | { status: () => number }> {
-    const { failedLoads = [], hold = false, requests = [], status } = page;
+    const { failedLoads = [], hold = false, requests = [], status, warnedAt = [] } = page;
     return async (url, settings) => {
         recorder.log.push(`goto ${url} ${JSON.stringify(settings)}`);
         for (const route of routes) {
@@ -96,6 +98,13 @@ function navigation(
                 location: () => ({ url: failed }),
                 text: () => `Failed to load resource: ${failed}`,
                 type: () => 'error',
+            });
+        }
+        for (const warned of warnedAt) {
+            handlers.get('console')?.({
+                location: () => ({ url: warned }),
+                text: () => `Deprecated: ${warned}`,
+                type: () => 'warning',
             });
         }
         handlers.get('pageerror')?.(new TypeError('boom'));

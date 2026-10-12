@@ -20,6 +20,7 @@ import { sourceCopiedBy } from './ground-shared-or-inline.copies.js';
 import {
     INLINE_CAPS,
     isFrozen,
+    isWrittenInPlace,
     jsonOf,
     replacementOf,
     survivesInPlace,
@@ -147,7 +148,7 @@ function inlinable(reference: Reference, target: string): boolean {
         !staysAFile(target, cap) &&
         // invariant: the checker asks only what the fixer writes: a golden whose form the fixer leaves is left by both.
         !isFrozen(reference.after) &&
-        replacementOf(reference.before, readFileSync(target, 'utf8'), target, '') !== undefined
+        isWrittenInPlace(reference.before, target)
     );
 }
 
@@ -186,8 +187,10 @@ function singleUseFiles(rootDir: string): SingleUse[] {
         const shared = namedOutside.some((path) => path === target || isWithin(path, target));
         if (only !== undefined && !shared && inlinable(only, target)) {
             const copy = sourceCopiedBy(rootDir, target);
+            // Stryker disable next-line ConditionalExpression: a key holding undefined reads as no copy to every reader
+            const copied = copy === undefined ? {} : { copyOf: copy };
             single.push({
-                ...(copy === undefined ? {} : { copyOf: copy }),
+                ...copied,
                 reference: only,
                 references: named.length,
                 target,
@@ -268,14 +271,13 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
         )) {
             const line = text.slice(text.lastIndexOf('\n', reference.start) + 1);
             const indent = line.slice(0, line.length - line.trimStart().length);
-            const replacement = isFrozen(text.slice(reference.end, reference.end + AROUND))
-                ? undefined
-                : replacementOf(
-                      text.slice(0, reference.start),
-                      readFileSync(target, 'utf8'),
-                      target,
-                      indent,
-                  );
+            const replacement = replacementOf(
+                text.slice(0, reference.start),
+                readFileSync(target, 'utf8'),
+                target,
+                indent,
+            );
+            // Stryker disable next-line ConditionalExpression: `inlinable` asked `replacementOf` the same question of the same text before the use was listed, and a frozen call was left out there
             if (replacement === undefined) {
                 continue;
             }

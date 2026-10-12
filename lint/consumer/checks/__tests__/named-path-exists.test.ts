@@ -78,9 +78,11 @@ describe('named-path-exists', () => {
                 "const lookalike = resolve(import.meta.dirname, '../../distribution', 'index.js');",
                 '',
             ].join('\n'),
+            'dist/index.js': 'built\n',
             'specs/cli/run.spec.ts': [
                 "test('runs', async () => {",
                 "    await cli.fixture(file('../../dist/index.js'));",
+                "    await cli.fixture(directory('../../dist/index.js'));",
                 "    await cli.fixture(file('../../.artifacts/go/spwn'));",
                 "    await cli.fixture(file('../../.artifacts/spwn'));",
                 '});',
@@ -88,9 +90,13 @@ describe('named-path-exists', () => {
             ].join('\n'),
         });
 
-        // Then - the look-alike folder and an artefact with no tool folder are the only paths that name nothing
+        // Then - the look-alike folder, an artefact with no tool folder, and a built file named as a directory are the only paths found wrong
         expect(
             checkNamedPathExists(root).map(({ line, path }) => `${path}:${String(line)}`),
-        ).toStrictEqual(['specs/cli/cli.specification.ts:3', 'specs/cli/run.spec.ts:4']);
+        ).toStrictEqual([
+            'specs/cli/cli.specification.ts:3',
+            'specs/cli/run.spec.ts:3',
+            'specs/cli/run.spec.ts:5',
+        ]);
     });
 });

@@ -80,13 +80,31 @@ describe('ExecAdapter', () => {
         const merged = buildEnv({ NODE_OPTIONS: '--enable-source-maps' });
         const carrying = buildEnv({ NODE_OPTIONS: `--trace-warnings ${reporter}` });
         const silent = buildEnv({ ADDED: 'yes' });
+        const empty = buildEnv({ NODE_OPTIONS: '' });
 
-        // Then - the reporter joins the stated options, is not doubled, and an env that states none is the parent's
-        expect([merged.NODE_OPTIONS, carrying.NODE_OPTIONS, silent.NODE_OPTIONS]).toStrictEqual([
+        // Then - the reporter joins the stated options, is not doubled, an env that states none is the parent's, and an empty statement is the reporter alone
+        expect([
+            merged.NODE_OPTIONS,
+            carrying.NODE_OPTIONS,
+            silent.NODE_OPTIONS,
+            empty.NODE_OPTIONS,
+        ]).toStrictEqual([
             `--enable-source-maps ${reporter}`,
             `--trace-warnings ${reporter}`,
             `--max-old-space-size=512 ${reporter}`,
+            reporter,
         ]);
+    });
+
+    test('exec adapter — buildEnv — a NODE_OPTIONS a chain states is left as stated when the run carries no coverage reporter', () => {
+        // Given - a parent NODE_OPTIONS without the reporter
+        vi.stubEnv('NODE_OPTIONS', '--max-old-space-size=512');
+
+        // When - a chain states its own
+        const stated = buildEnv({ NODE_OPTIONS: '--enable-source-maps' });
+
+        // Then - the statement stands whole
+        expect(stated.NODE_OPTIONS).toBe('--enable-source-maps');
     });
 
     test('exec adapter — observeProcess — resolves 0 when the waitFor pattern appears, then terminates the child', async () => {

@@ -108,4 +108,26 @@ describe('rawFetch', () => {
             ),
         );
     });
+
+    test('fetch.action — preparing — refuses a chain that stated a page’s storage, whole', () => {
+        // Given - a chain seeding local storage
+        const seeded = readerOf({
+            slices: { storage: { local: { theme: 'dark' } } },
+            testDir: null,
+        });
+
+        // Then - the refusal whole
+        expect(() => {
+            void rawFetch.prepare?.(['/'], seeded);
+        }).toThrow(
+            new Error(
+                [
+                    'found: .storage() on a chain ending in .fetch(), which opens no page',
+                    'why: .storage() seeds or blocks the web storage of a page, and .fetch() is one raw HTTP exchange.',
+                    'fix: visit the page, or drop .storage()',
+                    'read: docs/guides/website-specs.md#storage',
+                ].join('\n'),
+            ),
+        );
+    });
 });
