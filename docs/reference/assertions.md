@@ -62,22 +62,22 @@ All file-based comparisons understand the [`{{token}}` grammar](tokens.md); all 
 
 Plain values take vitest's native matchers. No framework matcher exists (or is needed) for them.
 
-| Subject                                     | Type           | Example                                                                                                                                  |
-| ------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `result.status`                             | `number`       | `expect(result.status).toBe(201)`                                                                                                        |
-| `result.exitCode`                           | `number`       | `expect(result.exitCode).toBe(0)`                                                                                                        |
-| `result.filesystem.cwd`                     | `string`       | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                                                       |
-| `result.response.body`                      | parsed body    | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                                                  |
-| `result.json.value`                         | parsed JSON    | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                                            |
-| `result.stdout.grep(pattern)`               | `TextAccessor` | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                                              |
-| `result.file(path).exists`                  | `boolean`      | `expect(result.file('dist/index.js').exists).toBe(true)`                                                                                 |
-| `result.file(path).content`                 | `string`       | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                                                  |
-| `result.stdout.text`                        | `string`       | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                                               |
-| `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                                              |
-| `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                                            |
+| Subject                                     | Type                               | Example                                                                                                                                      |
+| ------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `result.status`                             | `number`                           | `expect(result.status).toBe(201)`                                                                                                            |
+| `result.exitCode`                           | `number`                           | `expect(result.exitCode).toBe(0)`                                                                                                            |
+| `result.filesystem.cwd`                     | `string`                           | `expect(result.filesystem.cwd).toContain('/tmp/')`                                                                                           |
+| `result.response.body`                      | parsed body                        | `expect(result.response.body).toEqual({ error: 'User 999 not found' })`                                                                      |
+| `result.json.value`                         | parsed JSON                        | `expect(result.json.value).toMatchObject({ name: 'shoply' })`                                                                                |
+| `result.stdout.grep(pattern)`               | `TextAccessor`                     | `expect(result.stdout.grep('broken.yaml').text).toContain('missing price')`                                                                  |
+| `result.file(path).exists`                  | `boolean`                          | `expect(result.file('dist/index.js').exists).toBe(true)`                                                                                     |
+| `result.file(path).content`                 | `string`                           | `expect(result.file('shoply.yaml').content).toContain('name: my-shop')`                                                                      |
+| `result.stdout.text`                        | `string`                           | `expect(result.stdout.text).toBe('')` — ANSI stripped, `transform` applied                                                                   |
+| `result.stdout.raw`                         | `string`                           | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                                                  |
+| `result.containerIds`                       | `string[]`                         | `expect(result.containerIds).toHaveLength(1)`                                                                                                |
 | `result.requests`                           | `{ body, headers, method, url }[]` | `expect(result.requests.map(({ body }) => body)).toStrictEqual([{ report: 'daily' }])` — what the binary sent its declared backend, in order |
-| `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                                                       |
-| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [Spec documents](../guides/spec-documents.md#the-three-doors-one-runner) |
+| `await result.filesystem.files()`           | `string[]`                         | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                                                           |
+| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`                        | the document asserts itself; the LAST run's result comes back — [Spec documents](../guides/spec-documents.md#the-three-doors-one-runner)     |
 
 ## `result.response` — HTTP response (api)
 
@@ -312,13 +312,13 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Matcher summary
 
-| Matcher                 | Valid subjects                                                                                                                                                                                        | Sync/async                                     | Reads                |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------- |
-| `toMatch(<value>)`      | `response` (its `.http` text), `stdout`, `stderr`, `error`, `tree`, `text(…)` (a text), `json`, `value` (a value), `table(…)` (rows)                                                                  | sync, except a table and inside a page (async) | the test itself      |
-| `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                           | sync, except inside a page (async)             | the path it is given |
-| `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                          | async                                          | the path it is given |
-| `toBeEmpty`             | `table(…)` — an empty stream is `expect(<stream>.text).toBe('')`                                                                                                                                      | async                                          | —                    |
-| `toBeRunning`           | `container(…)`                                                                                                                                                                                        | async                                          | —                    |
+| Matcher                 | Valid subjects                                                                                                                                                                                                    | Sync/async                                     | Reads                |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------- |
+| `toMatch(<value>)`      | `response` (its `.http` text), `stdout`, `stderr`, `error`, `tree`, `text(…)` (a text), `json`, `value` (a value), `table(…)` (rows)                                                                              | sync, except a table and inside a page (async) | the test itself      |
+| `toMatch(file(…))`      | `response`, `stdout`, `stderr`, `json`, `value`, `error`, `tree`, `text(…)`                                                                                                                                       | sync, except inside a page (async)             | the path it is given |
+| `toMatch(directory(…))` | `directory(…)`, `filesystem`                                                                                                                                                                                      | async                                          | the path it is given |
+| `toBeEmpty`             | `table(…)` — an empty stream is `expect(<stream>.text).toBe('')`                                                                                                                                                  | async                                          | —                    |
+| `toBeRunning`           | `container(…)`                                                                                                                                                                                                    | async                                          | —                    |
 | native vitest           | every scalar/read accessor (`status`, `exitCode`, `filesystem.cwd`, `.text`, `.raw`, `.value`, `.exists`, `.content`, `grep(…)`, `files()`, `containerIds`, `requests`) — and `toMatch` with a value, on a string | per vitest                                     | —                    |
 
 `.not` is supported on every framework matcher.

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { SPECIFICATIONS } from '../../../kit/project/specifications.js';
 import { recommendedRules } from '../../catalogue/manifest.js';
 import { importRulesForSpecifications } from '../import.js';
 import { TEST_COMMENT_OPENINGS, testPreset } from '../preset.js';
@@ -127,5 +128,14 @@ describe('preset', () => {
             ['appium', 'webdriverio', '@vitest/browser-playwright', 'playwright'],
             [],
         ]);
+    });
+
+    test('testPreset — the specification folders the checker holds a runner to are among those its standard files specs under', () => {
+        // Given - the folders the standard names
+        const named = testPreset().settings?.specifications;
+        const filed = new Set(Array.isArray(named) ? named.map(String) : []);
+
+        // Then - every specification the checker asks a runner of is one: the standard is the wider list and the owner of the names
+        expect([...SPECIFICATIONS].filter((name) => !filed.has(name))).toStrictEqual([]);
     });
 });
