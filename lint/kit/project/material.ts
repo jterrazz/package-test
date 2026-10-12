@@ -5,7 +5,8 @@ import { projectRootOf, projectSegments, roleOf } from './role.js';
 
 export const SOURCE = /\.[cm]?[jt]sx?$/u;
 
-const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures)\.[cm]?[jt]sx?$/u;
+// outside: a `*.render.tsx` is a jest-expo test, which jest collects by its name; beside its component it is test material, never production.
+const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures|render)\.[cm]?[jt]sx?$/u;
 
 const STUBS_FACADE = /\.stubs\.[cm]?[jt]sx?$/u;
 

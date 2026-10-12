@@ -35,6 +35,7 @@ describe('material', () => {
         { path: 'lint/rule.ts', production: true },
         { path: 'src/domain/order.test.ts', production: false },
         { path: 'src/domain/order.fixtures.ts', production: false },
+        { path: 'src/domain/order.render.tsx', production: false },
         { path: 'src/domain/__fixtures__/app.ts', production: false },
         { path: 'src/news/stubs/http/events.ts', production: false },
         { path: 'scripts/seed.ts', production: true },
@@ -55,6 +56,7 @@ describe('material', () => {
     test.each([
         { kind: 'a test file', path: 'src/a.spec.ts' },
         { kind: 'a test file', path: 'src/a.test-d.ts' },
+        { kind: 'a test file', path: 'src/screens/home.render.tsx' },
         { kind: 'a test file', path: 'specs/api/api.specification.ts' },
         { kind: 'the specs tree', path: 'specs/__setup__/seed.ts' },
         { kind: 'ground', path: 'src/__requests__/create.http' },
