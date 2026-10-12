@@ -111,7 +111,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/specifications/cli/documents/literate-judge.ts',
             'src/specifications/api/api.composition.ts',
             'src/specifications/cli/cli.composition.ts',
-            'src/specifications/cli/cli.handle.ts',
             'src/specifications/component/component.composition.ts',
             'src/specifications/component/component.handle.ts',
             'src/specifications/integration/integration.composition.ts',
