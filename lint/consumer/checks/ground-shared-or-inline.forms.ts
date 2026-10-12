@@ -94,7 +94,7 @@ export function replacementOf(
     if (!/\.toMatch\s*\(\s*$/u.test(before)) {
         return undefined;
     }
-    if (JSON_SUBJECT.test(before)) {
+    if (extension === '.json' && JSON_SUBJECT.test(before)) {
         const parsed = jsonOf(content);
         return parsed === undefined ? undefined : value(parsed, indent);
     }

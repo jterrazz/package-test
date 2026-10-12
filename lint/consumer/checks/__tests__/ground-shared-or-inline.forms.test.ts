@@ -41,6 +41,12 @@ describe('ground-shared-or-inline.forms', () => {
         expect(replacementOf('await other(', 'x', '/x/a.txt', '')).toBeUndefined();
     });
 
+    test('a golden whose text parses as JSON keeps its text form when its file is no .json, under a JSON accessor too', () => {
+        // Given - a .txt golden holding JSON text, matched by a JSON accessor
+        // Then - the text block, never the value it parses to
+        expect(replacementOf('expect(result.json).toMatch(', '[1]', '/x/a.txt', '')).toBe('`[1]`');
+    });
+
     test('a text survives in place unless it opens on a line break its lines share an indentation after', () => {
         // Given - one line, lines a template keeps, lines only the quoted form keeps, a text opening on a break flush left, and a cobra banner opening on a break, indented
         // Then - only the banner has no literal the comparison's dedent leaves equal
