@@ -1,4 +1,3 @@
-import type { MatchableRequest } from '../../stubs/exchange.js';
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import type { MatrixRow } from '../../chain/capability.js';
 import { refusal } from '../../chain/refusals/refusal.js';
@@ -14,6 +13,14 @@ import {
     inspectContainer,
     removeContainers,
 } from './docker-cli.js';
+
+/** A request a binary sent the declared backend: the parsed JSON body or the raw text (`null` when absent), the headers by lowercased name, the uppercased method, and the url as the backend saw it. */
+export type SentRequest = {
+    body: unknown;
+    headers: Record<string, string>;
+    method: string;
+    url: string;
+};
 
 /** Raw output of a command: exit code and captured streams. */
 export type CliOutput = {
@@ -77,7 +84,7 @@ export class CliResult extends BaseResult {
     private readonly cwd: string;
     private containersCache: Map<string, CapturedContainer> | null = null;
     private readonly dockerConfig?: DockerSpecConfig | undefined;
-    private readonly received: readonly MatchableRequest[];
+    private readonly received: readonly SentRequest[];
     private readonly containers: RunContainers;
     private readonly testRunId?: string | undefined;
     private readonly transform?: ((text: string) => string) | undefined;
@@ -87,7 +94,7 @@ export class CliResult extends BaseResult {
         config: ResultConfig;
         containers?: RunContainers | undefined;
         dockerConfig?: DockerSpecConfig | undefined;
-        requests?: readonly MatchableRequest[] | undefined;
+        requests?: readonly SentRequest[] | undefined;
         testDir: string;
         testRunId?: string | undefined;
         transform?: ((text: string) => string) | undefined;
@@ -137,7 +144,7 @@ export class CliResult extends BaseResult {
     }
 
     /** The requests the binary sent the declared backend during the run, in order, each `{ body, headers, method, url }` — the body parsed when JSON; empty without a backend. */
-    get requests(): MatchableRequest[] {
+    get requests(): SentRequest[] {
         return this.received.map((request) => ({ ...request, headers: { ...request.headers } }));
     }
 

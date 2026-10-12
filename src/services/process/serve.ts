@@ -6,6 +6,8 @@ import { resolve as resolvePath } from 'node:path';
 import { pause } from '../../chain/pause.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { findFreePort, firstAnswering } from './listening.js';
+import { lessonOf } from './port-in-use.js';
+import type { Lesson } from './port-in-use.js';
 import {
     groupEnded,
     KILL_GRACE_MS,
@@ -45,11 +47,6 @@ async function reapStrays(strays: Strays): Promise<void> {
     // Stryker disable next-line ConditionalExpression,EqualityOperator,ObjectLiteral,StringLiteral: a reaper handed no strays reaps nothing, and its output is read by no one
     await (strays.length > 0 ? reaped(spawn(process.execPath, args, { stdio: 'ignore' })) : null);
 }
-
-type Lesson = { fix: string; found: string; why: string };
-
-// outside: Node names a bound port EADDRINUSE, and the frameworks word it as "address already in use" or "port is already in use".
-const PORT_IN_USE = /EADDRINUSE|address already in use|port \d+ is already in use/iu;
 
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     // Stryker disable next-line StringLiteral: an empty stdio reads as the default, piped
@@ -212,26 +209,9 @@ export class ServedProcess {
         return this.options.timeout ?? DEFAULT_READY_TIMEOUT;
     }
 
-    // invariant: a server that could not bind says so in its output whatever else it printed, and the lesson names the `port` option, the one place a port is chosen.
-    private lessonOf(reason: Lesson): Lesson {
-        if (!PORT_IN_USE.test(this.output)) {
-            return reason;
-        }
-        const { port } = this.options;
-
-        return {
-            fix:
-                port === undefined
-                    ? 'have the command listen on the `PORT` it is handed, a free one, or stop the process holding the port it binds'
-                    : `stop the process holding port ${String(port)}, or drop the \`port\` option so a free one is picked`,
-            found: 'the server could not bind its port, which another process already holds',
-            why: 'A process is handed a free port unless `port` pins one, and a port another process holds is not free.',
-        };
-    }
-
     private async refuse(reason: Lesson): Promise<never> {
         await this.stop();
-        const lesson = this.lessonOf(reason);
+        const lesson = lessonOf(reason, this.output, this.options.port);
         throw new Error(
             refusal({
                 fix: lesson.fix,

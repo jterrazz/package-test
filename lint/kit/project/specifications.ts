@@ -1,9 +1,14 @@
 import { basename } from 'node:path';
 
-import STANDARD from '../../../src/standard/standard.js';
-
-// outside: the standard owns which folders of `specs/` hold specifications; the Names pass of @jterrazz/typescript reads the same list from the resolved `test` section.
-export const SPECIFICATIONS: ReadonlySet<string> = new Set(STANDARD.test?.specifications);
+export const SPECIFICATIONS: ReadonlySet<string> = new Set([
+    'api',
+    'cli',
+    'integration',
+    'job',
+    'lint',
+    'mobile',
+    'website',
+]);
 
 // invariant: the source, not a substring: `../website.specification` carries no extension.
 const IMPORT_SOURCE = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"](?<source>[^'"]+)['"]/gu;

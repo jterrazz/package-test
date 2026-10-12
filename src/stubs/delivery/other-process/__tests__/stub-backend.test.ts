@@ -36,7 +36,7 @@ describe('StubBackend', () => {
         ]);
         expect(received[0]?.headers['content-type']).toBe('application/json');
 
-        // When - the list is changed by its reader, and the next chain begins
+        // And - the list is changed by its reader, and the next chain begins
         received.length = 0;
         const kept = backend.requests().length;
         backend.beginChain([]);

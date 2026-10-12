@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { reachesRunner } from '../specifications.js';
+import STANDARD from '../../../../src/standard/standard.js';
+import { reachesRunner, SPECIFICATIONS } from '../specifications.js';
 
 describe('specifications', () => {
     test('reachesRunner — a test reaches its runner through the package, a specification module, or a constructor call', () => {
@@ -27,5 +28,13 @@ describe('specifications', () => {
 
         // Then - it reaches none
         expect(reachesRunner(text)).toBe(false);
+    });
+
+    test('SPECIFICATIONS — every specification the checker holds a runner to is a folder the standard files specs under', () => {
+        // Given - the standard's folders of specs/ that hold specifications
+        const filed = new Set(STANDARD.test?.specifications);
+
+        // Then - the ones the checker asks a runner of are among them: the standard is the wider list, the owner of the names
+        expect([...SPECIFICATIONS].filter((name) => !filed.has(name))).toStrictEqual([]);
     });
 });

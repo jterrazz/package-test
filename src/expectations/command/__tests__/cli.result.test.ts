@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { CliResult, createDockerReader } from '../cli.result.js';
-import type { RunContainers } from '../cli.result.js';
-import type { MatchableRequest } from '../../../stubs/exchange.js';
+import type { RunContainers, SentRequest } from '../cli.result.js';
 
 const DOCKER = { envVar: 'TEST_RUN_ID', nameLabel: 'test.name', testRunLabel: 'test.run' };
 
@@ -37,7 +36,7 @@ function resultOf(
     stdout: string,
     options: {
         containers?: RunContainers;
-        requests?: MatchableRequest[];
+        requests?: SentRequest[];
         testRunId?: string;
         transform?: (text: string) => string;
         withDocker?: boolean;
@@ -68,7 +67,7 @@ function refusalOf(work: () => unknown): string {
 describe('CliResult', () => {
     test('requests — lists what the binary sent its backend, as copies, and none when no backend was declared', () => {
         // Given - a result of a run that sent one request, and one of a run with no backend
-        const sent: MatchableRequest = {
+        const sent: SentRequest = {
             body: { report: 'daily' },
             headers: { 'content-type': 'application/json' },
             method: 'POST',
