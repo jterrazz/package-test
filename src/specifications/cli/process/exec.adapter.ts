@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
+import { onTestFinished } from 'vitest';
 
 import {
     KILL_GRACE_MS,
@@ -143,6 +144,10 @@ export class ExecAdapter implements CliPort {
             detached: SIGNALS_GROUPS,
             env,
             shell: true,
+        });
+        // invariant: the run's group ends with the test, 'close' or not: a grandchild holding no stdio, or a child a test timeout abandoned, outlives nothing.
+        onTestFinished(() => {
+            endGroup(child);
         });
         return await new Promise((resolve) => {
             const output = { stderr: '', stdout: '' };

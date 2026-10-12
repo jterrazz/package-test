@@ -1,8 +1,21 @@
 /* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
+import { waitUntil } from '../../../../expectations/conditions/wait-until.js';
 import { buildEnv, ExecAdapter, observeProcess } from '../exec.adapter.js';
 import type { ObservableProcess } from '../exec.adapter.js';
+
+function isAlive(pid: number): boolean {
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch {
+        return false;
+    }
+}
 
 class FakeChild implements ObservableProcess {
     exitListeners: ((code: null | number) => void)[] = [];
@@ -279,4 +292,25 @@ describe('ExecAdapter', () => {
         // Then - it reports 124, within a test timeout shorter than the two-second SIGKILL grace
         expect(result.exitCode).toBe(124);
     }, 1500);
+
+    test('exec adapter — ExecAdapter.exec — ends the group of a run with its test, so a grandchild holding no stdio is gone after it', async () => {
+        // Given - a check registered first, so it runs after the adapter's own hook: the grandchild is gone within the grace
+        const folder = mkdtempSync(join(tmpdir(), 'exec-adapter-'));
+        const pidFile = join(folder, 'pid');
+        onTestFinished(async () => {
+            const pid = Number(readFileSync(pidFile, 'utf8'));
+            await waitUntil(() => !isAlive(pid), { why: `the grandchild ${pid} is gone` });
+            rmSync(folder, { force: true, recursive: true });
+        });
+        const adapter = new ExecAdapter('sh');
+
+        // When - a command leaves a grandchild with no stdio behind, writes its pid to a file and exits
+        const result = await adapter.exec(
+            `-c "sleep 60 </dev/null >/dev/null 2>&1 & echo \\$! > '${pidFile}'"`,
+            process.cwd(),
+        );
+
+        // Then - the run ended cleanly; the hook above judges the grandchild
+        expect(result.exitCode).toBe(0);
+    });
 });
