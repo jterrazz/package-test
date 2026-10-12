@@ -103,18 +103,27 @@ A payload a module test feeds itself lives in a `<file>.fixtures.ts` beside it i
 `test.each` is the form for a rule with many cases, and `given-and-then-markers-present` judges the table ONCE — the Given/Then narration is written on the table, not repeated in every row.
 
 ```typescript
-test.each([
-    { expected: 'fresh', label: 'a fresher post of equal score', posts: equalScore },
-    { expected: 'high', label: 'a higher score of equal age', posts: equalAge },
-])(
-    // Given - $label
-    // Then - it leads the ranking
-    'ranks $label first',
-    ({ expected, posts }) => {
-        expect(rank(posts)[0]?.id).toBe(expected);
-    },
-);
+import { describe, expect, test } from 'vitest';
+
+import { equalAge, equalScore } from './ranking.fixtures.js';
+import { rank } from './ranking.js';
+
+describe('rank', () => {
+    test.each([
+        { expected: 'fresh', label: 'a fresher post of equal score', posts: equalScore },
+        { expected: 'high', label: 'a higher score of equal age', posts: equalAge },
+    ])(
+        // Given - $label
+        // Then - it leads the ranking
+        'ranks $label first',
+        ({ expected, posts }) => {
+            expect(rank(posts)[0]?.id).toBe(expected);
+        },
+    );
+});
 ```
+
+The whole file is that: one top-level `describe` titled by the subject, and inside the `test.each` the `// Given -` and `// Then -` markers written once, before the title string. The linter reads the markers there, and a table written without that shape fails `given-and-then-markers-present` and `one-describe-per-file` in turn.
 
 ## The result is the return value
 

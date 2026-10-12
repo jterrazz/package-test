@@ -53,6 +53,8 @@ afterEach(() => {
 
 It works, and it is a stopover: `using _ = clock.at(…)` inside the test puts the instant where the test that needs it is read.
 
+A timer a subject sets and must release is proven by `vi.getTimerCount()` after `clock.run()`: a count of zero says the `clearTimeout` ran, and kills the mutants of a `finally` or of the clear itself without a directive.
+
 ### `.clock()` on a chain
 
 A chain pins the same instant for its own action with `.clock(iso)`, released when the action resolves:
@@ -118,6 +120,10 @@ describe('checkout', () => {
 It is deep by default: reading a member nobody stubbed hands back another double, however far the port nests. `mockOf<Port>({ deep: false })` is the flat form — every member of the port and nothing beneath them.
 
 State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app — a class implementing the port, swapped in by the specification — is a test adapter, and lives in `__setup__/<port>.adapter.ts` ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)).
+
+### A rejection the subject must handle
+
+`vi.fn().mockRejectedValue(error)` cannot prove a rejection is handled: the rejected promise it hands back exists before the subject attaches a handler, and the test passes whether or not the subject ever does. The double is a function that throws when it is called, `async () => { throw error; }`, so the rejection is born inside the subject's own call. To let an `unhandledRejection` surface before the assertion, wait one `setImmediate` tick (`await new Promise((resolve) => setImmediate(resolve))`), never a `setTimeout`, which `no-sleep` refuses.
 
 ## Pitfalls
 

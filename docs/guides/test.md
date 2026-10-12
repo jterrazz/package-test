@@ -578,6 +578,10 @@ TEST_UPDATE=1 npx vitest --run --project unit   # or: npx vitest --run -u
 
 What update mode writes, what it preserves and the discipline it asks for are [Tokens § Update mode](../reference/tokens.md#update-mode-tokens-are-preserved)'s, whole.
 
+## A gate runs alone
+
+A gate's browser journeys, component specs and mutation run assume an otherwise idle machine: above a load of about 8, journeys time out and Stryker's dry run aborts on a test that passed a minute before. Run gates one at a time. There is no retry-once policy and no timeout that scales with the load: a retry hides a real flake, and the verdict must replay.
+
 ## Hunting a flake
 
 A test that fails once and passes on the rerun is chased, never retried: the preset sets `retry: 0`. The gesture is Vitest's `--repeats`, which runs every test of the files it is handed ten times in one process:

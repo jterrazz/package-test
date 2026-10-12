@@ -324,6 +324,10 @@ The framework supplies the ground; the chain states the sandbox, in three verbs:
 | `.env({ PATH: '$WORKDIR/bin:/usr/bin:/bin' })`      | puts those stubs FIRST — the binary finds the stub, never the tool installed on the host   |
 | `.env({ HOME: '$WORKDIR' })`                        | moves config dirs, caches and credential stores onto the temp cwd, off the operator's home |
 
+A sealed `HOME` hides what the product itself shells out to. Pinning `HOME` onto the temp cwd also removes the operator's docker CLI plugins and git configuration, so a product that runs `docker build` loses its buildx plugin and prints a legacy-builder notice a racing stream then carries. Seal the product's own home, the folder it writes its configuration to (`.env({ MYAPP_HOME: '$WORKDIR' })`), and leave the operator's `HOME` for the tools the product shells out to.
+
+A spec document cannot take a lock on a resource the suite shares — the one named container a TypeScript specification starts under a lock. A spec that needs a shared resource is code: a `*.spec.ts` that takes the lock the others take.
+
 `PATH` is not rewritten for you: `.fixture(directory(…))` lays the tree down, `.env()` decides what the child is allowed to find. Pin the tail of `PATH` too — inheriting the developer's own `PATH` re-opens the door the stub was there to close.
 
 ```typescript
