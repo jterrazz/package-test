@@ -121,6 +121,7 @@ export async function startCli<Services extends ServiceRecord>(
     const services = declaredServices(options.services);
     const databaseKeys = declaredDatabaseKeys(services);
 
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: the daemon is asked for only where a Docker option stands, which a run on a machine with one cannot tell from a run with none; specs/cli/docker proves it where one runs
     if (options.docker !== undefined) {
         requireDockerDaemon();
     }
@@ -129,6 +130,10 @@ export async function startCli<Services extends ServiceRecord>(
         started = await startServices(services, root, { type: 'none' });
     }
     const { backend, defaults } = await startedBackend(options.backend, options.defaults, started);
+    // Stryker disable next-line ConditionalExpression: a run id is read only beside a Docker option
+    const dockerTestRunIdOf = options.docker === undefined ? undefined : dockerTestRunId();
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: a services record with no entry reads as no services to everything that takes it
+    const declaredServicesOf = Object.keys(services).length > 0 ? services : undefined;
 
     const config: Started<CliConfig, 'command'> = {
         backend: backend ?? undefined,
@@ -137,12 +142,12 @@ export async function startCli<Services extends ServiceRecord>(
         databaseKeys,
         databases: started?.databases,
         dockerConfig: options.docker,
-        dockerTestRunId: options.docker === undefined ? undefined : dockerTestRunId(),
+        dockerTestRunId: dockerTestRunIdOf,
         defaultEnv: defaults,
         envSets: options.env,
         root,
         serveRegistry: options.serve,
-        services: Object.keys(services).length > 0 ? services : undefined,
+        services: declaredServicesOf,
         transform: options.transform,
     };
 
@@ -151,12 +156,14 @@ export async function startCli<Services extends ServiceRecord>(
             await backend?.stop();
             await started?.stopProcesses();
             await releaseIsolation(services);
+            // Stryker disable next-line ConditionalExpression: an orchestrator exists only beside services, which are containers
             if (started) {
                 await started.orchestrator.stop();
             }
         },
         cli: cliDefinition.open(config),
         docker: createDockerReader(callerDir),
+        // Stryker disable next-line LogicalOperator: an orchestrator exists only beside services, which are containers
         orchestrator: started?.orchestrator ?? null,
     };
 }

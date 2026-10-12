@@ -8,9 +8,10 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const PLAIN_STRING_MEMBERS = new Set(['content', 'raw', 'text']);
 
-// Stryker disable next-line ConditionalExpression,LogicalOperator: the value of a quasi is always an object holding its cooked text
-const hasCooked = (value: unknown): value is { cooked: unknown } =>
-    typeof value === 'object' && value !== null && 'cooked' in value;
+function hasCooked(value: unknown): value is { cooked: unknown } {
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: the value of a quasi is always an object holding its cooked text
+    return typeof value === 'object' && value !== null && 'cooked' in value;
+}
 
 function isEmptyText(node: AstNode | undefined): boolean {
     if (node?.type === 'Literal') {
@@ -65,11 +66,8 @@ export const noEmptySubstringMatch = defineRule(
                     // Stryker disable next-line ConditionalExpression: `memberPropertyName` reads an absent subject as no member
                     const member = subject === undefined ? undefined : memberPropertyName(subject);
                     // Stryker disable next-line ConditionalExpression: a member that is absent is in no set of members
-                    if (
-                        member !== undefined &&
-                        PLAIN_STRING_MEMBERS.has(member) &&
-                        isEmptyText(childList(node, 'arguments')[0])
-                    ) {
+                    const plain = member !== undefined && PLAIN_STRING_MEMBERS.has(member);
+                    if (plain && isEmptyText(childList(node, 'arguments')[0])) {
                         context.report({ messageId: 'emptySubstring', node });
                     }
                 },

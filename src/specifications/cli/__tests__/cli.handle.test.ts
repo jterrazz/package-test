@@ -23,9 +23,10 @@ describe('cli.handle', () => {
 
     test('startCli — a runner declaring no backend is cleaned up all the same', async () => {
         // Given - a runner with no backend
-        const { cleanup } = await startCli('echo');
+        const { cleanup, orchestrator } = await startCli('echo');
 
         // Then - the cleanup has nothing to stop and says so by ending
         await expect(cleanup()).resolves.toBeUndefined();
+        expect(orchestrator).toBeNull();
     });
 });

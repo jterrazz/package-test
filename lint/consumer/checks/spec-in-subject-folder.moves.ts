@@ -61,7 +61,7 @@ export function fixSpecInSubjectFolder(specsRoot: string): string[] {
         if (targets.every((target) => target === spec.file)) {
             continue;
         }
-        // Stryker disable next-line MethodExpression: a plan of one subject holds one target, which `some` and `every` read alike
+        // Stryker disable next-line MethodExpression,ConditionalExpression: a plan of one subject holds one target, which `some` and `every` read alike, and one that is not the spec's own file is the only one that is asked about
         const taken = targets.some((target) => target !== spec.file && existsSync(target));
         const refused = splitRefusal(specsRoot, spec, plan) !== undefined;
         if (taken || refused) {
