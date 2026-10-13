@@ -56,6 +56,9 @@ describe('material', () => {
     test.each([
         { kind: 'a test file', path: 'src/a.spec.ts' },
         { kind: 'a test file', path: 'src/a.test-d.ts' },
+        { kind: 'a test file', path: 'src/a.test.mts' },
+        { kind: 'a test file', path: 'src/a.fixtures.cjs' },
+        { kind: undefined, path: 'src/a.test.ts.bak' },
         { kind: 'a test file', path: 'src/screens/home.render.tsx' },
         { kind: 'a test file', path: 'specs/api/api.specification.ts' },
         { kind: 'the specs tree', path: 'specs/__setup__/seed.ts' },
