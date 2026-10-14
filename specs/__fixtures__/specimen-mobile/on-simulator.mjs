@@ -134,7 +134,9 @@ async function startAppium(bin) {
 // Each process is matched by its program's own name and the words its
 // command line holds, never by a pattern over every command line: a shell
 // whose command merely mentions WebDriverAgent and the UDID is left alone.
-function endWebDriverAgent(udid) {
+// A match that was already running before this run began belongs to someone
+// else, and stays.
+function webDriverAgents(udid) {
     const listed = (column) =>
         new Map(
             spawnSync('ps', ['-A', '-o', `pid=,${column}=`], { encoding: 'utf8' })
@@ -149,18 +151,26 @@ function endWebDriverAgent(udid) {
         { holds: ['WebDriverAgent', `id=${udid}`], program: 'xcodebuild' },
         { holds: [`/Devices/${udid}/`], program: 'WebDriverAgentRunner-Runner' },
     ];
-    for (const [pid, program] of listed('comm')) {
-        const stray = strays.some(
-            (one) =>
-                (program === one.program || program.endsWith(`/${one.program}`)) &&
-                one.holds.every((word) => (commands.get(pid) ?? '').includes(word)),
-        );
-        if (stray) {
-            try {
-                process.kill(pid, 'SIGTERM');
-            } catch {
-                // Already gone.
-            }
+    return [...listed('comm')]
+        .filter(([pid, program]) =>
+            strays.some(
+                (one) =>
+                    (program === one.program || program.endsWith(`/${one.program}`)) &&
+                    one.holds.every((word) => (commands.get(pid) ?? '').includes(word)),
+            ),
+        )
+        .map(([pid]) => pid);
+}
+
+function endWebDriverAgent(udid, before) {
+    for (const pid of webDriverAgents(udid)) {
+        if (before.has(pid)) {
+            continue;
+        }
+        try {
+            process.kill(pid, 'SIGTERM');
+        } catch {
+            // Already gone.
         }
     }
 }
@@ -170,6 +180,7 @@ const app = buildApp();
 const udid = bootSimulator();
 run('xcrun', ['simctl', 'install', udid, app]);
 console.log(`test-mobile: ${specimen.name} installed on ${simulator.name} (iOS ${simulator.os}, ${udid})`);
+const before = new Set(webDriverAgents(udid));
 const appium = await startAppium(installAppium());
 const suite = spawnSync(
     'npx',
@@ -180,5 +191,5 @@ appium.child.kill('SIGTERM');
 // Appium keeps WebDriverAgent's xcodebuild alive across sessions, and past
 // its own exit, and the runner app on the simulator with it: the run ends
 // both, as the specification ends the WebDriverAgent of a server it spawned.
-endWebDriverAgent(udid);
+endWebDriverAgent(udid, before);
 process.exitCode = suite.status ?? 1;
