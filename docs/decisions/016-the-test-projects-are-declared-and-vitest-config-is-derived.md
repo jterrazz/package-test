@@ -1,6 +1,6 @@
 # ADR-016: The test projects are declared, and vitest.config.ts is derived
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-03
 
 ## Context
