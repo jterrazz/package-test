@@ -10,7 +10,7 @@ a reader asks of any one of them: which files does this reach, what do I do
 about it, and what proves it is true.
 
 **Reach was a path segment.** Five rules gated on `parts.includes('specs')` or
-`includes('src')` — I2, I4, J2, d12w, d15w — and each of them drew the line in
+`includes('src')` (I2, I4, J2, d12w, d15w), and each of them drew the line in
 a slightly different place. The consequences were not theoretical: a sleep in a
 module test beside `src/` was invisible to J2, while the same sleep two folders
 away failed a build; a repository's consistency suite was an "orphan module
@@ -20,7 +20,7 @@ find out was to read the implementation.
 
 **A row could not say what to do.** A ban with no destination is an argument
 rather than a rule, and forty-odd messages ended on `see docs/reference/linting.md`
-with no fragment — a route to a chapter, not to a row. Nothing failed when a
+with no fragment: a route to a chapter, not to a row. Nothing failed when a
 heading moved, so the routes rotted silently.
 
 **Nothing said which pass a finding came from.** The manifest's `channel` field
@@ -41,9 +41,9 @@ and the role is read from the SUFFIX: `.specification.ts(x)`, `.spec.yaml`,
 `.spec.ts`, `.test.tsx`, `.test.ts`, `vitest.config.*`, a ground ancestor, a
 `contracts/` ancestor. A statique rule reads those three fields and, where it
 must know where the file sits, the ONE package-bounded anchor every pass shares
-(`specsAnchorOf` in `lint/kit/project/linted-file.ts`) — never a bare path segment. The rules
+(`specsAnchorOf` in `lint/kit/project/linted-file.ts`), never a bare path segment. The rules
 that need it say so: C1, C4, C8, C13, F2, F3, I1, I4. Walking a TREE is the
-checker's — C1's depth, C12, C18, C20, C21w.
+checker's: C1's depth, C12, C18, C20, C21w.
 
 ### A row says what it reaches, and what to do
 
@@ -52,8 +52,8 @@ fix is one imperative line the message carries too.
 
 ### Seven channels, each answering for its rows
 
-**Seven channels, one per row** — `statique`, `upstream`, `checker`, `runtime`,
-`type`, `meta`, `process` — and each channel answers for its rows the way that
+**Seven channels, one per row** (`statique`, `upstream`, `checker`, `runtime`,
+`type`, `meta`, `process`), and each channel answers for its rows the way that
 channel can: a rule file and a fixture pair, an assertion on the resolved
 option, a bundled pass, a `// RUNTIME <ID>` marker above the spec that drives
 the refusal, an `@ts-expect-error` in `src/type-channel.test-d.ts`, a named
@@ -72,11 +72,11 @@ routes to the chapter and the id says which row.
 **A row is born on a COUNT.** A rule is written when its defect class has been
 seen once and its criterion is decidable. A class nobody has seen is a backlog
 line with its criterion written, coded on its first occurrence. The R8 dry run
-— the whole catalogue run over every clone of the workbench, read-only — is
+(the whole catalogue run over every clone of the workbench, read-only) is
 what settles which of the two a row is, and it is re-run whenever a criterion
 changes. The counts below are the run of 2026-09-20, re-run after the fix pass
 that bounded six false classes: 27 clones plus the estate's own `apps`,
-`packages` and `specs`, with each package's own violation FIXTURES excluded —
+`packages` and `specs`, with each package's own violation FIXTURES excluded:
 they violate on purpose, and counting them would let a rule justify itself.
 `jterrazz-web-astro-react` and `signews-web-astro` are not repositories: they
 are clones of `jterrazz-web` and `signews-web` checked out on a merged
@@ -119,8 +119,8 @@ experiment branch, counted here as the folders the run walked.
 
 Four rows were at zero with no new surface to be the boundary of, and the gate
 moved them to the backlog with their criteria written: **B14** (a marker
-inside a declarator chain — renamed from the B12 this record first gave it,
-since B12 had already named route coverage), **C19** (backend ground under a screen facet — the
+inside a declarator chain, renamed from the B12 this record first gave it,
+since B12 had already named route coverage), **C19** (backend ground under a screen facet; the
 component facet that was its reason stopped being a folder when component tests
 became colocated), **D21w** (a volatile literal in a golden: 108 findings, every
 one a publication date the PRODUCT pins rather than a value a run minted; once
@@ -133,7 +133,7 @@ the `cli()` helper now defaults) and **C20** (folder = constructor, which the
 Two rows ship at zero for a reason the re-run wrote itself. **D16** is the
 error half of a class d16w counts 57 times: the one occurrence the first run
 found was a test that PINS its clock and then reads it, which is what the rule
-tells an author to do — so the exemption that made it disappear is the rule
+tells an author to do, so the exemption that made it disappear is the rule
 working. **J9** has no occurrence because the toolchain's suppression gate
 reads `oxlint-disable*` and nothing else: the checker's own directive has never
 been held by anything, and the 16 of them on the workbench were written under
@@ -141,10 +141,10 @@ no obligation to say why.
 
 Six false classes the re-run bounded, each of which had made a row look larger
 than it is: C18 read a spec importing `../x.specification` (no extension) as
-reaching no runner — 13 of its 44; C12 and C18 both claimed the same file, and
+reaching no runner (13 of its 44); C12 and C18 both claimed the same file, and
 `--fix` performed the wrong one; C21w counted a golden named through a template
 as no reader at all; W5w read a `db.select()` as a visitor's action and every
-component test as a screen scenario — 13 of its 26 were the estate's console;
+component test as a screen scenario (13 of its 26 were the estate's console);
 D18w called a precise negative (`not.toHaveBeenCalled()`) an existence check;
 D19w called three reads of one `value` a cluster.
 
@@ -152,31 +152,31 @@ The chapters are renumbered ONCE, in the same release, so a link repointed by
 this change is repointed for good. The map it lands on runs the fork's own
 order: the spine, then the kinds of test from the one with no runner to the one
 that drives a simulator, then the shared references every kind links into, then
-the enforcement. Two chapters are BORN by it — 05, the majority kind that had no
+the enforcement. Two chapters are BORN by it (05, the majority kind that had no
 page, and 13, the element vocabulary two facet chapters were each holding half
-of — and every kind chapter is rewritten on one seven-section skeleton.
+of), and every kind chapter is rewritten on one seven-section skeleton.
 
-| Old | New | Chapter                                   |
-| --- | --- | ----------------------------------------- |
-| 01  | 01  | Architecture                              |
-| 02  | 02  | Developing                                |
-| 03  | 03  | Testing                                   |
-| 04  | 04  | Operating                                 |
-| —   | 05  | Module tests (new)                        |
-| 17  | 06  | Integration specs                         |
-| 16  | 07  | Component specs                           |
-| 14  | 08  | Website specs                             |
-| 15  | 09  | Mobile specs                              |
-| 05  | 10  | API specs                                 |
-| 06  | 11  | Jobs specs                                |
-| 07  | 12  | CLI specs                                 |
-| —   | 13  | Elements (new)                            |
-| 08  | 14  | Assertions                                |
-| 09  | 15  | Tokens (+ update mode end to end)         |
-| 10  | 16  | Contracts (+ `intercept()`)               |
-| 11  | 17  | Services                                  |
-| 12  | 18  | Conventions                               |
-| 13  | 19  | Linting (carries the generated catalogue) |
+| Old  | New | Chapter                                   |
+| ---- | --- | ----------------------------------------- |
+| 01   | 01  | Architecture                              |
+| 02   | 02  | Developing                                |
+| 03   | 03  | Testing                                   |
+| 04   | 04  | Operating                                 |
+| none | 05  | Module tests (new)                        |
+| 17   | 06  | Integration specs                         |
+| 16   | 07  | Component specs                           |
+| 14   | 08  | Website specs                             |
+| 15   | 09  | Mobile specs                              |
+| 05   | 10  | API specs                                 |
+| 06   | 11  | Jobs specs                                |
+| 07   | 12  | CLI specs                                 |
+| none | 13  | Elements (new)                            |
+| 08   | 14  | Assertions                                |
+| 09   | 15  | Tokens (+ update mode end to end)         |
+| 10   | 16  | Contracts (+ `intercept()`)               |
+| 11   | 17  | Services                                  |
+| 12   | 18  | Conventions                               |
+| 13   | 19  | Linting (carries the generated catalogue) |
 
 A rule message anchored at `docs/13-linting.md#<name>` now reads
 `docs/reference/linting.md#<name>`; `links-resolve` holds that every one of them resolves, so a
@@ -186,7 +186,7 @@ renumbering that missed a message fails the suite rather than a reader.
 
 The release proof of this wave reads: the package's own tree green under
 `typescript check`, the `unit` project inside the budget
-[03 — Testing](../guides/test.md) states, the
+[03: Testing](../guides/test.md) states, the
 catalogue's own meta-tests holding freshness, completeness, reach and channel,
 and the R8 counts above re-derivable from the branch head. All of it holds.
 
@@ -194,7 +194,7 @@ and the R8 counts above re-derivable from the branch head. All of it holds.
 counted. The proof as written asked for zero directives added to this package's
 own tree: `src/` and `specs/` carry 66 `oxlint-disable` outside fixtures and
 goldens where `main` carried 51, so the wave adds 15. They are three shapes,
-and none of them is debt: a test whose SUBJECT is the primitive the rule bans —
+and none of them is debt: a test whose SUBJECT is the primitive the rule bans:
 the clock seam, `waitUntil`, the adapter deadlines, the marker rule's own
 one-line fixture; a negative spec whose violation IS the behaviour under test;
 and one skipped spec, the repro of a seam defect, which left once the seam
@@ -203,7 +203,7 @@ without exempting the class it guards, so the directive carries the reason
 instead.
 
 The second half is the RATCHET, and it is debt rather than exemption: the wave
-absorbs 107 findings of this package's own rules into `oxlint.baseline.json` —
+absorbs 107 findings of this package's own rules into `oxlint.baseline.json`:
 `e9w` 39, `j6w` 37, `d18w` 14, `d16w` 10, `w5w` 4, `d15w` 3, beside the single
 `i1` line `main` already carried. A ratchet key names a convention, never a
 pass, so those are 107 lines a reader can spend one convention at a time, and
@@ -219,12 +219,12 @@ reading.
   references**, were both deferred from the catalogue cut to the renumbering
   that follows it in the same release: the vocabulary had no page to move to
   until chapter 20 existed, and the references had no generated card to be
-  replaced by. Both landed with it — 13 owns the vocabulary, and
+  replaced by. Both landed with it: 13 owns the vocabulary, and
   `references/<kind>.md` is generated from the facet matrix.
 - **`response.body.cancel()`.** A seam defect, not a catalogue one, left out
   of the cut. It is fixed since: the node driver hands the body of every reply
   to `fetch` back as a stream the package owns, so the repro runs and M3
-  sanctions no suppression ([17 — Contracts](../reference/stubs.md)).
+  sanctions no suppression ([17: Contracts](../reference/stubs.md)).
 - **W4 stays a runtime row** rather than a type one, for the reason written in
   `src/type-channel.test-d.ts`.
 - **The three statuses.** ADR-006, 007 and 008 are `Proposed`; only the owner

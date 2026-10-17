@@ -11,7 +11,7 @@ Three questions came due together at the major.
 meant the package proved itself on two runners and a consumer could be on
 either. Vitest 5 is not a drop-in: `Assertion` gained a type parameter (an
 augmentation whose parameter list differs is refused outright), and Browser Mode
-pins its provider to the runner's EXACT patch — `@vitest/browser-playwright@X`
+pins its provider to the runner's EXACT patch: `@vitest/browser-playwright@X`
 peers `vitest: X`.
 
 **Which dependencies?** `better-sqlite3`, `pg`, `redis` and `testcontainers`
@@ -23,7 +23,7 @@ pointed at a database. Under pnpm a native seam only builds when it is named in
 **Where do artefacts go?** Vitest 5 writes to `.vitest/` at the repository root,
 Browser Mode leaks `.vitest-attachments/` there and `__screenshots__/` beside
 the tests. The estate's doctrine says an artefact is never on the row, and the
-toolchain's gate enforces it — which would have failed every consumer's first
+toolchain's gate enforces it, which would have failed every consumer's first
 run on 5.
 
 ## Decision
@@ -33,18 +33,18 @@ pins `vitest` and `@vitest/browser-playwright` to the same exact patch, and
 `component()` asserts that equality at startup, naming both versions. The adopt
 flow bumps the pair in one unit.
 
-**`engines.node: ">=24"`** — the toolchain's floor, not a third one.
+**`engines.node: ">=24"`**: the toolchain's floor, not a third one.
 
 **The four native seams become OPTIONAL peers**, each loaded on first use
 through `loadPeer()`, whose refusal names the specification, the peer, the install
-command of the package manager the project's own lockfile names, and — under
-pnpm — the `onlyBuiltDependencies` line. What stays a dependency is what every
+command of the package manager the project's own lockfile names, and (under
+pnpm) the `onlyBuiltDependencies` line. What stays a dependency is what every
 consumer uses and none should declare: `msw`, `vitest-mock-extended`, `yaml`.
 That list is what rule F8 reads.
 
 The saving is npm's and Bun's. pnpm resolves a peer it can satisfy whatever
-the consumer declares — with `auto-install-peers` (its default since 8) all
-four arrive anyway, and the native one builds — so under pnpm the change buys
+the consumer declares: with `auto-install-peers` (its default since 8) all
+four arrive anyway, and the native one builds, so under pnpm the change buys
 the DECLARATION, not the install: a member that uses `sqlite()` says so, and a
 member that does not is no longer described by its dependency tree as a
 database consumer.
@@ -63,7 +63,7 @@ The preset also takes the hygiene defaults a suite should not have to restate:
   package no longer pays for two runners, and the type augmentation can state
   vitest 5's signature character for character.
 - A consumer using `sqlite()`, `postgres()`, `redis()` or a container declares
-  that peer — three repositories on the workbench use `sqlite()` today. Every
+  that peer; three repositories on the workbench use `sqlite()` today. Every
   other consumer stops installing four native packages it never loads.
 - The failure mode for a missing peer is a startup message naming the install
   command, not a module-resolution error from inside an adapter.

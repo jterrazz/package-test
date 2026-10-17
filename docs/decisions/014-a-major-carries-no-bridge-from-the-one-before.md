@@ -19,7 +19,7 @@ against.
 
 Every piece of it was code whose only reader was the world 17 replaces.
 Each needed its own specs, it grew with every rename, and it kept the old
-spellings alive in the package that had just retired them — the ids a
+spellings alive in the package that had just retired them, the ids a
 closing audit would have to find again.
 
 ## Decision
@@ -46,4 +46,4 @@ no `^10` range, so the toolchain's major ships first.
 - Migrating a consumer costs a wave of hand or agent work per major, paid
   once, where a bridge would have been paid by every release after it.
 - A consumer that bumps without migrating goes red on the rules themselves,
-  in their four-part messages — the migration's instructions are the findings.
+  in their four-part messages: the migration's instructions are the findings.

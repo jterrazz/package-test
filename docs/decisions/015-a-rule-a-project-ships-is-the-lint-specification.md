@@ -27,7 +27,7 @@ to vitest by hand, and nothing held a case to state where it reports.
 
 ## Decision
 
-A rule is a subject a team tests, like a binary, so it is a specification — the
+A rule is a subject a team tests, like a binary, so it is a specification, the
 seventh constructor:
 
 - `specification.lint({ plugins, config, presets, checkers, root })` names the
@@ -48,7 +48,7 @@ seventh constructor:
 This package dogfoods it: `specs/lint/` is the specification's folder, one spec per
 rule over its fixture trees on five runners, and the wrappers, the
 standalone configs and the documents are gone. The checker's own command
-line — the ratchet, `baseline`, `--member` — is a binary, so its specs moved
+line (the ratchet, `baseline`, `--member`) is a binary, so its specs moved
 to `specs/cli/`.
 
 ## Consequences
@@ -62,4 +62,4 @@ to `specs/cli/`.
   file, the line limits, the depth law. The repository suite named `lint/`
   is gone; `surface/` is the one suite name the estate shares.
 - Rule unit tests state a position for every error, which the type and the
-  runtime both hold — 270 cases were given the line and column they fire on.
+  runtime both hold: 270 cases were given the line and column they fire on.

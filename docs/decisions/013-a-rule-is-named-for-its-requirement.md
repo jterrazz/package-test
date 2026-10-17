@@ -10,7 +10,7 @@ folded here when that page was deleted.
 ## Context
 
 Every rule, checker pass, self lock and review principle answered to a
-letter code — `c28-ground-shared-or-inline`, `d8w-raw-bypass`, `i11-engine-owner` —
+letter code (`c28-ground-shared-or-inline`, `d8w-raw-bypass`, `i11-engine-owner`):
 a family letter, a number in the order rules were written, and a `w` suffix
 for the warn tier. The code said nothing a reader could act on, the number
 said only when a rule arrived, and one code covered several checker passes
@@ -20,7 +20,7 @@ said only when a rule arrived, and one code covered several checker passes
 
 - Every rule answers to ONE name that states its requirement, the same
   everywhere it is addressed. The naming law is
-  [24 — Linting § The rule catalogue](../reference/linting.md#the-rule-catalogue)'s.
+  [24: Linting § The rule catalogue](../reference/linting.md#the-rule-catalogue)'s.
 - A family is a word, the folder of its rules and the section of the
   catalogue. The warn tier is gone with the suffix: every rule errors, and its
   debt is held by the ratchet.

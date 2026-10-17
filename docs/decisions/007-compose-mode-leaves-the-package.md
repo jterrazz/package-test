@@ -42,8 +42,8 @@ from the key at start, and the init script a database runs is read from
 - One shape of world: a specification starts the services its record declares
   and hands the subject to `server`. An agent that knows one specification knows them
   all, and the orchestrator has one path through startup instead of two.
-- A consumer config naming a removed rule id fails oxlint's unknown-rule check
-  — the same failure mode ADR-002 had for J1/J3/J4/J5, and the survey found no
+- A consumer config naming a removed rule id fails oxlint's unknown-rule check,
+  the same failure mode ADR-002 had for J1/J3/J4/J5, and the survey found no
   consumer config naming any of the five.
 - A future need to drive a deployed stack is not closed: `process()` is the one
   shape an external process takes in either slot, and `url` already targets a

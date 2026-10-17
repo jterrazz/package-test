@@ -10,7 +10,7 @@ states the decision taken within that delegation.
 
 The source trees hold each third-party library to exactly one slice, and a
 truly shared library (git, yaml, oxc-parser, process spawning) lives behind a
-port in `kernel/` or in the ONE slice that needs it ([01 — Architecture § The
+port in `kernel/` or in the ONE slice that needs it ([01: Architecture § The
 source trees](../concepts/architecture.md#the-source-trees)). `one-owner-per-library` (today the `library-*-has-one-owner` rules of `lint/self/checks/architecture.ts`, over `OWNERS_OF_LIBRARIES` in `lint/self/checks/libraries.ts`) holds the
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
@@ -42,7 +42,7 @@ forbids.
   and `expectations/` may import only the kernel, so the move would need an
   `expectations → world` edge the layer map forbids, or a port threaded
   through every `CliResult` a specification builds for one program with one
-  lifecycle — `execSync('docker …')` renamed.
+  lifecycle: `execSync('docker ...')` renamed.
 - Within `world/`, every process goes through `world/services/process/serve.ts`:
   sqlite's schema push now calls its `runToCompletion`, so `world/` has one
   spawning site.
@@ -53,9 +53,9 @@ forbids.
 ## Consequences
 
 - The layer map holds the builtin rule: `architecture/process-spawned-by-its-program-owner`
-  lets `node:child_process` into `src/` from the four spawning sites alone —
+  lets `node:child_process` into `src/` from the four spawning sites alone:
   `expectations/command/docker-cli.ts`, `specifications/cli/process/exec.adapter.ts`,
-  `specifications/mobile/server/simulator.ts` and `world/services/process/serve.ts` —
+  `specifications/mobile/server/simulator.ts` and `world/services/process/serve.ts`,
   so a second spawning site fails the Architecture pass. `lint/`'s own tools
   and probes are not the product's slices, and stay outside it.
 - A future port for spawning is not ruled out: when two slices spawn the SAME

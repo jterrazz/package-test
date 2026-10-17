@@ -6,8 +6,8 @@
 ## Context
 
 The fork the corpus drew had two rungs: a module alone, tested beside its code
-with no runner, and the assembled product behind an entry — HTTP, a binary, a
-served page, a screen — specified through `specification.*`. A whole kind of
+with no runner, and the assembled product behind an entry (HTTP, a binary, a
+served page, a screen), specified through `specification.*`. A whole kind of
 test fell between them, and every repository invented its own answer for it.
 
 A module that needs a real database is one. signews-api kept a
@@ -18,7 +18,7 @@ package-analytics did the same with a root tests folder and `vi.mock`.
 
 A module whose oracle is a GOLDEN is the other. package-attestation's byte
 contracts and package-intelligence's fifty-three input/output pairs are
-golden-file tests, and both reached for `toMatchSnapshot` — a second golden
+golden-file tests, and both reached for `toMatchSnapshot`: a second golden
 mechanism, with no token grammar, no `{ frozen }`, and no `TEST_UPDATE=1`,
 living beside the one the package owns. Rule D20 could ban the matcher only
 once the tests it serves had somewhere to go.
@@ -33,7 +33,7 @@ Three shapes were weighed and refused:
 - **Plain vitest under a folder named for it.** The shape every repository had
   already reached, and the shape the evidence indicts: the services are
   hand-started, nothing resets between tests, and the goldens are somebody's.
-- **`sqlite()` outside a runner.** A second lifecycle path for services — two
+- **`sqlite()` outside a runner.** A second lifecycle path for services, two
   answers to "when does this start and who stops it", which is the defect the
   orchestrator exists to prevent.
 
@@ -41,18 +41,18 @@ Three shapes were weighed and refused:
 
 `specification.integration({ services?, root? })` is the eighth kind of test
 and the sixth constructor. Its subject is a MODULE; its terminal action is
-`.call((services) => …)`, which hands the started record to the subject so it
+`.call((services) => ...)`, which hands the started record to the subject so it
 is built with real connection strings; its result is `CallResult`.
 
 `CallResult` has two readings and never both: `value` is what the call
-returned — a `TextAccessor` for a string, a `JsonAccessor` for anything else —
+returned (a `TextAccessor` for a string, a `JsonAccessor` for anything else),
 and `error` is what it threw, as text, empty when it returned. Both are the
 package's ordinary accessors, so `toMatch`, the `{{token}}` grammar,
 `{ frozen }` and `TEST_UPDATE=1` reach them with no new mechanism.
 
 The setups are the ones every specification already has: `.seed()`, `.intercept()`,
 `.clock()`. Without `services` the constructor starts nothing: that is the
-golden-only half, and it is the whole of what a fifty-three-row table needs —
+golden-only half, and it is the whole of what a fifty-three-row table needs:
 one `.call()` inside `test.each`.
 
 ## Consequences
@@ -65,8 +65,8 @@ one `.call()` inside `test.each`.
 - **One more folder name is spoken for, and no unowned one is added.**
   `specs/integration/` is a specification folder: singular, like `website/`, and
   holding a `*.specification.ts` at its root. The package renamed its own
-  plural folder in the same change. What lived there — probes of the container
-  adapters themselves — became integration specs under
+  plural folder in the same change. What lived there (probes of the container
+  adapters themselves) became integration specs under
   `specs/integration/<seam>/`: an adapter met against a real service IS a
   module against a real service. Folder = constructor holds for the package
   too, so no probe earns a folder under `specs/` that no constructor owns, and
