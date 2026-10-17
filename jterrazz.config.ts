@@ -58,6 +58,11 @@ export default defineConfig({
         },
     },
     typescript: {
+        knip: {
+            ignoreBinaries: {
+                go: 'the Go specimen of the cli specification is built by the Go toolchain, a machine requirement and never an npm dependency',
+            },
+        },
         mutation: {
             exclude: {
                 'src/chain/paths/__tests__/temp-root.global-setup.test.ts':
