@@ -1,7 +1,7 @@
 {
     "name": "@jterrazz/test",
     "version": "17.0.0",
-    "description": "Declarative testing framework for HTTP APIs, CLIs, background jobs, websites, mobile apps, rendered components and the rules a project ships — one entry point, real infrastructure and a real browser, golden-file assertions, plus an oxlint convention plugin.",
+    "description": "Declarative testing framework for HTTP APIs, CLIs, background jobs, websites, mobile apps, rendered components and the rules a project ships: one entry point, real infrastructure and a real browser, golden-file assertions, plus an oxlint convention plugin.",
     "keywords": [
         "api-testing",
         "browser-mode",
