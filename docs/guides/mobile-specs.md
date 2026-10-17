@@ -273,7 +273,7 @@ When a scenario throws — an element never appears, a `see()` times out — the
 
 Provisioning the simulator environment is not this package's job. The framework needs, in this order:
 
-1. **Xcode + an iOS simulator** — `xcrun simctl list devices` must show the device named in `device`.
+1. **Xcode, its first launch done, + an iOS simulator** — `xcodebuild -checkFirstLaunchStatus` must exit 0 (else `sudo xcodebuild -runFirstLaunch`; until then simctl never answers and the run is refused), and `xcrun simctl list devices` must show the device named in `device`.
 2. **The app installed on that simulator** — `.open()` launches by bundle id; it does not build or install. Install with your build tooling (`xcrun simctl install <udid> <path>.app`, Expo/EAS, xcodebuild).
 3. **appium + webdriverio + the XCUITest driver** in the caller project — both are optional peer dependencies:
 

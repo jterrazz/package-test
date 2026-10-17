@@ -22,6 +22,18 @@ async function run(
         });
     });
 }
+
+// hazard: until Xcode's first launch is done, every `xcrun simctl` starts `xcodebuild -runFirstLaunch`, which waits for an administrator and never answers.
+let firstLaunch: Promise<unknown> | undefined;
+
+async function simctl(
+    args: readonly string[],
+    options: { maxBuffer?: number; timeout?: number } = {},
+): Promise<{ stdout: string }> {
+    firstLaunch ??= run('xcodebuild', ['-checkFirstLaunchStatus']);
+    await firstLaunch;
+    return await run('xcrun', ['simctl', ...args], options);
+}
 // Stryker restore all
 
 const BOOT_TIMEOUT_MS = 120_000;
@@ -132,7 +144,7 @@ export async function resolveSimulatorUdid(criteria: {
     name: string;
     os?: string;
 }): Promise<string> {
-    const { stdout } = await run('xcrun', ['simctl', 'list', 'devices', '--json'], {
+    const { stdout } = await simctl(['list', 'devices', '--json'], {
         maxBuffer: 16 * 1024 * 1024,
     });
     return selectSimulator(stdout, criteria).udid;
@@ -142,7 +154,7 @@ export async function resolveSimulatorUdid(criteria: {
 export async function ensureBooted(udid: string): Promise<void> {
     try {
         // Stryker disable next-line ArrayDeclaration,StringLiteral: see run
-        await run('xcrun', ['simctl', 'boot', udid]);
+        await simctl(['boot', udid]);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         // outside: "Unable to boot device in current state: Booted" — already up.
@@ -150,7 +162,7 @@ export async function ensureBooted(udid: string): Promise<void> {
         if (!message.includes('current state: Booted')) {
             throw new Error(
                 refusal({
-                    fix: 'boot it by hand (`xcrun simctl boot <udid>`) and correct what simctl names',
+                    fix: "finish Xcode's first launch if it asks (`sudo xcodebuild -runFirstLaunch`), boot it by hand (`xcrun simctl boot <udid>`) and correct what simctl names",
                     found: `specification.mobile(): could not boot simulator ${udid}.\n${message}`,
                     read: 'docs/guides/mobile-specs.md#requirements--what-the-machine-must-have',
                     why: 'A mobile spec runs on a simulator the machine can boot.',
@@ -159,5 +171,5 @@ export async function ensureBooted(udid: string): Promise<void> {
             );
         }
     }
-    await run('xcrun', ['simctl', 'bootstatus', udid, '-b'], { timeout: BOOT_TIMEOUT_MS });
+    await simctl(['bootstatus', udid, '-b'], { timeout: BOOT_TIMEOUT_MS });
 }
