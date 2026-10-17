@@ -33,7 +33,7 @@ describe('postgres', () => {
         });
     });
 
-    test('postgres.adapter — postgres handle — a healthcheck before any connection string is the framework’s own broken invariant', async () => {
+    test("postgres.adapter — postgres handle — a healthcheck before any connection string is the framework's own broken invariant", async () => {
         // Given - a fresh handle nothing ever wired
         // Then - the refusal says which half is absent, and whose bug it is
         await expect(postgres().healthcheck()).rejects.toThrow(

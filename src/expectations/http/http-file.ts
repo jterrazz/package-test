@@ -51,7 +51,7 @@ export function parseHeaders(headerLines: string[], fileName: string): Record<st
                     fix: 'write the header as `Name: value`',
                     found: `${fileName}: the header line "${line}" has no colon`,
                     read: 'docs/guides/api-specs.md#http-request-files--full-format',
-                    why: 'An `.http` file’s header is a `Name: value` line.',
+                    why: "An `.http` file's header is a `Name: value` line.",
                 }),
             );
         }

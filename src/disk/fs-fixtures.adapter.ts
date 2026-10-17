@@ -17,7 +17,7 @@ function copyPlan(path: string, specDir: string, workDir: string): FixtureCopyPl
         throw new Error(
             refusal('disk-named-by-relative-path-at-runtime', {
                 fix: `create ${src}, or correct the path`,
-                found: `fixture: ${JSON.stringify(path)} names nothing — ${src} does not exist`,
+                found: `fixture: ${JSON.stringify(path)} names nothing: ${src} does not exist`,
             }),
         );
     }
@@ -29,7 +29,7 @@ function copyPlan(path: string, specDir: string, workDir: string): FixtureCopyPl
                 'disk-named-by-relative-path-at-runtime',
                 isDirectory
                     ? {
-                          fix: `end its path in /: directory('${path}/') — its contents are spread into the working directory`,
+                          fix: `end its path in /: directory('${path}/'), whose contents are spread into the working directory`,
                           found: `fixture: ${JSON.stringify(path)} names a directory`,
                       }
                     : {

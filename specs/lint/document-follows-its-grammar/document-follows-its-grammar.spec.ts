@@ -11,9 +11,9 @@ describe('document-follows-its-grammar', () => {
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             specs/widget/case.spec.yaml:2:1  jterrazz-check(document-follows-its-grammar)
-                found: fixture: reads __fixtures__/, and "./__expected__/shop/" names __expected__/ — put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)
-                why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`__fixtures__/\`.
-                fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
+                found: fixture: reads __fixtures__/, and "./__expected__/shop/" names __expected__/, so put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)
+                why: A \`<case>.spec.yaml\` document follows its grammar: closed keys (\`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\`) and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`__fixtures__/\`.
+                fix: rewrite the document to its grammar: the Spec documents page lists the keys, their order and what each run requires
                 read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });
@@ -25,9 +25,9 @@ describe('document-follows-its-grammar', () => {
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             specs/widget/case.spec.yaml:5:1  jterrazz-check(document-follows-its-grammar)
-                found: unknown key "cases:" in a spec document — known keys: description, fixture, env, serve, runs
-                why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`__fixtures__/\`.
-                fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
+                found: unknown key "cases:" in a spec document; known keys: description, fixture, env, serve, runs
+                why: A \`<case>.spec.yaml\` document follows its grammar: closed keys (\`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\`) and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`__fixtures__/\`.
+                fix: rewrite the document to its grammar: the Spec documents page lists the keys, their order and what each run requires
                 read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });
@@ -41,9 +41,9 @@ describe('document-follows-its-grammar', () => {
         // Then - the grammar the runner parses is the grammar the lint enforces
         expect(result.report).toMatch(`
             specs/widget/builds.spec.yaml:2:1  jterrazz-check(document-follows-its-grammar)
-                found: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs
-                why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`__fixtures__/\`.
-                fix: rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires
+                found: unknown key "when:" in a spec document; known keys: description, fixture, env, serve, runs
+                why: A \`<case>.spec.yaml\` document follows its grammar: closed keys (\`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\`) and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`__fixtures__/\`.
+                fix: rewrite the document to its grammar: the Spec documents page lists the keys, their order and what each run requires
                 read: docs/reference/linting.md#document-follows-its-grammar
         `);
     });

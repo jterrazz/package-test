@@ -21,8 +21,8 @@ function fixOf(specification: string, file: string): string {
         .find((name) => existsSync(join(dirname(file), name)));
 
     return module === undefined
-        ? `import \`{ ${specification} }\` from \`${specification}.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder`
-        : `a module of a specs tree has no module test: move \`${module}\` out of \`specs/\` into a code root — \`src/\`, or one \`typescript.roots\` declares, such as \`scripts/\` — with its test in that folder's \`__tests__/\`; or import \`{ ${specification} }\` and drive the product through it`;
+        ? `import \`{ ${specification} }\` from \`${specification}.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module's folder`
+        : `a module of a specs tree has no module test: move \`${module}\` out of \`specs/\` into a code root (\`src/\`, or one \`typescript.roots\` declares, such as \`scripts/\`) with its test in that folder's \`__tests__/\`; or import \`{ ${specification} }\` and drive the product through it`;
 }
 
 function isUnderGround(relativePath: string): boolean {

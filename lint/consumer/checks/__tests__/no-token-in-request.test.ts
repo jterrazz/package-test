@@ -13,7 +13,7 @@ describe('noTokenInRequestFindings', () => {
         // Then - the known token alone
         expect(found).toStrictEqual([
             {
-                fix: 'write the literal value the request sends — a request is sent, never matched',
+                fix: 'write the literal value the request sends: a request is sent, never matched',
                 found: 'the token {{uuid}} in a __requests__/ file',
                 line: 2,
                 path: '__requests__/create.http',

@@ -23,7 +23,7 @@ export const seedsAreSql = defineRule(
         messages: {
             notSql: {
                 found: '`__seeds__/{{entry}}` is not a `.sql` file',
-                fix: 'move it to `__fixtures__/` and lay it with `.fixture(file(…))`; `__seeds__/` holds database state only',
+                fix: 'move it to `__fixtures__/` and lay it with `.fixture(file(...))`; `__seeds__/` holds database state only',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

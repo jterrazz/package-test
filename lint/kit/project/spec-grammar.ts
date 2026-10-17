@@ -46,19 +46,19 @@ export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> =
             keys: ['description'],
             law: 'each',
             refusal: () =>
-                'missing "description:" — every document is one test, and this is its title',
+                'missing "description:": every document is one test, and this is its title',
         },
         {
             keys: ['runs'],
             law: 'each',
-            refusal: () => 'missing "runs:" — description and runs are mandatory',
+            refusal: () => 'missing "runs:": description and runs are mandatory',
         },
     ],
     files: [
         {
             keys: FILE_CONTENT_KEYS,
             law: 'some',
-            refusal: (path) => `files: ${path} asserts nothing — give it contains: or equals:`,
+            refusal: (path) => `files: ${path} asserts nothing: give it contains: or equals:`,
         },
     ],
     run: [
@@ -66,13 +66,13 @@ export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> =
             keys: ['command', 'exit'],
             law: 'each',
             refusal: (_subject, key) =>
-                `a run is missing "${key}:" — command and exit are mandatory`,
+                `a run is missing "${key}:": command and exit are mandatory`,
         },
         {
             keys: ['waitFor'],
             law: 'apart',
             refusal: () =>
-                'waitFor: and stdin: cannot share a run — the pattern is watched on a process nobody closed the input of',
+                'waitFor: and stdin: cannot share a run: the pattern is watched on a process nobody closed the input of',
             with: 'stdin',
         },
     ],

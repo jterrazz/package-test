@@ -89,10 +89,10 @@ describe('simulator', () => {
     test('selectSimulator — refuses a device no simulator matches with the full listing, and one several match with the matches', () => {
         // Given - a name that does not exist, one on an os it is not on, and one on two runtimes
         const listing = [
-            '  iPhone 16 Pro — iOS 18.2 (Shutdown) AAAA-18',
-            '  iPhone 16 Pro — iOS 26.5 (Booted) AAAA-26',
-            '  iPhone 17 — iOS 26.5 (Shutdown) BBBB-26',
-            '  Apple Vision Pro — com.apple.CoreSimulator.SimRuntime.xrOS (Shutdown) DDDD-XR',
+            '  iPhone 16 Pro: iOS 18.2 (Shutdown) AAAA-18',
+            '  iPhone 16 Pro: iOS 26.5 (Booted) AAAA-26',
+            '  iPhone 17: iOS 26.5 (Shutdown) BBBB-26',
+            '  Apple Vision Pro: com.apple.CoreSimulator.SimRuntime.xrOS (Shutdown) DDDD-XR',
         ];
         const missing = (wanted: string): string =>
             [

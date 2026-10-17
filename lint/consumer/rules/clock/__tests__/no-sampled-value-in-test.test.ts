@@ -65,7 +65,7 @@ ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
             filename: TEST_FILE,
         },
         {
-            name: 'Only a `using` of clock.at or clock.run with an instant pins, and a sample inside a non-structural expectation stays the test’s.',
+            name: "Only a `using` of clock.at or clock.run with an instant pins, and a sample inside a non-structural expectation stays the test's.",
             code: `test('stamps', () => {
                 const _ = clock.at('2026-03-04T09:30:00Z');
                 using a = clock.advance(5000);
@@ -96,7 +96,7 @@ ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
             filename: TEST_FILE,
         },
         {
-            name: 'A sample handed to expect itself, or nested in a structural expectation, is that rule’s.',
+            name: "A sample handed to expect itself, or nested in a structural expectation, is that rule's.",
             code: `test('stamps', () => {
                 expect(Date.now()).toBe(1);
                 expect(stamp()).toEqual({ at: Date.now() });

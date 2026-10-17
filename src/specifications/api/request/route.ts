@@ -39,7 +39,7 @@ function parameterOf(segment: string): string | undefined {
 
 function callWith(method: string, template: string, names: readonly string[]): string {
     const values =
-        names.length === 0 ? '{}' : `{ ${names.map((name) => `${name}: …`).join(', ')} }`;
+        names.length === 0 ? '{}' : `{ ${names.map((name) => `${name}: ...`).join(', ')} }`;
     return `.${method.toLowerCase()}(${JSON.stringify(template)}, { params: ${values} })`;
 }
 

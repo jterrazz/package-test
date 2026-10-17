@@ -33,7 +33,7 @@ export async function prepareDocker(
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(
             refusal({
-                fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
+                fix: 'start Docker (Docker Desktop, OrbStack, colima or another) and run again',
                 found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (${reason})`,
                 read: 'docs/reference/services.md#one-container-per-run',
                 why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',

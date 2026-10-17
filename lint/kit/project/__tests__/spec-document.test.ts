@@ -77,7 +77,7 @@ describe('spec-document', () => {
 
             // Then - refused by the grammar, where the path is written
             expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
-                /^case\.spec\.yaml:3: fixture: ".*" is not a relative path — name it from this document/u,
+                /^case\.spec\.yaml:3: fixture: ".*" is not a relative path: name it from this document/u,
             );
         },
     );
@@ -101,7 +101,7 @@ describe('spec-document', () => {
 
             // Then - the first ground folder is the one judged, as for every other path key
             expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
-                `case.spec.yaml:2: fixture: reads __fixtures__/, and "${path}" ${names} — put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)`,
+                `case.spec.yaml:2: fixture: reads __fixtures__/, and "${path}" ${names}, so put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)`,
             );
         },
     );
@@ -250,7 +250,7 @@ describe('spec-document', () => {
         expect(refusal.message).toContain('unknown key "kind:" in a spec document');
     });
 
-    test('spec document — refusals — malformed YAML is refused with the parser’s own line', () => {
+    test("spec document — refusals — malformed YAML is refused with the parser's own line", () => {
         // Given - a document that is not YAML at all
         const refusal = refusalOf('description: x\n  runs: [\n');
 

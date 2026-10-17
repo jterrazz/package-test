@@ -20,7 +20,7 @@ export function requireExtension(name: string, subject: string): void {
                 fix: `name the file with its extension: file('./__expected__/help.txt')`,
                 found: `toMatch(file("${name}")) on ${subject}, a golden path with no extension`,
                 read: 'docs/reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives',
-                why: 'The extension is part of a golden’s path.',
+                why: "The extension is part of a golden's path.",
             }),
         );
     }
@@ -58,7 +58,7 @@ export function emptyStreamRefusal(accessor: TextAccessor): TypeError {
     return new TypeError(
         refusal('one-verb-per-meaning', {
             fix: `compare its text: expect(<result>.${accessor.streamName}.text).toBe('')`,
-            found: `toBeEmpty() on the stream "${accessor.streamName}" — an empty stream is an empty text`,
+            found: `toBeEmpty() on the stream "${accessor.streamName}": an empty stream is an empty text`,
         }),
     );
 }
@@ -76,7 +76,7 @@ export function streamValueRoute(subject: unknown, value: unknown): ValueRoute {
         ? 'whole'
         : new TypeError(
               refusal('one-verb-per-meaning', {
-                  fix: `write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.${subject.streamName}.text).toMatch(…)`,
+                  fix: `write the whole text in place, toMatch('...'), or match a part with vitest on its text: expect(<result>.${subject.streamName}.text).toMatch(...)`,
                   found: `toMatch(a ${value instanceof RegExp ? 'RegExp' : typeof value}) on the stream "${subject.streamName}"`,
               }),
           );

@@ -142,7 +142,7 @@ ruleTester().run('one-describe-per-file', oneDescribePerFile, {
                 {
                     column: 22,
                     line: 1,
-                    message: /^found: the file’s `describe\.each` is titled "a computed title" · /u,
+                    message: /^found: the file's `describe\.each` is titled "a computed title" · /u,
                 },
             ],
             filename: SPEC,

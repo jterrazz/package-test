@@ -26,7 +26,7 @@ describe('setup', () => {
         ).toStrictEqual([['inPlaceRewrites', '/projects/app/.artifacts/vitest/in-place/<run>']]);
     });
 
-    test('the in-place setup — the run’s end writes the rewrites its tests left pending', () => {
+    test("the in-place setup — the run's end writes the rewrites its tests left pending", () => {
         // Given - a project whose run left one value pending for a test file
         const root = mkdtempSync(join(tmpdir(), 'in-place-setup-'));
         onTestFinished(() => {

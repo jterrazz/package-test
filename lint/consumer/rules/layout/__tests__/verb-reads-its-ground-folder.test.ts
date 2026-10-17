@@ -8,7 +8,7 @@ const MODULE_TEST = '/repo/src/report/report.test.ts';
 ruleTester().run('verb-reads-its-ground-folder', verbReadsItsGroundFolder, {
     invalid: [
         {
-            name: 'A binding resolves through the blocks that enclose the call, never a sibling test’s; the message names a path with no ground folder.',
+            name: "A binding resolves through the blocks that enclose the call, never a sibling test's; the message names a path with no ground folder.",
             code: "const rows = file('./rows.sql');\ntest('a', () => { const rows = file('./__seeds__/rows.sql'); api.seed(rows); });\ntest('b', () => { api.seed(rows); });",
             errors: [
                 {

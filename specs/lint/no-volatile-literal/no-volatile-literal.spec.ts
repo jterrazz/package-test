@@ -14,7 +14,7 @@ describe('no-volatile-literal', () => {
         expect(result.report).toMatch(`
             specs/widget/serves.spec.yaml:6:1  jterrazz-check(no-volatile-literal)
                 found: "127.0.0.1:52341", a value the next run will not reproduce
-                why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`).
+                why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/...\`, \`/home/...\`).
                 fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands
                 read: docs/reference/linting.md#no-volatile-literal
         `);
@@ -30,12 +30,12 @@ describe('no-volatile-literal', () => {
         expect(result.report).toMatch(`
             specs/cli/report/__expected__/summary.txt:1:1  jterrazz-check(no-volatile-literal)
                 found: "/tmp/", a value the next run will not reproduce
-                why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`).
+                why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/...\`, \`/home/...\`).
                 fix: write {{string}} where "/tmp/" stands
                 read: docs/reference/linting.md#no-volatile-literal
             specs/cli/report/__expected__/summary.txt:2:1  jterrazz-check(no-volatile-literal)
                 found: "127.0.0.1:52341", a value the next run will not reproduce
-                why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`).
+                why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/...\`, \`/home/...\`).
                 fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands
                 read: docs/reference/linting.md#no-volatile-literal
         `);

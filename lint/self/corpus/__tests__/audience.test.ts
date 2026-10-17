@@ -194,7 +194,7 @@ describe('audience', () => {
         expect(selfOnPublished).toStrictEqual([]);
     });
 
-    test('a meta row is a self row: it holds this package’s own suite, which no consumer runs', () => {
+    test("a meta row is a self row: it holds this package's own suite, which no consumer runs", () => {
         // Given - every row of the meta-test channel
         const consumerMeta = allRows
             .filter((row) => row.channel === 'meta' && row.audience !== 'self')

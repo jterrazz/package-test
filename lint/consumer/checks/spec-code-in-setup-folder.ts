@@ -59,7 +59,7 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Spotted[] {
             found.push({
                 path: shown,
                 line: 1,
-                fix: `name the module for what it holds and move it into the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — \`specs/${home}/<meaning>.ts\` — and the paths that import it`,
+                fix: `name the module for what it holds and move it into the \`${SETUP_FOLDER}/\` of the lowest folder its readers share, \`specs/${home}/<meaning>.ts\`, and the paths that import it`,
                 found: `\`${name}\` under specs/: a fixture is input data, a file in \`__fixtures__/\`, never a module`,
                 rule: 'spec-code-in-setup-folder',
             });
@@ -78,7 +78,7 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Spotted[] {
         found.push({
             path: shown,
             line: 1,
-            fix: `move it to \`specs/${setupTargetOf(specsRoot, file, read)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it`,
+            fix: `move it to \`specs/${setupTargetOf(specsRoot, file, read)}\`, the \`${SETUP_FOLDER}/\` of the lowest folder its readers share, and the paths that import it`,
             found: `\`${name}\`, code that prepares specs outside every \`${SETUP_FOLDER}/\``,
             rule: 'spec-code-in-setup-folder',
         });

@@ -28,13 +28,13 @@ describe('checkDocumentDescriptionReadsAsATitle', () => {
         [
             'a'.repeat(101),
             [
-                `${RULE} a \`description:\` of 101 characters — shorten it under 100 characters — a title, not a paragraph`,
+                `${RULE} a \`description:\` of 101 characters — shorten it under 100 characters: a title, not a paragraph`,
             ],
         ],
         [
             'lists the orders.',
             [
-                `${RULE} a \`description:\` ending with a period — drop the period — a title is a fragment, not a sentence`,
+                `${RULE} a \`description:\` ending with a period — drop the period: a title is a fragment, not a sentence`,
             ],
         ],
         [

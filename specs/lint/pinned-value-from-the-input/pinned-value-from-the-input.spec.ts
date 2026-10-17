@@ -14,7 +14,7 @@ describe('pinned-value-from-the-input', () => {
         expect(result.report).toMatch(`
             specs/widget/stamps.spec.yaml:6:1  jterrazz-check(pinned-value-from-the-input)
                 found: "2026-07-17T10:00:00.000Z", which no \`fixture:\` or \`stdin:\` of this document pins
-                why: A literal ISO-8601 timestamp or uuid in an expected stream of a \`<case>.spec.yaml\` → error, unless the same value appears in a \`fixture:\`, the document's sibling \`__fixtures__/\`, a \`stdin:\`, a command argument or an \`env:\`/\`serve:\` value of the same document (it is then pinned, not volatile).
+                why: A literal ISO-8601 timestamp or uuid in an expected stream of a \`<case>.spec.yaml\` is an error, unless the same value appears in a \`fixture:\`, the document's sibling \`__fixtures__/\`, a \`stdin:\`, a command argument or an \`env:\`/\`serve:\` value of the same document (it is then pinned, not volatile).
                 fix: write {{string}} where "2026-07-17T10:00:00.000Z" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document
                 read: docs/reference/linting.md#pinned-value-from-the-input
         `);

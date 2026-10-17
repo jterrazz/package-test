@@ -41,7 +41,7 @@ describe('scenarioFailure', () => {
         );
     });
 
-    test('scenarioFailure — a bare value thrown — is wrapped in the visit scenario’s lesson with its evidence, and kept as the cause', () => {
+    test("scenarioFailure — a bare value thrown — is wrapped in the visit scenario's lesson with its evidence, and kept as the cause", () => {
         // Given - a step that threw a bare string, and a screenshot taken
         const failure = scenarioFailure('boom', '/tmp/evidence/page.png', 'visit');
 

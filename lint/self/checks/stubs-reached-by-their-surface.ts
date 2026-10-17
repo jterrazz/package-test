@@ -68,7 +68,7 @@ function reachesBelowTheSurface(
                 'stubs-reached-by-their-surface',
                 from,
                 {
-                    fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\` — or, for a specification wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
+                    fix: `import what the stubs publish (\`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\`) or, for a specification wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
                     found: `\`${target}\` is reached from outside the stubs, below their surface`,
                 },
                 reference,

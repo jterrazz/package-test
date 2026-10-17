@@ -62,7 +62,7 @@ describe('specimenOf', () => {
         );
     });
 
-    test('specimen — the project’s own app, and the shared fixtures named only in a comment, are no specimen', () => {
+    test("specimen — the project's own app, and the shared fixtures named only in a comment, are no specimen", () => {
         // Given - a runner starting the project's app, a comment naming a fixture
         const root = specsTree({
             'api/api.specification.ts':
@@ -92,7 +92,7 @@ describe('specimenOf', () => {
             'under an app handed in, not started',
             "const BROKEN = resolve(import.meta.dirname, '../__fixtures__/broken-init');\nspecification.api({ root: BROKEN, server: () => app });",
         ],
-    ])('specimen — the root a runner reads its services’ ground from is no app, %s', (_, door) => {
+    ])("specimen — the root a runner reads its services' ground from is no app, %s", (_, door) => {
         // Given - a runner whose root holds only its services' ground
         const root = specsTree({ 'integration/integration.specification.ts': door });
         const spec = "import { integration } from '../integration.specification.js';\n";

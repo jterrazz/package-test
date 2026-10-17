@@ -141,7 +141,7 @@ describe('buildStubHandlers', () => {
         ]);
     });
 
-    test('strictness — a request no stub takes is answered 501 and recorded once, a method msw has no handler for included, and the runner’s own traffic passes through', async () => {
+    test("strictness — a request no stub takes is answered 501 and recorded once, a method msw has no handler for included, and the runner's own traffic passes through", async () => {
         // Given - one stub, one on a method with no handler, and the runner's own server beside them
         const own = createServer((_request, response) => {
             response.end('own');

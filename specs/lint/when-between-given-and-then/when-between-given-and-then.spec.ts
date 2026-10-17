@@ -21,12 +21,12 @@ describe('when-between-given-and-then', () => {
             __tests__/scenario.test.ts:6:1  jterrazz(when-between-given-and-then)
                 found: \`// When -\` written before \`// Given -\`
                 why: A \`// When -\` marker is optional; written, it sits after \`// Given -\` and before \`// Then -\`.
-                fix: move it above the action it narrates, between Given and Then — or delete it when the chain is the action
+                fix: move it above the action it narrates, between Given and Then, or delete it when the chain is the action
                 read: docs/reference/linting.md#when-between-given-and-then
             __tests__/scenario.test.ts:14:1  jterrazz(when-between-given-and-then)
                 found: \`// When -\` written after \`// Then -\`
                 why: A \`// When -\` marker is optional; written, it sits after \`// Given -\` and before \`// Then -\`.
-                fix: move it above the action it narrates, between Given and Then — or delete it when the chain is the action
+                fix: move it above the action it narrates, between Given and Then, or delete it when the chain is the action
                 read: docs/reference/linting.md#when-between-given-and-then
         `);
     });

@@ -31,8 +31,8 @@ export const noRawBypass = defineRule(
         docs: row,
         messages: {
             rawBypass: {
-                found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
-                fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',
+                found: '`expect(x.raw).{{matcher}}(...)` asserts on the stream as captured',
+                fix: 'compare `x.text`, ANSI stripped and `transform` applied: the text an expectation compares',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

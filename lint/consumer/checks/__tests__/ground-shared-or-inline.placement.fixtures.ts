@@ -5,7 +5,7 @@ export const API_READS = {
 };
 
 export const APP_KEPT_FOR_API = [
-    "specs/__fixtures__/app: ground only specs/api reaches for, kept above it — move it to specs/api/__fixtures__/app and name it directory('./__fixtures__/app/') — `typescript fix` does both",
+    "specs/__fixtures__/app: ground only specs/api reaches for, kept above it — move it to specs/api/__fixtures__/app and name it directory('./__fixtures__/app/'); `typescript fix` does both",
 ];
 
 /** A tree whose pool entry is shared, outside the placement's reach, or not read at all. */

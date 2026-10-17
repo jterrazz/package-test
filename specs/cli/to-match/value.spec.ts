@@ -21,7 +21,7 @@ describe('value', () => {
             [
                 `found: toMatch(file("${GOLDEN}")) on a subject that holds no file of its kind`,
                 WHY,
-                'fix: compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(…))`',
+                'fix: compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(...))`',
                 READ,
             ].join('\n'),
         );
@@ -38,7 +38,7 @@ describe('value', () => {
             [
                 `found: toMatch(file("${GOLDEN}")) on a string, a value with no golden`,
                 WHY,
-                "fix: wrap the string to golden it — `expect(text(value)).toMatch(file(…))` — or compare it to a value, `toMatch('…')`",
+                "fix: wrap the string to golden it, `expect(text(value)).toMatch(file(...))`, or compare it to a value, `toMatch('...')`",
                 READ,
             ].join('\n'),
         );

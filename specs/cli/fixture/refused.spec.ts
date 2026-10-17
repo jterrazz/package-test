@@ -41,7 +41,7 @@ describe('refused', () => {
         // @ts-expect-error -- a path the types refuse, refused at run time too
         expect(() => cli.fixture(file('./__fixtures__/chain-ground/'))).toThrow(
             [
-                'found: file("./__fixtures__/chain-ground/"), a path ending in / — a directory\'s',
+                'found: file("./__fixtures__/chain-ground/"), a path ending in /, which is a directory\'s',
                 WHY,
                 'fix: name the directory with directory("./__fixtures__/chain-ground/"), or the file without its /: file("./__fixtures__/chain-ground")',
                 READ,
@@ -57,7 +57,7 @@ describe('refused', () => {
             [
                 'found: fixture("./__fixtures__/chain-ground/"), a value where the disk is read',
                 WHY,
-                "fix: name the disk: fixture(file('./…')) for a file, fixture(directory('./…/')) for a directory",
+                "fix: name the disk: fixture(file('./<path>')) for a file, fixture(directory('./<path>/')) for a directory",
                 READ,
             ].join('\n'),
         );
@@ -71,7 +71,7 @@ describe('refused', () => {
             [
                 'found: fixture: "./__fixtures__/chain-ground" names a directory',
                 WHY,
-                "fix: end its path in /: directory('./__fixtures__/chain-ground/') — its contents are spread into the working directory",
+                "fix: end its path in /: directory('./__fixtures__/chain-ground/'), whose contents are spread into the working directory",
                 READ,
             ].join('\n'),
         );
@@ -95,7 +95,7 @@ describe('refused', () => {
         // checker-disable-next-line named-path-exists -- the absence is the refusal under test
         await expect(cli.fixture(file('./__fixtures__/absent.txt')).exec('help')).rejects.toThrow(
             [
-                `found: fixture: "./__fixtures__/absent.txt" names nothing — ${resolved} does not exist`,
+                `found: fixture: "./__fixtures__/absent.txt" names nothing: ${resolved} does not exist`,
                 WHY,
                 `fix: create ${resolved}, or correct the path`,
                 READ,

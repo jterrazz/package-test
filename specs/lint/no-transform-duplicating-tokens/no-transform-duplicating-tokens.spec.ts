@@ -12,7 +12,7 @@ describe('no-transform-duplicating-tokens', () => {
         expect(result.report).toMatch(`
             specs/cli/tf.specification.ts:6:5  jterrazz(no-transform-duplicating-tokens)
                 found: a \`transform\` that only rewrites output into token literals
-                why: A \`transform\` that only rewrites into equivalents of the standard tokens duplicates the grammar → error.
+                why: A \`transform\` that only rewrites into equivalents of the standard tokens duplicates the grammar, and is an error.
                 fix: delete the transform and write the tokens in the expectation; \`transform\` is for noise no token covers
                 read: docs/reference/linting.md#no-transform-duplicating-tokens
         `);

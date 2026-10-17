@@ -466,7 +466,7 @@ The moment a chain declares one stub, the network is guarded: every outgoing req
 found: an unmatched outgoing request, POST https://api.openai.com/v1/chat/completions; declared:
   - POST https://api.openai.com/v1/chat/completions (exhausted after 1)
 why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.
-fix: declare a stub for POST https://api.openai.com/v1/chat/completions — or raise the `times` of the one it exhausted
+fix: declare a stub for POST https://api.openai.com/v1/chat/completions, or raise the `times` of the one it exhausted
 read: docs/reference/linting.md#network-strict-after-first-stub
 ```
 

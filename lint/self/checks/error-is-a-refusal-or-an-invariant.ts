@@ -101,7 +101,7 @@ function constructions(program: AstNode, classes: ReadonlySet<string>): Judged[]
             at: node,
             teaching: {
                 fix: `a user can cause it: \`new ${name}(refusal({ found, why, fix, read }))\`, its read the heading that explains it; only the framework can: \`invariant('<what broke>')\``,
-                found: `\`${written}(…)\` carries a message written by hand`,
+                found: `\`${written}(...)\` carries a message written by hand`,
             },
         });
     });

@@ -14,7 +14,7 @@ describe('no-unused-ground', () => {
         expect(result.report).toMatch(`
             specs/widget/__seeds__/dead.sql:1:1  jterrazz-check(no-unused-ground)
                 found: __seeds__/dead.sql, which no test of widget names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete __seeds__/dead.sql, or name it from the test that stands on it
                 read: docs/reference/linting.md#no-unused-ground
         `);
@@ -40,7 +40,7 @@ describe('no-unused-ground', () => {
         expect(result.report).toMatch(`
             specs/widget:1:1  jterrazz-check(no-unused-ground)
                 found: a domain folder holding __expected__ and no test or document
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: write the test that stands on __expected__, or delete the folder
                 read: docs/reference/linting.md#no-unused-ground
         `);
@@ -56,7 +56,7 @@ describe('no-unused-ground', () => {
         expect(result.report).toMatch(`
             specs/widget/__seeds__/orphaned.sql:1:1  jterrazz-check(no-unused-ground)
                 found: __seeds__/orphaned.sql, which no test of widget names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete __seeds__/orphaned.sql, or name it from the test that stands on it
                 read: docs/reference/linting.md#no-unused-ground
         `);
@@ -72,13 +72,13 @@ describe('no-unused-ground', () => {
         expect(result.report).toMatch(`
             specs/__fixtures__/orphan.sql:1:1  jterrazz-check(no-unused-ground)
                 found: the pool entry orphan.sql, which no spec under specs names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete orphan.sql, or name it from the specs that share it
                 read: docs/reference/linting.md#no-unused-ground
             specs/__fixtures__/used-app:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only widget reaches for, kept above it
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to widget/__fixtures__/used-app and name it directory('./__fixtures__/used-app/') — \`typescript fix\` does both
+                fix: move it to widget/__fixtures__/used-app and name it directory('./__fixtures__/used-app/'); \`typescript fix\` does both
                 read: docs/reference/linting.md#ground-shared-or-inline
         `);
     });
@@ -93,13 +93,13 @@ describe('no-unused-ground', () => {
         expect(result.report).toMatch(`
             specs/__seeds__/orphan.sql:1:1  jterrazz-check(no-unused-ground)
                 found: the pool entry orphan.sql, which no spec under specs names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete orphan.sql, or name it from the specs that share it
                 read: docs/reference/linting.md#no-unused-ground
             specs/__seeds__/two-users.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/__seeds__/two-users.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
+                fix: move it to api/__seeds__/two-users.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it; \`typescript fix\` does both
                 read: docs/reference/linting.md#ground-shared-or-inline
         `);
     });
@@ -115,16 +115,16 @@ describe('no-unused-ground', () => {
             specs/__seeds__/one-user.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/__seeds__/one-user.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
+                fix: move it to api/__seeds__/one-user.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it; \`typescript fix\` does both
                 read: docs/reference/linting.md#ground-shared-or-inline
             specs/__seeds__/two-users.sql:1:1  jterrazz-check(no-unused-ground)
                 found: the pool entry two-users.sql, which no spec under specs names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete two-users.sql, or name it from the specs that share it
                 read: docs/reference/linting.md#no-unused-ground
             specs/api/orders/__seeds__/one-user.sql:1:1  jterrazz-check(no-unused-ground)
                 found: __seeds__/one-user.sql, which no test of orders names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete __seeds__/one-user.sql, or name it from the test that stands on it
                 read: docs/reference/linting.md#no-unused-ground
         `);

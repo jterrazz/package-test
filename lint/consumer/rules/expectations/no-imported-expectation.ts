@@ -59,7 +59,7 @@ export const noImportedExpectation = defineRule(
         messages: {
             imported: {
                 found: 'the expectation `{{name}}`, imported from "{{source}}"',
-                fix: 'write the expected value in this test — in place, or `file(…)` when several tests of this leaf share it — and stop importing `{{name}}`',
+                fix: 'write the expected value in this test (in place, or `file(...)` when several tests of this leaf share it) and stop importing `{{name}}`',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

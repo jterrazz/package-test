@@ -20,7 +20,7 @@ describe('no-expect-outside-a-test', () => {
         expect(result.report).toMatch(`
             specs/cli/__setup__/built.ts:4:5  jterrazz(no-expect-outside-a-test)
                 found: vitest's \`expect()\` called in a file under \`specs/\` that is no test
-                why: Under \`specs/\`, vitest's \`expect\` is called in a test file alone — a \`*.spec.ts\`, a \`*.test.ts(x)\`, a \`*.test-d.ts\`: a \`__setup__/\` module, a test adapter, a stub or a \`*.specification.ts\` that asserts is refused at the call.
+                why: Under \`specs/\`, vitest's \`expect\` is called in a test file alone (a \`*.spec.ts\`, a \`*.test.ts(x)\`, a \`*.test-d.ts\`): a \`__setup__/\` module, a test adapter, a stub or a \`*.specification.ts\` that asserts is refused at the call.
                 fix: return what the module reads, and assert it in the test that calls it
                 read: docs/reference/linting.md#no-expect-outside-a-test
         `);

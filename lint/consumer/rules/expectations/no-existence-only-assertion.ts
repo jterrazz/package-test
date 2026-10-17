@@ -26,7 +26,7 @@ export const noExistenceOnlyAssertion = defineRule(
         messages: {
             existenceOnly: {
                 found: "`{{matcher}}()` is this test's only oracle, and passes for almost anything",
-                fix: 'assert the value itself — `toBe`/`toStrictEqual`, the whole result with `toMatch`, or the rows',
+                fix: 'assert the value itself: `toBe`/`toStrictEqual`, the whole result with `toMatch`, or the rows',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

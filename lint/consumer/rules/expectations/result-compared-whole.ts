@@ -112,7 +112,7 @@ export const resultComparedWhole = defineRule(
         messages: {
             partialOracle: {
                 found: 'the test reads {{subject}} and never compares it whole',
-                fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
+                fix: 'add ``expect({{subject}}).toMatch(`...`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

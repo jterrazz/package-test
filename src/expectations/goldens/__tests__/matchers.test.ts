@@ -48,7 +48,7 @@ describe('registerMatchers', () => {
             // @ts-expect-error -- a RegExp on a stream is refused by the type before the run refuses it
             expect(subject).toMatch(/built in/u);
         }).toThrow(
-            "fix: write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.stdout.text).toMatch(…)",
+            "fix: write the whole text in place, toMatch('...'), or match a part with vitest on its text: expect(<result>.stdout.text).toMatch(...)",
         );
         expect(subject.text).toMatch(/^built in \ds$/mu);
     });
@@ -71,31 +71,31 @@ describe('registerMatchers', () => {
         ]).toStrictEqual([
             oneVerb(
                 'toMatch(a string) on a directory',
-                'compare it to its golden tree: `await expect(…).toMatch(directory(…))`',
+                'compare it to its golden tree: `await expect(...).toMatch(directory(...))`',
             ),
             oneVerb(
                 'toMatch(a RegExp) on a directory',
-                'compare it to its golden tree: `await expect(…).toMatch(directory(…))`',
+                'compare it to its golden tree: `await expect(...).toMatch(directory(...))`',
             ),
             oneVerb(
                 'toMatch(a number) on a container',
-                'assert its state, `await expect(…).toBeRunning()`, or compare its logs, `result.container(…).stdout`, whole',
+                'assert its state, `await expect(...).toBeRunning()`, or compare its logs, `result.container(...).stdout`, whole',
             ),
             oneVerb(
                 'toMatch(a RegExp) on a response',
-                'write the whole response in place, ``toMatch(`HTTP/1.1 200 OK …`)``, or compare it to toMatch(file(…))',
+                'write the whole response in place, ``toMatch(`HTTP/1.1 200 OK ...`)``, or compare it to toMatch(file(...))',
             ),
             oneVerb(
                 'toMatch(a RegExp) on a json',
-                'write the whole value in place, `toMatch({ … })`, or compare it to toMatch(file(…))',
+                'write the whole value in place, `toMatch({ ... })`, or compare it to toMatch(file(...))',
             ),
             oneVerb(
                 'toMatch(a string) on a table',
-                "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[…]])`",
+                "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[...]])`",
             ),
             oneVerb(
                 'toMatch(an array) on a table',
-                "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[…]])`",
+                "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[...]])`",
             ),
         ]);
     });
@@ -114,20 +114,20 @@ describe('registerMatchers', () => {
         ]).toStrictEqual([
             oneVerb(
                 'toMatch(a string) routed to the golden comparison',
-                'name the golden with file(…) or directory(…)',
+                'name the golden with file(...) or directory(...)',
             ),
             '',
             oneVerb(
                 'toMatch(a string) on a subject that is not compared to a value written in place',
-                'compare it to its golden, `toMatch(file(…))`, or assert a part of its text with vitest on `.text`',
+                'compare it to its golden, `toMatch(file(...))`, or assert a part of its text with vitest on `.text`',
             ),
             oneVerb(
                 'toMatch(a number) on a subject that is not compared to a value written in place',
-                'compare it to its golden, `toMatch(file(…))`, or assert a part of its text with vitest on `.text`',
+                'compare it to its golden, `toMatch(file(...))`, or assert a part of its text with vitest on `.text`',
             ),
             oneVerb(
                 'toMatch(a number) on a subject that is not compared to a value written in place',
-                'compare it to its golden, `toMatch(file(…))`, or assert a part of its text with vitest on `.text`',
+                'compare it to its golden, `toMatch(file(...))`, or assert a part of its text with vitest on `.text`',
             ),
         ]);
     });
@@ -157,7 +157,7 @@ describe('registerMatchers', () => {
                 "assert a table empty, `await expect(result.table('<name>')).toBeEmpty()`; any other subject is compared whole with toMatch",
             ),
             oneVerb(
-                'toBeEmpty() on the stream "stderr" — an empty stream is an empty text',
+                'toBeEmpty() on the stream "stderr": an empty stream is an empty text',
                 "compare its text: expect(<result>.stderr.text).toBe('')",
             ),
         ]);
@@ -188,7 +188,7 @@ describe('registerMatchers', () => {
             new TypeError(
                 oneVerb(
                     'toMatch(file("./__expected__/tree.txt")) on a subject that holds no file of its kind',
-                    'compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(…))`',
+                    'compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(...))`',
                 ),
             ),
         );

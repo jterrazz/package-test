@@ -17,7 +17,7 @@ export const literateRunnerExists = defineRule(
         messages: {
             missing: {
                 found: '`literate.runner` names `{{path}}`, which resolves to no file',
-                fix: 'point it at the `*.specification.ts` exporting the runner the documents run on — `./specs/cli/cli.specification.ts` by convention',
+                fix: 'point it at the `*.specification.ts` exporting the runner the documents run on, `./specs/cli/cli.specification.ts` by convention',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

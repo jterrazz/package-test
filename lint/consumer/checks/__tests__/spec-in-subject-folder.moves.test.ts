@@ -14,7 +14,7 @@ const listing = (rule: string): string =>
     `import { api } from '../api.specification.js'; // checker-disable-line ${rule} -- filed by its author\ntest('a', async () => { await api.get('/orders'); });\n`;
 
 describe('fixSpecInSubjectFolder', () => {
-    test('subject-moves — a spec of two routes is reported with the plan of its split and left whole: naming a file is its author’s', () => {
+    test("subject-moves — a spec of two routes is reported with the plan of its split and left whole: naming a file is its author's", () => {
         // Given - one file of a GET test and a POST test, and the golden its GET test reads through a helper
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -33,7 +33,7 @@ describe('fixSpecInSubjectFolder', () => {
         }).toStrictEqual({
             done: [],
             fix: [
-                'split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
+                'split it by hand, one file per subject, each file named by you; GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
             ],
             kept: true,
         });
@@ -64,7 +64,7 @@ describe('fixSpecInSubjectFolder', () => {
 
         // Then - `spec-in-subject-folder` names the folder, and the fix moves it there
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
-            'move it to api/orders/list/listing.spec.ts — `typescript fix` moves it, and the ground it stands on',
+            'move it to api/orders/list/listing.spec.ts; `typescript fix` moves it, and the ground it stands on',
         ]);
         fixSpecInSubjectFolder(root);
         expect(readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8')).toContain(
@@ -155,7 +155,7 @@ describe('fixSpecInSubjectFolder', () => {
 
         // Then - the finding says what the test stands on, and the file is left whole in its place
         expect(checkOneSubjectPerSpec(root)[0]?.fix).toContain(
-            'the test "creates then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
+            'the test "creates then lists" reaches POST /orders and GET /orders: state what it stands on with a seed, and keep one subject per test',
         );
         expect([done, readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')]).toStrictEqual(
             [[], source],
@@ -226,7 +226,7 @@ describe('fixSpecInSubjectFolder', () => {
         }).toStrictEqual({
             done: [],
             fix: [
-                "split it by hand, one file per subject, each file named by you — beware: visit /articles/:id has no standard folder: the file it goes to is its author's to name",
+                "split it by hand, one file per subject, each file named by you; beware: visit /articles/:id has no standard folder: the file it goes to is its author's to name",
             ],
             kept: true,
         });

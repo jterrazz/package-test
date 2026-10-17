@@ -28,7 +28,7 @@ describe('cwd', () => {
             // Then - refused, naming the form to write
             await expect(run).rejects.toThrow(
                 [
-                    `found: .exec(…, { cwd: ${JSON.stringify(cwd)} }), a folder outside the working directory`,
+                    `found: .exec(..., { cwd: ${JSON.stringify(cwd)} }), a folder outside the working directory`,
                     'why: A command runs in the working directory the chain laid, or in one of its folders: anywhere else is the machine, not the fixture.',
                     "fix: name a folder below the working directory, relative to it: .exec('check', { cwd: 'packages/site' })",
                     READ,
@@ -46,7 +46,7 @@ describe('cwd', () => {
         // Then - refused, naming where the folder comes from
         await expect(run).rejects.toThrow(
             [
-                'found: .exec(…, { cwd: "packages/absent" }), a folder the working directory does not hold',
+                'found: .exec(..., { cwd: "packages/absent" }), a folder the working directory does not hold',
                 'why: A command runs in a folder the chain laid: one that does not exist has no files of the fixture.',
                 'fix: lay the folder with a fixture, or name one the fixtures laid',
                 READ,

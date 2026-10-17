@@ -6,7 +6,7 @@ export function required<T>(value: null | T | undefined, why: string): T {
         throw new Error(
             refusal({
                 fix: 'state it in the Given, or assert on what the subject actually produced',
-                found: `required(): ${why} — got ${value === null ? 'null' : 'undefined'}`,
+                found: `required(): ${why}, got ${value === null ? 'null' : 'undefined'}`,
                 read: 'docs/reference/assertions.md#two-helpers-that-are-not-matchers',
                 why: '`required()` answers a present value, and `null` and `undefined` are the two it refuses.',
             }),

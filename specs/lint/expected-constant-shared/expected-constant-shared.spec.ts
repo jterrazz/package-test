@@ -21,7 +21,7 @@ describe('expected-constant-shared', () => {
             specs/api/events/list/pagination.spec.ts:5:7  jterrazz(expected-constant-shared)
                 found: the expectation \`FIRST_PAGE\`, declared for the file and read by one test
                 why: A file-level \`const\` a spec hands to a matcher as the expected value serves two tests or more; read by one test, it is an error at its declaration.
-                fix: write its value in place, in the matcher the test hands it to, and delete \`FIRST_PAGE\` — \`typescript fix\` inlines it
+                fix: write its value in place, in the matcher the test hands it to, and delete \`FIRST_PAGE\`; \`typescript fix\` inlines it
                 read: docs/reference/linting.md#expected-constant-shared
         `);
     });

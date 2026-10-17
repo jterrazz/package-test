@@ -119,7 +119,7 @@ export function checkDocumentEnvAndServeRegistered(
                 finding('document-env-and-serve-registered', token.line, {
                     fix:
                         registered.env.size === 0
-                            ? `register "${token.name}" in the \`env\` option of \`specification.cli(…)\`, or write the variable as \`NAME=value\``
+                            ? `register "${token.name}" in the \`env\` option of \`specification.cli(...)\`, or write the variable as \`NAME=value\``
                             : `name one of ${[...registered.env].toSorted().join(', ')}, or register "${token.name}" in \`specification.cli({ env })\``,
                     found: `env: "${token.name}", which no specification registers`,
                 }),
@@ -132,7 +132,7 @@ export function checkDocumentEnvAndServeRegistered(
                 finding('document-env-and-serve-registered', entry.line, {
                     fix:
                         registered.serve.size === 0
-                            ? `register "${entry.name}" in the \`serve\` option of \`specification.cli(…)\``
+                            ? `register "${entry.name}" in the \`serve\` option of \`specification.cli(...)\``
                             : `name one of ${[...registered.serve].toSorted().join(', ')}, or register "${entry.name}" in \`specification.cli({ serve })\``,
                     found: `serve: "${entry.name}", which no specification registers`,
                 }),

@@ -192,7 +192,7 @@ export class AppiumAdapter implements DevicePort {
         return new Error(
             refusal({
                 fix: 'designate what this screen shows, or raise `timeouts.action` for a slow build',
-                found: `${verb}(${asWritten(target)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
+                found: `${verb}(${asWritten(target)}) timed out after ${this.actionTimeoutMs}ms: no visible match.${excerpt}`,
                 read: 'docs/guides/mobile-specs.md#declared-timeouts',
                 why: 'A mobile verb waits for one visible match, within the declared action budget.',
             }),

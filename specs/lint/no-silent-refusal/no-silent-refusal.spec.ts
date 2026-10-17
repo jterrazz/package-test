@@ -12,7 +12,7 @@ describe('no-silent-refusal', () => {
         expect(result.report).toMatch(`
             specs/widget/refuses.spec.yaml:3:1  jterrazz-check(no-silent-refusal)
                 found: \`exit: 1\` with no \`stdout:\` and no \`stderr:\`
-                why: A run whose \`exit:\` is non-zero with neither \`stdout:\` nor \`stderr:\` → error: the document does not say why the command refused.
+                why: A run whose \`exit:\` is non-zero with neither \`stdout:\` nor \`stderr:\` is an error: the document does not say why the command refused.
                 fix: write the words the refusal printed under \`stderr:\` (or \`stdout:\`)
                 read: docs/reference/linting.md#no-silent-refusal
         `);

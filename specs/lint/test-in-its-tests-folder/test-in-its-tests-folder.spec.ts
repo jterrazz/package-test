@@ -12,7 +12,7 @@ describe('test-in-its-tests-folder', () => {
         expect(result.report).toMatch('');
     });
 
-    test('a module test in the __tests__ of its module’s folder passes', async () => {
+    test("a module test in the __tests__ of its module's folder passes", async () => {
         // Given - the sibling tree
         const result = await lint.fixture(directory('./__fixtures__/sibling/')).run();
 
@@ -28,18 +28,18 @@ describe('test-in-its-tests-folder', () => {
         expect(result.report).toMatch(`
             src/__tests__/util.test.ts:1:1  jterrazz(test-in-its-tests-folder)
                 found: a module test naming no "util.ts" in the folder above its \`__tests__/\`
-                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\` — the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
-                fix: name it for a module of that folder — \`__tests__/<file>.test.ts\` tests \`<file>.ts\`; a test needing more than its module is a spec — move it under \`specs/\` as a \`.spec.ts\`
+                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\`: the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
+                fix: name it for a module of that folder (\`__tests__/<file>.test.ts\` tests \`<file>.ts\`); a test needing more than its module is a spec, so move it under \`specs/\` as a \`.spec.ts\`
                 read: docs/reference/linting.md#test-in-its-tests-folder
             src/beside.test.ts:1:1  jterrazz(test-in-its-tests-folder)
                 found: a module test outside the \`__tests__/\` of its folder
-                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\` — the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
-                fix: move it to \`__tests__/beside.test.ts\`, and each relative path it imports one folder up (\`./<file>.js\` → \`../<file>.js\`)
+                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\`: the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
+                fix: move it to \`__tests__/beside.test.ts\`, and each relative path it imports one folder up (\`./<file>.js\` becomes \`../<file>.js\`)
                 read: docs/reference/linting.md#test-in-its-tests-folder
         `);
     });
 
-    test('typed test data outside every __tests__ is refused, and in its module’s or the lowest shared one passes', async () => {
+    test("typed test data outside every __tests__ is refused, and in its module's or the lowest shared one passes", async () => {
         // Given - the stray-fixtures tree
         const result = await lint.fixture(directory('./__fixtures__/stray-fixtures/')).run();
 
@@ -47,8 +47,8 @@ describe('test-in-its-tests-folder', () => {
         expect(result.report).toMatch(`
             src/orders/orders.fixtures.ts:1:1  jterrazz(test-in-its-tests-folder)
                 found: typed test data outside every \`__tests__/\`
-                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\` — the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
-                fix: move it into the \`__tests__/\` of its module’s folder, or — when the module tests of several folders share it — into the \`__tests__/\` of the lowest folder they share, and the paths that import it
+                why: The test of \`<dir>/<file>.ts\` is \`<dir>/__tests__/<file>.test.ts\`: the conventional folder of its module's folder, holding its tests, the typed data they read (\`<file>.fixtures.ts\`) and the ground they stand on.
+                fix: move it into the \`__tests__/\` of its module's folder or, when the module tests of several folders share it, into the \`__tests__/\` of the lowest folder they share, and the paths that import it
                 read: docs/reference/linting.md#test-in-its-tests-folder
         `);
     });

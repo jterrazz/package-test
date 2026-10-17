@@ -29,7 +29,7 @@ ruleTester().run('test-in-its-tests-folder', testInItsTestsFolder, {
             filename: `${UNSTAGED}/src/__tests__/local.test.ts`,
         },
         {
-            name: 'No util.ts in the folder above the orphan’s __tests__.',
+            name: "No util.ts in the folder above the orphan's __tests__.",
             code: 'test("x", () => {});',
             errors: [
                 {
@@ -106,7 +106,7 @@ ruleTester().run('test-in-its-tests-folder', testInItsTestsFolder, {
             filename: `${UNSTAGED}/src/__tests__/fresh.test.ts`,
         },
         {
-            name: 'The module sits in the folder above the test’s __tests__.',
+            name: "The module sits in the folder above the test's __tests__.",
             code: 'test("x", () => {});',
             filename: `${OWN}/sibling/src/__tests__/util.test.ts`,
         },

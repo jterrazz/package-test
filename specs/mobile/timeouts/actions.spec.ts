@@ -12,7 +12,7 @@ describe('actions', () => {
 
         // Then - the refusal names the runner's five seconds, and what was on screen instead
         await expect(opened).rejects.toThrow(
-            /see\(content\("Never drawn"\)\) timed out after 5000ms — no visible match\.\nCurrently on screen: .*Welcome to Specimen/u,
+            /see\(content\("Never drawn"\)\) timed out after 5000ms: no visible match\.\nCurrently on screen: .*Welcome to Specimen/u,
         );
     });
 });

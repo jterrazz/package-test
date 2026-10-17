@@ -71,7 +71,7 @@ export const noStatusOnlyTest = defineRule(
         messages: {
             statusOnlyProbe: {
                 found: "the test's only assertions probe the HTTP status",
-                fix: 'compare the whole response, ``expect(result.response).toMatch(`HTTP/1.1 …`)`` (`TEST_UPDATE=1` fills an empty one), and keep the status probe beside it only if the status is the point',
+                fix: 'compare the whole response, ``expect(result.response).toMatch(`HTTP/1.1 ...`)`` (`TEST_UPDATE=1` fills an empty one), and keep the status probe beside it only if the status is the point',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

@@ -28,7 +28,7 @@ export const specNamedForItsAspect = defineRule(
         messages: {
             generic: {
                 found: 'the aspect "{{aspect}}" names no question about the subject',
-                fix: 'rename the file for what its tests ask — `pagination`, `filters`, `validation`, `not-found`, `auth`, `shape` — and split it when they ask several',
+                fix: 'rename the file for what its tests ask (`pagination`, `filters`, `validation`, `not-found`, `auth`, `shape`), and split it when they ask several',
             },
             notKebab: {
                 found: 'the aspect "{{aspect}}" is not kebab-case',

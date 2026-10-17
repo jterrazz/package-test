@@ -23,11 +23,11 @@ export const whenBetweenGivenAndThen = defineRule(
         messages: {
             afterThen: {
                 found: '`// When -` written after `// Then -`',
-                fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+                fix: 'move it above the action it narrates, between Given and Then, or delete it when the chain is the action',
             },
             beforeGiven: {
                 found: '`// When -` written before `// Given -`',
-                fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+                fix: 'move it above the action it narrates, between Given and Then, or delete it when the chain is the action',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

@@ -37,7 +37,7 @@ function parsedManifest(directory: string): unknown {
         throw new Error(
             refusal({
                 fix: `correct ${path}, so npm and Node read the package it describes`,
-                found: `packed(): ${path} is no JSON — ${error instanceof Error ? error.message : String(error)}`,
+                found: `packed(): ${path} is no JSON: ${error instanceof Error ? error.message : String(error)}`,
                 read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
                 why: 'packed() reads the name, the bin and the runtime closure the package declares in its package.json.',
             }),

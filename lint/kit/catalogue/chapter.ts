@@ -54,9 +54,7 @@ function catalogueSections(published: Row[], families: Record<string, string>): 
         const rows = published
             .filter((entry) => entry.family === family)
             .toSorted((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
-        return rows.length === 0
-            ? []
-            : [[`## ${family} — ${title}`, '', rowTable(rows)].join('\n')];
+        return rows.length === 0 ? [] : [[`## ${family}: ${title}`, '', rowTable(rows)].join('\n')];
     });
 }
 
@@ -75,8 +73,8 @@ export function catalogueBody(published: Row[], families: Record<string, string>
     ] as const;
     const channels = named
         .filter(([count]) => count > 0)
-        .map(([count, label]) => label.replace(' (', ` — ${String(count)} (`))
+        .map(([count, label]) => label.replace(' (', `: ${String(count)} (`))
         .join(', ');
-    const intro = `Every rule a project using the framework meets, across its enforcement channels — ${channels} — sourced from one manifest so the code and the catalogue can never drift.`;
+    const intro = `Every rule a project using the framework meets, across its enforcement channels (${channels}), sourced from one manifest so the code and the catalogue can never drift.`;
     return [intro, ...catalogueSections(published, families)].join('\n\n');
 }

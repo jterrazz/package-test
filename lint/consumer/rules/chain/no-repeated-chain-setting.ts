@@ -243,7 +243,7 @@ export const noRepeatedChainSetting = defineRule(
         messages: {
             repeated: {
                 found: 'all {{count}} chains of this file state `{{setting}}` alike',
-                fix: 'state it once for the file — `const {{view}} = {{handle}}.with({ {{context}} })` — and start every chain from `{{view}}`; `typescript fix` writes it',
+                fix: 'state it once for the file, `const {{view}} = {{handle}}.with({ {{context}} })`, and start every chain from `{{view}}`; `typescript fix` writes it',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

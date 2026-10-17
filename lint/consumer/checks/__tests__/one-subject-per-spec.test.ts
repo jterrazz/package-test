@@ -35,9 +35,9 @@ describe('checkOneSubjectPerSpec', () => {
                     `${rule} ${path}:${line}:${column} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
-            'one-subject-per-spec api/orders/alone.spec.ts:2:78 a spec reaching 2 subjects — POST /orders, GET /orders — the test "orders then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
-            'one-subject-per-spec api/orders/journey.spec.ts:2:78 a spec reaching 2 subjects — POST /orders, GET /orders — split it by hand, one file per subject, each file named by you — POST /orders → api/orders/create/ ("orders then lists"); GET /orders → api/orders/list/ ("lists"); the test "orders then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
-            'one-subject-per-spec api/orders/orders.spec.ts:25:30 a spec reaching 2 subjects — GET /orders, POST /orders — split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
+            'one-subject-per-spec api/orders/alone.spec.ts:2:78 a spec reaching 2 subjects: POST /orders, GET /orders — the test "orders then lists" reaches POST /orders and GET /orders: state what it stands on with a seed, and keep one subject per test',
+            'one-subject-per-spec api/orders/journey.spec.ts:2:78 a spec reaching 2 subjects: POST /orders, GET /orders — split it by hand, one file per subject, each file named by you; POST /orders → api/orders/create/ ("orders then lists"); GET /orders → api/orders/list/ ("lists"); the test "orders then lists" reaches POST /orders and GET /orders: state what it stands on with a seed, and keep one subject per test',
+            'one-subject-per-spec api/orders/orders.spec.ts:25:30 a spec reaching 2 subjects: GET /orders, POST /orders — split it by hand, one file per subject, each file named by you; GET /orders → api/orders/list/ ("lists the orders"); POST /orders → api/orders/create/ ("creates an order")',
         ]);
     });
 
@@ -56,7 +56,7 @@ describe('checkOneSubjectPerSpec', () => {
 
         // Then - the plan names both titles of the first subject on one line
         expect(checkOneSubjectPerSpec(root).map(({ fix }) => fix)).toStrictEqual([
-            'split it by hand, one file per subject, each file named by you — GET /orders → api/orders/list/ ("lists", "pages"); POST /orders → api/orders/create/ ("creates")',
+            'split it by hand, one file per subject, each file named by you; GET /orders → api/orders/list/ ("lists", "pages"); POST /orders → api/orders/create/ ("creates")',
         ]);
     });
 });

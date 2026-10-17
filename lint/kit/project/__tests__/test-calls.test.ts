@@ -180,7 +180,7 @@ describe('test-calls', () => {
         ]);
     });
 
-    test('escapedFor — a text written into a title keeps the title’s own quotes, and a template its holes', () => {
+    test("escapedFor — a text written into a title keeps the title's own quotes, and a template its holes", () => {
         // Given - titles quoted each way
         const titles = ["test('a');", 'test("a");', 'test(`a`);'].map(
             (source) => firstArgumentOf(statementOf(source)) ?? statementOf('x;'),

@@ -20,22 +20,22 @@ describe('no-snapshot-folder', () => {
         expect(result.report).toMatch(`
             specs/api/orders/golden/:1:1  jterrazz-check(no-snapshot-folder)
                 found: \`golden/\`, a synonym of \`__expected__/\`
-                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it — any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
+                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it; any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
                 fix: rename \`golden/\` to \`__expected__/\`, beside the test that reads it
                 read: docs/reference/linting.md#no-snapshot-folder
             specs/api/orders/snapshots/:1:1  jterrazz-check(no-snapshot-folder)
                 found: \`snapshots/\`, a synonym of \`__expected__/\`
-                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it — any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
+                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it; any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
                 fix: rename \`snapshots/\` to \`__expected__/\`, beside the test that reads it
                 read: docs/reference/linting.md#no-snapshot-folder
             src/__snapshots__/:1:1  jterrazz-check(no-snapshot-folder)
                 found: \`__snapshots__/\`, a synonym of \`__expected__/\`
-                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it — any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
+                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it; any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
                 fix: rename \`__snapshots__/\` to \`__expected__/\`, beside the test that reads it
                 read: docs/reference/linting.md#no-snapshot-folder
             src/report/goldens/:1:1  jterrazz-check(no-snapshot-folder)
                 found: \`goldens/\`, a synonym of \`__expected__/\`
-                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it — any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
+                why: One word per meaning: a folder named \`snapshots/\`, \`__snapshots__/\`, \`golden/\` or \`goldens/\` is an error anywhere in a member when a test would stand on it; any such folder under \`specs/\`, and elsewhere one that holds no module of code (a \`goldens/\` folder of matcher source is named for what its code does).
                 fix: rename \`goldens/\` to \`__expected__/\`, beside the test that reads it
                 read: docs/reference/linting.md#no-snapshot-folder
         `);

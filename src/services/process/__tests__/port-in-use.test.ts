@@ -15,8 +15,8 @@ describe('lessonOf', () => {
     });
 
     test.each([
-        ['Node’s code', 'Error: listen EADDRINUSE: address already in use 127.0.0.1:4321'],
-        ['a framework’s sentence', 'error: Port 3000 is already in use'],
+        ["Node's code", 'Error: listen EADDRINUSE: address already in use 127.0.0.1:4321'],
+        ["a framework's sentence", 'error: Port 3000 is already in use'],
         ['the words alone', 'the address already in use'],
     ])(
         'lessonOf — a port held is named by %s, and the option to drop is `port`',

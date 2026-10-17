@@ -42,7 +42,7 @@ describe('redis', () => {
         expect(server.log).toStrictEqual(['PING', 'close']);
     });
 
-    test('redis.adapter — redis handle — flushes the index of its pair on acquire, reset and release, and the container’s own once released, hanging up each time', async () => {
+    test("redis.adapter — redis handle — flushes the index of its pair on acquire, reset and release, and the container's own once released, hanging up each time", async () => {
         // Given - worker 20's cache on a server that answers
         const server = await fakeRedis();
         const handle = unreachableService('cache');
@@ -117,7 +117,7 @@ describe('redis', () => {
         });
     });
 
-    test('redis.adapter — redis handle — a healthcheck before any connection string is the framework’s own broken invariant', async () => {
+    test("redis.adapter — redis handle — a healthcheck before any connection string is the framework's own broken invariant", async () => {
         // Given - a fresh handle nothing ever wired
         // Then - the refusal says which half is absent, and whose bug it is
         await expect(redis().healthcheck()).rejects.toThrow(
@@ -158,7 +158,7 @@ describe('redis', () => {
         await expect(crowded.isolation().acquire('64')).rejects.toThrow(
             [
                 'found: redis: worker 64 has no database index for "redis"',
-                'why: A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
+                "why: A redis container's indexes are shared out four per worker, so its workers and their services are counted.",
                 'fix: run with fewer workers (--maxWorkers): a container serves 63',
                 'read: docs/reference/services.md#per-worker-isolation',
             ].join('\n'),
@@ -186,7 +186,7 @@ describe('redis', () => {
         await expect(fifth.isolation().acquire('60')).rejects.toThrow(
             [
                 'found: redis: worker 60 has no database index for "e"',
-                'why: A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
+                "why: A redis container's indexes are shared out four per worker, so its workers and their services are counted.",
                 'fix: declare fewer redis services: a worker holds 4 at once',
                 'read: docs/reference/services.md#per-worker-isolation',
             ].join('\n'),

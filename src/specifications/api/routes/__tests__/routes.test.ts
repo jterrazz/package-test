@@ -91,7 +91,7 @@ describe('routes', () => {
         ]);
     });
 
-    test('route coverage — what a request reaches — the edges of a match: ALL, a short path, an empty segment, a wildcard’s prefix, a braced name in part', () => {
+    test("route coverage — what a request reaches — the edges of a match: ALL, a short path, an empty segment, a wildcard's prefix, a braced name in part", () => {
         // Given - routes and requests at each edge
         const pairs: [string, string, string][] = [
             ['ALL /health', 'DELETE', '/health'],

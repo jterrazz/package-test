@@ -41,7 +41,7 @@ describe('env', () => {
         expect(result.stdout.text).toContain('MY_VAR=hello');
     });
 
-    test('a view made with() starts every command from the file’s environment', async () => {
+    test("a view made with() starts every command from the file's environment", async () => {
         // Given - the environment a whole file shares, and one chain adding to it
         const shared = cli.with({ env: { MY_VAR: 'shared' } });
         const result = await shared

@@ -80,7 +80,7 @@ describe('ground-shared-or-inline.placement', () => {
         expect([directory, file]).toStrictEqual([
             APP_KEPT_FOR_API,
             [
-                "specs/__fixtures__/a.json: ground only specs/api reaches for, kept above it — move it to specs/api/__fixtures__/a.json and name it file('./__fixtures__/a.json') — `typescript fix` does both",
+                "specs/__fixtures__/a.json: ground only specs/api reaches for, kept above it — move it to specs/api/__fixtures__/a.json and name it file('./__fixtures__/a.json'); `typescript fix` does both",
             ],
         ]);
     });
@@ -100,7 +100,7 @@ describe('ground-shared-or-inline.placement', () => {
 
         // Then - the lowest folder they share is its home, whether or not it reads the entry itself
         const spread = [
-            'specs/__fixtures__/app: ground only the leaves under specs/api reach for, kept above them — move it to specs/api/__fixtures__/app, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — `typescript fix` does both',
+            'specs/__fixtures__/app: ground only the leaves under specs/api reach for, kept above them — move it to specs/api/__fixtures__/app, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it; `typescript fix` does both',
         ];
         expect([found, withTheFolderItself]).toStrictEqual([spread, spread]);
     });

@@ -75,11 +75,11 @@ describe('checkErrorIsARefusalOrAnInvariant', () => {
         expect(checkErrorIsARefusalOrAnInvariant(ROOT)).toStrictEqual([]);
         expect(checkErrorIsARefusalOrAnInvariant(declared)).toStrictEqual([]);
         expect(located(checkErrorIsARefusalOrAnInvariant(drifted))).toStrictEqual([
-            'src/clock/clock.ts:3:15 error-is-a-refusal-or-an-invariant: `new TypeError(…)` carries a message written by hand',
+            'src/clock/clock.ts:3:15 error-is-a-refusal-or-an-invariant: `new TypeError(...)` carries a message written by hand',
             'src/clock/clock.ts:5:53 error-is-a-refusal-or-an-invariant: the refusal reads no heading of the manual written in place',
             'src/clock/clock.ts:8:22 error-is-a-refusal-or-an-invariant: `docs/reference/time-and-doubles.md#clock` names a heading no page has',
-            'src/clock/clock.ts:15:15 error-is-a-refusal-or-an-invariant: `new PinError(…)` carries a message written by hand',
-            'src/clock/clock.ts:18:15 error-is-a-refusal-or-an-invariant: `Error(…)` carries a message written by hand',
+            'src/clock/clock.ts:15:15 error-is-a-refusal-or-an-invariant: `new PinError(...)` carries a message written by hand',
+            'src/clock/clock.ts:18:15 error-is-a-refusal-or-an-invariant: `Error(...)` carries a message written by hand',
             'src/clock/clock.ts:23:19 error-is-a-refusal-or-an-invariant: the refusal reads no heading of the manual written in place',
             'src/clock/clock.ts:24:113 error-is-a-refusal-or-an-invariant: the refusal reads no heading of the manual written in place',
         ]);

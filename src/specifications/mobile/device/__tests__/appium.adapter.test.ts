@@ -68,7 +68,7 @@ describe('AppiumAdapter', () => {
         ]);
     });
 
-    test('appium adapter — opening — a session the run shares is the run’s to end, and close leaves it open', async () => {
+    test("appium adapter — opening — a session the run shares is the run's to end, and close leaves it open", async () => {
         // Given - an adapter whose session the run's ledger records
         const log: DeviceLog = [];
         const adapter = adapterOver(fakeDevice(log).webdriverio, { shared: true });
@@ -169,7 +169,7 @@ describe('AppiumAdapter', () => {
         // Then - the timeout names the one label and says why the screen is empty
         expect(stalled.error?.message).toBe(
             [
-                'found: tap(button("Pay")) timed out after 1ms — no visible match.',
+                'found: tap(button("Pay")) timed out after 1ms: no visible match.',
                 'Currently on screen: SigNews',
                 'The app is stalled on the splash: nothing but its launch screen is up.',
                 ...TIMEOUT_LESSON,
@@ -198,13 +198,13 @@ describe('AppiumAdapter', () => {
         // Then - each timeout, the labels in sight named when there are some
         expect([labelled.error?.message, labelled.log, bare.error?.message]).toStrictEqual([
             [
-                'found: tap(button("Pay")) timed out after 600ms — no visible match.',
+                'found: tap(button("Pay")) timed out after 600ms: no visible match.',
                 'Currently on screen: App | Welcome | Pay',
                 ...TIMEOUT_LESSON,
             ].join('\n'),
             ['mobile: scrollToElement {"elementId":"pay"}'],
             [
-                'found: fill(field("Email")) timed out after 1ms — no visible match.',
+                'found: fill(field("Email")) timed out after 1ms: no visible match.',
                 ...TIMEOUT_LESSON,
             ].join('\n'),
         ]);

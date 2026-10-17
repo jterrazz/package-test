@@ -48,7 +48,7 @@ describe('testTitle', () => {
         expect(subjectOfSource('route-judge', source, 'route-judge.ts')).toBe('route-judge');
     });
 
-    test('reads the module of the folder above the test’s __tests__/, its own extension first, or the one beside a rendered unit of a specs tree', () => {
+    test("reads the module of the folder above the test's __tests__/, its own extension first, or the one beside a rendered unit of a specs tree", () => {
         // Given - a component and a same-named plain module, a rendered unit of the component specimen, and a test naming no module
         const root = packageWith({
             'specs/component/clock/dial.tsx': 'export function ClockDial() {}\n',

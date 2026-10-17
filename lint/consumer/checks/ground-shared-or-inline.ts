@@ -218,8 +218,8 @@ export function checkGroundSharedOrInline(rootDir: string): Spotted[] {
         line: reference.line,
         fix:
             copyOf === undefined
-                ? `write it here, ${inPlaceForm(reference)}, and delete the file — \`typescript fix\` inlines it`
-                : `compare with the source: read ${relative(rootDir, copyOf)} instead, and delete the copy — \`typescript fix\` leaves it to you`,
+                ? `write it here, ${inPlaceForm(reference)}, and delete the file; \`typescript fix\` inlines it`
+                : `compare with the source: read ${relative(rootDir, copyOf)} instead, and delete the copy; \`typescript fix\` leaves it to you`,
         found: `${relative(isWithin(rootDir, target) ? rootDir : dirname(rootDir), target)}, ${copyOf === undefined ? '' : `a byte copy of ${relative(rootDir, copyOf)}, `}read by this test alone`,
         rule: 'ground-shared-or-inline' as const,
     }));

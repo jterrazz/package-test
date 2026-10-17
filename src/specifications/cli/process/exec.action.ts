@@ -31,7 +31,7 @@ function requireRelativeFolder(cwd: string | undefined): void {
         throw new Error(
             refusal({
                 fix: "name a folder below the working directory, relative to it: .exec('check', { cwd: 'packages/site' })",
-                found: `.exec(…, { cwd: ${JSON.stringify(cwd)} }), a folder outside the working directory`,
+                found: `.exec(..., { cwd: ${JSON.stringify(cwd)} }), a folder outside the working directory`,
                 read: 'docs/guides/cli-specs.md#cwd--a-folder-of-the-working-directory',
                 why: 'A command runs in the working directory the chain laid, or in one of its folders: anywhere else is the machine, not the fixture.',
             }),
@@ -48,7 +48,7 @@ function runFolder(root: string, cwd: string | undefined): string {
         throw new Error(
             refusal({
                 fix: 'lay the folder with a fixture, or name one the fixtures laid',
-                found: `.exec(…, { cwd: ${JSON.stringify(cwd)} }), a folder the working directory does not hold`,
+                found: `.exec(..., { cwd: ${JSON.stringify(cwd)} }), a folder the working directory does not hold`,
                 read: 'docs/guides/cli-specs.md#cwd--a-folder-of-the-working-directory',
                 why: 'A command runs in a folder the chain laid: one that does not exist has no files of the fixture.',
             }),
@@ -114,7 +114,7 @@ export const exec = defineAction<
             throw new Error(
                 refusal({
                     fix: 'wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
-                    found: '.exec([…], { waitFor/timeout }), options on a command sequence',
+                    found: '.exec([...], { waitFor/timeout }), options on a command sequence',
                     read: 'docs/guides/cli-specs.md#long-running-processes-waitfor--timeout',
                     why: '`waitFor` and `timeout` wait on one long-running process.',
                 }),

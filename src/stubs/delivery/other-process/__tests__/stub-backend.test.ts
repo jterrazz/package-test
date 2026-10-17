@@ -161,7 +161,7 @@ describe('StubBackend', () => {
         // Then - the honest failure: the screen never asked for the range
         const violation = backend.violation();
         expect(violation?.message).toContain(
-            '- GET /indicators?range=1M — declared and required but never requested',
+            '- GET /indicators?range=1M: declared and required but never requested',
         );
     });
 
@@ -305,7 +305,7 @@ describe('StubBackend', () => {
                 'declared stubs:',
                 '  - GET /events',
                 '  - GET /users',
-                'why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.',
+                "why: From its first stub, a chain's network is strict: every outgoing request matches a declared stub.",
                 "fix: add a stub for each to the chain's composite",
                 'read: docs/reference/linting.md#network-strict-after-first-stub',
             ].join('\n'),

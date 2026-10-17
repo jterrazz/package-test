@@ -60,7 +60,7 @@ function resolveUnderWorkDir(path: string, context: Judgement): string {
 }
 
 function preview(text: string): string {
-    const flat = JSON.stringify(text.length > 160 ? `${text.slice(0, 160)}…` : text);
+    const flat = JSON.stringify(text.length > 160 ? `${text.slice(0, 160)}...` : text);
     return flat;
 }
 
@@ -109,9 +109,9 @@ function checkFile(assertion: SpecFileAssertion, context: Judgement): null | str
 function failure(run: SpecRun, context: Judgement, details: string[]): Error {
     const error = new Error(
         refusal({
-            fix: 'correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else',
+            fix: 'correct the command, or run with TEST_UPDATE=1 to rewrite the runs: the exit code and the streams, and nothing else',
             found: [
-                `spec mismatch — ${context.document.description}`,
+                `spec mismatch: ${context.document.description}`,
                 '',
                 `$ ${run.command}`,
                 '',

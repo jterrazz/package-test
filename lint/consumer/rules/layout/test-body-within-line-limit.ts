@@ -61,7 +61,7 @@ export const testBodyWithinLineLimit = defineRule(
         docs: row,
         messages: {
             tooLong: {
-                found: 'a test body of {{lines}} lines of gestures, over {{max}} — the lines of a `toMatch`, `toStrictEqual` or `toEqual` expected value are not counted',
+                found: 'a test body of {{lines}} lines of gestures, over {{max}} (the lines of a `toMatch`, `toStrictEqual` or `toEqual` expected value are not counted)',
                 fix: 'split it into one test per behaviour, or move a long Given into a function the test calls',
             },
         },

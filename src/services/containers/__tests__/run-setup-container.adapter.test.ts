@@ -9,7 +9,7 @@ import { fakeRuntime, POSTGRES, servedRun, unreachable } from './run-containers.
 const startRefusal = (reason: string): string =>
     [
         `found: the run's setup could not start postgres:17-alpine:\n  ${reason}`,
-        'why: A container is started once per run, by the run’s setup, and a worker asks it for the address.',
+        "why: A container is started once per run, by the run's setup, and a worker asks it for the address.",
         'fix: fix what the reason names, and run again',
         'read: docs/reference/services.md#one-container-per-run',
     ].join('\n');

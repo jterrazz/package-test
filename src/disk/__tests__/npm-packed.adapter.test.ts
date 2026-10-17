@@ -65,19 +65,19 @@ describe('installPacked', () => {
             [
                 "found: link('@acme/other', packed()) packs lib, whose package.json names @acme/lib",
                 'why: A consumer imports a package by the name it is published under, so the install lays it there.',
-                "fix: link it under the name its package.json declares: link('@acme/lib', packed(…))",
+                "fix: link it under the name its package.json declares: link('@acme/lib', packed(...))",
                 READ,
             ].join('\n'),
             [
                 "found: link('@acme/lib', packed()) packs nameless, whose package.json names no package",
                 'why: A consumer imports a package by the name it is published under, so the install lays it there.',
-                "fix: link it under the name its package.json declares: link('<no name>', packed(…))",
+                "fix: link it under the name its package.json declares: link('<no name>', packed(...))",
                 READ,
             ].join('\n'),
             [
                 `found: packed(): no package.json from ${nowhere} up`,
                 'why: packed() packs the project the spec belongs to, which its nearest package.json names.',
-                "fix: run the spec inside the package it specifies, or name the package: packed(directory('./…/'))",
+                "fix: run the spec inside the package it specifies, or name the package: packed(directory('./<path>/'))",
                 READ,
             ].join('\n'),
             false,
@@ -101,7 +101,7 @@ describe('installPacked', () => {
             existsSync(join(work, 'node_modules')),
         ]).toStrictEqual([
             [
-                `found: link('@acme/lib', packed(directory("./missing/"))) names nothing — ${join(root, 'missing')} does not exist`,
+                `found: link('@acme/lib', packed(directory("./missing/"))) names nothing: ${join(root, 'missing')} does not exist`,
                 DISK_WHY,
                 `fix: create ${join(root, 'missing')}, or correct the path`,
                 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',

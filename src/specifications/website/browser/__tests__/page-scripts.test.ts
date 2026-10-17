@@ -71,7 +71,7 @@ describe('page-scripts', () => {
         expect(session.held.size).toBe(0);
     });
 
-    test('seedStorage — "throws" makes every read of both stores throw the browser’s own SecurityError', () => {
+    test('seedStorage — "throws" makes every read of both stores throw the browser\'s own SecurityError', () => {
         // Given - the blocking seed, run once
         seedStorage('throws');
 

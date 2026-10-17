@@ -31,7 +31,7 @@ function ambiguityOf(
     return {
         ...positionOf(spec.text, at.index),
         path: shown(specsRoot, spec.file),
-        fix: `write the route's template: \`.${verb}('${template}', { params: { <name>: '${segment}' } })\` — or, if \`${segment}\` is the route's own segment, state that the path is the route: \`.${verb}('${bare}', { params: {} })\``,
+        fix: `write the route's template: \`.${verb}('${template}', { params: { <name>: '${segment}' } })\` or, if \`${segment}\` is the route's own segment, state that the path is the route: \`.${verb}('${bare}', { params: {} })\``,
         found: `\`${method} ${bare}\` names \`${segment}\` right after the collection \`${collection}\`: a value or a segment of the route, and the folder depends on which`,
         rule: 'spec-in-subject-folder' as const,
     };
@@ -59,7 +59,7 @@ export function checkSpecInSubjectFolder(specsRoot: string): Spotted[] {
         return [
             {
                 path: shown(specsRoot, spec.file),
-                fix: `move it to ${shown(specsRoot, target)} — \`typescript fix\` moves it, and the ground it stands on`,
+                fix: `move it to ${shown(specsRoot, target)}; \`typescript fix\` moves it, and the ground it stands on`,
                 found: `a spec of ${only}, filed under ${shown(specsRoot, dirname(spec.file))}/`,
                 line: 1,
                 rule: 'spec-in-subject-folder' as const,

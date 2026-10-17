@@ -30,7 +30,7 @@ export const specificationIsAComposition = defineRule(
         messages: {
             adapter: {
                 found: 'the adapter `{{port}}` is a {{what}} written in the specification, not one its adapter module builds',
-                fix: 'name the adapter, or call the constructor its adapter module exports — under the notion it adapts (`src/stubs/`, `src/services/`, `src/disk/`, `src/clock/`, `src/mocks/`), or in a concept folder of the specification — on the config alone',
+                fix: 'name the adapter, or call the constructor its adapter module exports (under the notion it adapts, `src/stubs/`, `src/services/`, `src/disk/`, `src/clock/`, `src/mocks/`, or in a concept folder of the specification) on the config alone',
             },
             buildsResult: {
                 found: 'the constructor builds a `{{built}}`, a result',
@@ -38,11 +38,11 @@ export const specificationIsAComposition = defineRule(
             },
             defined: {
                 found: '`defineSpecification` is handed a {{what}}, and it takes nothing but the chain type',
-                fix: 'write `defineSpecification<Chain>()({ … })`: the specification object carries everything the specification composes',
+                fix: 'write `defineSpecification<Chain>()({ ... })`: the specification object carries everything the specification composes',
             },
             adapters: {
                 found: "the specification's `adapters` is not an arrow handing back the object of its adapters",
-                fix: 'write `adapters: (config) => ({ <port>: <adapter>, … })`, its parameter a bare name; what builds an adapter is its adapter module',
+                fix: 'write `adapters: (config) => ({ <port>: <adapter>, ... })`, its parameter a bare name; what builds an adapter is its adapter module',
             },
             inline: {
                 found: "the specification's `{{key}}` is a {{what}} written in the specification, not a reference imported from its module",
@@ -58,7 +58,7 @@ export const specificationIsAComposition = defineRule(
             },
             option: {
                 found: 'the option `{{name}}` is not a matrix row written as string literals',
-                fix: 'write the option as `{ group: …, name: …, probe: … }`, each a string literal',
+                fix: 'write the option as `{ group: ..., name: ..., probe: ... }`, each a string literal',
             },
             runsStep: {
                 found: 'the constructor calls `{{owner}}.{{step}}()`, a step of a definition',

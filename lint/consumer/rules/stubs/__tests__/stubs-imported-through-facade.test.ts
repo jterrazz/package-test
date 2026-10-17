@@ -27,7 +27,7 @@ ruleTester().run('stubs-imported-through-facade', stubsImportedThroughFacade, {
     ],
     valid: [
         {
-            name: 'Outside specs/, and inside a stubs folder, the units are no facade’s to hide.',
+            name: "Outside specs/, and inside a stubs folder, the units are no facade's to hide.",
             code: `import events from './stubs/http/events.js';`,
             filename: '/repo/src/home.ts',
         },

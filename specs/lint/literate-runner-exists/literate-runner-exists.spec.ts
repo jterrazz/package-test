@@ -21,7 +21,7 @@ describe('literate-runner-exists', () => {
             jterrazz.config.ts:5:40  jterrazz(literate-runner-exists)
                 found: \`literate.runner\` names \`./specs/cli/cli.specification.ts\`, which resolves to no file
                 why: \`literate.runner\`, resolved from the config directory, names a file that exists.
-                fix: point it at the \`*.specification.ts\` exporting the runner the documents run on — \`./specs/cli/cli.specification.ts\` by convention
+                fix: point it at the \`*.specification.ts\` exporting the runner the documents run on, \`./specs/cli/cli.specification.ts\` by convention
                 read: docs/reference/linting.md#literate-runner-exists
         `);
     });

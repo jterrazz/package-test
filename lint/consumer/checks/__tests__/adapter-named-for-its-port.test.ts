@@ -53,12 +53,12 @@ describe('checkAdapterNamedForItsPort', () => {
                 ({ fix, found, line, path, rule }) => `${rule} ${path}:${line} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
-            'adapter-named-for-its-port specs/cli/__setup__/bare.ts:2 `bare.ts`, whose `Adapter` implements the port `Port` — name the file for the port it replaces: `specs/cli/__setup__/port.adapter.ts` — the class keeps whatever name it has',
-            'adapter-named-for-its-port specs/cli/__setup__/by-default.ts:2 `by-default.ts`, whose `Frozen` implements the port `Clock` — name the file for the port it replaces: `specs/cli/__setup__/clock.adapter.ts` — the class keeps whatever name it has',
-            'adapter-named-for-its-port specs/cli/__setup__/by-namespace.ts:2 `by-namespace.ts`, whose `the class` implements the port `ClockPort` — name the file for the port it replaces: `specs/cli/__setup__/clock.adapter.ts` — the class keeps whatever name it has',
-            'adapter-named-for-its-port specs/cli/__setup__/by-string.ts:2 `by-string.ts`, whose `Fixed` implements the port `TickerSourcePort` — name the file for the port it replaces: `specs/cli/__setup__/ticker-source.adapter.ts` — the class keeps whatever name it has',
-            'adapter-named-for-its-port specs/cli/__setup__/http.ts:2 `http.ts`, whose `Adapter` implements the port `HTTPClientPort` — name the file for the port it replaces: `specs/cli/__setup__/http-client.adapter.ts` — the class keeps whatever name it has',
-            'adapter-named-for-its-port specs/cli/__setup__/portfolio.ts:2 `portfolio.ts`, whose `Adapter` implements the port `PortfolioPort` — name the file for the port it replaces: `specs/cli/__setup__/portfolio.adapter.ts` — the class keeps whatever name it has',
+            'adapter-named-for-its-port specs/cli/__setup__/bare.ts:2 `bare.ts`, whose `Adapter` implements the port `Port` — name the file for the port it replaces, `specs/cli/__setup__/port.adapter.ts`; the class keeps whatever name it has',
+            'adapter-named-for-its-port specs/cli/__setup__/by-default.ts:2 `by-default.ts`, whose `Frozen` implements the port `Clock` — name the file for the port it replaces, `specs/cli/__setup__/clock.adapter.ts`; the class keeps whatever name it has',
+            'adapter-named-for-its-port specs/cli/__setup__/by-namespace.ts:2 `by-namespace.ts`, whose `the class` implements the port `ClockPort` — name the file for the port it replaces, `specs/cli/__setup__/clock.adapter.ts`; the class keeps whatever name it has',
+            'adapter-named-for-its-port specs/cli/__setup__/by-string.ts:2 `by-string.ts`, whose `Fixed` implements the port `TickerSourcePort` — name the file for the port it replaces, `specs/cli/__setup__/ticker-source.adapter.ts`; the class keeps whatever name it has',
+            'adapter-named-for-its-port specs/cli/__setup__/http.ts:2 `http.ts`, whose `Adapter` implements the port `HTTPClientPort` — name the file for the port it replaces, `specs/cli/__setup__/http-client.adapter.ts`; the class keeps whatever name it has',
+            'adapter-named-for-its-port specs/cli/__setup__/portfolio.ts:2 `portfolio.ts`, whose `Adapter` implements the port `PortfolioPort` — name the file for the port it replaces, `specs/cli/__setup__/portfolio.adapter.ts`; the class keeps whatever name it has',
         ]);
     });
 });

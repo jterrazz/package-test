@@ -61,7 +61,7 @@ export function classified(root: string): { kind: SiblinglessKind | undefined; p
 
 export const SIBLINGS_MARKERS: Markers = {
     end: '<!-- /GENERATED:siblings -->',
-    start: '<!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->',
+    start: '<!-- GENERATED:siblings. Do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->',
 };
 
 export function renderSiblings(root: string): string {

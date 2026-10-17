@@ -21,7 +21,7 @@ describe('storage', () => {
         expect(result.content.text).toBe('Storage\n\nnone\n\nnone');
     });
 
-    test('a chain blocking storage makes every read of it throw the browser’s own error', async () => {
+    test("a chain blocking storage makes every read of it throw the browser's own error", async () => {
         // Given - the same page, visited as by a browser that refuses site data
         const result = await website.storage('throws').visit('/storage');
 

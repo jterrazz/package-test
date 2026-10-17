@@ -51,7 +51,7 @@ export function closedPairs(
             fail(
                 context,
                 pair,
-                `unknown key "${key}:" in ${what} — known keys: ${allowed.join(', ')}`,
+                `unknown key "${key}:" in ${what}; known keys: ${allowed.join(', ')}`,
             );
         }
         pairs.push(pair);

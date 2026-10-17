@@ -84,7 +84,7 @@ describe('member-pass', () => {
                 column: 1,
                 line: 4,
                 message:
-                    'found: packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `@testing-library/react` from packages/seam-dependency/package.json, and write its tests on `component()`, `website()`, `clock` or `intercept()` · read: docs/reference/linting.md#no-redundant-test-dependency',
+                    "found: packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only, as a production dependency it is the product's own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`), except `@testing-library/react-native` where jest runs the tests of the member: the only vocabulary that runtime has until the React Native answer lands. · fix: remove `@testing-library/react` from packages/seam-dependency/package.json, and write its tests on `component()`, `website()`, `clock` or `intercept()` · read: docs/reference/linting.md#no-redundant-test-dependency",
                 path: 'packages/seam-dependency/package.json',
                 rule: 'jterrazz-check/no-redundant-test-dependency',
             },
@@ -92,7 +92,7 @@ describe('member-pass', () => {
                 column: 1,
                 line: 5,
                 message:
-                    'found: packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `msw` from packages/seam-dependency/package.json · read: docs/reference/linting.md#no-redundant-test-dependency',
+                    "found: packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only, as a production dependency it is the product's own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`), except `@testing-library/react-native` where jest runs the tests of the member: the only vocabulary that runtime has until the React Native answer lands. · fix: remove `msw` from packages/seam-dependency/package.json · read: docs/reference/linting.md#no-redundant-test-dependency",
                 path: 'packages/seam-dependency/package.json',
                 rule: 'jterrazz-check/no-redundant-test-dependency',
             },
@@ -133,7 +133,7 @@ describe('member-pass', () => {
         // Then - the tree pass ran for the member: the golden is refused where the test names it
         expect(result.exitCode).toBe(1);
         expect(result.stdout.text).toContain(
-            'packages/site/specs/widget/widget.test.ts:6:33: error jterrazz-check(ground-shared-or-inline): found: widget/__expected__/ready.txt, read by this test alone · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: write it here, the value `toMatch` compares, and delete the file — `typescript fix` inlines it · read: docs/reference/linting.md#ground-shared-or-inline',
+            'packages/site/specs/widget/widget.test.ts:6:33: error jterrazz-check(ground-shared-or-inline): found: widget/__expected__/ready.txt, read by this test alone · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: write it here, the value `toMatch` compares, and delete the file; `typescript fix` inlines it · read: docs/reference/linting.md#ground-shared-or-inline',
         );
     });
 });

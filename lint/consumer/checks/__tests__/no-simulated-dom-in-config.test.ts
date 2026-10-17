@@ -23,8 +23,8 @@ describe('checkNoSimulatedDomInConfig', () => {
                 ),
             ),
         ).toStrictEqual([
-            "no-simulated-dom-in-config a/vitest.config.ts:3 `environment: 'jsdom'` gives every file of this project a drawing of a browser — delete `environment: 'jsdom'`, and write each rendered test as a `.test.tsx` in the `__tests__/` of its component’s folder, collected by the `component` project",
-            "no-simulated-dom-in-config b/vitest.config.ts:1 `environment: 'happy-dom'` gives every file of this project a drawing of a browser — delete `environment: 'happy-dom'`, and write each rendered test as a `.test.tsx` in the `__tests__/` of its component’s folder, collected by the `component` project",
+            "no-simulated-dom-in-config a/vitest.config.ts:3 `environment: 'jsdom'` gives every file of this project a drawing of a browser — delete `environment: 'jsdom'`, and write each rendered test as a `.test.tsx` in the `__tests__/` of its component's folder, collected by the `component` project",
+            "no-simulated-dom-in-config b/vitest.config.ts:1 `environment: 'happy-dom'` gives every file of this project a drawing of a browser — delete `environment: 'happy-dom'`, and write each rendered test as a `.test.tsx` in the `__tests__/` of its component's folder, collected by the `component` project",
         ]);
     });
 });

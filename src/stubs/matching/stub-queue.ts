@@ -111,11 +111,11 @@ export class StubQueue {
         }
         const lines = reached.map(
             ({ reached: calls, stub }) =>
-                `  - ${describeRoute(stub.request)} — reached by ${calls.join(', ')}`,
+                `  - ${describeRoute(stub.request)}: reached by ${calls.join(', ')}`,
         );
         return new Error(
             refusal({
-                fix: 'take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
+                fix: 'take the call out of the path under test or, if the call is now intended, replace the never stub with one that answers it',
                 found: `a route the chain declared never requested was reached:\n${lines.join('\n')}`,
                 read: 'docs/reference/stubs.md#never--a-call-that-must-not-happen',
                 why: "A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
@@ -133,12 +133,12 @@ export class StubQueue {
             if (times === undefined) {
                 if (served === 0) {
                     unmet.push(
-                        `  - ${describeRoute(stub.request)} — declared and required but never requested`,
+                        `  - ${describeRoute(stub.request)}: declared and required but never requested`,
                     );
                 }
             } else if (served !== times) {
                 unmet.push(
-                    `  - ${describeRoute(stub.request)} — declared required with times: ${times} but was requested ${served} time(s)`,
+                    `  - ${describeRoute(stub.request)}: declared required with times: ${times} but was requested ${served} time(s)`,
                 );
             }
         }
@@ -164,7 +164,7 @@ export class StubQueue {
                       .join('\n');
         return new Error(
             refusal('network-strict-after-first-stub', {
-                fix: `declare a stub for ${method} ${url} — or raise the \`times\` of the one it exhausted`,
+                fix: `declare a stub for ${method} ${url}, or raise the \`times\` of the one it exhausted`,
                 found: `an unmatched outgoing request, ${method} ${url}; declared:\n${declared}`,
             }),
         );

@@ -20,11 +20,11 @@ function missingTarget(named: string, target: string, onDisk: boolean): Teaching
     return onDisk
         ? {
               fix: `track ${target} (it is ignored by git), or name a file that is`,
-              found: `${named} names nothing — ${target} is ignored by git`,
+              found: `${named} names nothing: ${target} is ignored by git`,
           }
         : {
               fix: `create ${target}, or correct the path`,
-              found: `${named} names nothing — ${target} does not exist`,
+              found: `${named} names nothing: ${target} does not exist`,
           };
 }
 

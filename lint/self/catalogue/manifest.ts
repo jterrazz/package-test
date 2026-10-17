@@ -26,13 +26,13 @@ export const SELF_CHECKER_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         sentence:
-            'A spec of a SPECIMEN, and every file of the component tree, is filed by the capability it specifies. A `.spec.ts` whose runner drives an app under a `__fixtures__/`, its specification’s or the pool’s — a specification module it imports a runner from, one that module imports a runner from, or the spec itself when it builds its runner inline, names it in a literal: a file inside a specimen’s folder — the app module, the binary, the script a command runs — or the folder itself as the root a `server: { command }` of the runner it feeds runs from, whether the literal is written in the call or in a `const` the call names (a root alone is where the services read their ground, and no app) — or an integration spec importing the fixtures module its chains call, specifies the framework, not that app, and sits one folder below its specification, in a folder the capability matrix names for that specification’s column (`<specs>/api/seed/<aspect>.spec.ts`), one file per aspect of the capability. The vocabulary is closed: each capability the matrix declares for the column, the words before its first parenthesis kebab-cased (`.seed()` → `seed`, `toMatch(file())` → `to-match`, `.exitCode` → `exit-code`); a capability of another column is no folder of this specification (`appium` is mobile’s, never `cli/appium/`). A first-level folder that is no specification has no column, and takes a capability of any. `one-subject-per-spec` and `spec-in-subject-folder` leave such a spec alone. The component specification’s own tree is the fixture app its tests render, and it is filed the same way: every `.ts` and `.tsx` under `<specs>/component/` — a rendered unit, the hook or DOM function a test hosts, the `.test.tsx` beside it, the project’s frame — sits one folder below it, in a folder the matrix names for the `component` column, the capability its test specifies (`<specs>/component/intercept/post-table.tsx`). An error at the file’s first line of code, where a reasoned `checker-disable-next-line specimen-filed-by-capability` above it silences it.',
+            "A spec of a SPECIMEN, and every file of the component tree, is filed by the capability it specifies. A `.spec.ts` whose runner drives an app under a `__fixtures__/` (its specification's or the pool's), or an integration spec importing the fixtures module its chains call, specifies the framework, not that app, and sits one folder below its specification, in a folder the capability matrix names for that specification's column (`<specs>/api/seed/<aspect>.spec.ts`), one file per aspect of the capability. A runner drives such an app when a specification module the spec imports a runner from, one that module imports a runner from, or the spec itself when it builds its runner inline names it in a literal: a file inside a specimen's folder (the app module, the binary, the script a command runs), or the folder itself as the root a `server: { command }` of the runner it feeds runs from, whether the literal is written in the call or in a `const` the call names (a root alone is where the services read their ground, and no app). The vocabulary is closed: each capability the matrix declares for the column, the words before its first parenthesis kebab-cased (`seed` for `.seed()`, `to-match` for `toMatch(file())`, `exit-code` for `.exitCode`); a capability of another column is no folder of this specification (`appium` is mobile's, never `cli/appium/`). A first-level folder that is no specification has no column, and takes a capability of any. `one-subject-per-spec` and `spec-in-subject-folder` leave such a spec alone. The component specification's own tree is the fixture app its tests render, and it is filed the same way: every `.ts` and `.tsx` under `<specs>/component/` (a rendered unit, the hook or DOM function a test hosts, the `.test.tsx` beside it, the project's frame) sits one folder below it, in a folder the matrix names for the `component` column, the capability its test specifies (`<specs>/component/intercept/post-table.tsx`). An error at the file's first line of code, where a reasoned `checker-disable-next-line specimen-filed-by-capability` above it silences it.",
         specification: 'model',
         family: 'layout',
-        fix: 'Move the file to `<specs>/<specification>/<capability>/<aspect>.spec.ts`, the capability it asks about, named as the matrix names it in that specification’s column — a component and its test together to `<specs>/component/<capability>/`.',
+        fix: "Move the file to `<specs>/<specification>/<capability>/<aspect>.spec.ts`, the capability it asks about, named as the matrix names it in that specification's column; a component and its test together to `<specs>/component/<capability>/`.",
         name: 'specimen-filed-by-capability',
         rationale:
-            'A specimen exists to exercise the framework, and its routes are nobody’s product: filed by the route, the framework’s own specs read as an app’s, and the reader looking for what `.seed()` promises opens a folder named for a URL. The component tree is a specimen too, and flat it answers the same question only by opening every test.',
+            "A specimen exists to exercise the framework, and its routes are nobody's product: filed by the route, the framework's own specs read as an app's, and the reader looking for what `.seed()` promises opens a folder named for a URL. The component tree is a specimen too, and flat it answers the same question only by opening every test.",
         reach: 'specs',
     },
     ...ARCHITECTURE_PASSES,
@@ -83,10 +83,10 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order — `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.',
+            'Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order: `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.',
         specification: 'model',
         family: 'catalogue',
-        fix: "Write the message as its `found` and its `fix` — `lessonsAt()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime — and let the row give the `why` and the `read`.",
+        fix: "Write the message as its `found` and its `fix` (`lessonsAt()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime) and let the row give the `why` and the `read`.",
         name: 'message-has-four-parts',
         rationale:
             'A message is the only page of the catalogue most readers see: one that names the fault without its reason or its gesture sends the reader to the chapter for what the line could have said.',
@@ -112,7 +112,7 @@ export const META_ROWS: Row[] = [
             'Every `static` and `checker` row proves WHERE it reports, in a spec of its own: a report golden of its `specs/lint/<rule>/` folder naming the rule at a `line:col`, or a `ruleTester()` case of its unit test, which states the `line` and `column` of every error. A row with none cannot enter the catalogue.',
         specification: 'model',
         family: 'catalogue',
-        fix: 'Golden the finding whole — its `path:line:col` included — or state `line` in the RuleTester case that reports it.',
+        fix: 'Golden the finding whole (its `path:line:col` included) or state `line` in the RuleTester case that reports it.',
         name: 'every-position-proven',
         rationale:
             'A finding at the wrong place sends the reader to a line that holds nothing wrong; an exit code proves a rule fires, never that it points at the fault.',
@@ -122,7 +122,7 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'No catalogue sentence, channel name or family title has gone back to French — a deny-list of the tokens the manifest actually carried.',
+            'No catalogue sentence, channel name or family title has gone back to French: a deny-list of the tokens the manifest actually carried.',
         specification: 'model',
         family: 'catalogue',
         fix: 'Write the row in English, like every sentence the catalogue publishes.',
@@ -148,10 +148,10 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every capability a specification DECLARES — a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family — is exercised by at least one of the package\u2019s own test files in that specification, or its row names the reason it is not.',
+            "Every capability a specification DECLARES (a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family) is exercised by at least one of the package's own test files in that specification, or its row names the reason it is not.",
         specification: 'model',
         family: 'catalogue',
-        fix: 'Write the spec, or state the reason on the capability row — a blank cell says nothing and a zero with no reason is a surface nobody holds.',
+        fix: 'Write the spec, or state the reason on the capability row; a blank cell says nothing and a zero with no reason is a surface nobody holds.',
         name: 'every-capability-exercised',
         rationale:
             'A suite proves what it runs, never what it does not: a specification can grow a method and be green forever without one test touching it.',
@@ -187,13 +187,13 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and lives in the manifest of its audience, and the tarball exposes no `self` rule, read as `npm pack` writes it and extracted: no byte of it — bundle, chunk, type, page, manifest — names a self row by its name or its code, nor the `jterrazz-self` plugin; every target the `exports` map publishes but a type and a JSON file is a `.js`, `.cjs` or `.mjs` module, so none is left unloaded; no module the `exports` map publishes, loaded under each condition node loads, carries at any depth a rule object whose `meta.docs` says `self` or a key or string naming a self row; no private entry it publishes (`#checker`), run as the toolchain runs a preset’s checks, prints a self pass’s finding over that pass’s fixtures; no packed chunk is one only an unpacked bundle loads, and no packed bundle imports a module the tarball lacks; no row of the runtime, type or upstream channel is `self`, and no row of the meta channel is `consumer`, every refusal the runtime raises being a consumer row read at a heading of the catalogue.',
+            "Every catalogue row declares its audience (`consumer`, what a project using the package meets, or `self`, this package's own suite discipline) and lives in the manifest of its audience, and the tarball exposes no `self` rule, read as `npm pack` writes it and extracted: no byte of it (bundle, chunk, type, page, manifest) names a self row by its name or its code, nor the `jterrazz-self` plugin; every target the `exports` map publishes but a type and a JSON file is a `.js`, `.cjs` or `.mjs` module, so none is left unloaded; no module the `exports` map publishes, loaded under each condition node loads, carries at any depth a rule object whose `meta.docs` says `self` or a key or string naming a self row; no private entry it publishes (`#checker`), run as the toolchain runs a preset's checks, prints a self pass's finding over that pass's fixtures; no packed chunk is one only an unpacked bundle loads, and no packed bundle imports a module the tarball lacks; no row of the runtime, type or upstream channel is `self`, and no row of the meta channel is `consumer`, every refusal the runtime raises being a consumer row read at a heading of the catalogue.",
         specification: 'model',
         family: 'catalogue',
-        fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts` — never in `lint/consumer/rules/plugin.ts` or `lint/consumer/checks/checker.ts`.',
+        fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts`, never in `lint/consumer/rules/plugin.ts` or `lint/consumer/checks/checker.ts`.',
         name: 'rule-declares-its-audience',
         rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` would file their specs by a capability matrix they do not have, and `source-root-holds-known-entries` would refuse every entry a consumer’s own `src/` holds.',
+            "A rule only this package is held to, once shipped, runs in every consumer's tree: `specimen-filed-by-capability` would file their specs by a capability matrix they do not have, and `source-root-holds-known-entries` would refuse every entry a consumer's own `src/` holds.",
         reach: 'all',
     },
     ...ARCHITECTURE_META_ROWS,
@@ -217,7 +217,7 @@ export const SELF_PROCESS_RULES: Row[] = [
         audience: 'self',
         channel: 'process',
         sentence:
-            'Every defect class discovered produces, in the same change, the guard that stops it coming back (a static rule, a meta-test or a runtime error) — or documents why no channel can hold it.',
+            'Every defect class discovered produces, in the same change, the guard that stops it coming back (a static rule, a meta-test or a runtime error), or documents why no channel can hold it.',
         specification: 'model',
         family: 'catalogue',
         fix: 'Write the guard in the same change, or write down why no channel can hold it.',

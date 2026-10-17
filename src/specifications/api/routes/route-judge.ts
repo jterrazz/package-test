@@ -26,10 +26,10 @@ export type RunScope = 'partial' | 'shard' | 'whole';
 export type RouteRun = { failed: number; scope: RunScope; update: boolean };
 
 export const SHARD_UNJUDGED =
-    "api routes: not judged — a shard's ledgers are a part of the run's; the route ratchet is judged only over every shard's ledgers (docs/guides/api-specs.md)";
+    "api routes: not judged, since a shard's ledgers are a part of the run's and the route ratchet is judged only over every shard's ledgers (docs/guides/api-specs.md)";
 
 export const PARTIAL_UNJUDGED =
-    'api routes: not judged — a partial run (--changed, a file filter or -t) reaches only some routes';
+    'api routes: not judged, since a partial run (--changed, a file filter or -t) reaches only some routes';
 
 export type RouteVerdict = { failure?: Lesson; line?: string };
 
@@ -56,12 +56,12 @@ function unjudgedRun({ failed, scope, update }: RouteRun): RouteVerdict | undefi
         ? {
               failure: {
                   fix: 'make the run green, then record with TEST_UPDATE=1',
-                  found: `api routes: not recorded — ${why}`,
+                  found: `api routes: not recorded: ${why}`,
                   read: 'docs/guides/api-specs.md#when-a-run-is-not-judged',
                   why: 'The route ratchet is recorded only from a run that is green and whole.',
               },
           }
-        : { line: `api routes: not judged — ${why}` };
+        : { line: `api routes: not judged: ${why}` };
 }
 
 function ratchetMoved(missing: number, held: number, named: string): Lesson {

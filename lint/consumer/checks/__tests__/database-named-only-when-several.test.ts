@@ -57,9 +57,9 @@ describe('checkDatabaseNamedOnlyWhenSeveral', () => {
                 ({ fix, found, line, path, rule }) => `${rule} ${path}:${line} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
-            "database-named-only-when-several specs/api/a.spec.ts:2 `.seed()` with no `{ database }`, while 2 SQL databases are declared — pass `.seed(…, { database: '<key>' })`, naming one of the 2 databases the services record declares",
+            "database-named-only-when-several specs/api/a.spec.ts:2 `.seed()` with no `{ database }`, while 2 SQL databases are declared — pass `.seed(..., { database: '<key>' })`, naming one of the 2 databases the services record declares",
             'database-named-only-when-several specs/api/b.spec.ts:2 `.table()` passes `{ database }`, while a single SQL database is declared — delete the `{ database }` option of `.table()`',
-            "database-named-only-when-several specs/api/e.spec.ts:3 `.seed()` with no `{ database }`, while 2 SQL databases are declared — pass `.seed(…, { database: '<key>' })`, naming one of the 2 databases the services record declares",
+            "database-named-only-when-several specs/api/e.spec.ts:3 `.seed()` with no `{ database }`, while 2 SQL databases are declared — pass `.seed(..., { database: '<key>' })`, naming one of the 2 databases the services record declares",
         ]);
     });
 });

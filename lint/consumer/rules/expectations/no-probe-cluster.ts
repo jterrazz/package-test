@@ -58,7 +58,7 @@ export const noProbeCluster = defineRule(
         messages: {
             cluster: {
                 found: '{{count}} probes on `{{subject}}`',
-                fix: 'compare it whole — ``expect({{subject}}).toMatch(`…`)``, `TEST_UPDATE=1` writing the value — with tokens for what moves',
+                fix: 'compare it whole, ``expect({{subject}}).toMatch(`...`)`` with `TEST_UPDATE=1` writing the value, with tokens for what moves',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

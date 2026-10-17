@@ -16,7 +16,7 @@ describe('methodless', () => {
         // Given - an empty list beside an app.all() route
         // Then - the missing route is named with the line that adds it
         expect(methodlessDrift([ALL_MCP, GET_HEALTH], [])).toStrictEqual([
-            "  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp' with why the app takes it on any method",
+            "  ALL /mcp: the app takes it on any method, and the list misses it, so add '/mcp' with why the app takes it on any method",
         ]);
     });
 
@@ -24,8 +24,8 @@ describe('methodless', () => {
         // Given - /health taken on GET alone, and no /gone in the table
         // Then - each stale entry says why it goes
         expect(methodlessDrift([ALL_MCP, GET_HEALTH], ['/mcp', '/health', '/gone'])).toStrictEqual([
-            "  /health — the list names it, and the app takes it on its own methods only: remove '/health'",
-            "  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
+            "  /health: the list names it, and the app takes it on its own methods only, so remove '/health'",
+            "  /gone: the list names it, and the app's table holds no such route, so remove '/gone'",
         ]);
     });
 
@@ -45,8 +45,8 @@ describe('methodless', () => {
         expect(methodlessDrift(table, ['/mcp/:session'])).toStrictEqual([]);
         expect(methodlessDrift(table, ['/mcp/'])).toHaveLength(2);
         expect(methodlessDrift(table, ['/mcp/:id/x'])).toStrictEqual([
-            "  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id' with why the app takes it on any method",
-            "  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
+            "  ALL /mcp/:id: the app takes it on any method, and the list misses it, so add '/mcp/:id' with why the app takes it on any method",
+            "  /mcp/:id/x: the list names it, and the app's table holds no such route, so remove '/mcp/:id/x'",
         ]);
     });
 });

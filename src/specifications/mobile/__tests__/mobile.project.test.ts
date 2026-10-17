@@ -4,7 +4,7 @@ import { mobile } from '../mobile.project.js';
 import { mobileSessionSetup } from '../session/mobile-session.global-setup.js';
 
 describe('mobile', () => {
-    test('mobile() — runs its files one at a time in the third group, a global setup holding the run’s session, and serves the declared device from its root', () => {
+    test("mobile() — runs its files one at a time in the third group, a global setup holding the run's session, and serves the declared device from its root", () => {
         // Given - a project with no device, and one declaring a device with and without a root
         const plain = mobile().test;
         const served = mobile({ device: { name: 'iPhone 17' }, root: 'apps/mobile' }).test;

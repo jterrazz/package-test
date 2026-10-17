@@ -20,7 +20,7 @@ ruleTester().run('spec-file-within-line-limit', specFileWithinLineLimit, {
                     column: 0,
                     line: 1,
                     message:
-                        /fix: cut it along its tests’ groups — "rejects" \(2\), "accepts" \(1\)/u,
+                        /fix: cut it along its tests' groups \("rejects" \(2\), "accepts" \(1\)\)/u,
                 },
             ],
             filename: SPEC,
@@ -57,7 +57,7 @@ describe('specFileWithinLineLimit', () => {
 
         // Then - the largest first, then by name, five at most, an ellipsis for the rest
         expect([groupsOf(many), groupsOf(five)]).toStrictEqual([
-            '"a" (3), "b" (1), "c" (1), "d" (1), "e" (1), …',
+            '"a" (3), "b" (1), "c" (1), "d" (1), "e" (1) and more',
             '"a" (1), "b" (1), "c" (1), "d" (1), "e" (1)',
         ]);
     });

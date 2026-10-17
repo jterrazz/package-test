@@ -27,7 +27,7 @@ export const testIdStatesWhatIsMissing = defineRule(
         messages: {
             unexplainedTestId: {
                 found: '`testId()` with no line saying what the element lacks',
-                fix: 'name the element with `button()`/`link()`/`field()`/`heading()`/`content()`, or write `// testId: <no accessible name|no role|…>` on this line or the one above',
+                fix: 'name the element with `button()`/`link()`/`field()`/`heading()`/`content()`, or write `// testId: <no accessible name|no role|...>` on this line or the one above',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

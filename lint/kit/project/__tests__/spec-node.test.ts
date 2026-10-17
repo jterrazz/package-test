@@ -46,22 +46,22 @@ const REFUSED: [string, string, string][] = [
     [
         'a file assertion asserting nothing',
         'description: a\nruns:\n  - command: a\n    exit: 0\n    files:\n      a.txt: {}\n',
-        'case.spec.yaml:6: files: a.txt asserts nothing — give it contains: or equals:',
+        'case.spec.yaml:6: files: a.txt asserts nothing: give it contains: or equals:',
     ],
     [
         'a run that waits on a process it pipes into',
         'description: a\nruns:\n  - command: a\n    exit: 0\n    stdin: x\n    waitFor: y\n',
-        'case.spec.yaml:6: waitFor: and stdin: cannot share a run — the pattern is watched on a process nobody closed the input of',
+        'case.spec.yaml:6: waitFor: and stdin: cannot share a run: the pattern is watched on a process nobody closed the input of',
     ],
     [
         'a document with no description',
         'runs:\n  - command: a\n    exit: 0\n',
-        'case.spec.yaml:1: missing "description:" — every document is one test, and this is its title',
+        'case.spec.yaml:1: missing "description:": every document is one test, and this is its title',
     ],
     [
         'a document with no runs',
         'description: a\n',
-        'case.spec.yaml:1: missing "runs:" — description and runs are mandatory',
+        'case.spec.yaml:1: missing "runs:": description and runs are mandatory',
     ],
 ];
 

@@ -3,7 +3,7 @@ import { refusal } from './refusal.js';
 export function refuse(name: string): never {
     throw new Error(
         refusal({
-            fix: 'specify it from a test collected by a node project (unit/api/job/cli/website/mobile); a rendered thing is a `.test.tsx` in the `__tests__/` of its component’s folder',
+            fix: "specify it from a test collected by a node project (unit/api/job/cli/website/mobile); a rendered thing is a `.test.tsx` in the `__tests__/` of its component's folder",
             found: `${name} runs under node, and was called in a page`,
             read: 'docs/guides/component-specs.md#what-it-does-not-do',
             why: 'A page has no filesystem, no child process and no socket.',

@@ -20,28 +20,28 @@ describe('spec-code-in-setup-folder', () => {
         expect(result.report).toMatch(`
             specs/cli/__setup__/rows.fixtures.ts:1:1  jterrazz-check(spec-code-in-setup-folder)
                 found: \`rows.fixtures.ts\` under specs/: a fixture is input data, a file in \`__fixtures__/\`, never a module
-                why: Under a specs tree, a module — \`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin — that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
-                fix: name the module for what it holds and move it into the \`__setup__/\` of the lowest folder its readers share — \`specs/cli/__setup__/<meaning>.ts\` — and the paths that import it
+                why: Under a specs tree, a module (\`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin) that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
+                fix: name the module for what it holds and move it into the \`__setup__/\` of the lowest folder its readers share, \`specs/cli/__setup__/<meaning>.ts\`, and the paths that import it
                 read: docs/reference/linting.md#spec-code-in-setup-folder
             specs/cli/orders/format.test.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
                 found: a test under the \`cli\` specification that reaches no runner
                 why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
-                fix: a module of a specs tree has no module test: move \`format.ts\` out of \`specs/\` into a code root — \`src/\`, or one \`typescript.roots\` declares, such as \`scripts/\` — with its test in that folder's \`__tests__/\`; or import \`{ cli }\` and drive the product through it
+                fix: a module of a specs tree has no module test: move \`format.ts\` out of \`specs/\` into a code root (\`src/\`, or one \`typescript.roots\` declares, such as \`scripts/\`) with its test in that folder's \`__tests__/\`; or import \`{ cli }\` and drive the product through it
                 read: docs/reference/linting.md#specification-test-uses-its-runner
             specs/cli/orders/format.ts:1:1  jterrazz-check(spec-code-in-setup-folder)
                 found: \`format.ts\`, code that prepares specs outside every \`__setup__/\`
-                why: Under a specs tree, a module — \`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin — that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
-                fix: move it to \`specs/cli/orders/__setup__/format.ts\` — the \`__setup__/\` of the lowest folder its readers share — and the paths that import it
+                why: Under a specs tree, a module (\`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin) that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
+                fix: move it to \`specs/cli/orders/__setup__/format.ts\`, the \`__setup__/\` of the lowest folder its readers share, and the paths that import it
                 read: docs/reference/linting.md#spec-code-in-setup-folder
             specs/cli/orders/orders.fixtures.ts:1:1  jterrazz-check(spec-code-in-setup-folder)
                 found: \`orders.fixtures.ts\` under specs/: a fixture is input data, a file in \`__fixtures__/\`, never a module
-                why: Under a specs tree, a module — \`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin — that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
-                fix: name the module for what it holds and move it into the \`__setup__/\` of the lowest folder its readers share — \`specs/cli/orders/__setup__/<meaning>.ts\` — and the paths that import it
+                why: Under a specs tree, a module (\`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin) that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
+                fix: name the module for what it holds and move it into the \`__setup__/\` of the lowest folder its readers share, \`specs/cli/orders/__setup__/<meaning>.ts\`, and the paths that import it
                 read: docs/reference/linting.md#spec-code-in-setup-folder
             specs/cli/orders/stubs/catalog.stubs.ts:1:1  jterrazz-check(spec-code-in-setup-folder)
                 found: \`catalog.stubs.ts\`, code that prepares specs outside every \`__setup__/\`
-                why: Under a specs tree, a module — \`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin — that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
-                fix: move it to \`specs/cli/orders/__setup__/stubs/catalog.stubs.ts\` — the \`__setup__/\` of the lowest folder its readers share — and the paths that import it
+                why: Under a specs tree, a module (\`.ts\`, \`.tsx\`, \`.js\`, \`.mjs\` and their kin) that is no spec (\`*.spec.ts\`), no test (\`*.test.ts\`, \`*.test.tsx\`) and no runner (\`*.specification.ts\`) sits under a \`__setup__/\`: a test adapter, a shared value, a helper, a stub facade and its kind folders (\`__setup__/stubs/\`).
+                fix: move it to \`specs/cli/orders/__setup__/stubs/catalog.stubs.ts\`, the \`__setup__/\` of the lowest folder its readers share, and the paths that import it
                 read: docs/reference/linting.md#spec-code-in-setup-folder
         `);
     });

@@ -18,7 +18,7 @@ export function checkNoSimulatedDomInConfig(config: string, rootDir: string): Sp
         {
             path: relative(rootDir, config),
             line: lineAt(text, found.index),
-            fix: `delete \`environment: '${dom}'\`, and write each rendered test as a \`.test.tsx\` in the \`__tests__/\` of its component’s folder, collected by the \`component\` project`,
+            fix: `delete \`environment: '${dom}'\`, and write each rendered test as a \`.test.tsx\` in the \`__tests__/\` of its component's folder, collected by the \`component\` project`,
             found: `\`environment: '${dom}'\` gives every file of this project a drawing of a browser`,
             rule: 'no-simulated-dom-in-config',
         },

@@ -151,7 +151,7 @@ describe('source-scan', () => {
         ]);
     });
 
-    test('comments end at the text’s end when they never close, and a block opened by its own slash runs to its close', () => {
+    test("comments end at the text's end when they never close, and a block opened by its own slash runs to its close", () => {
         // Given - comments at the end of the text, and one written /*/
         const sources = [
             'a // c',

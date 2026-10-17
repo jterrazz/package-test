@@ -106,7 +106,7 @@ export class BaseResult {
                 refusal(
                     options?.database === undefined
                         ? {
-                              fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()`',
+                              fix: "declare a database in the specification's `services`: `postgres()` or `sqlite()`",
                               found: `table("${tableName}"), and no database is declared`,
                               read: 'docs/reference/services.md#the-database-rule',
                               why: 'A table is read from a declared database.',

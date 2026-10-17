@@ -28,13 +28,13 @@ describe('result-compared-whole', () => {
         expect(result.report).toMatch(`
             specs/api/facts/pagination.spec.ts:17:31  jterrazz(result-compared-whole)
                 found: the test reads first.response and never compares it whole
-                why: A test that reads a response, a json or a table — \`<result>.response\`, \`<result>.json\`, \`<result>.table('<name>')\` of a result it awaited — compares it WHOLE, once: \`toMatch\` handed the whole result written in place or its golden, or a table's \`toBeEmpty()\`.
-                fix: add \`\`expect(first.response).toMatch(\`…\`)\`\` with the whole result in place (\`TEST_UPDATE=1\` fills an empty one); a precise assertion stays beside it
+                why: A test that reads a response, a json or a table (\`<result>.response\`, \`<result>.json\`, \`<result>.table('<name>')\` of a result it awaited) compares it WHOLE, once: \`toMatch\` handed the whole result written in place or its golden, or a table's \`toBeEmpty()\`.
+                fix: add \`\`expect(first.response).toMatch(\`...\`)\`\` with the whole result in place (\`TEST_UPDATE=1\` fills an empty one); a precise assertion stays beside it
                 read: docs/reference/linting.md#result-compared-whole
             specs/api/facts/pagination.spec.ts:35:12  jterrazz(result-compared-whole)
                 found: the test reads second.json and never compares it whole
-                why: A test that reads a response, a json or a table — \`<result>.response\`, \`<result>.json\`, \`<result>.table('<name>')\` of a result it awaited — compares it WHOLE, once: \`toMatch\` handed the whole result written in place or its golden, or a table's \`toBeEmpty()\`.
-                fix: add \`\`expect(second.json).toMatch(\`…\`)\`\` with the whole result in place (\`TEST_UPDATE=1\` fills an empty one); a precise assertion stays beside it
+                why: A test that reads a response, a json or a table (\`<result>.response\`, \`<result>.json\`, \`<result>.table('<name>')\` of a result it awaited) compares it WHOLE, once: \`toMatch\` handed the whole result written in place or its golden, or a table's \`toBeEmpty()\`.
+                fix: add \`\`expect(second.json).toMatch(\`...\`)\`\` with the whole result in place (\`TEST_UPDATE=1\` fills an empty one); a precise assertion stays beside it
                 read: docs/reference/linting.md#result-compared-whole
         `);
     });
@@ -47,8 +47,8 @@ describe('result-compared-whole', () => {
         expect(result.report).toMatch(`
             specs/api/users/listed.spec.ts:11:12  jterrazz(result-compared-whole)
                 found: the test reads result.response and never compares it whole
-                why: A test that reads a response, a json or a table — \`<result>.response\`, \`<result>.json\`, \`<result>.table('<name>')\` of a result it awaited — compares it WHOLE, once: \`toMatch\` handed the whole result written in place or its golden, or a table's \`toBeEmpty()\`.
-                fix: add \`\`expect(result.response).toMatch(\`…\`)\`\` with the whole result in place (\`TEST_UPDATE=1\` fills an empty one); a precise assertion stays beside it
+                why: A test that reads a response, a json or a table (\`<result>.response\`, \`<result>.json\`, \`<result>.table('<name>')\` of a result it awaited) compares it WHOLE, once: \`toMatch\` handed the whole result written in place or its golden, or a table's \`toBeEmpty()\`.
+                fix: add \`\`expect(result.response).toMatch(\`...\`)\`\` with the whole result in place (\`TEST_UPDATE=1\` fills an empty one); a precise assertion stays beside it
                 read: docs/reference/linting.md#result-compared-whole
         `);
     });

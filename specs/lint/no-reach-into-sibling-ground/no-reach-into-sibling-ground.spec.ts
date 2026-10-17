@@ -28,8 +28,8 @@ describe('no-reach-into-sibling-ground', () => {
         expect(result.report).toMatch(`
             specs/widget/widget.test.ts:9:48  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../../src/x/" leaves widget
-                why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included — \`<specs>/<role>/\`, what the specifications share.
-                fix: move what it names beside widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: <role>/ when they span specifications
+                why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included, whose \`<specs>/<role>/\` holds what the specifications share.
+                fix: move what it names beside widget, or, when several leaves share it, into the ground of the lowest folder they share, which each reaches by climbing: <role>/ when they span specifications
                 read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });
@@ -43,7 +43,7 @@ describe('no-reach-into-sibling-ground', () => {
             specs/__seeds__/catalog.sql:1:1  jterrazz-check(ground-shared-or-inline)
                 found: ground only the leaves under api reach for, kept above them
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: move it to api/__seeds__/catalog.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`typescript fix\` does both
+                fix: move it to api/__seeds__/catalog.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it; \`typescript fix\` does both
                 read: docs/reference/linting.md#ground-shared-or-inline
         `);
     });
@@ -56,8 +56,8 @@ describe('no-reach-into-sibling-ground', () => {
         expect(result.report).toMatch(`
             specs/widget/case.spec.yaml:2:1  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../gadget/__fixtures__/gadget-stub/" leaves widget
-                why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included — \`<specs>/<role>/\`, what the specifications share.
-                fix: move what it names beside widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: <role>/ when they span specifications
+                why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included, whose \`<specs>/<role>/\` holds what the specifications share.
+                fix: move what it names beside widget, or, when several leaves share it, into the ground of the lowest folder they share, which each reaches by climbing: <role>/ when they span specifications
                 read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });
@@ -70,8 +70,8 @@ describe('no-reach-into-sibling-ground', () => {
         expect(result.report).toMatch(`
             specs/widget/widget.test.ts:9:48  jterrazz-check(no-reach-into-sibling-ground)
                 found: "../gadget/__fixtures__/gadget-stub/" leaves widget
-                why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included — \`<specs>/<role>/\`, what the specifications share.
-                fix: move what it names beside widget, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: <role>/ when they span specifications
+                why: A path leaves its leaf only by climbing: into the ground of a folder that encloses it, the specs root's included, whose \`<specs>/<role>/\` holds what the specifications share.
+                fix: move what it names beside widget, or, when several leaves share it, into the ground of the lowest folder they share, which each reaches by climbing: <role>/ when they span specifications
                 read: docs/reference/linting.md#no-reach-into-sibling-ground
         `);
     });

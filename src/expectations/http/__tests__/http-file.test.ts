@@ -66,7 +66,7 @@ describe('http-file', () => {
             ].join('\n'),
             [
                 'found: r.http: the header line "broken header" has no colon',
-                'why: An `.http` file’s header is a `Name: value` line.',
+                "why: An `.http` file's header is a `Name: value` line.",
                 'fix: write the header as `Name: value`',
                 READ_LINK,
             ].join('\n'),

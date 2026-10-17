@@ -5,7 +5,7 @@ import { invariant, refusal } from '../refusal.js';
 import { REFUSAL_WHY } from '../rows.js';
 
 describe('refusal', () => {
-    test('refusal — a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {
+    test("refusal — a refusal — the lesson the runtime throws — states the case, the row's sentence and the row's heading, a part per line", () => {
         // Given - a refusal of the disk law, for one call
         const message = refusal('disk-named-by-relative-path-at-runtime', {
             fix: "start it with ./ or ../: file('./out.txt')",
@@ -60,7 +60,7 @@ describe('refusal', () => {
         );
     });
 
-    test('invariant — a broken invariant — is an error that says the bug is the framework’s, then what broke', () => {
+    test("invariant — a broken invariant — is an error that says the bug is the framework's, then what broke", () => {
         // Given - an invariant the framework holds for itself
         const error = invariant('the run containers are served on no port');
 

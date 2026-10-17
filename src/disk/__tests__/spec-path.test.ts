@@ -121,18 +121,18 @@ describe('spec-path', () => {
         ]).toStrictEqual([
             [
                 'found: toMatch(file("./__fixtures__/config.json")) on a string, a value with no golden',
-                "fix: wrap the string to golden it — `expect(text(value)).toMatch(file(…))` — or compare it to a value, `toMatch('…')`",
+                "fix: wrap the string to golden it, `expect(text(value)).toMatch(file(...))`, or compare it to a value, `toMatch('...')`",
                 'read: docs/reference/linting.md#one-verb-per-meaning',
             ],
             [
                 'found: toMatch(directory("./__fixtures__/shop/")) on a string, a value with no golden',
-                "fix: wrap the string to golden it — `expect(text(value)).toMatch(directory(…))` — or compare it to a value, `toMatch('…')`",
+                "fix: wrap the string to golden it, `expect(text(value)).toMatch(directory(...))`, or compare it to a value, `toMatch('...')`",
                 'read: docs/reference/linting.md#one-verb-per-meaning',
             ],
         ]);
     });
 
-    test('requireDiskFile — hands back the file it reads, and refuses a directory, a value or a file of another kind, the example the verb’s', () => {
+    test("requireDiskFile — hands back the file it reads, and refuses a directory, a value or a file of another kind, the example the verb's", () => {
         // Given - a file of each kind, a directory, and plain values
         const json = file('./__fixtures__/config.json');
 
@@ -198,7 +198,7 @@ describe('spec-path', () => {
             true,
             [
                 'found: docker("x"), a value where the disk is read',
-                "fix: name the disk: docker(file('./…')) for a file, docker(directory('./…/')) for a directory",
+                "fix: name the disk: docker(file('./<path>')) for a file, docker(directory('./<path>/')) for a directory",
                 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],
         ]);
@@ -212,7 +212,7 @@ describe('spec-path', () => {
             refusalOf(() => directory(untyped('./fixtures'))),
         ]).toStrictEqual([
             [
-                'found: file("./out//"), a path ending in / — a directory\'s',
+                'found: file("./out//"), a path ending in /, which is a directory\'s',
                 'fix: name the directory with directory("./out//"), or the file without its /: file("./out")',
                 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime',
             ],

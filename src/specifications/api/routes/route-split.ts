@@ -7,13 +7,13 @@ import type { RouteRun, RouteVerdict } from './route-judge.js';
 
 export const NO_SHARD_LEDGERS: Lesson = {
     fix: 'run every shard (`make test SHARD=<index>/<count>`) before the merge, since a whole run empties the shard folders',
-    found: `api routes: not judged — no shard's ledgers under ${ROUTES_DIR}/shard-*/`,
+    found: `api routes: not judged, since no shard's ledgers are under ${ROUTES_DIR}/shard-*/`,
     read: 'docs/guides/api-specs.md#when-a-run-is-not-judged',
-    why: 'The split judges the routes over every shard’s ledgers, so a merge with none has no run to judge.',
+    why: "The split judges the routes over every shard's ledgers, so a merge with none has no run to judge.",
 };
 
 export function partialSplitUnjudged(shards: readonly string[]): string {
-    return `api routes: not judged — ${shards.join(', ')} ran under a test name filter (-t), so the split reaches only some routes`;
+    return `api routes: not judged: ${shards.join(', ')} ran under a test name filter (-t), so the split reaches only some routes`;
 }
 
 /** A merge finding no shard's ledgers fails: a split of an api project always writes some. */

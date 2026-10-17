@@ -40,7 +40,7 @@ describe('route-split', () => {
 
         // Then - the merge names both and judges nothing
         await expect(judgeSplit(root, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: not judged — shard-1-2, shard-2-2 ran under a test name filter (-t), so the split reaches only some routes',
+            line: 'api routes: not judged: shard-1-2, shard-2-2 ran under a test name filter (-t), so the split reaches only some routes',
         });
     });
 

@@ -123,7 +123,7 @@ describe('files', () => {
                 [
                     'found: seed(), and no database is declared',
                     'why: A seed writes into a declared database.',
-                    'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                    "fix: declare a database in the specification's `services` (`postgres()` or `sqlite()`), or drop the seed",
                     'read: docs/reference/services.md#the-database-rule',
                 ].join('\n'),
             );

@@ -12,7 +12,7 @@ describe('no-redundant-root', () => {
         expect(result.report).toMatch(`
             specs/cli/rooted.specification.ts:6:5  jterrazz(no-redundant-root)
                 found: \`root: "../.."\` names the directory the walk already finds
-                why: A \`root\` pointing at the directory the automatic walk would have found is redundant → error.
+                why: A \`root\` pointing at the directory the automatic walk would have found is redundant, and an error.
                 fix: delete the \`root\` option
                 read: docs/reference/linting.md#no-redundant-root
         `);

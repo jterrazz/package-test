@@ -5,7 +5,7 @@ export const FORK_CHAPTER = 'docs/start/getting-started.md';
 
 export const FORK_MARKERS: Markers = {
     end: '<!-- /GENERATED:fork -->',
-    start: '<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/fork.ts -->',
+    start: '<!-- GENERATED:fork. Do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/fork.ts -->',
 };
 
 type ForkRow = {
@@ -28,7 +28,7 @@ export const FORK: ForkRow[] = [
         read: '[Website specs](../guides/website-specs.md)',
     },
     {
-        constructor: 'none — the `component` chain',
+        constructor: 'none, the `component` chain',
         kind: 'component',
         livesAt: '`__tests__/<file>.test.tsx` by `<file>.tsx`',
         project: '`component`',
@@ -72,7 +72,7 @@ export const FORK: ForkRow[] = [
         kind: 'lint',
         livesAt: '`specs/lint/<rule>/<aspect>.spec.ts`',
         project: '`lint`',
-        question: 'Is it a rule the project ships — a plugin, a checker, a preset?',
+        question: 'Is it a rule the project ships: a plugin, a checker, a preset?',
         read: '[Lint specs](../guides/lint-specs.md)',
     },
     {
@@ -96,7 +96,7 @@ export const FORK: ForkRow[] = [
         kind: 'repository suite',
         livesAt: '`specs/<suite>/<domain>/<aspect>.test.ts`',
         project: 'any name',
-        question: 'Is it the repository itself — a suite over several apps?',
+        question: 'Is it the repository itself, a suite over several apps?',
         read: '[Conventions § The third door](../concepts/conventions.md#the-third-door-a-repository-suite)',
     },
 ];

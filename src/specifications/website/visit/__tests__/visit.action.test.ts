@@ -44,7 +44,7 @@ async function visited(
 }
 
 describe('visit', () => {
-    test('visit — opens the page at the site under test with the chain’s headers and clock, the stub backend allowed, external requests allowed unless blocked', async () => {
+    test("visit — opens the page at the site under test with the chain's headers and clock, the stub backend allowed, external requests allowed unless blocked", async () => {
         // Given - a site with a backend and headers and a clock on the chain, and one with neither, blocking external requests
         const full = await visited(
             { backendUrl: 'http://127.0.0.1:4100/api', baseUrl: 'http://site.test' },

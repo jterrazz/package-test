@@ -24,7 +24,7 @@ export function recordBaseline(registry: CheckerRegistry): KitCommand {
         const counts = countsOf(findings);
         writeBaseline(root, counts);
         process.stdout.write(
-            `${labelOf(TEST_SECTION)} written — ${String(findings.length)} finding(s) across ${String(Object.keys(counts).length)} rule(s)\n`,
+            `${labelOf(TEST_SECTION)} written: ${String(findings.length)} finding(s) across ${String(Object.keys(counts).length)} rule(s)\n`,
         );
 
         return 0;

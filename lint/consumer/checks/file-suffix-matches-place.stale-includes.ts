@@ -31,8 +31,8 @@ function collectedEntries(text: string): string[] {
 
 function noticeFor(where: string, entry: string): string {
     return entry.includes('*')
-        ? `${where}: ${entry} still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (file-suffix-matches-place)`
-        : `${where}: ${entry} names a file this run renamed — it is \`${entry.slice(0, -'.test.ts'.length)}.spec.ts\` now, and the entry collects nothing until it follows (file-suffix-matches-place)`;
+        ? `${where}: ${entry} still names \`.test.ts\`, though the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (file-suffix-matches-place)`
+        : `${where}: ${entry} names a file this run renamed, \`${entry.slice(0, -'.test.ts'.length)}.spec.ts\` now, and the entry collects nothing until it follows (file-suffix-matches-place)`;
 }
 
 function staleEntriesIn(path: string, owner: string, renamed: Rename[]): string[] {

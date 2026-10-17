@@ -73,7 +73,7 @@ describe('refusals', () => {
 
         // Then - the whole rendering, tokens covering the path and the run cwd
         expect(text(message)).toMatch(`
-            found: spec mismatch — a run whose golden stdout is deliberately wrong
+            found: spec mismatch: a run whose golden stdout is deliberately wrong
 
             $ help
 
@@ -92,7 +92,7 @@ describe('refusals', () => {
 
             specs/cli/run/__fixtures__/wrong-stdout.spec.yaml:3
             why: A spec document states what its runs produce: the exit code and the streams, whole.
-            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs: the exit code and the streams, and nothing else
             read: docs/guides/spec-documents.md#failure-and-update`);
     });
 
@@ -104,7 +104,7 @@ describe('refusals', () => {
 
         // Then - the whole rendering, stderr included
         expect(text(message)).toMatch(`
-            found: spec mismatch — a run whose golden exit code is deliberately wrong
+            found: spec mismatch: a run whose golden exit code is deliberately wrong
 
             $ fail
 
@@ -118,7 +118,7 @@ describe('refusals', () => {
 
             specs/cli/run/__fixtures__/wrong-exit.spec.yaml:3
             why: A spec document states what its runs produce: the exit code and the streams, whole.
-            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs: the exit code and the streams, and nothing else
             read: docs/guides/spec-documents.md#failure-and-update`);
     });
 
@@ -130,7 +130,7 @@ describe('refusals', () => {
 
         // Then - the whole rendering, one line per rejected assertion
         expect(text(message)).toMatch(`
-            found: spec mismatch — a run whose files assertions are deliberately wrong
+            found: spec mismatch: a run whose files assertions are deliberately wrong
 
             $ scaffold
 
@@ -142,7 +142,7 @@ describe('refusals', () => {
 
             specs/cli/run/__fixtures__/wrong-files.spec.yaml:3
             why: A spec document states what its runs produce: the exit code and the streams, whole.
-            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs: the exit code and the streams, and nothing else
             read: docs/guides/spec-documents.md#failure-and-update`);
     });
 
@@ -166,7 +166,7 @@ describe('refusals', () => {
         // Then - a refusal naming the line and the key, whose frame is that line, not a parser frame
         expect(error.message).toBe(
             [
-                'found: specs/cli/run/__fixtures__/unknown-key.spec.yaml:2: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs',
+                'found: specs/cli/run/__fixtures__/unknown-key.spec.yaml:2: unknown key "when:" in a spec document; known keys: description, fixture, env, serve, runs',
                 'why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
                 'fix: write the key the grammar names; the reason prints the accepted set',
                 'read: docs/reference/linting.md#document-follows-its-grammar',

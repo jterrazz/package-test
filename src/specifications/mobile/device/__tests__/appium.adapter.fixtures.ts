@@ -180,12 +180,12 @@ export const SCENARIO_LESSON = [
 /** The refusal of a target matching both Pay buttons of a screen. */
 export function ambiguousPay(target: string): string {
     return [
-        `found: Ambiguous element: ${target} matched 2 elements on the screen —`,
+        `found: Ambiguous element: ${target} matched 2 elements on the screen:`,
         '  1. Button "Pay"',
         '  2. Button "Pay"  [testId: pay-later]',
         'why: A verb acts on exactly ONE element: a target that matches several is refused, never settled by the first.',
         'fix: designate one of them:',
-        `  • scope it       within(testId('…'), ${target}) — a screen has no landmarks; any target works as the scope`,
+        `  • scope it       within(testId('...'), ${target}): a screen has no landmarks, and any target works as the scope`,
         '  • other element  a button() or field() may name one thing where this does not',
         'read: docs/reference/linting.md#target-matches-one-element',
     ].join('\n');

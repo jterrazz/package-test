@@ -59,13 +59,13 @@ describe('named-path-exists', () => {
         ).toStrictEqual([
             'named-path-exists specs/api/case.spec.yaml:4:1 fixture: "./__fixtures__/present.json/" names a file — write "./__fixtures__/present.json"',
             'named-path-exists specs/api/case.spec.yaml:5:1 fixture: "./__fixtures__/app" names a directory — write "./__fixtures__/app/"',
-            'named-path-exists specs/api/case.spec.yaml:6:1 fixture: "./__fixtures__/gone.json" names nothing — specs/api/__fixtures__/gone.json does not exist — create specs/api/__fixtures__/gone.json, or correct the path',
-            "named-path-exists specs/api/users.spec.ts:8:47 '../gone', 'x.txt' names nothing — specs/gone/x.txt does not exist — create specs/gone/x.txt, or correct the path",
-            "named-path-exists specs/api/users.spec.ts:3:28 file('./__fixtures__/missing.json') names nothing — specs/api/__fixtures__/missing.json does not exist — create specs/api/__fixtures__/missing.json, or correct the path",
+            'named-path-exists specs/api/case.spec.yaml:6:1 fixture: "./__fixtures__/gone.json" names nothing: specs/api/__fixtures__/gone.json does not exist — create specs/api/__fixtures__/gone.json, or correct the path',
+            "named-path-exists specs/api/users.spec.ts:8:47 '../gone', 'x.txt' names nothing: specs/gone/x.txt does not exist — create specs/gone/x.txt, or correct the path",
+            "named-path-exists specs/api/users.spec.ts:3:28 file('./__fixtures__/missing.json') names nothing: specs/api/__fixtures__/missing.json does not exist — create specs/api/__fixtures__/missing.json, or correct the path",
             "named-path-exists specs/api/users.spec.ts:4:33 directory('./__fixtures__/present.json') names a file — write file('./__fixtures__/present.json')",
             "named-path-exists specs/api/users.spec.ts:5:28 file('./__fixtures__/app/') names a directory — write directory('./__fixtures__/app/')",
             "named-path-exists specs/api/users.spec.ts:6:28 file('./__fixtures__/app') names a directory — write directory('./__fixtures__/app/')",
-            "named-path-exists specs/api/users.spec.ts:14:28 file('./__fixtures__/ignored.json') names nothing — specs/api/__fixtures__/ignored.json is ignored by git — track specs/api/__fixtures__/ignored.json (it is ignored by git), or name a file that is",
+            "named-path-exists specs/api/users.spec.ts:14:28 file('./__fixtures__/ignored.json') names nothing: specs/api/__fixtures__/ignored.json is ignored by git — track specs/api/__fixtures__/ignored.json (it is ignored by git), or name a file that is",
         ]);
     });
 

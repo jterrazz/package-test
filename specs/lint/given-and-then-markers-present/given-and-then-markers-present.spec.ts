@@ -40,22 +40,22 @@ describe('given-and-then-markers-present', () => {
             __tests__/scenario.test.ts:4:1  jterrazz(given-and-then-markers-present)
                 found: the test has no \`// Given -\` marker
                 why: Every test carries \`// Given -\` then \`// Then -\` (both, in that order); a Given declared after a Then is an error.
-                fix: write \`// Given - <a sentence about the subject>\` — every test carries a Given, then a Then
+                fix: write \`// Given - <a sentence about the subject>\`; every test carries a Given, then a Then
                 read: docs/reference/linting.md#given-and-then-markers-present
             __tests__/scenario.test.ts:9:1  jterrazz(given-and-then-markers-present)
                 found: the test has no \`// Then -\` marker
                 why: Every test carries \`// Given -\` then \`// Then -\` (both, in that order); a Given declared after a Then is an error.
-                fix: write \`// Then - <a sentence about the subject>\` — every test carries a Given, then a Then
+                fix: write \`// Then - <a sentence about the subject>\`; every test carries a Given, then a Then
                 read: docs/reference/linting.md#given-and-then-markers-present
             __tests__/scenario.test.ts:14:1  jterrazz(given-and-then-markers-present)
                 found: the test has no \`// Given -\` marker
                 why: Every test carries \`// Given -\` then \`// Then -\` (both, in that order); a Given declared after a Then is an error.
-                fix: write \`// Given - <a sentence about the subject>\` — every test carries a Given, then a Then
+                fix: write \`// Given - <a sentence about the subject>\`; every test carries a Given, then a Then
                 read: docs/reference/linting.md#given-and-then-markers-present
             __tests__/scenario.test.ts:14:1  jterrazz(given-and-then-markers-present)
                 found: the test has no \`// Then -\` marker
                 why: Every test carries \`// Given -\` then \`// Then -\` (both, in that order); a Given declared after a Then is an error.
-                fix: write \`// Then - <a sentence about the subject>\` — every test carries a Given, then a Then
+                fix: write \`// Then - <a sentence about the subject>\`; every test carries a Given, then a Then
                 read: docs/reference/linting.md#given-and-then-markers-present
         `);
     });

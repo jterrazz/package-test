@@ -74,7 +74,7 @@ describe('text-assertions', () => {
         expect(() => {
             toMatch(/built/u);
         }).toThrow(
-            "fix: write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(…)",
+            "fix: write the whole text in place, toMatch('...'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(...)",
         );
         expect(streamValueRoute('built', 'built')).toBeUndefined();
     });
@@ -163,7 +163,7 @@ describe('text-assertions', () => {
             'named',
             ...['./__expected__/help', './__expected__.d/help'].map(
                 (name) =>
-                    `Error: found: toMatch(file("${name}")) on the stream "stdout", a golden path with no extension\nwhy: The extension is part of a golden’s path.\nfix: name the file with its extension: file('./__expected__/help.txt')\nread: docs/reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives`,
+                    `Error: found: toMatch(file("${name}")) on the stream "stdout", a golden path with no extension\nwhy: The extension is part of a golden's path.\nfix: name the file with its extension: file('./__expected__/help.txt')\nread: docs/reference/assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives`,
             ),
         ]);
     });
@@ -199,9 +199,9 @@ describe('text-assertions', () => {
             String(streamValueRoute(accessor, 42)),
             String(streamValueRoute(accessor, /x/u)).split('\n')[0],
         ]).toStrictEqual([
-            'found: toBeEmpty() on the stream "stderr" — an empty stream is an empty text\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: compare its text: expect(<result>.stderr.text).toBe(\'\')\nread: docs/reference/linting.md#one-verb-per-meaning',
+            'found: toBeEmpty() on the stream "stderr": an empty stream is an empty text\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: compare its text: expect(<result>.stderr.text).toBe(\'\')\nread: docs/reference/linting.md#one-verb-per-meaning',
             'whole',
-            'TypeError: found: toMatch(a number) on the stream "stderr"\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: write the whole text in place, toMatch(\'…\'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(…)\nread: docs/reference/linting.md#one-verb-per-meaning',
+            'TypeError: found: toMatch(a number) on the stream "stderr"\nwhy: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.\nfix: write the whole text in place, toMatch(\'...\'), or match a part with vitest on its text: expect(<result>.stderr.text).toMatch(...)\nread: docs/reference/linting.md#one-verb-per-meaning',
             'TypeError: found: toMatch(a RegExp) on the stream "stderr"',
         ]);
     });
@@ -243,7 +243,7 @@ describe('text-assertions', () => {
         ]);
     });
 
-    test('matchThroughGolden — a subject with no golden or whole comparison is vitest’s', () => {
+    test("matchThroughGolden — a subject with no golden or whole comparison is vitest's", () => {
         // Given - a plain subject with no golden, and a stream subject with no whole comparison
         const answered: string[] = [];
         const plain = chaiWith(answered, undefined, { [GOLDEN_MATCHER]: undefined });
@@ -262,7 +262,7 @@ describe('text-assertions', () => {
         expect(answered).toStrictEqual(['vitest', 'vitest']);
     });
 
-    test('matchThroughGolden — a failure thrown or rejected through the router loses the router’s frames, and anything else thrown passes untouched', async () => {
+    test("matchThroughGolden — a failure thrown or rejected through the router loses the router's frames, and anything else thrown passes untouched", async () => {
         // Given - goldens failing every way, each with a frame under the router's own directory
 
         // Then - each failure as the test reads it

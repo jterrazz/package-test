@@ -19,9 +19,9 @@ describe('one-describe-per-file', () => {
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             specs/api/events/list/pagination.spec.ts:5:10  jterrazz(one-describe-per-file)
-                found: the file’s \`describe\` is titled "events listing"
-                why: A test file — a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\` — holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
-                fix: title it 'pagination', the file's aspect, or in the words of the file's name — 'cli reference' for \`cli-reference.spec.ts\`
+                found: the file's \`describe\` is titled "events listing"
+                why: A test file (a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\`) holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
+                fix: title it 'pagination', the file's aspect, or in the words of the file's name: 'cli reference' for \`cli-reference.spec.ts\`
                 read: docs/reference/linting.md#one-describe-per-file
         `);
     });
@@ -34,8 +34,8 @@ describe('one-describe-per-file', () => {
         expect(result.report).toMatch(`
             specs/api/events/list/pagination.spec.ts:5:1  jterrazz(one-describe-per-file)
                 found: the tests of this file stand in no \`describe\`
-                why: A test file — a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\` — holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
-                fix: wrap them in \`describe('pagination', () => { … })\` — \`typescript fix\` does it
+                why: A test file (a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\`) holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
+                fix: wrap them in \`describe('pagination', () => { ... })\`; \`typescript fix\` does it
                 read: docs/reference/linting.md#one-describe-per-file
         `);
     });
@@ -57,9 +57,9 @@ describe('one-describe-per-file', () => {
         // Then - the finding stands, and the file is its own golden
         expect(result.report).toMatch(`
             specs/api/articles/create/articles.spec.ts:5:10  jterrazz(one-describe-per-file)
-                found: the file’s \`describe\` is titled "createArticle"
-                why: A test file — a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\` — holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
-                fix: title it 'articles', the file's aspect, or in the words of the file's name — 'cli reference' for \`cli-reference.spec.ts\`
+                found: the file's \`describe\` is titled "createArticle"
+                why: A test file (a \`.spec.ts\`, a \`.test.ts\`, a \`.test.tsx\`) holds one top-level \`describe\`, titled with what the file is about, and every test inside it.
+                fix: title it 'articles', the file's aspect, or in the words of the file's name: 'cli reference' for \`cli-reference.spec.ts\`
                 read: docs/reference/linting.md#one-describe-per-file
         `);
         await expect(result.directory()).toMatch(directory('./__expected__/merged-twice/'));

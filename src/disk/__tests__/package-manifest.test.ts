@@ -53,7 +53,7 @@ describe('manifestAt', () => {
         ]);
     });
 
-    test('package manifest — manifestAt — a manifest that is no JSON — is refused whole, its parse error kept as the cause', () => {
+    test('package manifest — manifestAt — a manifest that is no JSON: is refused whole, its parse error kept as the cause', () => {
         // Given - a package whose manifest breaks off
         const directory = packageWith(BROKEN);
 
@@ -67,7 +67,7 @@ describe('manifestAt', () => {
             error instanceof Error ? error.cause instanceof SyntaxError : false,
         ]).toStrictEqual([
             [
-                `found: packed(): ${join(directory, 'package.json')} is no JSON — ${parsing instanceof Error ? parsing.message : ''}`,
+                `found: packed(): ${join(directory, 'package.json')} is no JSON: ${parsing instanceof Error ? parsing.message : ''}`,
                 'why: packed() reads the name, the bin and the runtime closure the package declares in its package.json.',
                 `fix: correct ${join(directory, 'package.json')}, so npm and Node read the package it describes`,
                 'read: docs/guides/cli-specs.md#a-package-specified-from-its-artefact',

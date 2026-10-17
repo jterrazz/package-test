@@ -222,7 +222,7 @@ describe('update-mode', () => {
         }
 
         // Then - it still threw its diff, and the file on disk is untouched
-        expect(message).toContain('found: spec mismatch — ');
+        expect(message).toContain('found: spec mismatch: ');
         expect(readFileSync(target, 'utf8')).toBe(before);
     });
 });

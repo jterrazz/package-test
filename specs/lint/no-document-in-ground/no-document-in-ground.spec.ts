@@ -14,7 +14,7 @@ describe('no-document-in-ground', () => {
         expect(result.report).toMatch(`
             specs/widget:1:1  jterrazz-check(no-unused-ground)
                 found: a domain folder holding __expected__ and no test or document
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: write the test that stands on __expected__, or delete the folder
                 read: docs/reference/linting.md#no-unused-ground
             specs/widget/__expected__/builds.spec.yaml:1:1  jterrazz-check(no-document-in-ground)

@@ -30,6 +30,6 @@ describe('QuoteStatus', () => {
         await expect(chain).rejects.toThrow(
             'found: a route the chain declared never requested was reached:',
         );
-        await expect(chain).rejects.toThrow('- GET /api/quote — reached by GET');
+        await expect(chain).rejects.toThrow('- GET /api/quote: reached by GET');
     });
 });

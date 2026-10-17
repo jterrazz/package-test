@@ -41,8 +41,8 @@ export function compilePredicate(target: Target, options?: { anyVisibility?: boo
     if (!isMobileKind(target.kind)) {
         throw new Error(
             refusal('no-landmark-on-mobile', {
-                fix: `scope with within(testId('…'), …) — any target works as the scope`,
-                found: `${asWritten(target)}, a landmark — an iOS screen has no '${target.kind}' region`,
+                fix: `scope with within(testId('...'), ...): any target works as the scope`,
+                found: `${asWritten(target)}, a landmark: an iOS screen has no '${target.kind}' region`,
             }),
         );
     }
@@ -118,7 +118,7 @@ const LABEL_WIDTH = 60;
 
 // invariant: a long accessible name is the evidence that matters most, so it is shortened where it would have been dropped.
 const labelShortened = (label: string): string =>
-    label.length > LABEL_WIDTH ? `${label.slice(0, LABEL_WIDTH - 1)}…` : label;
+    label.length > LABEL_WIDTH ? `${label.slice(0, LABEL_WIDTH - 3)}...` : label;
 
 /** The labels a page source shows, each at most 60 characters, for a timeout's evidence. */
 export function onScreenLabels(source: string): string[] {

@@ -61,7 +61,7 @@ describe('CallResult', () => {
         });
     });
 
-    test('callResult — the accessors — each named for what it reads, and every one binding captures in the result’s one scope', () => {
+    test("callResult — the accessors — each named for what it reads, and every one binding captures in the result's one scope", () => {
         // Given - a call that returned text, and one that returned JSON
         const text = new CallResult<string>({
             config: {},

@@ -96,7 +96,7 @@ describe('architecture', () => {
         expect([...new Set(named('action'))]).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
     });
 
-    test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested in its folder’s __tests__/ or declared siblingless, and armed through a port of its own', () => {
+    test("the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested in its folder's __tests__/ or declared siblingless, and armed through a port of its own", () => {
         // Given - every definition a setup or an action module exports
         // Then - each answers to its module, has its test, and names a port exactly when it arms an adapter
         expect(definitions.flatMap((found) => straysOf(ROOT, found, ACTION_MODULES))).toStrictEqual(

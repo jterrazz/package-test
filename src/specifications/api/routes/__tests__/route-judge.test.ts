@@ -103,7 +103,7 @@ describe('route-judge', () => {
         ).resolves.toStrictEqual({
             failure: {
                 fix: 'make the run green, then record with TEST_UPDATE=1',
-                found: 'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests',
+                found: 'api routes: not recorded: 1 file(s) of the run failed, and a failed file may not have sent its requests',
                 read: 'docs/guides/api-specs.md#when-a-run-is-not-judged',
                 why: 'The route ratchet is recorded only from a run that is green and whole.',
             },
@@ -119,7 +119,7 @@ describe('route-judge', () => {
         await expect(
             judgeRoutes(root, directory, { failed: 2, scope: 'whole', update: false }),
         ).resolves.toStrictEqual({
-            line: 'api routes: not judged — 2 file(s) of the run failed, and a failed file may not have sent its requests',
+            line: 'api routes: not judged: 2 file(s) of the run failed, and a failed file may not have sent its requests',
         });
     });
 
@@ -213,13 +213,13 @@ describe('route-judge', () => {
 
         // Then - the drift is named, whatever the mode
         const failure = methodlessDrift(
-            "  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp' with why the app takes it on any method",
+            "  ALL /mcp: the app takes it on any method, and the list misses it, so add '/mcp' with why the app takes it on any method",
         );
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(failure);
         await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
     });
 
-    test('route judge — the api run judged — the method-less list is held to the app’s own table, even when an OpenAPI document measures the coverage', async () => {
+    test("route judge — the api run judged — the method-less list is held to the app's own table, even when an OpenAPI document measures the coverage", async () => {
         // Given - the app takes /mcp on any method, and the member declares a document that knows only its POST
         const { directory, root } = methodlessRun(['/mcp']);
         writeFileSync(

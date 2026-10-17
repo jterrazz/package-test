@@ -5,7 +5,7 @@ import { packageWith } from '../../../__tests__/package-tree.fixtures.js';
 import { sourceCopiedBy } from '../ground-shared-or-inline.copies.js';
 
 describe('sourceCopiedBy', () => {
-    test('names a file of the repository that holds exactly the golden’s bytes, and none when the bytes differ in a character or in length', () => {
+    test("names a file of the repository that holds exactly the golden's bytes, and none when the bytes differ in a character or in length", () => {
         // Given - a golden, a source holding the same bytes, a file of the same length with one character changed, and a longer file
         const root = packageWith({
             'docs/same.md': '# Page\n',

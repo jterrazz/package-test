@@ -46,7 +46,7 @@ ruleTester().run('expected-constant-shared', expectedConstantShared, {
             filename: SPEC,
         },
         {
-            name: 'An expectation read outside any test, a `let`, and a module test are not this rule’s.',
+            name: "An expectation read outside any test, a `let`, and a module test are not this rule's.",
             code: "const PAGE = 'x';\nexpect(a).toBe(PAGE);",
             filename: SPEC,
         },

@@ -21,7 +21,7 @@ describe('stubBackend', () => {
             [
                 'found: .intercept(), and this runner has no declared backend',
                 'why: A site, an app or a binary is served its stubs by a declared stub backend, the URL it reads in place of its API.',
-                "fix: add `backend` to the specification options: specification.mobile({ …, backend: { env: 'API_URL' } })",
+                "fix: add `backend` to the specification options: specification.mobile({ ..., backend: { env: 'API_URL' } })",
                 'read: docs/guides/mobile-specs.md#declared-backend',
             ].join('\n'),
         );
@@ -36,7 +36,7 @@ describe('stubBackend', () => {
             network.accepts();
         }).toThrow(
             [
-                "fix: add `backend` to the specification options: specification.website({ …, backend: { env: 'API_URL' } })",
+                "fix: add `backend` to the specification options: specification.website({ ..., backend: { env: 'API_URL' } })",
                 'read: docs/guides/website-specs.md#declared-backend',
             ].join('\n'),
         );

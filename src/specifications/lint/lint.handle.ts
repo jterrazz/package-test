@@ -87,7 +87,7 @@ export function oxlintBinary(anchors: readonly string[]): string {
     }
     throw new Error(
         refusal({
-            fix: 'install oxlint — an optional peer of @jterrazz/test — beside the project',
+            fix: 'install oxlint, an optional peer of @jterrazz/test, beside the project',
             found: `specification.lint() runs oxlint, and none resolves from ${anchors.join(', ')}`,
             read: 'docs/guides/lint-specs.md#options',
             why: 'A plugin and a config are run by the real oxlint, the one a project lints with.',
@@ -105,7 +105,7 @@ export async function startLint(options: LintSpecificationOptions): Promise<Lint
     if (!runsOxlint && checkers.length === 0 && options.presets === undefined) {
         throw new Error(
             refusal({
-                fix: 'name the plugins, the config, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
+                fix: 'name the plugins, the config, the checkers or the presets the specification lints with (`presets: []` for the base preset alone)',
                 found: 'specification.lint() with no plugin, no config, no checker and no presets',
                 read: 'docs/guides/lint-specs.md#options',
                 why: 'A lint specification runs the linters it names, and one that names none judges nothing.',

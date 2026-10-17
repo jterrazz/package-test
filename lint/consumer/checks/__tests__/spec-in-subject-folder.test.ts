@@ -22,14 +22,14 @@ describe('checkSpecInSubjectFolder', () => {
             {
                 column: 31,
                 path: 'api/charts/filled.spec.ts',
-                fix: "write the route's template: `.get('/indicators/:<name>/chart', { params: { <name>: 'btc' } })` — or, if `btc` is the route's own segment, state that the path is the route: `.get('/indicators/btc/chart', { params: {} })`",
+                fix: "write the route's template: `.get('/indicators/:<name>/chart', { params: { <name>: 'btc' } })` or, if `btc` is the route's own segment, state that the path is the route: `.get('/indicators/btc/chart', { params: {} })`",
                 found: '`GET /indicators/btc/chart` names `btc` right after the collection `indicators`: a value or a segment of the route, and the folder depends on which',
                 line: 2,
                 rule: 'spec-in-subject-folder',
             },
             {
                 path: 'api/charts/templated.spec.ts',
-                fix: 'move it to api/indicators/chart/templated.spec.ts — `typescript fix` moves it, and the ground it stands on',
+                fix: 'move it to api/indicators/chart/templated.spec.ts; `typescript fix` moves it, and the ground it stands on',
                 found: 'a spec of GET /indicators/:id/chart, filed under api/charts/',
                 line: 1,
                 rule: 'spec-in-subject-folder',
@@ -50,8 +50,8 @@ describe('checkSpecInSubjectFolder', () => {
 
         // Then - the first word files the one, the declared words the other
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
-            'move it to cli/db/runs.spec.ts — `typescript fix` moves it, and the ground it stands on',
-            'move it to cli/db/migrate/runs.spec.ts — `typescript fix` moves it, and the ground it stands on',
+            'move it to cli/db/runs.spec.ts; `typescript fix` moves it, and the ground it stands on',
+            'move it to cli/db/migrate/runs.spec.ts; `typescript fix` moves it, and the ground it stands on',
         ]);
     });
 
@@ -75,7 +75,7 @@ describe('checkSpecInSubjectFolder', () => {
         // Then - no finding before the declaration, and the list folder after it
         expect(plain).toStrictEqual([]);
         expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
-            'move it to api/data/list/listing.spec.ts — `typescript fix` moves it, and the ground it stands on',
+            'move it to api/data/list/listing.spec.ts; `typescript fix` moves it, and the ground it stands on',
         ]);
     });
 

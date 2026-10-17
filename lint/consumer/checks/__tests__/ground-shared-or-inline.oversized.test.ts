@@ -29,17 +29,17 @@ describe('ground-shared-or-inline.oversized', () => {
                 return `${line}:${column} ${found} — ${fix}`;
             }),
         ).toStrictEqual([
-            "4:35 a request of 33 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/creates-a-user.txt and name it with file('./__requests__/creates-a-user.txt') — `typescript fix` moves it",
-            "39:31 a request of 31 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/replaces-it.json and name it with file('./__requests__/replaces-it.json') — `typescript fix` moves it",
-            "40:46 a request of 32 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/replaces-it.json and name it with file('./__requests__/replaces-it.json') — `typescript fix` moves it",
-            "43:23 a request of 31 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/sends-raw.http and name it with file('./__requests__/sends-raw.http') — `typescript fix` moves it",
-            "145:25 a request of 33 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/renames-it.txt and name it with file('./__requests__/renames-it.txt') — `typescript fix` moves it",
-            '178:26 a request of 32 lines written in the test, past the __requests__/ cap of 30 — move it to a file under ./__requests__/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only',
-            "212:33 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to ./__expected__/lists-users.json and name it with file('./__expected__/lists-users.json') — `typescript fix` moves it",
-            "213:37 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to ./__expected__/lists-users.http and name it with file('./__expected__/lists-users.http') — `typescript fix` moves it",
-            "366:35 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to ./__expected__/lists-users.txt and name it with file('./__expected__/lists-users.txt') — `typescript fix` moves it",
-            "519:28 an expectation of 153 lines written in the test, past the __expected__/ cap of 150 — a string has no golden: wrap it — `expect(text(output)).toMatch(file('./__expected__/lists-users.txt'))` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file",
-            '825:34 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to a file under ./__expected__/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only',
+            "4:35 a request of 33 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/creates-a-user.txt and name it with file('./__requests__/creates-a-user.txt'); `typescript fix` moves it",
+            "39:31 a request of 31 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/replaces-it.json and name it with file('./__requests__/replaces-it.json'); `typescript fix` moves it",
+            "40:46 a request of 32 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/replaces-it.json and name it with file('./__requests__/replaces-it.json'); `typescript fix` moves it",
+            "43:23 a request of 31 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/sends-raw.http and name it with file('./__requests__/sends-raw.http'); `typescript fix` moves it",
+            "145:25 a request of 33 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/renames-it.txt and name it with file('./__requests__/renames-it.txt'); `typescript fix` moves it",
+            '178:26 a request of 32 lines written in the test, past the __requests__/ cap of 30 — move it to a file under ./__requests__/ and name it with file(), by hand, since the fixer reads a string, a template or a JSON value only',
+            "212:33 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to ./__expected__/lists-users.json and name it with file('./__expected__/lists-users.json'); `typescript fix` moves it",
+            "213:37 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to ./__expected__/lists-users.http and name it with file('./__expected__/lists-users.http'); `typescript fix` moves it",
+            "366:35 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to ./__expected__/lists-users.txt and name it with file('./__expected__/lists-users.txt'); `typescript fix` moves it",
+            "519:28 an expectation of 153 lines written in the test, past the __expected__/ cap of 150 — a string has no golden: wrap it, `expect(text(output)).toMatch(file('./__expected__/lists-users.txt'))`, or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file",
+            '825:34 an expectation of 151 lines written in the test, past the __expected__/ cap of 150 — move it to a file under ./__expected__/ and name it with file(), by hand, since the fixer reads a string, a template or a JSON value only',
         ]);
     });
 

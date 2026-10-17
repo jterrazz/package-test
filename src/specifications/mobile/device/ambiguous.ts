@@ -16,7 +16,7 @@ function formatFixes(target: Target, matches: MobileElementMatch[]): string[] {
 
     if (!target.scope) {
         fixes.push(
-            `scope it       within(testId('…'), ${asWrittenUnscoped(target)}) — a screen has no landmarks; any target works as the scope`,
+            `scope it       within(testId('...'), ${asWrittenUnscoped(target)}): a screen has no landmarks, and any target works as the scope`,
         );
     }
 

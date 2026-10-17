@@ -67,15 +67,15 @@ async function toMatchGolden(
     if (!isDiskFile(expected)) {
         throw new TypeError(
             refusal('one-verb-per-meaning', {
-                fix: 'compare the tree under node, or a captured text of the page to its file(…)',
-                found: 'toMatch(directory(…)) in a page, which has no working directory',
+                fix: 'compare the tree under node, or a captured text of the page to its file(...)',
+                found: 'toMatch(directory(...)) in a page, which has no working directory',
             }),
         );
     }
     if (!(received instanceof TextAccessor)) {
         throw new TypeError(
             refusal('one-verb-per-meaning', {
-                fix: `compare a captured text — result.tree, result.html, text(…) — to file(${JSON.stringify(expected.path)})`,
+                fix: `compare a captured text (result.tree, result.html, text(...)) to file(${JSON.stringify(expected.path)})`,
                 found: `toMatch(file(${JSON.stringify(expected.path)})) in a page, on a subject that is no captured text`,
             }),
         );
@@ -92,7 +92,7 @@ async function toMatchWhole(
     if (!(received instanceof TextAccessor) || typeof expected !== 'string') {
         throw new TypeError(
             refusal('one-verb-per-meaning', {
-                fix: 'compare a captured text — result.tree, result.html, text(…) — to a text written in place',
+                fix: 'compare a captured text (result.tree, result.html, text(...)) to a text written in place',
                 found: 'toMatch(<value>) in a page, on a subject or a value that is no text',
             }),
         );

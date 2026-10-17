@@ -36,7 +36,7 @@ const run = (
 });
 
 describe('rawFetch', () => {
-    test('fetch.action — one raw exchange — sends the chain’s headers, and answers a redirect as itself, never followed', async () => {
+    test("fetch.action — one raw exchange — sends the chain's headers, and answers a redirect as itself, never followed", async () => {
         // Given - a site
         const baseUrl = await site();
 
@@ -89,7 +89,7 @@ describe('rawFetch', () => {
         );
     });
 
-    test('fetch.action — preparing — opens no working directory, and refuses a chain that pinned a page’s clock', () => {
+    test("fetch.action — preparing — opens no working directory, and refuses a chain that pinned a page's clock", () => {
         // Given - a chain stating no clock, and one stating one
         const pinned = readerOf({ slices: { clock: '2026-01-01T00:00:00Z' }, testDir: null });
 
@@ -109,7 +109,7 @@ describe('rawFetch', () => {
         );
     });
 
-    test('fetch.action — preparing — refuses a chain that stated a page’s storage, whole', () => {
+    test("fetch.action — preparing — refuses a chain that stated a page's storage, whole", () => {
         // Given - a chain seeding local storage
         const seeded = readerOf({
             slices: { storage: { local: { theme: 'dark' } } },

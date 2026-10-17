@@ -85,7 +85,7 @@ describe('CliResult', () => {
         expect([result.requests, resultOf('').requests]).toStrictEqual([[sent], []]);
     });
 
-    test('cli.result — what a command left — its exit, each stream named for itself, its working directory, all in the result’s one capture scope', () => {
+    test("cli.result — what a command left — its exit, each stream named for itself, its working directory, all in the result's one capture scope", () => {
         // Given - a command that exited 3, printing on both streams
         const result = resultOf('{"id": 7}');
 

@@ -20,8 +20,8 @@ describe('spec-named-for-its-aspect', () => {
         expect(result.report).toMatch(`
             specs/api/events/list/misc.spec.ts:1:1  jterrazz(spec-named-for-its-aspect)
                 found: the aspect "misc" names no question about the subject
-                why: A spec file is named for its aspect: kebab-case (\`not-found.spec.ts\`), and never a name that says the file holds what fit nowhere else — \`misc\`, \`other\`, \`basic\`, \`general\`, \`more\`, \`edge-cases\`, \`tests\`, \`main\`.
-                fix: rename the file for what its tests ask — \`pagination\`, \`filters\`, \`validation\`, \`not-found\`, \`auth\`, \`shape\` — and split it when they ask several
+                why: A spec file is named for its aspect: kebab-case (\`not-found.spec.ts\`), and never a name that says the file holds what fit nowhere else (\`misc\`, \`other\`, \`basic\`, \`general\`, \`more\`, \`edge-cases\`, \`tests\`, \`main\`).
+                fix: rename the file for what its tests ask (\`pagination\`, \`filters\`, \`validation\`, \`not-found\`, \`auth\`, \`shape\`), and split it when they ask several
                 read: docs/reference/linting.md#spec-named-for-its-aspect
         `);
     });

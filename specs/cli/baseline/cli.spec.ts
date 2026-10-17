@@ -65,7 +65,7 @@ describe('cli', () => {
         // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            [{"column":1,"line":1,"message":"found: __seeds__/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete __seeds__/dead.sql, or name it from the test that stands on it · read: docs/reference/linting.md#no-unused-ground","path":"specs/widget/__seeds__/dead.sql","rule":"jterrazz-check/no-unused-ground"}]
+            [{"column":1,"line":1,"message":"found: __seeds__/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete __seeds__/dead.sql, or name it from the test that stands on it · read: docs/reference/linting.md#no-unused-ground","path":"specs/widget/__seeds__/dead.sql","rule":"jterrazz-check/no-unused-ground"}]
         `);
     });
 

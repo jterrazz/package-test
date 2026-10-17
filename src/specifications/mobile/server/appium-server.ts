@@ -113,7 +113,7 @@ export function runDevice(device: MobileDevice | undefined, run: RunServer): Mob
                 fix: 'name that device, or declare no device on mobile() so each file serves its own',
                 found: `specification.mobile() names the device ${named(device)}, and the run's Appium server drives ${named({ ...run.device, udid: run.udid })}, the device its mobile({ device }) project declares`,
                 read: 'docs/guides/mobile-specs.md#one-session-per-run',
-                why: 'The run’s setup booted the project’s device alone.',
+                why: "The run's setup booted the project's device alone.",
             }),
         );
     }

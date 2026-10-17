@@ -16,7 +16,7 @@ describe('unused', () => {
 
         // Then - the silent omission is the failure, naming the route
         await expect(chain).rejects.toThrow(
-            `- GET ${QUOTES_URL} — declared and required but never requested`,
+            `- GET ${QUOTES_URL}: declared and required but never requested`,
         );
     });
 

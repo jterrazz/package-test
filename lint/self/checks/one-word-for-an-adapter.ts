@@ -25,7 +25,7 @@ function synonymOf(path: string): Spotted<SelfPassId> {
     const name = path.split('/').at(-1) ?? '';
     const { extension = 'ts', tail = '' } = SYNONYM.exec(name)?.groups ?? {};
     return finding('one-word-for-an-adapter', path, {
-        fix: `rename it \`<what it adapts>.adapter${tail}.${extension}\` — the process clock's is \`process-clock.adapter.ts\` — and the paths that import it`,
+        fix: `rename it \`<what it adapts>.adapter${tail}.${extension}\` (the process clock's is \`process-clock.adapter.ts\`) and the paths that import it`,
         found: `\`${name}\` carries the suffix \`.driver\`, a second word for an adapter`,
     });
 }

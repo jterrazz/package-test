@@ -11,7 +11,7 @@ export function linkedDirectory(call: string, path: string, testDir: string): st
         throw new Error(
             refusal('disk-named-by-relative-path-at-runtime', {
                 fix: `create ${src}, or correct the path`,
-                found: `${call} names nothing — ${src} does not exist`,
+                found: `${call} names nothing: ${src} does not exist`,
             }),
         );
     }

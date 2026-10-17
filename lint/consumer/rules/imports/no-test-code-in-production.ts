@@ -27,7 +27,7 @@ export const noTestCodeInProduction = defineRule(
             },
             reach: {
                 found: 'production code references "{{source}}", {{kind}} ({{what}})',
-                fix: 'move the reference into a test — specs, `*.test.ts`, `*.fixtures.ts` or `*.specification.ts` — or move what production needs out of the test material',
+                fix: 'move the reference into a test (specs, `*.test.ts`, `*.fixtures.ts` or `*.specification.ts`), or move what production needs out of the test material',
             },
             reachThrough: {
                 found: 'production code references "{{source}}", which reaches {{kind}} ({{what}}) through {{through}}',
@@ -50,7 +50,7 @@ export const noTestCodeInProduction = defineRule(
                 const what = reach.kind === 'a test package' ? reach.what : shown(reach.what);
                 const data = { kind: reach.kind, source, what };
                 if (reach.through.length > 0) {
-                    const through = reach.through.map((module) => shown(module)).join(' → ');
+                    const through = reach.through.map((module) => shown(module)).join(', then ');
                     context.report({ data: { ...data, through }, messageId: 'reachThrough', node });
                 } else {
                     context.report({ data, messageId: 'reach', node });

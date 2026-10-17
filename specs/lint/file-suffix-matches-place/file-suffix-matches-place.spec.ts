@@ -41,12 +41,12 @@ describe('file-suffix-matches-place', () => {
             specs/api/helpers/normalize.test.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
                 found: a test under the \`api\` specification that reaches no runner
                 why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
-                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder
+                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module's folder
                 read: docs/reference/linting.md#specification-test-uses-its-runner
             specs/api/users/creation.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
-                fix: rename it \`api/users/creation.spec.ts\` — \`typescript fix\` does it with \`git mv\`
+                fix: rename it \`api/users/creation.spec.ts\`; \`typescript fix\` does it with \`git mv\`
                 read: docs/reference/linting.md#file-suffix-matches-place
         `);
     });
@@ -62,7 +62,7 @@ describe('file-suffix-matches-place', () => {
             specs/operator/manifest/manifest.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
-                fix: rename it \`operator/manifest/manifest.spec.ts\` — \`typescript fix\` does it with \`git mv\`
+                fix: rename it \`operator/manifest/manifest.spec.ts\`; \`typescript fix\` does it with \`git mv\`
                 read: docs/reference/linting.md#file-suffix-matches-place
         `);
     });

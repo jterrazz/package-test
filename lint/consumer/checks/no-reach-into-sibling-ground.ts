@@ -31,7 +31,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Spotted[] {
                     column,
                     path: rel,
                     line,
-                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: ${join(relative(rootDir, specsRoot), '<role>')}/ when they span specifications`,
+                    fix: `move what it names beside ${relative(rootDir, leaf)}, or, when several leaves share it, into the ground of the lowest folder they share, which each reaches by climbing: ${join(relative(rootDir, specsRoot), '<role>')}/ when they span specifications`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,
                     rule: 'no-reach-into-sibling-ground',
                 });

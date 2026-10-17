@@ -15,7 +15,7 @@ describe('specification-test-uses-its-runner', () => {
             specs/api/orders/total.spec.ts:1:1  jterrazz-check(specification-test-uses-its-runner)
                 found: a test under the \`api\` specification that reaches no runner
                 why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
-                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module’s folder
+                fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module's folder
                 read: docs/reference/linting.md#specification-test-uses-its-runner
         `);
     });

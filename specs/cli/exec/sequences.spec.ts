@@ -47,7 +47,7 @@ describe('sequences', () => {
                 .exec(['build', 'start'], { waitFor: 'x' }),
         ).rejects.toThrow(
             [
-                'found: .exec([…], { waitFor/timeout }), options on a command sequence',
+                'found: .exec([...], { waitFor/timeout }), options on a command sequence',
                 'why: `waitFor` and `timeout` wait on one long-running process.',
                 'fix: wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
                 'read: docs/guides/cli-specs.md#long-running-processes-waitfor--timeout',

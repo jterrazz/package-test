@@ -99,7 +99,7 @@ export function sameRuntime(one: string, other: string): boolean {
 
 function formatListing(devices: SimulatorDevice[]): string {
     return devices
-        .map((device) => `  ${device.name} — ${device.os} (${device.state}) ${device.udid}`)
+        .map((device) => `  ${device.name}: ${device.os} (${device.state}) ${device.udid}`)
         .join('\n');
 }
 

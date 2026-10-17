@@ -27,7 +27,7 @@ export const givenAndThenMarkersPresent = defineRule(
             },
             missing: {
                 found: 'the test has no `// {{marker}} -` marker',
-                fix: 'write `// {{marker}} - <a sentence about the subject>` — every test carries a Given, then a Then',
+                fix: 'write `// {{marker}} - <a sentence about the subject>`; every test carries a Given, then a Then',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

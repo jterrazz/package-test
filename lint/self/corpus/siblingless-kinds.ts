@@ -107,7 +107,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/specifications/component/render/render.action.ts',
         ),
         name: 'a module that runs only in a page',
-        why: 'it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof',
+        why: 'it reads the `document` and `window` of the page it renders in, which node has none of (`no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global), so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof',
     },
     {
         claims: oneOf(
@@ -176,7 +176,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/specifications/mobile/screen/appium-app.adapter.ts',
         ),
         name: 'an adapter',
-        why: 'an adapter, and what only an adapter reads, is proven through the specification that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)',
+        why: 'an adapter, and what only an adapter reads, is proven through the specification that wires it: a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)',
     },
     {
         claims: oneOf(
@@ -194,7 +194,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(...SIBLINGLESS_LINT_LAYER),
         name: 'a lint-layer module',
-        why: 'the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint specification',
+        why: "the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain's Architecture and Names passes over fixture trees on the lint specification",
     },
     {
         claims: oneOf(
@@ -206,7 +206,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/chain/refusals/node-only.ts',
         ),
         name: 'a chain or runner internal',
-        why: 'it is reached through the chain, so its proof is the specification specs that drive the chain — a direct test would assert on a seam nothing else speaks to',
+        why: 'it is reached through the chain, so its proof is the specification specs that drive the chain: a direct test would assert on a seam nothing else speaks to',
     },
     {
         claims: oneOf(
@@ -222,7 +222,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/visitor/targets/roles.ts',
         ),
         name: 'a module the specs reach through the published entry',
-        why: 'what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package — its refusals compared whole where a consumer meets them — are its proof; a test beside it restated it or repeated a spec',
+        why: 'what it does is only ever reached through what `@jterrazz/test` publishes, so the specs that drive the built package, its refusals compared whole where a consumer meets them, are its proof; a test beside it restated it or repeated a spec',
     },
     {
         claims: oneOf('src/standard/standard.ts'),

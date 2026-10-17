@@ -35,7 +35,7 @@ export function databaseSet(config: ServicesConfig): SeedPort {
             if (!config.database) {
                 throw new Error(
                     refusal({
-                        fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                        fix: "declare a database in the specification's `services` (`postgres()` or `sqlite()`), or drop the seed",
                         found: 'seed(), and no database is declared',
                         read: 'docs/reference/services.md#the-database-rule',
                         why: 'A seed writes into a declared database.',

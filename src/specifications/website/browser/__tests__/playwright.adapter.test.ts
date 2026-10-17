@@ -26,7 +26,7 @@ async function failingScenario(visitor: { goto: (path: string) => Promise<void> 
 }
 
 describe('PlaywrightAdapter', () => {
-    test('the PlaywrightAdapter — a visit — opens a context with the chain’s headers, pins the clock before loading, and answers what the page holds', async () => {
+    test("the PlaywrightAdapter — a visit — opens a context with the chain's headers, pins the clock before loading, and answers what the page holds", async () => {
         // Given - a page answering 201, a visit carrying headers and a clock, and one carrying neither
         const chromium = stubChromium({ status: 201 });
         const adapter = new PlaywrightAdapter({ launch: chromium.launch });

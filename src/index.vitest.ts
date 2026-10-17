@@ -129,7 +129,7 @@ function declaredProjects(declared: unknown): Map<string, Record<string, unknown
     if (!isRecord(declared)) {
         throw refused(
             '`test.projects` is not a record',
-            'key each project by its specification — `projects: { cli: { timeout: 120_000, reason: … } }`',
+            'key each project by its specification: `projects: { cli: { timeout: 120_000, reason: ... } }`',
         );
     }
     const projects = new Map<string, Record<string, unknown>>();

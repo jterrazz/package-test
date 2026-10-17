@@ -25,7 +25,7 @@ describe('checkDocumentFollowsItsGrammar', () => {
                 ),
             ),
         ).toStrictEqual([
-            'document-follows-its-grammar 3 a run is missing "exit:" — command and exit are mandatory — rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires',
+            'document-follows-its-grammar 3 a run is missing "exit:": command and exit are mandatory — rewrite the document to its grammar: the Spec documents page lists the keys, their order and what each run requires',
             'no-unknown-token 7 the unknown token {{nope}} — write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir',
         ]);
     });

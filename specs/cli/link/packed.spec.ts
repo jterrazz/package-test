@@ -65,7 +65,7 @@ describe('packed', () => {
             [
                 "found: link('@acme/other', packed()) packs __fixtures__/shipped, whose package.json names @acme/shipped",
                 'why: A consumer imports a package by the name it is published under, so the install lays it there.',
-                "fix: link it under the name its package.json declares: link('@acme/shipped', packed(…))",
+                "fix: link it under the name its package.json declares: link('@acme/shipped', packed(...))",
                 'read: docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
             ].join('\n'),
         );

@@ -18,7 +18,7 @@ import selfPlugin from '../../rules/plugin.js';
 import { chapterOf, goldenCheckerLines, ROOT, rowNamed, sourcesUnder } from '../messages.js';
 
 describe('messages', () => {
-    test('`message-has-four-parts` — every message of a static rule states the four parts, its why and read its row’s', () => {
+    test("`message-has-four-parts` — every message of a static rule states the four parts, its why and read its row's", () => {
         // Given - every message the shipped plugin can print, before oxlint fills its data
         const messages = Object.entries({ ...plugin.rules, ...selfPlugin.rules }).flatMap(
             ([name, rule]) =>
@@ -76,7 +76,7 @@ describe('messages', () => {
         expect(lines.filter((message) => missingParts(message).length > 0)).toStrictEqual([]);
     });
 
-    test('`message-has-four-parts` — every refusal of the runtime opens on its row’s sentence, and is thrown somewhere', () => {
+    test("`message-has-four-parts` — every refusal of the runtime opens on its row's sentence, and is thrown somewhere", () => {
         // Given - the runtime rows that refuse, and the source that throws them
         const source = sourcesUnder(resolve(ROOT, 'src'));
         const rows = Object.keys(REFUSAL_WHY).filter(

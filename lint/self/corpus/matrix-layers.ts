@@ -10,7 +10,7 @@ import { SPECIFICATION_MATRIX_COLUMNS } from './specification-matrix.js';
 
 export const MATRIX_LAYERS_MARKERS: Markers = {
     end: '<!-- /GENERATED:layers -->',
-    start: '<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->',
+    start: '<!-- GENERATED:layers. Do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->',
 };
 
 type Layer = { count: number; judges: string; layer: string; where: string };
@@ -69,7 +69,7 @@ export function layers(root: string): Layer[] {
         {
             count: specificationSpecs,
             judges: "the framework's own specifications, each met through its constructor",
-            layer: 'The package’s own specs',
+            layer: "The package's own specs",
             where: '`specs/<specification>/`',
         },
         {

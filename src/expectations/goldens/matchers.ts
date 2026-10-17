@@ -49,7 +49,7 @@ function toMatchGolden(
         }
         throw new TypeError(
             refusal('one-verb-per-meaning', {
-                fix: 'compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(…))`',
+                fix: 'compare a stream, a json or a response to its file; a directory or the working directory is `await toMatch(directory(...))`',
                 found: `toMatch(file(${JSON.stringify(expected.path)})) on a subject that holds no file of its kind`,
             }),
         );
@@ -59,7 +59,7 @@ function toMatchGolden(
     }
     throw new TypeError(
         refusal('one-verb-per-meaning', {
-            fix: 'name the golden with file(…) or directory(…)',
+            fix: 'name the golden with file(...) or directory(...)',
             found: `toMatch(${spelledValue(expected)}) routed to the golden comparison`,
         }),
     );
@@ -99,7 +99,7 @@ function toMatchWhole(
 function noValueRefusal(expected: unknown): TypeError {
     return new TypeError(
         refusal('one-verb-per-meaning', {
-            fix: 'compare it to its golden, `toMatch(file(…))`, or assert a part of its text with vitest on `.text`',
+            fix: 'compare it to its golden, `toMatch(file(...))`, or assert a part of its text with vitest on `.text`',
             found: `toMatch(${spelledValue(expected)}) on a subject that is not compared to a value written in place`,
         }),
     );
@@ -133,7 +133,7 @@ async function toBeRunning(received: unknown): Promise<MatcherResult> {
     if (!(received instanceof ContainerAccessor)) {
         throw new TypeError(
             refusal({
-                fix: 'assert it on a container accessor: result.container(…) or spec.docker(…)',
+                fix: 'assert it on a container accessor: result.container(...) or spec.docker(...)',
                 found: 'toBeRunning() on a subject that is no container accessor',
                 read: 'docs/reference/assertions.md#container-subjects-docker-aware-cli',
                 why: '`toBeRunning()` judges a container.',
@@ -173,7 +173,7 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
             ? 'whole'
             : new TypeError(
                   refusal('one-verb-per-meaning', {
-                      fix: 'write the whole response in place, ``toMatch(`HTTP/1.1 200 OK …`)``, or compare it to toMatch(file(…))',
+                      fix: 'write the whole response in place, ``toMatch(`HTTP/1.1 200 OK ...`)``, or compare it to toMatch(file(...))',
                       found: `toMatch(${spelledValue(value)}) on a response`,
                   }),
               );
@@ -182,7 +182,7 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
         return value instanceof RegExp
             ? new TypeError(
                   refusal('one-verb-per-meaning', {
-                      fix: 'write the whole value in place, `toMatch({ … })`, or compare it to toMatch(file(…))',
+                      fix: 'write the whole value in place, `toMatch({ ... })`, or compare it to toMatch(file(...))',
                       found: 'toMatch(a RegExp) on a json',
                   }),
               )
@@ -193,7 +193,7 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
             ? 'whole'
             : new TypeError(
                   refusal('one-verb-per-meaning', {
-                      fix: "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[…]])`",
+                      fix: "write its rows in place, one array of cells per row in the table's column order: `await expect(result.table('<name>')).toMatch([[...]])`",
                       found: `toMatch(${spelledValue(value)}) on a table`,
                   }),
               );
@@ -201,7 +201,7 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
     if (subject instanceof DirectoryAccessor || subject instanceof FilesystemAccessor) {
         return new TypeError(
             refusal('one-verb-per-meaning', {
-                fix: 'compare it to its golden tree: `await expect(…).toMatch(directory(…))`',
+                fix: 'compare it to its golden tree: `await expect(...).toMatch(directory(...))`',
                 found: `toMatch(${spelledValue(value)}) on a directory`,
             }),
         );
@@ -209,7 +209,7 @@ function routeValue(subject: unknown, value: unknown): ValueRoute {
     if (subject instanceof ContainerAccessor) {
         return new TypeError(
             refusal('one-verb-per-meaning', {
-                fix: 'assert its state, `await expect(…).toBeRunning()`, or compare its logs, `result.container(…).stdout`, whole',
+                fix: 'assert its state, `await expect(...).toBeRunning()`, or compare its logs, `result.container(...).stdout`, whole',
                 found: `toMatch(${spelledValue(value)}) on a container`,
             }),
         );

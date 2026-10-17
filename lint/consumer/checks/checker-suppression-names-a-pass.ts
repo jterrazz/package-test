@@ -14,7 +14,7 @@ export function checkCheckerSuppressionNamesAPass(
             .map((id) => ({
                 path,
                 line,
-                fix: `name the pass this line is the exception to, or delete the directive — \`${id}\` silences nothing`,
+                fix: `name the pass this line is the exception to, or delete the directive: \`${id}\` silences nothing`,
                 found: `a checker suppression naming \`${id}\`, which no pass of the checker has`,
                 rule: 'checker-suppression-names-a-pass',
             })),

@@ -50,7 +50,7 @@ function refusalOf(work: () => unknown): string {
 }
 
 describe('request', () => {
-    test('request.action — the verbs — each sends its method to the filled route, a file body read by its kind, the chain’s headers only when it carries some', async () => {
+    test("request.action — the verbs — each sends its method to the filled route, a file body read by its kind, the chain's headers only when it carries some", async () => {
         // Given - a spec folder, a recording server, and a chain carrying a header and one carrying none
         const testDir = import.meta.dirname;
         const asked: Asked[] = [];
@@ -109,7 +109,7 @@ describe('request', () => {
         ]);
     });
 
-    test('request.action — .request() — sends a request written in place or in a file, the chain’s headers over the written ones', async () => {
+    test("request.action — .request() — sends a request written in place or in a file, the chain's headers over the written ones", async () => {
         // Given - a spec folder, and a chain carrying a header the file also writes
         const testDir = import.meta.dirname;
         const asked: Asked[] = [];

@@ -53,7 +53,7 @@ export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
             path: rel,
             line: 1,
             // Stryker disable next-line Regex: every move is of a name ending on the suffix
-            fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`typescript fix\` does it with \`git mv\``,
+            fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\`; \`typescript fix\` does it with \`git mv\``,
             found: `a \`.test.ts\` under \`${where}\`, where a file specifies the assembled product`,
             rule: 'file-suffix-matches-place',
         };
@@ -106,7 +106,7 @@ export function checkFileSuffixMatchesPlaceOfDocument(rel: string): DocumentFind
     if (!KEBAB.test(caseName)) {
         findings.push(
             finding('file-suffix-matches-place', 1, {
-                fix: `rename it in kebab-case — lowercase words joined by single hyphens, \`<case>${SPEC_EXTENSION}\``,
+                fix: `rename it in kebab-case, lowercase words joined by single hyphens: \`<case>${SPEC_EXTENSION}\``,
                 found: `"${name}" is not kebab-case`,
             }),
         );

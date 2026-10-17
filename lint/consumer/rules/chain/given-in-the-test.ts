@@ -18,7 +18,7 @@ export const givenInTheTest = defineRule(
         messages: {
             givenInAHook: {
                 found: '`{{hook}}` moves the Given out of the tests',
-                fix: 'write the Given in each test — a shared value is a function each test calls, and `clock.at()` restores itself',
+                fix: 'write the Given in each test: a shared value is a function each test calls, and `clock.at()` restores itself',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

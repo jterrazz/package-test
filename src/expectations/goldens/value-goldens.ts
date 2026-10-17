@@ -26,7 +26,7 @@ export type InPlace = {
 };
 
 export const UNRECORDED =
-    'nothing is written in place yet — run with TEST_UPDATE=1 (or vitest -u) and the actual value is written into the test.';
+    'nothing is written in place yet: run with TEST_UPDATE=1 (or vitest -u) and the actual value is written into the test.';
 
 export function unrecorded(expected: unknown): boolean {
     return typeof expected === 'string' && expected.trim() === '';
@@ -41,8 +41,8 @@ export function writeAt(context: InPlace, render: (indent: string) => string): M
     if (site === undefined) {
         throw new Error(
             refusal({
-                fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
-                found: 'update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written',
+                fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(...))',
+                found: 'update mode: no frame of this toMatch call is a test file, so the value in place has nowhere to be written',
                 read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A value written in place is rewritten in the test that states it.',
             }),
@@ -113,7 +113,7 @@ export function matchJsonValue(
     if (accessor.thrown !== undefined) {
         throw new Error(
             refusal({
-                fix: 'assert the error — `expect(result.error).toMatch(…)` — or fix the call so it returns',
+                fix: 'assert the error with `expect(result.error).toMatch(...)`, or fix the call so it returns',
                 found: `update mode: the call threw "${accessor.thrown}", so its value is null`,
                 read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A null recorded over a call that failed is an expectation no failure can break: every call could fail and the test would stay green.',

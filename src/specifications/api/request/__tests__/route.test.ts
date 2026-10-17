@@ -54,7 +54,7 @@ describe('route', () => {
             new TypeError(
                 refused(
                     '.get("/events/:id/seats/:seat") names :id, :seat and is handed no params',
-                    '.get("/events/:id/seats/:seat", { params: { id: …, seat: … } })',
+                    '.get("/events/:id/seats/:seat", { params: { id: ..., seat: ... } })',
                 ),
             ),
         );
@@ -70,7 +70,7 @@ describe('route', () => {
         ]).toStrictEqual([
             refused(
                 '.get("/events/:id", { params }): :id has no value',
-                '.get("/events/:id", { params: { id: … } })',
+                '.get("/events/:id", { params: { id: ... } })',
             ),
             refused(
                 '.get("/users/me", { params }): `id` is no parameter of it',
@@ -78,7 +78,7 @@ describe('route', () => {
             ),
             refused(
                 '.delete("/events/:id", { params }): :id has no value, `eventId` is no parameter of it',
-                '.delete("/events/:id", { params: { id: … } })',
+                '.delete("/events/:id", { params: { id: ... } })',
             ),
         ]);
     });

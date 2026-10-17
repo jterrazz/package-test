@@ -20,7 +20,7 @@ export function declared(
     if (maybeResponse === undefined) {
         throw new Error(
             refusal({
-                fix: `pass a stub — defineStub({ request, response }) — or the inline pair ${call}(request, response)`,
+                fix: `pass a stub, defineStub({ request, response }), or the inline pair ${call}(request, response)`,
                 found: `${call}(request), a bare request with no response`,
                 read: 'docs/reference/stubs.md#using-them-intercept',
                 why: 'A stub is a request and its response: a request alone answers nothing.',

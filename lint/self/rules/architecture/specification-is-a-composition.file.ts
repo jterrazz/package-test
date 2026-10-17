@@ -119,7 +119,7 @@ export function importsOf(program: AstNode): Map<string, string> {
 }
 
 function unlisted(member: AstNode, imports: ReadonlyMap<string, string>): CompositionFinding[] {
-    const key = propertyKeyName(member) ?? '…';
+    const key = propertyKeyName(member) ?? '...';
     const value = unwrapped(child(member, 'value'));
     const listed = value?.type === 'ArrayExpression' ? childList(value, 'elements') : [member];
     return listed
@@ -142,7 +142,7 @@ function unrowed(member: AstNode): CompositionFinding[] {
             (option) => option === member || !isNamedKey(option) || !isRow(child(option, 'value')),
         )
         .map((option) => ({
-            data: { name: propertyKeyName(option) ?? '…' },
+            data: { name: propertyKeyName(option) ?? '...' },
             messageId: 'option',
             node: option,
         }));
@@ -159,7 +159,7 @@ function compositionFindings(
         }
         return key === 'options'
             ? unrowed(member)
-            : [{ data: { key: key ?? '…' }, messageId: 'member', node: member }];
+            : [{ data: { key: key ?? '...' }, messageId: 'member', node: member }];
     });
 }
 
@@ -192,7 +192,7 @@ function specificationFindings(
         .filter((adapter) => !isNamedKey(adapter) || !isAdapter(child(adapter, 'value'), imports))
         .map((adapter) => ({
             data: {
-                port: propertyKeyName(adapter) ?? '…',
+                port: propertyKeyName(adapter) ?? '...',
                 what: kindOf(unwrapped(child(adapter, 'value')) ?? adapter),
             },
             messageId: 'adapter' as const,
@@ -202,7 +202,7 @@ function specificationFindings(
         .filter((property) => !isNamed(property, imports))
         .map((property) => ({
             data: {
-                key: propertyKeyName(property) ?? '…',
+                key: propertyKeyName(property) ?? '...',
                 what: kindOf(unwrapped(child(property, 'value'))),
             },
             messageId: 'inline' as const,

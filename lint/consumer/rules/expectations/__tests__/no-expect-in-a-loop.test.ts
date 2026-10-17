@@ -12,7 +12,7 @@ ruleTester().run('no-expect-in-a-loop', noExpectInALoop, {
         expect(order.total).toBeGreaterThan(0);
     }
 });`,
-            errors: [{ column: 8, line: 3, message: /^found: `expect\(\)` inside a for…of, /u }],
+            errors: [{ column: 8, line: 3, message: /^found: `expect\(\)` inside a for...of, /u }],
             filename: TEST_FILE,
         },
         {

@@ -33,7 +33,7 @@ function installed(checker: string, root: string): string {
 function unreported(linter: string, lines: readonly string[]): Error {
     return new Error(
         refusal({
-            fix: `run ${linter} on the fixture by hand and correct what stops it — a plugin that does not load, a config it refuses`,
+            fix: `run ${linter} on the fixture by hand and correct what stops it: a plugin that does not load, a config it refuses`,
             found: `${linter} failed and reported no diagnostic: ${lines.slice(0, 5).join(' / ')}`,
             read: 'docs/guides/lint-specs.md#what-run-runs',
             why: 'A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.',
@@ -121,7 +121,7 @@ async function presetDiagnostics(tree: string, linters: Linters): Promise<Diagno
         presets: linters.presets,
     });
     if (problems.length > 0) {
-        throw unreported('the presets’ checks', problems);
+        throw unreported("the presets' checks", problems);
     }
     return findings.map((finding) => presetDiagnostic(finding));
 }
@@ -132,7 +132,7 @@ export function localLinters(linters: Linters): LintPort {
             if (linters.oxlint === null && Object.keys(run.rules).length > 0) {
                 throw new Error(
                     refusal({
-                        fix: 'name the plugins, or the `config`, the rules run under — or drop the `.rules()` call',
+                        fix: 'name the plugins, or the `config`, the rules run under, or drop the `.rules()` call',
                         found: `.rules() states ${Object.keys(run.rules).join(', ')}, and the specification runs no oxlint`,
                         read: 'docs/guides/lint-specs.md#the-chain',
                         why: 'Rules are run by oxlint alone, and rules no linter reads would judge nothing and say nothing.',

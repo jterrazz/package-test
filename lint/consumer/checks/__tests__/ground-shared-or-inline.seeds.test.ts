@@ -83,9 +83,9 @@ describe('ground-shared-or-inline.seeds', () => {
                     `${path}:${line}:${column} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
-            "specs/api/users/list.spec.ts:3:20 SQL written in the test, tagged `sql` — write the statements to ./__seeds__/two-users.sql and seed it with file('./__seeds__/two-users.sql') — `typescript fix` writes the file",
-            "specs/api/users/list.spec.ts:8:50 SQL written in the test, tagged `sql` — write the statements to ./__seeds__/pages-users.sql and seed it with file('./__seeds__/pages-users.sql') — `typescript fix` writes the file",
-            "specs/api/users/list.spec.ts:9:44 SQL written in the test, tagged `sql` — write the statements to ./__seeds__/built.sql and seed it with file('./__seeds__/built.sql') — `typescript fix` writes the file",
+            "specs/api/users/list.spec.ts:3:20 SQL written in the test, tagged `sql` — write the statements to ./__seeds__/two-users.sql and seed it with file('./__seeds__/two-users.sql'); `typescript fix` writes the file",
+            "specs/api/users/list.spec.ts:8:50 SQL written in the test, tagged `sql` — write the statements to ./__seeds__/pages-users.sql and seed it with file('./__seeds__/pages-users.sql'); `typescript fix` writes the file",
+            "specs/api/users/list.spec.ts:9:44 SQL written in the test, tagged `sql` — write the statements to ./__seeds__/built.sql and seed it with file('./__seeds__/built.sql'); `typescript fix` writes the file",
         ]);
     });
 

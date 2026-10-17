@@ -18,7 +18,7 @@ function refused(call: '.intercept' | 'intercept'): string {
     return [
         `found: ${call}(request), a bare request with no response`,
         'why: A stub is a request and its response: a request alone answers nothing.',
-        `fix: pass a stub — defineStub({ request, response }) — or the inline pair ${call}(request, response)`,
+        `fix: pass a stub, defineStub({ request, response }), or the inline pair ${call}(request, response)`,
         'read: docs/reference/stubs.md#using-them-intercept',
     ].join('\n');
 }

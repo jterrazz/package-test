@@ -85,7 +85,7 @@ describe('clock', () => {
             new Error(
                 [
                     'found: clock.advance(), and no clock is pinned',
-                    'why: Only a pinned clock moves: the real one holds no time of the test’s to advance.',
+                    "why: Only a pinned clock moves: the real one holds no time of the test's to advance.",
                     "fix: take one first: `using _ = clock.at('<iso>')` (the calendar) or `using _ = clock.run()` (the scheduler)",
                     CHAPTER,
                 ].join('\n'),

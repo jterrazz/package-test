@@ -28,12 +28,12 @@ describe('verb-reads-its-ground-folder', () => {
         expect(result.report).toMatch(`
             specs/api/orders/orders.spec.ts:9:35  jterrazz(verb-reads-its-ground-folder)
                 found: \`seed()\` reads __seeds__/, and \`file('./__fixtures__/rows.sql')\` names __fixtures__/
-                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(…))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder — or under \`__fixtures__/\` for a document that is an input a negative spec runs.
+                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(...))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder, or under \`__fixtures__/\` for a document that is an input a negative spec runs.
                 fix: move the file to ./__seeds__/ beside the test, or in the __seeds__/ of the lowest folder the leaves share (specs/__seeds__/ across specifications), and name it from there
                 read: docs/reference/linting.md#verb-reads-its-ground-folder
             specs/api/orders/orders.spec.ts:12:37  jterrazz(verb-reads-its-ground-folder)
                 found: \`toMatch()\` reads __expected__/, and \`file('./__requests__/orders.http')\` names __requests__/
-                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(…))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder — or under \`__fixtures__/\` for a document that is an input a negative spec runs.
+                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(...))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder, or under \`__fixtures__/\` for a document that is an input a negative spec runs.
                 fix: move the file to ./__expected__/ beside the test, or in the __expected__/ of the lowest folder the leaves share (specs/__expected__/ across specifications), and name it from there
                 read: docs/reference/linting.md#verb-reads-its-ground-folder
         `);
@@ -47,12 +47,12 @@ describe('verb-reads-its-ground-folder', () => {
         expect(result.report).toMatch(`
             specs/api/orders/orders.spec.ts:7:40  jterrazz(verb-reads-its-ground-folder)
                 found: \`seed()\` reads __seeds__/, and \`file('./__fixtures__/rows.sql')\` names __fixtures__/
-                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(…))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder — or under \`__fixtures__/\` for a document that is an input a negative spec runs.
+                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(...))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder, or under \`__fixtures__/\` for a document that is an input a negative spec runs.
                 fix: move the file to ./__seeds__/ beside the test, or in the __seeds__/ of the lowest folder the leaves share (specs/__seeds__/ across specifications), and name it from there
                 read: docs/reference/linting.md#verb-reads-its-ground-folder
             specs/api/orders/orders.spec.ts:10:42  jterrazz(verb-reads-its-ground-folder)
                 found: \`toMatch()\` reads __expected__/, and \`file('./__requests__/orders.http')\` names __requests__/
-                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(…))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder — or under \`__fixtures__/\` for a document that is an input a negative spec runs.
+                why: The verb and the ground folder agree: \`seed()\` reads \`__seeds__/\`, \`request()\` and a request body (\`post\`/\`put\`) read \`__requests__/\`, \`fixture()\` reads \`__fixtures__/\`, a golden \`toMatch(file|directory(...))\` reads \`__expected__/\`, and \`run()\` reads a document beside the test, under no ground folder, or under \`__fixtures__/\` for a document that is an input a negative spec runs.
                 fix: move the file to ./__expected__/ beside the test, or in the __expected__/ of the lowest folder the leaves share (specs/__expected__/ across specifications), and name it from there
                 read: docs/reference/linting.md#verb-reads-its-ground-folder
         `);

@@ -22,7 +22,7 @@ export function checkDocumentDescriptionReadsAsATitle(document: SpecDocument): D
         findings.push(
             at(
                 `a \`description:\` of ${text.length} characters`,
-                `shorten it under ${MAX_DESCRIPTION} characters — a title, not a paragraph`,
+                `shorten it under ${MAX_DESCRIPTION} characters: a title, not a paragraph`,
             ),
         );
     }
@@ -30,7 +30,7 @@ export function checkDocumentDescriptionReadsAsATitle(document: SpecDocument): D
         findings.push(
             at(
                 'a `description:` ending with a period',
-                'drop the period — a title is a fragment, not a sentence',
+                'drop the period: a title is a fragment, not a sentence',
             ),
         );
     }

@@ -15,7 +15,7 @@ const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch 
 const OTHER_ELEMENT =
     '  • other element  a button() or field() may name one thing where this does not';
 
-const SCOPE_BOOKMARK = `  • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any target works as the scope`;
+const SCOPE_BOOKMARK = `  • scope it       within(testId('...'), button("Bookmark")): a screen has no landmarks, and any target works as the scope`;
 
 function fixesOf(target: Target, matches: MobileElementMatch[]): string[] {
     const { message } = ambiguousScreenElementError({ matches, target });
@@ -40,7 +40,7 @@ describe('ambiguousScreenElementError', () => {
         // Then - the whole refusal, readable without opening the simulator
         expect(message).toBe(
             [
-                'found: Ambiguous element: button("Bookmark") matched 4 elements on the screen —',
+                'found: Ambiguous element: button("Bookmark") matched 4 elements on the screen:',
                 '  1. Button "Bookmark"',
                 '  2. TextField "Email"  value="a@b.test"',
                 '  3. Button "Bookmark"  [testId: event-1-bookmark]',
@@ -67,16 +67,16 @@ describe('ambiguousScreenElementError', () => {
             fixesOf(button('Bookmark'), mixed),
         ]).toStrictEqual([
             [
-                `  • scope it       within(testId('…'), button("Bookmark", { exact: false })) — a screen has no landmarks; any target works as the scope`,
+                `  • scope it       within(testId('...'), button("Bookmark", { exact: false })): a screen has no landmarks, and any target works as the scope`,
                 '  • exact name     button("Bookmark", { exact: true })   [leaves 2 of 3]',
                 OTHER_ELEMENT,
             ],
             [
-                `  • scope it       within(testId('…'), button("Bookmark", { exact: false })) — a screen has no landmarks; any target works as the scope`,
+                `  • scope it       within(testId('...'), button("Bookmark", { exact: false })): a screen has no landmarks, and any target works as the scope`,
                 OTHER_ELEMENT,
             ],
             [
-                `  • scope it       within(testId('…'), button("Bookmark", { exact: false })) — a screen has no landmarks; any target works as the scope`,
+                `  • scope it       within(testId('...'), button("Bookmark", { exact: false })): a screen has no landmarks, and any target works as the scope`,
                 OTHER_ELEMENT,
             ],
             [SCOPE_BOOKMARK, OTHER_ELEMENT],
@@ -108,7 +108,7 @@ describe('ambiguousScreenElementError', () => {
             ],
             [SCOPE_BOOKMARK, OTHER_ELEMENT],
             [
-                `  • scope it       within(testId('…'), testId("row")) — a screen has no landmarks; any target works as the scope`,
+                `  • scope it       within(testId('...'), testId("row")): a screen has no landmarks, and any target works as the scope`,
                 OTHER_ELEMENT,
             ],
             [OTHER_ELEMENT],

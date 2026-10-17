@@ -30,13 +30,13 @@ describe('specs-root-holds-specifications-and-shared', () => {
         expect(result.report).toMatch(`
             specs/helpers.ts:1:1  names(specs-root-holds-specifications-and-shared)
                 found: \`specs/helpers.ts\` breaks ls-lint's \`.*: exists:0\`
-                why: The specs root holds its specification folders and the special folders of what they share alone — a repository suite is a first-level folder too: code every specification shares is \`<specs>/__setup__/\`, data the ground at the specs root.
-                fix: move a file where it belongs — code into \`specs/__setup__/\` or the \`__setup__/\` of the one specification that reads it, data into the ground folder of its role
+                why: The specs root holds its specification folders and the special folders of what they share alone (a repository suite is a first-level folder too): code every specification shares is \`<specs>/__setup__/\`, data the ground at the specs root.
+                fix: move a file where it belongs: code into \`specs/__setup__/\` or the \`__setup__/\` of the one specification that reads it, data into the ground folder of its role
                 read: docs/reference/linting.md#specs-root-holds-specifications-and-shared
             specs/orders.json:1:1  names(specs-root-holds-specifications-and-shared)
                 found: \`specs/orders.json\` breaks ls-lint's \`.json: regex:(package|tsconfig)\`
-                why: The specs root holds its specification folders and the special folders of what they share alone — a repository suite is a first-level folder too: code every specification shares is \`<specs>/__setup__/\`, data the ground at the specs root.
-                fix: move a file where it belongs — code into \`specs/__setup__/\` or the \`__setup__/\` of the one specification that reads it, data into the ground folder of its role
+                why: The specs root holds its specification folders and the special folders of what they share alone (a repository suite is a first-level folder too): code every specification shares is \`<specs>/__setup__/\`, data the ground at the specs root.
+                fix: move a file where it belongs: code into \`specs/__setup__/\` or the \`__setup__/\` of the one specification that reads it, data into the ground folder of its role
                 read: docs/reference/linting.md#specs-root-holds-specifications-and-shared
         `);
     });

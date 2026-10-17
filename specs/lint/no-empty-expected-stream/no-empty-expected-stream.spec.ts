@@ -14,7 +14,7 @@ describe('no-empty-expected-stream', () => {
         expect(result.report).toMatch(`
             specs/widget/builds.spec.yaml:6:1  jterrazz-check(no-empty-expected-stream)
                 found: a stream that is only {{any}}
-                why: An expected stream whose whole content is \`{{any}}\` → error: the run executes and proves nothing.
+                why: An expected stream whose whole content is \`{{any}}\` is an error: the run executes and proves nothing.
                 fix: write what the command actually printed, tokens for what moves
                 read: docs/reference/linting.md#no-empty-expected-stream
         `);

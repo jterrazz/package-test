@@ -98,7 +98,7 @@ describe('ground-shared-or-inline', () => {
 
         // Then - the form in place is the request or its body
         expect(found).toStrictEqual([
-            'specs/api/users.spec.ts:2:23 specs/api/__requests__/create.http, read by this test alone — write it here, the request or its body, and delete the file — `typescript fix` inlines it',
+            'specs/api/users.spec.ts:2:23 specs/api/__requests__/create.http, read by this test alone — write it here, the request or its body, and delete the file; `typescript fix` inlines it',
         ]);
     });
 
@@ -112,8 +112,8 @@ describe('ground-shared-or-inline', () => {
 
         // Then - the file is to inline, and only the folder is to move
         expect(found).toStrictEqual([
-            'specs/api/users.spec.ts:2:39 specs/__expected__/users.json, read by this test alone — write it here, the value `toMatch` compares, and delete the file — `typescript fix` inlines it',
-            "specs/__fixtures__/app:1:- ground only specs/api reaches for, kept above it — move it to specs/api/__fixtures__/app and name it directory('./__fixtures__/app/') — `typescript fix` does both",
+            'specs/api/users.spec.ts:2:39 specs/__expected__/users.json, read by this test alone — write it here, the value `toMatch` compares, and delete the file; `typescript fix` inlines it',
+            "specs/__fixtures__/app:1:- ground only specs/api reaches for, kept above it — move it to specs/api/__fixtures__/app and name it directory('./__fixtures__/app/'); `typescript fix` does both",
         ]);
     });
 
@@ -128,7 +128,7 @@ describe('ground-shared-or-inline', () => {
 
         // Then - the file is still read by that test alone
         expect(found).toStrictEqual([
-            'specs/api/users.spec.mts:2:39 specs/api/__expected__/users.json, read by this test alone — write it here, the value `toMatch` compares, and delete the file — `typescript fix` inlines it',
+            'specs/api/users.spec.mts:2:39 specs/api/__expected__/users.json, read by this test alone — write it here, the value `toMatch` compares, and delete the file; `typescript fix` inlines it',
         ]);
     });
 
@@ -145,7 +145,7 @@ describe('ground-shared-or-inline', () => {
 
         // Then - the cap is named
         expect(found).toStrictEqual([
-            "specs/api/users.spec.ts:2:23 a request of 31 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/creates.http and name it with file('./__requests__/creates.http') — `typescript fix` moves it",
+            "specs/api/users.spec.ts:2:23 a request of 31 lines written in the test, past the __requests__/ cap of 30 — move it to ./__requests__/creates.http and name it with file('./__requests__/creates.http'); `typescript fix` moves it",
         ]);
     });
 
@@ -315,7 +315,7 @@ describe('ground-shared-or-inline', () => {
             existsSync(join(root, 'specs/api/__expected__/sample.md')),
         ]).toStrictEqual([
             [
-                'specs/api/users.spec.ts:2:39 specs/api/__expected__/sample.md, a byte copy of docs/sample.md, read by this test alone — compare with the source: read docs/sample.md instead, and delete the copy — `typescript fix` leaves it to you',
+                'specs/api/users.spec.ts:2:39 specs/api/__expected__/sample.md, a byte copy of docs/sample.md, read by this test alone — compare with the source: read docs/sample.md instead, and delete the copy; `typescript fix` leaves it to you',
             ],
             [],
             true,

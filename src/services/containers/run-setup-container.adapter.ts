@@ -23,7 +23,7 @@ function relayed(message: string, image: string): Error {
             fix: 'fix what the reason names, and run again',
             found: `the run's setup could not start ${image}:\n  ${message.replaceAll('\n', '\n  ')}`,
             read: 'docs/reference/services.md#one-container-per-run',
-            why: 'A container is started once per run, by the run’s setup, and a worker asks it for the address.',
+            why: "A container is started once per run, by the run's setup, and a worker asks it for the address.",
         }),
     );
 }

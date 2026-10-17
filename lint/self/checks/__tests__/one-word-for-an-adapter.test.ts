@@ -23,12 +23,12 @@ describe('checkOneWordForAnAdapter', () => {
                 ({ fix, found, line, path }) => `${path}:${line} ${found} | ${fix}`,
             ),
         ).toStrictEqual([
-            "src/clock/clock.driver.browser.ts:1 `clock.driver.browser.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.browser.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
-            "src/clock/clock.driver.fixtures.ts:1 `clock.driver.fixtures.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.fixtures.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
-            "src/clock/clock.driver.test-d.ts:1 `clock.driver.test-d.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.test-d.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
-            "src/clock/clock.driver.test.ts:1 `clock.driver.test.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.test.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
-            "src/clock/clock.driver.ts:1 `clock.driver.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
-            "src/stubs/page/page.driver.tsx:1 `page.driver.tsx` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.tsx` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
+            "src/clock/clock.driver.browser.ts:1 `clock.driver.browser.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.browser.ts` (the process clock's is `process-clock.adapter.ts`) and the paths that import it",
+            "src/clock/clock.driver.fixtures.ts:1 `clock.driver.fixtures.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.fixtures.ts` (the process clock's is `process-clock.adapter.ts`) and the paths that import it",
+            "src/clock/clock.driver.test-d.ts:1 `clock.driver.test-d.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.test-d.ts` (the process clock's is `process-clock.adapter.ts`) and the paths that import it",
+            "src/clock/clock.driver.test.ts:1 `clock.driver.test.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.test.ts` (the process clock's is `process-clock.adapter.ts`) and the paths that import it",
+            "src/clock/clock.driver.ts:1 `clock.driver.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.ts` (the process clock's is `process-clock.adapter.ts`) and the paths that import it",
+            "src/stubs/page/page.driver.tsx:1 `page.driver.tsx` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.tsx` (the process clock's is `process-clock.adapter.ts`) and the paths that import it",
         ]);
     });
 

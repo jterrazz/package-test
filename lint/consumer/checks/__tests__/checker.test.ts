@@ -111,7 +111,7 @@ describe('checker', () => {
 
         // Then - only the ignored golden names nothing a checkout holds
         expect(findings(root, 'named-path-exists')).toStrictEqual([
-            "api/boot.spec.ts:3: file('./__expected__/local.txt') names nothing — api/__expected__/local.txt is ignored by git",
+            "api/boot.spec.ts:3: file('./__expected__/local.txt') names nothing: api/__expected__/local.txt is ignored by git",
         ]);
     });
 

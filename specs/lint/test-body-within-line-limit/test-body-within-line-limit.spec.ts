@@ -27,8 +27,8 @@ describe('test-body-within-line-limit', () => {
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             specs/api/events/list/pagination.spec.ts:6:43  jterrazz(test-body-within-line-limit)
-                found: a test body of 61 lines of gestures, over 60 — the lines of a \`toMatch\`, \`toStrictEqual\` or \`toEqual\` expected value are not counted
-                why: A test body spans at most 60 lines of gestures — the function a \`test(…)\`/\`it(…)\` runs, from the line it opens on to the line it closes on, blank lines and comments included, less the lines the expected value of a \`toMatch\`, \`toStrictEqual\` or \`toEqual\` holds past the one it opens on: it is the claim the test makes, and \`ground-shared-or-inline\` caps a \`toMatch\` one, not this rule; a longer one is refused at the function.
+                found: a test body of 61 lines of gestures, over 60 (the lines of a \`toMatch\`, \`toStrictEqual\` or \`toEqual\` expected value are not counted)
+                why: A test body spans at most 60 lines of gestures, counted over the function a \`test(...)\`/\`it(...)\` runs from the line it opens on to the line it closes on, blank lines and comments included, less the lines the expected value of a \`toMatch\`, \`toStrictEqual\` or \`toEqual\` holds past the one it opens on (that value is the claim the test makes, and \`ground-shared-or-inline\` caps a \`toMatch\` one, not this rule); a longer one is refused at the function.
                 fix: split it into one test per behaviour, or move a long Given into a function the test calls
                 read: docs/reference/linting.md#test-body-within-line-limit
         `);

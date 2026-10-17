@@ -23,7 +23,7 @@ function checkTestFile(testFile: string, runners: ReadonlySet<string>, rootDir: 
             violations.push({
                 path: relative(rootDir, testFile),
                 line,
-                fix: `bind it with \`await using result = await ${runner}…\`, so the containers it started are removed at the end of the scope`,
+                fix: `bind it with \`await using result = await ${runner}...\`, so the containers it started are removed at the end of the scope`,
                 found: `a result of the docker-aware runner "${runner}" bound without \`await using\``,
                 rule: 'docker-exec-bound-with-await-using',
             });

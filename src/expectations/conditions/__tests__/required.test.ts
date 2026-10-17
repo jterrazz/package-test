@@ -19,7 +19,7 @@ describe('required', () => {
         }).toThrow(
             new Error(
                 [
-                    'found: required(): the reply carries the new id — got undefined',
+                    'found: required(): the reply carries the new id, got undefined',
                     'why: `required()` answers a present value, and `null` and `undefined` are the two it refuses.',
                     'fix: state it in the Given, or assert on what the subject actually produced',
                     'read: docs/reference/assertions.md#two-helpers-that-are-not-matchers',

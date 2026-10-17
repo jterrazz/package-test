@@ -46,7 +46,7 @@ const REFUSED: [string, string, string][] = [
     [
         'a server env named by no word',
         documentWith('serve:\n  - web: { [a]: b }\n'),
-        'case.spec.yaml:3: serve: web — a variable name must be a plain word',
+        'case.spec.yaml:3: serve: web is no variable name, which must be a plain word',
     ],
     [
         'a server env value that is no text',
@@ -61,7 +61,7 @@ const REFUSED: [string, string, string][] = [
     [
         'a run with no command',
         'description: x\nruns:\n  - exit: 0\n',
-        'case.spec.yaml:3: a run is missing "command:" — command and exit are mandatory',
+        'case.spec.yaml:3: a run is missing "command:": command and exit are mandatory',
     ],
     [
         'a command that is no text',
@@ -81,7 +81,7 @@ const REFUSED: [string, string, string][] = [
     [
         'a file state the grammar has not',
         documentWith('', '    files: { a.txt: gone }\n'),
-        'case.spec.yaml:5: files: "a.txt: gone" is not a state — write absent or exists, or a { contains, equals } assertion',
+        'case.spec.yaml:5: files: "a.txt: gone" is not a state: write absent or exists, or a { contains, equals } assertion',
     ],
     [
         'a file assertion that is no map',
@@ -101,7 +101,7 @@ const REFUSED: [string, string, string][] = [
     [
         'a file assertion naming a key the grammar has not',
         documentWith('', '    files: { a.txt: { holds: a } }\n'),
-        'case.spec.yaml:5: unknown key "holds:" in files: a.txt — known keys: contains, equals',
+        'case.spec.yaml:5: unknown key "holds:" in files: a.txt; known keys: contains, equals',
     ],
     [
         'an equals that is no text',
@@ -141,17 +141,17 @@ const REFUSED: [string, string, string][] = [
     [
         'a fixture that is no relative path',
         documentWith('fixture: /abs/__fixtures__/a\n'),
-        'case.spec.yaml:2: fixture: "/abs/__fixtures__/a" is not a relative path — name it from this document (./… or ../…)',
+        'case.spec.yaml:2: fixture: "/abs/__fixtures__/a" is not a relative path: name it from this document (./... or ../...)',
     ],
     [
         'a fixture outside any fixtures folder',
         documentWith('fixture: ./a.json\n'),
-        'case.spec.yaml:2: fixture: reads __fixtures__/, and "./a.json" names no __fixtures__/ folder — put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)',
+        'case.spec.yaml:2: fixture: reads __fixtures__/, and "./a.json" names no __fixtures__/ folder, so put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)',
     ],
     [
         'a fixture in another ground folder',
         documentWith('fixture: ./__expected__/a.json\n'),
-        'case.spec.yaml:2: fixture: reads __fixtures__/, and "./__expected__/a.json" names __expected__/ — put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)',
+        'case.spec.yaml:2: fixture: reads __fixtures__/, and "./__expected__/a.json" names __expected__/, so put the file in ./__fixtures__/ beside the document, or in the __fixtures__/ of the lowest folder the leaves share (specs/__fixtures__/ across specifications) (verb-reads-its-ground-folder)',
     ],
 ];
 

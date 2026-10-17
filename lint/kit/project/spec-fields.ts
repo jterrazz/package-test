@@ -76,7 +76,11 @@ function readServeEntry(context: Context, node: Node | null): SpecServeEntry {
     for (const entry of nodePairs(envMap)) {
         const key = scalarString(entry.key);
         if (key === null) {
-            fail(context, entry, `serve: ${serverName} — a variable name must be a plain word`);
+            fail(
+                context,
+                entry,
+                `serve: ${serverName} is no variable name, which must be a plain word`,
+            );
         }
         env[key] = requireString(context, entry.value, `serve: ${serverName}.${key}`);
     }
@@ -103,7 +107,7 @@ function readFiles(context: Context, node: Node | null): SpecFileAssertion[] {
                 fail(
                     context,
                     pair,
-                    `files: "${path}: ${state}" is not a state — write ${FILE_STATES.join(' or ')}, or a { ${FILE_CONTENT_KEYS.join(', ')} } assertion`,
+                    `files: "${path}: ${state}" is not a state: write ${FILE_STATES.join(' or ')}, or a { ${FILE_CONTENT_KEYS.join(', ')} } assertion`,
                 );
             }
             return { kind, line, path };
@@ -147,7 +151,7 @@ export function readRun(context: Context, node: Node | null, isLast: boolean): S
         fail(
             context,
             waitForPair,
-            'waitFor: is only allowed on the LAST run — a long-running command ends the session',
+            'waitFor: is only allowed on the LAST run, since a long-running command ends the session',
         );
     }
 
@@ -183,7 +187,7 @@ export function readFixtures(context: Context, node: Node | null): SpecFixture[]
             throw new SpecSyntaxError(
                 context.fileName,
                 line,
-                `fixture: "${value}" is not a relative path — name it from this document (./… or ../…)`,
+                `fixture: "${value}" is not a relative path: name it from this document (./... or ../...)`,
             );
         }
         const found = groundOf(value);
@@ -192,7 +196,7 @@ export function readFixtures(context: Context, node: Node | null): SpecFixture[]
             throw new SpecSyntaxError(
                 context.fileName,
                 line,
-                `fixture: reads ${GROUND_FIXTURES}/, and "${value}" names ${found === undefined ? `no ${GROUND_FIXTURES}/ folder` : `${found}/`} — put the file in ${where} (verb-reads-its-ground-folder)`,
+                `fixture: reads ${GROUND_FIXTURES}/, and "${value}" names ${found === undefined ? `no ${GROUND_FIXTURES}/ folder` : `${found}/`}, so put the file in ${where} (verb-reads-its-ground-folder)`,
             );
         }
         return { line, path: value };

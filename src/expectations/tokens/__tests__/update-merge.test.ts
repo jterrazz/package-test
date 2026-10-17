@@ -241,7 +241,7 @@ describe('update-merge', () => {
         ]);
     });
 
-    test('workdir substitution — mergePreservingPlaceholders substitutes the workdir in nested lists, and takes the run’s value where the shapes differ', () => {
+    test("workdir substitution — mergePreservingPlaceholders substitutes the workdir in nested lists, and takes the run's value where the shapes differ", () => {
         // Given - values nested in lists, and previous values of another shape than the run's
         // Then - each merged
         expect([

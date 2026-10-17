@@ -92,7 +92,7 @@ ruleTester().run('no-test-code-in-production', noTestCodeInProduction, {
                 {
                     column: 14,
                     line: 1,
-                    message: /through \.\.\/tests\/chain\.ts → \.\.\/tests\/render\.ts · /u,
+                    message: /through \.\.\/tests\/chain\.ts, then \.\.\/tests\/render\.ts · /u,
                 },
             ],
             filename: BARREL,

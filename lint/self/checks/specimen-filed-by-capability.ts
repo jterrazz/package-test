@@ -65,7 +65,7 @@ function foldersBelowSpecification(specsRoot: string, file: string): string[] {
 }
 
 function fixOf(specification: string, shape: string, vocabulary: Set<string>, beside = ''): string {
-    return `file it under the capability it specifies, one folder below its specification — \`${specification}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${specification}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/guides/test.md § The capability matrix)`;
+    return `file it under the capability it specifies, one folder below its specification, \`${specification}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${specification}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\` and the like; docs/guides/test.md § The capability matrix)`;
 }
 
 function checkComponentTree(specsRoot: string): Spotted<SelfPassId>[] {

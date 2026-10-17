@@ -41,7 +41,7 @@ ruleTester().run('no-redundant-root', noRedundantRoot, {
     ],
     valid: [
         {
-            name: 'A runner of no specification is none of this rule’s.',
+            name: "A runner of no specification is none of this rule's.",
             code: 'await other.cli("./bin", { root: "../.." });',
             filename: SPEC_FILE,
         },

@@ -50,7 +50,7 @@ test-mobile: build
 
 # outside: needs the network and a lychee on the machine; `check` never calls it.
 check-links:
-	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
+	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine; brew install lychee"; exit 1; }
 	lychee --no-progress README.md docs skills
 
 mutation: build

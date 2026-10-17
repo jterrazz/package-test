@@ -46,7 +46,7 @@ describe('localLinters', () => {
 
         // Then - the four-part refusal names the checker and what it printed
         await expect(linted).rejects.toThrow(
-            `found: node ${checker} failed and reported no diagnostic: something went wrong\nwhy: A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.\nfix: run node ${checker} on the fixture by hand and correct what stops it — a plugin that does not load, a config it refuses\nread: docs/guides/lint-specs.md#what-run-runs`,
+            `found: node ${checker} failed and reported no diagnostic: something went wrong\nwhy: A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.\nfix: run node ${checker} on the fixture by hand and correct what stops it: a plugin that does not load, a config it refuses\nread: docs/guides/lint-specs.md#what-run-runs`,
         );
     });
 
@@ -61,7 +61,7 @@ describe('localLinters', () => {
 
         // Then - the problem is the refusal's finding, never an empty report
         await expect(linted).rejects.toThrow(
-            'found: the presets’ checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape',
+            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape",
         );
     });
 
@@ -80,13 +80,13 @@ describe('localLinters', () => {
             [
                 'found: .rules() states acme/no-sleep, acme/no-wait, and the specification runs no oxlint',
                 'why: Rules are run by oxlint alone, and rules no linter reads would judge nothing and say nothing.',
-                'fix: name the plugins, or the `config`, the rules run under — or drop the `.rules()` call',
+                'fix: name the plugins, or the `config`, the rules run under, or drop the `.rules()` call',
                 'read: docs/guides/lint-specs.md#the-chain',
             ].join('\n'),
         );
     });
 
-    test('localLinters — a checker installed in the project — is run from node_modules/.bin with the run’s arguments, fixing first when asked, its diagnostics read from either stream', async () => {
+    test("localLinters — a checker installed in the project — is run from node_modules/.bin with the run's arguments, fixing first when asked, its diagnostics read from either stream", async () => {
         // Given - a checker installed in the project that logs each call and reports one finding on stdout and one on stderr
         const root = scratchDirectory('local-linters-root-');
         const tree = scratchDirectory('local-linters-tree-');
@@ -126,7 +126,7 @@ describe('localLinters', () => {
         ).resolves.toStrictEqual([]);
     });
 
-    test('localLinters — a failure’s refusal shows the first five lines of what it printed', async () => {
+    test("localLinters — a failure's refusal shows the first five lines of what it printed", async () => {
         // Given - a checker exiting 1 that prints seven lines
         const tree = scratchDirectory('local-linters-tree-');
         const checker = join(tree, 'long.mjs');
@@ -143,7 +143,7 @@ describe('localLinters', () => {
         );
     });
 
-    test('localLinters — oxlint — runs the real oxlint under the config and the run’s rules, fixing first when asked; a clean tree reports nothing, a plugin that does not load is refused', async () => {
+    test("localLinters — oxlint — runs the real oxlint under the config and the run's rules, fixing first when asked; a clean tree reports nothing, a plugin that does not load is refused", async () => {
         // Given - a tree logging to the console, a clean tree, and oxlint under a config of its own
         const tree = scratchDirectory('local-linters-tree-');
         writeFileSync(join(tree, 'a.js'), 'let a = 1;\nconsole.log(a);\n');
@@ -185,7 +185,7 @@ describe('localLinters', () => {
         ]);
     });
 
-    test('localLinters — a checker that fails with a finding — is read, not refused; a preset’s finding is read at its place', async () => {
+    test("localLinters — a checker that fails with a finding — is read, not refused; a preset's finding is read at its place", async () => {
         // Given - a checker reporting a finding and exiting 1, and a preset whose names rule a file breaks
         const tree = scratchDirectory('local-linters-tree-');
         mkdirSync(join(tree, 'src'));
@@ -231,7 +231,7 @@ describe('localLinters', () => {
         ]).toStrictEqual([
             [],
             [],
-            'found: the presets’ checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape',
+            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape",
         ]);
     });
 });

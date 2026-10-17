@@ -7,7 +7,7 @@ import { api } from '../api.project.js';
 import { routeCoverageSetup } from '../routes/route-coverage.global-setup.js';
 
 describe('api', () => {
-    test('api.project — the vitest project of the specification — is named for it, and starts the run’s services after the setups every project has and judges its routes', () => {
+    test("api.project — the vitest project of the specification — is named for it, and starts the run's services after the setups every project has and judges its routes", () => {
         // Given - the specification's project
         const project = api();
 

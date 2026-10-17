@@ -37,7 +37,7 @@ ruleTester().run('specs-at-declared-depth', specsAtDeclaredDepth, {
     ],
     valid: [
         {
-            name: 'A helper module anywhere a test would be misplaced is no test, a ground module is no spec, and the specs root’s `__setup__/` holds modules.',
+            name: "A helper module anywhere a test would be misplaced is no test, a ground module is no spec, and the specs root's `__setup__/` holds modules.",
             code: 'const x = 1;',
             filename: '/repo/specs/api/helpers.ts',
         },

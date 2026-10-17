@@ -163,13 +163,13 @@ function freePath(file: string, role: string, name: string, form: FileForm): str
 
 function capFix(oversized: Oversized): string {
     if (oversized.subject !== undefined) {
-        return `a string has no golden: wrap it — \`expect(text(${oversized.subject})).toMatch(file('./${oversized.role}/${oversized.name}.txt'))\` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file`;
+        return `a string has no golden: wrap it, \`expect(text(${oversized.subject})).toMatch(file('./${oversized.role}/${oversized.name}.txt'))\`, or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file`;
     }
     if (oversized.form === undefined) {
-        return `move it to a file under ./${oversized.role}/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only`;
+        return `move it to a file under ./${oversized.role}/ and name it with file(), by hand, since the fixer reads a string, a template or a JSON value only`;
     }
     const target = `./${oversized.role}/${oversized.name}${oversized.form.extension}`;
-    return `move it to ${target} and name it with file('${target}') — \`typescript fix\` moves it`;
+    return `move it to ${target} and name it with file('${target}'); \`typescript fix\` moves it`;
 }
 
 export function capFinding(rootDir: string, oversized: Oversized): Spotted {

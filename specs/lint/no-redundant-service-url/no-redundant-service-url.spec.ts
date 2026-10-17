@@ -11,9 +11,9 @@ describe('no-redundant-service-url', () => {
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
             specs/app/widget/widget.test.ts:8:36  jterrazz(no-redundant-service-url)
-                found: \`.env({ DATABASE_URL: ….connectionString })\` restates what the framework injects
-                why: \`.env({ <SERVICE>_URL: ….connectionString })\` repeats the framework's own injection → error.
-                fix: delete the \`DATABASE_URL\` entry — the service record key already injects \`<KEY>_URL\`, and \`DATABASE_URL\`/\`REDIS_URL\` when unambiguous
+                found: \`.env({ DATABASE_URL: <service>.connectionString })\` restates what the framework injects
+                why: \`.env({ <SERVICE>_URL: <service>.connectionString })\` repeats the framework's own injection, and is an error.
+                fix: delete the \`DATABASE_URL\` entry: the service record key already injects \`<KEY>_URL\`, and \`DATABASE_URL\`/\`REDIS_URL\` when unambiguous
                 read: docs/reference/linting.md#no-redundant-service-url
         `);
     });

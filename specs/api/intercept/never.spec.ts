@@ -34,7 +34,7 @@ describe('never', () => {
             'found: a route the chain declared never requested was reached:',
         );
         await expect(chain).rejects.toThrow(
-            `- POST ${QUOTES_URL} — reached by POST ${QUOTES_URL}?lang=en`,
+            `- POST ${QUOTES_URL}: reached by POST ${QUOTES_URL}?lang=en`,
         );
     });
 
@@ -46,9 +46,9 @@ describe('never', () => {
         await expect(chain).rejects.toThrow(
             [
                 'found: a route the chain declared never requested was reached:',
-                '  - POST https://api.openai.com/v1/chat/completions — reached by POST https://api.openai.com/v1/chat/completions',
+                '  - POST https://api.openai.com/v1/chat/completions: reached by POST https://api.openai.com/v1/chat/completions',
                 "why: A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
-                'fix: take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
+                'fix: take the call out of the path under test or, if the call is now intended, replace the never stub with one that answers it',
                 'read: docs/reference/stubs.md#never--a-call-that-must-not-happen',
             ].join('\n'),
         );

@@ -86,7 +86,7 @@ describe('peer', () => {
         await expect(failed).rejects.toHaveProperty('cause', original);
     });
 
-    test('loadPeer — the install line is the project’s manager’s, and a native peer under pnpm is told to be built', async () => {
+    test("loadPeer — the install line is the project's manager's, and a native peer under pnpm is told to be built", async () => {
         // Given - projects of each manager, and one with no lockfile
         // Then - each line to copy
         expect([

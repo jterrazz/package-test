@@ -39,7 +39,7 @@ export function file<const Path extends RelativePath>(
         throw new TypeError(
             refusal('disk-named-by-relative-path-at-runtime', {
                 fix: `name the directory with directory(${JSON.stringify(path)}), or the file without its /: file(${JSON.stringify(bare)})`,
-                found: `file(${JSON.stringify(path)}), a path ending in / — a directory's`,
+                found: `file(${JSON.stringify(path)}), a path ending in /, which is a directory's`,
             }),
         );
     }
@@ -56,7 +56,7 @@ function diskValue<Brand extends 'directory' | 'file', Path extends string>(
         value: () => {
             throw new TypeError(
                 refusal('one-verb-per-meaning', {
-                    fix: `wrap the string to golden it — \`expect(text(value)).toMatch(${brand}(…))\` — or compare it to a value, \`toMatch('…')\``,
+                    fix: `wrap the string to golden it, \`expect(text(value)).toMatch(${brand}(...))\`, or compare it to a value, \`toMatch('...')\``,
                     found: `toMatch(${brand}(${JSON.stringify(path)})) on a string, a value with no golden`,
                 }),
             );
@@ -134,7 +134,7 @@ export function requireDiskTarget(verb: string, value: unknown): DiskTarget {
     if (!isDiskTarget(value)) {
         throw new TypeError(
             refusal('disk-named-by-relative-path-at-runtime', {
-                fix: `name the disk: ${verb}(file('./…')) for a file, ${verb}(directory('./…/')) for a directory`,
+                fix: `name the disk: ${verb}(file('./<path>')) for a file, ${verb}(directory('./<path>/')) for a directory`,
                 found: `${verb}(${spelled(value)}), a value where the disk is read`,
             }),
         );

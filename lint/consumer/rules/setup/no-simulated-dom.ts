@@ -22,7 +22,7 @@ export const noSimulatedDom = defineRule(
         messages: {
             pragma: {
                 found: '`@vitest-environment {{environment}}` simulates a browser',
-                fix: 'delete the pragma, and write the rendered test as a `.test.tsx` in the `__tests__/` of its component’s folder, collected by the `component()` project',
+                fix: "delete the pragma, and write the rendered test as a `.test.tsx` in the `__tests__/` of its component's folder, collected by the `component()` project",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

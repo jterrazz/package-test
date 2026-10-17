@@ -12,13 +12,13 @@ describe('tests-folder', () => {
         expect(result.report).toMatch(`
             src/render/__tests__/__expected__/gone.aria.txt:1:1  jterrazz-check(no-unused-ground)
                 found: __expected__/gone.aria.txt, which no test of __tests__ names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete __expected__/gone.aria.txt, or name it from the test that stands on it
                 read: docs/reference/linting.md#no-unused-ground
             src/render/__tests__/heading.test.ts:9:42  jterrazz-check(ground-shared-or-inline)
                 found: src/render/__tests__/__expected__/notes.aria.txt, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
-                fix: write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it
+                fix: write it here, the value \`toMatch\` compares, and delete the file; \`typescript fix\` inlines it
                 read: docs/reference/linting.md#ground-shared-or-inline
         `);
     });
@@ -51,7 +51,7 @@ describe('tests-folder', () => {
         expect(result.report).toMatch(`
             src/render/__tests__/__expected__/gone.aria.txt:1:1  jterrazz-check(no-unused-ground)
                 found: __expected__/gone.aria.txt, which no test of __tests__ names
-                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced — a folder's, by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
+                why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan.
                 fix: delete __expected__/gone.aria.txt, or name it from the test that stands on it
                 read: docs/reference/linting.md#no-unused-ground
         `);

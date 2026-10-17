@@ -113,7 +113,7 @@ describe('appium-server', () => {
         expect(() => runDevice({ name: 'iPad Pro' }, run)).toThrow(
             [
                 "found: specification.mobile() names the device 'iPad Pro', and the run's Appium server drives 'iPhone 17' (26.5) [SIM-17], the device its mobile({ device }) project declares",
-                'why: The run’s setup booted the project’s device alone.',
+                "why: The run's setup booted the project's device alone.",
                 'fix: name that device, or declare no device on mobile() so each file serves its own',
                 'read: docs/guides/mobile-specs.md#one-session-per-run',
             ].join('\n'),
@@ -135,7 +135,7 @@ describe('appium-server', () => {
         );
     });
 
-    test('reachAppium — a declared server is the author’s, handed the device, and outlives the file; the run’s drives the project’s device', async () => {
+    test("reachAppium — a declared server is the author's, handed the device, and outlives the file; the run's drives the project's device", async () => {
         // Given - a declared server with a device, and the run's server with none named
         const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
         const declared = await reachAppium(
@@ -189,7 +189,7 @@ describe('appium-server', () => {
         );
     });
 
-    test('startAppiumServer — serves the project’s appium on the port it picks, until stopped with the WebDriverAgent it spawned for its simulator', async () => {
+    test("startAppiumServer — serves the project's appium on the port it picks, until stopped with the WebDriverAgent it spawned for its simulator", async () => {
         // Given - a root whose appium spawns, each in a group of its own, the xcodebuild and runner app of its simulator's WebDriverAgent beside three it must leave alone, then answers its status on the port its flag names; and one whose appium exits
         const udid = 'APPIUM-SERVER-STOP-SIM';
         const xcodebuild = programNamed('xcodebuild');

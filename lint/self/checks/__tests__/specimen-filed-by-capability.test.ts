@@ -55,11 +55,11 @@ describe('checkSpecimenFiledByCapability', () => {
         expect(
             checkSpecimenFiledByCapability(root).map(({ fix, path }) => `${path} ${fix}`),
         ).toStrictEqual([
-            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its specification — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `intercept`, `to-match`, `exec`, …; docs/guides/test.md § The capability matrix)',
+            'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its specification, `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `intercept`, `to-match`, `exec` and the like; docs/guides/test.md § The capability matrix)',
         ]);
     });
 
-    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a capability folder passes, and a spec of the project’s own app is `spec-in-subject-folder`’s', () => {
+    test("`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a capability folder passes, and a spec of the project's own app is `spec-in-subject-folder`'s", () => {
         // Given - a specimen spec under seed/, and a project whose runner starts its own app
         const specimen = specsTree({
             'api/api.specification.ts': SPECIMEN,
@@ -91,7 +91,7 @@ describe('checkSpecimenFiledByCapability', () => {
         ).toStrictEqual(['api/users/get/reading.spec.ts:2']);
     });
 
-    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a repository suite, which has no column, files a specimen’s spec under a capability of any', () => {
+    test("`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a repository suite, which has no column, files a specimen's spec under a capability of any", () => {
         // Given - a suite's specs of a specimen under an api capability, a mobile one, and neither
         const suite = "import { surface } from '../surface.specification.js';\n";
         const root = specsTree({
@@ -108,7 +108,7 @@ describe('checkSpecimenFiledByCapability', () => {
         ]);
     });
 
-    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is its specification’s fixtures’, and its author’s when inline', () => {
+    test("`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is its specification's fixtures', and its author's when inline", () => {
         // Given - two specs on a module-only runner under a folder the matrix never names
         const runner = "import { integration } from '../pure.specification.js';\n";
         const root = specsTree({
@@ -150,7 +150,7 @@ describe('checkSpecimenFiledByCapability', () => {
             'component/providers.tsx:2 a file of the component tree, filed under `component/`',
         ]);
         expect(checkSpecimenFiledByCapability(root)[0]?.fix).toBe(
-            'file it under the capability it specifies, one folder below its specification — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/guides/test.md § The capability matrix)',
+            'file it under the capability it specifies, one folder below its specification, `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match` and the like; docs/guides/test.md § The capability matrix)',
         );
     });
 

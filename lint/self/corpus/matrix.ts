@@ -162,11 +162,11 @@ export function matrixRows(root: string): MatrixRow[] {
 
 export const MATRIX_MARKERS: Markers = {
     end: '<!-- /GENERATED:matrix -->',
-    start: '<!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->',
+    start: '<!-- GENERATED:matrix. Do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->',
 };
 
 function cellOf(count: null | number): string {
-    return count === null ? '—' : String(count);
+    return count === null ? 'n/a' : String(count);
 }
 
 function exemptions(rows: MatrixRow[]): { column: Column; name: string; why: string }[] {
@@ -204,8 +204,8 @@ export function renderMatrixBody(root: string): string {
     for (const { column, name, why } of exemptions(rows)) {
         byReason.set(why, [...(byReason.get(why) ?? []), `\`${name}\`·${column}`]);
     }
-    const notes = [...byReason].map(([why, cells]) => `- ${why} — ${cells.join(', ')}`);
+    const notes = [...byReason].map(([why, cells]) => `- ${why}: ${cells.join(', ')}`);
     const intro =
-        'What the framework can do, and how many of this package\u2019s own test FILES exercise it, per specification: a call read from each file\u2019s syntax tree, whatever lines a formatter splits it across, and any other probe read as its literal with comments stripped \u2014 strings too for a key or an accessor \u2014 so a sentence or a string naming a capability never counts as a test of it. A blank (`\u2014`) is a capability the specification does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.';
+        "What the framework can do, and how many of this package's own test FILES exercise it, per specification: a call read from each file's syntax tree, whatever lines a formatter splits it across, and any other probe read as its literal with comments stripped (strings too, for a key or an accessor), so a sentence or a string naming a capability never counts as a test of it. A cell reading `n/a` is a capability the specification does not declare; a `0` is a declared capability nothing here exercises, and every one of them is named under **Exemptions** with the reason it is accepted. `matrix.test.ts` fails on a `0` that is not.";
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }

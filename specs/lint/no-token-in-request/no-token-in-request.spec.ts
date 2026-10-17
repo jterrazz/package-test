@@ -14,8 +14,8 @@ describe('no-token-in-request', () => {
         expect(result.report).toMatch(`
             specs/widget/__requests__/create.http:4:1  jterrazz-check(no-token-in-request)
                 found: the token {{string}} in a __requests__/ file
-                why: A known token in a file under \`__requests__/\` → error: requests are inputs, never matched.
-                fix: write the literal value the request sends — a request is sent, never matched
+                why: A known token in a file under \`__requests__/\` is an error: requests are inputs, never matched.
+                fix: write the literal value the request sends: a request is sent, never matched
                 read: docs/reference/linting.md#no-token-in-request
         `);
     });

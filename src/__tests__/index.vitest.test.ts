@@ -116,7 +116,7 @@ describe('index.vitest', () => {
             new Error(
                 refusal(
                     '`test.projects` is not a record',
-                    'key each project by its specification — `projects: { cli: { timeout: 120_000, reason: … } }`',
+                    'key each project by its specification: `projects: { cli: { timeout: 120_000, reason: ... } }`',
                 ),
             ),
         );

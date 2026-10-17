@@ -25,10 +25,10 @@ describe('no-duplicate-ground', () => {
 
         // Then - each copy is named, beside the other
         expect(found).toStrictEqual([
-            'specs/api/orders/__expected__/a.json:1 the same file as specs/api/users/__expected__/a.json — keep one copy in specs/api/__expected__/a.json — `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
-            'specs/api/users/__expected__/a.json:1 the same file as specs/api/orders/__expected__/a.json — keep one copy in specs/api/__expected__/a.json — `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
-            'specs/api/orders/__fixtures__/app:1 the same tree as specs/api/users/__fixtures__/app — keep one copy in specs/api/__fixtures__/app — `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
-            'specs/api/users/__fixtures__/app:1 the same tree as specs/api/orders/__fixtures__/app — keep one copy in specs/api/__fixtures__/app — `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
+            'specs/api/orders/__expected__/a.json:1 the same file as specs/api/users/__expected__/a.json — keep one copy in specs/api/__expected__/a.json; `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
+            'specs/api/users/__expected__/a.json:1 the same file as specs/api/orders/__expected__/a.json — keep one copy in specs/api/__expected__/a.json; `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
+            'specs/api/orders/__fixtures__/app:1 the same tree as specs/api/users/__fixtures__/app — keep one copy in specs/api/__fixtures__/app; `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
+            'specs/api/users/__fixtures__/app:1 the same tree as specs/api/orders/__fixtures__/app — keep one copy in specs/api/__fixtures__/app; `typescript fix` moves it there and rewrites every whole relative path that named a copy (no-duplicate-ground)',
         ]);
     });
 
@@ -82,12 +82,12 @@ describe('no-duplicate-ground', () => {
         // Then - the advice names what to do by hand
         expect([named.map(({ fix }) => fix), taken.map(({ fix }) => fix)]).toStrictEqual([
             [
-                'give the copies the one name the entry should keep — they go by several, so `typescript fix` moves none',
-                'give the copies the one name the entry should keep — they go by several, so `typescript fix` moves none',
+                'give the copies the one name the entry should keep: they go by several, so `typescript fix` moves none',
+                'give the copies the one name the entry should keep: they go by several, so `typescript fix` moves none',
             ],
             [
-                'keep one copy in specs/api/__fixtures__/x.txt — it holds another x.txt, so rename one of the two first',
-                'keep one copy in specs/api/__fixtures__/x.txt — it holds another x.txt, so rename one of the two first',
+                'keep one copy in specs/api/__fixtures__/x.txt, which holds another x.txt, so rename one of the two first',
+                'keep one copy in specs/api/__fixtures__/x.txt, which holds another x.txt, so rename one of the two first',
             ],
         ]);
     });
@@ -169,7 +169,7 @@ describe('no-duplicate-ground', () => {
         // Then - the others listed, the plain advice for a held copy, and no move
         expect([three[0]?.found, held[0]?.fix, unsettled]).toStrictEqual([
             'the same file as specs/b/__fixtures__/x.txt, specs/c/__fixtures__/x.txt',
-            'keep one copy in specs/api/__fixtures__/x.txt — `typescript fix` moves it there and rewrites every whole relative path that named a copy',
+            'keep one copy in specs/api/__fixtures__/x.txt; `typescript fix` moves it there and rewrites every whole relative path that named a copy',
             [[], []],
         ]);
     });

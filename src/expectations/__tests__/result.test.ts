@@ -31,7 +31,7 @@ function refusalOf(work: () => unknown): string {
 }
 
 describe('result', () => {
-    test('result — the disk a run left — read in its working directory, else the spec’s folder, the working directory resolved for {{workdir}}', () => {
+    test("result — the disk a run left — read in its working directory, else the spec's folder, the working directory resolved for {{workdir}}", () => {
         // Given - a run with a working directory, and one without
         const [testDir, workDir] = [folderWith('spec side'), folderWith('run side')];
         const ran = new BaseResult({ config: {}, testDir, workDir });
@@ -78,7 +78,7 @@ describe('result', () => {
         ]).toStrictEqual([refused, refused]);
     });
 
-    test('result — a table — read from the database named, else the chain’s first, and from the only one whatever a chain with no map names', async () => {
+    test("result — a table — read from the database named, else the chain's first, and from the only one whatever a chain with no map names", async () => {
         // Given - a run over two databases, one over one, and one whose map no key list states
         const several: ResultConfig = {
             database: database('orders'),
@@ -133,7 +133,7 @@ describe('result', () => {
             [
                 'found: table("users"), and no database is declared',
                 'why: A table is read from a declared database.',
-                'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()`',
+                "fix: declare a database in the specification's `services`: `postgres()` or `sqlite()`",
                 'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
             [

@@ -36,7 +36,7 @@ export const clock = {
                     fix: "take one first: `using _ = clock.at('<iso>')` (the calendar) or `using _ = clock.run()` (the scheduler)",
                     found: 'clock.advance(), and no clock is pinned',
                     read: 'docs/reference/time-and-doubles.md#the-clock',
-                    why: 'Only a pinned clock moves: the real one holds no time of the test’s to advance.',
+                    why: "Only a pinned clock moves: the real one holds no time of the test's to advance.",
                 }),
             );
         }

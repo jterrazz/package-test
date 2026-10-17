@@ -37,9 +37,9 @@ describe('staleIncludes', () => {
 
         // Then - the glob and both literal entries are named; the commented-out entry, the other literal, the glob naming no `.test.ts` and the unrelated glob are not
         expect(notices).toStrictEqual([
-            'jterrazz.config.ts: specs/api/**/*.test.ts still names `.test.ts` — the files it collected are `.spec.ts` now, and the project collects nothing until the glob follows (file-suffix-matches-place)',
-            'jterrazz.config.ts: specs/api/orders.test.ts names a file this run renamed — it is `specs/api/orders.spec.ts` now, and the entry collects nothing until it follows (file-suffix-matches-place)',
-            'jterrazz.config.ts: specs/api/orders.test.ts names a file this run renamed — it is `specs/api/orders.spec.ts` now, and the entry collects nothing until it follows (file-suffix-matches-place)',
+            'jterrazz.config.ts: specs/api/**/*.test.ts still names `.test.ts`, though the files it collected are `.spec.ts` now, and the project collects nothing until the glob follows (file-suffix-matches-place)',
+            'jterrazz.config.ts: specs/api/orders.test.ts names a file this run renamed, `specs/api/orders.spec.ts` now, and the entry collects nothing until it follows (file-suffix-matches-place)',
+            'jterrazz.config.ts: specs/api/orders.test.ts names a file this run renamed, `specs/api/orders.spec.ts` now, and the entry collects nothing until it follows (file-suffix-matches-place)',
         ]);
     });
 

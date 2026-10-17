@@ -17,7 +17,7 @@ function pinning(log: (null | string)[]): { clock: ClockPort } {
 const RUN = { config: {}, testDir: '/spec', workDir: null };
 
 describe('clock', () => {
-    test('clock.capability — .clock() — the chain’s last instant is handed to the adapter, and none when it stated none', async () => {
+    test("clock.capability — .clock() — the chain's last instant is handed to the adapter, and none when it stated none", async () => {
         // Given - a chain pinning twice, and one pinning nothing
         const log: (null | string)[] = [];
         const setup = { adapters: pinning(log), config: {} };

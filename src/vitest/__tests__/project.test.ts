@@ -17,7 +17,7 @@ function testOf(
 }
 
 describe('project', () => {
-    test('specificationProject — collects the specification’s spec files, in group 0, on the preset’s budget', () => {
+    test("specificationProject — collects the specification's spec files, in group 0, on the preset's budget", () => {
         // Given - a specification project stated by nobody
         const project = testOf(specificationProject('api', {}));
 
@@ -32,7 +32,7 @@ describe('project', () => {
         ]);
     });
 
-    test('specificationProject — adds a stated exclude to the preset’s', () => {
+    test("specificationProject — adds a stated exclude to the preset's", () => {
         // Given - a specification project that stays out of one folder
         const project = testOf(specificationProject('api', { exclude: ['specs/api/slow/**'] }));
 

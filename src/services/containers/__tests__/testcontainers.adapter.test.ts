@@ -127,7 +127,7 @@ describe('TestcontainersAdapter', () => {
         ]);
     });
 
-    test('testcontainers adapter — reads a started container’s logs, since a moment in seconds', async () => {
+    test("testcontainers adapter — reads a started container's logs, since a moment in seconds", async () => {
         // Given - a started container
         const log: BuildLog = [];
         const adapter = new TestcontainersAdapter(

@@ -30,7 +30,7 @@ describe('declared', () => {
             [
                 'found: .intercept(request), a bare request with no response',
                 'why: A stub is a request and its response: a request alone answers nothing.',
-                'fix: pass a stub — defineStub({ request, response }) — or the inline pair .intercept(request, response)',
+                'fix: pass a stub, defineStub({ request, response }), or the inline pair .intercept(request, response)',
                 'read: docs/reference/stubs.md#using-them-intercept',
             ].join('\n'),
         );

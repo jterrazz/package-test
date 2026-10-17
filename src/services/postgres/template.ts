@@ -79,7 +79,7 @@ export async function buildTemplate(
                         fix: `correct ${initPath}: the SQL fails as written`,
                         found: `the postgres init script ${initPath} failed: ${error instanceof Error ? error.message : String(error)}`,
                         read: 'docs/reference/services.md#dockerserviceinitsql',
-                        why: 'A postgres service’s template database is built by its init script, run whole.',
+                        why: "A postgres service's template database is built by its init script, run whole.",
                     }),
                     { cause: error },
                 );

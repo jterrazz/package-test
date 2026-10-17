@@ -17,7 +17,7 @@ describe('linked', () => {
         `);
     });
 
-    test('a bare name is the package the spec’s own project installed', async () => {
+    test("a bare name is the package the spec's own project installed", async () => {
         // Given - yaml, a dependency of the project this spec belongs to
         const result = await cli.link('yaml').exec('package yaml');
 

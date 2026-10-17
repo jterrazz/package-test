@@ -38,7 +38,7 @@ describe('mswNode', () => {
         await expect(mswNode.arm([])).resolves.toStrictEqual({});
     });
 
-    test('msw-node — arming — a chain’s stubs answer until released, and a call none declared is its violation', async () => {
+    test("msw-node — arming — a chain's stubs answer until released, and a call none declared is its violation", async () => {
         // Given - a real server, and a chain armed with a stub of one of its routes
         const real = await realServer();
         const armed = await mswNode.arm([

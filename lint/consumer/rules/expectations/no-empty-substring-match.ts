@@ -35,7 +35,7 @@ export const noEmptySubstringMatch = defineRule(
         docs: row,
         messages: {
             emptySubstring: {
-                found: "`toMatch('')` on a plain string, where it is vitest’s substring match and holds for any text",
+                found: "`toMatch('')` on a plain string, where it is vitest's substring match and holds for any text",
                 fix: "compare the string whole, `expect(<result>.stdout.text).toBe('')`, or hand the accessor itself to `toMatch` so the empty value is the one update mode records",
             },
         },

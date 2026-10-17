@@ -67,7 +67,7 @@ export const REFUSALS: [string, ProcessOptions, string][] = [
         },
         refused(
             '`before` exited 4.\nCommand: node -e "console.log(process.argv.length); console.error(2); process.exit(4)"\nOutput:\n1\n2\n',
-            'A process’s `before` must exit 0 before the process starts.',
+            "A process's `before` must exit 0 before the process starts.",
             'run the command by hand and correct what its output names',
         ),
     ],
@@ -113,7 +113,7 @@ export const REFUSALS: [string, ProcessOptions, string][] = [
         refused(
             `the ready pattern /listening on (?<port>\\w+)/u matched, and its capture group is not a port ("x").\nCommand: node -e "console.log('listening on x'); setInterval(() => {}, 1000)"\nOutput:\nlistening on x\n`,
             'A RegExp `ready` is read over the output, and its one capture group is the port.',
-            String.raw`capture the port alone in the pattern’s one group, e.g. /listening on (\d+)/`,
+            String.raw`capture the port alone in the pattern's one group, e.g. /listening on (\d+)/`,
         ),
     ],
     [

@@ -21,7 +21,7 @@ describe('given-in-the-test', () => {
             __tests__/scenario.test.ts:7:1  jterrazz(given-in-the-test)
                 found: \`beforeEach\` moves the Given out of the tests
                 why: A \`beforeEach\`/\`beforeAll\` in a test file is an error: the Given is built in the test.
-                fix: write the Given in each test — a shared value is a function each test calls, and \`clock.at()\` restores itself
+                fix: write the Given in each test: a shared value is a function each test calls, and \`clock.at()\` restores itself
                 read: docs/reference/linting.md#given-in-the-test
         `);
     });

@@ -13,8 +13,8 @@ describe('process', () => {
         expect(result.error.text).toBe(
             [
                 'found: process().url read before the process was ready',
-                'why: A process’s URL is known once it is ready.',
-                'fix: read it from the started services record — `env: (services) => …` or `server: (services) => …` — never at declaration time',
+                "why: A process's URL is known once it is ready.",
+                'fix: read it from the started services record (`env: (services) => ...` or `server: (services) => ...`), never at declaration time',
                 'read: docs/reference/services.md#process--the-one-shape-an-external-process-takes',
             ].join('\n'),
         );

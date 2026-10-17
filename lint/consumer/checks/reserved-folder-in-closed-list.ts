@@ -51,7 +51,7 @@ function judged(
             rootDir,
             folder,
             `\`${name}/\`, a folder of what several specifications share, and no subject: it holds no spec`,
-            `move what it holds into the special folders of \`${shownFolder(specsRoot, dirname(folder))}\` itself — what the leaves of a folder share sits in that folder's \`${SETUP_FOLDER}/\` or ground, \`specs/${SETUP_FOLDER}/\` and the ground at the specs root for what specifications share`,
+            `move what it holds into the special folders of \`${shownFolder(specsRoot, dirname(folder))}\` itself: what the leaves of a folder share sits in that folder's \`${SETUP_FOLDER}/\` or ground, \`specs/${SETUP_FOLDER}/\` and the ground at the specs root for what specifications share`,
         );
     }
     const renamed = renamedSpecialOf(specsRoot, folder);
@@ -105,7 +105,7 @@ function refusedInSetup(
             rootDir,
             path,
             `\`${name}/\` inside a \`${SETUP_FOLDER}/\`, where every folder is the code's own`,
-            `drop the \`_\` and name it for what it holds — the special folders, ${CLOSED_LIST}, sit beside a \`${SETUP_FOLDER}/\`, never inside it`,
+            `drop the \`_\` and name it for what it holds: the special folders, ${CLOSED_LIST}, sit beside a \`${SETUP_FOLDER}/\`, never inside it`,
         );
     }
     if (isDirectory || isModuleName(name) || DECLARATION.test(name)) {
@@ -116,7 +116,7 @@ function refusedInSetup(
         rootDir,
         path,
         `\`${name}\` inside a \`${SETUP_FOLDER}/\`, data where code alone belongs`,
-        `move it into the ground of its role beside that \`${SETUP_FOLDER}/\` — \`${owner}/${role}/${name}\`, or \`${owner}/${GROUND_EXPECTED}/${name}\` when a test compares against it — and the paths that import or name it`,
+        `move it into the ground of its role beside that \`${SETUP_FOLDER}/\` (\`${owner}/${role}/${name}\`, or \`${owner}/${GROUND_EXPECTED}/${name}\` when a test compares against it) and the paths that import or name it`,
     );
 }
 

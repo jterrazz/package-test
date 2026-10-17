@@ -155,20 +155,20 @@ What it checks, and how to deviate from a rule, is [Set up a project § Turning 
 
 Ask the questions in order: the first yes is the kind, and the kind decides where the file lives, which constructor it uses and which vitest project runs it.
 
-<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/fork.ts -->
+<!-- GENERATED:fork. Do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/fork.ts -->
 
 | Question                                                               | Kind             | Lives at                                         | Constructor                   | Project       | Read                                                                                         |
 | ---------------------------------------------------------------------- | ---------------- | ------------------------------------------------ | ----------------------------- | ------------- | -------------------------------------------------------------------------------------------- |
 | Does it render in a browser as a whole served page?                    | website          | `specs/website/<domain>/<aspect>.spec.ts`        | `specification.website()`     | `website`     | [Website specs](../guides/website-specs.md)                                                  |
-| Does it render as a component (React, a DOM function, a hook)?         | component        | `__tests__/<file>.test.tsx` by `<file>.tsx`      | none — the `component` chain  | `component`   | [Component specs](../guides/component-specs.md)                                              |
+| Does it render as a component (React, a DOM function, a hook)?         | component        | `__tests__/<file>.test.tsx` by `<file>.tsx`      | none, the `component` chain   | `component`   | [Component specs](../guides/component-specs.md)                                              |
 | Does it render on a simulator?                                         | mobile           | `specs/mobile/<domain>/<aspect>.spec.ts`         | `specification.mobile()`      | `mobile`      | [Mobile specs](../guides/mobile-specs.md)                                                    |
 | Does it answer HTTP?                                                   | api              | `specs/api/<resource>/<action>/<aspect>.spec.ts` | `specification.api()`         | `api`         | [API specs](../guides/api-specs.md)                                                          |
 | Is it triggered by name, in-process?                                   | job              | `specs/job/<job>/<aspect>.spec.ts`               | `specification.job()`         | `job`         | [Job specs](../guides/job-specs.md)                                                          |
 | Is it a binary?                                                        | cli              | `specs/cli/<command>/` (+ `<case>.spec.yaml`)    | `specification.cli(bin)`      | `cli`         | [CLI specs](../guides/cli-specs.md), [Spec documents](../guides/spec-documents.md)           |
-| Is it a rule the project ships — a plugin, a checker, a preset?        | lint             | `specs/lint/<rule>/<aspect>.spec.ts`             | `specification.lint()`        | `lint`        | [Lint specs](../guides/lint-specs.md)                                                        |
+| Is it a rule the project ships: a plugin, a checker, a preset?         | lint             | `specs/lint/<rule>/<aspect>.spec.ts`             | `specification.lint()`        | `lint`        | [Lint specs](../guides/lint-specs.md)                                                        |
 | Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts`    | `specification.integration()` | `integration` | [Integration specs](../guides/integration-specs.md)                                          |
 | Is it a module alone?                                                  | module           | `__tests__/<file>.test.ts` by `<file>.ts`        | none                          | `unit`        | [Module tests](../guides/module-tests.md)                                                    |
-| Is it the repository itself — a suite over several apps?               | repository suite | `specs/<suite>/<domain>/<aspect>.test.ts`        | none                          | any name      | [Conventions § The third door](../concepts/conventions.md#the-third-door-a-repository-suite) |
+| Is it the repository itself, a suite over several apps?                | repository suite | `specs/<suite>/<domain>/<aspect>.test.ts`        | none                          | any name      | [Conventions § The third door](../concepts/conventions.md#the-third-door-a-repository-suite) |
 
 <!-- /GENERATED:fork -->
 

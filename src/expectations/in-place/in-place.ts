@@ -117,7 +117,7 @@ export function writeInPlace(
         throw new Error(
             refusal({
                 fix: 'call `.toMatch(` on the expect() written at that line, not through an alias',
-                found: `update mode: no toMatch( stands at ${site.file}:${site.line}:${site.column} — the value in place cannot be written`,
+                found: `update mode: no toMatch( stands at ${site.file}:${site.line}:${site.column}, so the value in place cannot be written`,
                 read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A value written in place is rewritten where its `toMatch(` stands.',
             }),
@@ -127,7 +127,7 @@ export function writeInPlace(
     if (written !== '' && !LITERAL.test(written)) {
         throw new Error(
             refusal({
-                fix: 'write the expectation as a literal in `toMatch(`, or record it by hand: a table’s rows are recorded one by one, never from the last row',
+                fix: "write the expectation as a literal in `toMatch(`, or record it by hand: a table's rows are recorded one by one, never from the last row",
                 found: `update mode: toMatch(${written}) at ${site.file}:${site.line}:${site.column} holds a name or a call, not a literal`,
                 read: 'docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'Update mode rewrites the literal a `toMatch(` holds; a variable stands for values the rewrite would replace by the last one it saw.',

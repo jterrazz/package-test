@@ -107,7 +107,7 @@ function misnamedAdapters(rootDir: string, specsRoot: string): Spotted[] {
         found.push({
             path: relative(rootDir, file),
             line: lineAt(text, first.at),
-            fix: `name the file for the port it replaces: \`specs/${named}\` — the class keeps whatever name it has`,
+            fix: `name the file for the port it replaces, \`specs/${named}\`; the class keeps whatever name it has`,
             found: `\`${basename(file)}\`, whose \`${first.name}\` implements the port \`${first.port}\``,
             rule: 'adapter-named-for-its-port',
         });

@@ -122,9 +122,9 @@ describe('COMPONENT_COMMANDS', () => {
         // Then - the refusal says the value has nowhere to be written, with a browser or without one, and no file appears
         const refusal = new Error(
             [
-                'found: update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written',
+                'found: update mode: no frame of this toMatch call is the test file, so the value in place has nowhere to be written',
                 'why: A value written in place is rewritten in the test that states it.',
-                'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
+                'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(...))',
                 'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
             ].join('\n'),
         );

@@ -162,7 +162,7 @@ export async function matchDirectoryGolden(
     }
     throw new TypeError(
         refusal('one-verb-per-meaning', {
-            fix: `compare result.filesystem or result.directory(…) to directory(${JSON.stringify(path)}); a text is compared to file(…)`,
+            fix: `compare result.filesystem or result.directory(...) to directory(${JSON.stringify(path)}); a text is compared to file(...)`,
             found: `toMatch(directory(${JSON.stringify(path)})) on a subject that is no tree`,
         }),
     );

@@ -53,7 +53,7 @@ describe('file-suffix-matches-place', () => {
 
         // Then - the one is named, from the specs root
         expect(foundIn(join(root, 'specs'))).toStrictEqual([
-            'api/users/list.test.ts:1 a `.test.ts` under `specs/api/`, where a file specifies the assembled product — rename it `api/users/list.spec.ts` — `typescript fix` does it with `git mv` (file-suffix-matches-place)',
+            'api/users/list.test.ts:1 a `.test.ts` under `specs/api/`, where a file specifies the assembled product — rename it `api/users/list.spec.ts`; `typescript fix` does it with `git mv` (file-suffix-matches-place)',
         ]);
     });
 
@@ -67,8 +67,8 @@ describe('file-suffix-matches-place', () => {
 
         // Then - both are named, under the plain specs wording
         expect(foundIn(join(root, 'tests'))).toStrictEqual([
-            'loose.test.ts:1 a `.test.ts` under `specs/`, where a file specifies the assembled product — rename it `loose.spec.ts` — `typescript fix` does it with `git mv` (file-suffix-matches-place)',
-            'tools/x.test.ts:1 a `.test.ts` under `specs/`, where a file specifies the assembled product — rename it `tools/x.spec.ts` — `typescript fix` does it with `git mv` (file-suffix-matches-place)',
+            'loose.test.ts:1 a `.test.ts` under `specs/`, where a file specifies the assembled product — rename it `loose.spec.ts`; `typescript fix` does it with `git mv` (file-suffix-matches-place)',
+            'tools/x.test.ts:1 a `.test.ts` under `specs/`, where a file specifies the assembled product — rename it `tools/x.spec.ts`; `typescript fix` does it with `git mv` (file-suffix-matches-place)',
         ]);
         expect(foundIn(join(root, 'missing'))).toStrictEqual([]);
     });
@@ -106,7 +106,7 @@ describe('file-suffix-matches-place', () => {
                 ),
             ),
         ).toStrictEqual([
-            'file-suffix-matches-place:1 rename it in kebab-case — lowercase words joined by single hyphens, `<case>.spec.yaml`',
+            'file-suffix-matches-place:1 rename it in kebab-case, lowercase words joined by single hyphens: `<case>.spec.yaml`',
             'file-suffix-matches-place:1 drop "spec" from the name and name the case it proves',
             'file-suffix-matches-place:1 name it for what this case proves, not where it sits',
         ]);

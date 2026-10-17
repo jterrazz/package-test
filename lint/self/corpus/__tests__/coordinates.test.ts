@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 import { coordinatesOf, landingOf, pages, ROOT } from '../coordinates.js';
 
 describe('coordinates', () => {
-    test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every relative link lands on a file, and every anchor on a heading', () => {
+    test("conventions catalogue — the corpus' own coordinates (meta-test) — `links-resolve` — every relative link lands on a file, and every anchor on a heading", () => {
         // Given - the pages, and the anchors each of them offers
         const texts = new Map(
             pages().map((path) => [path, readFileSync(resolve(ROOT, path), 'utf8')]),
@@ -32,7 +32,7 @@ describe('coordinates', () => {
         expect(coordinates.length).toBeGreaterThan(300);
     });
 
-    test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every page of the manual the source cites exists', () => {
+    test("conventions catalogue — the corpus' own coordinates (meta-test) — `links-resolve` — every page of the manual the source cites exists", () => {
         // Given - every page path the source names: a test TITLE and a comment cite pages too, and a move takes the file while leaving those behind
         const cited: string[] = [];
         for (const entry of readdirSync(resolve(ROOT, 'src'), { recursive: true })) {

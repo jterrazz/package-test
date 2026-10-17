@@ -181,7 +181,7 @@ describe('table-goldens', () => {
             [true, 'expected table "users" not to match the rows in place'],
             [
                 false,
-                'Table "users" (the value in place): nothing is written in place yet — run with TEST_UPDATE=1 (or vitest -u) and the actual value is written into the test.',
+                'Table "users" (the value in place): nothing is written in place yet: run with TEST_UPDATE=1 (or vitest -u) and the actual value is written into the test.',
             ],
         ]);
     });

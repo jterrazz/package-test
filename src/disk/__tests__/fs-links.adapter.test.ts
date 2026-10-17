@@ -114,7 +114,7 @@ describe('fsLinks', () => {
         );
     });
 
-    test('fsLinks — a bare name — links the package the spec’s project resolves', () => {
+    test("fsLinks — a bare name — links the package the spec's project resolves", () => {
         // Given - an empty working directory
         const { testDir } = project();
         const workDir = workDirectory();
@@ -152,12 +152,12 @@ describe('fsLinks', () => {
         ]).toStrictEqual([
             [
                 "found: link('@acme/absent'): no node_modules from <root>/specs/cli/feature up holds @acme/absent",
-                'why: A bare name links the package the spec’s own project resolves, found as Node finds it.',
-                "fix: install @acme/absent in the project the spec belongs to, or name the package's directory: link('@acme/absent', directory('./__fixtures__/…/'))",
+                "why: A bare name links the package the spec's own project resolves, found as Node finds it.",
+                "fix: install @acme/absent in the project the spec belongs to, or name the package's directory: link('@acme/absent', directory('./__fixtures__/<package>/'))",
                 LINK_CHAPTER,
             ].join('\n'),
             [
-                `found: link('@acme/greeter', directory("./__fixtures__/absent/")) names nothing — <root>/specs/cli/feature/__fixtures__/absent does not exist`,
+                `found: link('@acme/greeter', directory("./__fixtures__/absent/")) names nothing: <root>/specs/cli/feature/__fixtures__/absent does not exist`,
                 DISK_WHY,
                 'fix: create <root>/specs/cli/feature/__fixtures__/absent, or correct the path',
                 DISK_CHAPTER,

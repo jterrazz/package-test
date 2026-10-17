@@ -43,23 +43,23 @@ export const testInItsTestsFolder = defineRule(
         messages: {
             fixturesOutsideTests: {
                 found: 'typed test data outside every `__tests__/`',
-                fix: 'move it into the `__tests__/` of its module’s folder, or — when the module tests of several folders share it — into the `__tests__/` of the lowest folder they share, and the paths that import it',
+                fix: "move it into the `__tests__/` of its module's folder or, when the module tests of several folders share it, into the `__tests__/` of the lowest folder they share, and the paths that import it",
             },
             orphanComponent: {
                 found: 'a component test naming no "{{expected}}"',
-                fix: 'name it for what it renders — a hook or a DOM function is the `.ts` of the same basename, its Host in the test',
+                fix: 'name it for what it renders: a hook or a DOM function is the `.ts` of the same basename, its Host in the test',
             },
             orphanTest: {
                 found: 'a module test naming no "{{expected}}" in the folder above its `__tests__/`',
-                fix: 'name it for a module of that folder — `__tests__/<file>.test.ts` tests `<file>.ts`; a test needing more than its module is a spec — move it under `specs/` as a `.spec.ts`',
+                fix: 'name it for a module of that folder (`__tests__/<file>.test.ts` tests `<file>.ts`); a test needing more than its module is a spec, so move it under `specs/` as a `.spec.ts`',
             },
             outsideTests: {
                 found: 'a module test outside the `__tests__/` of its folder',
-                fix: 'move it to `{{target}}`, and each relative path it imports one folder up (`./<file>.js` → `../<file>.js`)',
+                fix: 'move it to `{{target}}`, and each relative path it imports one folder up (`./<file>.js` becomes `../<file>.js`)',
             },
             rootTests: {
                 found: 'a package-level `{{directory}}/` directory',
-                fix: 'move each module test into the `__tests__/` of its module’s folder under `src/`, and each product specification under `specs/`',
+                fix: "move each module test into the `__tests__/` of its module's folder under `src/`, and each product specification under `specs/`",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

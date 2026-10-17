@@ -20,12 +20,12 @@ describe('spec-file-in-a-specs-tree', () => {
         expect(result.report).toMatch(`
             src/orders/listing.daily.spec.ts:1:1  names(spec-file-in-a-specs-tree)
                 found: \`src/orders/listing.daily.spec.ts\` breaks ls-lint's \`.*.spec.ts: exists:0\`
-                why: A \`.spec.ts\` — the ASSEMBLED product — sits under a \`specs/\` tree; one in any other folder is an error at the file.
+                why: A \`.spec.ts\` (the ASSEMBLED product) sits under a \`specs/\` tree; one in any other folder is an error at the file.
                 fix: move it under \`specs/<specification>/\`, or rename it \`.test.ts\` in the \`__tests__/\` of the folder of the module it covers
                 read: docs/reference/linting.md#spec-file-in-a-specs-tree
             src/orders/listing.spec.ts:1:1  names(spec-file-in-a-specs-tree)
                 found: \`src/orders/listing.spec.ts\` breaks ls-lint's \`.spec.ts: exists:0\`
-                why: A \`.spec.ts\` — the ASSEMBLED product — sits under a \`specs/\` tree; one in any other folder is an error at the file.
+                why: A \`.spec.ts\` (the ASSEMBLED product) sits under a \`specs/\` tree; one in any other folder is an error at the file.
                 fix: move it under \`specs/<specification>/\`, or rename it \`.test.ts\` in the \`__tests__/\` of the folder of the module it covers
                 read: docs/reference/linting.md#spec-file-in-a-specs-tree
         `);

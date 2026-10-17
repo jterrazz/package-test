@@ -24,7 +24,7 @@ export const requestFileExtensionKnown = defineRule(
         messages: {
             noExtension: {
                 found: '`__requests__/{{entry}}` carries no extension',
-                fix: 'name it by how it is sent — `__requests__/{{entry}}.http` for a whole request, `__requests__/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
+                fix: 'name it by how it is sent: `__requests__/{{entry}}.http` for a whole request, `__requests__/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

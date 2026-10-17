@@ -37,7 +37,7 @@ export default defineConfig({
             component: {
                 clock: '2026-01-02T03:04:05.000Z',
                 locale: 'fr-FR',
-                reason: 'the component specs prove each option of the project reaches the page — clock, locale, zone, viewport, wrap and vite pipeline — and render this package as its browser build',
+                reason: 'the component specs prove each option of the project reaches the page (clock, locale, zone, viewport, wrap and vite pipeline) and render this package as its browser build',
                 root: 'specs/component',
                 timezone: 'Europe/Paris',
                 viewport: { height: 640, width: 1024 },
@@ -78,7 +78,7 @@ export default defineConfig({
         mutation: {
             exclude: {
                 'src/chain/paths/__tests__/temp-root.global-setup.test.ts':
-                    'the temp root is the run’s own, and cannot judge a mutant',
+                    "the temp root is the run's own, and cannot judge a mutant",
             },
             ignore: {
                 'src/specifications/website/browser/page-scripts.ts':

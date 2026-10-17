@@ -20,13 +20,13 @@ describe('request-file-extension-known', () => {
         expect(result.report).toMatch(`
             specs/app/widget/widget.test.ts:1:1  jterrazz(request-file-extension-known)
                 found: \`__requests__/create-user\` carries no extension
-                why: \`__requests__/\` holds what a spec SENDS: a whole request as a \`.http\` (\`request()\`), or a body a verb sends (\`post\`/\`put\`/\`patch\` with a \`file()\`) — a \`.json\`, a \`.txt\`, any format the app reads.
-                fix: name it by how it is sent — \`__requests__/create-user.http\` for a whole request, \`__requests__/create-user.json\` for a body the app parses, any other extension for a body sent verbatim
+                why: \`__requests__/\` holds what a spec SENDS: a whole request as a \`.http\` (\`request()\`), or a body a verb sends (\`post\`/\`put\`/\`patch\` with a \`file()\`), whether a \`.json\`, a \`.txt\` or any format the app reads.
+                fix: name it by how it is sent: \`__requests__/create-user.http\` for a whole request, \`__requests__/create-user.json\` for a body the app parses, any other extension for a body sent verbatim
                 read: docs/reference/linting.md#request-file-extension-known
             specs/app/widget/widget.test.ts:7:1  jterrazz(no-status-only-test)
                 found: the test's only assertions probe the HTTP status
-                why: A test whose ONLY assertions are HTTP status probes (\`expect(X.status).toBe(N)\` / \`.toEqual(N)\`, N a numeric literal 100–599) → error: this case wants a full golden (\`expect(result.response).toMatch(file('./__expected__/case.http'))\`).
-                fix: compare the whole response, \`\`expect(result.response).toMatch(\`HTTP/1.1 …\`)\`\` (\`TEST_UPDATE=1\` fills an empty one), and keep the status probe beside it only if the status is the point
+                why: A test whose ONLY assertions are HTTP status probes (\`expect(X.status).toBe(N)\` / \`.toEqual(N)\`, N a numeric literal from 100 to 599) is an error: this case wants a full golden (\`expect(result.response).toMatch(file('./__expected__/case.http'))\`).
+                fix: compare the whole response, \`\`expect(result.response).toMatch(\`HTTP/1.1 ...\`)\`\` (\`TEST_UPDATE=1\` fills an empty one), and keep the status probe beside it only if the status is the point
                 read: docs/reference/linting.md#no-status-only-test
         `);
     });

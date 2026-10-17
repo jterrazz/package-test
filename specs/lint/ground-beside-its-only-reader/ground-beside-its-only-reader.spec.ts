@@ -20,7 +20,7 @@ describe('ground-beside-its-only-reader', () => {
         `);
     });
 
-    test('leaves a subject’s folder alone: its aspect files share its ground', async () => {
+    test("leaves a subject's folder alone: its aspect files share its ground", async () => {
         // Given - two specs of GET /orders/:id in its standard folder, one of them reading the golden
         const result = await checker
             .fixture(directory('./__fixtures__/ground-beside-its-only-reader-subject-leaf/'))

@@ -53,7 +53,7 @@ function pluginKeysLeft(root: string): string[] {
                     fix: "run 'typescript baseline'",
                     found: `\`${key}\` is held in the ${TEST_SECTION} section`,
                     read: 'docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
-                    why: "the plugin's rules are oxlint's own, held file by file in .jterrazz/oxlint-suppressions.json — one finding, one judge",
+                    why: "the plugin's rules are oxlint's own, held file by file in .jterrazz/oxlint-suppressions.json: one finding, one judge",
                 })}`,
         );
 }

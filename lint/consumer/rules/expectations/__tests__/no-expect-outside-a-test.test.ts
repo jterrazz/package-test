@@ -78,7 +78,7 @@ export function expectBuilt(stdout: string): void {
     ],
     valid: [
         {
-            name: 'An expect of another module, another name from vitest, or an import of another module is none of vitest’s.',
+            name: "An expect of another module, another name from vitest, or an import of another module is none of vitest's.",
             code: `import { expect } from 'node:assert';
 import vitest from 'vitest';
 export async function probe(): Promise<void> {

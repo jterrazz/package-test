@@ -15,8 +15,8 @@ export const noRedundantServiceUrl = defineRule(
         docs: row,
         messages: {
             redundant: {
-                found: '`.env({ {{key}}: ….connectionString })` restates what the framework injects',
-                fix: 'delete the `{{key}}` entry — the service record key already injects `<KEY>_URL`, and `DATABASE_URL`/`REDIS_URL` when unambiguous',
+                found: '`.env({ {{key}}: <service>.connectionString })` restates what the framework injects',
+                fix: 'delete the `{{key}}` entry: the service record key already injects `<KEY>_URL`, and `DATABASE_URL`/`REDIS_URL` when unambiguous',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

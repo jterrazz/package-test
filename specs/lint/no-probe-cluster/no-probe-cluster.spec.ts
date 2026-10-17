@@ -20,8 +20,8 @@ describe('no-probe-cluster', () => {
         expect(result.report).toMatch(`
             __tests__/scenario.test.ts:6:1  jterrazz(no-probe-cluster)
                 found: 3 probes on \`result.stdout\`
-                why: Three probes (\`threshold\`, default 3) on one goldenable subject — \`stdout\`, \`stderr\`, \`content\`, \`head\`, \`meta()\`, \`canonical\`, \`alternates\`, \`tree\`, \`html\` — with no \`toMatch(file(…))\` on it is an error.
-                fix: compare it whole — \`\`expect(result.stdout).toMatch(\`…\`)\`\`, \`TEST_UPDATE=1\` writing the value — with tokens for what moves
+                why: Three probes (\`threshold\`, default 3) on one goldenable subject (\`stdout\`, \`stderr\`, \`content\`, \`head\`, \`meta()\`, \`canonical\`, \`alternates\`, \`tree\`, \`html\`) with no \`toMatch(file(...))\` on it is an error.
+                fix: compare it whole, \`\`expect(result.stdout).toMatch(\`...\`)\`\` with \`TEST_UPDATE=1\` writing the value, with tokens for what moves
                 read: docs/reference/linting.md#no-probe-cluster
         `);
     });

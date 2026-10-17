@@ -119,7 +119,7 @@ export const SPEC_SCHEMA: SpecSchema = {
         'One case of the @jterrazz/test literate format, one file per test: the ground it stands on, what it does, and what came back.',
     properties: {
         description: {
-            description: 'The vitest test title — one lowercase line, no trailing period.',
+            description: 'The vitest test title: one lowercase line, no trailing period.',
             type: 'string',
         },
         env: {
@@ -129,7 +129,7 @@ export const SPEC_SCHEMA: SpecSchema = {
         },
         fixture: {
             description:
-                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is __fixtures__/ — ./__fixtures__/ beside the document, or specs/__fixtures__/ reached by the path that climbs to it.",
+                "Fixture paths copied into the working directory, layering in order, each relative to this document (`./...`, `../...`) and in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is __fixtures__/: ./__fixtures__/ beside the document, or specs/__fixtures__/ reached by the path that climbs to it.",
             ...oneOrMany(fixturePath()),
         },
         runs: {

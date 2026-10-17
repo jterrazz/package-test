@@ -6,7 +6,7 @@ import { servicesSetup } from '../../../services/containers/services.global-setu
 import { integration } from '../integration.project.js';
 
 describe('integration', () => {
-    test('integration.project — the vitest project of the specification — is named for it, and starts the run’s services after the setups every project has', () => {
+    test("integration.project — the vitest project of the specification — is named for it, and starts the run's services after the setups every project has", () => {
         // Given - the specification's project
         const project = integration();
 

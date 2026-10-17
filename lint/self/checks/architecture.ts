@@ -129,7 +129,7 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
                     dependencyTypes: LOCAL_DEPENDENCY,
                     pathNot: either(imports.map((one) => targetOf(one))),
                 },
-                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← specifications ← the entries`,
+                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it, each layer reading those below it: the chain, then the notions (visitor, expectations, stubs, services, disk, clock, mocks), then vitest, then the specifications, then the entries`,
             },
             {
                 fix: 'import it from the slice that owns it, or declare the package on the layer in `FRAMEWORK_LAYERS` with its reason',
@@ -148,7 +148,7 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
 
 function ownerRules(): ArchitectureRule[] {
     return Object.entries(OWNERS_OF_LIBRARIES).map(([library, owners]) => ({
-        fix: `reach \`${library}\` through the port \`${owners.join('` or `')}\` implements, handed in by the specification — or import only what the owner exports`,
+        fix: `reach \`${library}\` through the port \`${owners.join('` or `')}\` implements, handed in by the specification, or import only what the owner exports`,
         from: {
             path: '^(src|lint)/',
             pathNot: either([
@@ -211,14 +211,14 @@ function specificationRules(): ArchitectureRule[] {
     const face = String.raw`^src/specifications/[^/]+/[^/]+\.face(\.browser)?\.ts$`;
     const readers = specificationReaders();
     const outside: Pick<ArchitectureRule, 'fix' | 'read' | 'why'> = {
-        fix: 'import it from the specification’s face — export it from `src/specifications/<specification>/<specification>.face.ts` — or move it below the specifications',
+        fix: "import it from the specification's face (export it from `src/specifications/<specification>/<specification>.face.ts`), or move it below the specifications",
         read: READ_LAYERS,
         why: 'a specification is entered from outside by its face, and a concept folder reached from outside is an internal that can no longer move',
     };
 
     return [
         {
-            fix: 'move what the two specifications share below the specifications — to `chain/` or the notion it is (`visitor/`, `expectations/`, `stubs/`, `services/`, `disk/`, `clock/`, `mocks/`) — and import it from there',
+            fix: 'move what the two specifications share below the specifications, to `chain/` or the notion it is (`visitor/`, `expectations/`, `stubs/`, `services/`, `disk/`, `clock/`, `mocks/`), and import it from there',
             from: { path: '^src/specifications/([^/]+)/', pathNot: TEST_MATERIAL },
             name: 'specification-imports-no-other-specification',
             read: READ_LAYERS,

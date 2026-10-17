@@ -87,7 +87,7 @@ export function ambiguityError(options: {
         refusal('target-matches-one-element', {
             fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
             found: [
-                `Ambiguous element: ${asWritten(target)} matched ${lines.length} elements on ${where} —`,
+                `Ambiguous element: ${asWritten(target)} matched ${lines.length} elements on ${where}:`,
                 ...lines,
             ].join('\n'),
         }),

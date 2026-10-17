@@ -30,7 +30,7 @@ function refusalOf(work: () => unknown): string {
 }
 
 describe('databaseSet', () => {
-    test('database-set — reads a seed file from the spec’s folder, and refuses a path not relative to it', () => {
+    test("database-set — reads a seed file from the spec's folder, and refuses a path not relative to it", () => {
         // Given - a spec folder holding a seed
         const testDir = mkdtempSync(join(tmpdir(), 'seed-'));
         mkdirSync(join(testDir, '__seeds__'));
@@ -115,7 +115,7 @@ describe('databaseSet', () => {
             [
                 'found: seed(), and no database is declared',
                 'why: A seed writes into a declared database.',
-                'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                "fix: declare a database in the specification's `services` (`postgres()` or `sqlite()`), or drop the seed",
                 'read: docs/reference/services.md#the-database-rule',
             ].join('\n'),
         ]);

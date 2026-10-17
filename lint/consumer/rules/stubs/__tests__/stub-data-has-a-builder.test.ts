@@ -19,7 +19,7 @@ ruleTester().run('stub-data-has-a-builder', stubDataHasABuilder, {
     ],
     valid: [
         {
-            name: 'Request data outside a stubs folder is no unit’s.',
+            name: "Request data outside a stubs folder is no unit's.",
             code: "export const path = '/articles';",
             filename: `${SPECS_LINT}/stub-data-has-a-builder/__fixtures__/violation/specs/app/widget/__setup__/mocks/http/articles.request.ts`,
         },

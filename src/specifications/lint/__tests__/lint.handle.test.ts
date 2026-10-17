@@ -56,7 +56,7 @@ describe('lint.handle', () => {
         // Then - the refusal names every anchor it searched and the peer to install
         expect(() => oxlintBinary([anchor, ...odd])).toThrow(
             new Error(
-                `found: specification.lint() runs oxlint, and none resolves from ${[anchor, ...odd].join(', ')}\nwhy: A plugin and a config are run by the real oxlint, the one a project lints with.\nfix: install oxlint — an optional peer of @jterrazz/test — beside the project\nread: docs/guides/lint-specs.md#options`,
+                `found: specification.lint() runs oxlint, and none resolves from ${[anchor, ...odd].join(', ')}\nwhy: A plugin and a config are run by the real oxlint, the one a project lints with.\nfix: install oxlint, an optional peer of @jterrazz/test, beside the project\nread: docs/guides/lint-specs.md#options`,
             ),
         );
     });
@@ -141,14 +141,14 @@ describe('lint.handle', () => {
             [
                 'found: specification.lint() with no plugin, no config, no checker and no presets',
                 'why: A lint specification runs the linters it names, and one that names none judges nothing.',
-                'fix: name the plugins, the config, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
+                'fix: name the plugins, the config, the checkers or the presets the specification lints with (`presets: []` for the base preset alone)',
                 'read: docs/guides/lint-specs.md#options',
             ].join('\n'),
-            'found: the presets’ checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape',
+            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape",
         ]);
     });
 
-    test('startLint — the oxlint run is the project’s own, resolved from its root before the package’s', async () => {
+    test("startLint — the oxlint run is the project's own, resolved from its root before the package's", async () => {
         // Given - a project whose oxlint is a stand-in reporting one finding of its own
         const root = scratchDirectory('lint-handle-root-');
         mkdirSync(join(root, 'node_modules/oxlint'), { recursive: true });

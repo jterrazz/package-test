@@ -24,11 +24,13 @@ const SNAPSHOT_MATCHERS: Record<string, string> = {
 
 // outside: `no-vitest-time-or-global-stub`. `stubEnv` is not here: it restores itself. `vi.mock`/`vi.doMock` stay on `no-module-mock`, whose allow-list the option cannot express.
 const RESTRICTED_VI_METHODS: Record<string, string> = {
-    setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
+    setSystemTime:
+        '`vi.setSystemTime` gives way to `clock.at(iso)`, which gives the calendar back.',
     stubGlobal:
-        "`vi.stubGlobal('fetch')` → `await using _ = await intercept(defineStubs(…))`; a subject that fetches a PATH states where it resolves: `intercept(stubs, { origin: 'http://<host>.test' })`.",
-    useFakeTimers: '`vi.useFakeTimers` → `clock.at(iso)` and `clock.advance(ms)`.',
-    useRealTimers: '`vi.useRealTimers` → nothing: `using` gives the clock back at the scope end.',
+        "`vi.stubGlobal('fetch')` gives way to `await using _ = await intercept(defineStubs(...))`; a subject that fetches a PATH states where it resolves: `intercept(stubs, { origin: 'http://<host>.test' })`.",
+    useFakeTimers: '`vi.useFakeTimers` gives way to `clock.at(iso)` and `clock.advance(ms)`.',
+    useRealTimers:
+        '`vi.useRealTimers` gives way to nothing: `using` gives the clock back at the scope end.',
 };
 
 /** Set in an override because a base profile turns the vitest plugin on in an override over the test globs, and an override's entry replaces a top-level one. */

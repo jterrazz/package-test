@@ -37,11 +37,11 @@ function splitAdvice(specsRoot: string, spec: SpecRead): string {
             ...(plan.size >= 2 ? [planLines(specsRoot, spec, plan).join('; ')] : []),
             ...(refusal === undefined ? [] : [`beware: ${refusal}`]),
         ];
-        advice.push(parts.join(' — '));
+        advice.push(parts.join('; '));
     }
     if (journey !== undefined) {
         advice.push(
-            `the test "${journey.title}" reaches ${journey.subjects.join(' and ')} — state what it stands on with a seed, and keep one subject per test`,
+            `the test "${journey.title}" reaches ${journey.subjects.join(' and ')}: state what it stands on with a seed, and keep one subject per test`,
         );
     }
     return advice.join('; ');
@@ -58,7 +58,7 @@ export function checkOneSubjectPerSpec(specsRoot: string): Spotted[] {
                 ...secondSubjectAt(spec),
                 path: shown(specsRoot, spec.file),
                 fix: splitAdvice(specsRoot, spec),
-                found: `a spec reaching ${names.length} subjects — ${names.join(', ')}`,
+                found: `a spec reaching ${names.length} subjects: ${names.join(', ')}`,
                 rule: 'one-subject-per-spec' as const,
             },
         ];

@@ -29,7 +29,7 @@ describe('backend', () => {
         await expect(chain).rejects.toThrow(
             'found: a route the chain declared never requested was reached:',
         );
-        await expect(chain).rejects.toThrow('- GET /greeting — reached by GET');
+        await expect(chain).rejects.toThrow('- GET /greeting: reached by GET');
     });
 
     test('a stub forbidding a header the server sends does not answer it, and the visit is refused naming the forbidden header', async () => {

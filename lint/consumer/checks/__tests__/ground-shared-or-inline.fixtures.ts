@@ -8,7 +8,7 @@ export const REQUEST =
 export const EXPECTED = { 'specs/api/__expected__/users.json': '[]\n' };
 
 export const readAlone = (name = 'users.json'): string[] => [
-    `specs/api/users.spec.ts:2:39 specs/api/__expected__/${name}, read by this test alone — write it here, the value \`toMatch\` compares, and delete the file — \`typescript fix\` inlines it`,
+    `specs/api/users.spec.ts:2:39 specs/api/__expected__/${name}, read by this test alone — write it here, the value \`toMatch\` compares, and delete the file; \`typescript fix\` inlines it`,
 ];
 
 export const READ_ALONE = readAlone();

@@ -21,22 +21,22 @@ describe('no-test-code-in-production', () => {
             src/report/report.ts:1:20  jterrazz(no-test-code-in-production)
                 found: production code references "./__expected__/sample.json", ground (__expected__/sample.json)
                 why: A production module never reaches test material.
-                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                fix: move the reference into a test (specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\`), or move what production needs out of the test material
                 read: docs/reference/linting.md#no-test-code-in-production
             src/report/report.ts:2:22  jterrazz(no-test-code-in-production)
                 found: production code references "./__fixtures__/rows.js", ground (__fixtures__/rows.ts)
                 why: A production module never reaches test material.
-                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                fix: move the reference into a test (specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\`), or move what production needs out of the test material
                 read: docs/reference/linting.md#no-test-code-in-production
             src/report/report.ts:3:21  jterrazz(no-test-code-in-production)
                 found: production code references "./__requests__/report.http?raw", ground (__requests__/report.http?raw)
                 why: A production module never reaches test material.
-                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                fix: move the reference into a test (specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\`), or move what production needs out of the test material
                 read: docs/reference/linting.md#no-test-code-in-production
             src/report/report.ts:4:18  jterrazz(no-test-code-in-production)
                 found: production code references "./__seeds__/rows.sql?raw", ground (__seeds__/rows.sql?raw)
                 why: A production module never reaches test material.
-                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                fix: move the reference into a test (specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\`), or move what production needs out of the test material
                 read: docs/reference/linting.md#no-test-code-in-production
         `);
     });
@@ -50,7 +50,7 @@ describe('no-test-code-in-production', () => {
             src/service.ts:1:24  jterrazz(no-test-code-in-production)
                 found: production code references "vitest", a test package (vitest)
                 why: A production module never reaches test material.
-                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                fix: move the reference into a test (specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\`), or move what production needs out of the test material
                 read: docs/reference/linting.md#no-test-code-in-production
         `);
     });
@@ -64,7 +64,7 @@ describe('no-test-code-in-production', () => {
             src/service.ts:1:23  jterrazz(no-test-code-in-production)
                 found: production code references "~/__fixtures__/users.js", ground (__fixtures__/users.ts)
                 why: A production module never reaches test material.
-                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                fix: move the reference into a test (specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\`), or move what production needs out of the test material
                 read: docs/reference/linting.md#no-test-code-in-production
         `);
     });

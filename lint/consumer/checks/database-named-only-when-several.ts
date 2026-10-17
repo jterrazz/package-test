@@ -35,7 +35,7 @@ function misnamed(
 ): null | Pick<Spotted, 'fix' | 'found'> {
     if (count >= 2 && !hasDatabase) {
         return {
-            fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
+            fix: `pass \`.${verb}(..., { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
             found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
         };
     }

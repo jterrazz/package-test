@@ -47,7 +47,7 @@ describe('ambiguous', () => {
         // Then - the whole refusal, readable without opening a browser
         expect(message).toBe(
             [
-                'found: Ambiguous element: link("Articles") matched 4 elements on http://site.test/ —',
+                'found: Ambiguous element: link("Articles") matched 4 elements on http://site.test/:',
                 '  1. <a href="/articles">Articles</a>  in <nav>',
                 '  2. <input name="q"></input>',
                 '  3. <button>Delete</button>  named "Delete Post a"',

@@ -56,52 +56,52 @@ type Seam = { fix: string; from?: string; packages: readonly string[]; seam: str
 
 const SEAMS: readonly Seam[] = [
     {
-        fix: '`component.render()` and the element vocabulary render in a real browser — the queries are the same nouns, and they run against what ships',
+        fix: '`component.render()` and the element vocabulary render in a real browser: the queries are the same nouns, and they run against what ships',
         packages: ['@testing-library/*'],
         seam: 'renderer',
     },
     {
-        fix: 'a drawing of a browser proves what a browser does not — a rendered thing is a `.test.tsx` in the `__tests__/` of its component’s folder, collected by `component()`',
+        fix: "a drawing of a browser proves what a browser does not: a rendered thing is a `.test.tsx` in the `__tests__/` of its component's folder, collected by `component()`",
         packages: ['happy-dom', 'jsdom'],
         seam: 'simulated-dom',
     },
     {
-        fix: 'Browser Mode is the seam, not the surface — `component.render()` owns the locators, the visitor and the ARIA tree',
+        fix: 'Browser Mode is the seam, not the surface: `component.render()` owns the locators, the visitor and the ARIA tree',
         packages: ['vitest/browser', 'vitest-browser-*', '@vitest/browser*'],
         seam: 'browser-mode',
     },
     {
-        fix: 'the network answers through stubs — `await using _ = await intercept(defineStubs(…))` in module scope, `.intercept()` on a chain',
+        fix: 'the network answers through stubs: `await using _ = await intercept(defineStubs(...))` in module scope, `.intercept()` on a chain',
         packages: ['msw', 'nock'],
         seam: 'network',
     },
     {
-        fix: 'the doubles ladder is closed — `mockOf<Port>()` for an injected interface, `vi.fn()` for a function, `vi.spyOn` for an object the test passes in',
+        fix: 'the doubles ladder is closed: `mockOf<Port>()` for an injected interface, `vi.fn()` for a function, `vi.spyOn` for an object the test passes in',
         packages: ['sinon', 'vitest-mock-extended'],
         seam: 'doubles',
     },
     {
-        fix: 'vitest is the runner this vocabulary speaks — `test`, `expect` and `vi` come from it',
+        fix: 'vitest is the runner this vocabulary speaks: `test`, `expect` and `vi` come from it',
         packages: ['jest', '@jest/*'],
         seam: 'runner',
     },
     {
-        fix: 'time is one primitive — `using _ = clock.at(iso)` pins the calendar and gives it back at the end of the scope',
+        fix: 'time is one primitive: `using _ = clock.at(iso)` pins the calendar and gives it back at the end of the scope',
         packages: ['mockdate'],
         seam: 'clock',
     },
     {
-        fix: 'the website specification drives the browser — `specification.website()` owns the page, and the peer is its',
+        fix: 'the website specification drives the browser: `specification.website()` owns the page, and the peer is its',
         packages: ['playwright', 'playwright-core', '@playwright/test'],
         seam: 'browser',
     },
     {
-        fix: 'the mobile specification drives the simulator — `specification.mobile()` owns the session, and the peers are its',
+        fix: 'the mobile specification drives the simulator: `specification.mobile()` owns the session, and the peers are its',
         packages: ['webdriverio', 'appium'],
         seam: 'simulator',
     },
     {
-        fix: 'a component rendered to a string is still a component — the test is a `.test.tsx` in the `__tests__/` of its folder, and `result.html` carries the markup',
+        fix: 'a component rendered to a string is still a component: the test is a `.test.tsx` in the `__tests__/` of its folder, and `result.html` carries the markup',
         from: String.raw`\.test\.ts$`,
         packages: ['react-dom/server'],
         seam: 'string-renderer',
@@ -203,7 +203,7 @@ const EARLIER_SPELLINGS = Object.entries(RENAMED_FOLDERS)
 const NAMES: NamesRule[] = [
     {
         ...taughtBy('specs-root-holds-specifications-and-shared'),
-        fix: `move a file where it belongs — code into \`specs/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one specification that reads it, data into the ground folder of its role`,
+        fix: `move a file where it belongs: code into \`specs/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one specification that reads it, data into the ground folder of its role`,
         ls: {
             '**/specs': specsRootFiles(),
             // invariant: below the specs root the root's file list no longer holds; any folder name is the closed-list rule's to judge.
@@ -213,7 +213,7 @@ const NAMES: NamesRule[] = [
     },
     {
         ...taughtBy('special-folder-in-closed-list'),
-        fix: `rename it to the special folder that says what it holds — ${LISTED} — or drop the \`_\` if it is a subject; an earlier spelling names its own — ${EARLIER_SPELLINGS} — and what \`_shared/\` held sits in the special folders at the specs root`,
+        fix: `rename it to the special folder that says what it holds (${LISTED}), or drop the \`_\` if it is a subject; an earlier spelling names its own (${EARLIER_SPELLINGS}), and what \`_shared/\` held sits in the special folders at the specs root`,
         ignore: SPECIAL_FOLDERS.map((name) => `**/${name}`),
         ls: { '**/specs/**': { '.dir': CLOSED_LIST } },
         name: 'special-folder-in-closed-list',

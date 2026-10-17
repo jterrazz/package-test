@@ -154,7 +154,7 @@ export const noModuleMock = defineRule(
             },
             bannedDir: {
                 found: 'a `{{dir}}/` directory',
-                fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a `<file>.fixtures.ts` beside it, a spec's in `__fixtures__/` — and delete the directory",
+                fix: "write the doubles as code (`mockOf<Port>()` inline, a module test's payloads in a `<file>.fixtures.ts` beside it, a spec's in `__fixtures__/`) and delete the directory",
             },
             unreasoned: {
                 found: '"{{source}}" is on the `modules` allow-list with no reason',
@@ -162,7 +162,7 @@ export const noModuleMock = defineRule(
             },
             viMock: {
                 found: '`vi.mock` doubles a module for every importer',
-                fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list: `{ module, reason }`',
+                fix: 'double the port instead (`mockOf<Port>()`, `vi.fn()`, `vi.spyOn`), or put a native module no consumer can inject on the `modules` allow-list: `{ module, reason }`',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

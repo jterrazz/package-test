@@ -22,7 +22,7 @@ ruleTester().run('no-module-mock', noModuleMock, {
             filename: SRC_TEST,
         },
         {
-            name: 'A data asset a banned folder holds is the folder’s finding alone: only a module test imports one wrongly.',
+            name: "A data asset a banned folder holds is the folder's finding alone: only a module test imports one wrongly.",
             code: 'import data from "./payload.json";',
             errors: [{ column: 0, line: 1, messageId: 'bannedDir' }],
             filename: '/repo/src/specification/__mocks__/data.ts',
@@ -130,7 +130,7 @@ ruleTester().run('no-module-mock', noModuleMock, {
             filename: '/repo/src/specification/config.ts',
         },
         {
-            name: 'A module test’s ground is a special folder, never a mock: its `__tests__/__fixtures__/` holds data the test reads.',
+            name: "A module test's ground is a special folder, never a mock: its `__tests__/__fixtures__/` holds data the test reads.",
             code: 'export {};',
             filename: '/repo/src/specification/__tests__/__fixtures__/data.ts',
         },

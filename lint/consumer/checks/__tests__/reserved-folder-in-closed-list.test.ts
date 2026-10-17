@@ -61,11 +61,11 @@ describe('checkReservedFolderInClosedList', () => {
 
         // Then - the remedy for each
         expect(fixes).toStrictEqual([
-            "move what it holds into the special folders of `specs/api/` itself — what the leaves of a folder share sits in that folder's `__setup__/` or ground, `specs/__setup__/` and the ground at the specs root for what specifications share",
+            "move what it holds into the special folders of `specs/api/` itself: what the leaves of a folder share sits in that folder's `__setup__/` or ground, `specs/__setup__/` and the ground at the specs root for what specifications share",
             'move it beside that `__setup__/`, to `specs/api/users/__fixtures__/`, and the paths that name what it holds',
             'move its modules into `__setup__/`, each test adapter named for the port it replaces (`<port>.adapter.ts`), and the paths that import them',
             'rename it `__fixtures__/`, and the paths that name it',
-            "move what it holds into the special folders of `specs/` itself — what the leaves of a folder share sits in that folder's `__setup__/` or ground, `specs/__setup__/` and the ground at the specs root for what specifications share",
+            "move what it holds into the special folders of `specs/` itself: what the leaves of a folder share sits in that folder's `__setup__/` or ground, `specs/__setup__/` and the ground at the specs root for what specifications share",
         ]);
     });
 
@@ -89,11 +89,11 @@ describe('checkReservedFolderInClosedList', () => {
         // Then - each thing that is no code, with where it goes
         expect(found).toStrictEqual([
             'specs/__setup__/__seeds__/ `__seeds__/` inside a `__setup__/`, which holds code alone — move it beside that `__setup__/`, to `specs/__seeds__/`, and the paths that name what it holds',
-            'specs/__setup__/data.json `data.json` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` — `specs/__fixtures__/data.json`, or `specs/__expected__/data.json` when a test compares against it — and the paths that import or name it',
+            'specs/__setup__/data.json `data.json` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` (`specs/__fixtures__/data.json`, or `specs/__expected__/data.json` when a test compares against it) and the paths that import or name it',
             'specs/api/__setup__/__fixtures__/ `__fixtures__/` inside a `__setup__/`, which holds code alone — move it beside that `__setup__/`, to `specs/api/__fixtures__/`, and the paths that name what it holds',
-            "specs/api/__setup__/_private/ `_private/` inside a `__setup__/`, where every folder is the code's own — drop the `_` and name it for what it holds — the special folders, `__setup__/`, `__expected__/`, `__fixtures__/`, `__requests__/`, `__seeds__/`, sit beside a `__setup__/`, never inside it",
-            'specs/api/__setup__/rows.sql `rows.sql` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` — `specs/api/__seeds__/rows.sql`, or `specs/api/__expected__/rows.sql` when a test compares against it — and the paths that import or name it',
-            'specs/api/__setup__/stubs/create.http `create.http` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` — `specs/api/__requests__/create.http`, or `specs/api/__expected__/create.http` when a test compares against it — and the paths that import or name it',
+            "specs/api/__setup__/_private/ `_private/` inside a `__setup__/`, where every folder is the code's own — drop the `_` and name it for what it holds: the special folders, `__setup__/`, `__expected__/`, `__fixtures__/`, `__requests__/`, `__seeds__/`, sit beside a `__setup__/`, never inside it",
+            'specs/api/__setup__/rows.sql `rows.sql` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` (`specs/api/__seeds__/rows.sql`, or `specs/api/__expected__/rows.sql` when a test compares against it) and the paths that import or name it',
+            'specs/api/__setup__/stubs/create.http `create.http` inside a `__setup__/`, data where code alone belongs — move it into the ground of its role beside that `__setup__/` (`specs/api/__requests__/create.http`, or `specs/api/__expected__/create.http` when a test compares against it) and the paths that import or name it',
         ]);
     });
 });

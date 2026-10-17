@@ -183,7 +183,7 @@ found: Ambiguous element: button("Bookmark") matched 3 elements on the screen �
   3. Button "Bookmark all"
 why: A verb acts on exactly ONE element: a target that matches several is refused, never settled by the first.
 fix: designate one of them:
-  • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any target works as the scope
+  • scope it       within(testId('...'), button("Bookmark")): a screen has no landmarks, and any target works as the scope
   • test id        testId("event-1-bookmark")   [also here: event-2-bookmark]
   • other element  a button() or field() may name one thing where this does not
 read: docs/reference/linting.md#target-matches-one-element

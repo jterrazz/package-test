@@ -156,7 +156,7 @@ describe('checkNoUnusedGround', () => {
         ]);
     });
 
-    test('a dead pool entry is named once, as the pool’s, never again as the specs root’s ground', () => {
+    test("a dead pool entry is named once, as the pool's, never again as the specs root's ground", () => {
         // Given - a pool holding one entry a spec names and one nothing names
         const found = findingsIn({
             'specs/__expected__/dead.json': '{}\n',

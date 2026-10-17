@@ -153,7 +153,7 @@ export class RedisHandle implements ServiceHandle {
                                     : `run with fewer workers (--maxWorkers): a container serves ${WORKERS}`,
                             found: `redis: worker ${workerId} has no database index for "${service}"`,
                             read: 'docs/reference/services.md#per-worker-isolation',
-                            why: 'A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
+                            why: "A redis container's indexes are shared out four per worker, so its workers and their services are counted.",
                         }),
                     );
                 }

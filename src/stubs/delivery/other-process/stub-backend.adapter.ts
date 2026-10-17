@@ -11,7 +11,7 @@ export function stubBackend(
         accepts: () => {
             if (backend === undefined) {
                 const lesson = {
-                    fix: `add \`backend\` to the specification options: specification.${specification}(${specification === 'cli' ? 'bin, ' : ''}{ …, backend: { env: 'API_URL' } })`,
+                    fix: `add \`backend\` to the specification options: specification.${specification}(${specification === 'cli' ? 'bin, ' : ''}{ ..., backend: { env: 'API_URL' } })`,
                     found: '.intercept(), and this runner has no declared backend',
                     why: 'A site, an app or a binary is served its stubs by a declared stub backend, the URL it reads in place of its API.',
                 };

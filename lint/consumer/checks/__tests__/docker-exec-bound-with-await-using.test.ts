@@ -31,8 +31,8 @@ describe('checkDockerExecBoundWithAwaitUsing', () => {
                 ({ fix, found, line, path, rule }) => `${rule} ${path}:${line} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
-            'docker-exec-bound-with-await-using specs/cli/run.spec.ts:3 a result of the docker-aware runner "run" bound without `await using` — bind it with `await using result = await run…`, so the containers it started are removed at the end of the scope',
-            'docker-exec-bound-with-await-using specs/cli/run.spec.ts:4 a result of the docker-aware runner "run" bound without `await using` — bind it with `await using result = await run…`, so the containers it started are removed at the end of the scope',
+            'docker-exec-bound-with-await-using specs/cli/run.spec.ts:3 a result of the docker-aware runner "run" bound without `await using` — bind it with `await using result = await run...`, so the containers it started are removed at the end of the scope',
+            'docker-exec-bound-with-await-using specs/cli/run.spec.ts:4 a result of the docker-aware runner "run" bound without `await using` — bind it with `await using result = await run...`, so the containers it started are removed at the end of the scope',
         ]);
     });
 });

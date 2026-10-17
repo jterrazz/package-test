@@ -57,23 +57,23 @@ export const oneDescribePerFile = defineRule(
         messages: {
             noDescribe: {
                 found: 'the tests of this file stand in no `describe`',
-                fix: "wrap them in `describe('{{named}}', () => { … })` — `typescript fix` does it",
+                fix: "wrap them in `describe('{{named}}', () => { ... })`; `typescript fix` does it",
             },
             severalDescribes: {
                 found: 'a second top-level `describe` in a file about one {{what}}',
-                fix: "merge the groups under `describe('{{named}}', …)`, every test keeping its title — `typescript fix` does it when every group holds tests alone and no two tests share a title — or move this one to a file of its own {{what}}",
+                fix: "merge the groups under `describe('{{named}}', ...)`, every test keeping its title (`typescript fix` does it when every group holds tests alone and no two tests share a title), or move this one to a file of its own {{what}}",
             },
             tableTitle: {
-                found: 'the file’s `describe.each` is titled "{{title}}"',
-                fix: "start its title with the file's {{what}}, '{{named}} — …', keeping what names its rows",
+                found: 'the file\'s `describe.each` is titled "{{title}}"',
+                fix: "start its title with the file's {{what}}, '{{named}} — ...', keeping what names its rows",
             },
             testOutside: {
                 found: 'a test beside the `describe` of the file',
-                fix: "move it inside `describe('{{named}}', …)` — `typescript fix` does it when the group holds tests alone",
+                fix: "move it inside `describe('{{named}}', ...)`; `typescript fix` does it when the group holds tests alone",
             },
             wrongTitle: {
-                found: 'the file’s `describe` is titled "{{title}}"',
-                fix: "title it '{{named}}', the file's {{what}}, or in the words of the file's name — 'cli reference' for `cli-reference.spec.ts`",
+                found: 'the file\'s `describe` is titled "{{title}}"',
+                fix: "title it '{{named}}', the file's {{what}}, or in the words of the file's name: 'cli reference' for `cli-reference.spec.ts`",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

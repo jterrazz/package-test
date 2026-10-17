@@ -18,7 +18,7 @@ export function checkDocumentFollowsItsGrammar(text: string, rel: string): Spott
             {
                 path: rel,
                 line: error.line,
-                fix: 'rewrite the document to its grammar — the Spec documents page lists the keys, their order and what each run requires',
+                fix: 'rewrite the document to its grammar: the Spec documents page lists the keys, their order and what each run requires',
                 found: error.reason,
                 rule: 'document-follows-its-grammar',
             },

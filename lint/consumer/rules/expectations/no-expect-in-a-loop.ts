@@ -57,7 +57,7 @@ function loopAround(node: AstNode): string | undefined {
     let current = child(node, 'parent');
     while (current !== undefined) {
         if (LOOPS.has(current.type)) {
-            return current.type === 'ForOfStatement' ? 'for…of' : 'loop';
+            return current.type === 'ForOfStatement' ? 'for...of' : 'loop';
         }
         if (FUNCTIONS.has(current.type)) {
             return iterationOf(current);
@@ -74,8 +74,8 @@ export const noExpectInALoop = defineRule(
         docs: row,
         messages: {
             expectInALoop: {
-                found: '`expect()` inside a {{loop}}, which runs it once per element — and not at all over none',
-                fix: 'compare the whole collection in one assertion — `expect(rows.map(…)).toStrictEqual([…])` — or state each case with `test.each`',
+                found: '`expect()` inside a {{loop}}, which runs it once per element, and not at all over none',
+                fix: 'compare the whole collection in one assertion, `expect(rows.map(...)).toStrictEqual([...])`, or state each case with `test.each`',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

@@ -13,7 +13,7 @@ describe('rows', () => {
 
         // Then - nothing is tapped, and the refusal lists both candidates
         await expect(opened).rejects.toThrow(
-            /button\("Delete"\) matched 2 elements on the screen —\n {2}1\. Button "Delete"\n {2}2\. Button "Delete"\n/u,
+            /button\("Delete"\) matched 2 elements on the screen:\n {2}1\. Button "Delete"\n {2}2\. Button "Delete"\n/u,
         );
     });
 

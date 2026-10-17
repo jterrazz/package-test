@@ -218,7 +218,7 @@ describe('file-goldens', () => {
                 [
                     'found: toMatch(directory("./__expected__/tree/")) on a subject that is no tree',
                     'why: `toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.',
-                    'fix: compare result.filesystem or result.directory(…) to directory("./__expected__/tree/"); a text is compared to file(…)',
+                    'fix: compare result.filesystem or result.directory(...) to directory("./__expected__/tree/"); a text is compared to file(...)',
                     'read: docs/reference/linting.md#one-verb-per-meaning',
                 ].join('\n'),
             ),

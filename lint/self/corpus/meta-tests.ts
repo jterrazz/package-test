@@ -46,7 +46,7 @@ export function metaTests(root: string): MetaTest[] {
 
 export const META_TESTS_MARKERS: Markers = {
     end: '<!-- /GENERATED:meta-tests -->',
-    start: '<!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->',
+    start: '<!-- GENERATED:meta-tests. Do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->',
 };
 
 export function renderMetaTests(root: string): string {
@@ -57,7 +57,7 @@ export function renderMetaTests(root: string): string {
     ]);
     const total = rows.length;
     return [
-        `**${total} files** are the channel — every \`*.test.ts\` directly under ${META_TESTS_LAYER_ROOTS.map((folder) => `\`${folder}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
+        `**${total} files** are the channel: every \`*.test.ts\` directly under ${META_TESTS_LAYER_ROOTS.map((folder) => `\`${folder}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
         '',
         markdownTable(['Meta-test', 'Holds', 'Tests'], rows),
     ].join('\n');

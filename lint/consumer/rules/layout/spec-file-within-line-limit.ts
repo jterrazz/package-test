@@ -29,7 +29,7 @@ export function groupsOf(titles: string[]): string {
         ([a, left], [b, right]) => right - left || a.localeCompare(b),
     );
     const shown = groups.slice(0, GROUPS_SHOWN).map(([prefix, count]) => `"${prefix}" (${count})`);
-    return groups.length > GROUPS_SHOWN ? `${shown.join(', ')}, …` : shown.join(', ');
+    return groups.length > GROUPS_SHOWN ? `${shown.join(', ')} and more` : shown.join(', ');
 }
 
 const row = rowNamed(consumerRows, 'spec-file-within-line-limit');
@@ -40,7 +40,7 @@ export const specFileWithinLineLimit = defineRule(
         messages: {
             tooLong: {
                 found: 'a spec file of {{lines}} lines, over {{max}}',
-                fix: 'cut it along its tests’ groups — {{groups}} — one aspect per file',
+                fix: "cut it along its tests' groups ({{groups}}), one aspect per file",
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

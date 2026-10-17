@@ -47,7 +47,7 @@ export function checkFolderNamedForAConcept(root: string): Spotted<SelfPassId>[]
             ...(ROLE_NAMES.has(name)
                 ? [
                       finding('folder-named-for-a-concept', path, {
-                          fix: 'name the folder for what its files are about, and let each file carry its role on its suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …)',
+                          fix: 'name the folder for what its files are about, and let each file carry its role on its suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` and the like)',
                           found: `the folder \`${name}/\` is named for a role, not a concept`,
                       }),
                   ]
@@ -95,7 +95,7 @@ function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>
                   )
                   .map((file) =>
                       finding('folder-named-for-a-concept', file, {
-                          fix: 'move it into the concept folder it belongs to; the root of a specification with concept folders holds its face alone — `<specification>.face.ts`, `<specification>.composition.ts`, `<specification>.handle.ts`, `<specification>.project.ts`',
+                          fix: 'move it into the concept folder it belongs to; the root of a specification with concept folders holds its face alone: `<specification>.face.ts`, `<specification>.composition.ts`, `<specification>.handle.ts`, `<specification>.project.ts`',
                           found: `\`${file.split('/').at(-1) ?? ''}\` sits at the root of the specification \`${specification}\`, and is no file of its face`,
                       }),
                   );

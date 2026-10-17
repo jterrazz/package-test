@@ -52,7 +52,7 @@ describe('fsFixtures', () => {
             refusalOf('/__fixtures__/config.json'),
         ]).toStrictEqual([
             [
-                `found: fixture: "./__fixtures__/absent.json" names nothing — ${absent} does not exist`,
+                `found: fixture: "./__fixtures__/absent.json" names nothing: ${absent} does not exist`,
                 DISK_WHY,
                 `fix: create ${absent}, or correct the path`,
                 DISK_CHAPTER,
@@ -60,7 +60,7 @@ describe('fsFixtures', () => {
             [
                 'found: fixture: "./__fixtures__/shop" names a directory',
                 DISK_WHY,
-                "fix: end its path in /: directory('./__fixtures__/shop/') — its contents are spread into the working directory",
+                "fix: end its path in /: directory('./__fixtures__/shop/'), whose contents are spread into the working directory",
                 DISK_CHAPTER,
             ].join('\n'),
             [

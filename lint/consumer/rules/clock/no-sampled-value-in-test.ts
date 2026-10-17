@@ -88,7 +88,7 @@ export const noSampledValueInTest = defineRule(
         messages: {
             ambientValue: {
                 found: 'time or randomness sampled in the test',
-                fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',
+                fix: 'pin the time with `clock.at(...)`/`clock.advance(...)`, or absorb the value with a token in the expectation',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

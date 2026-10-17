@@ -19,14 +19,14 @@ export function methodlessDrift(table: readonly Route[], methodless: readonly st
         .filter(([shape]) => !named.has(shape))
         .map(
             ([, path]) =>
-                `  ALL ${path} — the app takes it on any method, and the list misses it: add '${path}' with why the app takes it on any method`,
+                `  ALL ${path}: the app takes it on any method, and the list misses it, so add '${path}' with why the app takes it on any method`,
         );
     const stale = methodless
         .filter((path) => !taken.has(shapeOf(path)))
         .map((path) =>
             table.some((route) => shapeOf(route.path) === shapeOf(path))
-                ? `  ${path} — the list names it, and the app takes it on its own methods only: remove '${path}'`
-                : `  ${path} — the list names it, and the app's table holds no such route: remove '${path}'`,
+                ? `  ${path}: the list names it, and the app takes it on its own methods only, so remove '${path}'`
+                : `  ${path}: the list names it, and the app's table holds no such route, so remove '${path}'`,
         );
     return [...missed, ...stale];
 }

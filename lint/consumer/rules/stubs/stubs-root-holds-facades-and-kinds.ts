@@ -226,11 +226,11 @@ export const stubsRootHoldsFacadesAndKinds = defineRule(
         messages: {
             badKindDir: {
                 found: '`__setup__/stubs/{{entry}}/` is no stub kind',
-                fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
+                fix: 'move its units into the folder of the builder they call, one of {{kinds}}',
             },
             badName: {
                 found: 'the stub unit "{{base}}" is not named `<kebab-name>.ts`',
-                fix: 'rename it in kebab-case, without the kind — the folder carries it',
+                fix: 'rename it in kebab-case, without the kind: the folder carries it',
             },
             exportsNothing: {
                 found: 'the stub facade "{{base}}" exports nothing',
@@ -238,15 +238,15 @@ export const stubsRootHoldsFacadesAndKinds = defineRule(
             },
             missingDefault: {
                 found: 'the stub unit "{{base}}" has no default export',
-                fix: 'default-export `defineStub(…)`, or a factory returning one',
+                fix: 'default-export `defineStub(...)`, or a factory returning one',
             },
             notDefineStub: {
                 found: "a stub unit's default export is not a stub",
-                fix: 'default-export `defineStub(…)`, or a factory returning one',
+                fix: 'default-export `defineStub(...)`, or a factory returning one',
             },
             notDefineStubs: {
                 found: 'the default export of "{{base}}" is not built from stubs',
-                fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
+                fix: 'build it from `defineStubs(...)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
             },
             foreignBuilder: {
                 found: 'a stub under `__setup__/stubs/{{kind}}/` calls the `{{used}}` builder',
@@ -254,7 +254,7 @@ export const stubsRootHoldsFacadesAndKinds = defineRule(
             },
             rootFile: {
                 found: 'the stub unit "{{base}}" sits at the `__setup__/stubs/` root',
-                fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
+                fix: 'move it into the folder of its kind, one of {{kinds}}; the root holds only `*.stubs.ts` facades',
             },
             tooDeep: {
                 found: 'the stub file "{{base}}" is nested below `__setup__/stubs/<kind>/`',

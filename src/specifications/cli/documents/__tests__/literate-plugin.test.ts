@@ -72,7 +72,7 @@ describe('literate-plugin', () => {
         ]);
     });
 
-    test('literate — the plugin — refuses a document off its grammar, naming the line and keeping the parser’s reason', () => {
+    test("literate — the plugin — refuses a document off its grammar, naming the line and keeping the parser's reason", () => {
         // Given - a document whose run has no exit
         const root = documentIn('description: builds\nruns:\n    - command: build\n');
         const plugin = literate({ runner: '/s.ts' });
@@ -83,7 +83,7 @@ describe('literate-plugin', () => {
         expect(loading).toThrow(
             new Error(
                 [
-                    `found: ${document}:3: a run is missing "exit:" — command and exit are mandatory`,
+                    `found: ${document}:3: a run is missing "exit:": command and exit are mandatory`,
                     'why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
                     'fix: write the key the grammar names; the reason prints the accepted set',
                     'read: docs/reference/linting.md#document-follows-its-grammar',

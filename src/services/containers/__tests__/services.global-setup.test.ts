@@ -48,7 +48,7 @@ describe('setup', () => {
         expect(servicesSetup()).toBe(join(import.meta.dirname, '../services.global-setup.ts'));
     });
 
-    test('the services setup — the run containers, served — starts a worker’s container once Docker is prepared, and answers where it listens', async () => {
+    test("the services setup — the run containers, served — starts a worker's container once Docker is prepared, and answers where it listens", async () => {
         // Given - a run whose preparation succeeds, over containers that answer one address
         const provided: string[] = [];
         const created: string[] = [];
@@ -235,7 +235,7 @@ describe('setup', () => {
         expect(refused).toStrictEqual(
             new Error(
                 refusal({
-                    fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
+                    fix: 'start Docker (Docker Desktop, OrbStack, colima or another) and run again',
                     found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (connect ENOENT /var/run/docker.sock)`,
                     read: 'docs/reference/services.md#one-container-per-run',
                     why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',

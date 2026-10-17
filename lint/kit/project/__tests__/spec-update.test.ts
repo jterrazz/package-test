@@ -149,7 +149,7 @@ describe('updateSpecFile', () => {
         );
     });
 
-    test('at the document’s own indentation, a stdout opening on a space reads back byte for byte in a four-space document', () => {
+    test("at the document's own indentation, a stdout opening on a space reads back byte for byte in a four-space document", () => {
         // Given - a document formatted at four spaces, the step oxfmt writes YAML at
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
 
@@ -162,7 +162,7 @@ describe('updateSpecFile', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('at the document’s own indentation, the same stdout reads back byte for byte in a two-space document', () => {
+    test("at the document's own indentation, the same stdout reads back byte for byte in a two-space document", () => {
         // Given - a two-space document, YAML's own default step
         const file = readSpecFile(TWO_SPACE_DOCUMENT, 'case.spec.yaml');
 
@@ -175,7 +175,7 @@ describe('updateSpecFile', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('at the document’s own indentation, a stdout opening on several spaces keeps every one of them', () => {
+    test("at the document's own indentation, a stdout opening on several spaces keeps every one of them", () => {
         // Given - a four-space document and a stream indented on its own
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
 
@@ -188,7 +188,7 @@ describe('updateSpecFile', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('at the document’s own indentation, a stdout opening on a tab survives without an indicator', () => {
+    test("at the document's own indentation, a stdout opening on a tab survives without an indicator", () => {
         // Given - a four-space document and a tab-started stream, which YAML never reads as indentation
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
         const stdout = '\tTABBED\nback\n';
@@ -199,7 +199,7 @@ describe('updateSpecFile', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('at the document’s own indentation, stderr states its indentation as stdout does', () => {
+    test("at the document's own indentation, stderr states its indentation as stdout does", () => {
         // Given - a four-space document and a warning that opens on a space
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
         const stderr = ' WARN  deprecated flag\n';
@@ -210,7 +210,7 @@ describe('updateSpecFile', () => {
         expect(streamOf(written, 'stderr')).toBe(stderr);
     });
 
-    test('at the document’s own indentation, the stdin and files: blocks an author wrote survive the rewrite unchanged', () => {
+    test("at the document's own indentation, the stdin and files: blocks an author wrote survive the rewrite unchanged", () => {
         // Given - a four-space document whose stdin and files.equals both open on A space, each stating the four spaces it is written at
         const source = [
             'description: keeps what it did not write',

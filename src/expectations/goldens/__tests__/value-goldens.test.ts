@@ -125,7 +125,7 @@ describe('value-goldens', () => {
         // Then - refused outside update mode, written inside it with the uuid tokenised only where a token stood before
         expect(() => {
             void wholeOf(subject)('', undefined, scratch.stack);
-        }).toThrow('nothing is written in place yet — run with TEST_UPDATE=1');
+        }).toThrow('nothing is written in place yet: run with TEST_UPDATE=1');
         vi.stubEnv('TEST_UPDATE', '1');
         void wholeOf(subject)('', undefined, scratch.stack);
         expect(scratch.read()).toContain(
@@ -166,7 +166,7 @@ describe('value-goldens', () => {
             [
                 'found: update mode: the call threw "connection refused", so its value is null',
                 'why: A null recorded over a call that failed is an expectation no failure can break: every call could fail and the test would stay green.',
-                'fix: assert the error — `expect(result.error).toMatch(…)` — or fix the call so it returns',
+                'fix: assert the error with `expect(result.error).toMatch(...)`, or fix the call so it returns',
                 'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
             ].join('\n'),
         );
@@ -222,9 +222,9 @@ describe('value-goldens', () => {
         ).toThrow(
             new Error(
                 [
-                    'found: update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written',
+                    'found: update mode: no frame of this toMatch call is a test file, so the value in place has nowhere to be written',
                     'why: A value written in place is rewritten in the test that states it.',
-                    'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
+                    'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(...))',
                     'read: docs/reference/tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 ].join('\n'),
             ),

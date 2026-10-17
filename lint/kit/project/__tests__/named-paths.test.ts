@@ -72,7 +72,7 @@ describe('named-paths', () => {
         ).toStrictEqual([['2:1 fixture directory ./__fixtures__/tree/'], []]);
     });
 
-    test('anchoredPaths — a path built from the module’s own folder, past a lone bare piece and an absolute one', () => {
+    test("anchoredPaths — a path built from the module's own folder, past a lone bare piece and an absolute one", () => {
         // Given - paths anchored on import.meta, written each way, and a module that does not parse
         const root = packageWith({ 'src/broken.ts': 'const = ;\n', 'src/paths.ts': ANCHORED });
 

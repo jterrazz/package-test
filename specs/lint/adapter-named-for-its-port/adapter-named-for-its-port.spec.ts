@@ -20,13 +20,13 @@ describe('adapter-named-for-its-port', () => {
         expect(result.report).toMatch(`
             specs/cli/__setup__/fixed-ticker.ts:3:1  jterrazz-check(adapter-named-for-its-port)
                 found: \`fixed-ticker.ts\`, whose \`FixedTickerSource\` implements the port \`TickerSourcePort\`
-                why: A \`__setup__/\` module whose class \`implements\` a type it imports from outside the specs tree — the application’s port — is a test adapter, and its file is named for that port: \`<port>.adapter.ts\`, the port’s name kebab-cased with a trailing \`Port\` dropped (\`TickerSourcePort\` → \`ticker-source.adapter.ts\`); the class keeps whatever name it has.
-                fix: name the file for the port it replaces: \`specs/cli/__setup__/ticker-source.adapter.ts\` — the class keeps whatever name it has
+                why: A \`__setup__/\` module whose class \`implements\` a type it imports from outside the specs tree (the application's port) is a test adapter, and its file is named for that port: \`<port>.adapter.ts\`, the port's name kebab-cased with a trailing \`Port\` dropped (\`ticker-source.adapter.ts\` for \`TickerSourcePort\`); the class keeps whatever name it has.
+                fix: name the file for the port it replaces, \`specs/cli/__setup__/ticker-source.adapter.ts\`; the class keeps whatever name it has
                 read: docs/reference/linting.md#adapter-named-for-its-port
             specs/cli/__setup__/frozen-clock.ts:3:1  jterrazz-check(adapter-named-for-its-port)
                 found: \`frozen-clock.ts\`, whose \`FrozenClock\` implements the port \`ClockPort\`
-                why: A \`__setup__/\` module whose class \`implements\` a type it imports from outside the specs tree — the application’s port — is a test adapter, and its file is named for that port: \`<port>.adapter.ts\`, the port’s name kebab-cased with a trailing \`Port\` dropped (\`TickerSourcePort\` → \`ticker-source.adapter.ts\`); the class keeps whatever name it has.
-                fix: name the file for the port it replaces: \`specs/cli/__setup__/clock.adapter.ts\` — the class keeps whatever name it has
+                why: A \`__setup__/\` module whose class \`implements\` a type it imports from outside the specs tree (the application's port) is a test adapter, and its file is named for that port: \`<port>.adapter.ts\`, the port's name kebab-cased with a trailing \`Port\` dropped (\`ticker-source.adapter.ts\` for \`TickerSourcePort\`); the class keeps whatever name it has.
+                fix: name the file for the port it replaces, \`specs/cli/__setup__/clock.adapter.ts\`; the class keeps whatever name it has
                 read: docs/reference/linting.md#adapter-named-for-its-port
         `);
     });

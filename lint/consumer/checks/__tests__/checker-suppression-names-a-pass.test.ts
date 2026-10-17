@@ -25,8 +25,8 @@ describe('checkCheckerSuppressionNamesAPass', () => {
                 ({ fix, found, line, path, rule }) => `${rule} ${path}:${line} ${found} — ${fix}`,
             ),
         ).toStrictEqual([
-            'checker-suppression-names-a-pass specs/api/users.spec.ts:5 a checker suppression naming `gone`, which no pass of the checker has — name the pass this line is the exception to, or delete the directive — `gone` silences nothing',
-            'checker-suppression-names-a-pass specs/api/users.spec.ts:5 a checker suppression naming `lost`, which no pass of the checker has — name the pass this line is the exception to, or delete the directive — `lost` silences nothing',
+            'checker-suppression-names-a-pass specs/api/users.spec.ts:5 a checker suppression naming `gone`, which no pass of the checker has — name the pass this line is the exception to, or delete the directive: `gone` silences nothing',
+            'checker-suppression-names-a-pass specs/api/users.spec.ts:5 a checker suppression naming `lost`, which no pass of the checker has — name the pass this line is the exception to, or delete the directive: `lost` silences nothing',
         ]);
     });
 });

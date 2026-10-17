@@ -16,7 +16,7 @@ function projectOf(testDir: string): string {
         if (dirname(directory) === directory) {
             throw new Error(
                 refusal({
-                    fix: "run the spec inside the package it specifies, or name the package: packed(directory('./…/'))",
+                    fix: "run the spec inside the package it specifies, or name the package: packed(directory('./<path>/'))",
                     found: `packed(): no package.json from ${testDir} up`,
                     read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
                     why: 'packed() packs the project the spec belongs to, which its nearest package.json names.',
@@ -129,7 +129,7 @@ export function installPacked(
     if (declared.name !== name) {
         throw new Error(
             refusal({
-                fix: `link it under the name its package.json declares: link('${declared.name ?? '<no name>'}', packed(…))`,
+                fix: `link it under the name its package.json declares: link('${declared.name ?? '<no name>'}', packed(...))`,
                 found: `link('${name}', packed()) packs ${relative(testDir, packageRoot) || '.'}, whose package.json names ${declared.name ?? 'no package'}`,
                 read: 'docs/guides/cli-specs.md#a-package-specified-from-its-artefact',
                 why: 'A consumer imports a package by the name it is published under, so the install lays it there.',

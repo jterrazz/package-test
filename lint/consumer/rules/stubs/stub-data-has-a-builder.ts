@@ -34,7 +34,7 @@ export const stubDataHasABuilder = defineRule(
         messages: {
             orphan: {
                 found: '`__setup__/stubs/{{kind}}/{{entry}}` has no stub beside it',
-                fix: 'write `__setup__/stubs/{{kind}}/{{owner}}` — the data pairs with the unit named by its stem, up to the first dot — or delete the orphan',
+                fix: 'write `__setup__/stubs/{{kind}}/{{owner}}` (the data pairs with the unit named by its stem, up to the first dot), or delete the orphan',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),

@@ -30,7 +30,7 @@ ruleTester().run('no-transform-duplicating-tokens', noTransformDuplicatingTokens
     ],
     valid: [
         {
-            name: 'A block that returns nothing, or more than its return, another method, no replace at all, a member receiver, and no specification are none of this rule’s.',
+            name: "A block that returns nothing, or more than its return, another method, no replace at all, a member receiver, and no specification are none of this rule's.",
             code: `await specification.cli("./bin", { transform: (text) => {} });
                 await specification.cli("./bin", { transform: (text) => { text.replace(/x/g, "{{uuid}}"); } });
                 await specification.cli("./bin", { transform: (text) => { throw text.replace(/x/g, "{{uuid}}"); } });

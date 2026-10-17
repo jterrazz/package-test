@@ -39,7 +39,7 @@ tester.run('no-dom-in-module-test', noDomInModuleTest, {
     ],
     valid: [
         {
-            name: 'A parameter of that name is the test’s own, and a key of that name reaches nothing.',
+            name: "A parameter of that name is the test's own, and a key of that name reaches nothing.",
             code: 'test("x", () => { const read = (document) => document.title; const keys = { navigator: 1 }; });',
             filename: MODULE_TEST,
         },

@@ -68,7 +68,7 @@ describe('derivedProjects', () => {
         });
     });
 
-    test('derived-projects — an in-process specification is handed its runner where its folder’s one specification module is named for it', () => {
+    test("derived-projects — an in-process specification is handed its runner where its folder's one specification module is named for it", () => {
         // Given - api with its one runner, job with two, integration with one named otherwise, and cli, which runs no subject in-process
         const root = tree([
             'specs/api/api.specification.ts',

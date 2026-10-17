@@ -72,9 +72,9 @@ describe('xcui-query', () => {
         expect(() => compilePredicate(navigation())).toThrow(
             new Error(
                 [
-                    "found: navigation(), a landmark — an iOS screen has no 'navigation' region",
-                    'why: An iOS screen has no ARIA landmark: a mobile verb is scoped with `within(testId(…), …)`.',
-                    "fix: scope with within(testId('…'), …) — any target works as the scope",
+                    "found: navigation(), a landmark: an iOS screen has no 'navigation' region",
+                    'why: An iOS screen has no ARIA landmark: a mobile verb is scoped with `within(testId(...), ...)`.',
+                    "fix: scope with within(testId('...'), ...): any target works as the scope",
                     'read: docs/reference/linting.md#no-landmark-on-mobile',
                 ].join('\n'),
             ),
@@ -100,7 +100,7 @@ describe('xcui-query', () => {
 
         // Then - the long one ends in an ellipsis at sixty characters, the exact one is whole
         expect(onScreenLabels(`label="${long}" label="${exact}"`)).toStrictEqual([
-            `${'a'.repeat(59)}…`,
+            `${'a'.repeat(57)}...`,
             exact,
         ]);
     });
