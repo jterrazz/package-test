@@ -11,7 +11,11 @@ function conventionsOf(stdout: string): string {
     const from = plain.indexOf(LABEL);
     const to = plain.slice(from).search(/\n (?:RUN|DRIFT|END) /u);
 
-    return plain.slice(from, from + to).trim();
+    // invariant: a verdict line closes on the time the pass took, which no two runs share.
+    return plain
+        .slice(from, from + to)
+        .trim()
+        .replaceAll(/ \(\d+(?:\.\d+)?(?:ms|s|m|h)\)$/gmu, ' (<time>)');
 }
 
 describe('conventions', () => {
@@ -31,7 +35,7 @@ describe('conventions', () => {
                 '',
                 'specs/cli/widget/version.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a `.test.ts` under `specs/cli/`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it `cli/widget/version.spec.ts` — `typescript fix` does it with `git mv` · read: docs/reference/linting.md#file-suffix-matches-place',
                 "found: every finding above, and .jterrazz/baseline.json records no `jterrazz-check/` entry in its `test` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
-                '✗ Failed with exit code 1',
+                '✗ Failed with exit code 1 (<time>)',
             ].join('\n'),
         );
     });
@@ -51,7 +55,9 @@ describe('conventions', () => {
         expect(result.file('specs/cli/widget/version.spec.ts').exists).toBe(true);
         expect(result.file('specs/cli/widget/version.test.ts').exists).toBe(false);
         expect(conventionsOf(result.stdout.text)).toBe(
-            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed'].join('\n'),
+            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed (<time>)'].join(
+                '\n',
+            ),
         );
     });
 
@@ -83,7 +89,9 @@ describe('conventions', () => {
         // Then - the whole check passes, and the conventions say what the ratchet holds
         expect(result.exitCode).toBe(0);
         expect(conventionsOf(result.stdout.text)).toBe(
-            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed'].join('\n'),
+            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed (<time>)'].join(
+                '\n',
+            ),
         );
     });
 });
