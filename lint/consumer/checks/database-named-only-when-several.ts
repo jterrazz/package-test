@@ -12,7 +12,7 @@ import { suppressedLines } from '../../kit/project/suppression.js';
 import { lineAt, listFiles, readSource, readText } from '../../kit/project/tree.js';
 import type { Spotted } from './checker.js';
 
-// invariant: the object is read when the call hangs off a plain name: `local.seed(…)`, never `api.with({}).seed(…)`.
+// invariant: the object is read when the call hangs off a plain name: `local.seed(...)`, never `api.with({}).seed(...)`.
 const SEED_OR_TABLE = /(?<object>[A-Za-z_$][\w$]*)?\s*\.(?<verb>seed|table)\s*\(/gu;
 
 const NAMES_A_DATABASE = /\bdatabase\s*:/u;

@@ -109,9 +109,9 @@ function buildResponsesReply(data: unknown): StubResponse {
 }
 
 export type OpenAIStreamInit = {
-    /** The API whose stream is served — Chat Completions (default) or Responses. */
+    /** The API whose stream is served: Chat Completions (default) or Responses. */
     api?: 'chat' | 'responses';
-    /** Milliseconds between two events. Default 0 — every event at once. */
+    /** Milliseconds between two events. Default 0: every event at once. */
     delay?: number;
     /** The tokens the stream reports it spent: a Chat Completions stream ends on a usage chunk, as `stream_options.include_usage` asks, and a Responses stream carries them in its completed response. Default 10 and 10. */
     usage?: { completionTokens: number; promptTokens: number };

@@ -4,7 +4,7 @@ import type { IsolationStrategy } from '../isolation.port.js';
 import type { ServiceHandle } from '../service.port.js';
 import { ServedProcess } from './serve.js';
 
-/** The one shape an external process takes: `website({ server })`, `services: { api: process(…) }`, `serve:`. */
+/** The one shape an external process takes: `website({ server })`, `services: { api: process(...) }`, `serve:`. */
 export type ProcessOptions = {
     /** A one-shot command run once per specification before the spawn, which must exit 0. */
     before?: string;
@@ -97,12 +97,12 @@ export class ProcessHandle implements ServiceHandle {
         this.started = false;
     }
 
-    /** What it was declared as — what a specification reads to start it in a slot of its own. */
+    /** What it was declared as: what a specification reads to start it in a slot of its own. */
     get spec(): ProcessOptions {
         return this.options;
     }
 
-    /** The base URL it came up on — known only once it is started. */
+    /** The base URL it came up on, known only once it is started. */
     get url(): string {
         if (!this.started) {
             throw new Error(

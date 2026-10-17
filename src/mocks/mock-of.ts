@@ -14,5 +14,5 @@ export function mockOf<T extends object>(options?: MockOfOptions): DeepMockProxy
     return options?.deep === false ? mock<T>() : mockDeep<T>();
 }
 
-/** The factory's own shape — kept as a name so a consumer can annotate with it. */
+/** The factory's own shape, kept as a name so a consumer can annotate with it. */
 export type MockPort = typeof mockOf;

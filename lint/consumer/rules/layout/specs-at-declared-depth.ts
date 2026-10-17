@@ -52,7 +52,7 @@ function depthOf(option: unknown): SpecsDepth | undefined {
 
 const DEFAULT_DEPTH: SpecsDepth = 'specification-domain';
 
-// invariant: a module’s test beside it — a specs tree holds no `__tests__/` — tells a ground module’s test from a spec that wandered into the ground.
+// invariant: a module's test beside it (a specs tree holds no `__tests__/`) tells a ground module's test from a spec that wandered into the ground.
 function testsItsNeighbour(filename: string): boolean {
     return filename.endsWith(TEST_SUFFIX) && isFile(`${filename.slice(0, -TEST_SUFFIX.length)}.ts`);
 }
@@ -211,7 +211,7 @@ export const specsAtDeclaredDepth = defineRule(
                     const placement: Placement = {
                         base: anchor.relative.at(-1) ?? '',
                         filename: context.filename,
-                        // invariant: `[specification, domain, …]`.
+                        // invariant: `[specification, domain, ...]`.
                         nesting: anchor.relative.length - 1,
                         relative: anchor.relative,
                     };

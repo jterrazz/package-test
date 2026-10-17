@@ -9,11 +9,11 @@ import {
 } from '../../../kit/project/ast.js';
 import type { AstNode } from '../../../kit/project/ast.js';
 
-// invariant: `result-compared-whole` exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison.
+// invariant: `result-compared-whole` exempts a CARRIED read (a value taken from one result only to be sent in a later request of the same test) from the whole comparison.
 
 const CARRY_DEPTH = 4;
 
-// invariant: `await api.params({ cursor }).get('/facts')`, or held whole in a name the test awaits; a result's own members and `expect(…)` are never one.
+// invariant: `await api.params({ cursor }).get('/facts')`, or held whole in a name the test awaits; a result's own members and `expect(...)` are never one.
 function isRequestLink(call: AstNode, test: AstNode, results: ReadonlySet<string>): boolean {
     const root = chainRootName(call);
     // Stryker disable next-line OptionalChaining: a call always has a callee
@@ -96,7 +96,7 @@ function bindingCarried(
     );
 }
 
-/** An `expect(…)` or a statement of its own on the way makes it a read. */
+/** An `expect(...)` or a statement of its own on the way makes it a read. */
 export function isCarried(
     node: AstNode,
     callback: AstNode,

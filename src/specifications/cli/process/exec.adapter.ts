@@ -13,7 +13,7 @@ const DEFAULT_WATCH_TIMEOUT = 10_000;
 // invariant: one exit code for a run killed at its timeout, whichever path ran it.
 const TIMED_OUT = 124;
 
-// outside: the mutation run hands every process a test spawns the coverage reporter in NODE_OPTIONS (`--require="…/child-coverage.cjs"`); a chain that states its own NODE_OPTIONS must not drop it.
+// outside: the mutation run hands every process a test spawns the coverage reporter in NODE_OPTIONS (`--require=".../child-coverage.cjs"`); a chain that states its own NODE_OPTIONS must not drop it.
 const COVERAGE_REPORTER = /--require="[^"]*child-coverage\.cjs"/u;
 
 function withCoverageReporter(extra: CliEnv | undefined): CliEnv | undefined {
@@ -127,7 +127,7 @@ function endGroup(child: ChildProcess): void {
     }, KILL_GRACE_MS).unref();
 }
 
-/** Spawned, never `spawnSync`: the test's event loop keeps running while the binary does, so a server the test started — a collector, a stub — answers it. stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
+/** Spawned, never `spawnSync`: the test's event loop keeps running while the binary does, so a server the test started (a collector, a stub) answers it. stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
 export class ExecAdapter implements CliPort {
     private readonly command: string;
 

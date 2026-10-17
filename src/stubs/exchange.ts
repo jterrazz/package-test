@@ -6,21 +6,21 @@ export type MatchableRequest = {
     headers: Record<string, string>;
     /** Uppercased HTTP method of the observed request. */
     method: string;
-    /** The request URL — fully-qualified, or origin-relative for the stub backend. */
+    /** The request URL: fully-qualified, or origin-relative for the stub backend. */
     url: string;
 };
 
 /** The request half of a stub: an absolute URL, or a path form (`/articles/{{uuid}}`) matching any origin. */
 export type StubRequest = {
-    /** Adapter name — `http` | `openai` | `anthropic`. */
+    /** Adapter name: `http` | `openai` | `anthropic`. */
     adapter: string;
     /** HTTP method to match. `*` matches any method. */
     method: string;
     /** Absolute URL (string | RegExp) or an any-origin path form (`/articles/{{uuid}}`). */
     url: RegExp | string;
-    /** Optional request matcher — the stub only fires if this returns true. */
+    /** Optional request matcher; the stub only fires if this returns true. */
     match?: ((request: MatchableRequest) => boolean) | undefined;
-    /** Header names, case-insensitive, whose presence keeps the stub from firing — `http.*` writes them from `without.headers`. */
+    /** Header names, case-insensitive, whose presence keeps the stub from firing; `http.*` writes them from `without.headers`. */
     absentHeaders?: readonly string[] | undefined;
     /** Transform raw data into a provider-specific response envelope. */
     wrap: (data: unknown) => StubResponse;
@@ -48,7 +48,7 @@ export type StreamBody = {
     chunks: readonly string[];
     /** The `content-type` the stream is served under. */
     contentType: string;
-    /** Milliseconds between two chunks. Default 0 — everything at once. */
+    /** Milliseconds between two chunks. Default 0: everything at once. */
     delayBetweenChunks: number;
     kind: typeof STREAM_BODY;
 };

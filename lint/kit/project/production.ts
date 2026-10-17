@@ -186,7 +186,7 @@ function isRequireLike(callee: AstNode | undefined): boolean {
     return identifierName(object) === 'require' || object?.type === 'MetaProperty';
 }
 
-/** `import type`, `export *`, a type's `import('…')`, `import x = require('…')`, `require.resolve()` and `import.meta.resolve()` included. */
+/** `import type`, `export *`, a type's `import('...')`, `import x = require('...')`, `require.resolve()` and `import.meta.resolve()` included. */
 export function moduleReferenceVisitor(
     onReference: (entry: ImportSource) => void,
 ): Record<string, (node: AstNode) => void> {

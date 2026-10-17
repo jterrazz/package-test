@@ -12,7 +12,7 @@ function isAlive(pid: number): boolean {
     }
 }
 
-// invariant: the pid a run's folder is named for, `<pid>-…`, or null for a name no run gave.
+// invariant: the pid a run's folder is named for, `<pid>-...`, or null for a name no run gave.
 function runOf(entry: string): null | number {
     const pid = Number(entry.split('-')[0]);
     return Number.isInteger(pid) && pid > 0 ? pid : null;
@@ -37,7 +37,7 @@ export function sweepFinishedEvidence(folder: string): void {
     }
     for (const entry of readdirSync(folder)) {
         const pid = runOf(entry);
-        // Stryker disable next-line ConditionalExpression: a name no run gave reads as no pid, which process.kill refuses as it refuses a dead run's — the null test serves the type
+        // Stryker disable next-line ConditionalExpression: a name no run gave reads as no pid, which process.kill refuses as it refuses a dead run's; the null test serves the type
         if (pid === null || !isAlive(pid)) {
             // Stryker disable next-line BooleanLiteral: the entry was just listed, so only a concurrent sweep could make `force` matter
             rmSync(join(folder, entry), { force: true, recursive: true });

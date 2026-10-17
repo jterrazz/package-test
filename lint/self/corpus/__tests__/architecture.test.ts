@@ -91,7 +91,7 @@ describe('architecture', () => {
 
     test('the architecture a specification is composed in (meta-tests) — `definition-is-its-module` — the setups and the actions under src/ are exactly the ones the chain offers', () => {
         // Given - every definition a setup or an action module exports
-        // Then - one module per setup, and every action is one the list places — a verb two specifications share (`run`) is each specification's own module
+        // Then - one module per setup, and every action is one the list places: a verb two specifications share (`run`) is each specification's own module
         expect(named('setup context')).toStrictEqual(SETUPS);
         expect([...new Set(named('action'))]).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
     });

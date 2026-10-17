@@ -57,7 +57,7 @@ export type WebsiteConfig = Pick<ResultConfig, 'transform'> &
 export type WebsiteBackendOptions = {
     /** Env var receiving the stub's URL in the server child (e.g. `'API_URL'`). */
     env: string;
-    /** Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port. */
+    /** Fixed port; pins a stable stub URL across runs. Default: a free OS-assigned port. */
     port?: number;
 };
 
@@ -155,7 +155,7 @@ function servicesOf<Services extends ServiceRecord>(
     return (options.services ?? {}) as Services;
 }
 
-/** What `specification.website()` returns: `const { website, cleanup } = …` (`no-runner-alias`). */
+/** What `specification.website()` returns: `const { website, cleanup } = ...` (`no-runner-alias`). */
 export type WebsiteHandle = {
     /** Stop the server process and the shared browser instance. */
     cleanup: () => Promise<void>;

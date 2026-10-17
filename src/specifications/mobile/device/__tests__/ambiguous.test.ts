@@ -24,7 +24,7 @@ function fixesOf(target: Target, matches: MobileElementMatch[]): string[] {
 }
 
 describe('ambiguousScreenElementError', () => {
-    // RUNTIME no-landmark-on-mobile — the vocabulary is ONE across the specifications, and the part with no iOS equivalent is refused rather than approximated: a screen has no ARIA landmarks, so the fix it offers is `within(testId(…), …)`.
+    // RUNTIME no-landmark-on-mobile — the vocabulary is ONE across the specifications, and the part with no iOS equivalent is refused rather than approximated: a screen has no ARIA landmarks, so the fix it offers is `within(testId(...), ...)`.
     test('names the target, the count and every candidate with what it carries, then the rule and where it is documented', () => {
         // Given - candidates with a label alone, a value, an identifier, and nothing but a type
         const { message } = ambiguousScreenElementError({

@@ -35,7 +35,7 @@ export type LiterateServeRegistration = {
 export type CliBackendOptions = {
     /** Env var receiving the stub's URL in the child (e.g. `'INGEST_URL'`). */
     env: string;
-    /** Fixed port — pins a stable stub URL across runs. Default: a free OS-assigned port. */
+    /** Fixed port; pins a stable stub URL across runs. Default: a free OS-assigned port. */
     port?: number;
 };
 
@@ -60,7 +60,7 @@ export type CliSpecificationOptions<Services extends ServiceRecord = ServiceReco
     commands?: readonly string[];
     /** Opt-in Docker awareness; declare results with `await using` so leaked containers are removed (`docker-exec-bound-with-await-using`). */
     docker?: DockerSpecConfig;
-    /** Environment applied to every run (`TZ`, `NO_COLOR`, …); a chain's `.env()` and a document's `env:` win. */
+    /** Environment applied to every run (`TZ`, `NO_COLOR`, ...); a chain's `.env()` and a document's `env:` win. */
     defaults?: CliEnv;
     /** Named environment sets a document names by bare word (`env: frozen`). */
     env?: Record<string, CliEnv>;
@@ -74,7 +74,7 @@ export type CliSpecificationOptions<Services extends ServiceRecord = ServiceReco
     transform?: ((text: string) => string) | undefined;
 };
 
-/** What `specification.cli()` returns: `const { cli, cleanup, docker } = …` (`no-runner-alias`). */
+/** What `specification.cli()` returns: `const { cli, cleanup, docker } = ...` (`no-runner-alias`). */
 export type CliHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;

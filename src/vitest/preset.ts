@@ -10,7 +10,7 @@ import { BLOB_DIR, COVERAGE_DIR, REPORTER_OUTPUT_FILES } from '../../lint/kit/pr
 import { isRecord } from '../../lint/kit/project/json-shape.js';
 import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project.js';
 
-// invariant: `json-summary` is the machine-readable report beside `text` and `html` — coverage is a report, not a gate; the v8 provider is an optional peer.
+// invariant: `json-summary` is the machine-readable report beside `text` and `html`; coverage is a report, not a gate; the v8 provider is an optional peer.
 const COVERAGE = {
     exclude: [
         // outside: browser Mode instruments the page's bundle: without this, react-dom alone buries the project's own number.

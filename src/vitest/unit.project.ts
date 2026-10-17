@@ -3,7 +3,7 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 import type { SpecificationProjectOptions } from './project.js';
 import { onProjectDefaults, projectTest } from './project.js';
 
-/** `unit()` — module tests, in the `__tests__/` of the folder of the modules they cover (rule `test-in-its-tests-folder`). */
+/** `unit()`: module tests, in the `__tests__/` of the folder of the modules they cover (rule `test-in-its-tests-folder`). */
 export type UnitProjectOptions = SpecificationProjectOptions & {
     /** `false` shares one module graph per worker (`isolate: false`); for pure projects only. */
     isolate?: boolean;

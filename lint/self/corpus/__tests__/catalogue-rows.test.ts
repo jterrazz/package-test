@@ -62,7 +62,7 @@ describe('catalogue-rows', () => {
         const entries = [...RUNTIME_RULES, ...PROCESS_RULES, ...SELF_PROCESS_RULES];
         expect(entries.length).toBeGreaterThan(0);
 
-        // Then - each carries non-empty normative text and a rationale (its "implementation" is the framework runtime or human review — documented here, not a lint rule)
+        // Then - each carries non-empty normative text and a rationale (its "implementation" is the framework runtime or human review, documented here, not a lint rule)
         expect(
             entries
                 .filter((entry) => entry.sentence.length === 0 || entry.rationale.length === 0)
@@ -147,7 +147,7 @@ describe('catalogue-rows', () => {
     });
 
     test('catalogueRows — conventions catalogue — completeness (meta-test) — a static row that states a role gate has one', () => {
-        // Given - every static row whose reach is one KIND of file — `tests` and `all` are out, because a rule gated on a SHAPE (a `.fixture()` literal, a `.trigger()` name) looks at every file and finds that shape only in a test, which is what its convention says
+        // Given - every static row whose reach is one KIND of file. `tests` and `all` are out, because a rule gated on a SHAPE (a `.fixture()` literal, a `.trigger()` name) looks at every file and finds that shape only in a test, which is what its convention says
         const ROLE_REACH = new Set([
             'component',
             'config',
@@ -159,7 +159,7 @@ describe('catalogue-rows', () => {
             'specification',
         ]);
 
-        // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and `test-id-states-what-is-missing` was one — any file with a `.visit/.render/.open` scenario was judged
+        // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and `test-id-states-what-is-missing` was one: any file with a `.visit/.render/.open` scenario was judged
         const gated = everyRow.filter(
             (entry) => entry.channel === 'static' && ROLE_REACH.has(entry.reach),
         );

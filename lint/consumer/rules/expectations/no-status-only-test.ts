@@ -64,7 +64,7 @@ function isStatusProbe(node: AstNode): boolean {
 
 const row = rowNamed(consumerRows, 'no-status-only-test');
 
-/** Fires only when every `expect(…)` of the callback is a status probe: one beside a real assertion is the scalpel, and `no-probe-cluster` needs a cluster of three. */
+/** Fires only when every `expect(...)` of the callback is a status probe: one beside a real assertion is the scalpel, and `no-probe-cluster` needs a cluster of three. */
 export const noStatusOnlyTest = defineRule(
     {
         docs: row,

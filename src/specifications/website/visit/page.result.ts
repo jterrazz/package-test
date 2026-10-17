@@ -16,7 +16,7 @@ type HeadSummary = {
     title: string;
 };
 
-/** Result from a rendered `.visit()` action — the page as a browser saw it. */
+/** Result from a rendered `.visit()` action: the page as a browser saw it. */
 export class PageResult extends BaseResult {
     private readonly page: BrowserPage;
 
@@ -93,7 +93,7 @@ export class PageResult extends BaseResult {
         return this.page.links;
     }
 
-    /** The content of a named meta — `meta('description')`, `meta('og:image')`. */
+    /** The content of a named meta: `meta('description')`, `meta('og:image')`. */
     meta(name: string): string | undefined {
         return this.page.metas.find((m) => m.name === name || m.property === name)?.content;
     }

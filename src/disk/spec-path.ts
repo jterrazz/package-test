@@ -17,7 +17,7 @@ export type FileAt<Path extends string> = {
     readonly path: Path;
 };
 
-/** A file whose path ends in `Extension` — what a verb that reads one file accepts. */
+/** A file whose path ends in `Extension`: what a verb that reads one file accepts. */
 export type DiskFile<Extension extends string = string> = FileAt<RelativePath<Extension>>;
 
 /** A directory the spec names; its path ends in `/`. */
@@ -26,7 +26,7 @@ export type DiskDirectory = {
     readonly path: RelativePath<'/'>;
 };
 
-/** Either of the two — what a verb that takes a file or a directory accepts. */
+/** Either of the two: what a verb that takes a file or a directory accepts. */
 export type DiskTarget = DiskDirectory | DiskFile;
 
 /** Name one file, by its path from the spec file. */

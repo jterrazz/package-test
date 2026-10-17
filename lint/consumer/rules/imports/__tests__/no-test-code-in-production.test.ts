@@ -172,7 +172,7 @@ ruleTester().run('no-test-code-in-production', noTestCodeInProduction, {
             [2, 24],
         ),
         refused(`const golden = \`\${__dirname}/__expected__/out.txt\`;`, 'pathRead', [1, 15]),
-        // invariant: a reach through a module that is not production — a separate test root: the barrel re-exports it.
+        // invariant: a reach through a module that is not production, a separate test root: the barrel re-exports it.
         refused('export * from "../tests/render.js";', 'reachThrough', [1, 14], BARREL),
         refused('export { users } from "../tests/data.js";', 'reachThrough', [1, 22], BARREL),
         // invariant: that module is parsed: a path it builds into test material is a reach too.

@@ -110,7 +110,7 @@ describe('update-merge', () => {
         // Given - a fresh JSON fixture (no previous) whose values embed the cwd
         const actual = { cwd: WORKDIR, nested: { path: `${WORKDIR}/out.txt` }, other: 7 };
 
-        // Then - the workdir is written back as its {{workdir}} token, not the run-specific temp path — parity with the text path
+        // Then - the workdir is written back as its {{workdir}} token, not the run-specific temp path, for parity with the text path
         expect(mergePreservingPlaceholders(null, actual, WORKDIR)).toStrictEqual({
             cwd: '{{workdir}}',
             nested: { path: '{{workdir}}/out.txt' },

@@ -19,7 +19,7 @@ const SSE_CONTENT_TYPE = 'text/event-stream';
 export type HttpStreamInit = {
     /** The `content-type` the stream is served under. Default `application/octet-stream`. */
     contentType?: string;
-    /** Milliseconds between two chunks. Default 0 — every chunk at once. */
+    /** Milliseconds between two chunks. Default 0: every chunk at once. */
     delay?: number;
     /** Response headers, merged over the builder's own. */
     headers?: Record<string, string>;

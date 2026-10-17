@@ -41,7 +41,7 @@ describe('bridge', () => {
     });
 
     test('a two-run sequence shares one working directory', async () => {
-        // Given - build writes dist/, start reads it — one cwd, two runs
+        // Given - build writes dist/, start reads it: one cwd, two runs
         const result = await cli.run(file('./built-then-started.spec.yaml'));
 
         // Then - the document proved the sequence; the cwd is readable afterwards

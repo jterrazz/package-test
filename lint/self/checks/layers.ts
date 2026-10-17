@@ -5,7 +5,7 @@ export type LayerOptions = {
     folders?: Record<string, string[]>;
     /** A prefix when it ends with `/`, an exact module path otherwise. */
     imports?: string[];
-    /** Whole name, or `<name>/…`. */
+    /** Whole name, or `<name>/...`. */
     packages?: string[];
     /** The lazy seam a layer opens once. */
     seams?: Record<string, string[]>;

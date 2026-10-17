@@ -43,7 +43,7 @@ function buildReply(data: unknown): StubResponse {
 
 /** Init options for a streamed Anthropic reply. */
 export type AnthropicStreamInit = {
-    /** Milliseconds between two events. Default 0 — every event at once. */
+    /** Milliseconds between two events. Default 0: every event at once. */
     delay?: number;
 };
 

@@ -62,7 +62,7 @@ export function strandedBundles(root: string, packed: Set<string>): string[] {
         .toSorted();
 }
 
-// invariant: only the bundler's own spelling (a statement opening a line, `import(…)`, `require(…)`, double-quoted), never a path a comment or a message spells.
+// invariant: only the bundler's own spelling (a statement opening a line, `import(...)`, `require(...)`, double-quoted), never a path a comment or a message spells.
 const BUNDLER_IMPORT =
     /(?:^(?:import|export)\b[^\n]*?\bfrom\s*|^import\s*|\bimport\(|\brequire\()"(?<target>\.{1,2}\/[^"]+)"/gmu;
 

@@ -101,7 +101,7 @@ export function matrixCapabilities(): Capability[] {
     return [...declaredCapabilities(), ...tokens];
 }
 
-/** `.seed()` → `seed`, `toMatch(file())` → `to-match`, `.exitCode` → `exit-code`, `{{uuid}}` → `uuid`. */
+/** `.seed()` gives `seed`, `toMatch(file())` gives `to-match`, `.exitCode` gives `exit-code`, `{{uuid}}` gives `uuid`. */
 export function capabilityFolder(name: string): string {
     return (name.split('(')[0] ?? '')
         .replaceAll(/(?<lower>[a-z0-9])(?<upper>[A-Z])/gu, '$<lower> $<upper>')

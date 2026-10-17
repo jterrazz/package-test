@@ -43,7 +43,7 @@ function importedDoors(text: string, wanted: (imported: string) => boolean): Map
     return doors;
 }
 
-// invariant: a view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle.
+// invariant: a view bound to a handle (`const db = cli.with(...)`) comes under the module of that handle.
 function doorsWanted(text: string, wanted: (imported: string) => boolean): Map<string, string> {
     const doors = importedDoors(text, wanted);
     const views = [...text.matchAll(VIEW)];

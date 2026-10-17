@@ -48,7 +48,7 @@ declare module 'vitest' {
     interface ProvidedContext {
         /** The instant `component({ clock })` pins for every render. */
         componentClock?: string;
-        /** The page size `component({ viewport })` states — the size a test is restored to. */
+        /** The page size `component({ viewport })` states, the size a test is restored to. */
         componentViewport: { height: number; width: number };
         /** `TEST_UPDATE=1` / `-u`, read on the server and handed to the page. */
         update?: boolean;

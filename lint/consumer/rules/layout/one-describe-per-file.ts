@@ -27,7 +27,7 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
 
 type TitleFinding = { messageId: string; node: AstNode };
 
-// invariant: a title the author wrote is never rewritten: it is reported, and the author retitles it. A title that states the file's subject in other words — its name read with spaces, 'cli reference' for `cli-reference.spec.ts` — is the subject all the same.
+// invariant: a title the author wrote is never rewritten: it is reported, and the author retitles it. A title that states the file's subject in other words (its name read with spaces, 'cli reference' for `cli-reference.spec.ts`) is the subject all the same.
 function titleFinding(group: AstNode, subject: FileSubject): TitleFinding | undefined {
     const { named } = subject;
     const title = firstArgumentOf(group);

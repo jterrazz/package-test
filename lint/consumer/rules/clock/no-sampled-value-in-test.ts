@@ -81,7 +81,7 @@ function pinnedSpans(body: AstNode): Span[] {
 
 const row = rowNamed(consumerRows, 'no-sampled-value-in-test');
 
-/** Silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal — a per-run directory name is the one sampled value the framework cannot mint — and on a `Date` reading after a `using` that pins the clock to an instant in the same block. */
+/** Silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal (a per-run directory name is the one sampled value the framework cannot mint), and on a `Date` reading after a `using` that pins the clock to an instant in the same block. */
 export const noSampledValueInTest = defineRule(
     {
         docs: row,

@@ -120,7 +120,7 @@ export class ContainerAccessor {
         return this.resultOf(execInContainer(id, ['sh', '-c', cmd]));
     }
 
-    /** The captured container's id — refused when none was captured. */
+    /** The captured container's id, refused when none was captured. */
     private requireExists(member: string): string {
         if (this.containerId === null) {
             throw new Error(

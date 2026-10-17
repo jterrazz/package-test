@@ -6,7 +6,7 @@ import { cli as dockerCli } from '../docker-cli.specification.js';
 
 describe('unqueried', () => {
     test('command-only run (never calls container()) does not query docker', async () => {
-        // Given - a fixture that prints help and exits without spawning a container. The test never calls .container(), so the runner never touches the Docker daemon — but the cleanup path still runs.
+        // Given - a fixture that prints help and exits without spawning a container. The test never calls .container(), so the runner never touches the Docker daemon, but the cleanup path still runs.
         await using result = await dockerCli.exec('help');
 
         // Then - the run succeeded

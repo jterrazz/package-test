@@ -10,7 +10,7 @@ describe('kitchen-sink', () => {
             .fixture(directory('./__fixtures__/checker-kitchen-sink/'))
             .run();
 
-        // Then - the whole diagnostic block is asserted (the \`no-token-in-request\` line's echoed {{uuid}} token is covered by {{string}}; a literal token in the golden would itself be read as a placeholder by the grammar — see \`no-unknown-token\`)
+        // Then - the whole diagnostic block is asserted (the \`no-token-in-request\` line's echoed {{uuid}} token is covered by {{string}}; a literal token in the golden would itself be read as a placeholder by the grammar; see \`no-unknown-token\`)
         expect(result.report).toMatch(`
             specs/db/__seeds__/x.sql:1:1  jterrazz-check(no-duplicate-ground)
                 found: the same file as grammar/__seeds__/used.sql

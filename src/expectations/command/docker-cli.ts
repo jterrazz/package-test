@@ -78,7 +78,7 @@ export function removeContainers(ids: string[]): void {
             timeout: DEFAULT_TIMEOUT,
         });
     } catch {
-        // invariant: ignore — containers may already be gone.
+        // invariant: ignore: containers may already be gone.
     }
 }
 

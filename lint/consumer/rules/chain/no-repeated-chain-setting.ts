@@ -131,7 +131,7 @@ function camelOf(word: string): string {
     );
 }
 
-// invariant: `events/list/` → `events`, `indicators/chart/` → `chart`; `undefined` for a subject with no standard name.
+// invariant: `events/list/` gives `events`, `indicators/chart/` gives `chart`; `undefined` for a subject with no standard name.
 function subjectWord(subject: Subject): string | undefined {
     if (subject.specification === 'job') {
         return subject.job;

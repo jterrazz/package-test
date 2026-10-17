@@ -5,7 +5,7 @@ export type Span = { end: number; start: number };
 const TITLED_TEST =
     /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(\s*(?<quote>['"`])(?<title>(?:[^\\]|\\.)*?)\k<quote>/gu;
 
-/** `Two users, one admin` → `two-users-one-admin`. */
+/** `Two users, one admin` gives `two-users-one-admin`. */
 export function kebabName(words: string): string {
     return words
         .toLowerCase()
@@ -41,7 +41,7 @@ export function titleAround(text: string, index: number): string | undefined {
         }
         // Stryker disable next-line OptionalChaining,StringLiteral: a match always carries its named group
         const written = found.groups?.title ?? '';
-        // invariant: the call's own parenthesis is the last before its title, past any `.each(…)` table.
+        // invariant: the call's own parenthesis is the last before its title, past any `.each(...)` table.
         const call = text.lastIndexOf('(', found.index + found[0].length - written.length - 2);
         // Stryker disable next-line EqualityOperator: a value never starts on a test's closing parenthesis
         if (closingOf(text, call) > index) {

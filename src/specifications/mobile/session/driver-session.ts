@@ -5,10 +5,10 @@ import type { MobileDevice } from '../device/device.port.js';
 import { SERVER_CALL_TIMEOUT_MS } from './session-ledger.js';
 import type { SessionLedger } from './session-ledger.js';
 
-/** The session factory — webdriverio's `remote`, the adapter's single seam onto a new session. */
+/** The session factory: webdriverio's `remote`, the adapter's single seam onto a new session. */
 export type RemoteFn = typeof remote;
 
-/** The way onto a session another runner opened — webdriverio's `attach`. */
+/** The way onto a session another runner opened: webdriverio's `attach`. */
 export type AttachFn = typeof attach;
 
 /** The driver session type, derived so webdriverio stays a type-only import. */
@@ -21,7 +21,7 @@ type SessionRequest = {
     bundleId: string;
     device: MobileDevice;
     launchTimeoutMs: number;
-    // invariant: the run's ledger — absent when the run shares no session.
+    // invariant: the run's ledger, absent when the run shares no session.
     ledger?: SessionLedger | undefined;
     serverUrl: string;
     // invariant: injected by the adapter's own tests; loaded from the optional peer otherwise.

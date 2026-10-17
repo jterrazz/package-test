@@ -186,7 +186,7 @@ function namesRead(code: string): Set<string> {
     );
 }
 
-/** Each hook call of a spec — `beforeAll`, `afterEach` and their kin — from its leading comments to the end of its line. */
+/** Each hook call of a spec (`beforeAll`, `afterEach` and their kin), from its leading comments to the end of its line. */
 export function hooksOf(text: string): Span[] {
     const blank = blankComments(text);
     return [...blank.matchAll(HOOK_CALL)].map((found) => {

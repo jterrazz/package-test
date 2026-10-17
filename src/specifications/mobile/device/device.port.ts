@@ -3,9 +3,9 @@ import type { VisitorVerbs } from '../../../visitor/verbs.js';
 export type MobileDevice = {
     /** Simulator name, matched exactly (`iPhone 17`). */
     name: string;
-    /** OS narrowing when the name exists on several runtimes — `'26.5'` or `'iOS 26.5'`. */
+    /** OS narrowing when the name exists on several runtimes: `'26.5'` or `'iOS 26.5'`. */
     os?: string;
-    /** Explicit UDID — skips name/os resolution entirely. */
+    /** Explicit UDID; skips name/os resolution entirely. */
     udid?: string;
 };
 
@@ -18,7 +18,7 @@ export type MobileElementMatch = {
     identifier?: string;
     /** The accessible label, whitespace-collapsed and truncated. */
     label?: string;
-    /** Element type without the `XCUIElementType` prefix — `Button`, `StaticText`. */
+    /** Element type without the `XCUIElementType` prefix: `Button`, `StaticText`. */
     type: string;
     /** The element value (text-field content, adjustable value), when present. */
     value?: string;
@@ -29,7 +29,7 @@ export type MobileVisitor = Pick<VisitorVerbs, 'fill' | 'see'> & {
     tap: VisitorVerbs['click'];
 };
 
-/** The behavior of an open — the When of the spec; assertions stay in the Then. */
+/** The behavior of an open, the When of the spec; assertions stay in the Then. */
 export type MobileScenario = (visitor: MobileVisitor) => Promise<void>;
 
 /** One node of the projected accessibility tree: noise wrappers dropped, `XCUIElementType` prefix removed. */
@@ -38,7 +38,7 @@ export type ScreenNode = {
     /** The accessibility identifier, only when it differs from the label. */
     identifier?: string;
     label?: string;
-    /** Element type without the `XCUIElementType` prefix — `Button`, `StaticText`. */
+    /** Element type without the `XCUIElementType` prefix: `Button`, `StaticText`. */
     type: string;
     value?: string;
 };
@@ -51,7 +51,7 @@ export type DeviceScreen = {
 
 /** Per-open options forwarded to the device session. */
 export type DeviceOpenOptions = {
-    /** The app under test — terminated and relaunched for a fresh, deterministic state. */
+    /** The app under test, terminated and relaunched for a fresh, deterministic state. */
     bundleId: string;
     /** Deep link applied after the relaunch (`news://events`); absent opens the app plainly. */
     deepLink?: string | undefined;

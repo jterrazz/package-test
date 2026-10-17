@@ -12,7 +12,7 @@ function refuse(): never {
     );
 }
 
-/** Present, typed, and refusing — every setup and the terminal action alike. */
+/** Present, typed, and refusing: every setup and the terminal action alike. */
 export const component: ComponentChain = {
     clock: refuse,
     intercept: refuse,

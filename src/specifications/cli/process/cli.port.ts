@@ -17,7 +17,7 @@ export type ExecOptions = WatchOptions & {
     cwd?: string | undefined;
 };
 
-/** Extra environment variables to set for the child process — the record `.env()` and `with({ env })` state. */
+/** Extra environment variables to set for the child process: the record `.env()` and `with({ env })` state. */
 export type CliEnv = EnvRecord;
 
 /** Per-run inputs; absent, the child gets an immediately-closed stdin (never a TTY). */

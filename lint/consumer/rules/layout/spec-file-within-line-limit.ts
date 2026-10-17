@@ -18,7 +18,7 @@ function titlePrefix(title: string): string {
     return head === title ? (title.split(/\s+/u)[0] ?? title) : head;
 }
 
-/** `rejects (6), accepts (3), …`, largest first. */
+/** `rejects (6), accepts (3), ...`, largest first. */
 export function groupsOf(titles: string[]): string {
     const counts = new Map<string, number>();
     for (const title of titles) {

@@ -26,7 +26,7 @@ export type Assertion = {
 
 const MODIFIERS = new Set(['element', 'not', 'rejects', 'resolves']);
 
-/** `expect(x).not.toBe(y)` → subject `x`, matcher `toBe`, modifiers `['not']`. */
+/** `expect(x).not.toBe(y)` gives subject `x`, matcher `toBe`, modifiers `['not']`. */
 export function assertionOf(node: AstNode): Assertion | undefined {
     // Stryker disable next-line ConditionalExpression,BlockStatement: only parentheses let a construction end a member chain on an expect() call, and they reach no reader
     if (node.type !== 'CallExpression') {

@@ -45,7 +45,7 @@ function isSleep(node: AstNode): boolean {
         return false;
     }
     const name = callee.type === 'Identifier' ? identifierName(callee) : memberPropertyName(callee);
-    // invariant: `Atomics.wait(…)` blocks the thread: a sleep in disguise.
+    // invariant: `Atomics.wait(...)` blocks the thread: a sleep in disguise.
     return (
         name === 'setTimeout' ||
         name === 'setInterval' ||
@@ -88,7 +88,7 @@ export const noSleep = defineRule(
                     // Stryker restore ArrayDeclaration,EqualityOperator,ConditionalExpression
                     return isTestRole(identityOf(context).role);
                 },
-                // invariant: opened on the function, not the object, so a `setTimeout(…)` in a non-function property is still the test's own.
+                // invariant: opened on the function, not the object, so a `setTimeout(...)` in a non-function property is still the test's own.
                 Property(node: AstNode) {
                     const implementation = implementationOf(node);
                     // Stryker disable next-line ConditionalExpression: no implementation spans nothing

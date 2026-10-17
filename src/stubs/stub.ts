@@ -9,7 +9,7 @@ export type Stub = {
     response: StubResponseValue;
     /** How many times it may serve; omitted is unlimited. `0` with `required` is a never stub: docs/reference/stubs.md#never--a-call-that-must-not-happen. */
     times?: number;
-    /** Fail the chain unless it was requested — exactly `times` times when set, so `times: 0` fails it once requested. */
+    /** Fail the chain unless it was requested: exactly `times` times when set, so `times: 0` fails it once requested. */
     required?: boolean;
 };
 

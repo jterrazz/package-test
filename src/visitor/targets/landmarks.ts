@@ -1,25 +1,25 @@
 import { optionallyNamed } from './roles.js';
 import type { OptionallyNamedTargetFactory, Target } from './target.js';
 
-/** The `banner` landmark — the page header. */
+/** The `banner` landmark: the page header. */
 export const banner: OptionallyNamedTargetFactory = optionallyNamed('banner');
 
-/** The `complementary` landmark — an `<aside>`, a sidebar. */
+/** The `complementary` landmark: an `<aside>`, a sidebar. */
 export const complementary: OptionallyNamedTargetFactory = optionallyNamed('complementary');
 
-/** The `contentinfo` landmark — the page footer. */
+/** The `contentinfo` landmark: the page footer. */
 export const contentinfo: OptionallyNamedTargetFactory = optionallyNamed('contentinfo');
 
-/** The `form` landmark — a form carrying an accessible name. */
+/** The `form` landmark: a form carrying an accessible name. */
 export const form: OptionallyNamedTargetFactory = optionallyNamed('form');
 
-/** The `main` landmark — the primary content of the document. */
+/** The `main` landmark: the primary content of the document. */
 export const main: OptionallyNamedTargetFactory = optionallyNamed('main');
 
-/** The `navigation` landmark — a `<nav>`. Name it when a page has several. */
+/** The `navigation` landmark: a `<nav>`. Name it when a page has several. */
 export const navigation: OptionallyNamedTargetFactory = optionallyNamed('navigation');
 
-/** The `region` landmark — a `<section>` carrying an accessible name. */
+/** The `region` landmark: a `<section>` carrying an accessible name. */
 export const region: OptionallyNamedTargetFactory = optionallyNamed('region');
 
 /** The `search` landmark. */

@@ -19,7 +19,7 @@ describe('changed', () => {
             .fixture(directory('../__fixtures__/specimen-cli/'))
             .exec('scaffold-changed');
 
-        // Then - diff surfaces the changed file. Frozen: the shared golden is asserted negatively here against a changed tree — TEST_UPDATE must not overwrite it with the changed output
+        // Then - diff surfaces the changed file. Frozen: the shared golden is asserted negatively here against a changed tree; TEST_UPDATE must not overwrite it with the changed output
         await expect(
             expect(result.directory('out')).toMatch(directory('./__expected__/cli-scaffold/out/'), {
                 frozen: true,

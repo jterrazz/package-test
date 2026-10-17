@@ -126,7 +126,7 @@ export function projectRootOf(directory: string): string | undefined {
     return root;
 }
 
-/** A path no package and no repository holds (a rule's test case, `/repo/…`) is read whole. A workspace member named `specs` is the specs tree itself, so its folder name stays the first segment of what it holds. */
+/** A path no package and no repository holds (a rule's test case, `/repo/...`) is read whole. A workspace member named `specs` is the specs tree itself, so its folder name stays the first segment of what it holds. */
 export function projectSegments(filename: string): string[] {
     const root = projectRootOf(dirname(filename));
     if (root === undefined) {

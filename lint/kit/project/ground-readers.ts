@@ -5,7 +5,7 @@ import { documentPaths, parseSpecDocument } from './spec-document.js';
 import { SPEC_EXTENSION } from './spec-grammar.js';
 import { listFiles } from './tree.js';
 
-// outside: vitest's `vi.mock`, `vi.doMock`, `vi.unmock`, `vi.doUnmock`, `vi.importActual` and `vi.importMock` name a module as `import()` does, and `new URL('…', import.meta.url)` a path beside the file.
+// outside: vitest's `vi.mock`, `vi.doMock`, `vi.unmock`, `vi.doUnmock`, `vi.importActual` and `vi.importMock` name a module as `import()` does, and `new URL('...', import.meta.url)` a path beside the file.
 export const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*|(?<![.\w])vi\.(?:mock|doMock|unmock|doUnmock|importActual|importMock)\(\s*|\bnew\s+URL\(\s*(?=(?<base>['"])[^'"]*\k<base>\s*,\s*import\.meta\.url\b))(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 

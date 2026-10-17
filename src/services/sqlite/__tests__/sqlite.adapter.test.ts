@@ -101,7 +101,7 @@ describe('sqlite', () => {
     });
 
     test('the template build lock (regression guard) — concurrent handles on a cold cache all end up with the schema', async () => {
-        // Given - a fresh project root, no template yet, and four handles initializing at once — the cold-cache race that made a consumer keep `fileParallelism: false`
+        // Given - a fresh project root, no template yet, and four handles initializing at once: the cold-cache race that made a consumer keep `fileParallelism: false`
         const root = mkdtempSync(resolve(tmpdir(), 'sqlite-race-'));
         const initSqlPath = resolve(root, 'init.sql');
         writeFileSync(initSqlPath, 'CREATE TABLE "raced" (id INTEGER PRIMARY KEY);');

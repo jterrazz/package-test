@@ -120,7 +120,7 @@ export function holdsASpec(folder: string): boolean {
     );
 }
 
-/** The special folder a bare earlier spelling names — a `setup/` at the specs root or holding no spec — or `undefined`; a `_` name is refused before it is asked. */
+/** The special folder a bare earlier spelling names (a `setup/` at the specs root or holding no spec), or `undefined`; a `_` name is refused before it is asked. */
 export function renamedSpecialOf(specsRoot: string, folder: string): string | undefined {
     const renamed = RENAMED_FOLDERS[basename(folder)];
     // Stryker disable next-line ConditionalExpression,BlockStatement: a name no release spelt is answered undefined either way; the guard spares the walk of its tree

@@ -5,7 +5,7 @@ import { servicesSetup } from '../../services/containers/services.global-setup.j
 import { inProcessProject } from '../../vitest/project.js';
 import type { InProcessProjectOptions } from '../../vitest/project.js';
 
-/** `integration()` — a module against real services, or against a golden. */
+/** `integration()`: a module against real services, or against a golden. */
 export type IntegrationProjectOptions = InProcessProjectOptions;
 
 export function integration(

@@ -37,7 +37,7 @@ export type ComponentOptions = {
     wrap?: string;
 };
 
-/** `component()` — rendered units, in the `__tests__/` of the folder of the components they cover; under a specs tree, beside them. */
+/** `component()`: rendered units, in the `__tests__/` of the folder of the components they cover; under a specs tree, beside them. */
 export type ComponentProjectOptions = ComponentOptions & SpecificationProjectOptions;
 
 const PIPELINE_KEYS = [
@@ -66,7 +66,7 @@ const PAGE_DEPENDENCIES = [
 const requireFrom = createRequire(import.meta.url);
 const HELPERS_FILE = import.meta.filename;
 
-// invariant: a config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`.
+// invariant: a config vite bundled before importing it: `<its name>.timestamp-<hash>.mjs`.
 const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
 
 function callerFile(): string | undefined {
@@ -132,7 +132,7 @@ function mswWorkerPlugin(): Plugin {
 
 const isPluginList = (plugins: unknown): plugins is PluginOption[] => Array.isArray(plugins);
 
-// invariant: an allow-list: an unknown key (`environments`, `ssr`, …) could re-root the run. The consumer's `plugins` are concatenated after the project's.
+// invariant: an allow-list: an unknown key (`environments`, `ssr`, ...) could re-root the run. The consumer's `plugins` are concatenated after the project's.
 async function reroot(
     source: NonNullable<ComponentProjectOptions['vite']>,
     root: string,

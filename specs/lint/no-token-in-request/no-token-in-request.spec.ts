@@ -10,7 +10,7 @@ describe('no-token-in-request', () => {
             .fixture(directory('./__fixtures__/no-token-in-request/'))
             .run();
 
-        // Then - the finding, the echoed leaked token covered by {{string}} — a literal {{uuid}} in the golden would itself be read as a placeholder by the token grammar (see `no-unknown-token`).
+        // Then - the finding, the echoed leaked token covered by {{string}}; a literal {{uuid}} in the golden would itself be read as a placeholder by the token grammar (see `no-unknown-token`).
         expect(result.report).toMatch(`
             specs/widget/__requests__/create.http:4:1  jterrazz-check(no-token-in-request)
                 found: the token {{string}} in a __requests__/ file

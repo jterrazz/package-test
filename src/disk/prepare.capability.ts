@@ -4,7 +4,7 @@ import { refusal } from '../chain/refusals/refusal.js';
 import type { PreparePort, PrepareStep } from './prepare.port.js';
 
 export type PrepareChain<Self> = {
-    /** Lay in the working directory what no fixture can carry — a `.git`, an empty folder, a file a repository ignores — after every fixture and link, in the order stated. */
+    /** Lay in the working directory what no fixture can carry (a `.git`, an empty folder, a file a repository ignores), after every fixture and link, in the order stated. */
     prepare: (step: PrepareStep) => Self;
 };
 

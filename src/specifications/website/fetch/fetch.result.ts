@@ -44,7 +44,7 @@ export class FetchResult extends BaseResult {
         return this.exchange.headers.location;
     }
 
-    /** The HTTP response status code — redirects surface as 3xx, never followed. */
+    /** The HTTP response status code; redirects surface as 3xx, never followed. */
     get status(): number {
         return this.exchange.status;
     }

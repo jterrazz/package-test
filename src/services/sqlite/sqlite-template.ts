@@ -118,7 +118,7 @@ export function releaseTemplateLock(lockPath: string): void {
     try {
         unlinkSync(lockPath);
     } catch {
-        /* invariant: ignore — already released */
+        /* invariant: ignore: already released */
     }
 }
 

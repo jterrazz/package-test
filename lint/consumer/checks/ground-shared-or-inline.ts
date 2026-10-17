@@ -117,7 +117,7 @@ function inPlaceLines(path: string, content: string): number {
     return valueLines(parsed === undefined ? content : JSON.stringify(parsed, null, 4));
 }
 
-// invariant: a text no literal survives in place — one opening on a line break whose lines share an indentation, which the comparison's dedent strips from either form — keeps its file.
+// invariant: a text no literal survives in place (one opening on a line break whose lines share an indentation, which the comparison's dedent strips from either form) keeps its file.
 function staysAFile(path: string, cap: number): boolean {
     const bytes = readFileSync(path);
     if (bytes.subarray(0, 8000).includes(0)) {

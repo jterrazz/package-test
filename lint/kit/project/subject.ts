@@ -1,4 +1,4 @@
-// invariant: the standard name is derived, never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST` create, `P
+// invariant: the standard name is derived, never listed: `GET /events` gives `events/list/`, `GET /events/:id` gives `events/get/`, `POST` create, `P
 
 import { blankComments } from '@jterrazz/typescript/rules';
 
@@ -148,7 +148,7 @@ export function subjectFolder(
     return subject.specification === 'job' ? subject.job : undefined;
 }
 
-/** `GET /events/:id`, `trigger digest`, … */
+/** `GET /events/:id`, `trigger digest`, ... */
 export function subjectName(subject: Subject): string {
     if (subject.specification === 'api') {
         return `${subject.method} ${pathTemplate(subject.path)}`;

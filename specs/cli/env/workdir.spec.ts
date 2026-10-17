@@ -9,7 +9,7 @@ import { cli } from '../cli.specification.js';
 
 /* invariant: the `env` fixture dumps the whole child environment, ephemeral ports included: each test probes its one variable (`output-asserted-as-a-golden` scalpel). */
 
-// invariant: macOS's own `$TMPDIR` shape (`/var` → `/private/var`), made explicit so the guard holds on Linux: only the resolved spelling is what a child reports.
+// invariant: macOS's own `$TMPDIR` shape (`/var` links to `/private/var`), made explicit so the guard holds on Linux: only the resolved spelling is what a child reports.
 async function underSymlinkedTmp<T>(action: () => Promise<T>): Promise<T> {
     const realTmp = realpathSync(tmpdir());
     const base = mkdtempSync(resolve(realTmp, 'spec-symlinked-'));

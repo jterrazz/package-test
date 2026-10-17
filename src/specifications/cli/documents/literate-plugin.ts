@@ -21,7 +21,7 @@ export type LiterateOptions = {
 /** Structural, so the runner coupling stays one dependency (the layer map); assignable to vite's `Plugin`. */
 export type LiteratePlugin = {
     config: () => { test: { include: string[] } };
-    /** Vite hands the resolved root here — what a relative `runner` is resolved against. */
+    /** Vite hands the resolved root here: what a relative `runner` is resolved against. */
     configResolved: (resolved: { root: string }) => void;
     enforce: 'pre';
     load: (id: string) => null | string;

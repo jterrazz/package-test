@@ -72,7 +72,7 @@ describe('catalogue-proofs', () => {
     });
 
     test('catalogueProofs — conventions catalogue — the channels answer for themselves (meta-test) — `cited-rules-exist` — every rule the corpus cites resolves to a row', () => {
-        // Given - every citation the corpus writes, in the chapters, the skill, the messages the plugin ships and the code that implements them. A rule no row declares leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
+        // Given - every citation the corpus writes, in the chapters, the skill, the messages the plugin ships and the code that implements them. A rule no row declares leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know: the whole file, not the line
         const cited = new Map<string, string>();
         const collect = (text: string, where: string): void => {
             for (const line of text.split('\n')) {

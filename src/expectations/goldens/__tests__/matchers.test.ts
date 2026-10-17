@@ -248,7 +248,7 @@ describe('registerMatchers', () => {
     ])(
         'matchers — update mode records a golden whatever the file holds: nothing, or no file at all (`no-volatile-literal`) — %s: an empty golden is filled from what came back',
         async (_kind, name, subject, written) => {
-            // Given - update mode, and a golden that exists and holds nothing — a file created to be recorded
+            // Given - update mode, and a golden that exists and holds nothing, a file created to be recorded
             await registerMatchers();
             vi.stubEnv('TEST_UPDATE', '1');
             const scratch = mkdtempSync(join(tmpdir(), 'empty-golden-'));

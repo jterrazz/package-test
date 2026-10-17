@@ -97,7 +97,7 @@ function isRead(node: AstNode | undefined): boolean {
     );
 }
 
-// invariant: `{ reduce: run = undefined }` → reduce, run.
+// invariant: `{ reduce: run = undefined }` gives reduce, run.
 function destructured(pattern: AstNode): [string, string][] {
     return childList(pattern, 'properties').flatMap((property): [string, string][] => {
         const key = propertyKeyName(property) ?? stringValue(child(property, 'key'));

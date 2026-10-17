@@ -16,7 +16,7 @@ describe('subpaths', () => {
             .fixture(directory('./__fixtures__/consumer/'))
             .exec('subpaths.mjs');
 
-        // Then - each subpath answers every condition it declares: node loads its builds, and every package the browser build's one module imports — static, side-effect or dynamic — resolves under the browser condition
+        // Then - each subpath answers every condition it declares: node loads its builds, and every package the browser build's one module imports (static, side-effect or dynamic) resolves under the browser condition
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             @jterrazz/test (types) → ./dist/index.d.ts: held

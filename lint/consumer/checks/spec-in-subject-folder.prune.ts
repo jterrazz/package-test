@@ -172,7 +172,7 @@ export function pruned(text: string): string {
         .replace(/(?:\n[ \t]*\/\/[^\n]*|\n[ \t]*)+$/u, '\n');
 }
 
-// invariant: `from '…'`, `import('…')` and a `vi.` call name a module; every other lead names a path on disk.
+// invariant: `from '...'`, `import('...')` and a `vi.` call name a module; every other lead names a path on disk.
 function isModuleLead(lead: string): boolean {
     return /^(?:from\b|import\(|vi\.)/u.test(lead);
 }

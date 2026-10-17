@@ -336,7 +336,7 @@ describe('in-place', () => {
         await registerMatchers();
         writeInPlace({ column: 13, file, line: 1 }, (indent) => renderText('second', indent));
 
-        // Then - the test file is untouched, the first write waits in the folder, the second in the run’s
+        // Then - the test file is untouched, the first write waits in the folder, the second in the run's
         expect([
             readFileSync(file, 'utf8'),
             existsSync(join(folder, pending)),

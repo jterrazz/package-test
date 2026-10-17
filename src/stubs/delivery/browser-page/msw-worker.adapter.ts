@@ -48,7 +48,7 @@ export async function registerWorkerStubs(stubs: readonly Stub[]): Promise<StubR
     };
 }
 
-// invariant: drop every handler the page still carries — the per-test reset.
+// invariant: drop every handler the page still carries: the per-test reset.
 function resetWorkerStubs(): void {
     if (workerInstance !== null) {
         workerInstance.resetHandlers();

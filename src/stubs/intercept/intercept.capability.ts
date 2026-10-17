@@ -10,7 +10,7 @@ export type InterceptMethod<Self> = ((stubs: StubInput) => Self) &
     ((request: StubRequest, response: StubResponder | StubResponse) => Self);
 
 export type InterceptChain<Self> = {
-    /** Declare outgoing calls — a stub, a list, a composite, or an inline request + response pair. */
+    /** Declare outgoing calls: a stub, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<Self>;
 };
 

@@ -25,7 +25,7 @@ describe('tokens', () => {
             .fixture(directory('../__fixtures__/specimen-cli/'))
             .exec('version');
 
-        // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass — the token is exact)
+        // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass: the token is exact)
         expect(result.stdout.text).toContain('cwd /');
         expect(result.stdout).toMatch(file('./__expected__/version.txt'));
     });

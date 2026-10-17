@@ -46,7 +46,7 @@ function parsedManifest(directory: string): unknown {
     }
 }
 
-/** What `packed()` reads of a package's manifest: its name, the commands its `bin` lays, and what it requires at runtime — a manifest that is no JSON is refused. */
+/** What `packed()` reads of a package's manifest: its name, the commands its `bin` lays, and what it requires at runtime; a manifest that is no JSON is refused. */
 export function manifestAt(directory: string): Manifest {
     const parsed = parsedManifest(directory);
     const field = (key: string): unknown => (isRecord(parsed) ? parsed[key] : undefined);

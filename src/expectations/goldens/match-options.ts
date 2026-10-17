@@ -70,7 +70,7 @@ declare module 'vitest' {
         toBeEmpty: T extends TableAccessorType ? () => Promise<void> : never;
         /** A stream is refused here: vitest would read it as an empty list, and `.not.toContain` would pass. */
         toContain: T extends StreamMarker ? never : (item: unknown) => R;
-        /** Assert the container is running. Async — docker-backed subject. */
+        /** Assert the container is running. Async: docker-backed subject. */
         toBeRunning: T extends ContainerAccessorType ? () => Promise<void> : never;
         /** On a string, vitest's `toMatch`; on a framework result, the whole result against its value in place or its `file()`/`directory()` golden. */
         toMatch: ((

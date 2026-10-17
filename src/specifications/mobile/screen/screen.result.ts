@@ -4,7 +4,7 @@ import { JsonAccessor } from '../../../expectations/text/json.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
 import type { DeviceScreen } from '../device/device.port.js';
 
-/** Result from a `.open()` action — the screen as the device saw it, final state. */
+/** Result from a `.open()` action: the screen as the device saw it, final state. */
 export class ScreenResult extends BaseResult {
     private readonly capturedScreen: DeviceScreen;
 

@@ -11,7 +11,7 @@ import type { AppInfo, ServiceReport } from './startup-report.js';
 export type OrchestratorOptions = {
     /** Defaults to the api shape; a subject that is no app says `{ type: 'none' }` and gets no line. */
     subject?: AppInfo | undefined;
-    /** The kebab-case key names the init-script folder: `analyticsDb` → `docker/analytics-db/`. */
+    /** The kebab-case key names the init-script folder: `analyticsDb` reads `docker/analytics-db/`. */
     services: Record<string, ServiceHandle>;
     /** Required: resolved from the calling specification file (`no-redundant-root`), never from `process.cwd()`. */
     root: string;
@@ -148,7 +148,7 @@ export class Orchestrator {
         this.started = false;
     }
 
-    /** The default database — the first declared handle that is one. */
+    /** The default database: the first declared handle that is one. */
     getDatabase(): DatabasePort | null {
         for (const handle of Object.values(this.services)) {
             const adapter = handle.createDatabaseAdapter();

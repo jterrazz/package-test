@@ -53,7 +53,7 @@ describe('comparison', () => {
         // Given - an expectation that reuses one ref for fields with different values
         const result = await api.get('/session');
 
-        // Then - the second occurrence of {{…#val}} must equal the capture, and does not
+        // Then - the second occurrence of {{...#val}} must equal the capture, and does not
         expect(() => {
             expect(result.response).toMatch(
                 `

@@ -240,7 +240,7 @@ export function isReference(node: AstNode | undefined): boolean {
     );
 }
 
-/** `config.jobs` → `config`. */
+/** `config.jobs` gives `config`. */
 export function rootOf(node: AstNode | undefined): string | undefined {
     const read = unwrapped(node);
     return read?.type === 'MemberExpression' ? rootOf(child(read, 'object')) : identifierName(read);

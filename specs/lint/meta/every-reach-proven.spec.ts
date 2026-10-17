@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { lint } from '../lint.specification.js';
 
-// outside: `every-reach-proven` — the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable.
+// outside: `every-reach-proven`: the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable.
 async function reachRun(): Promise<string> {
     const result = await lint
         .rules({ 'jterrazz/specs-at-declared-depth': ['error', { depth: 'specification' }] })
@@ -49,7 +49,7 @@ describe('every-reach-proven', () => {
         const output = await reachRun();
         const suite = about(output, 'specs/build/graph.test.ts');
 
-        // Then - the test rules reach it, and the ones that would call it misplaced do not: `specs-at-declared-depth`'s declared depth is what judges its shape — a spec with no specification folder is what it refuses — and `test-in-its-tests-folder`'s orphan clause stops at the specs boundary
+        // Then - the test rules reach it, and the ones that would call it misplaced do not: `specs-at-declared-depth`'s declared depth is what judges its shape (a spec with no specification folder is what it refuses), and `test-in-its-tests-folder`'s orphan clause stops at the specs boundary
         expect(suite).toStrictEqual(expect.arrayContaining(['no-sleep', 'no-raw-env-write']));
         expect(suite).not.toContain('specs-at-declared-depth');
         expect(about(output, 'specs/stray.spec.ts')).toContain('specs-at-declared-depth');
@@ -61,7 +61,7 @@ describe('every-reach-proven', () => {
         // Given - the same run, read at the three paths the role-gated rows name
         const output = await reachRun();
 
-        // Then - the stub answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
+        // Then - the stub answers for itself, and the ground answers through the spec that owns it; oxlint never opens a `.json`
         expect(about(output, 'specs/api/orders/__setup__/stubs/rates.ts')).toContain(
             'stubs-root-holds-facades-and-kinds',
         );

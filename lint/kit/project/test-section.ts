@@ -59,7 +59,7 @@ function basePathOf(value: unknown): `/${string}` | undefined {
     return value;
 }
 
-/** A key of the wrong shape is read as its default, never half-used — the type check refuses it first; a base path the type lets through and no route can carry is refused here. */
+/** A key of the wrong shape is read as its default, never half-used: the type check refuses it first; a base path the type lets through and no route can carry is refused here. */
 export function testSettingsOf(test: unknown): ReadTestSettings {
     const section = isRecord(test) ? test : {};
     const allow = isRecord(section.production) ? reasonsOf(section.production.allow) : undefined;

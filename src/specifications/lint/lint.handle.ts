@@ -17,23 +17,23 @@ import type { LintConfig } from './local-linters.adapter.js';
 
 export type LintSpecificationConfig = ChainConfig & { linters?: LintPort | undefined };
 
-/** Options for {@link startLint | specification.lint}; at least one linter — a plugin, a config, a checker or a preset. */
+/** Options for {@link startLint | specification.lint}; at least one linter: a plugin, a config, a checker or a preset. */
 export type LintSpecificationOptions = {
     /** Cross-file checkers, each a command printing a finding a line as `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree as its last argument. */
     checkers?: readonly string[];
-    /** The oxlint config oxlint runs under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states; naming it alone runs oxlint's built-in rules. */
+    /** The oxlint config oxlint runs under (`rules`, `settings`, `categories`, `overrides`), less `jsPlugins`, which `plugins` states; naming it alone runs oxlint's built-in rules. */
     config?: LintConfig;
     /** oxlint JS plugins, each a path from the specification's folder or a package specifier. */
     plugins?: readonly string[];
     /** `@jterrazz/typescript` presets whose laws run on the tree, after the base preset, as `jterrazz.config.ts` lists them: `[]` holds the tree to the base preset alone. */
     presets?: readonly Preset[];
-    /** Project root override — the plugins' specifiers and the checkers' commands resolve from its `node_modules`. */
+    /** Project root override: the plugins' specifiers and the checkers' commands resolve from its `node_modules`. */
     root?: string;
-    /** What the project adds beside its presets, written as `jterrazz.config.ts` writes it — `typescript: { names, architecture }`, `optOuts`. */
+    /** What the project adds beside its presets, written as `jterrazz.config.ts` writes it: `typescript: { names, architecture }`, `optOuts`. */
     settings?: Readonly<Record<string, unknown>>;
 };
 
-/** What `specification.lint()` returns: `const { lint, cleanup } = …` (`no-runner-alias`). */
+/** What `specification.lint()` returns: `const { lint, cleanup } = ...` (`no-runner-alias`). */
 export type LintHandle = {
     /** Nothing is started: kept so every constructor is released the same way. */
     cleanup: () => Promise<void>;

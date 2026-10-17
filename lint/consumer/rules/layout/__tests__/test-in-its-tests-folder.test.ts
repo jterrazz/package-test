@@ -11,7 +11,7 @@ const OWN = resolve(
     import.meta.dirname,
     '../../../../../specs/lint/test-in-its-tests-folder/__fixtures__',
 );
-// invariant: the repo root DOES carry a package.json — the guard the rootTests branch reads.
+// invariant: the repo root DOES carry a package.json, the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../../../..');
 
 const UNSTAGED = checkoutUnder('work', ['src']);

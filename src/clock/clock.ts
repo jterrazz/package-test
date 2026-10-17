@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { refusal } from '../chain/refusals/refusal.js';
 import { instantOf } from './instant.js';
 
-/** A pinned clock — released when the `using` scope that declared it ends. */
+/** A pinned clock, released when the `using` scope that declared it ends. */
 export type PinnedClock = Disposable;
 
 // outside: one clock per test: vitest's fake timers restore only the real clock, so a nested scope ending would end the outer one too.

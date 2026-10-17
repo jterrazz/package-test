@@ -14,7 +14,7 @@ export type FetchOptions = {
 
 export type FetchSignature = ChainSignature & {
     readonly chain: {
-        /** Perform one raw HTTP exchange, a GET unless `method` says otherwise — redirects surface as 3xx results, never followed. */
+        /** Perform one raw HTTP exchange, a GET unless `method` says otherwise; redirects surface as 3xx results, never followed. */
         fetch: (path: string, options?: FetchOptions) => Promise<FetchResult>;
     };
 };

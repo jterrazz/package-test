@@ -110,7 +110,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 
     async healthcheck(): Promise<void> {
-        // invariant: SQLite is always ready — it's a file
+        // invariant: SQLite is always ready: it's a file
     }
 
     /** One worker builds under an exclusive lock, the others wait: two concurrent `prisma db push` on one file is `database is locked`. */

@@ -44,7 +44,7 @@ function packageDirectory(name: string, path: string, testDir: string): string {
 
 const UNPACKED = new Map<string, string>();
 
-// invariant: one pack per package and process — the tarball is what the checkout's build holds when the first spec asks for it.
+// invariant: one pack per package and process: the tarball is what the checkout's build holds when the first spec asks for it.
 function unpackedOf(packageRoot: string): string {
     const known = UNPACKED.get(packageRoot);
     // Stryker disable next-line ConditionalExpression,BlockStatement: packing again lays the same files, only slower
@@ -72,7 +72,7 @@ function packInto(packageRoot: string, into: string): string {
         // Stryker disable next-line ArrayDeclaration,StringLiteral: the streams decide what a failed pack says, a failure no spec can lay
         { cwd: packageRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
     );
-    // Stryker disable ConditionalExpression,EqualityOperator,BlockStatement,StringLiteral,ObjectLiteral,OptionalChaining,MethodExpression: npm packs every package a spec can name; a failed pack is the environment's — a broken npm, a full disk — which no spec can lay
+    // Stryker disable ConditionalExpression,EqualityOperator,BlockStatement,StringLiteral,ObjectLiteral,OptionalChaining,MethodExpression: npm packs every package a spec can name; a failed pack is the environment's (a broken npm, a full disk), which no spec can lay
     if (packing.status !== 0) {
         throw new Error(
             refusal({
@@ -138,7 +138,7 @@ export function installPacked(
     }
     const modules = join(workDir, 'node_modules');
     const destination = join(modules, name);
-    // invariant: nothing is packed or deleted before every path the install writes is checked — the package, each package it requires, each command it lays — and every package it requires is found.
+    // invariant: nothing is packed or deleted before every path the install writes is checked (the package, each package it requires, each command it lays) and every package it requires is found.
     for (const written of [
         destination,
         ...declared.runtime.map((dependency) => join(modules, dependency)),

@@ -118,7 +118,7 @@ async function observe(request: Request): Promise<MatchableRequest> {
         try {
             body = JSON.parse(rawText);
         } catch {
-            // invariant: not JSON — expose the raw text for string/RegExp filters.
+            // invariant: not JSON; expose the raw text for string/RegExp filters.
             body = rawText;
         }
     }

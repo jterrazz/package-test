@@ -19,7 +19,7 @@ import {
     strandedBundles,
 } from '../audience.js';
 
-// outside: `rule-declares-its-audience` (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first.
+// outside: `rule-declares-its-audience` (meta-test): a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first.
 const ROOT = resolve(import.meta.dirname, '../../../..');
 
 const TOOLCHAIN_CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');
@@ -135,7 +135,7 @@ describe('audience', () => {
         });
 
     test('no module the exports map publishes exposes a self rule, at any depth', () => {
-        // Given - every published entry of the extracted package, loaded by node itself as an install loads it — `require` takes a CommonJS build and an ES module alike, `.js`, `.cjs` or `.mjs`; a target of any other kind fails before a load
+        // Given - every published entry of the extracted package, loaded by node itself as an install loads it. `require` takes a CommonJS build and an ES module alike, `.js`, `.cjs` or `.mjs`; a target of any other kind fails before a load
         expect(published.map(({ condition, subpath }) => `${subpath}:${condition}`)).toStrictEqual(
             expect.arrayContaining([
                 '.:import',
@@ -147,7 +147,7 @@ describe('audience', () => {
         );
         expect(published.filter(({ target }) => !MODULE_FILE.test(target))).toStrictEqual([]);
 
-        // Then - every entry is a module node loads and is in the tarball, and no rule object, name nor rule map a consumer reaches is a self rule's — the browser build, which loads only inside Browser Mode, is held by the text above
+        // Then - every entry is a module node loads and is in the tarball, and no rule object, name nor rule map a consumer reaches is a self rule's; the browser build, which loads only inside Browser Mode, is held by the text above
         expect(published.filter(({ target }) => !packed.has(target))).toStrictEqual([]);
         expect(exposures.flat()).toStrictEqual([]);
     });

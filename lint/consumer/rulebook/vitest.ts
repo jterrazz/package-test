@@ -4,7 +4,7 @@ type Override = NonNullable<OxlintConfig['overrides']>[number];
 
 const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/**/*.{ts,tsx}'];
 
-// outside: `no-vitest-snapshot` — every snapshot matcher points back at `toMatch(file('./__expected__/<name>.<ext>'))`.
+// outside: `no-vitest-snapshot`: every snapshot matcher points back at `toMatch(file('./__expected__/<name>.<ext>'))`.
 const SNAPSHOT_MATCHERS: Record<string, string> = {
     toMatchAriaSnapshot:
         "The ARIA tree is a golden: `expect(result.tree).toMatch(file('./__expected__/<case>.aria.yaml'))`.",
@@ -22,7 +22,7 @@ const SNAPSHOT_MATCHERS: Record<string, string> = {
         "State the message: `expect(fn).toThrow('<what the subject says>')`.",
 };
 
-// outside: `no-vitest-time-or-global-stub` — `stubEnv` is not here: it restores itself. `vi.mock`/`vi.doMock` stay on `no-module-mock`, whose allow-list the option cannot express.
+// outside: `no-vitest-time-or-global-stub`. `stubEnv` is not here: it restores itself. `vi.mock`/`vi.doMock` stay on `no-module-mock`, whose allow-list the option cannot express.
 const RESTRICTED_VI_METHODS: Record<string, string> = {
     setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
     stubGlobal:
@@ -39,11 +39,11 @@ export const vitestOnTests: Override = {
             'error',
             { pattern: String.raw`.*\.(?:test\.[tj]sx?|spec\.[tj]s)$` },
         ],
-        // invariant: `one-describe-level` — one level of `describe`.
+        // invariant: `one-describe-level`: one level of `describe`.
         'vitest/max-nested-describe': ['error', { max: 1 }],
         'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
         'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],
-        // invariant: `one-describe-per-file` — the describe is titled with its subject: `LocaleNote` keeps its case.
+        // invariant: `one-describe-per-file`: the describe is titled with its subject: `LocaleNote` keeps its case.
         'vitest/prefer-lowercase-title': ['error', { ignoreTopLevelDescribe: true }],
     },
 };

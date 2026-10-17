@@ -7,13 +7,13 @@ import { parseProgram } from './module-parser.js';
 import type { FileRole } from './role.js';
 import { pathTemplate, subjectName, subjectsOf } from './subject.js';
 
-/** `pagination.spec.ts` → `pagination`. */
+/** `pagination.spec.ts` gives `pagination`. */
 export function aspectOf(filename: string): string {
     // Stryker disable next-line Regex: a spec's name ends on its suffix
     return basename(filename).replace(/\.spec\.ts$/u, '');
 }
 
-/** `route-judge.test.ts` → `route-judge`, `pagination.spec.ts` → `pagination`. */
+/** `route-judge.test.ts` gives `route-judge`, `pagination.spec.ts` gives `pagination`. */
 export function testBaseOf(filename: string): string {
     // Stryker disable next-line Regex: a test's name ends on its suffix
     return basename(filename).replace(/\.(?:test\.tsx?|spec\.ts)$/u, '');
@@ -73,7 +73,7 @@ function defaultNameOf(statements: AstNode[]): string | undefined {
     return identifierName(declaration) ?? identifierName(child(declaration, 'id'));
 }
 
-/** The first that answers: the default export's name; the one value export; the value export spelling the base in camelCase or PascalCase, or the base less a role suffix (`request.action` → `request`); else the base — an `index` module's being its folder's name, the package entry's aside. A type is no value export: a test calls what runs. */
+/** The first that answers: the default export's name; the one value export; the value export spelling the base in camelCase or PascalCase, or the base less a role suffix (`request.action` gives `request`); else the base, an `index` module's being its folder's name, the package entry's aside. A type is no value export: a test calls what runs. */
 export function subjectOfSource(base: string, source: string, filename: string): string {
     const program = parseProgram(filename, source);
     const statements = isNode(program) ? childList(program, 'body') : [];

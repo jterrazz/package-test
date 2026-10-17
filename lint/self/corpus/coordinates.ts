@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
-/** Meta-test `links-resolve` — every relative link and heading anchor of the corpus resolves, generated pages included. */
+/** Meta-test `links-resolve`: every relative link and heading anchor of the corpus resolves, generated pages included. */
 export type Coordinate = { fragment: string | undefined; from: string; target: string };
 
 /** An absolute url is somebody else's. */

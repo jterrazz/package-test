@@ -19,7 +19,7 @@ describe('no-unknown-token', () => {
     });
 
     test('rejects an unknown token in a document stream, never in its description', async () => {
-        // Given - a <case>.spec.yaml whose description prose AND whose stdout golden both spell {{widget}} — only a stream carries the grammar
+        // Given - a <case>.spec.yaml whose description prose AND whose stdout golden both spell {{widget}}; only a stream carries the grammar
         const result = await checker
             .fixture(directory('./__fixtures__/no-unknown-token-spec/'))
             .run();

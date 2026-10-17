@@ -127,7 +127,7 @@ describe('checkNoUnusedGround', () => {
     });
 
     test('the specs root, its setup and its pool are no domain, and a folder holding a test is no ground', () => {
-        // Given - ground-named folders where no domain is — the specs root's read by a spec — and a __fixtures__ folder holding a test
+        // Given - ground-named folders where no domain is (the specs root's, read by a spec) and a __fixtures__ folder holding a test
         const found = findingsIn({
             'specs/__fixtures__/a.json': '{}\n',
             'specs/__setup__/__fixtures__/b.json': '{}\n',

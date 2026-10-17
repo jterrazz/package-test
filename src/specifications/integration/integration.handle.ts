@@ -11,13 +11,13 @@ import { integrationDefinition } from './integration.composition.js';
 
 /** Options for {@link startIntegration | specification.integration}. */
 export type IntegrationSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /** Project-root override — see the `root` option of `specification.api()`. */
+    /** Project-root override; see the `root` option of `specification.api()`. */
     root?: string;
     /** Services the module is specified against; omit for a pure module whose oracle is a golden. */
     services?: Services;
 };
 
-/** What `specification.integration()` returns: `const { integration, cleanup } = …` (`no-runner-alias`). */
+/** What `specification.integration()` returns: `const { integration, cleanup } = ...` (`no-runner-alias`). */
 export type IntegrationHandle<
     Services extends ServiceRecord = ServiceRecord,
     DatabaseKey extends string = string,

@@ -6,7 +6,7 @@ import { cli } from '../cli.specification.js';
 
 describe('fresh-workdir', () => {
     test('fresh working dir — runs in a fresh empty temp dir when no fixture is set', async () => {
-        // Given - no .fixture() — scaffold writes into the cwd
+        // Given - no .fixture(); scaffold writes into the cwd
         const result = await cli.exec('scaffold');
 
         // Then - the scaffold output exists in the temp workdir

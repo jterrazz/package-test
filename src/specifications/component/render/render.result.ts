@@ -2,17 +2,17 @@ import { RenderedText } from './rendered-text.js';
 
 /** What a render resolves to: the component as the page saw it after the scenario. */
 export class RenderResult {
-    /** The browser console as a stream — one `[type] text` line per message. */
+    /** The browser console as a stream: one `[type] text` line per message. */
     readonly console: RenderedText;
     /** Rendered text of the whole document body (`innerText`). */
     readonly content: RenderedText;
     /** Console messages of type `error` only, plus any uncaught page error. */
     readonly errors: RenderedText;
-    /** The mounted markup, serialised — the escape hatch for a class or an attribute. */
+    /** The mounted markup, serialised: the escape hatch for a class or an attribute. */
     readonly html: RenderedText;
-    /** The ARIA snapshot of the rendered body — the outline a golden pins. */
+    /** The ARIA snapshot of the rendered body, the outline a golden pins. */
     readonly tree: RenderedText;
-    /** Rendered text of the body without the text of an element drawn fully transparent — what a reader sees of an animation, where `content` keeps a node at `opacity: 0`. */
+    /** Rendered text of the body without the text of an element drawn fully transparent: what a reader sees of an animation, where `content` keeps a node at `opacity: 0`. */
     readonly visibleContent: RenderedText;
 
     constructor(streams: {

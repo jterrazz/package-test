@@ -6,11 +6,11 @@ export type { ServerResponse } from '../../../expectations/http/response.js';
 export type ServerRequestOptions = {
     /** The headers to send. */
     headers?: Record<string, string> | undefined;
-    /** The route template the test wrote the path as, when it wrote one — what route coverage reads the request by. */
+    /** The route template the test wrote the path as, when it wrote one: what route coverage reads the request by. */
     template?: string | undefined;
 };
 
-/** The app a request is sent to — answered in this process (`server-sees-declared-services`); `HonoAdapter` is its one adapter. */
+/** The app a request is sent to, answered in this process (`server-sees-declared-services`); `HonoAdapter` is its one adapter. */
 export type ServerPort = {
     /** Send an HTTP request and return the parsed response. */
     request: (

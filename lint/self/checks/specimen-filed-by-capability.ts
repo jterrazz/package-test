@@ -27,7 +27,7 @@ const EXAMPLES = [
     'open',
 ];
 
-// invariant: a first-level folder that is no specification — a repository suite — has no column, and takes a capability of any.
+// invariant: a first-level folder that is no specification (a repository suite) has no column, and takes a capability of any.
 function vocabularyOf(specification: string): Set<string> {
     const column = SPECIFICATION_MATRIX_COLUMNS.find(
         (name) => name === specification && name !== 'module',

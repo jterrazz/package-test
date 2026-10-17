@@ -106,7 +106,7 @@ export class ServedProcess {
     private environment(port: null | number): NodeJS.ProcessEnv {
         return {
             ...process.env,
-            // hazard: Astro 7 detaches `astro preview` and `astro dev` under an agent — the command exits 0 and the server outlives the run — unless it is told to stay attached.
+            // hazard: Astro 7 detaches `astro preview` and `astro dev` under an agent (the command exits 0 and the server outlives the run) unless it is told to stay attached.
             ASTRO_DEV_BACKGROUND: '1',
             ASTRO_PREVIEW_BACKGROUND: '1',
             // Stryker disable next-line ConditionalExpression,EqualityOperator,StringLiteral: an env written as a function, which the specification reads into extraEnv, spreads to nothing either way

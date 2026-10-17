@@ -1,4 +1,4 @@
-/** A running service container (database, cache, …). */
+/** A running service container (database, cache, ...). */
 export type ContainerPort = {
     /** Start the container and wait until ready. */
     start: () => Promise<void>;
@@ -15,7 +15,7 @@ export type ContainerPort = {
     /** Get a full connection string for this service. */
     getConnectionString: () => string;
 
-    /** Get container logs (stdout + stderr) — all of them, or those logged since a moment. */
+    /** Get container logs (stdout + stderr): all of them, or those logged since a moment. */
     getLogs: (since?: Date) => Promise<string>;
 };
 

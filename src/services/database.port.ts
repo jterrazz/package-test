@@ -6,7 +6,7 @@ export type DatabasePort = {
     /** Query a table and return rows as arrays of values. */
     query: (table: string, columns: string[]) => Promise<unknown[][]>;
 
-    /** The table's columns, in the order the table declares them — what a whole-table comparison reads. */
+    /** The table's columns, in the order the table declares them: what a whole-table comparison reads. */
     columns: (table: string) => Promise<string[]>;
 
     /** Reset database to clean state between tests. */

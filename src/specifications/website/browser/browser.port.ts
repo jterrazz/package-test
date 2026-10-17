@@ -28,7 +28,7 @@ export type WebsiteVisitor = VisitorVerbs & {
     goto: (path: string) => Promise<void>;
 };
 
-/** The behavior of a visit — the When of the spec; assertions stay in the Then. */
+/** The behavior of a visit, the When of the spec; assertions stay in the Then. */
 export type VisitScenario = (visitor: WebsiteVisitor) => Promise<void>;
 
 /** Per-visit options forwarded to the browser context. */
@@ -65,7 +65,7 @@ export type BrowserPage = {
     status: number;
     /** Rendered `document.body.innerText`. */
     text: string;
-    /** The ARIA snapshot of the rendered `<body>` — the outline a golden pins. */
+    /** The ARIA snapshot of the rendered `<body>`, the outline a golden pins. */
     tree: string;
     /** `document.title` after rendering. */
     title: string;

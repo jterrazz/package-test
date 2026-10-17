@@ -10,7 +10,7 @@ describe('unreachable', () => {
             .intercept(http.get(QUOTES_URL), http.unreachable())
             .get('/offline');
 
-        // Then - the caller took its "nothing answered" branch, which only a transport failure reaches — `http.error(503)` would reach the other
+        // Then - the caller took its "nothing answered" branch, which only a transport failure reaches; `http.error(503)` would reach the other
         expect(result.response).toMatch(`
             HTTP/1.1 503 Service Unavailable
             content-type: application/json

@@ -11,7 +11,7 @@ import type { WebsiteVisitor } from './browser.port.js';
 
 type MatchScope = Locator | Page;
 
-/* invariant: Playwright's actionability default, so `see(valued(…))` waits as long as `see()`. */
+/* invariant: Playwright's actionability default, so `see(valued(...))` waits as long as `see()`. */
 const VALUE_TIMEOUT_MS = 30_000;
 const VALUE_POLL_MS = 100;
 

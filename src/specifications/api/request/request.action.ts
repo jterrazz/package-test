@@ -74,23 +74,23 @@ async function send(
 
 export type RequestSignature = ChainSignature & {
     readonly chain: {
-        /** Send a DELETE request to a route — `(template, { params })` — and resolve with the result. */
+        /** Send a DELETE request to a route (`(template, { params })`) and resolve with the result. */
         delete: <Path extends string>(
             path: Path,
             ...options: RouteArguments<Path>
         ) => Promise<HttpResult>;
-        /** Send a GET request to a route — `(template, { params })` — and resolve with the result. */
+        /** Send a GET request to a route (`(template, { params })`) and resolve with the result. */
         get: <Path extends string>(
             path: Path,
             ...options: RouteArguments<Path>
         ) => Promise<HttpResult>;
-        /** Send a POST request — the body a value or a `file()` — and resolve with the result. */
+        /** Send a POST request (the body a value or a `file()`) and resolve with the result. */
         post: <Path extends string>(
             path: Path,
             body?: unknown,
             ...options: RouteArguments<Path>
         ) => Promise<HttpResult>;
-        /** Send a PUT request — the body a value or a `file()` — and resolve with the result. */
+        /** Send a PUT request (the body a value or a `file()`) and resolve with the result. */
         put: <Path extends string>(
             path: Path,
             body?: unknown,

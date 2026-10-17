@@ -110,7 +110,7 @@ export async function scrollToOffscreen(
         // outside: `mobile: scroll`'s `toVisible` is for table and collection views: scroll the found element by id.
         await driver.executeScript('mobile: scrollToElement', [{ elementId }]);
     } catch {
-        // invariant: not scrollable (or already settling) — keep polling.
+        // invariant: not scrollable (or already settling); keep polling.
     }
 }
 

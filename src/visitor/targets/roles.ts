@@ -37,7 +37,7 @@ export const option: NamedTargetFactory = named('option');
 /** A modal or non-modal `<dialog>`, by accessible name. A closed one is absent. */
 export const dialog: OptionallyNamedTargetFactory = optionallyNamed('dialog');
 
-/** A live region announcing a result — `role="status"`, an `<output>`. */
+/** A live region announcing a result: `role="status"`, an `<output>`. */
 export const status: OptionallyNamedTargetFactory = optionallyNamed('status');
 
 /** A table, by its caption or accessible name. */

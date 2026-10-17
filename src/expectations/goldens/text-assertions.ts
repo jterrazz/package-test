@@ -12,7 +12,7 @@ export type TextComparison = {
     pass: boolean;
 };
 
-/** The golden's path carries its extension — the name IS the file. */
+/** The golden's path carries its extension: the name IS the file. */
 export function requireExtension(name: string, subject: string): void {
     if (!/\.[A-Za-z0-9]+$/u.test(name)) {
         throw new Error(
@@ -86,7 +86,7 @@ export function compareStreamInPlace(accessor: TextAccessor, expected: string): 
     return compareStreamText(accessor, IN_PLACE, dedent(expected));
 }
 
-/** The name the golden comparison is registered under — no member access can spell it. */
+/** The name the golden comparison is registered under; no member access can spell it. */
 export const GOLDEN_MATCHER = '@jterrazz/test:golden';
 
 export const WHOLE_MATCHER = '@jterrazz/test:whole';

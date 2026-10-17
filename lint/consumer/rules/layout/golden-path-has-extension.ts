@@ -10,7 +10,7 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const row = rowNamed(consumerRows, 'golden-path-has-extension');
 
-/** A tree is `toMatch(directory(…))`, whose path ends in `/`: out of reach. */
+/** A tree is `toMatch(directory(...))`, whose path ends in `/`: out of reach. */
 export const goldenPathHasExtension = defineRule(
     {
         docs: row,

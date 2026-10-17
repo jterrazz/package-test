@@ -52,7 +52,7 @@ const SKIPPED_WALK = new Set(['.git', 'dist', 'node_modules']);
 
 const GLOB_DEPTH = 12;
 
-/** `specs/api/**\/*.spec.ts` → `specs/api`. */
+/** `specs/api/**\/*.spec.ts` gives `specs/api`. */
 export function staticPrefix(glob: string): string {
     const parts = glob.split('/');
     // invariant: a glob with no wildcard finds -1, which drops its file name

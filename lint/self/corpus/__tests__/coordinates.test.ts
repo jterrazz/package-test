@@ -33,7 +33,7 @@ describe('coordinates', () => {
     });
 
     test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every page of the manual the source cites exists', () => {
-        // Given - every page path the source names — a test TITLE and a comment cite pages too, and a move takes the file while leaving those behind
+        // Given - every page path the source names: a test TITLE and a comment cite pages too, and a move takes the file while leaving those behind
         const cited: string[] = [];
         for (const entry of readdirSync(resolve(ROOT, 'src'), { recursive: true })) {
             const path = `src/${String(entry).replaceAll('\\', '/')}`;

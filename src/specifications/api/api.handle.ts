@@ -26,7 +26,7 @@ export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceReco
     services?: Services;
 };
 
-/** What `specification.api()` returns: `const { api, cleanup, docker } = …` (`no-runner-alias`). */
+/** What `specification.api()` returns: `const { api, cleanup, docker } = ...` (`no-runner-alias`). */
 export type ApiHandle<DatabaseKey extends string = string> = {
     api: ApiSpecification<DatabaseKey>;
     /** Stop all infrastructure started by this specification. */

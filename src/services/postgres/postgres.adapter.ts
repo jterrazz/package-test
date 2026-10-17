@@ -129,7 +129,7 @@ class PostgresHandle implements DatabasePort, ServiceHandle {
         const PgClient = await clientConstructor();
         const client = new PgClient({ connectionString: this.connectionString });
         client.on('error', () => {
-            // invariant: connection dropped (container stopped) — reset so next call reconnects
+            // invariant: connection dropped (container stopped); reset so next call reconnects
             this.client = null;
         });
         await client.connect();

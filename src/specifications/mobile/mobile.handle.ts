@@ -28,7 +28,7 @@ export type MobileBackendOptions = {
 
 /** Options for {@link startMobile | specification.mobile}. */
 export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /** The app under test — terminated and relaunched by every `.open()`. */
+    /** The app under test, terminated and relaunched by every `.open()`. */
     app: {
         bundleId: string;
     };
@@ -48,7 +48,7 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
     timeouts?: DeviceTimeouts;
 };
 
-/** What `specification.mobile()` returns: `const { mobile, cleanup, udid } = …` (`no-runner-alias`). */
+/** What `specification.mobile()` returns: `const { mobile, cleanup, udid } = ...` (`no-runner-alias`). */
 export type MobileHandle = {
     /** Base URL of the stub backend, with the `backend` option; inject it into your bundler env. */
     backendUrl?: string | undefined;

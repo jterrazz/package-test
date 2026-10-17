@@ -12,7 +12,7 @@ import type { Json } from './session.js';
 import { StaleElementError } from './stale-element-error.js';
 
 /**
- * outside: the Appium protocol double — a WebDriver server that answers like Appium's
+ * outside: the Appium protocol double: a WebDriver server that answers like Appium's
  * XCUITest driver, from a {@link ScriptedApp} instead of a simulator.
  *
  * It speaks the W3C endpoints the mobile specification's adapter calls: a session
@@ -20,7 +20,7 @@ import { StaleElementError } from './stale-element-error.js';
  * that terminate, activate, deep-link and scroll to an element, element
  * search by `-ios predicate string`, click, clear and value, attributes, the
  * page source, a screenshot and the session's timeouts. Every other endpoint answers `unknown command`, the
- * way a driver refuses one it does not implement — so a new call the adapter
+ * way a driver refuses one it does not implement, so a new call the adapter
  * starts making fails here before it fails on a device.
  */
 

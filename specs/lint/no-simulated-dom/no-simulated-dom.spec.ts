@@ -16,7 +16,7 @@ describe('no-simulated-dom', () => {
         // Given - the violation tree
         const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
-        // hazard: the pragma's `@` is spelled `\u0040` below — vitest takes the environment pragma from
+        // hazard: the pragma's `@` is spelled `\u0040` below: vitest takes the environment pragma from
         // anywhere in a test file's text, and would start this spec under happy-dom
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`

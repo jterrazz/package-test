@@ -40,7 +40,7 @@ const BOOT_TIMEOUT_MS = 120_000;
 
 export type SimulatorDevice = {
     name: string;
-    /** Human OS label derived from the runtime key — `iOS 26.5`. */
+    /** Human OS label derived from the runtime key: `iOS 26.5`. */
     os: string;
     state: string;
     udid: string;
@@ -158,7 +158,7 @@ export async function ensureBooted(udid: string): Promise<void> {
         await simctl(['boot', udid]);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        // outside: "Unable to boot device in current state: Booted" — already up.
+        // outside: "Unable to boot device in current state: Booted", already up.
         // Stryker disable next-line BlockStatement,BooleanLiteral,ConditionalExpression,StringLiteral: only a Mac with a booted simulator answers it; see run
         if (!message.includes('current state: Booted')) {
             throw new Error(

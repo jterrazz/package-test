@@ -15,7 +15,7 @@ export function checkPinnedValueFromTheInput(
 ): DocumentFinding[] {
     const findings: DocumentFinding[] = [];
     let fixed: null | string = null;
-    // invariant: no comment can stand inside a block scalar, so a directive above a stream's key — the line before its content — silences the stream.
+    // invariant: no comment can stand inside a block scalar, so a directive above a stream's key (the line before its content) silences the stream.
     const silenced = suppressedLines(source, 'pinned-value-from-the-input');
     const streams = assertedStreams(document).filter(
         (stream) => !silenced.has(stream.line) && !silenced.has(stream.line - 1),

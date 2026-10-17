@@ -3,11 +3,11 @@ import { refusal } from '../../chain/refusals/refusal.js';
 /** Responses hold the status, a subset of headers and the body; each supports `{{placeholder}}` forms. */
 
 export type ParsedResponseFile = {
-    /** Parsed JSON body — or the raw text when the body is not valid JSON. */
+    /** Parsed JSON body, or the raw text when the body is not valid JSON. */
     body: unknown;
     hasBody: boolean;
     headers: Record<string, string>;
-    /** Status token as written — usually numeric, may be a placeholder. */
+    /** Status token as written: usually numeric, may be a placeholder. */
     status: string;
 };
 

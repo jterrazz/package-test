@@ -36,7 +36,7 @@ function resultNames(body: AstNode): Set<string> {
     return names;
 }
 
-// invariant: a refusal whose throw is the subject (`expect(() => result.json.value).toThrow(…)`) never compares what it reads.
+// invariant: a refusal whose throw is the subject (`expect(() => result.json.value).toThrow(...)`) never compares what it reads.
 function inRefusal(node: AstNode): boolean {
     let current = child(node, 'parent');
     while (current !== undefined) {

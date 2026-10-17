@@ -20,7 +20,7 @@ export type DiskCall = {
     path: string | undefined;
 };
 
-/** The bare identifier only, never a result accessor (`result.file(…)`). */
+/** The bare identifier only, never a result accessor (`result.file(...)`). */
 export function diskCallOf(node: AstNode | undefined): DiskCall | undefined {
     if (node?.type !== 'CallExpression') {
         return undefined;

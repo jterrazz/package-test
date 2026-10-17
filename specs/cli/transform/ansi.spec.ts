@@ -36,7 +36,7 @@ function inUpdateMode(block: () => void): void {
 /* invariant: the accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 /* oxlint-disable jterrazz/no-raw-bypass -- The raw `.raw` accessor IS the subject
    under test here (see the note above): every `.raw` assertion proves what the
-   comparison strips. Whole-output goldens are the toMatch(file(…)) cases in this file. */
+   comparison strips. Whole-output goldens are the toMatch(file(...)) cases in this file. */
 
 describe('ansi', () => {
     test('transform strips ANSI from stdout before toMatch comparison', async () => {
@@ -109,7 +109,7 @@ describe('ansi', () => {
 
             const result = await asymmetricCli.exec('ansi');
 
-            // Then - passes only because the fixture is authoritative — NOT transformed
+            // Then - passes only because the fixture is authoritative, NOT transformed
             expect(result.stdout).toMatch(file(`./__expected__/${fixtureName}`));
             expect(readFileSync(fixturePath, 'utf8')).not.toContain(' plain');
         } finally {
@@ -127,7 +127,7 @@ describe('ansi', () => {
                 expect(result.stdout).toMatch(file(`./__expected__/${fixtureName}`));
             });
 
-            // Then - no ANSI in the fixture — transform ran before write
+            // Then - no ANSI in the fixture: transform ran before write
             const written = readFileSync(fixturePath, 'utf8');
             expect(written).toBe('red plain bold\n');
             expect(written).not.toContain('\u001B[');

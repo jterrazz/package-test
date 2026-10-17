@@ -4,11 +4,11 @@ import { LANDMARK_SELECTOR } from './landmark-of-tag.js';
 export type ElementMatch = {
     /** The accessible name, when it differs from the text (an `aria-label`). */
     accessibleName?: string | undefined;
-    /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
+    /** Nearest landmark ancestor (`nav`, `footer`, `main`...), when there is one. */
     context?: string | undefined;
     /** That landmark's accessible name. */
     contextName?: string | undefined;
-    /** The attribute that disambiguates most — `href` for links, `name` for fields. */
+    /** The attribute that disambiguates most: `href` for links, `name` for fields. */
     detail?: string | undefined;
     /** Tag name, lower-cased. */
     tag: string;

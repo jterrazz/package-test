@@ -18,10 +18,10 @@ export type ServiceHandle = {
     /** Environment variables to pass to the container. */
     readonly environment: Record<string, string>;
 
-    /** How the container runs beyond its image, port and environment — none when absent. */
+    /** How the container runs beyond its image, port and environment; none when absent. */
     readonly containerOptions?: ContainerOptions;
 
-    /** Connection string — populated after start. */
+    /** Connection string, populated after start. */
     connectionString: string;
 
     /** Build the connection string from host and port. */

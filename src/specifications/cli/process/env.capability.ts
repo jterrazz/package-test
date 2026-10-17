@@ -33,7 +33,7 @@ export const env = defineCapability<
     row: { group: 'Setup', name: '.env()', probe: '.env(' },
 });
 
-/** The resolved directory, never the raw temp path: on macOS `/var/folders/…` would never match `{{workdir}}`'s `/private/var/folders/…`. */
+/** The resolved directory, never the raw temp path: on macOS `/var/folders/...` would never match `{{workdir}}`'s `/private/var/folders/...`. */
 export function expandWorkdir(variables: CliEnv, workdir: string): CliEnv {
     const expanded: CliEnv = {};
     for (const [key, value] of Object.entries(variables)) {

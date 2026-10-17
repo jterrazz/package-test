@@ -5,7 +5,7 @@ import { api, QUOTES_URL } from '../intercepts.specification.js';
 
 describe('filters', () => {
     test('a body/header/query-filtered request matches the outgoing POST', async () => {
-        // Given - a filtered request half narrowing on a body subset, a header, and a query param — all of which the /submit route satisfies
+        // Given - a filtered request half narrowing on a body subset, a header, and a query param, all of which the /submit route satisfies
         const result = await api
             .intercept(
                 http.post(QUOTES_URL, {

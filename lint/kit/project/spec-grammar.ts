@@ -78,19 +78,19 @@ export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> =
     ],
 };
 
-/** One `env:` entry — a bare word naming a registered set, or a `KEY=value` pair. */
+/** One `env:` entry: a bare word naming a registered set, or a `KEY=value` pair. */
 export type SpecEnvToken =
     | { key: string; kind: 'pair'; line: number; value: string }
     | { kind: 'set'; line: number; name: string };
 
-/** One `serve:` entry — a registered server plus the extra env it is started with. */
+/** One `serve:` entry: a registered server plus the extra env it is started with. */
 export type SpecServeEntry = {
     env: Record<string, string>;
     line: number;
     name: string;
 };
 
-/** One `fixture:` entry — a path with the line it was declared on. */
+/** One `fixture:` entry: a path with the line it was declared on. */
 export type SpecFixture = {
     line: number;
     path: string;
@@ -98,7 +98,7 @@ export type SpecFixture = {
 
 /** An expected stream: its text, and the first line of that text in the file. */
 export type SpecStream = {
-    /** 1-based line the scalar's content starts on — where a token defect is reported. */
+    /** 1-based line the scalar's content starts on, where a token defect is reported. */
     line: number;
     text: string;
 };
@@ -118,7 +118,7 @@ export type SpecFileAssertion =
 /** One run: a command, what it must exit with, and what it must have produced. */
 export type SpecRun = {
     command: string;
-    /** 1-based line of the `command:` key — the frame a failure points at. */
+    /** 1-based line of the `command:` key, the frame a failure points at. */
     commandLine: number;
     exitCode: number;
     files: SpecFileAssertion[];

@@ -11,7 +11,7 @@ describe('ratchet', () => {
             .fixture(directory('./__fixtures__/checker-own-fixes-json/'))
             .exec(['baseline .', '. --fix']);
 
-        // Then - both views written, and the section — the checker's passes alone — holds nothing
+        // Then - both views written, and the section (the checker's passes alone) holds nothing
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
         expect(result.file('specs/api/events/list/pagination.spec.ts').content).toContain(
@@ -23,7 +23,7 @@ describe('ratchet', () => {
     });
 
     test('lint — checker CLI, the ratchet is exact — a green run over a section that holds nothing prints `nothing held`', async () => {
-        // Given - a clean project, recorded — nothing to hold, so no ledger — then judged
+        // Given - a clean project, recorded (nothing to hold, so no ledger), then judged
         const result = await cli
             .fixture(directory('../../__fixtures__/no-unused-ground-ok/'))
             .exec(['baseline .', '.']);

@@ -5,11 +5,11 @@ export type EnvRecord = Record<string, null | string>;
 
 /** What a file shares on every chain it starts: settings, never state. */
 export type ChainContext = {
-    /** The instant every chain pins — a chain's own `.clock()` wins. */
+    /** The instant every chain pins; a chain's own `.clock()` wins. */
     clock?: string;
-    /** The environment every command runs with — a chain's own `.env()` merges over it. */
+    /** The environment every command runs with; a chain's own `.env()` merges over it. */
     env?: EnvRecord;
-    /** The headers every request carries — a chain's own `.headers()` merges over them. */
+    /** The headers every request carries; a chain's own `.headers()` merges over them. */
     headers?: Record<string, string>;
 };
 

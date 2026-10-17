@@ -17,7 +17,7 @@ type ArgumentSpan = { end: number; indent: string; start: number };
 
 const TO_MATCH = /\btoMatch\s*\(/gu;
 
-// invariant: update mode rewrites a literal, which is the value itself; a name or a call stands for values it cannot rewrite — a table's rows, a shared constant.
+// invariant: update mode rewrites a literal, which is the value itself; a name or a call stands for values it cannot rewrite: a table's rows, a shared constant.
 const LITERAL = /^(?:['"`{[]|-?\d|(?:null|true|false|undefined)$)/u;
 
 export function callSiteOf(stack: string): CallSite | undefined {

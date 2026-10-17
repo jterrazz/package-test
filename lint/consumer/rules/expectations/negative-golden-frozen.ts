@@ -23,7 +23,7 @@ function hasFrozenOption(args: AstNode[]): boolean {
     return value?.type === 'Literal' && value.value === true;
 }
 
-// invariant: the walk stops at the first statement boundary or non-`expect` call, so a `toMatch` written inside `inUpdateMode(() => …)` is not flagged.
+// invariant: the walk stops at the first statement boundary or non-`expect` call, so a `toMatch` written inside `inUpdateMode(() => ...)` is not flagged.
 const TRANSPARENT_ANCESTORS = new Set([
     'ArrowFunctionExpression',
     'AwaitExpression',

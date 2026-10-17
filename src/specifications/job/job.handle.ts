@@ -21,13 +21,13 @@ export type JobConfig = ServicesConfig & { jobs?: Job[] | undefined };
 export type JobSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /** Named jobs `job.trigger(name)` runs: a factory of the started services, or an array. */
     jobs: ((services: Services) => Job[]) | Job[];
-    /** Project root override — see the `root` option of `specification.api()`. */
+    /** Project root override; see the `root` option of `specification.api()`. */
     root?: string;
     /** Named infrastructure record started via testcontainers. */
     services?: Services;
 };
 
-/** What `specification.job()` returns: `const { job, cleanup } = …` (`no-runner-alias`). */
+/** What `specification.job()` returns: `const { job, cleanup } = ...` (`no-runner-alias`). */
 export type JobHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;

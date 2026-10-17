@@ -16,7 +16,7 @@ import {
 
 const ROOT = resolve(import.meta.dirname, '../../../..');
 
-// invariant: Meta-test `siblingless-module-declared` (`siblingless-module-declared`) — a module with behaviour and no sibling test matches no declared kind and fails here.
+// invariant: Meta-test `siblingless-module-declared` (`siblingless-module-declared`): a module with behaviour and no sibling test matches no declared kind and fails here.
 describe('siblings', () => {
     test('modules with no sibling test (meta-test `siblingless-module-declared`) — reads the tree git does not ignore: a new module counts, an ignored one does not', () => {
         // Given - a checkout holding a new module and an ignored one, neither with a test

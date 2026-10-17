@@ -18,7 +18,7 @@ export function modulesOf(root: string, tree: string, suffix: string): string[] 
         .toSorted();
 }
 
-// invariant: only `import type`/`export type` is erased: under `verbatimModuleSyntax` an all-inline-typed import still compiles to `import {} from '…'`, which loads its module.
+// invariant: only `import type`/`export type` is erased: under `verbatimModuleSyntax` an all-inline-typed import still compiles to `import {} from '...'`, which loads its module.
 function typeOnly(declaration: AstNode): boolean {
     return declaration.importKind === 'type' || declaration.exportKind === 'type';
 }

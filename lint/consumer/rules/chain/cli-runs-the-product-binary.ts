@@ -38,7 +38,7 @@ function embedsThirdPartyBin(root: AstNode | null | undefined): boolean {
 
 const row = rowNamed(consumerRows, 'cli-runs-the-product-binary');
 
-/** Reads the hoisted `const BIN = resolve(…, '…/.bin/oxlint')` idiom too. A runner created outside a specification file is `runner-in-specification-file`'s finding. */
+/** Reads the hoisted `const BIN = resolve(..., '.../.bin/oxlint')` idiom too. A runner created outside a specification file is `runner-in-specification-file`'s finding. */
 export const cliRunsTheProductBinary = defineRule(
     {
         docs: row,

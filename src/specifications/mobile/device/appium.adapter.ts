@@ -68,7 +68,7 @@ export class AppiumAdapter implements DevicePort {
         try {
             await driver.executeScript('mobile: terminateApp', [{ bundleId: options.bundleId }]);
         } catch {
-            // invariant: the app was not running — a fresh state already.
+            // invariant: the app was not running, a fresh state already.
         }
         await (options.deepLink === undefined
             ? driver.executeScript('mobile: activateApp', [{ bundleId: options.bundleId }])
@@ -187,7 +187,7 @@ export class AppiumAdapter implements DevicePort {
                     '\nThe app is stalled on the splash: nothing but its launch screen is up.';
             }
         } catch {
-            // invariant: the excerpt is best-effort evidence — never mask the timeout.
+            // invariant: the excerpt is best-effort evidence; never mask the timeout.
         }
         return new Error(
             refusal({

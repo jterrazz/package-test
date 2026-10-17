@@ -23,7 +23,7 @@ export function versionOf(specifier: string): string {
 
 /** Vite 8 transforms with oxc and warns on every `esbuild` option; Vite 6 and 7 have no `oxc` key. */
 export function transformKey(): 'esbuild' | 'oxc' {
-    // Stryker disable next-line ConditionalExpression,StringLiteral: this package installs vite 8, so its own tests never meet a vite whose major falls short — the esbuild key is a consumer's on vite 6 or 7
+    // Stryker disable next-line ConditionalExpression,StringLiteral: this package installs vite 8, so its own tests never meet a vite whose major falls short; the esbuild key is a consumer's on vite 6 or 7
     return Number.parseInt(versionOf('vite').split('.')[0] ?? '', 10) >= 8 ? 'oxc' : 'esbuild';
 }
 

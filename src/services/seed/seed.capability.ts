@@ -6,7 +6,7 @@ import { validateDatabaseOption } from '../database-option.js';
 import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';
 
-/** What `.seed()` takes: a `.sql` file, never the statements themselves — SQL is not written in a test. */
+/** What `.seed()` takes: a `.sql` file, never the statements themselves: SQL is not written in a test. */
 export type SeedSource = DiskFile<'.sql'>;
 
 export type SeedMethod<Self, DatabaseKey extends string> = (
@@ -17,7 +17,7 @@ export type SeedMethod<Self, DatabaseKey extends string> = (
 type QueuedSeed = { readonly database: string | undefined; readonly path: string };
 
 export type SeedChain<Self, DatabaseKey extends string> = {
-    /** Queue a SQL seed — `file('./__seeds__/<name>.sql')` — to run before the action. */
+    /** Queue a SQL seed (`file('./__seeds__/<name>.sql')`) to run before the action. */
     seed: SeedMethod<Self, DatabaseKey>;
 };
 

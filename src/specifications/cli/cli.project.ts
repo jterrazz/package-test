@@ -12,13 +12,13 @@ export {
     type LiteratePlugin,
 } from './documents/literate-plugin.js';
 
-/** The literate door of the specification that reads documents — the cli. */
+/** The literate door of the specification that reads documents: the cli. */
 export type LiterateDoor = {
     /** Every `specs/cli/` `.spec.yaml` becomes a test bound to `specs/cli/cli.specification.ts`; `false` collects none. */
     literate?: false | Partial<LiterateOptions>;
 };
 
-/** `cli()` — a binary, and the documents that specify it. */
+/** `cli()`: a binary, and the documents that specify it. */
 export type CliProjectOptions = LiterateDoor & SpecificationProjectOptions;
 
 /** A cli project: the specification's `.spec.ts` files and its documents (docs/guides/spec-documents.md); the plugin's glob joins this project's include, never the root config. */

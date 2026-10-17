@@ -34,7 +34,7 @@ function facadeImports(node: AstNode): string[] {
     );
 }
 
-// invariant: `function world(): Stubs` and `const world = (): Stubs => …` alike.
+// invariant: `function world(): Stubs` and `const world = (): Stubs => ...` alike.
 function compositionBuilder(node: AstNode): string | undefined {
     const fn = node.type === 'VariableDeclarator' ? child(node, 'init') : node;
     return returnsComposition(fn) ? identifierName(child(node, 'id')) : undefined;
@@ -60,7 +60,7 @@ export function namesComposition(
     return (names as ReadonlySet<unknown>).has(identifierName(value));
 }
 
-/** Called on an `export … from`, `export * from` or `export { … }`. */
+/** Called on an `export ... from`, `export * from` or `export { ... }`. */
 export function exportsByName(node: AstNode): boolean {
     return (
         node.exportKind !== 'type' &&

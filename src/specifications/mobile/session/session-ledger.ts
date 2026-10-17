@@ -5,7 +5,7 @@ import { VITEST_ARTIFACTS_DIR } from '../../../../lint/kit/project/artifacts.js'
 import { isRecord } from '../../../../lint/kit/project/json-shape.js';
 
 type RecordedSession = {
-    // invariant: the capabilities the server answered with — what a runner attaching to it hands the driver.
+    // invariant: the capabilities the server answered with: what a runner attaching to it hands the driver.
     capabilities: Record<string, unknown>;
     // outside: the Appium server's base URL.
     serverUrl: string;

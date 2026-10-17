@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { findEnvOffenders, findUnsanctionedDynamicReads, sourceFiles } from '../env-allowlist.js';
 
-// invariant: rule `environment-read-allow-listed` (meta-test) — the framework reads only its own generic-prefixed env vars.
+// invariant: rule `environment-read-allow-listed` (meta-test): the framework reads only its own generic-prefixed env vars.
 const files = sourceFiles(originalOf(resolve(import.meta.dirname, '../../../../src')));
 
 // invariant: a `.txt`, so it never enters the real sweep.

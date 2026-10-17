@@ -11,7 +11,7 @@ import {
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 
-// invariant: a call probe is read as a shape in a closed grammar — `name(`, `.name(`, `object.name(`, then what the first argument opens on (`inner(`, `'`, `'/`, `{`, `[`), and a leading `))` for a call whose object ends on a call — so a formatter splitting a call changes nothing. A probe outside the grammar throws where it is read.
+// invariant: a call probe is read as a shape in a closed grammar (`name(`, `.name(`, `object.name(`, then what the first argument opens on: `inner(`, `'`, `'/`, `{`, `[`; and a leading `))` for a call whose object ends on a call), so a formatter splitting a call changes nothing. A probe outside the grammar throws where it is read.
 
 type Argument =
     | { callee: string; kind: 'call' }

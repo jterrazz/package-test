@@ -28,7 +28,7 @@ export function argumentsAt(text: string, open: number): string {
     return text.slice(open + 1, closingOf(text, open));
 }
 
-/** `{ api, cli: run } = await specification.cli(…)` → `api` bound as `api`, `cli` as `run`; the helpers beside a runner are none. */
+/** `{ api, cli: run } = await specification.cli(...)` binds `api` as `api`, `cli` as `run`; the helpers beside a runner are none. */
 export function runnerBindings(text: string): { key: string; local: string }[] {
     return [...text.matchAll(RUNNER_DECLARATION)].flatMap((match) => {
         // Stryker disable next-line StringLiteral: a declaration match always carries its names

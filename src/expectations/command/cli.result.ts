@@ -143,7 +143,7 @@ export class CliResult extends BaseResult {
         return new FilesystemAccessor(this.cwd, this.testDir, this.captures);
     }
 
-    /** The requests the binary sent the declared backend during the run, in order, each `{ body, headers, method, url }` — the body parsed when JSON; empty without a backend. */
+    /** The requests the binary sent the declared backend during the run, in order, each `{ body, headers, method, url }`, the body parsed when JSON; empty without a backend. */
     get requests(): SentRequest[] {
         return this.received.map((request) => ({ ...request, headers: { ...request.headers } }));
     }

@@ -78,7 +78,7 @@ export function withLeadingComments(text: string, start: number): number {
     return begin;
 }
 
-// invariant: `test.each(rows)('title', …)` is one test: its span runs to the close of its last call, its title read from that call.
+// invariant: `test.each(rows)('title', ...)` is one test: its span runs to the close of its last call, its title read from that call.
 function lastCallOf(text: string, open: number): { close: number; open: number } {
     const close = closingOf(text, open);
     const next = /^\s*\(/u.exec(text.slice(close + 1));
@@ -212,7 +212,7 @@ export function openedSubjects(spec: SpecRead): string[] {
     ];
 }
 
-/** A journey goes with the subject its chain starts on; the first subject keeps the file when no folder holds it, and a later one with no folder is left out — the split refuses to name its file. */
+/** A journey goes with the subject its chain starts on; the first subject keeps the file when no folder holds it, and a later one with no folder is left out: the split refuses to name its file. */
 export function splitPlan(specsRoot: string, spec: SpecRead): Map<string, string> {
     const plan = new Map<string, string>();
     for (const [position, name] of openedSubjects(spec).entries()) {

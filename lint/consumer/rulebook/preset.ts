@@ -242,7 +242,7 @@ const TEST_STANDARD = STANDARD.test ?? {};
 const recordOf = (value: unknown): Readonly<Record<string, unknown>> =>
     isRecord(value) ? value : {};
 
-// outside: the files a project's test section names for vitest to load by their path — the component project's `wrap` — which no import reaches.
+// outside: the files a project's test section names for vitest to load by their path (the component project's `wrap`), which no import reaches.
 function loadedByName(section: Readonly<Record<string, unknown>>): string[] {
     return Object.values(recordOf(section.projects)).flatMap((project) => {
         const { root, wrap } = recordOf(project);

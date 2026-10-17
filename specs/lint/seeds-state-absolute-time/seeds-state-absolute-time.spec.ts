@@ -5,7 +5,7 @@ import { lint as checker } from '../checker-lint.specification.js';
 
 describe('seeds-state-absolute-time', () => {
     test('rejects every spelling of a clock read, and reads past a comment', async () => {
-        // Given - a seed writing `datetime('now', …)`, `CURRENT_TIMESTAMP` and `NOW()`, under a comment that names one of them
+        // Given - a seed writing `datetime('now', ...)`, `CURRENT_TIMESTAMP` and `NOW()`, under a comment that names one of them
         const result = await checker
             .fixture(directory('./__fixtures__/seeds-state-absolute-time/'))
             .run();

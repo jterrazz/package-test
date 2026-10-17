@@ -24,7 +24,7 @@ function spelling(title: string): string {
     return title.replaceAll(/[^\p{L}\d]/gu, '').toLowerCase();
 }
 
-/** What the file is about: the title its `describe` takes, its own base name, and the pages or routes its chains reach — a website spec's `/articles/:id` is what it is about as much as its folder's name. */
+/** What the file is about: the title its `describe` takes, its own base name, and the pages or routes its chains reach: a website spec's `/articles/:id` is what it is about as much as its folder's name. */
 export interface FileSubject {
     readonly base: string;
     readonly named: string;

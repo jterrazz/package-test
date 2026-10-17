@@ -92,7 +92,7 @@ describe('StubBackend', () => {
             get('/events', { n: 2 }),
         ]);
 
-        // Then - first the finite one, then the tail — for every re-render
+        // Then - first the finite one, then the tail, for every re-render
         await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 1 });
         await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });
         await expect(fetchJson(`${url}/events`)).resolves.toStrictEqual({ n: 2 });

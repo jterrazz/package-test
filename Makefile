@@ -1,6 +1,6 @@
 .PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation
 
-# invariant: an install replaces the dependencies a running gate reads, so every path that installs — `install`, and any target that depends on `node_modules/.install` — asks the toolchain's `gate-lock` first, which refuses while another gate holds `.artifacts/gate.lock`; a checkout with no install yet holds no gate.
+# invariant: an install replaces the dependencies a running gate reads, so every path that installs (`install`, and any target that depends on `node_modules/.install`) asks the toolchain's `gate-lock` first, which refuses while another gate holds `.artifacts/gate.lock`; a checkout with no install yet holds no gate.
 node_modules/.install: package-lock.json $(wildcard .artifacts/packages/*.tgz)
 	@if [ -x node_modules/.bin/typescript ]; then npx typescript gate-lock; fi
 	npm ci
@@ -44,11 +44,11 @@ MUTATION = npx typescript mutation $(MUTATION_ARGS)
 check: node_modules/.install
 	@TYPESCRIPT_GATE=$$$$:$(CURDIR) $(MAKE) --no-print-directory build lint test mutation MUTATION_ARGS=--cold
 
-# outside: needs Xcode and a simulator — `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
+# outside: needs Xcode and a simulator; `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
 test-mobile: build
 	node specs/__fixtures__/specimen-mobile/on-simulator.mjs
 
-# outside: needs the network and a lychee on the machine — `check` never calls it.
+# outside: needs the network and a lychee on the machine; `check` never calls it.
 check-links:
 	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
 	lychee --no-progress README.md docs skills

@@ -55,7 +55,7 @@ export function testsFoldersOf(member: string): string[] {
     ];
 }
 
-/** A path inside the ground of a `__tests__/` folder: `<dir>/__tests__/__expected__/…`. */
+/** A path inside the ground of a `__tests__/` folder: `<dir>/__tests__/__expected__/...`. */
 export function isTestsFolderGround(path: string): boolean {
     const segments = path.split(/[/\\]/u);
     return segments.some(

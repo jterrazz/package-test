@@ -62,7 +62,7 @@ function runnerOf(root: string, folder: string, specification: string): Record<s
 const isSpecsMember = (root: string): boolean =>
     basename(root) === SPECS && existsSync(join(root, 'package.json'));
 
-/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder — an in-process one handed as its `runner` the folder's one specification module, `<specification>.specification.ts` —, `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
+/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder (an in-process one handed as its `runner` the folder's one specification module, `<specification>.specification.ts`), `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
 export function derivedProjects(root: string): Map<string, Record<string, unknown>> {
     const member = isSpecsMember(root);
     const prefix = member ? '' : `${SPECS}/`;
