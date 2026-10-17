@@ -1,0 +1,3 @@
+#!/bin/sh
+# Xcode, its first launch done.
+exit 0
