@@ -5,7 +5,7 @@ import { refusal } from '../../../chain/refusals/refusal.js';
 
 // outside: zero or several matches refuse with the full listing: the framework never guesses the simulator.
 
-// Stryker disable BlockStatement,CallExpression,ConditionalExpression,EqualityOperator,ObjectLiteral,StringLiteral: simctl answers only on a Mac with Xcode; the mobile specs judge what it is asked and how its answer reads
+// Stryker disable ArrayDeclaration,BlockStatement,CallExpression,ConditionalExpression,EqualityOperator,ObjectLiteral,StringLiteral: simctl answers only on a Mac with Xcode; the mobile specs judge what it is asked and how its answer reads
 async function run(
     command: string,
     args: readonly string[],
@@ -144,6 +144,7 @@ export async function resolveSimulatorUdid(criteria: {
     name: string;
     os?: string;
 }): Promise<string> {
+    // Stryker disable next-line ArrayDeclaration,ObjectLiteral,StringLiteral: see run
     const { stdout } = await simctl(['list', 'devices', '--json'], {
         maxBuffer: 16 * 1024 * 1024,
     });
@@ -171,5 +172,6 @@ export async function ensureBooted(udid: string): Promise<void> {
             );
         }
     }
+    // Stryker disable next-line ArrayDeclaration,ObjectLiteral,StringLiteral: see run
     await simctl(['bootstatus', udid, '-b'], { timeout: BOOT_TIMEOUT_MS });
 }
