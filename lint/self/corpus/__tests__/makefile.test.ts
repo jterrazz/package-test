@@ -40,10 +40,11 @@ describe('makefile', () => {
             for (const line of target.recipe) {
                 ran.add(line);
             }
+            // invariant: a `$(MAKE)` line names every goal after it; a flag and a variable it sets are none.
             const called = target.recipe.flatMap((line) =>
-                [...line.matchAll(/\$\(MAKE\)\s+(?<name>[\w-]+)/gu)].map(
-                    (match) => match.groups?.name ?? '',
-                ),
+                (/\$\(MAKE\)(?<goals>.*)$/u.exec(line)?.groups?.goals ?? '')
+                    .split(/\s+/u)
+                    .filter((word) => /^\w[\w-]*$/u.test(word)),
             );
             for (const next of [...target.prerequisites, ...called]) {
                 visit(next);

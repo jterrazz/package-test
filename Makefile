@@ -1,8 +1,8 @@
 .PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation
 
-# invariant: an install replaces the dependencies a running gate reads; `check` holds `.artifacts/gate.lock` with its own pid, and every path that installs — `install`, and any target that depends on `node_modules/.install` — is refused while that process lives.
+# invariant: an install replaces the dependencies a running gate reads, so every path that installs — `install`, and any target that depends on `node_modules/.install` — asks the toolchain's `gate-lock` first, which refuses while another gate holds `.artifacts/gate.lock`; a checkout with no install yet holds no gate.
 node_modules/.install: package-lock.json $(wildcard .artifacts/packages/*.tgz)
-	@if [ -f .artifacts/gate.lock ] && kill -0 "$$(cat .artifacts/gate.lock)" 2> /dev/null; then echo "install: the gate of pid $$(cat .artifacts/gate.lock) holds this checkout - wait for it to end, or install in a worktree of its own"; exit 1; fi
+	@if [ -x node_modules/.bin/typescript ]; then npx typescript gate-lock; fi
 	npm ci
 	@touch node_modules/.install
 
@@ -40,14 +40,9 @@ test-changed: node_modules/.install
 # value: `check` passes `--cold`, so the whole suite's run starts from no incremental report and a gate never stands on a verdict an earlier tree earned.
 MUTATION = npx typescript mutation $(MUTATION_ARGS)
 
-# invariant: the four targets CI runs, in its order; the lock names make's own pid, so a run that fails midway leaves a lock no live process holds, which `install` ignores.
+# invariant: the four targets CI runs, in its order, are one gate: `TYPESCRIPT_GATE` names this recipe's shell, which `check` and `mutation` hold the checkout in the name of, and whose own builds the lock never refuses; a run that fails midway leaves a lock no live process holds, which the next gate takes over.
 check: node_modules/.install
-	@mkdir -p .artifacts && echo $$PPID > .artifacts/gate.lock
-	$(MAKE) build
-	npm run lint
-	$(MAKE) test
-	$(MAKE) mutation MUTATION_ARGS=--cold
-	@rm -f .artifacts/gate.lock
+	@TYPESCRIPT_GATE=$$$$:$(CURDIR) $(MAKE) --no-print-directory build lint test mutation MUTATION_ARGS=--cold
 
 # outside: needs Xcode and a simulator — `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
 test-mobile: build
