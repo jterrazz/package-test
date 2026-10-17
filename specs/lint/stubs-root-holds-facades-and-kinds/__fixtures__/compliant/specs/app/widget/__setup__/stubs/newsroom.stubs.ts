@@ -1,4 +1,4 @@
-import { defineStubs } from '@jterrazz/test';
+import { defineStubs } from '@jterrazz/test/stubs';
 
 import articleGone from './http/article-gone.js';
 import events from './http/events.js';

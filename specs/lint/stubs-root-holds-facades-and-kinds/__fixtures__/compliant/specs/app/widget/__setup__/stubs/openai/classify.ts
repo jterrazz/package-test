@@ -1,4 +1,4 @@
-import { defineStub, openai } from '@jterrazz/test';
+import { defineStub, openai } from '@jterrazz/test/stubs';
 
 export default defineStub({
     request: openai.chat({ user: 'Classify: hats' }),

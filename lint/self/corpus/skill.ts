@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
+import { exportedNames, namesOf } from '../../kit/project/exported-names.js';
+
 /** Past it, the skill is restating a page. */
 export const SKILL_MAX_LINES = 120;
 
@@ -18,46 +20,9 @@ const VITEST = [
     'vi',
 ];
 
-const EXPORT_LIST = /export\s+(?:type\s+)?\{(?<names>[^}]*)\}/gu;
-const EXPORT_DECLARATION =
-    /export\s+(?:declare\s+)?(?:async\s+)?(?:const|let|function|class|type|interface|enum)\s+(?<name>[A-Za-z_$][\w$]*)/gu;
-const EXPORT_ALL = /export\s+\*\s+from\s+'(?<from>\.[^']+)'/gu;
 const SAMPLE_IMPORT = /import\s+\{(?<names>[^}]*)\}\s+from\s+'(?<from>@jterrazz\/test[^']*)'/gu;
 const PROSE_CALL = /`(?<name>_*[A-Za-z$][\w$]*)[(<.]/gu;
 const PAGE_LINK = /\]\((?<target>[^)#]+\.md)(?:#[^)]*)?\)/gu;
-
-function namesOf(list: string): string[] {
-    return list
-        .split(',')
-        .map((entry) =>
-            entry
-                .replace(/^\s*type\s+/u, '')
-                .split(/\s+as\s+/u)
-                .at(-1)
-                ?.trim(),
-        )
-        .filter((name): name is string => name !== undefined && name !== '');
-}
-
-function exportedNames(file: string): Set<string> {
-    const text = readFileSync(file, 'utf8');
-    const names = new Set<string>();
-    for (const match of text.matchAll(EXPORT_LIST)) {
-        for (const name of namesOf(match.groups?.names ?? '')) {
-            names.add(name);
-        }
-    }
-    for (const match of text.matchAll(EXPORT_DECLARATION)) {
-        names.add(match.groups?.name ?? '');
-    }
-    for (const match of text.matchAll(EXPORT_ALL)) {
-        const from = resolve(dirname(file), (match.groups?.from ?? '').replace(/\.js$/u, '.ts'));
-        for (const name of exportedNames(from)) {
-            names.add(name);
-        }
-    }
-    return names;
-}
 
 export type SkillFindings = {
     missingPages: string[];
@@ -70,6 +35,8 @@ export function skillFindings(skillPath: string, root: string): SkillFindings {
     const skill = readFileSync(skillPath, 'utf8');
     const published: Record<string, Set<string>> = {
         '@jterrazz/test': exportedNames(resolve(root, 'src/index.ts')),
+        '@jterrazz/test/services': exportedNames(resolve(root, 'src/index.services.ts')),
+        '@jterrazz/test/stubs': exportedNames(resolve(root, 'src/index.stubs.ts')),
         '@jterrazz/test/vitest': exportedNames(resolve(root, 'src/index.vitest.ts')),
     };
     const known = new Set(VITEST);

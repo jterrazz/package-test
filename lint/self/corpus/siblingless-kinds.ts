@@ -19,6 +19,10 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/index.ts',
             'src/index.browser.ts',
+            'src/index.services.ts',
+            'src/index.services.browser.ts',
+            'src/index.stubs.ts',
+            'src/index.stubs.browser.ts',
             'lint/index.oxlint.ts',
             'src/specifications/api/api.face.ts',
             'src/specifications/cli/cli.face.ts',
@@ -90,11 +94,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/catalogue/architecture.ts',
             'lint/self/catalogue/families.ts',
             'lint/kit/project/stub-kinds.ts',
+            'lint/kit/project/subpath-names.ts',
             'lint/self/corpus/siblingless-kinds.ts',
             'lint/self/corpus/siblingless-lint-layer.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `specification-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguous.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `architecture.test.ts` for the library owners)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `specification-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguous.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `package-exports.test.ts` for the names of the spec subpaths, `architecture.test.ts` for the library owners)',
     },
     {
         claims: oneOf(

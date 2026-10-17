@@ -46,6 +46,16 @@ describe('docs-typecheck', () => {
         expect(isFrameworkBlock(appCode)).toBe(false);
     });
 
+    test('docs-typecheck — block selection — keeps a block importing a published subpath alone', () => {
+        // Given - a stub sample, whose builders come from the stubs subpath
+        const stubs = { code: "import { http } from '@jterrazz/test/stubs';\n", jsx: false };
+        const unpublished = { code: "import { x } from '@jterrazz/test/internal';\n", jsx: false };
+
+        // Then - the published subpath is the framework; a path the package does not publish is not
+        expect(isFrameworkBlock(stubs)).toBe(true);
+        expect(isFrameworkBlock(unpublished)).toBe(false);
+    });
+
     test('docs-typecheck — block selection — rewrites the framework specifier to the repo entry', () => {
         // Given - a framework import
         const rewritten = rewriteFrameworkImports(
@@ -56,6 +66,19 @@ describe('docs-typecheck', () => {
         // Then - it points at the concrete module
         expect(rewritten).toContain("'/abs/src/index.js'");
         expect(rewritten).not.toContain('@jterrazz/test');
+    });
+
+    test('docs-typecheck — block selection — rewrites each subpath to its entry beside the root one', () => {
+        // Given - one import of each subpath
+        const rewritten = rewriteFrameworkImports(
+            "import { postgres } from '@jterrazz/test/services';\nimport { http } from '@jterrazz/test/stubs';",
+            '/abs/src/index.js',
+        );
+
+        // Then - each points at its own entry
+        expect(rewritten).toBe(
+            "import { postgres } from '/abs/src/index.services.js';\nimport { http } from '/abs/src/index.stubs.js';",
+        );
     });
 
     test('docs-typecheck — the published samples typecheck — every framework code block in docs/ compiles against src/', () => {

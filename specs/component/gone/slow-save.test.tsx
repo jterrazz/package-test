@@ -1,4 +1,5 @@
-import { button, component, content, defineStub, http } from '@jterrazz/test';
+import { button, component, content } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { SlowSave } from './slow-save.js';

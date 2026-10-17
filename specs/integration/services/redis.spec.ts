@@ -1,4 +1,4 @@
-import { redis } from '@jterrazz/test';
+import { redis } from '@jterrazz/test/services';
 import { describe, expect, inject, test } from 'vitest';
 
 import { integration } from '../redis.specification.js';

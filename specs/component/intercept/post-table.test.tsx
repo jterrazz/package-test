@@ -1,4 +1,5 @@
-import { component, content, defineStub, http } from '@jterrazz/test';
+import { component, content } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';

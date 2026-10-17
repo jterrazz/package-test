@@ -68,7 +68,8 @@ This `api` project only names a vitest project. The `api` you send requests with
 
 ```typescript
 // specs/api/api.specification.ts
-import { specification, sqlite } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { sqlite } from '@jterrazz/test/services';
 import { afterAll } from 'vitest';
 
 import { createApp } from '../../src/app.js';
@@ -80,6 +81,8 @@ export const { api, cleanup } = await specification.api({
 
 afterAll(cleanup);
 ```
+
+A spec imports from three entries: `@jterrazz/test` for what writes it (the constructors, `file()`, the targets, `match`), `@jterrazz/test/services` for what a specification starts (`sqlite()` here), and `@jterrazz/test/stubs` for what the network replies. A service or a stub imported from the root is a lint error, and `npx typescript fix` moves the import to its subpath (rule `service-or-stub-from-its-subpath`).
 
 `server` returns your app, and the specification sends it each request through its `request(path, init)` method, which answers a Fetch `Response`; a Hono `app` is one as it stands. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
 

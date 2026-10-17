@@ -83,15 +83,28 @@ const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
 const anchored = (root: string, path: string): string =>
     isAbsolute(path) ? path : resolve(root, path);
 
+const anchoredTarget = (root: string, target: unknown): unknown =>
+    typeof target === 'string' && target.startsWith('.') ? anchored(root, target) : target;
+
+// invariant: both of vite's forms: a record of names, and a list of `{ find, replacement }`, which alone orders a subpath before its package.
 function aliasesFrom(root: string, vite: unknown): unknown {
-    if (!isRecord(vite) || !isRecord(vite.resolve) || !isRecord(vite.resolve.alias)) {
+    if (!isRecord(vite) || !isRecord(vite.resolve)) {
+        return vite;
+    }
+    const stated = vite.resolve.alias;
+    if (Array.isArray(stated)) {
+        const alias = stated.map((entry: unknown) =>
+            isRecord(entry)
+                ? { ...entry, replacement: anchoredTarget(root, entry.replacement) }
+                : entry,
+        );
+        return { ...vite, resolve: { ...vite.resolve, alias } };
+    }
+    if (!isRecord(stated)) {
         return vite;
     }
     const alias = Object.fromEntries(
-        Object.entries(vite.resolve.alias).map(([name, target]) => [
-            name,
-            typeof target === 'string' && target.startsWith('.') ? anchored(root, target) : target,
-        ]),
+        Object.entries(stated).map(([name, target]) => [name, anchoredTarget(root, target)]),
     );
 
     return { ...vite, resolve: { ...vite.resolve, alias } };

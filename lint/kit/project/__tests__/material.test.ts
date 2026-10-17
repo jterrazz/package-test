@@ -66,6 +66,10 @@ describe('material', () => {
         { kind: 'a stub', path: 'src/news/stubs/http/events.ts' },
         { kind: 'a stub', path: 'src/news/stubs/news.stubs.ts' },
         { kind: undefined, path: 'src/stubs/engine.ts' },
+        { kind: undefined, path: 'src/index.stubs.ts' },
+        { kind: undefined, path: 'src/index.stubs.browser.ts' },
+        { kind: 'a stub', path: 'src/news/index.stubs.ts' },
+        { kind: 'a stub', path: 'index.stubs.ts' },
     ])('materialAt — `$path` is $kind', ({ kind, path }) => {
         // Given - a path of one kind
         // Then - the kind a message names it by

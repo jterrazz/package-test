@@ -1,4 +1,4 @@
-import { anthropic, defineStub } from '@jterrazz/test';
+import { anthropic, defineStub } from '@jterrazz/test/stubs';
 
 export default defineStub({
     request: anthropic.messages(),

@@ -26,7 +26,8 @@ A `postgres()` service runs `docker/<service>/init.sql` when it starts, under th
 ```typescript
 // specs/api/api.specification.ts
 import { afterAll } from 'vitest';
-import { specification, postgres, redis } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
 import { compose } from '../../src/composition/compose.js';
 import type { App } from '../../src/composition/compose.js';
 import { testConfig } from './__setup__/config.js';

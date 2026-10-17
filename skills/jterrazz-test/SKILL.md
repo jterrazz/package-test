@@ -33,7 +33,8 @@ A spec file asks ONE question (its name, the aspect, never `misc`) of ONE subjec
 ```typescript
 // specs/api/api.specification.ts: the runner, once per suite, at the specification root
 import { afterAll } from 'vitest';
-import { postgres, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 
 export const { api, cleanup } = await specification.api({
     server: () => ({ request: () => new Response('ok') }),

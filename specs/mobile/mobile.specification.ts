@@ -1,4 +1,5 @@
-import { process as processService, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { process as processService } from '@jterrazz/test/services';
 import { afterAll, inject } from 'vitest';
 
 import { simulator, specimen } from '../__fixtures__/specimen-mobile/specimen.js';

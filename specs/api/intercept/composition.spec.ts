@@ -1,4 +1,4 @@
-import { defineStubs, http } from '@jterrazz/test';
+import { defineStubs, http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { api, QUOTES_URL } from '../intercepts.specification.js';

@@ -15,7 +15,8 @@ The scheduler that invokes the job in production (a cron, a queue) is out of sco
 ```typescript
 // specs/job/job.specification.ts
 import { afterAll } from 'vitest';
-import { specification, postgres } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 import { nightlyReport, supportDrafts } from '../../src/jobs.js';
 
 // Hoisted, so a test can read this database after a chain that rejected

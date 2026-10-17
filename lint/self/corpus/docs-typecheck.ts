@@ -1,12 +1,21 @@
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 // invariant: only blocks importing the framework plus resolvable neighbours are checked: a block importing app code illustrates the consumer's code and cannot resolve.
 
 const ALLOWED_NEIGHBOURS = new Set(['react', 'vitest', 'vitest/config']);
 
 const FRAMEWORK_SPECIFIER = '@jterrazz/test';
+
+// invariant: each published subpath a sample may import, and the entry module it is checked against, beside the root's.
+const FRAMEWORK_SUBPATHS: Readonly<Record<string, string>> = {
+    '@jterrazz/test/services': 'index.services.js',
+    '@jterrazz/test/stubs': 'index.stubs.js',
+};
+
+const isFramework = (source: string): boolean =>
+    source === FRAMEWORK_SPECIFIER || source in FRAMEWORK_SUBPATHS;
 const TYPESCRIPT_BLOCK = /```(?<language>typescript|tsx)\n(?<code>[\s\S]*?)```/gu;
 const IMPORT_SOURCE = /(?:import|export)[^\n]*?\bfrom\s+['"](?<source>[^'"]+)['"]/gu;
 const TEST_GLOBAL = /\b(?:expect|describe|test|it|beforeAll|afterAll|beforeEach|afterEach)\s*\(/u;
@@ -27,22 +36,28 @@ function importSources(code: string): string[] {
 export function isFrameworkBlock(block: DocBlock): boolean {
     const { code } = block;
     const sources = importSources(code);
-    if (!sources.includes(FRAMEWORK_SPECIFIER)) {
+    if (!sources.some(isFramework)) {
         return false;
     }
     const importsResolve = sources.every(
         (source) =>
-            source === FRAMEWORK_SPECIFIER ||
-            source.startsWith('node:') ||
-            ALLOWED_NEIGHBOURS.has(source),
+            isFramework(source) || source.startsWith('node:') || ALLOWED_NEIGHBOURS.has(source),
     );
     // outside: a fragment leaning on vitest globals it never imports is prose: checking it would only raise phantom TS2304s.
     const selfContained = !TEST_GLOBAL.test(code) || sources.includes('vitest');
     return importsResolve && selfContained;
 }
 
+/** `indexModule` is the root's entry; each subpath's entry is read beside it. */
 export function rewriteFrameworkImports(code: string, indexModule: string): string {
-    return code.replaceAll(`'${FRAMEWORK_SPECIFIER}'`, `'${indexModule}'`);
+    let rewritten = code;
+    for (const [specifier, entry] of Object.entries(FRAMEWORK_SUBPATHS)) {
+        rewritten = rewritten.replaceAll(
+            `'${specifier}'`,
+            `'${join(dirname(indexModule), entry)}'`,
+        );
+    }
+    return rewritten.replaceAll(`'${FRAMEWORK_SPECIFIER}'`, `'${indexModule}'`);
 }
 
 export type DocTypecheckResult = { blocks: number; ok: boolean; output: string };

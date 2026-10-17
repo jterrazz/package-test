@@ -66,7 +66,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         sentence:
-            'The stubs are entered by what they publish: from outside `src/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/`, or `intercept/intercept.ts` or `intercept/intercept.capability.ts` — the entries (`index.ts`, `index.browser.ts`) also the `delivery/<channel>/intercept.ts` their channel picks, and a specification the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/`, the rest of `intercept/` (the delivery port `intercept.port.ts` among it) and the rest of `delivery/` are reached from inside the stubs alone. An error at the import; a `DELIVERY_READERS` row whose reader no longer takes its edge, an error at the lock.',
+            'The stubs are entered by what they publish: from outside `src/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/`, or `intercept/intercept.ts` or `intercept/intercept.capability.ts`. The node stubs entry `index.stubs.ts` and the page entry `index.browser.ts`, which holds the stubs of a page, also import the `delivery/<channel>/intercept.ts` their channel picks, and a specification the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/`, the rest of `intercept/` (the delivery port `intercept.port.ts` among it) and the rest of `delivery/` are reached from inside the stubs alone. An error at the import; a `DELIVERY_READERS` row whose reader no longer takes its edge, an error at the lock.',
         specification: 'model',
         family: 'architecture',
         fix: 'Import what the stubs publish; a specification that wires a delivery adapter declares the edge in `DELIVERY_READERS`, beside the pass.',
@@ -108,10 +108,10 @@ export const ARCHITECTURE_TOOLCHAIN_RULES: Row[] = [
         audience: 'self',
         channel: 'toolchain',
         sentence:
-            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, and the trees of the sentence — `specifications/`, what is tested; `visitor/`, how a screen is touched; `expectations/`, how a result is judged; `stubs/`, `services/`, `disk/`, `clock/` and `mocks/`, what surrounds the subject; `chain/`, the machinery that composes them; `vitest/`, the runner config — and `__tests__/`, the entries’ tests, and nothing else. An error at the stray entry.',
+            "The source root reads the sentence of a test: `src/` holds the entries (the node entry `index.ts` and the page entry `index.browser.ts`, the services entry `index.services.ts` and the stubs entry `index.stubs.ts` with their page twins, the runner-config entry `index.vitest.ts`), the trees of the sentence (`specifications/`, what is tested; `visitor/`, how a screen is touched; `expectations/`, how a result is judged; `stubs/`, `services/`, `disk/`, `clock/` and `mocks/`, what surrounds the subject; `chain/`, the machinery that composes them; `vitest/`, the runner config) and `__tests__/`, the entries' tests, and nothing else. An error at the stray entry.",
         specification: 'model',
         family: 'architecture',
-        fix: 'Move the module into the tree whose concept it is — what is tested (`specifications/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), what surrounds the subject (`stubs/`, `services/`, `disk/`, `clock/`, `mocks/`), the machinery (`chain/`) or the runner config (`vitest/`).',
+        fix: 'Move the module into the tree whose concept it is: what is tested (`specifications/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), what surrounds the subject (`stubs/`, `services/`, `disk/`, `clock/`, `mocks/`), the machinery (`chain/`) or the runner config (`vitest/`).',
         name: 'source-root-holds-known-entries',
         rationale:
             'A module left at the root belongs to every tree and to none: the grab-bag the restructure dissolved (`surface.ts`, `settings.ts`) starts again as one file nobody owns.',

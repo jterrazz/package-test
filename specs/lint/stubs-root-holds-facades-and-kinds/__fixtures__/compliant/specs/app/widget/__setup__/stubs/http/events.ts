@@ -1,4 +1,4 @@
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 import payload from '../../../__fixtures__/events.json' with { type: 'json' };
 

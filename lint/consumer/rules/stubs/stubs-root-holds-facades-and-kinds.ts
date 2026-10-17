@@ -58,7 +58,7 @@ function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<
     );
 }
 
-const ENTRY = /^@jterrazz\/test$|(?:^|\/)src\/index\.js$/u;
+const ENTRY = /^@jterrazz\/test\/stubs$|(?:^|\/)src\/index\.stubs\.js$/u;
 
 type EntryBindings = { builders: Map<string, string>; namespaces: Set<string> };
 

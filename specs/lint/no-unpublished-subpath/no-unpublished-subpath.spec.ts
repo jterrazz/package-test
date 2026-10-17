@@ -20,8 +20,8 @@ describe('no-unpublished-subpath', () => {
         expect(result.report).toMatch(`
             specs/app/widget/widget.test.ts:3:24  architecture(no-unpublished-subpath)
                 found: \`specs/app/widget/widget.test.ts\` imports \`@jterrazz/test/mock\`
-                why: Everything is imported from \`@jterrazz/test\`; an import of \`@jterrazz/test/<subpath>\` is an error, except the subpaths the package's \`exports\` map publishes — the entries are \`.\`, \`./vitest\`, \`./oxlint\` and \`./schema\`, and the three named ones are exempt everywhere.
-                fix: import from "@jterrazz/test"; the published subpaths are @jterrazz/test/config, @jterrazz/test/oxlint, @jterrazz/test/schema, @jterrazz/test/vitest
+                why: An import of \`@jterrazz/test/<subpath>\` is an error unless the package's \`exports\` map publishes the subpath: \`./services\` and \`./stubs\` for a spec, beside the root, and \`./vitest\`, \`./config\`, \`./oxlint\` and \`./schema\` for the tools.
+                fix: import from "@jterrazz/test"; the published subpaths are @jterrazz/test/config, @jterrazz/test/oxlint, @jterrazz/test/schema, @jterrazz/test/services, @jterrazz/test/stubs, @jterrazz/test/vitest
                 read: docs/reference/linting.md#no-unpublished-subpath
         `);
     });

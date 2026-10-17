@@ -4,10 +4,10 @@ Infrastructure is declared as a **named record** of service factories on the run
 
 ## Service factories
 
-All four import from the package root (rule `no-unpublished-subpath`):
+All four import from the services subpath, as do the types of a service and its handle (rule `service-or-stub-from-its-subpath`):
 
 ```typescript
-import { postgres, process, redis, sqlite } from '@jterrazz/test';
+import { postgres, process, redis, sqlite } from '@jterrazz/test/services';
 ```
 
 | Factory      | Backing                                           | Options                                                                         | Connection string shape               |
@@ -62,7 +62,8 @@ The options type is `ProcessOptions`, one shape for the one external process eve
 It sits in a `services` record like any other service, so it starts after the databases and can be handed their connection strings, and it is stopped with the specification:
 
 ```typescript
-import { postgres, process, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres, process } from '@jterrazz/test/services';
 
 const api = process({
     before: 'make build',

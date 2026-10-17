@@ -43,7 +43,19 @@ export default defineConfig({
                 viewport: { height: 640, width: 1024 },
                 vite: {
                     optimizeDeps: { include: ['react-router', '@jterrazz/typescript/rules'] },
-                    resolve: { alias: { '@jterrazz/test': './dist/browser/index.js' } },
+                    resolve: {
+                        alias: [
+                            {
+                                find: '@jterrazz/test/services',
+                                replacement: './dist/browser/services.js',
+                            },
+                            {
+                                find: '@jterrazz/test/stubs',
+                                replacement: './dist/browser/stubs.js',
+                            },
+                            { find: '@jterrazz/test', replacement: './dist/browser/index.js' },
+                        ],
+                    },
                 },
                 wrap: './wrap/providers.tsx',
             },
@@ -81,7 +93,11 @@ export default defineConfig({
         },
         tsconfig: {
             compilerOptions: {
-                paths: { '@jterrazz/test': ['./src/index.browser.ts'] },
+                paths: {
+                    '@jterrazz/test': ['./src/index.browser.ts'],
+                    '@jterrazz/test/services': ['./src/index.services.browser.ts'],
+                    '@jterrazz/test/stubs': ['./src/index.stubs.browser.ts'],
+                },
             },
             reason: 'the component tests import the package by its public name, typed from the browser source',
         },

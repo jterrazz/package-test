@@ -10,6 +10,9 @@ const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures|render)
 
 const STUBS_FACADE = /\.stubs\.[cm]?[jt]sx?$/u;
 
+// outside: the toolchain's entry grammar names the source of a `./stubs` subpath `src/index.stubs.ts`: an entry at the source root, which no facade is.
+const STUBS_ENTRY = /^index\.stubs(?:\.browser)?\.[cm]?[jt]sx?$/u;
+
 // invariant: the toolchain's, never shipped.
 const TOOL_CONFIG = /\.config\.[cm]?[jt]sx?$/u;
 
@@ -52,7 +55,8 @@ export function materialAt(path: string, directory = false): MaterialKind | unde
     if (folders.some((folder) => isGroundFolder(folder))) {
         return 'ground';
     }
-    if (isNamed(STUBS_FACADE)) {
+    const isEntry = folders.length === 1 && folders[0] === 'src' && isNamed(STUBS_ENTRY);
+    if (isNamed(STUBS_FACADE) && !isEntry) {
         return 'a stub';
     }
     return inStubsFolder(directory ? path : dirname(path), folders);

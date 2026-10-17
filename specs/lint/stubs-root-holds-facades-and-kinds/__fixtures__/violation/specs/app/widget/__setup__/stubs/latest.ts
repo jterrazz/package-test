@@ -1,4 +1,4 @@
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 // A unit stub at the stubs/ ROOT — the root holds only *.stubs.ts (`stubs-root-holds-facades-and-kinds`).
 export default defineStub({

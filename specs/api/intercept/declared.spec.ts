@@ -1,4 +1,4 @@
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { api as app } from '../api.specification.js';

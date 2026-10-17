@@ -95,7 +95,8 @@ Both arguments are Astro's. The first is required: Astro reads the app's `root` 
 ## The chain
 
 ```tsx
-import { button, component, content, defineStub, file, http } from '@jterrazz/test';
+import { button, component, content, file } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';

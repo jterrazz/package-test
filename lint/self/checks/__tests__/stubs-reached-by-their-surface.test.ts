@@ -21,7 +21,7 @@ describe('checkStubsReachedByTheirSurface', () => {
                 "import type { InterceptPort } from '../../stubs/intercept/intercept.port.js';",
                 '',
             ].join('\n'),
-            'src/index.ts':
+            'src/index.stubs.ts':
                 "export { intercept } from './stubs/delivery/same-process/intercept.js';\n",
             'src/chain/arm.ts':
                 "import { intercept } from '../stubs/delivery/same-process/intercept.js';\n",

@@ -1,4 +1,5 @@
-import { postgres, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 import { afterAll } from 'vitest';
 
 import { databaseJobs } from './__fixtures__/specimen-job/database-jobs.js';

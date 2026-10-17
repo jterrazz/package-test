@@ -7,7 +7,7 @@ import type { SelfPassId } from './checker.js';
 
 const STUBS = 'src/stubs/';
 
-const ENTRIES = new Set(['src/index.browser.ts', 'src/index.ts']);
+const ENTRIES = new Set(['src/index.browser.ts', 'src/index.stubs.ts']);
 
 const SURFACE = [
     /^stub\.ts$/u,

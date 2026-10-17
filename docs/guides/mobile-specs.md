@@ -48,7 +48,8 @@ Resolution refuses rather than guesses: zero matches and several matches both fa
 **`services` is where Metro goes.** A dev build loads its JavaScript from a bundler. It is a `process()` like any other external process the framework owns, started before the app is ever launched and stopped with the specification ([Services](../reference/services.md#process--the-one-shape-an-external-process-takes)):
 
 ```typescript
-import { process, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { process } from '@jterrazz/test/services';
 
 export const { cleanup, mobile, udid } = await specification.mobile({
     app: { bundleId: 'com.example.app' },

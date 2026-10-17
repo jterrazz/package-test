@@ -1,4 +1,4 @@
-import { defineStub, openai } from '@jterrazz/test';
+import { defineStub, openai } from '@jterrazz/test/stubs';
 
 import { prompt } from './classify.request.js';
 

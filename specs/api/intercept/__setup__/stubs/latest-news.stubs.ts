@@ -1,4 +1,4 @@
-import { defineStubs } from '@jterrazz/test';
+import { defineStubs } from '@jterrazz/test/stubs';
 
 import latestNews from './http/latest-news.js';
 

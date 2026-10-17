@@ -1,4 +1,5 @@
-import { component, content, http } from '@jterrazz/test';
+import { component, content } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { TokenFeed } from './token-feed.js';

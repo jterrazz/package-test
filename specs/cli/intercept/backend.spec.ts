@@ -1,4 +1,4 @@
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { cli as backendCli } from '../backend-cli.specification.js';

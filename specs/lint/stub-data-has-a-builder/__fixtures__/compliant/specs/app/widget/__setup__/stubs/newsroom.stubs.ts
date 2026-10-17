@@ -1,4 +1,4 @@
-import { defineStubs } from '@jterrazz/test';
+import { defineStubs } from '@jterrazz/test/stubs';
 
 import events from './http/events.js';
 import classify from './openai/classify.js';

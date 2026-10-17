@@ -1,4 +1,5 @@
-import { content, http } from '@jterrazz/test';
+import { content } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../backend.specification.js';

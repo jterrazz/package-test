@@ -2,7 +2,8 @@
 import { defineConfig } from '@jterrazz/typescript/config';
 import { expect } from 'vitest';
 
-import { directory, file, mockOf, postgres, specification } from '@jterrazz/test';
+import { directory, file, mockOf, specification } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 import type {
     ApiSpecification,
     CliSpecification,

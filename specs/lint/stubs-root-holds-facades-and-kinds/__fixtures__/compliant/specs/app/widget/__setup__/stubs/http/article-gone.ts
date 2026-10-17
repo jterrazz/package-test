@@ -1,4 +1,4 @@
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 export default (id: string) =>
     defineStub({

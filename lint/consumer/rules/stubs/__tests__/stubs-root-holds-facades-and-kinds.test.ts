@@ -16,12 +16,12 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
     invalid: [
         {
             name: 'Another call through the entry namespace is no stub, and a unit exporting only by name has no default.',
-            code: `import * as t from '@jterrazz/test';\nexport default t.other({});`,
+            code: `import * as t from '@jterrazz/test/stubs';\nexport default t.other({});`,
             errors: [{ column: 0, line: 1, messageId: 'notDefineStub' }],
             filename: UNIT,
         },
         {
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport const stub = defineStub({ request: http.get('u'), response: http.json({}) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport const stub = defineStub({ request: http.get('u'), response: http.json({}) });`,
             errors: [{ column: 0, line: 1, messageId: 'missingDefault' }],
             filename: UNIT,
         },
@@ -33,7 +33,7 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'A constructed defineStub, another call, or defineStub through no namespace of the entry, is no stub.',
-            code: `import { defineStub } from '@jterrazz/test';\nexport default new defineStub({});`,
+            code: `import { defineStub } from '@jterrazz/test/stubs';\nexport default new defineStub({});`,
             errors: [{ column: 0, line: 1, messageId: 'notDefineStub' }],
             filename: UNIT,
         },
@@ -49,13 +49,13 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'A unit stub left at the __setup__/stubs/ root.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
             errors: [{ column: 0, line: 1, messageId: 'rootFile' }],
             filename: `${FEATURE}/latest.ts`,
         },
         {
             name: 'A facade exporting nothing — a type alone is no builder.',
-            code: `import { defineStubs } from '@jterrazz/test';\nconst world = defineStubs();\nexport type World = typeof world;`,
+            code: `import { defineStubs } from '@jterrazz/test/stubs';\nconst world = defineStubs();\nexport type World = typeof world;`,
             errors: [{ column: 0, line: 1, messageId: 'exportsNothing' }],
             filename: FACADE,
         },
@@ -79,13 +79,13 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'A unit stub that is not kebab-case.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
             errors: [{ column: 0, line: 1, messageId: 'badName' }],
             filename: `${FEATURE}/http/Bad_Name.ts`,
         },
         {
             name: 'A unit stub with no default export.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nconst stub = defineStub({ request: http.get('u'), response: http.json({}) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nconst stub = defineStub({ request: http.get('u'), response: http.json({}) });`,
             errors: [{ column: 0, line: 1, messageId: 'missingDefault' }],
             filename: UNIT,
         },
@@ -97,7 +97,7 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'The folder says openai, every builder the unit calls says http.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
             errors: [
                 { column: 37, line: 2, messageId: 'foreignBuilder' },
                 { column: 62, line: 2, messageId: 'foreignBuilder' },
@@ -106,13 +106,13 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: "The request is the folder's kind, the reply another's: the unit mixes two kinds.",
-            code: `import { defineStub, http, openai } from '@jterrazz/test';\nexport default defineStub({ request: openai.chat({ user: 'u' }), response: http.error(500) });`,
+            code: `import { defineStub, http, openai } from '@jterrazz/test/stubs';\nexport default defineStub({ request: openai.chat({ user: 'u' }), response: http.error(500) });`,
             errors: [{ column: 75, line: 2, messageId: 'foreignBuilder' }],
             filename: `${FEATURE}/openai/classify.ts`,
         },
         {
             name: 'A builder renamed at the import is still its kind.',
-            code: `import { defineStub, openai as ai } from '@jterrazz/test';\nexport default defineStub({ request: ai.chat({ user: 'u' }), response: ai.reply({}) });`,
+            code: `import { defineStub, openai as ai } from '@jterrazz/test/stubs';\nexport default defineStub({ request: ai.chat({ user: 'u' }), response: ai.reply({}) });`,
             errors: [
                 { column: 37, line: 2, messageId: 'foreignBuilder' },
                 { column: 71, line: 2, messageId: 'foreignBuilder' },
@@ -121,7 +121,7 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'A namespace import reaches a builder too: `t.http` under `__setup__/stubs/openai/` is the http kind.',
-            code: `import * as t from '@jterrazz/test';\nexport default t.defineStub({ request: t.openai.chat({ user: 'u' }), response: t.http.error(500) });`,
+            code: `import * as t from '@jterrazz/test/stubs';\nexport default t.defineStub({ request: t.openai.chat({ user: 'u' }), response: t.http.error(500) });`,
             errors: [{ column: 79, line: 2, messageId: 'foreignBuilder' }],
             filename: `${FEATURE}/openai/classify.ts`,
         },
@@ -140,15 +140,15 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
     valid: [
         {
             name: 'A unit default-exports a function, a named function, a value built above, or the default of another.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default function (id: string) {\n    return defineStub({ request: http.get(id), response: http.json({}) });\n}`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default function (id: string) {\n    return defineStub({ request: http.get(id), response: http.json({}) });\n}`,
             filename: UNIT,
         },
         {
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default (function gone(id: string) {\n    return defineStub({ request: http.get(id), response: http.json({}) });\n});`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default (function gone(id: string) {\n    return defineStub({ request: http.get(id), response: http.json({}) });\n});`,
             filename: UNIT,
         },
         {
-            code: `import { defineStub, http } from '../../../../../../src/index.js';\nconst stub = defineStub({ request: http.get('u'), response: http.json({}) });\nexport default stub;`,
+            code: `import { defineStub, http } from '../../../../../../src/index.stubs.js';\nconst stub = defineStub({ request: http.get('u'), response: http.json({}) });\nexport default stub;`,
             filename: UNIT,
         },
         {
@@ -157,7 +157,7 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'What no import of the entry binds as a builder — a re-export, a name no kind holds, a member of no namespace — is no kind.',
-            code: `import { defineStub, http, notAKind } from '@jterrazz/test';\nimport * as t from '@jterrazz/test';\nexport { openai } from '@jterrazz/test';\nexport default defineStub({ request: http.get(notAKind.x, t.notAKind, other.openai.chat()), response: openai.reply({}) });`,
+            code: `import { defineStub, http, notAKind } from '@jterrazz/test/stubs';\nimport * as t from '@jterrazz/test/stubs';\nexport { openai } from '@jterrazz/test/stubs';\nexport default defineStub({ request: http.get(notAKind.x, t.notAKind, other.openai.chat()), response: openai.reply({}) });`,
             filename: UNIT,
         },
         {
@@ -172,17 +172,17 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: 'The canonical facade: composed default + a named scenario factory.',
-            code: `import { defineStubs } from '@jterrazz/test';\nimport events from './http/events.js';\nimport gone from './http/article-gone.js';\nconst world = defineStubs(events);\nexport default world;\nexport const withArticleGone = (id: string) => world.with(gone(id));`,
+            code: `import { defineStubs } from '@jterrazz/test/stubs';\nimport events from './http/events.js';\nimport gone from './http/article-gone.js';\nconst world = defineStubs(events);\nexport default world;\nexport const withArticleGone = (id: string) => world.with(gone(id));`,
             filename: FACADE,
         },
         {
             name: 'A facade with no default: its builder and its set exported by name.',
-            code: `import { defineStubs } from '@jterrazz/test';\nimport events from './http/events.js';\nexport const newsroom = defineStubs(events);\nexport function pipeline(options: { ingestion: string }) {\n    return newsroom.with();\n}`,
+            code: `import { defineStubs } from '@jterrazz/test/stubs';\nimport events from './http/events.js';\nexport const newsroom = defineStubs(events);\nexport function pipeline(options: { ingestion: string }) {\n    return newsroom.with();\n}`,
             filename: FACADE,
         },
         {
             name: 'A unit built through a namespace import of the entry, with its own kind alone.',
-            code: `import * as t from '@jterrazz/test';\nexport default t.defineStub({ request: t.http.get('u'), response: t.http.json({}) });`,
+            code: `import * as t from '@jterrazz/test/stubs';\nexport default t.defineStub({ request: t.http.get('u'), response: t.http.json({}) });`,
             filename: UNIT,
         },
         {
@@ -202,22 +202,22 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
         },
         {
             name: "A builder of this file whose declared return type is the composition's.",
-            code: `import type { Stubs } from '@jterrazz/test';\nimport { base } from './pipeline.stubs.js';\nfunction quiet(): Stubs {\n    return base.world;\n}\nexport default quiet();`,
+            code: `import type { Stubs } from '@jterrazz/test/stubs';\nimport { base } from './pipeline.stubs.js';\nfunction quiet(): Stubs {\n    return base.world;\n}\nexport default quiet();`,
             filename: FACADE,
         },
         {
             name: 'The canonical unit stub, matching its kind folder.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('/events'), response: http.json({}) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default defineStub({ request: http.get('/events'), response: http.json({}) });`,
             filename: UNIT,
         },
         {
             name: 'A factory returning stubs is a unit too.',
-            code: `import { defineStub, http } from '@jterrazz/test';\nexport default (id: string) => defineStub({ request: http.get('/a/' + id), response: http.error(410) });`,
+            code: `import { defineStub, http } from '@jterrazz/test/stubs';\nexport default (id: string) => defineStub({ request: http.get('/a/' + id), response: http.error(410) });`,
             filename: `${FEATURE}/http/article-gone.ts`,
         },
         {
             name: 'A name the entry does not bind to a builder is no kind, whatever it is called.',
-            code: `import { defineStub, openai } from '@jterrazz/test';\nimport * as http from './local-helpers.js';\nexport default defineStub({ request: openai.chat({ user: http.prompt() }), response: openai.reply({}) });`,
+            code: `import { defineStub, openai } from '@jterrazz/test/stubs';\nimport * as http from './local-helpers.js';\nexport default defineStub({ request: openai.chat({ user: http.prompt() }), response: openai.reply({}) });`,
             filename: `${FEATURE}/openai/classify.ts`,
         },
         {

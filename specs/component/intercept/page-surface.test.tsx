@@ -1,14 +1,6 @@
-import {
-    component,
-    content,
-    http,
-    intercept,
-    mockOf,
-    postgres,
-    ProcessHandle,
-    required,
-    waitUntil,
-} from '@jterrazz/test';
+import { component, content, mockOf, required, waitUntil } from '@jterrazz/test';
+import { postgres, ProcessHandle } from '@jterrazz/test/services';
+import { http, intercept } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { SurfacePanel } from './page-surface.js';

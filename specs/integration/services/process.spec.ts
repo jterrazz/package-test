@@ -1,4 +1,4 @@
-import { process as processService } from '@jterrazz/test';
+import { process as processService } from '@jterrazz/test/services';
 import { describe, expect, test } from 'vitest';
 
 import { integration } from '../pure.specification.js';

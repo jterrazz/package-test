@@ -30,13 +30,14 @@ describe('skill', () => {
     });
 
     test('the skill names only what exists (meta-test) — names what a false page cites', () => {
-        // Given - a skill beside the real one, citing a symbol and a page that do not exist
+        // Given - a skill beside the real one, citing a symbol and a page that do not exist, and a service from the stubs subpath
         const scratch = mkdtempSync(join(tmpdir(), 'skill-'));
         const page = join(scratch, 'SKILL.md');
         writeFileSync(
             page,
             [
                 "import { fakeOf, specification } from '@jterrazz/test';",
+                "import { http, postgres } from '@jterrazz/test/stubs';",
                 'Double the port with `fakeOf<T>()`, then scope with `within(…)`.',
                 'Read [the page](./docs/guides/gone.md).',
             ].join('\n'),
@@ -46,7 +47,7 @@ describe('skill', () => {
         expect(skillFindings(page, ROOT)).toStrictEqual({
             missingPages: ['./docs/guides/gone.md'],
             unknownCalls: ['fakeOf'],
-            unknownImports: ['fakeOf from @jterrazz/test'],
+            unknownImports: ['fakeOf from @jterrazz/test', 'postgres from @jterrazz/test/stubs'],
         });
     });
 

@@ -1,4 +1,5 @@
-import { process as processService, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { process as processService } from '@jterrazz/test/services';
 import { afterAll } from 'vitest';
 
 /** `server` is a function of the started services: how the site learns a URL whose port the OS chose. */

@@ -1,4 +1,4 @@
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { integration } from '../pure.specification.js';

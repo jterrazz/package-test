@@ -20,8 +20,14 @@ describe('subpaths', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             @jterrazz/test (types) → ./dist/index.d.ts: held
-            @jterrazz/test (browser) → ./dist/browser/index.js: reaches 1 module, imports @jterrazz/typescript/rules, msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
-            @jterrazz/test (import) → ./dist/index.js: loads, 50 names
+            @jterrazz/test (browser) → ./dist/browser/index.js: reaches 2 modules, imports @jterrazz/typescript/rules, msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
+            @jterrazz/test (import) → ./dist/index.js: loads, 39 names
+            @jterrazz/test/services (types) → ./dist/services.d.ts: held
+            @jterrazz/test/services (browser) → ./dist/browser/services.js: reaches 2 modules, imports @jterrazz/typescript/rules, msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
+            @jterrazz/test/services (import) → ./dist/services.js: loads, 5 names
+            @jterrazz/test/stubs (types) → ./dist/stubs.d.ts: held
+            @jterrazz/test/stubs (browser) → ./dist/browser/stubs.js: reaches 2 modules, imports @jterrazz/typescript/rules, msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
+            @jterrazz/test/stubs (import) → ./dist/stubs.js: loads, 6 names
             @jterrazz/test/vitest (types) → ./dist/vitest.d.ts: held
             @jterrazz/test/vitest (import) → ./dist/vitest.js: loads, 12 names
             @jterrazz/test/config (types) → ./dist/config.d.ts: held
@@ -57,6 +63,44 @@ describe('subpaths', () => {
             vitest
             vitest-mock-extended
             yaml
+        `);
+    });
+
+    test('the services entry loads no database driver and no container runtime until a spec starts a service', async () => {
+        // Given - a consumer's project importing the services entry into a fresh module graph
+        const result = await cli
+            .link('@jterrazz/test', packed())
+            .link('@vitest/browser-playwright')
+            .link('playwright')
+            .link('react')
+            .link('react-dom')
+            .link('vitest-browser-react')
+            .fixture(directory('./__fixtures__/consumer/'))
+            .exec('eager.mjs @jterrazz/test/services');
+
+        // Then - each driver stays behind the lazy import of the service that needs it
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(`
+            @jterrazz/typescript
+        `);
+    });
+
+    test('the stubs entry loads no network double until a spec serves a stub', async () => {
+        // Given - a consumer's project importing the stubs entry into a fresh module graph
+        const result = await cli
+            .link('@jterrazz/test', packed())
+            .link('@vitest/browser-playwright')
+            .link('playwright')
+            .link('react')
+            .link('react-dom')
+            .link('vitest-browser-react')
+            .fixture(directory('./__fixtures__/consumer/'))
+            .exec('eager.mjs @jterrazz/test/stubs');
+
+        // Then - the builders are data: msw stays behind the delivery that serves them
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(`
+            @jterrazz/typescript
         `);
     });
 

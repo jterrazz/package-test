@@ -1,6 +1,7 @@
 import { afterAll } from 'vitest';
 
-import { postgres, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 
 export const { api, cleanup } = await specification.api({
     server: () => ({}) as never,

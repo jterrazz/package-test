@@ -8,7 +8,8 @@ registerHooks({
         return resolved;
     },
 });
-await import('@jterrazz/test');
+const entry = process.argv[2] ?? '@jterrazz/test';
+await import(entry);
 const names = new Set();
 for (const url of urls) {
     const inside = url.split('/node_modules/').at(-1);

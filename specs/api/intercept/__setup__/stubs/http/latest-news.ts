@@ -1,4 +1,4 @@
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 export default defineStub({
     request: http.get('https://news.spec.test/api/latest'),

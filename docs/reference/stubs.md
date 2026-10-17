@@ -13,7 +13,7 @@ A stub is behavior: it decides what matches and what is served, it can count, it
 ## `defineStub`
 
 ```typescript
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 export default defineStub({
     request: http.get('/articles/{{uuid}}'),
@@ -37,7 +37,7 @@ One queue serves all three deliveries. An observed request matches a stub when t
 **The first stub in list order that matches AND is not exhausted wins**, except a never stub (`required` with `times: 0`), which takes every request it matches ([`never`](#never--a-call-that-must-not-happen)). That single rule covers the two shapes you need:
 
 ```typescript
-import { defineStubs, http } from '@jterrazz/test';
+import { defineStubs, http } from '@jterrazz/test/stubs';
 
 // A retry sequence: three failures, then an unlimited tail.
 export default defineStubs(
@@ -53,7 +53,7 @@ If every matching stub is exhausted, or nothing matches at all, the spec fails (
 `times` is how a spec asserts a **call count** without reaching for a spy: `times: 3` on a failing stub plus an unlimited success tail says "the app retries exactly three times before it succeeds". `required: true` is the other half: it turns a declaration nobody exercised into a failure:
 
 ```typescript
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 // If the screen never asks for the 1M range, the spec fails, instead of
 // passing green on a chart that silently rendered the default range.
@@ -71,7 +71,7 @@ Without `required`, a stub nobody calls is invisible: the test passes, and the a
 The other half of a call count is zero. `http.never(request)` is the stub `required` with `times: 0`, and it states that the subject must not reach the route within the chain's terminal action, or the `intercept()` scope, it is declared for:
 
 ```typescript
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
@@ -104,7 +104,7 @@ Unlike an exhausted stub, a never stub is never skipped: the first request it ma
 A test imports **one** artifact: the world its feature lives in. `defineStubs` composes stubs, lists, and other composites into it, recursively, order preserved.
 
 ```typescript
-import { defineStubs, http } from '@jterrazz/test';
+import { defineStubs, http } from '@jterrazz/test/stubs';
 
 const events = defineStubs({
     request: http.get('/events'),
@@ -128,7 +128,7 @@ export default defineStubs(events, {
 The prepend is what makes a _more specific_ override work without deleting the generic route it lives beside: `/articles/gone-1` does not claim the route `/articles/{{uuid}}`, so the generic stub survives, but the override is checked first, so the one article that is gone answers 410 while every other article still answers 200.
 
 ```typescript
-import { defineStub, defineStubs, http } from '@jterrazz/test';
+import { defineStub, defineStubs, http } from '@jterrazz/test/stubs';
 
 const newsroom = defineStubs(
     { request: http.get('/events'), response: http.json({ items: [] }) },
@@ -180,11 +180,11 @@ The rules, enforced by [`stubs-root-holds-facades-and-kinds`](linting.md#stubs-r
 - **Tests import only `*.stubs.ts`.** Kind folders are internal; reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
 - Shared data has ONE owner: a second stub imports the same `__fixtures__/events.json`. No copies.
 
-A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source**. Importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
+A unit stub may import the framework (its builders from `@jterrazz/test/stubs`, rule `service-or-stub-from-its-subpath`), its neighbours inside `stubs/`, **and the app's own source**. Importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
 
 ```typescript
 // __setup__/stubs/newsroom.stubs.ts: the facade a test imports
-import { defineStubs } from '@jterrazz/test';
+import { defineStubs } from '@jterrazz/test/stubs';
 
 import articleGone from './http/article-gone.js';
 import events from './http/events.js';
@@ -196,7 +196,7 @@ export const withArticleGone = (id: string) => newsroom.with(articleGone(id));
 
 ```typescript
 // __setup__/stubs/http/events.ts: a unit, serving its payload from __fixtures__/
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 import payload from '../../../__fixtures__/events.json' with { type: 'json' };
 
@@ -217,7 +217,7 @@ Every specification that reaches the network takes the same three forms:
 | `.intercept(request, response)` | An inline pair, for one-off plumbing that deserves no name |
 
 ```typescript
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
@@ -244,7 +244,7 @@ Repeated `.intercept()` calls **append**. Composition and override semantics liv
 A module test has no runner and therefore no chain to hang stubs on, and its subject can still reach the network. `intercept(...)` is that case, and it takes the same three forms:
 
 ```typescript
-import { http, intercept } from '@jterrazz/test';
+import { http, intercept } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 describe('rate provider', () => {
@@ -315,7 +315,7 @@ The stub backend resets between chains, the way databases do: one chain = one te
 ### `http.*` — any URL
 
 ```typescript
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 
 http.get('https://rates.example.com/v1/latest');
 http.get('/articles/{{uuid}}'); // path form: any origin, structural segment
@@ -348,7 +348,8 @@ The optional `filter` narrows beyond method + URL, and these are **filters**, so
 A string filter on a provider builder means **exact equality**. Looser matching is explicit: a RegExp, or the code-only matcher `match.includes(...)`:
 
 ```typescript
-import { defineStub, match, openai } from '@jterrazz/test';
+import { match } from '@jterrazz/test';
+import { defineStub, openai } from '@jterrazz/test/stubs';
 
 // Exact: the app's own builder produces the prompt, so it cannot drift.
 const PROMPT = 'Classify the article into one of: TECH, POLITICS, SPORT.';
@@ -395,7 +396,7 @@ The point: your stub states the **business payload** (`{ category: 'TECH' }`) an
 A subject that reads a reply AS IT LANDS (a token-by-token render, a progress bar, a client that reconnects on a half-read body) is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three deliveries honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile specifications serve from.
 
 ```typescript
-import { http, intercept } from '@jterrazz/test';
+import { http, intercept } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 describe('streamed reply', () => {
@@ -434,7 +435,7 @@ Both take `delay`, the milliseconds between two events, and `openai.stream` take
 
 ```typescript
 // specs/api/assistant/__setup__/stubs/openai/greeting.ts
-import { defineStub, openai } from '@jterrazz/test';
+import { defineStub, openai } from '@jterrazz/test/stubs';
 
 export default defineStub({
     request: openai.chat({ user: 'Say hello' }),
@@ -447,7 +448,7 @@ export default defineStub({
 A `response` may be a function of the incoming request (`(request: MatchableRequest) => StubResponse`), evaluated per served request:
 
 ```typescript
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 export default defineStub({
     request: http.post('https://gateway.shoply.dev/v1/echo'),

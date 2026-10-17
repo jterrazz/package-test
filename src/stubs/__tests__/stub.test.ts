@@ -7,7 +7,7 @@ import {
     anthropic as publishedAnthropic,
     http as publishedHttp,
     openai as publishedOpenai,
-} from '../../index.js';
+} from '../../index.stubs.js';
 import { anthropic } from '../kinds/anthropic.js';
 import { http } from '../kinds/http.js';
 import { defineStub, defineStubs } from '../stub.js';

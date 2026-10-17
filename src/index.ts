@@ -19,42 +19,6 @@ export {
     type RelativePath,
 } from './disk/spec-path.js';
 export { packed, type PackedPackage } from './disk/packed.js';
-export { anthropic } from './stubs/kinds/anthropic.js';
-export {
-    http,
-    type HttpResponseInit,
-    type HttpStreamInit,
-    type HttpStubFilter,
-    type SseEvent,
-} from './stubs/kinds/http.js';
-export { type TextFilter } from './stubs/kinds/text-filter.js';
-export { openai } from './stubs/kinds/openai.js';
-export { defineStub, defineStubs, type Stub, type StubInput, type Stubs } from './stubs/stub.js';
-export type {
-    MatchableRequest,
-    StreamBody,
-    StubRequest,
-    StubResponder,
-    StubResponse,
-    StubResponseValue,
-} from './stubs/exchange.js';
-export { intercept } from './stubs/delivery/same-process/intercept.js';
-export type { Intercept, InterceptOptions, InterceptScope } from './stubs/intercept/intercept.js';
-export { postgres, type PostgresOptions } from './services/postgres/postgres.adapter.js';
-export { redis, type RedisOptions } from './services/redis/redis.adapter.js';
-export { sqlite } from './services/sqlite/sqlite.adapter.js';
-export type { SqliteOptions } from './services/sqlite/sqlite-template.js';
-export {
-    processService as process,
-    ProcessHandle,
-    type ProcessOptions,
-} from './services/process/process.adapter.js';
-export { type DatabaseKeys, type ServiceRecord } from './services/services.js';
-export type { SeedSource } from './services/seed/seed.capability.js';
-export type { DatabasePort } from './services/database.port.js';
-export type { IsolationStrategy } from './services/isolation.port.js';
-export type { ServiceHandle } from './services/service.port.js';
-export type { ContainerOptions, ContainerPort } from './services/containers/container.port.js';
 export { clock, type PinnedClock } from './clock/clock.js';
 export { mockOf, type MockOfOptions, type MockPort } from './mocks/mock-of.js';
 

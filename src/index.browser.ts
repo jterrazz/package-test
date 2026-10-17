@@ -1,4 +1,5 @@
 // invariant: the page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name.
+// outside: it also holds the page values of the services and stubs subpaths, whose page entries re-export them from here: the toolchain writes the shared chunks of every page build beside the node build's, under the same names, so a page module two page entries share would be overwritten by its node namesake.
 
 import { nodeOnlyClass, refuse } from './chain/refusals/node-only.js';
 import type { postgres as postgresFn } from './services/postgres/postgres.adapter.js';
@@ -31,13 +32,14 @@ export const ProcessHandle: typeof ProcessHandleClass = nodeOnlyClass('ProcessHa
 export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
-export { packed, type PackedPackage } from './disk/packed.js';
-export { directory, file } from './disk/spec-path.js';
 export { anthropic } from './stubs/kinds/anthropic.js';
 export { http } from './stubs/kinds/http.js';
 export { openai } from './stubs/kinds/openai.js';
 export { defineStub, defineStubs } from './stubs/stub.js';
 export { intercept } from './stubs/delivery/browser-page/intercept.js';
+
+export { packed, type PackedPackage } from './disk/packed.js';
+export { directory, file } from './disk/spec-path.js';
 export { clock } from './clock/clock.js';
 export { mockOf } from './mocks/mock-of.js';
 

@@ -25,7 +25,7 @@ describe('paths-named-in-the-test', () => {
                 read: docs/reference/linting.md#paths-named-in-the-test
             specs/api/orders/__setup__/stubs/http/stock.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
                 found: the stub unit "stock.ts" has no default export
-                why: Under \`specs/**/__setup__/stubs/\`: the ROOT carries only \`*.stubs.ts\` facades and one folder per stub KIND — a stub builder the package exports: \`http\` | \`openai\` | \`anthropic\`, the closed list its exports decide.
+                why: Under \`specs/**/__setup__/stubs/\`: the ROOT carries only \`*.stubs.ts\` facades and one folder per stub KIND — a stub builder \`@jterrazz/test/stubs\` exports: \`http\` | \`openai\` | \`anthropic\`, the closed list its exports decide.
                 fix: default-export \`defineStub(…)\`, or a factory returning one
                 read: docs/reference/linting.md#stubs-root-holds-facades-and-kinds
             specs/api/orders/__setup__/stubs/http/stock.ts:4:12  jterrazz(paths-named-in-the-test)

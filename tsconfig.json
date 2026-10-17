@@ -2,7 +2,9 @@
     "extends": "@jterrazz/typescript/tsconfig/node",
     "compilerOptions": {
         "paths": {
-            "@jterrazz/test": ["./src/index.browser.ts"]
+            "@jterrazz/test": ["./src/index.browser.ts"],
+            "@jterrazz/test/services": ["./src/index.services.browser.ts"],
+            "@jterrazz/test/stubs": ["./src/index.stubs.browser.ts"]
         }
     },
     "exclude": [

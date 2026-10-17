@@ -1,5 +1,6 @@
 // invariant: through the package entry: it wires the integration registry the constructors consume (`no-framework-internals`).
-import { postgres, redis, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
 /* oxlint-disable jterrazz/runner-in-specification-file -- negative constructor specs:
    every specification.api() call here MUST fail to start, so no runner can
    live in a *.specification.ts file (`runner-in-specification-file`'s sanctioned home is for runners that

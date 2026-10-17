@@ -24,10 +24,6 @@
     ComponentUi
     ComponentVisitor
     ContainerAccessor
-    ContainerOptions
-    ContainerPort
-    DatabaseKeys
-    DatabasePort
     DeviceOpenOptions
     DevicePort
     DeviceScreen
@@ -46,17 +42,10 @@
     FileAt
     FilesystemAccessor
     HonoApp
-    HttpResponseInit
     HttpResult
-    HttpStreamInit
-    HttpStubFilter
     IntegrationHandle
     IntegrationSpecification
     IntegrationSpecificationOptions
-    Intercept
-    InterceptOptions
-    InterceptScope
-    IsolationStrategy
     Job
     JobHandle
     JobResult
@@ -74,7 +63,6 @@
     LiterateRunFlags
     LiterateServeRegistration
     MatchFixtureOptions
-    MatchableRequest
     Matcher
     MatcherKind
     MobileBackendOptions
@@ -92,11 +80,7 @@
     PinnedClock
     PositionedCases
     PositionedRuleTester
-    PostgresOptions
     PrepareStep
-    ProcessHandle
-    ProcessOptions
-    RedisOptions
     RelativePath
     RenderResult
     RenderSubject
@@ -104,13 +88,10 @@
     ResponseAccessor
     ScreenNode
     ScreenResult
-    SeedSource
     ServerPort
     ServerRequestOptions
     ServerResponse
     ServerSpec
-    ServiceHandle
-    ServiceRecord
     SpecDocument
     SpecEnvToken
     SpecFileAssertion
@@ -119,21 +100,10 @@
     SpecServeEntry
     SpecStream
     SpecificationConfig
-    SqliteOptions
-    SseEvent
-    StreamBody
-    Stub
-    StubInput
-    StubRequest
-    StubResponder
-    StubResponse
-    StubResponseValue
-    Stubs
     TableAccessor
     Target
     TargetOptions
     TextAccessor
-    TextFilter
     VisitScenario
     WaitUntilOptions
     WebsiteBackendOptions
@@ -141,7 +111,6 @@
     WebsiteSpecification
     WebsiteSpecificationOptions
     WebsiteVisitor
-    anthropic
     banner
     button
     clock
@@ -149,8 +118,6 @@
     component
     content
     contentinfo
-    defineStub
-    defineStubs
     dialog
     directory
     disabled
@@ -160,20 +127,14 @@
     focused
     form
     heading
-    http
-    intercept
     link
     listitem
     main
     match
     mockOf
     navigation
-    openai
     option
     packed
-    postgres
-    process
-    redis
     region
     required
     row
@@ -181,7 +142,6 @@
     search
     selected
     specification
-    sqlite
     status
     table
     testId
@@ -189,6 +149,50 @@
     valued
     waitUntil
     within
+
+@jterrazz/test/services:
+    ContainerOptions
+    ContainerPort
+    DatabaseKeys
+    DatabasePort
+    IsolationStrategy
+    PostgresOptions
+    ProcessHandle
+    ProcessOptions
+    RedisOptions
+    SeedSource
+    ServiceHandle
+    ServiceRecord
+    SqliteOptions
+    postgres
+    process
+    redis
+    sqlite
+
+@jterrazz/test/stubs:
+    HttpResponseInit
+    HttpStreamInit
+    HttpStubFilter
+    Intercept
+    InterceptOptions
+    InterceptScope
+    MatchableRequest
+    SseEvent
+    StreamBody
+    Stub
+    StubInput
+    StubRequest
+    StubResponder
+    StubResponse
+    StubResponseValue
+    Stubs
+    TextFilter
+    anthropic
+    defineStub
+    defineStubs
+    http
+    intercept
+    openai
 
 @jterrazz/test/vitest:
     ApiProjectOptions
@@ -284,4 +288,21 @@
     waitUntil
     within
 
-the page build lacks of the node build's values: none
+@jterrazz/test/services (browser):
+    ProcessHandle
+    postgres
+    process
+    redis
+    sqlite
+
+@jterrazz/test/stubs (browser):
+    anthropic
+    defineStub
+    defineStubs
+    http
+    intercept
+    openai
+
+the page build of @jterrazz/test lacks of the node build's values: none
+the page build of @jterrazz/test/services lacks of the node build's values: none
+the page build of @jterrazz/test/stubs lacks of the node build's values: none

@@ -25,6 +25,7 @@ import { noStatusOnlyTest } from './expectations/no-status-only-test.js';
 import { noTransformDuplicatingTokens } from './expectations/no-transform-duplicating-tokens.js';
 import { resultComparedWhole } from './expectations/result-compared-whole.js';
 import { noTestCodeInProduction } from './imports/no-test-code-in-production.js';
+import { serviceOrStubFromItsSubpath } from './imports/service-or-stub-from-its-subpath.js';
 import { goldenPathHasExtension } from './layout/golden-path-has-extension.js';
 import { oneDescribePerFile } from './layout/one-describe-per-file.js';
 import { pathsNamedInTheTest } from './layout/paths-named-in-the-test.js';
@@ -104,6 +105,7 @@ const plugin: LintPlugin = {
         'literate-runner-exists': literateRunnerExists,
         'no-raw-env-write': noRawEnvWrite,
         'no-test-code-in-production': noTestCodeInProduction,
+        'service-or-stub-from-its-subpath': serviceOrStubFromItsSubpath,
         'no-dom-in-module-test': noDomInModuleTest,
         'test-in-its-tests-folder': testInItsTestsFolder,
         'no-module-mock': noModuleMock,

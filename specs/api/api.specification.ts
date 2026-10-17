@@ -1,4 +1,5 @@
-import { postgres, redis, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { postgres, redis } from '@jterrazz/test/services';
 import { afterAll } from 'vitest';
 
 import { createApp } from '../__fixtures__/specimen-api/app.js';

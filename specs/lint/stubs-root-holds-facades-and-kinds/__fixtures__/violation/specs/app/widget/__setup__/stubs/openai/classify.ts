@@ -1,4 +1,4 @@
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 // The folder says openai, every builder the unit calls says http (`stubs-root-holds-facades-and-kinds`).
 export default defineStub({

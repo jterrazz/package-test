@@ -166,7 +166,7 @@ describe('index.vitest', () => {
     });
 
     test('vitestConfig — a component project resolves its root and its aliases from the project, and a setup is read as a path alone', async () => {
-        // Given - a component project with aliases of each kind and a setup list holding a stray value, one rooted in a folder of its own with its vite config there, and one with no alias
+        // Given - a component project with aliases of each kind and a setup list holding a stray value, one rooted in a folder of its own with its vite config there, one with no alias, and one listing its aliases in order
         const aliased = projectDeclaring(
             "{ component: { reason: 'the app', setup: ['start.ts', 3], vite: { resolve: { alias: { '@': './src', abs: '/abs', obj: { x: 1 }, pkg: 'some-package' } } } } }",
         );
@@ -181,23 +181,28 @@ describe('index.vitest', () => {
         const plain = projectDeclaring(
             "{ component: { reason: 'the app', vite: { define: { A: '1' } } } }",
         );
+        const listed = projectDeclaring(
+            "{ component: { reason: 'the app', vite: { resolve: { alias: [{ find: 'app/sub', replacement: './sub.js' }, { find: 'app', replacement: 'some-package' }, 3] } } } }",
+        );
 
         // When - the configs are derived
         const projects = await Promise.all(
-            [aliased, rooted, plain].map(async (root) => {
+            [aliased, rooted, plain, listed].map(async (root) => {
                 const [project] = await projectsOf(root);
 
                 return project;
             }),
         );
 
-        // Then - the relative alias anchored at the project root, the others as written; the rooted one's own config read; the stray setup dropped; a config with no alias as written
+        // Then - the relative alias anchored at the project root, in a record as in a list, the others as written; the rooted one's own config read; the stray setup dropped; a config with no alias as written
         expect(
             projects.map((project, index) => [
                 project?.resolve?.alias,
                 [project?.test?.globalSetup ?? []]
                     .flat()
-                    .filter((path) => path.startsWith([aliased, rooted, plain][index] ?? '')),
+                    .filter((path) =>
+                        path.startsWith([aliased, rooted, plain, listed][index] ?? ''),
+                    ),
                 project?.define,
             ]),
         ).toStrictEqual([
@@ -208,6 +213,15 @@ describe('index.vitest', () => {
             ],
             [{ '#': '/hash' }, [], undefined],
             [undefined, [], { A: '1' }],
+            [
+                [
+                    { find: 'app/sub', replacement: join(listed, 'sub.js') },
+                    { find: 'app', replacement: 'some-package' },
+                    3,
+                ],
+                [],
+                undefined,
+            ],
         ]);
     });
 });

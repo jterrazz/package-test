@@ -1,4 +1,4 @@
-import { http } from '@jterrazz/test';
+import { http } from '@jterrazz/test/stubs';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { describe, expect, onTestFinished, test } from 'vitest';

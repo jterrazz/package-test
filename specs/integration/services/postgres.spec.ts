@@ -1,4 +1,5 @@
-import { file, postgres } from '@jterrazz/test';
+import { file } from '@jterrazz/test';
+import { postgres } from '@jterrazz/test/services';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';

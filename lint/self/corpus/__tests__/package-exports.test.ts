@@ -1,7 +1,9 @@
 import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { exportedNames } from '../../../kit/project/exported-names.js';
 import { materialAt } from '../../../kit/project/material.js';
+import { SUBPATH_NAMES } from '../../../kit/project/subpath-names.js';
 import {
     augmentedPackages,
     compiledSources,
@@ -28,5 +30,36 @@ describe('package-exports', () => {
         expect(sources).toContain(resolve(ROOT, 'src/specifications/api/api.handle.ts'));
         const material = sources.filter((source) => materialAt(source) !== undefined);
         expect(material.map((source) => relative(ROOT, source))).toStrictEqual([]);
+    });
+
+    test('the names a spec subpath publishes are the names rule `service-or-stub-from-its-subpath` moves, and the root publishes none of them', () => {
+        // Given - what each entry publishes, read off its source
+        const root = exportedNames(resolve(ROOT, 'src/index.ts'));
+        const published = {
+            '@jterrazz/test/services': exportedNames(resolve(ROOT, 'src/index.services.ts')),
+            '@jterrazz/test/stubs': exportedNames(resolve(ROOT, 'src/index.stubs.ts')),
+        };
+
+        // Then - the rule's lists are each subpath's names, and none of them is the root's
+        expect(
+            Object.fromEntries(
+                Object.entries(published).map(([subpath, names]) => [
+                    subpath,
+                    [...names].toSorted(),
+                ]),
+            ),
+        ).toStrictEqual(
+            Object.fromEntries(
+                Object.entries(SUBPATH_NAMES).map(([subpath, names]) => [
+                    subpath,
+                    names.toSorted(),
+                ]),
+            ),
+        );
+        expect(
+            Object.values(SUBPATH_NAMES)
+                .flat()
+                .filter((name) => root.has(name)),
+        ).toStrictEqual([]);
     });
 });

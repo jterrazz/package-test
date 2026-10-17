@@ -188,7 +188,8 @@ export default await oxlintConfig(import.meta.url);
 ## Pitfalls
 
 - **Forgetting `afterAll(cleanup)` in a specification file.** The services leak into the next suite (rule `cleanup-passed-to-after-all`).
-- **Importing from a subpath the package does not publish** (`@jterrazz/test/services`). Every name a test uses comes from `@jterrazz/test`; the tool entries are `/vitest`, `/config`, `/oxlint` and `/schema` (rule `no-unpublished-subpath`).
+- **Importing from a subpath the package does not publish** (`@jterrazz/test/matchers`). A test imports from `@jterrazz/test`, `@jterrazz/test/services` and `@jterrazz/test/stubs`; the tool entries are `/vitest`, `/config`, `/oxlint` and `/schema` (rule `no-unpublished-subpath`).
+- **Importing a service or a stub from the root.** `postgres()` comes from `@jterrazz/test/services` and `http` from `@jterrazz/test/stubs`, so a spec that starts no container and serves no stub loads neither; `npx typescript fix` moves such an import to its subpath (rule `service-or-stub-from-its-subpath`).
 - **Writing `browser:` in a config by hand.** `component()` pins the provider to the runner's version, serves the service worker and pre-bundles cold dependencies; a derived config has no place for a hand-written one: a project's `specification` is its helper.
 
 ## Upgrading

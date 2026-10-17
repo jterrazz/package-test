@@ -43,6 +43,16 @@
             "browser": "./dist/browser/index.js",
             "import": "./dist/index.js"
         },
+        "./services": {
+            "types": "./dist/services.d.ts",
+            "browser": "./dist/browser/services.js",
+            "import": "./dist/services.js"
+        },
+        "./stubs": {
+            "types": "./dist/stubs.d.ts",
+            "browser": "./dist/browser/stubs.js",
+            "import": "./dist/stubs.js"
+        },
         "./vitest": {
             "types": "./dist/vitest.d.ts",
             "import": "./dist/vitest.js"

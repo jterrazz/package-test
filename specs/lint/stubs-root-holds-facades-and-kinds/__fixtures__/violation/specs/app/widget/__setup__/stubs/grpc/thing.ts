@@ -1,4 +1,4 @@
-import { defineStub, http } from '@jterrazz/test';
+import { defineStub, http } from '@jterrazz/test/stubs';
 
 // "grpc" is not a provider directory (`stubs-root-holds-facades-and-kinds`).
 export default defineStub({
