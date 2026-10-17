@@ -186,6 +186,20 @@ describe('liftGround', () => {
         expect(liftGround(root, join(root, 'cli/fix'))).toStrictEqual([]);
     });
 
+    test('liftGround — leaves a file whose new place a folder holds', () => {
+        // Given - a spec moved from fix to check, standing on a file of fix's ground whose name check gives a folder
+        const root = specsTree({
+            'cli/check/__fixtures__/comments/rule/index.ts': 'export {};\n',
+            'cli/check/kept.spec.ts':
+                "test('k', async () => { await cli.fixture(file('../fix/__fixtures__/comments')).exec('check'); });\n",
+            'cli/fix/__fixtures__/comments': 'a file\n',
+        });
+
+        // When - the fix folder's ground is lifted
+        // Then - nothing moved
+        expect(liftGround(root, join(root, 'cli/fix'))).toStrictEqual([]);
+    });
+
     test('liftGround — removes the namesake folder its entries all left', () => {
         // Given - a spec moved from fix to check, standing on the one project of fix's comments/, a folder check already holds
         const root = specsTree({
