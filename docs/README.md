@@ -1,8 +1,8 @@
-# @jterrazz/test — the manual
+# @jterrazz/test: the manual
 
 How to test with `@jterrazz/test`, and how this repository is built. New here: [Getting started](start/getting-started.md), then the guide of the kind of test you are writing. The front page is the root `README.md`; the brief an agent opens first is the root `AGENTS.md`.
 
-The pages follow the package's four export families — what is tested, what surrounds the subject, acting on a screen, judging the result: the first is a guide per kind, the other three are reference.
+The pages follow the package's four export families (what is tested, what surrounds the subject, acting on a screen, judging the result). The first is a guide per kind, the other three are reference.
 
 ## Start
 
@@ -13,20 +13,20 @@ The pages follow the package's four export families — what is tested, what sur
 
 ## Guides
 
-### What is tested — one guide per kind
+### What is tested: one guide per kind
 
-| Guide                                            | The subject                                                                              |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| [Module tests](guides/module-tests.md)           | One module, in its folder's `__tests__/`, nothing started — `<file>.test.ts`             |
-| [Integration specs](guides/integration-specs.md) | A module against real services, or against a golden — `specification.integration()`      |
-| [Component specs](guides/component-specs.md)     | A rendered unit in a real Chromium, in its folder's `__tests__/` — the `component` chain |
-| [Website specs](guides/website-specs.md)         | A served page, fetched or driven in a browser — `specification.website()`                |
-| [Mobile specs](guides/mobile-specs.md)           | A native app on an iOS simulator — `specification.mobile()`                              |
-| [API specs](guides/api-specs.md)                 | An HTTP app, in-process, through complete requests — `specification.api()`               |
-| [Job specs](guides/job-specs.md)                 | A pipeline triggered by name — `specification.job()`                                     |
-| [CLI specs](guides/cli-specs.md)                 | A binary in a fresh working directory — `specification.cli()`                            |
-| [Spec documents](guides/spec-documents.md)       | A CLI session written as data — the `<case>.spec.yaml` format                            |
-| [Lint specs](guides/lint-specs.md)               | The rules a project ships, over fixture trees — `specification.lint()`, `ruleTester()`   |
+| Guide                                            | The subject                                                                             |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| [Module tests](guides/module-tests.md)           | One module, in its folder's `__tests__/`, nothing started: `<file>.test.ts`             |
+| [Integration specs](guides/integration-specs.md) | A module against real services, or against a golden: `specification.integration()`      |
+| [Component specs](guides/component-specs.md)     | A rendered unit in a real Chromium, in its folder's `__tests__/`: the `component` chain |
+| [Website specs](guides/website-specs.md)         | A served page, fetched or driven in a browser: `specification.website()`                |
+| [Mobile specs](guides/mobile-specs.md)           | A native app on an iOS simulator: `specification.mobile()`                              |
+| [API specs](guides/api-specs.md)                 | An HTTP app, in-process, through complete requests: `specification.api()`               |
+| [Job specs](guides/job-specs.md)                 | A pipeline triggered by name: `specification.job()`                                     |
+| [CLI specs](guides/cli-specs.md)                 | A binary in a fresh working directory: `specification.cli()`                            |
+| [Spec documents](guides/spec-documents.md)       | A CLI session written as data: the `<case>.spec.yaml` format                            |
+| [Lint specs](guides/lint-specs.md)               | The rules a project ships, over fixture trees: `specification.lint()`, `ruleTester()`   |
 
 ### Developing this repository
 
@@ -53,13 +53,13 @@ The pages follow the package's four export families — what is tested, what sur
 | [Services](reference/services.md)                 | Real databases, caches and processes: `postgres()`, `redis()`, `sqlite()`, `process()` |
 | [Time and doubles](reference/time-and-doubles.md) | `clock`, `mockOf()`, and the doubles ladder                                            |
 
-The disk a subject reads is laid by its chain — `.fixture()`, `.link()` and, for what git cannot carry, `.prepare()` on a CLI ([CLI specs](guides/cli-specs.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([Lint specs](guides/lint-specs.md)) — and every path a test names is spelled with `file()` or `directory()` ([Conventions § The naming recap](concepts/conventions.md#the-naming-recap)).
+The disk a subject reads is laid by its chain: `.fixture()`, `.link()` and, for what git cannot carry, `.prepare()` on a CLI ([CLI specs](guides/cli-specs.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([Lint specs](guides/lint-specs.md)). Every path a test names is spelled with `file()` or `directory()` ([Conventions § The naming recap](concepts/conventions.md#the-naming-recap)).
 
 ### Acting on a screen
 
-| Page                                | Holds                                                                                                                |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [The visitor](reference/visitor.md) | The verbs (`click`, `fill`, `see` …), the targets (`button()`, `field()` …), scoping, and how one element is matched |
+| Page                                | Holds                                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [The visitor](reference/visitor.md) | The verbs (`click`, `fill`, `see` ...), the targets (`button()`, `field()` ...), scoping, and how one element is matched |
 
 ### Judging the result
 
@@ -73,7 +73,7 @@ The disk a subject reads is laid by its chain — `.fixture()`, `.link()` and, f
 | Page                              | Answers                                                                                            |
 | --------------------------------- | -------------------------------------------------------------------------------------------------- |
 | [Linting](reference/linting.md)   | The oxlint plugin, the conventions checker, the ratchet, and the generated catalogue of every rule |
-| [Glossary](reference/glossary.md) | The words this manual uses — kind, runner, chain, oracle, golden, ground, seam, ratchet, door      |
+| [Glossary](reference/glossary.md) | The words this manual uses: kind, runner, chain, oracle, golden, ground, seam, ratchet, door       |
 
 The examples use made-up products: `shoply`, a shop CLI; a news app with an events feed; and hosts under `.test` and `.example`, which never resolve on the internet.
 

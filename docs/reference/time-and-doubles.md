@@ -1,10 +1,10 @@
 # Time and doubles
 
-Two things around a subject are neither a service nor the network: the time it reads, and a collaborator it is handed. This page covers `clock`, which pins time, and `mockOf()`, which doubles an injected port — and the doubles ladder, which says when a double is the right tool at all.
+Two things around a subject are neither a service nor the network: the time it reads, and a collaborator it is handed. This page covers `clock`, which pins time, and `mockOf()`, which doubles an injected port, and the doubles ladder, which says when a double is the right tool at all.
 
 ## The clock
 
-A value a test samples — `Date.now()`, `new Date()`, `Math.random()`, `randomUUID()` — is different on every run, so it never reaches an expectation (rule `no-sampled-value-in-expectation`). Time is the one of those the framework pins for you, and `clock` is the whole vocabulary:
+A value a test samples (`Date.now()`, `new Date()`, `Math.random()`, `randomUUID()`) is different on every run, so it never reaches an expectation (rule `no-sampled-value-in-expectation`). Time is the one of those the framework pins for you, and `clock` is the whole vocabulary:
 
 ```typescript
 import { clock } from '@jterrazz/test';
@@ -29,13 +29,13 @@ The expectation compares what the subject returned, and the instant is a value t
 
 | Form                | Pins                           | For                                                                         |
 | ------------------- | ------------------------------ | --------------------------------------------------------------------------- |
-| `clock.at(iso)`     | the calendar (`Date`)          | a subject that reads the time — a stamp, an expiry, a greeting              |
-| `clock.run(iso?)`   | the calendar and the scheduler | a subject whose behaviour is elapsed time — a debounce, a backoff, a poll   |
-| `clock.advance(ms)` | —                              | moving the pinned clock on; under `run()`, firing every timer that came due |
+| `clock.at(iso)`     | the calendar (`Date`)          | a subject that reads the time: a stamp, an expiry, a greeting               |
+| `clock.run(iso?)`   | the calendar and the scheduler | a subject whose behaviour is elapsed time: a debounce, a backoff, a poll    |
+| `clock.advance(ms)` | none                           | moving the pinned clock on; under `run()`, firing every timer that came due |
 
-**`at()` leaves timers running.** Promises, renders and the framework's own polling keep working, because only `Date` is pinned. **`run()` queues timers instead**, so `setTimeout` and friends fire only when `await clock.advance(ms)` makes them due. That is how a test proves a five-second backoff without waiting five seconds — and without the arbitrary sleep rule `no-sleep` forbids.
+**`at()` leaves timers running.** Promises, renders and the framework's own polling keep working, because only `Date` is pinned. **`run()` queues timers instead**, so `setTimeout` and friends fire only when `await clock.advance(ms)` makes them due. That is how a test proves a five-second backoff without waiting five seconds, and without the arbitrary sleep rule `no-sleep` forbids.
 
-**Both are scopes.** `using _ = clock.at(…)` gives the real clock back when the scope ends, however it ends. `vi.useFakeTimers()` and `vi.setSystemTime()` are what this replaces: each owns a teardown a test will one day forget, and rule `no-vitest-time-or-global-stub` refuses them, naming `clock`.
+**Both are scopes.** `using _ = clock.at(...)` gives the real clock back when the scope ends, however it ends. `vi.useFakeTimers()` and `vi.setSystemTime()` are what this replaces: each owns a teardown a test will one day forget, and rule `no-vitest-time-or-global-stub` refuses them, naming `clock`.
 
 **One clock per test.** A second scope taken inside the first is refused rather than nested: ending the inner one would end the outer one too, since the only state vitest's timers can give back is the real clock. `clock.advance()` with no clock pinned is refused, and so is an instant `Date` cannot read. An instant is an ISO-8601 string, `'2026-03-04T09:30:00Z'`.
 
@@ -51,7 +51,7 @@ afterEach(() => {
 });
 ```
 
-It works, and it is a stopover: `using _ = clock.at(…)` inside the test puts the instant where the test that needs it is read.
+It works, and it is a stopover: `using _ = clock.at(...)` inside the test puts the instant where the test that needs it is read.
 
 A timer a subject sets and must release is proven by `vi.getTimerCount()` after `clock.run()`: a count of zero says the `clearTimeout` ran, and kills the mutants of a `finally` or of the clear itself without a directive.
 
@@ -59,14 +59,14 @@ A timer a subject sets and must release is proven by `vi.getTimerCount()` after 
 
 A chain pins the same instant for its own action with `.clock(iso)`, released when the action resolves:
 
-| On                          | Pins                                                                                                                               |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `api`, `job`, `integration` | the `Date` the app, the job or the module reads — they share the test's process                                                    |
-| `component`                 | the page's `Date`, and nothing else: faking a page's timers would stop React's scheduler                                           |
-| `website` (`.visit()` only) | the page's calendar, before its first byte is parsed. A `.fetch()` opens no page and refuses the pairing                           |
-| `cli`                       | nothing — a binary is another process. Its instant travels through its own env (`TZ`), or the golden absorbs it with `{{iso8601}}` |
+| On                          | Pins                                                                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `api`, `job`, `integration` | the `Date` the app, the job or the module reads; they share the test's process                                                    |
+| `component`                 | the page's `Date`, and nothing else: faking a page's timers would stop React's scheduler                                          |
+| `website` (`.visit()` only) | the page's calendar, before its first byte is parsed. A `.fetch()` opens no page and refuses the pairing                          |
+| `cli`                       | nothing: a binary is another process. Its instant travels through its own env (`TZ`), or the golden absorbs it with `{{iso8601}}` |
 
-A file whose chains all share one instant states it once, on a view: `const morning = api.with({ clock: '2026-03-04T09:30:00Z' })` — [Conventions § What a file shares](../concepts/conventions.md#what-a-file-shares). A chain whose clock is refused leaves nothing armed: the stubs it armed before the clock are released with the refusal.
+A file whose chains all share one instant states it once, on a view: `const morning = api.with({ clock: '2026-03-04T09:30:00Z' })` ([Conventions § What a file shares](../concepts/conventions.md#what-a-file-shares)). A chain whose clock is refused leaves nothing armed: the stubs it armed before the clock are released with the refusal.
 
 ## Doubles
 
@@ -74,25 +74,25 @@ A file whose chains all share one instant states it once, on a view: `const morn
 
 When a subject needs something it does not own, take the FIRST rung that fits. The list is closed: nothing below the fourth rung is a rung.
 
-1. **The real thing**, in the test's process — a pure module, a Hono app handed to `server`, a component mounted in a real Chromium.
-2. **A declared service** — `sqlite()`, `postgres()`, `redis()`, `process()` ([Services](services.md)): real, isolated per worker, reset at the start of every chain.
-3. **A stub** — `.intercept()` on a chain, or `intercept()` around module code ([Stubs](stubs.md)). Strict from the first stub: a request no stub answers fails the test.
-4. **A typed port double** — `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function. Asserting a call on one is a boundary observation; asserting only on doubles the test built proves nothing.
+1. **The real thing**, in the test's process: a pure module, a Hono app handed to `server`, a component mounted in a real Chromium.
+2. **A declared service:** `sqlite()`, `postgres()`, `redis()`, `process()` ([Services](services.md)): real, isolated per worker, reset at the start of every chain.
+3. **A stub:** `.intercept()` on a chain, or `intercept()` around module code ([Stubs](stubs.md)). Strict from the first stub: a request no stub answers fails the test.
+4. **A typed port double:** `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function. Asserting a call on one is a boundary observation; asserting only on doubles the test built proves nothing.
 
 **Off the ladder**, each with where to go instead:
 
-| Instead of                                       | Use                                           |
-| ------------------------------------------------ | --------------------------------------------- |
-| `vi.stubGlobal('fetch')`, `msw`, `nock`, `sinon` | `intercept()` or `.intercept()`, a stub       |
-| `vi.useFakeTimers()`, `vi.setSystemTime()`       | `clock`                                       |
-| `toMatchSnapshot()`                              | a golden, `toMatch(file('./__expected__/…'))` |
-| `vi.mock()` of your own module                   | inject the port, and double it                |
+| Instead of                                       | Use                                             |
+| ------------------------------------------------ | ----------------------------------------------- |
+| `vi.stubGlobal('fetch')`, `msw`, `nock`, `sinon` | `intercept()` or `.intercept()`, a stub         |
+| `vi.useFakeTimers()`, `vi.setSystemTime()`       | `clock`                                         |
+| `toMatchSnapshot()`                              | a golden, `toMatch(file('./__expected__/...'))` |
+| `vi.mock()` of your own module                   | inject the port, and double it                  |
 
 A native module a project genuinely cannot inject is the one exception, allowed per specifier with a reason in the `no-module-mock` options ([Linting § Deviating from a rule](linting.md#deviating-from-a-rule)). Why the ladder is closed: [ADR-005](https://github.com/jterrazz/package-test/blob/main/docs/decisions/005-the-doubles-ladder-is-closed.md).
 
 ### `mockOf()`
 
-`mockOf<Port>()` is the one double a test builds itself, and only a module test does — every other kind declares its doubles, because the test does not hold the subject's wiring.
+`mockOf<Port>()` is the one double a test builds itself, and only a module test does: every other kind declares its doubles, because the test does not hold the subject's wiring.
 
 ```typescript
 import { mockOf } from '@jterrazz/test';
@@ -117,9 +117,9 @@ describe('checkout', () => {
 });
 ```
 
-It is deep by default: reading a member nobody stubbed hands back another double, however far the port nests. `mockOf<Port>({ deep: false })` is the flat form — every member of the port and nothing beneath them.
+It is deep by default: reading a member nobody stubbed hands back another double, however far the port nests. `mockOf<Port>({ deep: false })` is the flat form: every member of the port and nothing beneath them.
 
-State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app — a class implementing the port, swapped in by the specification — is a test adapter, and lives in `__setup__/<port>.adapter.ts` ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)).
+State the port. `T` has no default, so `mockOf()` with no type argument answers for `object` and the error lands where the double is used, not where it was made. A double a runner hands the app (a class implementing the port, swapped in by the specification) is a test adapter, and lives in `__setup__/<port>.adapter.ts` ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)).
 
 ### A rejection the subject must handle
 

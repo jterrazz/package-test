@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-A testing framework on vitest for whole products: HTTP APIs, background jobs, CLIs, websites, native mobile apps, rendered components, modules against real databases, and the lint rules a project ships. You declare what a test needs — Postgres, a built binary, a real Chromium, an iOS simulator — and the framework starts it, isolates it per worker and cleans it up. Each test is one sentence: a few setups, one action, and the whole result compared with `expect()`.
+A testing framework on vitest for whole products: HTTP APIs, background jobs, CLIs, websites, native mobile apps, rendered components, modules against real databases, and the lint rules a project ships. You declare what a test needs (Postgres, a built binary, a real Chromium, an iOS simulator), and the framework starts it, isolates it per worker and cleans it up. Each test is one sentence: a few setups, one action, and the whole result compared with `expect()`.
 
 ```typescript
 // specs/api/users/list/shape.spec.ts
@@ -25,7 +25,7 @@ describe('shape', () => {
 });
 ```
 
-`api` comes from a specification file that builds it once for the suite: `specification.api({ services: { db: sqlite() }, server: … })` starts the database, wires your app to it and serves it in the test process. [Getting started](docs/start/getting-started.md) walks through it from `npm install` to a green run.
+`api` comes from a specification file that builds it once for the suite: `specification.api({ services: { db: sqlite() }, server: ... })` starts the database, wires your app to it and serves it in the test process. [Getting started](docs/start/getting-started.md) walks through it from `npm install` to a green run.
 
 ## Why
 
@@ -41,7 +41,7 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest
 
 [`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript) is the toolchain the framework is built for: one devDependency that builds, type-checks, lints and formats a project, run as `npx typescript check` and `npx typescript fix` (its bin is named `typescript`; it is not Microsoft's compiler package). It is a required peer ([why](docs/start/set-up-a-project.md#what-to-install)), and its lint conventions are opt-in: a project that never lists the framework's preset in `jterrazz.config.ts` runs none of them, and writes its tests all the same.
 
-An ES module project on Node 24, vitest 5 and `@jterrazz/typescript` 11 is required ([Setting up § Project requirements](docs/start/set-up-a-project.md#project-requirements)). A browser, a database driver or a simulator is installed only by a project that tests through it, and the error names the package when one is missing — [Setting up a project](docs/start/set-up-a-project.md#what-to-install).
+An ES module project on Node 24, vitest 5 and `@jterrazz/typescript` 11 is required ([Setting up § Project requirements](docs/start/set-up-a-project.md#project-requirements)). A browser, a database driver or a simulator is installed only by a project that tests through it, and the error names the package when one is missing: see [Setting up a project](docs/start/set-up-a-project.md#what-to-install).
 
 ## What you can test
 
@@ -63,9 +63,9 @@ Which kind a test is depends on its subject, and one ordered list of questions d
 
 The manual is [`docs/`](docs/README.md), mapped by the same four families as the package's exports:
 
-- **What is tested** — one guide per kind, linked above.
-- **What surrounds the subject** — [stubs](docs/reference/stubs.md) for the network, [services](docs/reference/services.md) for databases and processes, [time and doubles](docs/reference/time-and-doubles.md).
-- **Acting on a screen** — [the visitor](docs/reference/visitor.md): `click`, `fill`, `see`, and how elements are named.
-- **Judging the result** — [assertions](docs/reference/assertions.md) and [tokens](docs/reference/tokens.md).
+- **What is tested:** one guide per kind, linked above.
+- **What surrounds the subject:** [stubs](docs/reference/stubs.md) for the network, [services](docs/reference/services.md) for databases and processes, [time and doubles](docs/reference/time-and-doubles.md).
+- **Acting on a screen:** [the visitor](docs/reference/visitor.md): `click`, `fill`, `see`, and how elements are named.
+- **Judging the result:** [assertions](docs/reference/assertions.md) and [tokens](docs/reference/tokens.md).
 
-The conventions and their reasons are [Conventions](docs/concepts/conventions.md); every rule, generated from the code, is [Linting](docs/reference/linting.md). The API is the types the package publishes, one declaration file per entry — `dist/index.d.ts` for `@jterrazz/test`, then `dist/vitest.d.ts`, `dist/config.d.ts` and `dist/oxlint.d.ts` — which your editor reads, and which you can browse without one in `node_modules/@jterrazz/test/dist/` or on [npm's Code tab](https://www.npmjs.com/package/@jterrazz/test?activeTab=code); each guide shows its kind's constructor, chain and result. Agents read [`skills/jterrazz-test/SKILL.md`](skills/jterrazz-test/SKILL.md).
+The conventions and their reasons are [Conventions](docs/concepts/conventions.md); every rule, generated from the code, is [Linting](docs/reference/linting.md). The API is the types the package publishes, one declaration file per entry (`dist/index.d.ts` for `@jterrazz/test`, then `dist/vitest.d.ts`, `dist/config.d.ts` and `dist/oxlint.d.ts`), which your editor reads, and which you can browse without one in `node_modules/@jterrazz/test/dist/` or on [npm's Code tab](https://www.npmjs.com/package/@jterrazz/test?activeTab=code); each guide shows its kind's constructor, chain and result. Agents read [`skills/jterrazz-test/SKILL.md`](skills/jterrazz-test/SKILL.md).

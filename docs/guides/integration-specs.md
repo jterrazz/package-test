@@ -1,6 +1,6 @@
 # Integration specs: a module against the real thing
 
-`specification.integration()` tests a module — a function your test calls — against the real things it depends on: a database, a cache, a process, a declared stub. It also takes a module whose expected answer is a golden file. There is no HTTP, no binary and no page here; what makes this a spec rather than a module test beside the code is what the module stands on.
+`specification.integration()` tests a module (a function your test calls) against the real things it depends on: a database, a cache, a process, a declared stub. It also takes a module whose expected answer is a golden file. There is no HTTP, no binary and no page here; what makes this a spec rather than a module test beside the code is what the module stands on.
 
 ```typescript
 // specs/integration/integration.specification.ts
@@ -42,23 +42,23 @@ describe('orders', () => {
 
 An integration spec answers one question: **given these real services, what does this module return, throw, or leave in the database?** Two kinds of subject land here, the two halves of the fork's eighth question:
 
-- **a module on a real service** — a repository against Postgres, a cache client against Redis;
-- **a module whose oracle is a golden** — a renderer, a parser, a formatter whose output is long enough to be read as a file.
+- **a module on a real service:** a repository against Postgres, a cache client against Redis;
+- **a module whose oracle is a golden:** a renderer, a parser, a formatter whose output is long enough to be read as a file.
 
 A subject that answers HTTP, runs as a binary or draws a screen belongs to that kind instead; a module that needs neither a service nor a golden is a module test ([the fork](../start/getting-started.md#which-kind-of-test)). Why this is a kind of its own: [ADR-004](https://github.com/jterrazz/package-test/blob/main/docs/decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-specification.md).
 
 ## The constructor
 
-| Option     | Means                                                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `services` | the named record the module is specified against — `postgres()`, `redis()`, `sqlite()`, `process()`. Omit it for the golden-only half |
-| `root`     | project-root override (rule `no-redundant-root`), auto-discovered from the calling file                                               |
+| Option     | Means                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `services` | the named record the module is specified against: `postgres()`, `redis()`, `sqlite()`, `process()`. Omit it for the golden-only half |
+| `root`     | project-root override (rule `no-redundant-root`), auto-discovered from the calling file                                              |
 
 The handle is `{ integration, cleanup }`, destructured with those names (rule `no-runner-alias`) and cleaned up with `afterAll(cleanup)` (rule `cleanup-passed-to-after-all`).
 
 ## The chain
 
-Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
+Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })`, a view whose every chain starts at the instant the whole file shares ([Conventions](../concepts/conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
 
 | Setup                                 | Means                                                                                                   |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -78,11 +78,11 @@ Databases reset at the start of every chain, exactly as on api and job (rules `o
 
 Two readings, never both.
 
-| Accessor         | Is                                                                                                                                            |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `result.value`   | what the call RETURNED — a `TextAccessor` for a string, a `JsonAccessor<T>` for anything else, the union of both for a `T` that may be either |
-| `result.error`   | what it THREW, as text: an `Error`'s message, or the value itself. Empty when it returned                                                     |
-| `result.table()` | a table of a declared database, for row-level assertions                                                                                      |
+| Accessor         | Is                                                                                                                                           |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `result.value`   | what the call RETURNED: a `TextAccessor` for a string, a `JsonAccessor<T>` for anything else, the union of both for a `T` that may be either |
+| `result.error`   | what it THREW, as text: an `Error`'s message, or the value itself. Empty when it returned                                                    |
+| `result.table()` | a table of a declared database, for row-level assertions                                                                                     |
 
 A refusal is a reading, never a `try`/`catch`:
 
@@ -99,26 +99,26 @@ test('refuses an order that is not one', async () => {
 });
 ```
 
-That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all — `expect(result.error.text).toBe('')` is how a chain says "and it did not refuse": `result.error` is empty rather than absent when the call returned, so the empty text is the whole answer.
+That is what keeps a spec of a refusal the same size as a spec of a success, and what stops an "it should throw" spec from passing when nothing throws at all. `expect(result.error.text).toBe('')` is how a chain says "and it did not refuse": `result.error` is empty rather than absent when the call returned, so the empty text is the whole answer.
 
-`.call<T>()` carries `T` through to the result, so one field can be read where one field is what the spec means — `expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string — beside the comparison of the whole value, never instead of it (rule `result-compared-whole`).
+`.call<T>()` carries `T` through to the result, so one field can be read where one field is what the spec means (`expect(result.value.value.ok).toBe(true)` for JSON, `result.value.text` for a string), beside the comparison of the whole value, never instead of it (rule `result-compared-whole`).
 
-**The accessor follows the value, and the type says so.** A subject typed exactly `string` reads as a `TextAccessor`; one that can never be a string reads as a `JsonAccessor<T>`; one that MAY be a string (`string | undefined`, `string | number`) is typed as the union of the two, and the spec narrows it — because only the value in hand decides, and a type that guessed handed back a `JsonAccessor` whose `.value` was silently `undefined` while the runtime had built a `TextAccessor`.
+**The accessor follows the value, and the type says so.** A subject typed exactly `string` reads as a `TextAccessor`; one that can never be a string reads as a `JsonAccessor<T>`; one that MAY be a string (`string | undefined`, `string | number`) is typed as the union of the two, and the spec narrows it, because only the value in hand decides, and a type that guessed handed back a `JsonAccessor` whose `.value` was silently `undefined` while the runtime had built a `TextAccessor`.
 
-**What crosses is JSON, not the object.** A non-string value is serialised, so a `Map`, a `Set`, a `Date` or a class instance arrives as the plain JSON it serialises to — `{}`, `{}`, an ISO string, an object of its own fields — while `T` still claims the original type. A call whose answer is one of those projects it to plain data INSIDE the call, where the projection is visible:
+**What crosses is JSON, not the object.** A non-string value is serialised, so a `Map`, a `Set`, a `Date` or a class instance arrives as the plain JSON it serialises to (`{}`, `{}`, an ISO string, an object of its own fields), while `T` still claims the original type. A call whose answer is one of those projects it to plain data INSIDE the call, where the projection is visible:
 
 ```typescript
 // the Map is projected where the spec can see it, not silently at the seam
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./__expected__/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([Tokens](../reference/tokens.md), [Assertions](../reference/assertions.md)).
+Both accessors are the package's ordinary subjects, compared whole: to the value written in place (`toMatch({ ... })` for a json, `toMatch('...')` for a text) or to `file('./__expected__/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([Tokens](../reference/tokens.md), [Assertions](../reference/assertions.md)).
 
 A call that a declared stub never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule `network-strict-after-first-stub`).
 
 ## Unique here
 
-### The golden half — a pure module, no services at all
+### The golden half: a pure module, no services at all
 
 `specification.integration()` with no options is the pure-module runner: nothing starts, and what earns the folder is the golden.
 
@@ -145,7 +145,7 @@ The golden is named by a template literal, and the checker's `no-unused-ground` 
 
 The `integration` specification is the canonical project: a `specs/integration/` folder makes it, it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node specifications. `jterrazz.config.ts` states nothing for it until it departs from that.
 
-An env-gated sub-suite is an option of `test.projects.integration`, not a second project — the whole point of `{ include, exclude, timeout }`:
+An env-gated sub-suite is an option of `test.projects.integration`, not a second project: the whole point of `{ include, exclude, timeout }`:
 
 ```typescript
 const integration = {
@@ -162,11 +162,11 @@ specs/integration/
 ├── pure.specification.ts          # a second runner: no services, goldens only
 └── orders/                        # a domain
     ├── orders.spec.ts             # under specs/, the suffix is .spec.ts (rule `file-suffix-matches-place`)
-    ├── __seeds__/two-orders.sql       # ground: database state — beside its one test, or the tests of the leaf that share it
-    └── __expected__/                  # ground: a golden several tests share — one test's is written in place (`ground-shared-or-inline`)
+    ├── __seeds__/two-orders.sql       # ground: database state, beside its one test, or the tests of the leaf that share it
+    └── __expected__/                  # ground: a golden several tests share; one test's is written in place (`ground-shared-or-inline`)
 ```
 
-**`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the stubs it declared are checked when that call ends, and a stub declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.
+**`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the stubs it declared are checked when that call ends, and a stub declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification: it does not inherit the first's obligations.
 
 ## Pitfalls
 

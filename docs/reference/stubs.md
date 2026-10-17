@@ -1,14 +1,14 @@
 # Stubs: the outside world, declared
 
-Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on every specification that reaches the network — `api`, `job`, `integration`, `component`, `website` and `mobile`.
+Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form: no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on every specification that reaches the network: `api`, `job`, `integration`, `component`, `website` and `mobile`.
 
-A stub states what the provider replies, and nothing runs it against the provider it stands for — so it is named for what it does, never for a verification it does not make.
+A stub states what the provider replies, and nothing runs it against the provider it stands for, so it is named for what it does, never for a verification it does not make.
 
 ## The principle
 
-> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`__requests__/`, `__expected__/`) — never a mock format.
+> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`__requests__/`, `__expected__/`), never a mock format.
 
-A stub is behavior: it decides what matches and what is served, it can count, it can be required, it can compose. That belongs in TypeScript, where the type checker and the app's own builders are reachable. A 200-line payload is not behavior — it is data, and it goes to a sibling `.json` the stub imports. And `.http` keeps the one role it is good at: a complete, readable document of a request your api receives or a response your api returns.
+A stub is behavior: it decides what matches and what is served, it can count, it can be required, it can compose. That belongs in TypeScript, where the type checker and the app's own builders are reachable. A 200-line payload is not behavior: it is data, and it goes to a sibling `.json` the stub imports. And `.http` keeps the one role it is good at: a complete, readable document of a request your api receives or a response your api returns.
 
 ## `defineStub`
 
@@ -23,18 +23,18 @@ export default defineStub({
 
 The request is written as a path, so it matches that path on any origin: the app's real host, wherever its config points, does not matter. A full URL (`'https://news.example/articles/{{uuid}}'`) matches that origin alone ([§ `http.*`](#http--any-url)).
 
-| Field       | Meaning                                                                                                                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `request`   | What outgoing call this stub speaks for — a stub builder (`http.*`, `openai.*`, `anthropic.*`)                                                                                  |
-| `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                                                                           |
-| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves.                                                     |
-| `required?` | The chain FAILS unless it was actually requested — at least once, or exactly `times` times when `times` is set, zero included ([`never`](#never--a-call-that-must-not-happen)). |
+| Field       | Meaning                                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`   | What outgoing call this stub speaks for: a stub builder (`http.*`, `openai.*`, `anthropic.*`)                                                                                  |
+| `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                                                                          |
+| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves.                                                    |
+| `required?` | The chain FAILS unless it was actually requested: at least once, or exactly `times` times when `times` is set, zero included ([`never`](#never--a-call-that-must-not-happen)). |
 
 ### Selection
 
-One queue serves all three deliveries. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, none of the headers it states absent is present, and the `match` predicate — if any — passes on the body.
+One queue serves all three deliveries. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, none of the headers it states absent is present, and the `match` predicate, if any, passes on the body.
 
-**The first stub in list order that matches AND is not exhausted wins** — except a never stub (`required` with `times: 0`), which takes every request it matches ([`never`](#never--a-call-that-must-not-happen)). That single rule covers the two shapes you need:
+**The first stub in list order that matches AND is not exhausted wins**, except a never stub (`required` with `times: 0`), which takes every request it matches ([`never`](#never--a-call-that-must-not-happen)). That single rule covers the two shapes you need:
 
 ```typescript
 import { defineStubs, http } from '@jterrazz/test';
@@ -46,16 +46,16 @@ export default defineStubs(
 );
 ```
 
-If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction)). Under node and on the stub backend, a chain that declares **no** stub is not guarded: strictness begins with the first `.intercept()`. In a page it is ([Component specs](../guides/component-specs.md)).
+If every matching stub is exhausted, or nothing matches at all, the spec fails (strict; see [below](#strict-by-construction)). Under node and on the stub backend, a chain that declares **no** stub is not guarded: strictness begins with the first `.intercept()`. In a page it is ([Component specs](../guides/component-specs.md)).
 
-### `times` and `required` — saying what you mean
+### `times` and `required`: saying what you mean
 
-`times` is how a spec asserts a **call count** without reaching for a spy: `times: 3` on a failing stub plus an unlimited success tail says "the app retries exactly three times before it succeeds". `required: true` is the other half — it turns a declaration nobody exercised into a failure:
+`times` is how a spec asserts a **call count** without reaching for a spy: `times: 3` on a failing stub plus an unlimited success tail says "the app retries exactly three times before it succeeds". `required: true` is the other half: it turns a declaration nobody exercised into a failure:
 
 ```typescript
 import { defineStub, http } from '@jterrazz/test';
 
-// If the screen never asks for the 1M range, the spec fails — instead of
+// If the screen never asks for the 1M range, the spec fails, instead of
 // passing green on a chart that silently rendered the default range.
 export default defineStub({
     request: http.get('/indicators', { query: { range: '1M' } }),
@@ -97,9 +97,9 @@ describe('preview', () => {
 });
 ```
 
-Unlike an exhausted stub, a never stub is never skipped: the first request it matches is taken by it, whatever stub follows on the same route, and the subject receives a `418` whose body names the route — a status no HTTP client retries, so an SDK's backoff neither slows the failing spec nor repeats the call in the refusal. The chain then fails at its end, naming the route and every call that reached it. `http.unreachable()` beside an empty error says the call FAILED; only `never` says it did not happen. `openai.never(request)` and `anthropic.never(request)` are the same stub, so a unit of `openai/` or `anthropic/` calls its own folder's builder. It is a stub like any other: it turns the chain's network strict, and in `.with()` it claims its route.
+Unlike an exhausted stub, a never stub is never skipped: the first request it matches is taken by it, whatever stub follows on the same route, and the subject receives a `418` whose body names the route, a status no HTTP client retries, so an SDK's backoff neither slows the failing spec nor repeats the call in the refusal. The chain then fails at its end, naming the route and every call that reached it. `http.unreachable()` beside an empty error says the call FAILED; only `never` says it did not happen. `openai.never(request)` and `anthropic.never(request)` are the same stub, so a unit of `openai/` or `anthropic/` calls its own folder's builder. It is a stub like any other: it turns the chain's network strict, and in `.with()` it claims its route.
 
-## `defineStubs` — it's stubs all the way down
+## `defineStubs`: it's stubs all the way down
 
 A test imports **one** artifact: the world its feature lives in. `defineStubs` composes stubs, lists, and other composites into it, recursively, order preserved.
 
@@ -111,21 +111,21 @@ const events = defineStubs({
     response: http.json({ items: [] }),
 });
 
-// A composite extends a composite — same function, all the way down.
+// A composite extends a composite: same function, all the way down.
 export default defineStubs(events, {
     request: http.get('/articles/{{uuid}}'),
     response: http.json({ id: 'a-1' }),
 });
 ```
 
-### `.with()` — replacement by route, then prepend
+### `.with()`: replacement by route, then prepend
 
 `.with(...)` derives a **variant** without mutating the base. Two steps, in this order:
 
-1. Every base stub whose **route** an override claims is removed. Same route = same `method` + the same declared url pattern (string equality of the declared path, `.source` equality for a RegExp) — filters do not enter it, `without.headers` included: an override `http.get('/me', { without: { headers: ['authorization'] } })` removes every base `GET /me` stub, the authenticated one too, so an override that must keep both states both.
+1. Every base stub whose **route** an override claims is removed. Same route = same `method` + the same declared url pattern (string equality of the declared path, `.source` equality for a RegExp). Filters do not enter it, `without.headers` included: an override `http.get('/me', { without: { headers: ['authorization'] } })` removes every base `GET /me` stub, the authenticated one too, so an override that must keep both states both.
 2. The overrides are **prepended**, keeping their own order.
 
-The prepend is what makes a _more specific_ override work without deleting the generic route it lives beside: `/articles/gone-1` does not claim the route `/articles/{{uuid}}`, so the generic stub survives — but the override is checked first, so the one article that is gone answers 410 while every other article still answers 200.
+The prepend is what makes a _more specific_ override work without deleting the generic route it lives beside: `/articles/gone-1` does not claim the route `/articles/{{uuid}}`, so the generic stub survives, but the override is checked first, so the one article that is gone answers 410 while every other article still answers 200.
 
 ```typescript
 import { defineStub, defineStubs, http } from '@jterrazz/test';
@@ -158,7 +158,7 @@ specs/<specification>/<feature>/
 │   └── events.json                    the payload a unit serves
 └── __setup__/
     └── stubs/
-        ├── newsroom.stubs.ts          PUBLIC — the world and its scenarios, by name
+        ├── newsroom.stubs.ts          PUBLIC: the world and its scenarios, by name
         ├── http/
         │   ├── events.ts                  a unit stub
         │   └── article-gone.ts            a factory: (id) => Stub
@@ -169,21 +169,21 @@ specs/<specification>/<feature>/
             └── draft-reply.ts
 ```
 
-Stubs are TypeScript that prepares specs, so their root sits in a `__setup__/` — the one of the lowest folder the specs using them share ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)). A payload is data, and `__setup__/` holds code alone: it sits in the `__fixtures__/` beside that `__setup__/`, placed like any ground.
+Stubs are TypeScript that prepares specs, so their root sits in a `__setup__/`, the one of the lowest folder the specs using them share ([Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)). A payload is data, and `__setup__/` holds code alone: it sits in the `__fixtures__/` beside that `__setup__/`, placed like any ground.
 
 The rules, enforced by [`stubs-root-holds-facades-and-kinds`](linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](linting.md#stub-data-has-a-builder):
 
-- The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
-- A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.
-- A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
+- The **root** holds only `*.stubs.ts` facades and one folder per stub **kind**: a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind; filenames drop it and go back to being business names.
+- A facade **exports its builders and sets by name**: the world (`export const newsroom = defineStubs(...)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required: a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade (`export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js`) or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.
+- A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone: an `openai/` unit that replies with `http.error(...)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
 - Data with real mass goes to a payload in `__fixtures__/` (served), which the unit imports, or to a sibling `.request.ts` (matched). The stem before the FIRST dot pairs a `.request.ts` with its stub: `classify-article.request.ts` belongs to `classify-article.ts`, and an orphan one is an error.
-- **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
+- **Tests import only `*.stubs.ts`.** Kind folders are internal; reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
 - Shared data has ONE owner: a second stub imports the same `__fixtures__/events.json`. No copies.
 
-A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
+A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source**. Importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
 
 ```typescript
-// __setup__/stubs/newsroom.stubs.ts — the facade a test imports
+// __setup__/stubs/newsroom.stubs.ts: the facade a test imports
 import { defineStubs } from '@jterrazz/test';
 
 import articleGone from './http/article-gone.js';
@@ -195,7 +195,7 @@ export const withArticleGone = (id: string) => newsroom.with(articleGone(id));
 ```
 
 ```typescript
-// __setup__/stubs/http/events.ts — a unit, serving its payload from __fixtures__/
+// __setup__/stubs/http/events.ts: a unit, serving its payload from __fixtures__/
 import { defineStub, http } from '@jterrazz/test';
 
 import payload from '../../../__fixtures__/events.json' with { type: 'json' };
@@ -212,7 +212,7 @@ Every specification that reaches the network takes the same three forms:
 
 | Form                            | Use                                                        |
 | ------------------------------- | ---------------------------------------------------------- |
-| `.intercept(stubs)`             | A composite — the normal case, one import per feature      |
+| `.intercept(stubs)`             | A composite, the normal case, one import per feature       |
 | `.intercept(stub)` / `([a, b])` | A single stub or a list                                    |
 | `.intercept(request, response)` | An inline pair, for one-off plumbing that deserves no name |
 
@@ -262,13 +262,13 @@ describe('rate provider', () => {
 });
 ```
 
-The scope is an `AsyncDisposable`: the handlers come off at the end of the block however the block ends, and an outgoing request no stub accepted is thrown THERE — the same strictness a chain gets (rule `network-strict-after-first-stub`), which is what makes it a guard and not a convenience.
+The scope is an `AsyncDisposable`: the handlers come off at the end of the block however the block ends, and an outgoing request no stub accepted is thrown THERE, with the same strictness a chain gets (rule `network-strict-after-first-stub`), which is what makes it a guard and not a convenience.
 
-**The refusal lands at DISPOSAL, not at the call.** An undeclared request is not rejected where the subject made it: the `fetch` proceeds and fails on its own, and the violation is raised when the scope closes. That is the right place, because a subject that catches its own network failures — a retry loop, an `onError` callback, a fallback value — would swallow a rejection thrown at the call site and the spec would pass on a call nobody declared. Disposal happens after the subject is done, so nothing can catch it.
+**The refusal lands at DISPOSAL, not at the call.** An undeclared request is not rejected where the subject made it: the `fetch` proceeds and fails on its own, and the violation is raised when the scope closes. That is the right place, because a subject that catches its own network failures (a retry loop, an `onError` callback, a fallback value) would swallow a rejection thrown at the call site and the spec would pass on a call nobody declared. Disposal happens after the subject is done, so nothing can catch it.
 
-`await using _ = await intercept(…)` carries two awaits and both are load-bearing. The inner one waits for the network double to be listening; without it the subject could reach the real network before the first handler is in place. The shape refuses that spelling rather than leaving it to discipline: `intercept()` answers a promise, a promise is not an `AsyncDisposable`, and `await using _ = intercept(…)` does not compile.
+`await using _ = await intercept(...)` carries two awaits and both are load-bearing. The inner one waits for the network double to be listening; without it the subject could reach the real network before the first handler is in place. The shape refuses that spelling rather than leaving it to discipline: `intercept()` answers a promise, a promise is not an `AsyncDisposable`, and `await using _ = intercept(...)` does not compile.
 
-A file that declares the same world in several tests factors it into a function, and the two awaits survive the move — the helper is `async`, and it awaits what it hands back:
+A file that declares the same world in several tests factors it into a function, and the two awaits survive the move: the helper is `async`, and it awaits what it hands back:
 
 ```typescript
 async function rateProvider() {
@@ -280,31 +280,31 @@ async function rateProvider() {
 
 Both keywords are the rulebook's, not taste: a function returning a promise is `async` (`typescript/promise-function-async`) and a returned promise is awaited (`typescript/return-await`), so the other spellings do not lint.
 
-It is real in both runtimes — msw's server under node, msw's worker in a page — so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules `no-second-test-runtime` and `no-redundant-test-dependency` refuse a test and a consumer respectively.
+It is real in both runtimes (msw's server under node, msw's worker in a page), so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules `no-second-test-runtime` and `no-redundant-test-dependency` refuse a test and a consumer respectively.
 
-**A subject that fetches a PATH states where the path lives.** `fetch('/api/posts')` is browser code: under node the URL has no base, so the request fails before any stub can answer it. `intercept(stubs, { origin: 'http://console.test' })` gives the block that base — the relative call resolves against it, the stubs match as they would any other request (a path-form stub ignores the origin, an absolute one compares it), and `fetch` is put back when the scope ends. It is the seam's own wrapping, so no test has to own one.
+**A subject that fetches a PATH states where the path lives.** `fetch('/api/posts')` is browser code: under node the URL has no base, so the request fails before any stub can answer it. `intercept(stubs, { origin: 'http://console.test' })` gives the block that base: the relative call resolves against it, the stubs match as they would any other request (a path-form stub ignores the origin, an absolute one compares it), and `fetch` is put back when the scope ends. It is the seam's own wrapping, so no test has to own one.
 
 ```typescript
 await using _ = await intercept(posts, { origin: 'http://console.test' });
 ```
 
-**An empty list is refused.** `intercept(defineStubs())` guards nothing, and a subject with no network needs no intercept at all — the message says so. "This subject makes no network call" is said the other way round: declare each call it could make with [`http.never()`](#never--a-call-that-must-not-happen), and the spec fails if it makes one.
+**An empty list is refused.** `intercept(defineStubs())` guards nothing, and a subject with no network needs no intercept at all, and the message says so. "This subject makes no network call" is said the other way round: declare each call it could make with [`http.never()`](#never--a-call-that-must-not-happen), and the spec fails if it makes one.
 
-**A request fetch refuses is refused.** Under node, a `fetch` whose RequestInit fetch itself would refuse — an empty method, a forbidden one such as `TRACE`, a `GET` or `HEAD` with a body, an invalid header — rejects with fetch's own `TypeError` before any stub sees it. msw alone would build its request with `init.method || 'GET'` and serve the first three, so a subject's literal method mutated to `''` would be answered by a `GET` stub and its mutant survive. `specs/integration/intercept/refused-init.spec.ts` is the proof. In a page the browser's fetch refuses them before the worker.
+**A request fetch refuses is refused.** Under node, a `fetch` whose RequestInit fetch itself would refuse (an empty method, a forbidden one such as `TRACE`, a `GET` or `HEAD` with a body, an invalid header) rejects with fetch's own `TypeError` before any stub sees it. msw alone would build its request with `init.method || 'GET'` and serve the first three, so a subject's literal method mutated to `''` would be answered by a `GET` stub and its mutant survive. `specs/integration/intercept/refused-init.spec.ts` is the proof. In a page the browser's fetch refuses them before the worker.
 
-**A body the subject cancels settles.** Under node, every reply to `fetch` reaches the subject with its body as a stream this package owns, so `response.body.cancel()` — what an SDK client does with a body it will not read, before a retry — resolves at once. The status, the headers and the address the reply came from are read as they were served. msw keeps a branch of every body for itself and never cancels it; the owned stream is what stands between that branch and the subject's cancel. A reply no stub answered is owned too, since msw branches the body of a request it passes through to the network as well. `specs/api/intercept/body-cancel.spec.ts` is the proof for a stub's reply: an app that cancels the body of `http.error(503, { … })` answers its request. `specs/integration/intercept/passthrough-cancel.spec.ts` is the proof for a reply passed through to a real server. In a page nothing is wrapped: the worker's reply reaches the subject through the browser's own network stack, and its cancel settles as served — `specs/component/intercept/quote-status.test.tsx` is the proof.
+**A body the subject cancels settles.** Under node, every reply to `fetch` reaches the subject with its body as a stream this package owns, so `response.body.cancel()` (what an SDK client does with a body it will not read, before a retry) resolves at once. The status, the headers and the address the reply came from are read as they were served. msw keeps a branch of every body for itself and never cancels it; the owned stream is what stands between that branch and the subject's cancel. A reply no stub answered is owned too, since msw branches the body of a request it passes through to the network as well. `specs/api/intercept/body-cancel.spec.ts` is the proof for a stub's reply: an app that cancels the body of `http.error(503, { ... })` answers its request. `specs/integration/intercept/passthrough-cancel.spec.ts` is the proof for a reply passed through to a real server. In a page nothing is wrapped: the worker's reply reaches the subject through the browser's own network stack, and its cancel settles as served; `specs/component/intercept/quote-status.test.tsx` is the proof.
 
-**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its stubs last and its strictness is total ([Component specs](../guides/component-specs.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
+**Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain (`component.intercept(c).render(...)`) because the render registers its stubs last and its strictness is total ([Component specs](../guides/component-specs.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
 ## Three deliveries, one queue
 
 A stub reaches the subject by one of three deliveries, named for where the subject runs.
 
-| Specifications                                            | Delivery                                                          | Notes                                                                               |
-| --------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `api`, `job`, `integration`, and a module's `intercept()` | **same process** — msw server                                     | The subject runs here, so its outgoing requests pass through this process           |
-| `component`                                               | **browser page** — msw worker                                     | The component runs in Chromium, so the service worker answers its requests there    |
-| `website`, `mobile`                                       | **other process** — the declared stub backend (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
+| Specifications                                            | Delivery                                                         | Notes                                                                               |
+| --------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `api`, `job`, `integration`, and a module's `intercept()` | **same process**: msw server                                     | The subject runs here, so its outgoing requests pass through this process           |
+| `component`                                               | **browser page**: msw worker                                     | The component runs in Chromium, so the service worker answers its requests there    |
+| `website`, `mobile`                                       | **other process**: the declared stub backend (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
 
 All three consume the **same** selection queue, so a stub behaves identically whichever answers it: first match wins, `times` exhausts, `required` verifies at chain end, and "sticky" is the default (`times` omitted).
 
@@ -327,13 +327,13 @@ http.post('https://api.shoply.dev/orders', {
 http.get('/me', { without: { headers: ['authorization'] } }); // fires only for an anonymous request
 ```
 
-`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([Tokens](tokens.md)).
+`http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** (the app's real host does not matter), and `{{token}}` segments match structurally ([Tokens](tokens.md)).
 
 The optional `filter` narrows beyond method + URL, and these are **filters**, so subset is the right default:
 
 - `body`: an object is a deep **subset** match whose leaves may be `match.*` matchers; a string is a containment test; a RegExp is a `test()` over the raw text body.
 - `headers` / `query`: subset match (header names case-insensitive); a string value is **exact**, a RegExp is `test()`.
-- `without.headers`: the headers the request must **not** carry — a name listed there, present with any value, keeps the stub from firing, and the strict refusal lists the stub with the headers it forbids (`GET /me (without header authorization)`). A subset proves presence only, so absence is stated here; a name both in `headers` and in `without.headers` is refused when the stub is declared. In a page the stub sees the headers the subject set, never those the browser adds after the service worker — `cookie` among them.
+- `without.headers`: the headers the request must **not** carry: a name listed there, present with any value, keeps the stub from firing, and the strict refusal lists the stub with the headers it forbids (`GET /me (without header authorization)`). A subset proves presence only, so absence is stated here; a name both in `headers` and in `without.headers` is refused when the stub is declared. In a page the stub sees the headers the subject set, never those the browser adds after the service worker, `cookie` among them.
 
 ### `openai.*` / `anthropic.*`
 
@@ -345,12 +345,12 @@ The optional `filter` narrows beyond method + URL, and these are **filters**, so
 
 ### Matching: strings are EXACT
 
-A string filter on a provider builder means **exact equality**. Looser matching is explicit — a RegExp, or the code-only matcher `match.includes(...)`:
+A string filter on a provider builder means **exact equality**. Looser matching is explicit: a RegExp, or the code-only matcher `match.includes(...)`:
 
 ```typescript
 import { defineStub, match, openai } from '@jterrazz/test';
 
-// Exact — the app's own builder produces the prompt, so it cannot drift.
+// Exact: the app's own builder produces the prompt, so it cannot drift.
 const PROMPT = 'Classify the article into one of: TECH, POLITICS, SPORT.';
 
 export default defineStub({
@@ -365,34 +365,34 @@ export const byPrefix = defineStub({
 });
 ```
 
-Exactness is the default because a substring filter silently cross-matches: two prompts sharing a preamble both match the first stub, and the spec goes green on the wrong reply. `match.includes` is a code-only matcher, like `match.regex` — the `{{token}}` file vocabulary does not grow.
+Exactness is the default because a substring filter silently cross-matches: two prompts sharing a preamble both match the first stub, and the spec goes green on the wrong reply. `match.includes` is a code-only matcher, like `match.regex`; the `{{token}}` file vocabulary does not grow.
 
 ## Response builders
 
 | Response                                   | Produces                                                                            |
 | ------------------------------------------ | ----------------------------------------------------------------------------------- |
-| `http.json(body, init?)`                   | JSON response — `init: { status?, headers?, delay? }`                               |
+| `http.json(body, init?)`                   | JSON response: `init: { status?, headers?, delay? }`                                |
 | `http.text(body, init?)`                   | `text/plain` response                                                               |
 | `http.error(status, body?)`                | HTTP error, optional JSON body                                                      |
 | `http.empty(status = 204)`                 | Empty response                                                                      |
-| `http.stream(chunks, init?)`               | A body that arrives in PIECES — `init: { contentType?, delay?, status?, headers? }` |
+| `http.stream(chunks, init?)`               | A body that arrives in PIECES: `init: { contentType?, delay?, status?, headers? }`  |
 | `http.sse(events, init?)`                  | A server-sent event stream: one chunk per event, `text/event-stream`                |
 | `http.unreachable()`                       | No response at all: the request fails in TRANSPORT and the caller's `fetch` rejects |
 | `openai.reply(data)`                       | `data` wrapped in a valid Chat Completions envelope                                 |
 | `anthropic.reply(data)`                    | `data` (object or text) wrapped in a Messages envelope                              |
 | `openai.error(status)` / `anthropic.error` | Provider HTTP error (e.g. `429` rate limit)                                         |
 | `openai.timeout()` / `anthropic.timeout()` | A provider that never answers within the caller's timeout                           |
-| `openai.malformed(text)`                   | HTTP 200 whose assistant content is `text` — an unparseable payload to handle       |
-| `openai.stream(pieces, init?)`             | The assistant's text streamed, one delta per piece — see Streamed replies           |
+| `openai.malformed(text)`                   | HTTP 200 whose assistant content is `text`, an unparseable payload to handle        |
+| `openai.stream(pieces, init?)`             | The assistant's text streamed, one delta per piece; see Streamed replies            |
 | `anthropic.stream(pieces, init?)`          | The assistant's text streamed as Messages events, one delta per piece               |
 
 The point: your stub states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
-`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. All three deliveries honour it: msw's server and msw's worker fail the request in transport, and the stub backend drops the connection.
+`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches ("the server said no" and "nothing answered"), and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. All three deliveries honour it: msw's server and msw's worker fail the request in transport, and the stub backend drops the connection.
 
 ### Streamed replies
 
-A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three deliveries honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile specifications serve from.
+A subject that reads a reply AS IT LANDS (a token-by-token render, a progress bar, a client that reconnects on a half-read body) is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three deliveries honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile specifications serve from.
 
 ```typescript
 import { http, intercept } from '@jterrazz/test';
@@ -413,22 +413,22 @@ describe('streamed reply', () => {
 });
 ```
 
-`http.sse(events)` frames each event the way an `EventSource` reads it — `event:`, `id:`, `retry:` and one `data:` line per line of payload, then the blank line that ends the frame — and serves the lot as `text/event-stream`. An object payload is JSON; a string is sent as-is.
+`http.sse(events)` frames each event the way an `EventSource` reads it (`event:`, `id:`, `retry:` and one `data:` line per line of payload, then the blank line that ends the frame) and serves the lot as `text/event-stream`. An object payload is JSON; a string is sent as-is.
 
 | `SseEvent` field | Becomes                                                           |
 | ---------------- | ----------------------------------------------------------------- |
-| `data`           | the `data:` lines — an object is JSON, a string is sent verbatim  |
+| `data`           | the `data:` lines: an object is JSON, a string is sent verbatim   |
 | `event`          | the `event:` name; omitted, the client sees the default `message` |
 | `id`             | the `id:` the client echoes as `Last-Event-ID` when it reconnects |
 | `retry`          | the `retry:` hint, in milliseconds                                |
 
 A provider's streamed reply is its provider's stub, not an `http` one: `openai.stream(pieces)` and `anthropic.stream(pieces)` serve the text as the provider does under `stream: true`, one delta per piece in order, so the unit sits in `stubs/openai/` or `stubs/anthropic/` with the request it answers.
 
-| Builder                                       | Wire                                                                                                              |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `openai.stream(pieces)`                       | Chat Completions: unnamed `chat.completion.chunk` events — the role, the deltas, the finish — then `data: [DONE]` |
-| `openai.stream(pieces, { api: 'responses' })` | Responses: named, numbered events, one `response.output_text.delta` per piece, `response.completed` last          |
-| `anthropic.stream(pieces)`                    | Messages: `message_start`, a text block, a `ping`, one `text_delta` per piece, `message_stop` last                |
+| Builder                                       | Wire                                                                                                             |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `openai.stream(pieces)`                       | Chat Completions: unnamed `chat.completion.chunk` events (the role, the deltas, the finish), then `data: [DONE]` |
+| `openai.stream(pieces, { api: 'responses' })` | Responses: named, numbered events, one `response.output_text.delta` per piece, `response.completed` last         |
+| `anthropic.stream(pieces)`                    | Messages: `message_start`, a text block, a `ping`, one `text_delta` per piece, `message_stop` last               |
 
 Both take `delay`, the milliseconds between two events, and `openai.stream` takes `usage: { promptTokens, completionTokens }`: a Chat Completions stream then ends on the usage chunk (no choice, the tokens) before `[DONE]`, as `stream_options.include_usage` asks, and a Responses stream states them in its completed response. Any other server-sent stream is an `http.sse()` stub.
 
@@ -444,7 +444,7 @@ export default defineStub({
 
 ### Dynamic responses
 
-A `response` may be a function of the incoming request — `(request: MatchableRequest) => StubResponse` — evaluated per served request:
+A `response` may be a function of the incoming request (`(request: MatchableRequest) => StubResponse`), evaluated per served request:
 
 ```typescript
 import { defineStub, http } from '@jterrazz/test';
@@ -455,7 +455,7 @@ export default defineStub({
 });
 ```
 
-The `request` handed to it is the same `MatchableRequest` the match ran on: `{ body, headers, url }`, with `body` already parsed when the payload is JSON. Prefer a fixed response whenever the reply is known ahead of time — a dynamic one is for echo endpoints, request-derived ids, and per-call variation.
+The `request` handed to it is the same `MatchableRequest` the match ran on: `{ body, headers, url }`, with `body` already parsed when the payload is JSON. Prefer a fixed response whenever the reply is known ahead of time; a dynamic one is for echo endpoints, request-derived ids, and per-call variation.
 
 ## Strict by construction
 
@@ -473,22 +473,22 @@ At chain end the same channel verifies `required` stubs: one that was declared a
 
 ### `required` is verified per terminal action
 
-A chain's scope is ONE terminal action, and a stub's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a stub and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` stub unmet by the action it belongs to fails that action's chain.
+A chain's scope is ONE terminal action, and a stub's `required` is checked at the end of it, not at the end of the test, and not at the end of the file. A spec that declares a stub and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` stub unmet by the action it belongs to fails that action's chain.
 
-This is the same boundary rule `one-terminal-action-per-chain` already states from the other side — one chain, one action — read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
+This is the same boundary rule `one-terminal-action-per-chain` already states from the other side (one chain, one action), read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
 
 Two scoping notes:
 
-- **A chain with zero stubs does not guard its network** — a deliberate, documented boundary.
-- **A rendered component is the exception.** Its network is strict even with no stub declared, because a page shares its process with nothing else the test does — [Component specs](../guides/component-specs.md#unique-here).
+- **A chain with zero stubs does not guard its network**: a deliberate, documented boundary.
+- **A rendered component is the exception.** Its network is strict even with no stub declared, because a page shares its process with nothing else the test does ([Component specs](../guides/component-specs.md#unique-here)).
 
 ## Pitfalls
 
-- **Reaching into a kind folder from a test.** `import events from './__setup__/stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead — that is what facades are for.
-- **Pinning a prompt by copying it.** A 550-line prompt pasted into a stub is a fossil. Import the app's real builder, or match a stable prefix with `match.includes` — the stub pins the _interaction_, not the wording.
-- **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference — use `match.includes` if that is genuinely what you mean.
-- **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.
-- **Relying on declaration specificity instead of order.** Selection is first-match. `.with()` prepends precisely so an override wins without deleting the generic route — outside `.with()`, order is yours to get right.
+- **Reaching into a kind folder from a test.** `import events from './__setup__/stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead; that is what facades are for.
+- **Pinning a prompt by copying it.** A 550-line prompt pasted into a stub is a fossil. Import the app's real builder, or match a stable prefix with `match.includes`. The stub pins the _interaction_, not the wording.
+- **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference; use `match.includes` if that is genuinely what you mean.
+- **Writing a call count as a loop.** `for (...) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.
+- **Relying on declaration specificity instead of order.** Selection is first-match. `.with()` prepends precisely so an override wins without deleting the generic route. Outside `.with()`, order is yours to get right.
 - **Letting a pipeline hit the network.** An unintercepted call is a test escaping the sandbox, not extra realism. Once one stub is declared, `network-strict-after-first-stub` turns a stray call into a failure.
 - **Duplicating a payload.** The 45-line article exists ONCE, as a file of `__fixtures__/`; the second stub imports it.
 
