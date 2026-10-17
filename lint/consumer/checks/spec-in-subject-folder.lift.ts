@@ -6,7 +6,7 @@ import {
     treeKind,
 } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
-import { basename, dirname, join, resolve, sep } from 'node:path';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { repointFiles, repointModuleTests } from '../../kit/checker/repoint.js';
 import { documentReferences, RELATIVE_LITERAL } from '../../kit/project/ground-readers.js';
@@ -34,6 +34,44 @@ function isAtOrBelow(entry: string, path: string): boolean {
     return path === entry || path.startsWith(`${entry}${sep}`);
 }
 
+type Ground = {
+    folder: string;
+    references: readonly { file: string; target: string }[];
+    role: string;
+};
+
+function liftEntry(specsRoot: string, ground: Ground, path: string): string[] {
+    const readers = ground.references.filter(({ target }) => isAtOrBelow(path, target));
+    // invariant: an entry its leaf alone reads has its own place as destination, which exists.
+    if (readers.length === 0) {
+        return [];
+    }
+    const lowest = lowestCommonFolder(readers.map(({ file }) => dirname(file))) ?? specsRoot;
+    const destination = join(reservedFolderOf(lowest, ground.role), relative(ground.folder, path));
+    if (existsSync(destination)) {
+        // invariant: a namesake folder at the new place is entered, each entry below going where its own readers meet; a file there holds the name, and `no-reach-into-sibling-ground` keeps reporting the reach.
+        return treeKind(path) === 'directory' && treeKind(destination) === 'directory'
+            ? liftEntries(specsRoot, ground, path)
+            : [];
+    }
+    mkdirSync(dirname(destination), { recursive: true });
+    moveKeepingHistory(path, destination);
+    const moves = [{ copy: path, target: destination }];
+    repointModuleTests(specsRoot, moves);
+    repointFiles([...new Set(readers.map((reader) => reader.file))], moves);
+    return [`${shown(specsRoot, path)} → ${shown(specsRoot, destination)}`];
+}
+
+function liftEntries(specsRoot: string, ground: Ground, folder: string): string[] {
+    const lifted = treeEntries(folder).flatMap((entry) =>
+        liftEntry(specsRoot, ground, join(folder, entry.name)),
+    );
+    if (readdirSync(folder).length === 0) {
+        rmSync(folder, { recursive: true });
+    }
+    return lifted;
+}
+
 /** An entry of the leaf's ground goes to the lowest folder its readers share, once a reader has left the leaf. */
 export function liftGround(specsRoot: string, leaf: string): string[] {
     const lifted: string[] = [];
@@ -44,25 +82,9 @@ export function liftGround(specsRoot: string, leaf: string): string[] {
             continue;
         }
         for (const entry of treeEntries(folder)) {
-            const path = join(folder, entry.name);
-            const readers = references.filter(({ target }) => isAtOrBelow(path, target));
-            // invariant: an entry its leaf alone reads has its own place as destination, which exists.
-            if (readers.length === 0) {
-                continue;
-            }
-            const lowest =
-                lowestCommonFolder(readers.map(({ file }) => dirname(file))) ?? specsRoot;
-            const destination = join(reservedFolderOf(lowest, role), entry.name);
-            // invariant: the pool holds that name: `no-reach-into-sibling-ground` keeps reporting the reach.
-            if (existsSync(destination)) {
-                continue;
-            }
-            mkdirSync(dirname(destination), { recursive: true });
-            moveKeepingHistory(path, destination);
-            const moves = [{ copy: path, target: destination }];
-            repointModuleTests(specsRoot, moves);
-            repointFiles([...new Set(readers.map((reader) => reader.file))], moves);
-            lifted.push(`${shown(specsRoot, path)} → ${shown(specsRoot, destination)}`);
+            lifted.push(
+                ...liftEntry(specsRoot, { folder, references, role }, join(folder, entry.name)),
+            );
         }
         if (readdirSync(folder).length === 0) {
             rmSync(folder, { recursive: true });
