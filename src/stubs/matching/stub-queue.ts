@@ -117,7 +117,7 @@ export class StubQueue {
             refusal({
                 fix: 'take the call out of the path under test or, if the call is now intended, replace the never stub with one that answers it',
                 found: `a route the chain declared never requested was reached:\n${lines.join('\n')}`,
-                read: 'docs/reference/stubs.md#never--a-call-that-must-not-happen',
+                read: 'docs/reference/stubs.md#never-a-call-that-must-not-happen',
                 why: "A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
             }),
         );

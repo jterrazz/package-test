@@ -42,7 +42,7 @@ describe('parseRequestFile', () => {
                         `found: __requests__/bad.http: the first line is "${line}"`,
                         'why: A request file opens on `METHOD /path`.',
                         'fix: start the request file with its request line: "POST /users"',
-                        'read: docs/guides/api-specs.md#http-request-files--full-format',
+                        'read: docs/guides/api-specs.md#http-request-files-full-format',
                     ].join('\n'),
                 ),
             );

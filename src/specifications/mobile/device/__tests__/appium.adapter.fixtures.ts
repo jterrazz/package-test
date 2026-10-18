@@ -174,7 +174,7 @@ export const TIMEOUT_LESSON = [
 export const SCENARIO_LESSON = [
     'why: An open scenario drives the screen step by step, and the first step that fails ends it.',
     'fix: correct the step that failed, or the screen it drives',
-    'read: docs/guides/mobile-specs.md#open-scenarios--the-when',
+    'read: docs/guides/mobile-specs.md#open-scenarios-the-when',
 ];
 
 /** The refusal of a target matching both Pay buttons of a screen. */

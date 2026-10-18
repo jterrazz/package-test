@@ -45,9 +45,9 @@ export const { cleanup, website } = await specification.website({
 | `root`      | **Project-root override** (rule `no-redundant-root`): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                                                                                     |
 | `transform` | **Escape hatch only** (rule `no-transform-duplicating-tokens`): a normaliser applied to every compared reading (the head projection and the json-ld among them) before the comparison, for framework noise no token can name. It never mutates what the page said |
 
-`server` is a `ProcessOptions`, whatever of the three forms states it: `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this page: [Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
+`server` is a `ProcessOptions`, whatever of the three forms states it: `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this page: [Services § `process()`](../reference/services.md#process-the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
-The chosen port is injected as `PORT`; the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is ended the way every `process()` is ([Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes)), its own children with it.
+The chosen port is injected as `PORT`; the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is ended the way every `process()` is ([Services § `process()`](../reference/services.md#process-the-one-shape-an-external-process-takes)), its own children with it.
 
 The handle destructures to `{ website, cleanup, url }` (rule `no-runner-alias`), no `docker`: a browser is not a container. `url` is the resolved base URL: the one the server started on, or the `url` option with its trailing slash trimmed.
 
@@ -55,7 +55,7 @@ The handle destructures to `{ website, cleanup, url }` (rule `no-runner-alias`),
 
 A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record (the same one every other specification takes, see [Services](../reference/services.md)), started before the site, in declaration order, and stopped with the specification.
 
-That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time. The example (a `next dev` beside the API it calls and that API's database) is [Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes)'s.
+That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time. The example (a `next dev` beside the API it calls and that API's database) is [Services § `process()`](../reference/services.md#process-the-one-shape-an-external-process-takes)'s.
 
 A declared database is not seeded by the chain; a website chain has no `.seed()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
 
@@ -112,7 +112,7 @@ test('captures the full head surface of a rendered page', async () => {
 });
 ```
 
-### Visit scenarios — the When
+### Visit scenarios: the When
 
 A scenario is the interaction that happens **before** the capture, the visit's When. The capture always reflects the **final** page state, after the scenario ran:
 
@@ -236,7 +236,7 @@ test('exposes canonical, alternates, and named metas directly', async () => {
     // Then - the accessors read the head without a golden...
     expect(result.canonical).toBe('https://site.test/');
     expect(result.alternates['x-default']).toBe('https://site.test/');
-    expect(result.meta('og:title')).toBe('Fixture — Home');
+    expect(result.meta('og:title')).toBe('Fixture: Home');
 
     // ...or snapshot the whole surface at once
     expect(result.head).toMatch(file('./__expected__/home.head.json'));

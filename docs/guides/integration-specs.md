@@ -95,7 +95,7 @@ test('refuses an order that is not one', async () => {
     );
 
     // Then - what it threw is the reading, and nothing was written
-    expect(result.error).toMatch('an order of 0 is not an order — reference ORD-4');
+    expect(result.error).toMatch('an order of 0 is not an order: reference ORD-4');
     await expect(result.table('orders')).toBeEmpty();
 });
 ```

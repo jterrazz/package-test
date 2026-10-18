@@ -33,7 +33,7 @@ export async function startServers(
                             ? 'register it in the `serve` option of specification.cli()'
                             : `serve a registered server: ${known.join(', ')}`,
                     found: `${displayPath}:${entry.line}: serve: "${entry.name}" is not registered`,
-                    read: 'docs/guides/cli-specs.md#registration--once-per-app',
+                    read: 'docs/guides/cli-specs.md#registration-once-per-app',
                     why: 'A document serves what the app registered once, in the options of specification.cli().',
                 }),
             );
@@ -79,7 +79,7 @@ export function documentEnv(
                                 ? 'register it in the `env` option of specification.cli(), or write it inline: KEY=value'
                                 : `name a registered set: ${known.join(', ')}, or write it inline: KEY=value`,
                         found: `${displayPath}:${token.line}: env: "${token.name}" is not a registered env set`,
-                        read: 'docs/guides/cli-specs.md#registration--once-per-app',
+                        read: 'docs/guides/cli-specs.md#registration-once-per-app',
                         why: 'A bare word under `env:` names a set the app registered once, in the options of specification.cli().',
                     }),
                 );

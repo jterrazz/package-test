@@ -153,7 +153,7 @@ test('returns 404 with a useful body', async () => {
 });
 ```
 
-### `.http` request files — full format
+### `.http` request files: full format
 
 Requests live in `__requests__/`, one file per request, extension `.http`; the body files a verb sends live beside them, each named with its extension (rule `request-file-extension-known`). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
 
@@ -335,7 +335,7 @@ A run is judged, and `TEST_UPDATE=1` records, only when it is green and whole. O
 | a file of it failed                                                          | `api routes: not judged`, with the count of failed files | a failed file may not have sent its requests; `TEST_UPDATE=1` refuses and keeps the entry                                                                                                                                         |
 | a shard (`vitest --shard`)                                                   | `api routes: not judged`                                 | its requests are a part of the run's; it writes its ledgers to `.artifacts/vitest/routes/shard-<index>-<count>/`                                                                                                                  |
 | a merge (`vitest --merge-reports`)                                           | nothing                                                  | a merge runs no global setup; this package's own split judges its routes after the merge, over every shard's ledgers ([Test § What CI runs](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#what-ci-runs)) |
-| partial: some test files (`vitest --changed`, a file filter) or tests (`-t`) | `api routes: not judged — a partial run ...`             | it reached only some routes; a shard that `-t` filters marks its ledger folder partial, so its split is not judged at the merge                                                                                                   |
+| partial: some test files (`vitest --changed`, a file filter) or tests (`-t`) | `api routes: not judged, since a partial run ...`        | it reached only some routes; a shard that `-t` filters marks its ledger folder partial, so its split is not judged at the merge                                                                                                   |
 
 #### An app that is not Hono
 

@@ -41,7 +41,7 @@ Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard t
 
 ### The per-specification matrix
 
-Which surface declares which verb, target and modifier is generated from the code: [Test § The capability matrix](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-capability-matrix), its **Verb** and **Target** sections, a `—` for a word the specification does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector; it is a boundary the adapter refuses at runtime, with a message naming it.
+Which surface declares which verb, target and modifier is generated from the code: [Test § The capability matrix](https://github.com/jterrazz/package-test/blob/main/docs/guides/test.md#the-capability-matrix), its **Verb** and **Target** sections, an `n/a` for a word the specification does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector; it is a boundary the adapter refuses at runtime, with a message naming it.
 
 The ARIA landmarks are web-only: passing one to a mobile verb refuses at runtime with a message naming the boundary: an iOS screen has no ARIA regions, and inventing an equivalent would be a second vocabulary wearing the first one's words.
 
@@ -160,7 +160,7 @@ A verb acts on one element, and matching is how a target becomes it: the target 
 **A target must match exactly one element (rule `target-matches-one-element`).** When several match, the framework refuses the action instead of taking the first one:
 
 ```text
-found: Ambiguous element: link("Articles") matched 2 elements on http://site.test/ambiguous —
+found: Ambiguous element: link("Articles") matched 2 elements on http://site.test/ambiguous:
   1. <a href="/articles">Articles</a>  in <nav>
   2. <a href="/articles">Articles</a>  in <footer>
 why: A verb acts on exactly ONE element: a target that matches several is refused, never settled by the first.
@@ -177,7 +177,7 @@ Every suggestion carries what it LEAVES, so a rewrite that would keep the spec a
 On a device the same refusal reads in the device's terms: there are no landmarks to offer, so the evidence offers the accessibility identifiers it found:
 
 ```text
-found: Ambiguous element: button("Bookmark") matched 3 elements on the screen —
+found: Ambiguous element: button("Bookmark") matched 3 elements on the screen:
   1. Button "Bookmark"  [testId: event-1-bookmark]
   2. Button "Bookmark"  [testId: event-2-bookmark]
   3. Button "Bookmark all"

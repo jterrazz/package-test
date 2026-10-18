@@ -59,7 +59,7 @@ runs:
 | `env:`     | string or list                                | Each entry is either a **bare word** naming an env set registered in code, or `KEY=value` inline (`$WORKDIR` expands, as in `.env()`)                                                                                                                                                                                      |
 | `serve:`   | string, list of strings, or `- name: { ... }` | Servers registered in code, started once **per file** before the first run and shared by all of them. The mapping form adds env to that server                                                                                                                                                                             |
 
-The words `env:` and `serve:` name are registered once per app, in the options of `specification.cli()` ([CLI specs § Registration](cli-specs.md#registration--once-per-app)).
+The words `env:` and `serve:` name are registered once per app, in the options of `specification.cli()` ([CLI specs § Registration](cli-specs.md#registration-once-per-app)).
 
 ### The runs
 
@@ -80,7 +80,7 @@ The words `env:` and `serve:` name are registered once per app, in the options o
 
 **`|` and `|-` are the whole newline story.** A block scalar written `|` keeps the final newline of its text; `|-` drops it. The comparison is byte-exact against that, so a command whose output ends with `\n` is written `|`, and one that ends mid-line is written `|-`.
 
-### `files:` — what the run left behind
+### `files:`: what the run left behind
 
 Each key is a path relative to the working directory (never absolute, never escaping it). Each value is one of four forms:
 

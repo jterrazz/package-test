@@ -17,7 +17,7 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
             refusal({
                 fix: 'start the request file with its request line: "POST /users"',
                 found: `${fileName}: the first line is "${startLine}"`,
-                read: 'docs/guides/api-specs.md#http-request-files--full-format',
+                read: 'docs/guides/api-specs.md#http-request-files-full-format',
                 why: 'A request file opens on `METHOD /path`.',
             }),
         );

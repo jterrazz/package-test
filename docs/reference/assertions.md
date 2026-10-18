@@ -107,7 +107,7 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 `.not`: `expect(result.response).not.toMatch(file('./__expected__/user-created.http'))` passes when any part diverges. Rarely useful; prefer positive fixtures.
 
-## `result.table(name, { database }?)` — database tables (api, job, cli, integration)
+## `result.table(name, { database }?)`: database tables (api, job, cli, integration)
 
 Always `await expect(...)` (IO). When to name the `database:` is [Services § The `database:` rule (`database-named-only-when-several`)](services.md#the-database-rule)'s.
 
@@ -187,7 +187,7 @@ const message = await catchMessage(() =>
 expect(text(message)).toMatch(file('./__expected__/errors/wrong-body-error.txt'));
 ```
 
-## `result.json` — parsed stdout (cli)
+## `result.json`: parsed stdout (cli)
 
 | Matcher                          | Sync/async | Example                                                           |
 | -------------------------------- | ---------- | ----------------------------------------------------------------- |
@@ -196,7 +196,7 @@ expect(text(message)).toMatch(file('./__expected__/errors/wrong-body-error.txt')
 
 Deep-equal against the value in place or the JSON golden: every key, both ways; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
 
-## `result.file(path)` — single files in the cwd (cli)
+## `result.file(path)`: single files in the cwd (cli)
 
 A pure read accessor, with no framework matcher; assert on its properties with native `expect`:
 

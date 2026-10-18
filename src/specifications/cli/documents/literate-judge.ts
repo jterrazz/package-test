@@ -51,7 +51,7 @@ function resolveUnderWorkDir(path: string, context: Judgement): string {
             refusal({
                 fix: 'name a relative path under the working directory',
                 found: `${context.displayPath}: files: "${path}" leaves the working directory`,
-                read: 'docs/guides/spec-documents.md#files--what-the-run-left-behind',
+                read: 'docs/guides/spec-documents.md#files-what-the-run-left-behind',
                 why: 'A `files:` key is a relative path under the working directory.',
             }),
         );

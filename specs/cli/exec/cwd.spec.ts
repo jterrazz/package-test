@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-const READ = 'read: docs/guides/cli-specs.md#cwd--a-folder-of-the-working-directory';
+const READ = 'read: docs/guides/cli-specs.md#cwd-a-folder-of-the-working-directory';
 
 describe('cwd', () => {
     test('a command runs in the folder of the working directory it names', async () => {

@@ -15,7 +15,7 @@ function sourceOf(name: string, path: null | string, testDir: string): string {
                 refusal({
                     fix: `install ${name} in the project the spec belongs to, or name the package's directory: link('${name}', directory('./__fixtures__/<package>/'))`,
                     found: `link('${name}'): no node_modules from ${testDir} up holds ${name}`,
-                    read: 'docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
+                    read: 'docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves',
                     why: "A bare name links the package the spec's own project resolves, found as Node finds it.",
                 }),
             );

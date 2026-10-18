@@ -45,7 +45,7 @@ afterAll(cleanup);
 
 Resolution refuses rather than guesses: zero matches and several matches both fail with the full `simctl` device listing, so the fix never needs an Xcode round-trip. A shut-down simulator is booted (`simctl boot` + `bootstatus`); an already-booted one is reused as-is.
 
-**`services` is where Metro goes.** A dev build loads its JavaScript from a bundler. It is a `process()` like any other external process the framework owns, started before the app is ever launched and stopped with the specification ([Services](../reference/services.md#process--the-one-shape-an-external-process-takes)):
+**`services` is where Metro goes.** A dev build loads its JavaScript from a bundler. It is a `process()` like any other external process the framework owns, started before the app is ever launched and stopped with the specification ([Services](../reference/services.md#process-the-one-shape-an-external-process-takes)):
 
 ```typescript
 import { specification } from '@jterrazz/test';
@@ -60,7 +60,7 @@ export const { cleanup, mobile, udid } = await specification.mobile({
 });
 ```
 
-Without a declared `appium`, and unless the run already serves one ([One session per run](#one-session-per-run)), the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server is ended the way every `process()` is ([Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes)), its WebDriverAgent with it ([below](#the-simulator-and-what-the-run-leaves-on-it)).
+Without a declared `appium`, and unless the run already serves one ([One session per run](#one-session-per-run)), the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server is ended the way every `process()` is ([Services § `process()`](../reference/services.md#process-the-one-shape-an-external-process-takes)), its WebDriverAgent with it ([below](#the-simulator-and-what-the-run-leaves-on-it)).
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule `no-runner-alias`). `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
 
@@ -70,7 +70,7 @@ A run leaves the machine as it found it, but for the booted simulator: no window
 
 **The simulator runs headless.** Every session asks the XCUITest driver for it (`appium:isHeadless: true`), so no Simulator or DeviceHub window opens: not for a run, not for the hundredth run of an agent's loop. The driver holds the simulator to the mode a session asks for: a window already showing it is closed. To watch a run, set `TEST_MOBILE_HEADED=1` on that run alone. It is an environment variable and not an option, so no committed config can make every run open a window.
 
-**WebDriverAgent ends with the server that started it.** The driver runs WebDriverAgent's `xcodebuild` in a process group of its own and keeps it past the session and past the server's own exit, beside the runner app it installs on the simulator. So the teardown of a server the framework spawned also ends that `xcodebuild` (the one naming WebDriverAgent and the simulator's UDID) and the runner app inside that simulator, and so does the watchdog of a run killed before its teardown ([Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes)). A server you declare with `appium` is yours, and so is its WebDriverAgent. Each spawned server starts WebDriverAgent again, its build already cached: a project that declares its device pays that once per run ([One session per run](#one-session-per-run)), a file that spawns its own server pays it once per file.
+**WebDriverAgent ends with the server that started it.** The driver runs WebDriverAgent's `xcodebuild` in a process group of its own and keeps it past the session and past the server's own exit, beside the runner app it installs on the simulator. So the teardown of a server the framework spawned also ends that `xcodebuild` (the one naming WebDriverAgent and the simulator's UDID) and the runner app inside that simulator, and so does the watchdog of a run killed before its teardown ([Services § `process()`](../reference/services.md#process-the-one-shape-an-external-process-takes)). A server you declare with `appium` is yours, and so is its WebDriverAgent. Each spawned server starts WebDriverAgent again, its build already cached: a project that declares its device pays that once per run ([One session per run](#one-session-per-run)), a file that spawns its own server pays it once per file.
 
 The booted simulator itself is the machine's: it is reused by the next run, and `xcrun simctl shutdown <udid>` ends it.
 
@@ -152,7 +152,7 @@ test('shows the events feed behind its deep link', async () => {
 
 Without a deep link, the app opens on its launch screen. The driver session is opened lazily on the first `.open()` and reused; the expensive part is WebDriverAgent startup, not the app relaunch. How long it lives is [one session per run](#one-session-per-run)'s.
 
-### Open scenarios — the When
+### Open scenarios: the When
 
 A scenario is the interaction that happens **before** the capture, the open's When. The capture always reflects the **final** screen state, after the scenario ran:
 
@@ -270,7 +270,7 @@ The stub backend behaves exactly as on the website specification ([Website specs
 
 When a scenario throws (an element never appears, a `see()` times out), the error carries a screenshot of the state the scenario died in, referenced by its path in the error message. It is written under `.artifacts/vitest/evidence/`, in the folder of the run that took it, so it outlives the run and its temp root, until the next run starts, which sweeps every run's evidence but a living one's. A timeout additionally includes a compact excerpt of the labels currently on screen, so the failure reads without relaunching anything. The original error is never masked.
 
-### Requirements — what the machine must have
+### Requirements: what the machine must have
 
 Provisioning the simulator environment is not this package's job. The framework needs, in this order:
 

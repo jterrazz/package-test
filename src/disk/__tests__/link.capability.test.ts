@@ -7,7 +7,7 @@ import { directory, file } from '../spec-path.js';
 
 type Linked = Parameters<typeof link.reduce>[0];
 
-const CHAPTER = 'read: docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves';
+const CHAPTER = 'read: docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves';
 
 function linksInto(log: string[]): LinkPort {
     return {

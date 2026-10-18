@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-const READ = 'read: docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves';
+const READ = 'read: docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves';
 
 describe('refused', () => {
     test('a bare name no node_modules above the spec holds is refused before the binary runs', async () => {

@@ -85,7 +85,7 @@ export function absentHeadersOf(filter: HttpStubFilter = {}): string[] | undefin
             refusal({
                 fix: `state ${names} in \`headers\` or in \`without.headers\`, never both`,
                 found: `an http stub filter that both requires and forbids the header(s) ${names}`,
-                read: 'docs/reference/stubs.md#http--any-url',
+                read: 'docs/reference/stubs.md#http-any-url',
                 why: 'A header both required and absent matches no request, so the stub could never fire.',
             }),
         );

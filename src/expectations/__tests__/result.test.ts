@@ -70,7 +70,7 @@ describe('result', () => {
             'found: file("absent.txt"), and the run left no such file',
             'why: A file is read only where it exists.',
             'fix: assert `.exists` first, or name a file the run left',
-            'read: docs/reference/assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+            'read: docs/reference/assertions.md#resultfilepath-single-files-in-the-cwd-cli',
         ].join('\n');
         expect([
             refusalOf(() => result.file('absent.txt').content),

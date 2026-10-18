@@ -40,7 +40,7 @@ export function refuseUnusableAncestor(name: string, workDir: string, dest: stri
                 refusal({
                     fix: `drop the file at ${ancestor} from the fixture or the command that lays it, so the link can lay its folder there`,
                     found: `link('${name}'): ${ancestor} is a file, not a folder`,
-                    read: 'docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
+                    read: 'docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves',
                     why: 'A link is laid at node_modules/<name> inside the working directory, and a file on that path leaves it no folder to lay it in.',
                 }),
             );
@@ -50,7 +50,7 @@ export function refuseUnusableAncestor(name: string, workDir: string, dest: stri
                 refusal({
                     fix: `drop the symlink at ${ancestor} from the fixture or the command that lays it, so the working directory holds its own node_modules`,
                     found: `link('${name}'): ${ancestor} is a symlink, so the link would replace ${name} wherever it points`,
-                    read: 'docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
+                    read: 'docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves',
                     why: 'A link is laid inside the working directory only; through a symlinked folder it would delete a real install outside it.',
                 }),
             );

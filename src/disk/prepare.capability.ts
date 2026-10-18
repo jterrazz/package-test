@@ -21,7 +21,7 @@ function requireStep(step: unknown): PrepareStep {
         refusal({
             fix: "hand it a function of the working directory: .prepare((workdir) => { execFileSync('git', ['init'], { cwd: workdir }); })",
             found: `prepare(${JSON.stringify(step) ?? typeof step}), no step to run`,
-            read: 'docs/guides/cli-specs.md#prepare--what-no-fixture-can-carry',
+            read: 'docs/guides/cli-specs.md#prepare-what-no-fixture-can-carry',
             why: 'A step is run over the working directory once the fixtures are laid; only a function can be run.',
         }),
     );

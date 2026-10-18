@@ -39,7 +39,7 @@ export function alive(pid: number): boolean {
     }
 }
 
-const READ = 'docs/reference/services.md#process--the-one-shape-an-external-process-takes';
+const READ = 'docs/reference/services.md#process-the-one-shape-an-external-process-takes';
 
 /** A refusal of a process, its four parts as the specification named writes them. */
 export function refused(found: string, why: string, fix: string): string {

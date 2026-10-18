@@ -16,7 +16,7 @@ const head = (title, path) => `
     <link rel="alternate" hreflang="x-default" href="https://site.test${path}">`;
 
 const pages = {
-    '/': `<!doctype html><html lang="en"><head>${head('Fixture — Home', '/')}
+    '/': `<!doctype html><html lang="en"><head>${head('Fixture: Home', '/')}
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Fixture","url":"https://site.test"}</script>
     </head><body>
     <h1>Welcome</h1>

@@ -142,7 +142,7 @@ describe('installPacked', () => {
                     `found: link('@acme/lib'): ${join(work, 'node_modules')} is a symlink, so the link would replace @acme/lib wherever it points`,
                     'why: A link is laid inside the working directory only; through a symlinked folder it would delete a real install outside it.',
                     `fix: drop the symlink at ${join(work, 'node_modules')} from the fixture or the command that lays it, so the working directory holds its own node_modules`,
-                    'read: docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves',
+                    'read: docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves',
                 ].join('\n'),
                 true,
             ],

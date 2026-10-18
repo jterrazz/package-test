@@ -165,7 +165,7 @@ export async function ensureBooted(udid: string): Promise<void> {
                 refusal({
                     fix: "finish Xcode's first launch if it asks (`sudo xcodebuild -runFirstLaunch`), boot it by hand (`xcrun simctl boot <udid>`) and correct what simctl names",
                     found: `specification.mobile(): could not boot simulator ${udid}.\n${message}`,
-                    read: 'docs/guides/mobile-specs.md#requirements--what-the-machine-must-have',
+                    read: 'docs/guides/mobile-specs.md#requirements-what-the-machine-must-have',
                     why: 'A mobile spec runs on a simulator the machine can boot.',
                 }),
                 { cause: error },

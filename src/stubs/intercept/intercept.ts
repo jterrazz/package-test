@@ -45,7 +45,7 @@ function resolveRelativeAgainst(origin: string): () => () => void {
             refusal({
                 fix: "state an absolute URL: intercept(stubs, { origin: 'http://console.test' })",
                 found: `intercept(): \`origin\` is \`${origin}\`, not an absolute URL`,
-                read: 'docs/reference/stubs.md#intercept--the-same-double-with-no-chain',
+                read: 'docs/reference/stubs.md#intercept-the-same-double-with-no-chain',
                 why: '`origin` states where a relative request resolves, so it is an absolute URL.',
             }),
         );
@@ -94,7 +94,7 @@ export function interceptThrough(
                 refusal({
                     fix: 'declare at least one stub, or drop the intercept: a subject with no network needs none',
                     found: 'intercept(), and the list of stubs is empty',
-                    read: 'docs/reference/stubs.md#intercept--the-same-double-with-no-chain',
+                    read: 'docs/reference/stubs.md#intercept-the-same-double-with-no-chain',
                     why: 'An empty list guards nothing.',
                 }),
             );

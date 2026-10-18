@@ -43,7 +43,7 @@ export const { api, cleanup } = await specification.api({
 });
 ```
 
-## `process()` — the one shape an external process takes
+## `process()`: the one shape an external process takes
 
 A site's dev server, an API the site calls, the bundler a simulator loads from: each of them is a command, a way of knowing it is ready, and a lifetime. `process()` is the one shape for all three, and the framework owns the lifetime. Without it each would be declared somewhere else, and the last one would be a `beforeAll` spawning a child and an `afterAll` that sometimes forgets to kill it.
 

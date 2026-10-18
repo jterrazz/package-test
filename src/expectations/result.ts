@@ -19,7 +19,7 @@ function missingFile(path: string): Error {
         refusal({
             fix: 'assert `.exists` first, or name a file the run left',
             found: `file(${JSON.stringify(path)}), and the run left no such file`,
-            read: 'docs/reference/assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+            read: 'docs/reference/assertions.md#resultfilepath-single-files-in-the-cwd-cli',
             why: A_FILE_IS_READ_WHERE_IT_EXISTS,
         }),
     );

@@ -21,20 +21,20 @@ export default defineStub({
 });
 ```
 
-The request is written as a path, so it matches that path on any origin: the app's real host, wherever its config points, does not matter. A full URL (`'https://news.example/articles/{{uuid}}'`) matches that origin alone ([§ `http.*`](#http--any-url)).
+The request is written as a path, so it matches that path on any origin: the app's real host, wherever its config points, does not matter. A full URL (`'https://news.example/articles/{{uuid}}'`) matches that origin alone ([§ `http.*`](#http-any-url)).
 
-| Field       | Meaning                                                                                                                                                                        |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`   | What outgoing call this stub speaks for: a stub builder (`http.*`, `openai.*`, `anthropic.*`)                                                                                  |
-| `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                                                                          |
-| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves.                                                    |
-| `required?` | The chain FAILS unless it was actually requested: at least once, or exactly `times` times when `times` is set, zero included ([`never`](#never--a-call-that-must-not-happen)). |
+| Field       | Meaning                                                                                                                                                                       |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `request`   | What outgoing call this stub speaks for: a stub builder (`http.*`, `openai.*`, `anthropic.*`)                                                                                 |
+| `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                                                                         |
+| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves.                                                   |
+| `required?` | The chain FAILS unless it was actually requested: at least once, or exactly `times` times when `times` is set, zero included ([`never`](#never-a-call-that-must-not-happen)). |
 
 ### Selection
 
 One queue serves all three deliveries. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, none of the headers it states absent is present, and the `match` predicate, if any, passes on the body.
 
-**The first stub in list order that matches AND is not exhausted wins**, except a never stub (`required` with `times: 0`), which takes every request it matches ([`never`](#never--a-call-that-must-not-happen)). That single rule covers the two shapes you need:
+**The first stub in list order that matches AND is not exhausted wins**, except a never stub (`required` with `times: 0`), which takes every request it matches ([`never`](#never-a-call-that-must-not-happen)). That single rule covers the two shapes you need:
 
 ```typescript
 import { defineStubs, http } from '@jterrazz/test/stubs';
@@ -66,7 +66,7 @@ export default defineStub({
 
 Without `required`, a stub nobody calls is invisible: the test passes, and the assertion it was supposed to protect never ran.
 
-### `never` — a call that must not happen
+### `never`: a call that must not happen
 
 The other half of a call count is zero. `http.never(request)` is the stub `required` with `times: 0`, and it states that the subject must not reach the route within the chain's terminal action, or the `intercept()` scope, it is declared for:
 
@@ -239,7 +239,7 @@ describe('report', () => {
 
 Repeated `.intercept()` calls **append**. Composition and override semantics live in `defineStubs` / `.with()`, never in call order.
 
-## `intercept()` — the same double, with no chain
+## `intercept()`: the same double, with no chain
 
 A module test has no runner and therefore no chain to hang stubs on, and its subject can still reach the network. `intercept(...)` is that case, and it takes the same three forms:
 
@@ -288,7 +288,7 @@ It is real in both runtimes (msw's server under node, msw's worker in a page), s
 await using _ = await intercept(posts, { origin: 'http://console.test' });
 ```
 
-**An empty list is refused.** `intercept(defineStubs())` guards nothing, and a subject with no network needs no intercept at all, and the message says so. "This subject makes no network call" is said the other way round: declare each call it could make with [`http.never()`](#never--a-call-that-must-not-happen), and the spec fails if it makes one.
+**An empty list is refused.** `intercept(defineStubs())` guards nothing, and a subject with no network needs no intercept at all, and the message says so. "This subject makes no network call" is said the other way round: declare each call it could make with [`http.never()`](#never-a-call-that-must-not-happen), and the spec fails if it makes one.
 
 **A request fetch refuses is refused.** Under node, a `fetch` whose RequestInit fetch itself would refuse (an empty method, a forbidden one such as `TRACE`, a `GET` or `HEAD` with a body, an invalid header) rejects with fetch's own `TypeError` before any stub sees it. msw alone would build its request with `init.method || 'GET'` and serve the first three, so a subject's literal method mutated to `''` would be answered by a `GET` stub and its mutant survive. `specs/integration/intercept/refused-init.spec.ts` is the proof. In a page the browser's fetch refuses them before the worker.
 
@@ -312,7 +312,7 @@ The stub backend resets between chains, the way databases do: one chain = one te
 
 ## Request builders
 
-### `http.*` — any URL
+### `http.*`: any URL
 
 ```typescript
 import { http } from '@jterrazz/test/stubs';
@@ -470,7 +470,7 @@ fix: declare a stub for POST https://api.openai.com/v1/chat/completions, or rais
 read: docs/reference/linting.md#network-strict-after-first-stub
 ```
 
-At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route, and a never stub that was reached fails it, naming the route and each call ([never](#never--a-call-that-must-not-happen)). Every outcome of one action is reported together: a reached never stub, an unmatched request and an unmet `required` stub each keep their own refusal in the one error.
+At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route, and a never stub that was reached fails it, naming the route and each call ([never](#never-a-call-that-must-not-happen)). Every outcome of one action is reported together: a reached never stub, an unmatched request and an unmet `required` stub each keep their own refusal in the one error.
 
 ### `required` is verified per terminal action
 

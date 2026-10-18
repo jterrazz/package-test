@@ -88,7 +88,7 @@ test('reads the feed the gateway publishes', async () => {
 });
 ```
 
-The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusal of an empty stub list, and everything about the stubs themselves (selection, `times`, `required`, the facades, the streams) are [Stubs § `intercept()`](../reference/stubs.md#intercept--the-same-double-with-no-chain)'s.
+The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusal of an empty stub list, and everything about the stubs themselves (selection, `times`, `required`, the facades, the streams) are [Stubs § `intercept()`](../reference/stubs.md#intercept-the-same-double-with-no-chain)'s.
 
 ### Time
 

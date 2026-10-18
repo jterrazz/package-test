@@ -37,8 +37,7 @@ function manifestIn(workDir: string): unknown {
     return JSON.parse(readFileSync(manifest, 'utf8'));
 }
 
-const LINK_CHAPTER =
-    'read: docs/guides/cli-specs.md#link--a-package-the-working-directory-resolves';
+const LINK_CHAPTER = 'read: docs/guides/cli-specs.md#link-a-package-the-working-directory-resolves';
 
 const DISK_CHAPTER = 'read: docs/reference/linting.md#disk-named-by-relative-path-at-runtime';
 

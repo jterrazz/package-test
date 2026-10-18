@@ -262,7 +262,7 @@ describe('appium-server', () => {
             [
                 'why: A mobile spec runs on a simulator the machine can boot.',
                 "fix: finish Xcode's first launch if it asks (`sudo xcodebuild -runFirstLaunch`), boot it by hand (`xcrun simctl boot <udid>`) and correct what simctl names",
-                'read: docs/guides/mobile-specs.md#requirements--what-the-machine-must-have',
+                'read: docs/guides/mobile-specs.md#requirements-what-the-machine-must-have',
             ],
             true,
         ]);

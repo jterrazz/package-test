@@ -18,10 +18,10 @@ describe('head', () => {
             canonical: 'https://site.test/',
             metas: {
                 description: 'A tiny site the specs can trust.',
-                'og:title': 'Fixture — Home',
+                'og:title': 'Fixture: Home',
                 'og:image': 'https://site.test/assets/card.png',
             },
-            title: 'Fixture — Home',
+            title: 'Fixture: Home',
         });
     });
 
@@ -32,7 +32,7 @@ describe('head', () => {
         // Then - the accessors read the head without a golden
         expect(result.canonical).toBe('https://site.test/');
         expect(result.alternates['x-default']).toBe('https://site.test/');
-        expect(result.meta('og:title')).toBe('Fixture — Home');
+        expect(result.meta('og:title')).toBe('Fixture: Home');
         expect(result.meta('description')).toBe('A tiny site the specs can trust.');
     });
 

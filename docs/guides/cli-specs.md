@@ -34,8 +34,8 @@ afterAll(cleanup);
 | `docker`    | Opt-in Docker awareness: `{ envVar, nameLabel, testRunLabel }`. See [Docker-aware mode](#docker-aware-mode)                                                                                                                                                                                                                                                                                                                                                                                    |
 | `backend`   | A **stub backend** started before the first run: `{ env, port? }`. Its URL is handed to every run in `env`, and `.intercept()` declares the stubs it serves; see [Declared backend](#declared-backend)                                                                                                                                                                                                                                                                                         |
 | `defaults`  | Environment applied to **every** run of this binary: the variables the product needs to be deterministic at all (`TZ`, `NO_COLOR`, `LANG`, a config home under the spec's own workdir). Stated once per app; a chained `.env()` and a document's `env:` both win over it                                                                                                                                                                                                                       |
-| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`); see [Registration](#registration--once-per-app)                                                                                                                                                                                                                                                                                                                                                               |
-| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }`; see [Registration](#registration--once-per-app)                                                                                                                                                                                                                                                                                                                                                     |
+| `env`       | Named **environment sets** a spec document names by bare word (`env: [frozen]`); see [Registration](#registration-once-per-app)                                                                                                                                                                                                                                                                                                                                                                |
+| `serve`     | Named **servers** a spec document starts (`serve: [mcp]`): `{ command, ready, url, env }`; see [Registration](#registration-once-per-app)                                                                                                                                                                                                                                                                                                                                                      |
 | `transform` | **Escape hatch only** (rule `no-transform-duplicating-tokens`): a normalizer applied to streams before comparison, for application noise not covered by tokens. ANSI stripping is already the default; a transform that only re-implements standard tokens is a lint error                                                                                                                                                                                                                     |
 | `commands`  | The words the binary's commands are spelled with (`['db', 'migrate']`), read by the conventions checker and never by the run: a chain's subject is the leading words of its command line the list of ITS runner holds: `exec('db migrate --dry')` is filed under `cli/db/migrate/` (`one-subject-per-spec`, `spec-in-subject-folder`), whichever other runner the spec imports. Written in the call or bound to a `const` of the runner's file. Without it the first word alone is the subject |
 
@@ -80,11 +80,11 @@ test('dev server boots', async () => {
 
 - `waitFor`: a pattern; the promise resolves (exit code 0) as soon as it appears in **stdout or stderr** (both streams are watched). If the process exits before matching, the result carries a non-zero exit code (a clean exit-0 without the pattern is reported as `1`).
 - `timeout`: milliseconds; the process is killed when it elapses without a match, with exit code `124`. **Default: 10 000 ms** when `waitFor` is set without a `timeout`.
-- On resolution (match, exit, or timeout) the child is ended with the escalation every `process()` takes ([Services § `process()`](../reference/services.md#process--the-one-shape-an-external-process-takes)).
+- On resolution (match, exit, or timeout) the child is ended with the escalation every `process()` takes ([Services § `process()`](../reference/services.md#process-the-one-shape-an-external-process-takes)).
 - Termination targets the **whole process group**, not just the direct shell child: the process is spawned detached (its own group on POSIX) and signalled via the negative pid, so descendants (a `tsdown --watch` grandchild under a `dev` command, a background server the script forked) die with it instead of leaking past the spec. On platforms without group support (Windows), or when the group is already gone, it degrades to the direct child kill.
 - Passing either option marks the run as long-running; combining them with the array (sequence) form is an error.
 
-#### `cwd` — a folder of the working directory
+#### `cwd`: a folder of the working directory
 
 `{ cwd: 'packages/site' }` runs the command in a folder of the working directory, named relative to it: a workspace member a tool judges from inside, a clone whose parent holds what the tool must not read. The folder is one the fixtures laid; a path leaving the working directory, absolute or climbing out of it, is refused before anything runs, and so is a folder the working directory does not hold. `cwd` is no long-running option: it combines with a sequence, and with `waitFor`. The result still reads the working directory as a whole: `result.file('packages/site/out.txt')`.
 
@@ -112,7 +112,7 @@ Every spec gets a brand-new temp directory (`mkdtemp`) as its cwd. The runner ne
 
 That directory lives in the **OS temp dir**, inside the run's own temp root, and it stays there on purpose. It is scratch, created for one spec and removed once that spec's test has finished (at the run's end under `test.concurrent`, see [Set up a project](../start/set-up-a-project.md#where-a-run-writes)), not something the project produced, so it does not belong under `.artifacts/` with the caches a next run reuses (see [Set up a project](../start/set-up-a-project.md#where-a-run-writes)). Writing it inside the project would also change what a spec sees: a binary that walks up looking for a `package.json` would find yours instead of nothing.
 
-Two disjoint verbs shape a spec's state (rule `seeds-are-sql`): **`.fixture()` carries file state** (an isolated tree copied into the cwd), **`.seed()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree; only what git cannot carry is laid by a step ([`.prepare()`](#prepare--what-no-fixture-can-carry)).
+Two disjoint verbs shape a spec's state (rule `seeds-are-sql`): **`.fixture()` carries file state** (an isolated tree copied into the cwd), **`.seed()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree; only what git cannot carry is laid by a step ([`.prepare()`](#prepare-what-no-fixture-can-carry)).
 
 A fixture is named by `file()` or `directory()`, with its path from the spec file spelled in full; the wrapper states what it names:
 
@@ -239,7 +239,7 @@ test('deploys from a shaped workspace', async () => {
 
 A fixture tree sits beside the one leaf that reads it, `./__fixtures__/<name>/` or, when several leaves share it, in the `__fixtures__/` of the lowest folder they share, `specs/__fixtures__/` when they span specifications, reached by the path that climbs to it. That law holds for every reserved folder, `__setup__/` included, and its owner is [Conventions](../concepts/conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
 
-### `.link()` — a package the working directory resolves
+### `.link()`: a package the working directory resolves
 
 A fixture tree carries no `node_modules`: git never tracks one. A binary whose subject imports a package (a checker that loads a plugin, a build that resolves a peer) needs that package where Node looks for it, and `.link(name, source?)` puts it there: `<cwd>/node_modules/<name>`, a symlink to the package, never a copy and never an install, except for a packed package, which is the install a consumer gets.
 
@@ -289,7 +289,7 @@ The install lays the package and what its manifest requires, never what npm woul
 
 **`NODE_OPTIONS` reaches the binary on purpose.** A mutation run hands every spawned node its coverage reporter through it; a `defaults` that sets `NODE_OPTIONS: null` makes every mutant read as "no test runs". Clear what the product reads, never that.
 
-### `.prepare()` — what no fixture can carry
+### `.prepare()`: what no fixture can carry
 
 A fixture tree is what git tracks, and some ground git never tracks: a `.git` for a tool that reads a repository, an empty folder, a file the repository's own `.gitignore` keeps out of the fixture, an index holding one file and not another. `.prepare(step)` runs a function of the working directory's absolute path once every fixture and link is laid, in the order the steps are stated, before the binary runs; a step may be async, and one that throws fails the chain before anything runs.
 
@@ -398,7 +398,7 @@ Two failures, both exit 64, and they say different things: **no route** names th
 
 Pick by what the stub is standing in for. **Data-driven** when the answer is a document two worlds may legitimately differ on: that difference is then a fixture layered over another, and the script never changes. **`case`** when the stub simulates an action (a write, an exit code, a banner) or answers one constant: a file per constant is a directory of one-liners, and indirection nobody reads.
 
-A served stub (a `serve:` server in a spec document) routes the same way over `$TEST_WORKDIR`, which is where that document's `fixture:` landed: see [Registration: once per app](#registration--once-per-app).
+A served stub (a `serve:` server in a spec document) routes the same way over `$TEST_WORKDIR`, which is where that document's `fixture:` landed: see [Registration: once per app](#registration-once-per-app).
 
 ### Declared backend
 
@@ -450,7 +450,7 @@ test('lints a shop and reports per-file blocks', async () => {
 
 Most cli cases are documents: a session written as data (the ground, the runs, what each printed and left on disk), collected as a test file of its own by the `cli()` project. The format is [Spec documents](spec-documents.md): its keys, its paths, the three doors that run it, failure and update. What stays here is what only this constructor owns: the words a document names its ground by.
 
-#### Registration — once per app
+#### Registration: once per app
 
 The document names its ground by WORD; the code says what those words mean, in the `specification.cli()` options:
 
