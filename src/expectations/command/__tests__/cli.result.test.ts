@@ -113,7 +113,14 @@ describe('CliResult', () => {
 
         // Then - the masked value, and the refusal naming stdout
         expect(masked.json.value).toStrictEqual({ id: '<id>' });
-        expect(() => plain.json.value).toThrow('found: stdout is not valid JSON: done');
+        expect(() => plain.json.value).toThrow(
+            [
+                'found: stdout is not valid JSON: done',
+                'why: `.json` parses a stream that holds one JSON document.',
+                'fix: read stdout as text, or have it hold JSON',
+                'read: docs/reference/assertions.md#resultjson-parsed-stdout-cli',
+            ].join('\n'),
+        );
     });
 
     test('cli.result — the containers it spawned — each by its name label, else its id, read once, one docker cannot inspect left out', () => {

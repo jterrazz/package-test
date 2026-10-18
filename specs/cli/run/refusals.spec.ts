@@ -232,9 +232,9 @@ describe('refusals', () => {
         const document = documentAt(path);
 
         // Then - the refusal lists what specification.cli() actually declares
-        await expect(failureOf(cli.run(document))).resolves.toContain(
-            'fix: serve a registered server: echo',
-        );
+        const message = await failureOf(cli.run(document));
+        expect(message).toContain('fix: serve a registered server: echo');
+        expect(message).toContain('read: docs/guides/cli-specs.md#registration-once-per-app');
     });
 
     test('a file that is not a `.spec.yaml` document is refused before it is read', async () => {

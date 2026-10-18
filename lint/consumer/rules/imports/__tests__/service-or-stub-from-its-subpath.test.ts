@@ -97,6 +97,11 @@ ruleTester().run('service-or-stub-from-its-subpath', serviceOrStubFromItsSubpath
             filename: SPEC,
         },
         {
+            name: 'A member of a name imported from the root is no namespace read.',
+            code: "import { clock } from '@jterrazz/test';\nexport const odd = clock.http;",
+            filename: SPEC,
+        },
+        {
             name: 'A namespace import reaching only root names.',
             code: "import * as t from '@jterrazz/test';\nexport const at = t.file('./x');\nexport const other = u.postgres;",
             filename: SPEC,

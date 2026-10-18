@@ -160,4 +160,30 @@ describe('preset', () => {
                 'the mobile specification drives the simulator: `specification.mobile()` owns the session, and the peers are its',
         });
     });
+
+    test('presetSeamLawsApartFrom — a seam law reaches its packages wherever they install, from the files that run a test, and the preset states it with no exception', () => {
+        // Given - a wildcard seam, a seam read from module tests alone, and the preset's own law
+        const [renderer, stringRenderer] = presetSeamLawsApartFrom(
+            ['renderer', 'string-renderer'],
+            'NOT',
+        );
+        const law = testPreset().layers?.find(
+            (layer) => (layer as { name?: string }).name === 'no-second-test-runtime-renderer',
+        );
+
+        // Then - each source and target pattern, whole
+        expect([renderer?.from, renderer?.to]).toStrictEqual([
+            { path: String.raw`\.(test\.tsx?|spec\.ts|specification\.tsx?)$`, pathNot: 'NOT' },
+            {
+                path: '(?:((^|/)node_modules/@testing-library/[^/]*([./]|$)|^@testing-library/[^/]*([./]|$)))',
+            },
+        ]);
+        expect([stringRenderer?.from, stringRenderer?.to]).toStrictEqual([
+            { path: String.raw`\.test\.ts$`, pathNot: 'NOT' },
+            { path: '(?:((^|/)node_modules/react-dom/server([./]|$)|^react-dom/server([./]|$)))' },
+        ]);
+        expect((law as undefined | { from?: unknown })?.from).toStrictEqual({
+            path: String.raw`\.(test\.tsx?|spec\.ts|specification\.tsx?)$`,
+        });
+    });
 });

@@ -32,6 +32,6 @@ describe('exportedNames', () => {
     test('namesOf reads `type` and `as` off a list, whatever its spacing, and drops what binds no name', () => {
         // Given - a list as written by hand, with an entry of two words and a trailing comma
         // Then - the bound names
-        expect(namesOf('x, type   B,  c  as  d , e f, ')).toStrictEqual(['x', 'B', 'd']);
+        expect(namesOf('x, type   B,  cc  as  dd , e f, ')).toStrictEqual(['x', 'B', 'dd']);
     });
 });

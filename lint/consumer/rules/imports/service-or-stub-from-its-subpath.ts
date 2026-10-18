@@ -166,10 +166,11 @@ export const serviceOrStubFromItsSubpath = defineRule(
                     const namespace = identifierName(child(node, 'object'));
                     const name = memberPropertyName(node);
                     // Stryker disable next-line StringLiteral: no import binds the empty name
-                    if (!namespaces.has(namespace ?? '') || name === undefined) {
+                    if (!namespaces.has(namespace ?? '')) {
                         return;
                     }
-                    const subpath = subpathOf(name);
+                    // Stryker disable next-line StringLiteral: no subpath publishes the empty name
+                    const subpath = subpathOf(name ?? '');
                     if (subpath !== undefined) {
                         context.report({
                             data: { name, namespace, subpath },

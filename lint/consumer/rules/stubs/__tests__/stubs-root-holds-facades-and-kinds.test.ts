@@ -126,6 +126,12 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
             filename: `${FEATURE}/openai/classify.ts`,
         },
         {
+            name: "The package's own source entry is the stubs subpath too, reached by a relative path.",
+            code: `import * as t from '../../../../../../src/index.stubs.js';\nexport default t.defineStub({ request: t.openai.chat({ user: 'u' }), response: t.http.error(500) });`,
+            errors: [{ column: 79, line: 2, messageId: 'foreignBuilder' }],
+            filename: `${FEATURE}/openai/classify.ts`,
+        },
+        {
             name: 'Nested below the kind folder.',
             code: `export default 1;`,
             errors: [{ column: 0, line: 1, messageId: 'tooDeep' }],

@@ -29,6 +29,7 @@ function taughtBy(name: string): Lesson {
     return { read: readAt(row, CATALOGUE_CHAPTER), why: whyOf(row) };
 }
 
+// Stryker disable next-line StringLiteral: no package or folder name this module escapes holds a character a pattern reads, so the escape changes none of them
 const escaped = (text: string): string => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 
 const either = (patterns: readonly string[]): string =>
