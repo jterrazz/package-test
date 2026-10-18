@@ -61,7 +61,7 @@ describe('localLinters', () => {
 
         // Then - the problem is the refusal's finding, never an empty report
         await expect(linted).rejects.toThrow(
-            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape",
+            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list: a setting adds to a default, never replaces its shape",
         );
     });
 
@@ -231,7 +231,7 @@ describe('localLinters', () => {
         ]).toStrictEqual([
             [],
             [],
-            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape",
+            "found: the presets' checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list: a setting adds to a default, never replaces its shape",
         ]);
     });
 });

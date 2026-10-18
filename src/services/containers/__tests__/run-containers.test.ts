@@ -124,14 +124,14 @@ describe('RunContainers', () => {
                 500,
                 'application/json',
                 JSON.stringify({
-                    error: '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: a worker asked for {"image":"redis:7-alpine"}, no container request',
+                    error: '@jterrazz/test broke one of its own invariants, a bug of the framework, not of the test: a worker asked for {"image":"redis:7-alpine"}, no container request',
                 }),
             ],
             [
                 500,
                 'application/json',
                 JSON.stringify({
-                    error: '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: a worker asked for {"port":6379}, no container request',
+                    error: '@jterrazz/test broke one of its own invariants, a bug of the framework, not of the test: a worker asked for {"port":6379}, no container request',
                 }),
             ],
         ]);

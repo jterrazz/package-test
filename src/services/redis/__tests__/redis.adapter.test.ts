@@ -122,7 +122,7 @@ describe('redis', () => {
         // Then - the refusal says which half is absent, and whose bug it is
         await expect(redis().healthcheck()).rejects.toThrow(
             new Error(
-                '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: redis() was healthchecked before it had a connection string',
+                '@jterrazz/test broke one of its own invariants, a bug of the framework, not of the test: redis() was healthchecked before it had a connection string',
             ),
         );
     });

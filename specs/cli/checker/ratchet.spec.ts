@@ -31,8 +31,8 @@ describe('ratchet', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toBe(
             [
-                're-recorded .jterrazz/baseline.json › test › jterrazz-check/no-reach-into-sibling-ground 2 → 0',
-                're-recorded .jterrazz/baseline.json › test › jterrazz-check/no-unused-ground 3 → 1',
+                're-recorded .jterrazz/baseline.json › test › jterrazz-check/no-reach-into-sibling-ground from 2 to 0',
+                're-recorded .jterrazz/baseline.json › test › jterrazz-check/no-unused-ground from 3 to 1',
                 '.jterrazz/baseline.json › test: 3 held across 2 rules',
                 '',
             ].join('\n'),
@@ -51,7 +51,7 @@ describe('ratchet', () => {
         // Then - the paid entry goes, the new debt still fails the run and is not written
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            re-recorded .jterrazz/baseline.json › test › jterrazz-check/ground-shared-or-inline 1 → 0
+            re-recorded .jterrazz/baseline.json › test › jterrazz-check/ground-shared-or-inline from 1 to 0
             specs/widget/__seeds__/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: __seeds__/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete __seeds__/dead.sql, or name it from the test that stands on it · read: docs/reference/linting.md#no-unused-ground
             baseline-ratchet  .jterrazz/baseline.json › test  found: \`jterrazz-check/no-unused-ground\` has 1 finding(s) and no entry records them · why: the section holds the debt the project recorded, and a finding no entry holds is new debt · fix: fix the findings, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);

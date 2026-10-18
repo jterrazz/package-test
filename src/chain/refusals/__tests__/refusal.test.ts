@@ -55,7 +55,7 @@ describe('refusal', () => {
             Reflect.apply(refusal, undefined, row);
         }).toThrow(
             new Error(
-                "@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: refusal('disk-named-by-relative-path-at-runtime') was handed no found and no fix for its case",
+                "@jterrazz/test broke one of its own invariants, a bug of the framework, not of the test: refusal('disk-named-by-relative-path-at-runtime') was handed no found and no fix for its case",
             ),
         );
     });
@@ -66,7 +66,7 @@ describe('refusal', () => {
 
         // Then - the message clears the test, and names the invariant
         expect(error.message).toBe(
-            '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: the run containers are served on no port',
+            '@jterrazz/test broke one of its own invariants, a bug of the framework, not of the test: the run containers are served on no port',
         );
     });
 });
