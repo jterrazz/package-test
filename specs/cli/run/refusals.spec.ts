@@ -146,6 +146,29 @@ describe('refusals', () => {
             read: docs/guides/spec-documents.md#failure-and-update`);
     });
 
+    test('a value past 160 characters is quoted cut, and one of 160 whole', async () => {
+        // Given - a contains of 160 characters and an equals of 161, neither met
+        const message = await failureOf(
+            cli.run(file('./__fixtures__/long-files.spec.yaml'), { frozen: true }),
+        );
+
+        // Then - the longer value ends cut on three dots, the other reads whole
+        expect(text(message)).toMatch(`
+            found: spec mismatch: a run whose files assertions quote values past the preview's width
+
+            $ scaffold
+
+            files mismatch
+
+              out/main.go: expected to contain "package rust xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", got "package main\\n"
+              out/go.mod: expected "module yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy...", got "module example\\n"
+
+            specs/cli/run/__fixtures__/long-files.spec.yaml:3
+            why: A spec document states what its runs produce: the exit code and the streams, whole.
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs: the exit code and the streams, and nothing else
+            read: docs/guides/spec-documents.md#failure-and-update`);
+    });
+
     test('the stack carries ONE frame, on the run that failed', async () => {
         // Given - a golden whose run is deliberately wrong
         const error = await errorOf(

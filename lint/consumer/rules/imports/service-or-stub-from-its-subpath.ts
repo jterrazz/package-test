@@ -30,9 +30,11 @@ type Declaration = {
 
 const NAMED = new Set(['ExportSpecifier', 'ImportSpecifier']);
 
-function publishedName(specifier: AstNode): string | undefined {
+// invariant: a specifier always names what it binds, by an identifier or a string.
+function publishedName(specifier: AstNode): string {
     const name = child(specifier, specifier.type === 'ImportSpecifier' ? 'imported' : 'local');
-    return identifierName(name) ?? stringValue(name);
+    // Stryker disable next-line StringLiteral: no specifier names nothing
+    return identifierName(name) ?? stringValue(name) ?? '';
 }
 
 function declarationOf(node: AstNode, text: string): Declaration | undefined {
@@ -57,8 +59,8 @@ function declarationOf(node: AstNode, text: string): Declaration | undefined {
             continue;
         }
         const name = publishedName(specifier);
-        const subpath = name === undefined ? undefined : subpathOf(name);
-        if (name === undefined || subpath === undefined) {
+        const subpath = subpathOf(name);
+        if (subpath === undefined) {
             declaration.kept.push(written);
         } else {
             declaration.moved.push({ name, node: specifier, subpath, text: written });
@@ -102,17 +104,15 @@ function fixOf(fixer: Fixer, declaration: Declaration): Fix {
 
 function namespacesOf(program: AstNode): Set<string> {
     const names = new Set<string>();
+    // invariant: a re-export from the root binds no namespace, so every statement is read by its source alone.
     for (const statement of childList(program, 'body')) {
-        if (
-            statement.type !== 'ImportDeclaration' ||
-            stringValue(child(statement, 'source')) !== FRAMEWORK_ROOT
-        ) {
+        if (stringValue(child(statement, 'source')) !== FRAMEWORK_ROOT) {
             continue;
         }
         for (const specifier of childList(statement, 'specifiers')) {
-            const local = identifierName(child(specifier, 'local'));
-            if (specifier.type === 'ImportNamespaceSpecifier' && local !== undefined) {
-                names.add(local);
+            if (specifier.type === 'ImportNamespaceSpecifier') {
+                // Stryker disable next-line StringLiteral: a namespace import always binds a name
+                names.add(identifierName(child(specifier, 'local')) ?? '');
             }
         }
     }
@@ -137,6 +137,7 @@ export const serviceOrStubFromItsSubpath = defineRule(
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
+        // Stryker disable next-line StringLiteral: the type is metadata, and no run reads it
         type: 'problem',
     },
     {
@@ -151,6 +152,7 @@ export const serviceOrStubFromItsSubpath = defineRule(
                     context.report({
                         data: { name: moved.name, subpath: moved.subpath },
                         // invariant: one fix rewrites the whole declaration, so it rides on its first name alone: two fixes over one range would leave all but one unapplied.
+                        // Stryker disable next-line ConditionalExpression: a fix on every name rewrites the one range alike, and the fixer applies one of overlapping fixes, so the output cannot tell them apart
                         ...(index === 0 && { fix: (fixer: Fixer) => fixOf(fixer, declaration) }),
                         messageId: 'fromRoot',
                         node: moved.node,
@@ -158,20 +160,13 @@ export const serviceOrStubFromItsSubpath = defineRule(
                 }
             };
             return {
-                before() {
-                    namespaces = new Set();
-                    return true;
-                },
                 ExportNamedDeclaration: judge,
                 ImportDeclaration: judge,
                 MemberExpression(node: AstNode) {
                     const namespace = identifierName(child(node, 'object'));
                     const name = memberPropertyName(node);
-                    if (
-                        namespace === undefined ||
-                        name === undefined ||
-                        !namespaces.has(namespace)
-                    ) {
+                    // Stryker disable next-line StringLiteral: no import binds the empty name
+                    if (!namespaces.has(namespace ?? '') || name === undefined) {
                         return;
                     }
                     const subpath = subpathOf(name);

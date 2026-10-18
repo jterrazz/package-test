@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 import { SPECIFICATIONS } from '../../../kit/project/specifications.js';
 import { recommendedRules } from '../../catalogue/manifest.js';
 import { importRulesForSpecifications } from '../import.js';
-import { TEST_COMMENT_OPENINGS, testPreset } from '../preset.js';
+import { presetSeamLawsApartFrom, TEST_COMMENT_OPENINGS, testPreset } from '../preset.js';
 import { vitestOnTests } from '../vitest.js';
 
 describe('preset', () => {
@@ -137,5 +137,27 @@ describe('preset', () => {
 
         // Then - every specification the checker asks a runner of is one: the standard is the wider list and the owner of the names
         expect([...SPECIFICATIONS].filter((name) => !filed.has(name))).toStrictEqual([]);
+    });
+
+    test('presetSeamLawsApartFrom — each seam a test may not reach names, in its fix, what replaces it', () => {
+        // Given - every seam's law
+        const laws = presetSeamLawsApartFrom(
+            ['renderer', 'browser-mode', 'runner', 'browser', 'simulator'],
+            'nothing',
+        );
+
+        // Then - the fix of each, whole
+        expect(Object.fromEntries(laws.map(({ fix, name }) => [name, fix]))).toStrictEqual({
+            'no-second-test-runtime-browser':
+                'the website specification drives the browser: `specification.website()` owns the page, and the peer is its',
+            'no-second-test-runtime-browser-mode':
+                'Browser Mode is the seam, not the surface: `component.render()` owns the locators, the visitor and the ARIA tree',
+            'no-second-test-runtime-renderer':
+                '`component.render()` and the element vocabulary render in a real browser: the queries are the same nouns, and they run against what ships',
+            'no-second-test-runtime-runner':
+                'vitest is the runner this vocabulary speaks: `test`, `expect` and `vi` come from it',
+            'no-second-test-runtime-simulator':
+                'the mobile specification drives the simulator: `specification.mobile()` owns the session, and the peers are its',
+        });
     });
 });

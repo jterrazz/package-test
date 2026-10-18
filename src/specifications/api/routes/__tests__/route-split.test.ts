@@ -102,4 +102,15 @@ describe('route-split', () => {
             failure: NO_SHARD_LEDGERS,
         });
     });
+
+    test('a merge with no shard ledgers is refused in four parts', () => {
+        // Given - the lesson a merge finding none prints
+        // Then - whole
+        expect(NO_SHARD_LEDGERS).toStrictEqual({
+            fix: 'run every shard (`make test SHARD=<index>/<count>`) before the merge, since a whole run empties the shard folders',
+            found: `api routes: not judged, since no shard's ledgers are under ${ROUTES_DIR}/shard-*/`,
+            read: 'docs/guides/api-specs.md#when-a-run-is-not-judged',
+            why: "The split judges the routes over every shard's ledgers, so a merge with none has no run to judge.",
+        });
+    });
 });

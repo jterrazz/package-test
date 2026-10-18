@@ -81,4 +81,22 @@ describe('vitestOnTests', () => {
             '**/specs/**/*.{ts,tsx}',
         ]);
     });
+
+    test('the vitest rulebook — `no-vitest-time-or-global-stub` — each restricted vi method names the primitive that replaces it', () => {
+        // Given - the option the fragment sets on vitest's own rule
+        const { options: methods, severity } = optionOf('vitest/no-restricted-vi-methods');
+
+        // Then - every message, whole
+        expect(severity).toBe('error');
+        expect(methods).toStrictEqual({
+            setSystemTime:
+                '`vi.setSystemTime` gives way to `clock.at(iso)`, which gives the calendar back.',
+            stubGlobal:
+                "`vi.stubGlobal('fetch')` gives way to `await using _ = await intercept(defineStubs(...))`; a subject that fetches a PATH states where it resolves: `intercept(stubs, { origin: 'http://<host>.test' })`.",
+            useFakeTimers:
+                '`vi.useFakeTimers` gives way to `clock.at(iso)` and `clock.advance(ms)`.',
+            useRealTimers:
+                '`vi.useRealTimers` gives way to nothing: `using` gives the clock back at the scope end.',
+        });
+    });
 });

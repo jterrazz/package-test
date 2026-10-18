@@ -152,6 +152,11 @@ ruleTester().run('stubs-root-holds-facades-and-kinds', stubsRootHoldsFacadesAndK
             filename: UNIT,
         },
         {
+            name: 'A builder of another package is no kind: an SDK named `openai` in an http unit.',
+            code: `import { openai } from 'openai-sdk';\nimport { defineStub, http } from '@jterrazz/test/stubs';\nexport default defineStub({ request: http.get(openai.base), response: http.json({}) });`,
+            filename: UNIT,
+        },
+        {
             code: `export { default } from './other.js';`,
             filename: UNIT,
         },

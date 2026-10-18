@@ -268,6 +268,15 @@ describe('route-judge', () => {
         ).resolves.toStrictEqual([{ line: PARTIAL_UNJUDGED }, { line: PARTIAL_UNJUDGED }]);
         expect(heldUnreached(root)).toBe(0);
     });
+
+    test('the lines a run that is not judged prints say why, whole', () => {
+        // Given - the two lines a part of a run prints
+        // Then - each, as written
+        expect([SHARD_UNJUDGED, PARTIAL_UNJUDGED]).toStrictEqual([
+            "api routes: not judged, since a shard's ledgers are a part of the run's and the route ratchet is judged only over every shard's ledgers (docs/guides/api-specs.md)",
+            'api routes: not judged, since a partial run (--changed, a file filter or -t) reaches only some routes',
+        ]);
+    });
 });
 
 function methodlessRun(

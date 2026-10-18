@@ -156,7 +156,7 @@ describe('index.vitest', () => {
         await expect(vitestConfig(configIn(root))).rejects.toThrow(
             new Error(
                 [
-                    'found: jterrazz.config.ts does not load — presets not built',
+                    'found: jterrazz.config.ts does not load: presets not built',
                     'why: the test projects are declared there, and a config read without them would run none of them',
                     'fix: correct jterrazz.config.ts as the finding says, then run vitest again',
                     'read: docs/start/set-up-a-project.md#the-vitest-config',
@@ -179,7 +179,7 @@ describe('index.vitest', () => {
             "export default { resolve: { alias: { '#': '/hash' } } };\n",
         );
         const plain = projectDeclaring(
-            "{ component: { reason: 'the app', vite: { define: { A: '1' } } } }",
+            "{ component: { reason: 'the app', vite: { define: { A: '1' }, resolve: { conditions: ['app'] } } } }",
         );
         const listed = projectDeclaring(
             "{ component: { reason: 'the app', vite: { resolve: { alias: [{ find: 'app/sub', replacement: './sub.js' }, { find: 'app', replacement: 'some-package' }, 3] } } } }",

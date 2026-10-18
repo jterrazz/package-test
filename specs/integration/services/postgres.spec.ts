@@ -264,6 +264,9 @@ describe('postgres', () => {
         // Then - the message carries the script's path and the type error
         expect(result.error.text).toContain('found: the postgres init script ');
         expect(result.error.text).toContain('postgres/init.sql');
+        expect(result.error.text).toContain(
+            "why: A postgres service's template database is built by its init script, run whole.",
+        );
     });
 
     // RUNTIME state-isolated-per-worker — two workers on one container never share a row.

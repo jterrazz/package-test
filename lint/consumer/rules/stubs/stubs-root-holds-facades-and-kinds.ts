@@ -58,7 +58,8 @@ function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<
     );
 }
 
-const ENTRY = /^@jterrazz\/test\/stubs$|(?:^|\/)src\/index\.stubs\.js$/u;
+const isEntry = (source: string): boolean =>
+    source === '@jterrazz/test/stubs' || source.endsWith('/src/index.stubs.js');
 
 type EntryBindings = { builders: Map<string, string>; namespaces: Set<string> };
 
@@ -68,7 +69,7 @@ function entryBindings(program: AstNode): EntryBindings {
         if (
             // Stryker disable next-line ConditionalExpression: a re-export binds no name, and its specifiers import none
             statement.type !== 'ImportDeclaration' ||
-            !ENTRY.test(stringValue(child(statement, 'source')) ?? '')
+            !isEntry(stringValue(child(statement, 'source')) ?? '')
         ) {
             continue;
         }
