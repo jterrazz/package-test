@@ -51,11 +51,11 @@ describe('projects', () => {
     });
 
     test('a document the literate door collects that breaks its grammar fails the collection, its line and key named', async () => {
-        // Given - the cli's documents narrowed to a folder holding one with a key outside the closed set, and vitest's error report uncoloured, as the fixture reads it line by line
+        // Given - the cli's documents narrowed to a folder holding one with a key outside the closed set, and vitest's error report coloured, as a GitHub runner prints it
         const result = await cli
             .link('@jterrazz/test', packed())
             .fixture(directory('./__fixtures__/projects/'))
-            .env({ NO_COLOR: '1' })
+            .env({ FORCE_COLOR: '1', NO_COLOR: null })
             .exec('projects.mjs vitest.documents.config.mjs');
 
         // Then - the run is refused at collection, in the grammar's words
