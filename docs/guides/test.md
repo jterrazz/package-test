@@ -268,7 +268,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.intercept()` | 12  | 1   | 1   | n/a  | 3           | 2       | 1      | 6         | n/a    |
 | `.seed()`      | 9   | 1   | 1   | n/a  | 3           | n/a     | n/a    | n/a       | n/a    |
 | `.with()`      | 4   | 1   | 1   | n/a  | 1           | 1       | n/a    | n/a       | n/a    |
-| `.env()`       | n/a | n/a | 6   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.env()`       | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.fixture()`   | n/a | n/a | 48  | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.link()`      | n/a | n/a | 11  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.prepare()`   | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
