@@ -5,6 +5,7 @@ import type { Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
+import { findFreePort } from '../listening.js';
 import type { ProcessOptions } from '../process.adapter.js';
 
 /** Binds the port the OS hands it and answers its own pid: no spec picks a port. */
@@ -57,6 +58,9 @@ export function programNamed(name: string): string {
     return program;
 }
 
+// hazard: a fixed port may be a developer's own server (Astro's 4321) answering in the refused server's place.
+const PINNED = await findFreePort();
+
 /** Each process shape refused before it is ready, and the refusal it gets, whole. */
 export const REFUSALS: [string, ProcessOptions, string][] = [
     [
@@ -83,13 +87,13 @@ export const REFUSALS: [string, ProcessOptions, string][] = [
     [
         'a server that cannot bind the port `port` pins',
         {
-            command: `node -e "console.error('Error: listen EADDRINUSE: address already in use 127.0.0.1:4321')"`,
-            port: 4321,
+            command: `node -e "console.error('Error: listen EADDRINUSE: address already in use 127.0.0.1:${PINNED}')"`,
+            port: PINNED,
         },
         refused(
-            `the server could not bind its port, which another process already holds.\nCommand: node -e "console.error('Error: listen EADDRINUSE: address already in use 127.0.0.1:4321')"\nOutput:\nError: listen EADDRINUSE: address already in use 127.0.0.1:4321\n`,
+            `the server could not bind its port, which another process already holds.\nCommand: node -e "console.error('Error: listen EADDRINUSE: address already in use 127.0.0.1:${PINNED}')"\nOutput:\nError: listen EADDRINUSE: address already in use 127.0.0.1:${PINNED}\n`,
             'A process is handed a free port unless `port` pins one, and a port another process holds is not free.',
-            'stop the process holding port 4321, or drop the `port` option so a free one is picked',
+            `stop the process holding port ${PINNED}, or drop the \`port\` option so a free one is picked`,
         ),
     ],
     [
