@@ -11,12 +11,13 @@ export const SIGNALS_GROUPS = process.platform !== 'win32';
 const GROUP_POLL_MS = 1000;
 const GROUP_SETTLE_MS = 50;
 
-/** A process the served one spawned outside its group: its executable is `program`, or a path ending in it, and its command line holds every word of `holds`. */
+/** A process the served one spawned outside its group: its executable, as `ps` names it or as its command line's first word invokes it, is `program` or a path ending in it, and its command line holds every word of `holds`. */
 export type Stray = { holds: readonly string[]; program: string };
 
 export type Strays = readonly Stray[];
 
 // invariant: the strays are the script's first argument; a stray may lead a group of its own, which its signal reaches whole.
+// outside: Linux's `comm` is the main thread's name, which node renames and the kernel cuts at 15 characters, so the command line's first word names the program there.
 const STRAYS_SOURCE = `
 const { execFileSync } = require('node:child_process');
 const strays = JSON.parse(process.argv[1] ?? '[]');
@@ -28,11 +29,15 @@ const listed = (column) => {
         return found === null ? [] : [[Number(found[1]), found[2]]];
     }));
 };
+const names = (path, program) => path === program || path.endsWith('/' + program);
 const strayPids = () => {
     const commands = listed('command');
     return [...listed('comm')]
-        .filter(([pid, program]) => pid !== process.pid && strays.some((stray) =>
-            (program === stray.program || program.endsWith('/' + stray.program)) && stray.holds.every((word) => (commands.get(pid) ?? '').includes(word))))
+        .filter(([pid, executable]) => {
+            const command = commands.get(pid) ?? '';
+            return pid !== process.pid && strays.some((stray) =>
+                (names(executable, stray.program) || names(command.split(' ')[0], stray.program)) && stray.holds.every((word) => command.includes(word)));
+        })
         .map(([pid]) => pid);
 };
 const signalStrays = (signal) => {
