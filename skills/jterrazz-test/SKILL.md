@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing conventions for @jterrazz projects: the nine kinds (module, integration, component, website, mobile, api, job, cli, lint) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
+description: "Testing conventions for @jterrazz projects: the nine kinds (module, integration, component, website, mobile, api, job, cli, lint) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included."
 metadata:
     version: '17'
 ---
