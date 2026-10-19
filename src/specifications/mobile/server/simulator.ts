@@ -30,6 +30,7 @@ async function simctl(
     args: readonly string[],
     options: { maxBuffer?: number; timeout?: number } = {},
 ): Promise<{ stdout: string }> {
+    // Stryker disable next-line AssignmentOperator: a check never run differs only on a Mac whose Xcode awaits its first launch
     firstLaunch ??= run('xcodebuild', ['-checkFirstLaunchStatus']);
     await firstLaunch;
     return await run('xcrun', ['simctl', ...args], options);
