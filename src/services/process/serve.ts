@@ -6,6 +6,7 @@ import { resolve as resolvePath } from 'node:path';
 import { pause } from '../../chain/pause.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { findFreePort, firstAnswering } from './listening.js';
+import { OutputChange } from './output-change.js';
 import { lessonOf, refuseHeldPort } from './port-in-use.js';
 import type { Lesson } from './port-in-use.js';
 import {
@@ -21,7 +22,7 @@ import type { Strays } from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
 
 const DEFAULT_READY_TIMEOUT = 30_000;
-const READY_POLL_INTERVAL_MS = 250;
+const READY_POLL_INTERVAL_MS = 25;
 
 // Stryker disable ArrayDeclaration,BlockStatement,BooleanLiteral,CallExpression,ConditionalExpression,ObjectLiteral,OptionalChaining,StringLiteral: the watchdog acts only when this process dies before stop(), which no test inside this process can observe; process-group's script is what it runs
 function watchGroup(groupId: number, strays: Strays): ChildProcess {
@@ -57,6 +58,7 @@ export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
 export class ServedProcess {
     port: null | number = null;
     private child: ChildProcess | null = null;
+    private readonly change = new OutputChange();
     private readonly extraEnv: Record<string, string>;
     private readonly specification: string;
     private readonly options: ProcessOptions;
@@ -134,6 +136,7 @@ export class ServedProcess {
         }
         const collect = (data: unknown): void => {
             this.output += String(data);
+            this.change.notify();
         };
         // Stryker disable next-line OptionalChaining: piped, the stream is always there
         child.stdout?.on('data', collect);
@@ -141,6 +144,7 @@ export class ServedProcess {
         child.stderr?.on('data', collect);
         child.on('close', () => {
             this.exited = true;
+            this.change.notify();
         });
         // invariant: a spawn that fails, its folder missing, says why before it closes.
         child.on('error', (error) => {
@@ -164,7 +168,7 @@ export class ServedProcess {
                     why: 'A process is ready once its output matches `ready`, within `timeout`.',
                 });
             }
-            await pause(READY_POLL_INTERVAL_MS);
+            await this.change.next(deadline);
         }
         return null;
     }

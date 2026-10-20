@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, onTestFinished, test } from 'vitest';
 
+import { clock } from '../../../clock/clock.js';
 import { findFreePort } from '../listening.js';
 import { runToCompletion, ServedProcess } from '../serve.js';
 import {
@@ -35,6 +36,19 @@ describe('serve', () => {
         expect(baseUrl).toBe(`http://127.0.0.1:${adapter.port}`);
         const response = await fetch(baseUrl);
         expect(response.status).toBe(200);
+    });
+
+    test('a served process — reads the banner the moment the server prints it, with no timer to wait for', async () => {
+        // Given - a server that announces the port it got, started while this process's scheduler stands still
+        const served = new ServedProcess({ command: SERVER, ready: READY }, process.cwd());
+        adapter = served;
+        const baseUrl = await (async () => {
+            using _ = clock.run();
+            return await served.start();
+        })();
+
+        // Then - it is ready on the announced port all the same
+        expect(baseUrl).toBe(`http://127.0.0.1:${served.port}`);
     });
 
     test('a served process — a working directory given as a function is read when the process starts', async () => {
