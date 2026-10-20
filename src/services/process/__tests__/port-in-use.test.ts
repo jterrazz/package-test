@@ -4,7 +4,7 @@ import { lessonOf } from '../port-in-use.js';
 
 const REASON = { fix: 'f', found: 'the server exited', why: 'w' };
 
-describe('lessonOf', () => {
+describe('port-in-use', () => {
     test('lessonOf — a reason stands when the output names no port held, whatever else it says', () => {
         // Given - outputs that name no bind failure
         // Then - the reason as it came

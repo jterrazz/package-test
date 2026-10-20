@@ -1,21 +1,19 @@
-import { once } from 'node:events';
 import { existsSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
-import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, onTestFinished, test, vi } from 'vitest';
+import { afterEach, describe, expect, onTestFinished, test } from 'vitest';
 
+import { findFreePort } from '../listening.js';
 import { runToCompletion, ServedProcess } from '../serve.js';
 import {
     alive,
-    CALLS_HANDED,
     held,
     PRINTS_HANDED,
     READY,
     REFUSALS,
     refused,
     SERVER,
-    SILENT,
+    serving,
 } from './serve.fixtures.js';
 
 const SOURCE_FOLDER = join(process.cwd(), 'src');
@@ -144,24 +142,51 @@ describe('serve', () => {
     });
 
     test('a served process — the PORT form hands a stated port as PORT and is ready once the path answers', async () => {
-        // Given - a port this test holds and serves, stated to a child that calls it
-        const { paths, port, server } = await held();
+        // Given - a port nobody holds, stated to a child that serves it and reports the paths it is asked
+        const port = await findFreePort();
+        const { paths, server, url } = await held();
         adapter = new ServedProcess(
-            { command: CALLS_HANDED, port, ready: '/health' },
+            { command: serving(200), env: { REPORT: url }, port, ready: '/health' },
             process.cwd(),
         );
 
-        // Then - ready on that port, polled at the path, and the child was handed it
+        // Then - ready on that port, once the child answered the path
         try {
             await expect(adapter.start()).resolves.toBe(`http://127.0.0.1:${port}`);
             expect(paths).toContain('/health');
-            await vi.waitFor(() => {
-                expect(paths).toContain('/handed');
-            });
         } finally {
             server.close();
         }
     });
+
+    test.each(['127.0.0.1', '::1'])(
+        'a served process — a pinned port another process already holds on %s is refused before the command runs',
+        async (host) => {
+            // Given - a port this test holds, pinned by a command that would leave a marker
+            const { port, server } = await held(host);
+            const folder = mkdtempSync(join(tmpdir(), 'serve-held-'));
+            onTestFinished(() => {
+                rmSync(folder, { force: true, recursive: true });
+            });
+            const marker = join(folder, 'ran');
+            const command = `node -e "require('node:fs').writeFileSync(process.argv[1],'')" ${marker}`;
+            adapter = new ServedProcess({ command, port }, process.cwd(), 'api');
+
+            // Then - refused naming the port and the host holding it, and the command never ran
+            try {
+                await expect(adapter.start()).rejects.toThrow(
+                    refused(
+                        `port ${port}, which \`port\` pins, is already held: something answers on ${host} before the server is started.\nCommand: ${command}`,
+                        'A process pinned to a port is ready once that port answers, and a port another process holds would answer in its place.',
+                        `stop the process holding port ${port}, or drop the \`port\` option so a free one is picked`,
+                    ),
+                );
+                expect(existsSync(marker)).toBe(false);
+            } finally {
+                server.close();
+            }
+        },
+    );
 
     test.each(REFUSALS)('a served process — %s is refused whole', async (_, options, message) => {
         // Given - a process of that shape
@@ -280,15 +305,13 @@ describe('serve', () => {
     });
 
     test('a served process — a redirect is an answer, never followed', async () => {
-        // Given - a port that answers with a redirect to nowhere
-        const server = createServer((_, response) => {
-            response.writeHead(302, { location: 'http://127.0.0.1:9/' }).end();
-        });
-        server.listen(0, '127.0.0.1');
-        await once(server, 'listening');
-        const address = server.address();
-        const port = address === null || typeof address === 'string' ? 0 : address.port;
-        adapter = new ServedProcess({ command: SILENT, port, timeout: 2000 }, process.cwd());
+        // Given - a pinned port the child answers with a redirect to nowhere
+        const port = await findFreePort();
+        const { server, url } = await held();
+        adapter = new ServedProcess(
+            { command: serving(302), env: { REPORT: url }, port, timeout: 2000 },
+            process.cwd(),
+        );
 
         // Then - ready on the redirect itself
         try {
@@ -299,9 +322,13 @@ describe('serve', () => {
     });
 
     test('a served process — the PORT form with no ready path polls the root', async () => {
-        // Given - a port this test holds, and no ready path stated
-        const { paths, port, server } = await held();
-        adapter = new ServedProcess({ command: SILENT, port }, process.cwd());
+        // Given - a pinned port the child serves, and no ready path stated
+        const port = await findFreePort();
+        const { paths, server, url } = await held();
+        adapter = new ServedProcess(
+            { command: serving(200), env: { REPORT: url }, port },
+            process.cwd(),
+        );
 
         // Then - ready once the root answers
         try {

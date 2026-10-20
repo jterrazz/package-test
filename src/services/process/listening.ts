@@ -1,4 +1,4 @@
-import { createServer } from 'node:net';
+import { connect, createServer } from 'node:net';
 
 import { invariant } from '../../chain/refusals/refusal.js';
 
@@ -41,3 +41,28 @@ async function answers(url: string): Promise<boolean> {
     }
 }
 // Stryker restore BlockStatement
+
+// invariant: the loopback hosts the readiness probe asks, so a port held on either is one the probe would read as the server's.
+const LOOPBACK = ['127.0.0.1', '::1'];
+
+export async function holdingHost(port: number): Promise<string | undefined> {
+    const accepted = await Promise.all(
+        LOOPBACK.map(async (host) => ((await accepts(host, port)) ? host : undefined)),
+    );
+
+    return accepted.find((host) => host !== undefined);
+}
+
+async function accepts(host: string, port: number): Promise<boolean> {
+    return await new Promise((resolve) => {
+        const socket = connect({ host, port });
+        socket.once('connect', () => {
+            // Stryker disable next-line CallExpression: a socket left open closes with this process, and the answer is read already
+            socket.destroy();
+            resolve(true);
+        });
+        socket.once('error', () => {
+            resolve(false);
+        });
+    });
+}

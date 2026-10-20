@@ -1,3 +1,6 @@
+import { refusal } from '../../chain/refusals/refusal.js';
+import { holdingHost } from './listening.js';
+
 export type Lesson = { fix: string; found: string; why: string };
 
 // outside: Node names a bound port EADDRINUSE, and the frameworks word it as "address already in use" or "port is already in use".
@@ -17,4 +20,27 @@ export function lessonOf(reason: Lesson, output: string, port: number | undefine
         found: 'the server could not bind its port, which another process already holds',
         why: 'A process is handed a free port unless `port` pins one, and a port another process holds is not free.',
     };
+}
+
+// hazard: a port another process holds answers the readiness probe in the server's place (a developer's own `astro dev` on 4321).
+export async function refuseHeldPort(
+    port: number | undefined,
+    specification: string,
+    command: string,
+): Promise<void> {
+    if (port === undefined) {
+        return;
+    }
+    const host = await holdingHost(port);
+    if (host === undefined) {
+        return;
+    }
+    throw new Error(
+        refusal({
+            fix: `stop the process holding port ${String(port)}, or drop the \`port\` option so a free one is picked`,
+            found: `specification.${specification}(): port ${String(port)}, which \`port\` pins, is already held: something answers on ${host} before the server is started.\nCommand: ${command}`,
+            read: 'docs/reference/services.md#process-the-one-shape-an-external-process-takes',
+            why: 'A process pinned to a port is ready once that port answers, and a port another process holds would answer in its place.',
+        }),
+    );
 }

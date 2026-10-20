@@ -12,23 +12,34 @@ import type { ProcessOptions } from '../process.adapter.js';
 export const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(String(process.pid)));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
 export const READY = /listening on port (?<port>\d+)/u;
 
+/** Listens on the `PORT` it is handed, and reports each path it is asked to the `REPORT` address before it answers `status`. */
+export function serving(status: number): string {
+    return `node -e "require('node:http').createServer(async(q,r)=>{await fetch(process.env.REPORT+q.url).catch(()=>{});r.writeHead(${String(status)},{location:'http://127.0.0.1:9/'}).end()}).listen(Number(process.env.PORT),'127.0.0.1')"`;
+}
+
 /** Never binds what it is handed: reports the port it got and stays up. */
-export const CALLS_HANDED = `node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/handed').catch(()=>{});setInterval(()=>{},1000)"`;
 export const PRINTS_HANDED = `node -e "console.log('handed '+process.env.PORT);setInterval(()=>{},1000)"`;
 
-export async function held(): Promise<{ paths: string[]; port: number; server: Server }> {
+export async function held(
+    host = '127.0.0.1',
+): Promise<{ paths: string[]; port: number; server: Server; url: string }> {
     const paths: string[] = [];
     const server = createServer((request, response) => {
         paths.push(request.url ?? '');
         response.end();
     });
-    server.listen(0, '127.0.0.1');
+    server.listen(0, host);
     await once(server, 'listening');
     const address = server.address();
     if (address === null || typeof address === 'string') {
         throw new Error('the held server has no port');
     }
-    return { paths, port: address.port, server };
+    return {
+        paths,
+        port: address.port,
+        server,
+        url: `http://${host.includes(':') ? `[${host}]` : host}:${address.port}`,
+    };
 }
 
 export function alive(pid: number): boolean {

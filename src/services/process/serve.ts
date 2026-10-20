@@ -6,7 +6,7 @@ import { resolve as resolvePath } from 'node:path';
 import { pause } from '../../chain/pause.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { findFreePort, firstAnswering } from './listening.js';
-import { lessonOf } from './port-in-use.js';
+import { lessonOf, refuseHeldPort } from './port-in-use.js';
 import type { Lesson } from './port-in-use.js';
 import {
     groupEnded,
@@ -82,6 +82,7 @@ export class ServedProcess {
     }
 
     async start(): Promise<string> {
+        await refuseHeldPort(this.options.port, this.specification, this.options.command);
         this.runBefore();
         const banner = this.options.ready instanceof RegExp ? this.options.ready : null;
         // invariant: banner mode: the server picks and announces the port, nothing is injected as `PORT`.
