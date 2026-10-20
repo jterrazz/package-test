@@ -5,8 +5,8 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { sweepFinishedEvidence, sweepOrphanRoots } from '../run-folders.js';
 
-// invariant: a run that cannot be alive: above the pid range of every system the suite runs on.
-const DEAD = '2147483646';
+// invariant: a run that cannot be alive: above the pid range of every system the suite runs on, led by the digit of pid 1, alive on each, so a pid read short of its whole name reads as a living run.
+const DEAD = '1999999999';
 
 function folderHolding(entries: readonly string[]): string {
     const folder = mkdtempSync(join(tmpdir(), 'run-folders-'));
