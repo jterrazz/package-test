@@ -68,8 +68,8 @@ describe('derivedProjects', () => {
         });
     });
 
-    test("derived-projects — an in-process specification is handed its runner where its folder's one specification module is named for it", () => {
-        // Given - api with its one runner, job with two, integration with one named otherwise, and cli, which runs no subject in-process
+    test("derived-projects — a specification met through its runner is handed it where its folder's one specification module is named for it", () => {
+        // Given - api, cli and website with their one runner, job with two, integration with one named otherwise, and lint, which keeps a worker per file
         const root = tree([
             'specs/api/api.specification.ts',
             'specs/api/orders.spec.ts',
@@ -77,14 +77,18 @@ describe('derivedProjects', () => {
             'specs/job/other.specification.ts',
             'specs/integration/redis.specification.ts',
             'specs/cli/cli.specification.ts',
+            'specs/website/website.specification.ts',
+            'specs/lint/lint.specification.ts',
         ]);
 
-        // Then - the api project alone runs its files in one module graph
+        // Then - the api, cli and website projects run their files in one module graph
         expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
             api: { runner: './specs/api/api.specification.ts' },
-            cli: {},
+            cli: { runner: './specs/cli/cli.specification.ts' },
             integration: {},
             job: {},
+            lint: {},
+            website: { runner: './specs/website/website.specification.ts' },
         });
     });
 

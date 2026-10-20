@@ -1,8 +1,9 @@
+import { resolve } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { specificationProject } from '../../vitest/project.js';
-import type { SpecificationProjectOptions } from '../../vitest/project.js';
+import { runnerProject } from '../../vitest/project.js';
+import type { RunnerOption, SpecificationProjectOptions } from '../../vitest/project.js';
 import { literate } from './documents/literate-plugin.js';
 import type { LiterateOptions } from './documents/literate-plugin.js';
 
@@ -19,20 +20,29 @@ export type LiterateDoor = {
 };
 
 /** `cli()`: a binary, and the documents that specify it. */
-export type CliProjectOptions = LiterateDoor & SpecificationProjectOptions;
+export type CliProjectOptions = LiterateDoor & RunnerOption & SpecificationProjectOptions;
+
+// invariant: a document imports the module its door names, which the shared graph runs again before each file only when it is the project's runner.
+function runnerBeside(
+    common: RunnerOption & SpecificationProjectOptions,
+    documents: string,
+): RunnerOption & SpecificationProjectOptions {
+    const { runner, ...isolated } = common;
+    return runner !== undefined && resolve(runner) === resolve(documents) ? common : isolated;
+}
 
 /** A cli project: the specification's `.spec.ts` files and its documents (docs/guides/spec-documents.md); the plugin's glob joins this project's include, never the root config. */
 export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
     const { literate: door, ...common } = options;
-    const project = specificationProject('cli', common);
     if (door === false) {
-        return project;
+        return runnerProject('cli', common);
     }
-    return mergeConfig(project, {
+    const documents = door?.runner ?? './specs/cli/cli.specification.ts';
+    return mergeConfig(runnerProject('cli', runnerBeside(common, documents)), {
         plugins: [
             literate({
                 include: door?.include ?? ['specs/cli/**/*.spec.yaml'],
-                runner: door?.runner ?? './specs/cli/cli.specification.ts',
+                runner: documents,
             }),
         ],
     }) as TestProjectInlineConfiguration;

@@ -2,7 +2,7 @@ import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { servicesSetup } from '../../services/containers/services.global-setup.js';
-import { inProcessProject } from '../../vitest/project.js';
+import { runnerProject } from '../../vitest/project.js';
 import type { InProcessProjectOptions } from '../../vitest/project.js';
 import { routeCoverageSetup } from './routes/route-coverage.global-setup.js';
 
@@ -10,7 +10,7 @@ import { routeCoverageSetup } from './routes/route-coverage.global-setup.js';
 export type ApiProjectOptions = InProcessProjectOptions;
 
 export function api(options: ApiProjectOptions = {}): TestProjectInlineConfiguration {
-    return mergeConfig(inProcessProject('api', options), {
+    return mergeConfig(runnerProject('api', options), {
         test: { globalSetup: [servicesSetup(), routeCoverageSetup()] },
     }) as TestProjectInlineConfiguration;
 }

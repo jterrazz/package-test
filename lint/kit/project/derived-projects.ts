@@ -11,8 +11,8 @@ const UNIT = 'unit';
 // invariant: every specification a project is built by has its folder, the unit one aside: module tests sit in the `__tests__/` of their modules' folders.
 const FOLDERED: ReadonlySet<string> = new Set([...SPECIFICATIONS, 'component']);
 
-// invariant: these build their subject in the run's own process, so a worker's files can share one module graph.
-const IN_PROCESS: ReadonlySet<string> = new Set(['api', 'integration', 'job']);
+// invariant: a spec file of these meets its subject through the runner its specification module exports, so a worker's files can share one module graph and run that module again before each file.
+const RUNNER_SHARED: ReadonlySet<string> = new Set(['api', 'cli', 'integration', 'job', 'website']);
 
 const SPECIFICATION_MODULE = '.specification.ts';
 
@@ -47,7 +47,7 @@ const foldersIn = (path: string): string[] =>
 
 // invariant: the runner is derived only where the folder's one specification module is named for it: in a shared module graph, a second specification module would load once per worker, and its files would share the first one's subject.
 function runnerOf(root: string, folder: string, specification: string): Record<string, unknown> {
-    if (!IN_PROCESS.has(specification)) {
+    if (!RUNNER_SHARED.has(specification)) {
         return {};
     }
     const modules = readdirSync(join(root, folder)).filter((name) =>
@@ -62,7 +62,7 @@ function runnerOf(root: string, folder: string, specification: string): Record<s
 const isSpecsMember = (root: string): boolean =>
     basename(root) === SPECS && existsSync(join(root, 'package.json'));
 
-/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder (an in-process one handed as its `runner` the folder's one specification module, `<specification>.specification.ts`), `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
+/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder (one whose spec files meet their subject through a runner handed as its `runner` the folder's one specification module, `<specification>.specification.ts`), `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
 export function derivedProjects(root: string): Map<string, Record<string, unknown>> {
     const member = isSpecsMember(root);
     const prefix = member ? '' : `${SPECS}/`;

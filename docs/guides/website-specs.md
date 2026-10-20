@@ -99,7 +99,7 @@ test('serves robots.txt as plain text', async () => {
 
 #### `.visit(path, scenario?)`: a rendered page
 
-`.visit()` renders the page in a real chromium and resolves with the captured document. There is **one browser process per vitest worker**, shared by every runner the worker hosts and launched lazily on the first `.visit()`, so a spec file that only calls `.fetch()` never pays the browser-launch cost. It is Playwright's headless shell, named explicitly, the lighter of its two Chromium builds. Each visit gets a fresh, isolated browser context, and records no video and no trace: a scenario that fails leaves one screenshot ([Evidence on failure](#evidence-on-failure)).
+`.visit()` renders the page in a real chromium and resolves with the captured document. There is **one browser process per vitest worker**, shared by every runner the worker hosts and launched lazily on the first `.visit()`, so a spec file that only calls `.fetch()` never pays the browser-launch cost. A worker hosts every file it runs when the project names its runner ([Set up a project](../start/set-up-a-project.md#the-project-helpers)), and one file otherwise. It is Playwright's headless shell, named explicitly, the lighter of its two Chromium builds. Each visit gets a fresh, isolated browser context, and records no video and no trace: a scenario that fails leaves one screenshot ([Evidence on failure](#evidence-on-failure)).
 
 ```typescript
 test('captures the full head surface of a rendered page', async () => {

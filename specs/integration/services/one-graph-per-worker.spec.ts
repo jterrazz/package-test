@@ -20,6 +20,28 @@ describe('one-graph-per-worker', () => {
         ).toStrictEqual(['boot 1 of 1 loads', 'boot 2 of 2 loads']);
     });
 
+    test.each(['cli', 'website'])(
+        'a %s project naming its runner shares one module graph per worker too, and boots a subject for every file',
+        async (helper) => {
+            // Given - the same two files on one worker, collected by a project whose subject runs in a process of its own
+            const result = await vitestCli
+                .fixture(directory('./__fixtures__/one-graph/'))
+                .env({ HELPER: helper, RUNNER })
+                .exec('run --configLoader runner');
+
+            // Then - one graph for the worker, the specification ran once per file, and each file cleaned up the subject it booted
+            expect(result.exitCode).toBe(0);
+            expect(
+                [result.file('first.run').content, result.file('second.run').content].toSorted(),
+            ).toStrictEqual(['boot 1 of 1 loads', 'boot 2 of 2 loads']);
+            expect(result.file('cleanups').content.split('\n').toSorted()).toStrictEqual([
+                '',
+                'boot 1',
+                'boot 2',
+            ]);
+        },
+    );
+
     test('a project naming no runner isolates every file', async () => {
         // Given - the same two files, the project stated with no runner
         const result = await vitestCli

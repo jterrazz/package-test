@@ -4,8 +4,8 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import {
     EXCLUDE,
-    inProcessProject,
     projectTest,
+    runnerProject,
     specificationProject,
     statedOnce,
 } from '../project.js';
@@ -52,12 +52,10 @@ describe('project', () => {
         ]);
     });
 
-    test('inProcessProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {
+    test('runnerProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {
         // Given - the same specification with its specification named, and without
-        const named = testOf(
-            inProcessProject('api', { runner: './specs/api/api.specification.ts' }),
-        );
-        const unnamed = testOf(inProcessProject('api', {}));
+        const named = testOf(runnerProject('api', { runner: './specs/api/api.specification.ts' }));
+        const unnamed = testOf(runnerProject('api', {}));
 
         // Then - the named one runs its specification as a setup file over a shared graph; the other is the plain specification
         expect([

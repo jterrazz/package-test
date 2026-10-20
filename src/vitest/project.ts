@@ -109,15 +109,18 @@ export function specificationProject(
     });
 }
 
-/** What a specification whose runner boots its subject in this process accepts on top. */
-export type InProcessProjectOptions = SpecificationProjectOptions & {
+/** What a specification whose spec files import their runner from one module accepts on top. */
+export type RunnerOption = {
     /** The `*.specification.ts` module its spec files import their runner from: stated, a worker's files share one module graph and the module runs again before each file, so every file still boots its own subject. */
     runner?: string;
 };
 
-export function inProcessProject(
+/** What a specification whose runner boots its subject in this process accepts on top. */
+export type InProcessProjectOptions = RunnerOption & SpecificationProjectOptions;
+
+export function runnerProject(
     specification: string,
-    options: InProcessProjectOptions,
+    options: RunnerOption & SpecificationProjectOptions,
 ): TestProjectInlineConfiguration {
     const project = specificationProject(specification, options);
 
