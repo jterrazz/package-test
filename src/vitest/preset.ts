@@ -1,4 +1,5 @@
 import { GROUND_GLOB } from '@jterrazz/typescript/rules';
+import { resolve } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type {
     TestProjectConfiguration,
@@ -6,7 +7,12 @@ import type {
     ViteUserConfig,
 } from 'vitest/config';
 
-import { BLOB_DIR, COVERAGE_DIR, REPORTER_OUTPUT_FILES } from '../../lint/kit/project/artifacts.js';
+import {
+    BLOB_DIR,
+    COVERAGE_DIR,
+    NODE_COMPILE_CACHE_DIR,
+    REPORTER_OUTPUT_FILES,
+} from '../../lint/kit/project/artifacts.js';
 import { isRecord } from '../../lint/kit/project/json-shape.js';
 import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project.js';
 
@@ -50,9 +56,14 @@ export function reporterOutputFiles(argv: readonly string[]): Record<string, str
         : { ...REPORTER_OUTPUT_FILES, blob: `${BLOB_DIR}/blob-${shard.replace('/', '-')}.json` };
 }
 
+// invariant: vitest hands the root `env` to every worker it forks, and a worker to every process it spawns; the path is absolute, since a spawned command runs in its own folder. Vitest drops it under v8 coverage, whose source positions a compile-cached script lacks.
 function rootDefaults(): ViteUserConfig {
     return mergeConfig(projectDefaults(), {
-        test: { coverage: COVERAGE, outputFile: reporterOutputFiles(process.argv) },
+        test: {
+            coverage: COVERAGE,
+            env: { NODE_COMPILE_CACHE: resolve(NODE_COMPILE_CACHE_DIR) },
+            outputFile: reporterOutputFiles(process.argv),
+        },
     }) as ViteUserConfig;
 }
 

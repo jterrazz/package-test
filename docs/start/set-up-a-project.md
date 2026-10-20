@@ -131,11 +131,12 @@ const integration = {
 | `test.exclude`                                                                         | vitest's defaults + `.artifacts/**` + `**/{__expected__,__fixtures__,__requests__,__seeds__}/**` | What a test stands on is input, never a suite to run; `.artifacts/` holds copies of the project, a mutation sandbox among them |
 | `cacheDir`, `test.coverage.reportsDirectory`, `test.attachmentsDir`, `test.outputFile` | under `.artifacts/vitest/`                                                                       | Everything a tool writes lives at `.artifacts/<tool>/` ([below](#where-a-run-writes))                                          |
 | `test.globalSetup`                                                                     | update mode, the run's temp root                                                                 | Update mode writes after the run is reported; the temp root is [below](#where-a-run-writes)                                    |
+| `test.env.NODE_COMPILE_CACHE`                                                          | `.artifacts/node-compile-cache/`, as an absolute path                                            | Every Node process a run starts reuses the code an earlier one compiled ([below](#where-a-run-writes))                         |
 | `plugins`                                                                              | `literate()`, when `literate:` is given                                                          | Turns each `<case>.spec.yaml` into a test file ([Spec documents](../guides/spec-documents.md))                                 |
 
-Coverage attaches to every process a run spawns (`autoAttachSubprocess`), and reads `dist/` only to map each bundle back to the source it was built from (`excludeAfterRemap`): a spec that runs the built command counts toward the sources it exercised.
+Coverage attaches to every process a run spawns (`autoAttachSubprocess`), and reads `dist/` only to map each bundle back to the source it was built from (`excludeAfterRemap`): a spec that runs the built command counts toward the sources it exercised. A coverage run compiles without the cache: vitest turns it off, since V8 stores a cached script without the source positions precise coverage reads.
 
-It sets nothing else on purpose. `fileParallelism`, `reporters`, `environment`, `env` and every `include` are true of one project and not of another, so a project states them; a helper does it for you. The coverage provider is yours to install.
+It sets nothing else on purpose. `fileParallelism`, `reporters`, `environment`, every other `env` variable and every `include` are true of one project and not of another, so a project states them; a helper does it for you. The coverage provider is yours to install.
 
 The defaults reach every inline project too, since vitest resolves each project as its own config. A project given as a glob string, a promise or a function is handed back untouched.
 
@@ -175,6 +176,7 @@ export default await oxlintConfig(import.meta.url);
 | `.artifacts/vitest/coverage/`                    | the coverage provider                                      | Rewritten per coverage run      |
 | `.artifacts/vitest/sqlite/template-<key>.sqlite` | `sqlite()`'s schema template                               | Reused until the schema changes |
 | `.artifacts/vitest/evidence/<pid>-.../`          | the screenshot of a website or mobile scenario that failed | Kept until the next run starts  |
+| `.artifacts/node-compile-cache/`                 | Node, for the workers and every process they spawn         | Reused across runs              |
 
 **Everything else is scratch, in one temp folder per run.** Before the first worker starts, the preset creates `jterrazz-test-runs-<uid>/<pid>-...` in the OS temp directory and points `TMPDIR`, `TMP` and `TEMP` at it, so every temp folder a worker, a spawned child or a tool it runs makes lands inside. That holds each CLI spec's working directory, the per-worker database copies and a browser's profile. The run removes the folder when it ends, and the next run removes the folder of any run that died first. A CLI spec's working directory goes sooner, once its test has finished, except under `test.concurrent`, where it waits for the run.
 

@@ -1,8 +1,10 @@
+import { isAbsolute, relative } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import {
     ATTACHMENTS_DIR,
     COVERAGE_DIR,
+    NODE_COMPILE_CACHE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../../../lint/kit/project/artifacts.js';
@@ -56,6 +58,15 @@ describe('preset', () => {
             `${VITEST_ARTIFACTS_DIR}/blob/blob-1-3.json`,
             `${VITEST_ARTIFACTS_DIR}/blob/blob-2-3.json`,
         ]);
+    });
+
+    test("presetConfig() — artefact paths — points node's compile cache under .artifacts by an absolute path, which a process spawned in its own folder reads alike", () => {
+        // Given - the preset alone, nothing stated
+        const cache = presetConfig().test?.env?.NODE_COMPILE_CACHE ?? '';
+
+        // Then - the run's env names the one cache folder of the project
+        expect(isAbsolute(cache)).toBe(true);
+        expect(relative(process.cwd(), cache)).toBe(NODE_COMPILE_CACHE_DIR);
     });
 
     test('presetConfig() — artefact paths — gives a project the attachments directory too', () => {

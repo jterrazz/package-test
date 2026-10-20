@@ -91,7 +91,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 153   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
-| The package's own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 204   |
+| The package's own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 205   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 114   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -269,8 +269,8 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.seed()`      | 9   | 1   | 1   | n/a  | 3           | n/a     | n/a    | n/a       | n/a    |
 | `.with()`      | 4   | 1   | 1   | n/a  | 1           | 1       | n/a    | n/a       | n/a    |
 | `.env()`       | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.fixture()`   | n/a | n/a | 48  | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.link()`      | n/a | n/a | 11  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.fixture()`   | n/a | n/a | 49  | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.link()`      | n/a | n/a | 12  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.prepare()`   | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.rules()`     | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.storage()`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
@@ -287,7 +287,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.put()`     | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.delete()`  | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.trigger()` | n/a | 7   | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.exec()`    | n/a | n/a | 64  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.exec()`    | n/a | n/a | 65  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.run()`     | n/a | n/a | 5   | 113  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.call()`    | n/a | n/a | n/a | n/a  | 11          | n/a     | n/a    | n/a       | n/a    |
 | `.visit()`   | n/a | n/a | n/a | n/a  | n/a         | 23      | n/a    | n/a       | n/a    |
@@ -358,9 +358,9 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.table()`        | 7   | 4   | 1   | n/a  | 2           | n/a     | n/a    | n/a       | n/a    |
 | `.file()`         | 1   | n/a | 18  | 9    | 4           | n/a     | n/a    | n/a       | n/a    |
 | `.directory()`    | 1   | n/a | 4   | 6    | 1           | n/a     | n/a    | n/a       | n/a    |
-| `.stdout`         | n/a | n/a | 42  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.stdout`         | n/a | n/a | 43  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.stderr`         | n/a | n/a | 15  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.exitCode`       | n/a | n/a | 48  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.exitCode`       | n/a | n/a | 49  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.json`           | n/a | n/a | 6   | n/a  | n/a         | 2       | n/a    | n/a       | n/a    |
 | `.filesystem`     | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.container()`    | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |

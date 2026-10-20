@@ -28,6 +28,9 @@ export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;
 
 export const BLOB_DIR = `${VITEST_ARTIFACTS_DIR}/blob`;
 
+/** Node's compile cache, which every Node process of a run reads and writes: keyed by content, so an edit is never served old code. */
+export const NODE_COMPILE_CACHE_DIR = `${ARTIFACTS_DIR}/node-compile-cache`;
+
 /** Vitest 5's file-writing reporters, each pinned under the artifacts folder. */
 export const REPORTER_OUTPUT_FILES: Record<string, string> = {
     blob: `${BLOB_DIR}/blob.json`,
