@@ -1,6 +1,6 @@
 # ADR-021: The vitest peer starts where the mocker accepts msw 3
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-21
 
 Supersedes the `^5` peer of [ADR-008](008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md); the rest of ADR-008 stands.
