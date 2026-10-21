@@ -5,11 +5,12 @@ import type { StreamBody } from '../exchange.js';
 async function nextTask(): Promise<void> {
     const { port1, port2 } = new MessageChannel();
     await new Promise<void>((resolve) => {
-        port1.addEventListener('message', () => {
+        // oxlint-disable-next-line unicorn/prefer-add-event-listener -- the setter starts the port in a page and in node alike; a listener added leaves a page's port to a start() node never needs
+        port1.onmessage = () => {
+            // Stryker disable next-line CallExpression: a port left open only holds the event loop of a worker vitest ends itself, and the task is taken already
             port1.close();
             resolve();
-        });
-        port1.start();
+        };
         port2.postMessage(null);
     });
 }
