@@ -79,7 +79,12 @@ type CanonicalGlobs = { exclude?: string[]; include: string[] };
 
 type ProjectTest = NonNullable<TestProjectInlineConfiguration['test']>;
 
-/** A stated `include` or `exclude` replaces the canonical one; the group is 0 until a specification states its own. */
+// invariant: the one place a project's group is set: every project runs in group 0, on the one pool of workers the capacity model sizes, a browser project's pages beside the node kinds; a serial one runs after them, in group 1, since vitest refuses one group of two worker counts.
+const PARALLEL = { groupOrder: 0 } as const;
+
+const SERIAL = { groupOrder: 1 } as const;
+
+/** A stated `include` or `exclude` replaces the canonical one; a project shares group 0 with every other, a serial one runs after them. */
 export function projectTest(
     name: string,
     options: SpecificationProjectOptions,
@@ -91,7 +96,7 @@ export function projectTest(
         include: options.include ?? canonical.include,
         ...(options.serial === true ? { fileParallelism: false } : {}),
         name,
-        sequence: { groupOrder: 0 },
+        sequence: options.serial === true ? SERIAL : PARALLEL,
         ...(options.timeout === undefined
             ? {}
             : { hookTimeout: options.timeout, testTimeout: options.timeout }),

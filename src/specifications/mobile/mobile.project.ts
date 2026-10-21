@@ -13,14 +13,12 @@ export type MobileProjectOptions = SpecificationProjectOptions &
 /** A simulator cannot share a machine with itself: serial. A global setup holds one driver session for the run. */
 export function mobile(options: MobileProjectOptions = {}): TestProjectInlineConfiguration {
     const { device, root, ...common } = options;
-    return mergeConfig(specificationProject('mobile', common), {
+    return mergeConfig(specificationProject('mobile', { ...common, serial: true }), {
         test: {
-            fileParallelism: false,
             globalSetup: [mobileSessionSetup()],
             ...(device === undefined
                 ? {}
                 : { provide: { mobileAppium: { device, root: root ?? '.' } } }),
-            sequence: { groupOrder: 3 },
         },
     }) as TestProjectInlineConfiguration;
 }

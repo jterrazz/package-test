@@ -17,15 +17,15 @@ import {
 } from './component.project.fixtures.js';
 
 describe('component', () => {
-    test('component() — the browser project — runs headless chromium, and last of the groups', async () => {
+    test('component() — the browser project — runs headless chromium, in the group every project shares', async () => {
         // Given - the canonical browser project
         const project = testOf(await component());
 
-        // Then - one browser, no window, and a group of its own after website's
+        // Then - one browser, no window, and the node kinds' group
         expect(project.browser?.enabled).toBe(true);
         expect(project.browser?.headless).toBe(true);
         expect(project.browser?.instances).toStrictEqual([{ browser: 'chromium' }]);
-        expect(project.sequence).toStrictEqual({ groupOrder: 2 });
+        expect(project.sequence).toStrictEqual({ groupOrder: 0 });
     });
 
     test('component() — the browser project — keeps what Browser Mode leaks under the artefact folder', async () => {

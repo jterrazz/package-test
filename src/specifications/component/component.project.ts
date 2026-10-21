@@ -293,7 +293,6 @@ export async function component(
             ...(options.wrap === undefined
                 ? {}
                 : { setupFiles: [writeSetupFile(options.wrap, root)] }),
-            sequence: { groupOrder: 2 },
         },
     };
     return onProjectDefaults(project);

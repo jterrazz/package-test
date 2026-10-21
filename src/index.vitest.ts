@@ -67,7 +67,7 @@ type Project = Promise<TestProjectInlineConfiguration> | TestProjectInlineConfig
 
 type Builder = (options: Readonly<Record<string, unknown>>) => Project;
 
-// invariant: the order the projects run in: module tests first, then each specification, the browser last.
+// invariant: the specifications a project is keyed by, in the order the config lists the projects; the order they run in is `projectTest`'s.
 const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
     ['unit', unit],
     ['lint', lint],

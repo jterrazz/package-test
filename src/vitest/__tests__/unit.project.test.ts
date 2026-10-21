@@ -58,9 +58,9 @@ describe('unit', () => {
         expect(testOf(unit())).not.toHaveProperty('isolate');
     });
 
-    test('unit() — module tests, and only module tests — runs before either browser project', () => {
+    test('unit() — module tests, and only module tests — shares the one group with every other project', () => {
         // Given - the canonical project
-        // Then - node first (0), the page specifications after
+        // Then - group 0, which the browser projects share
         expect(testOf(unit()).sequence).toStrictEqual({ groupOrder: 0 });
     });
 });

@@ -40,16 +40,34 @@ describe('project', () => {
         expect(project.exclude).toStrictEqual([...EXCLUDE, 'specs/api/slow/**']);
     });
 
-    test('specificationProject — runs its files one at a time on its own budget when stated', () => {
+    test('specificationProject — runs its files one at a time on its own budget when stated, in the group after every parallel project', () => {
         // Given - a specification project that shares one app and needs a minute
         const project = testOf(specificationProject('api', { serial: true, timeout: 60_000 }));
 
-        // Then - no file parallelism, and the stated budget for its tests and its hooks alike
-        expect([project.fileParallelism, project.testTimeout, project.hookTimeout]).toStrictEqual([
-            false,
-            60_000,
-            60_000,
-        ]);
+        // Then - no file parallelism, group 1, and the stated budget for its tests and its hooks alike
+        expect([
+            project.fileParallelism,
+            project.sequence?.groupOrder,
+            project.testTimeout,
+            project.hookTimeout,
+        ]).toStrictEqual([false, 1, 60_000, 60_000]);
+    });
+
+    test('runnerProject — a serial project naming its runner keeps a group of its own, which vitest needs of one worker beside many', () => {
+        // Given - a serial project sharing its worker, as a site whose files share one served app states it
+        const project = testOf(
+            runnerProject('website', {
+                runner: './specs/website/website.specification.ts',
+                serial: true,
+            }),
+        );
+
+        // Then - one worker, one graph, and group 1
+        expect([
+            project.fileParallelism,
+            project.isolate,
+            project.sequence?.groupOrder,
+        ]).toStrictEqual([false, false, 1]);
     });
 
     test('runnerProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {
