@@ -70,9 +70,10 @@ export async function matching(
     /* oxlint-enable typescript/await-thenable */
 }
 
-async function captureMatch(
-    element: Pick<DriverElement, 'getAttribute'>,
-): Promise<MobileElementMatch> {
+// outside: read by its shape, not as webdriverio's element: webdriverio 10 binds `getAttribute` to `this: Element`, which a picked member no longer satisfies.
+async function captureMatch(element: {
+    readonly getAttribute: (name: string) => Promise<null | string>;
+}): Promise<MobileElementMatch> {
     const [type, label, value, identifier] = await Promise.all([
         element.getAttribute('type'),
         element.getAttribute('label'),
