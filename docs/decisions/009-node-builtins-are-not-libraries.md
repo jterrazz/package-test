@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-09-25
 
+Its `docker` bullet is superseded by [ADR-020](020-the-docker-program-is-spawned-beside-the-containers.md).
+
 The owner delegated the decision ("go tout faire") on 2026-09-27; this record
 states the decision taken within that delegation.
 
