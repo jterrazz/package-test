@@ -1,10 +1,18 @@
+import { once } from 'node:events';
 import { mkdtempSync } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
+import { clock } from '../../../clock/clock.js';
 import { processService } from '../../../services/process/process.adapter.js';
 import { sqlite } from '../../../services/sqlite/sqlite.adapter.js';
+import {
+    fakeContainers,
+    fakeService,
+} from '../../../services/startup/__tests__/orchestrator.fixtures.js';
+import type { CallLog } from '../../../services/startup/__tests__/orchestrator.fixtures.js';
 import {
     isListening,
     statusOf,
@@ -157,5 +165,37 @@ describe('startMobile', () => {
             answered,
             listening,
         ]).toStrictEqual([true, false, 200, false]);
+    });
+
+    test('mobile.handle — startMobile — a backend that cannot listen — releases the services started before it and stops them', async () => {
+        // Given - a port another server holds, and a cache on a fake container
+        using _ = clock.at('2026-10-21T10:00:00.000Z');
+        const holder = createServer().listen(0, '127.0.0.1');
+        await once(holder, 'listening');
+        const address = holder.address();
+        const port = typeof address === 'object' && address !== null ? address.port : 0;
+        const log: CallLog = [];
+        fakeContainers(log);
+        const printed = vi.spyOn(console, 'log').mockReturnValue();
+
+        // When - a runner declares a backend on that port beside the cache
+        const starting = startMobile({
+            app: { bundleId: 'com.example.app' },
+            appium: { url: 'http://127.0.0.1:4723' },
+            backend: { port },
+            device: ABSENT_DEVICE,
+            root: bareRoot(),
+            services: { cache: fakeService(log, 'redis:7') },
+        });
+
+        // Then - the start is refused, after the cache was acquired, released and its container stopped
+        await expect(starting).rejects.toThrow('EADDRINUSE');
+        printed.mockRestore();
+        holder.close();
+        expect(log.filter((line) => /^(?:acquire|release|stop) /u.test(line))).toStrictEqual([
+            `acquire redis:7 ${process.env.VITEST_POOL_ID}`,
+            'release redis:7',
+            'stop redis:7',
+        ]);
     });
 });

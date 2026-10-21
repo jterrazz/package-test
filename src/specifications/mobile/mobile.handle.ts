@@ -110,6 +110,25 @@ async function startBesideAppium(
     }
 }
 
+async function startedBackend(
+    declared: MobileBackendOptions | undefined,
+    started: null | StartedServices,
+    appium: { stop: () => Promise<void> },
+): Promise<{ backend: null | StubBackend; backendUrl: string | undefined }> {
+    if (!declared) {
+        return { backend: null, backendUrl: undefined };
+    }
+    // Stryker disable next-line ObjectLiteral: the port option is the stub backend's own, held by its tests: a module test reads no port it was handed
+    const backend = new StubBackend({ port: declared.port });
+    try {
+        return { backend, backendUrl: await backend.start() };
+    } catch (error) {
+        await started?.stop();
+        await appium.stop();
+        throw error;
+    }
+}
+
 export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
 ): Promise<MobileHandle> {
@@ -128,13 +147,7 @@ export async function startMobile<Services extends ServiceRecord>(
     const started = await startBesideAppium(services, root, appium);
 
     // invariant: the stub starts last, so a constructor refusal never orphans a server.
-    let backend: null | StubBackend = null;
-    let backendUrl: string | undefined;
-    if (options.backend) {
-        // Stryker disable next-line ObjectLiteral: the port option is the stub backend's own, held by its tests: a module test reads no port it was handed
-        backend = new StubBackend({ port: options.backend.port });
-        backendUrl = await backend.start();
-    }
+    const { backend, backendUrl } = await startedBackend(options.backend, started, appium);
 
     const device = lazyDevice({
         driven,
