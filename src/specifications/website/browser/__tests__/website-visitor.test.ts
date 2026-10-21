@@ -24,9 +24,17 @@ async function waited(value: null | string, target: Target, wanted: boolean): Pr
     const waiting = waitForValue(fieldHolding(value), target, wanted, 30);
     return await waiting.then(
         () => 'held',
-        (error: unknown) => (error instanceof Error ? (error.message.split('\n')[0] ?? '') : ''),
+        (error: unknown) => (error instanceof Error ? error.message : ''),
     );
 }
+
+const refused = (found: string): string =>
+    [
+        `found: ${found}`,
+        'why: A verb waits for what it states to hold, within its budget, and never sleeps.',
+        'fix: correct the value the scenario states, or what the page puts in the field',
+        'read: docs/reference/visitor.md#see-and-gone-are-the-synchronization',
+    ].join('\n');
 
 describe('website-visitor', () => {
     test('waitForValue — a field read by its live value — answers once the value holds, and refuses within its budget when it never does', async () => {
@@ -44,14 +52,14 @@ describe('website-visitor', () => {
             waited(null, email, true),
         ]);
 
-        // Then - the three that hold answer, the three that never do name what the field holds
+        // Then - the three that hold answer, the three that never do are refused whole, naming what the field holds
         expect(outcomes).toStrictEqual([
             'held',
             'held',
             'held',
-            'found: field("Email") never held "b", it holds "a"',
-            'found: field("Email") still holds "a", it holds "a"',
-            'found: field("Email") never held "a" (it is not on the page)',
+            refused('field("Email") never held "b", it holds "a"'),
+            refused('field("Email") still holds "a", it holds "a"'),
+            refused('field("Email") never held "a" (it is not on the page)'),
         ]);
     });
 });

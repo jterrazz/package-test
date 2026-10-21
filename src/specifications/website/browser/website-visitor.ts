@@ -128,7 +128,7 @@ export async function waitForValue(
     const held = await untilDeadline(
         async () => {
             actual = await currentValue(locator);
-            return (actual === null ? !wanted : (actual === value) === wanted) || undefined;
+            return (actual === value) === wanted || undefined;
         },
         { interval: VALUE_POLL_MS, timeout },
     );
