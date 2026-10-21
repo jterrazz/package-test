@@ -237,7 +237,7 @@ describe('setup', () => {
             new Error(
                 refusal({
                     fix: 'start Docker (Docker Desktop, OrbStack, colima or another) and run again',
-                    found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (connect ENOENT /var/run/docker.sock)`,
+                    found: 'a declared service asked for Docker, and no Docker daemon answered (connect ENOENT /var/run/docker.sock)',
                     read: 'docs/reference/services.md#one-container-per-run',
                     why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',
                 }),
