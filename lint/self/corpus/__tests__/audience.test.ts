@@ -72,15 +72,16 @@ describe('audience', () => {
     const rows = selfRows;
     const self = new Set(selfRows.map((row) => row.name));
 
-    test('the tarball npm pack reports is read off its record, and any other shape names none', () => {
-        // Given - the report npm 11 prints, and values it never prints
-        // Then - its one filename, then nothing
+    test('the tarball npm pack reports is read off its list or its record, and any other shape names none', () => {
+        // Given - the report npm 11 prints, the one npm 12 prints, and values neither prints
+        // Then - the one filename of each, then nothing
         expect([
+            packedFilenames('[{"filename":"jterrazz-test-17.0.0.tgz"}]'),
             packedFilenames('{"@jterrazz/test":{"filename":"jterrazz-test-17.0.0.tgz"}}'),
             packedFilenames('null'),
             packedFilenames('"x"'),
             packedFilenames('{"@jterrazz/test":{"name":"x"}}'),
-        ]).toStrictEqual([['jterrazz-test-17.0.0.tgz'], [], [], []]);
+        ]).toStrictEqual([['jterrazz-test-17.0.0.tgz'], ['jterrazz-test-17.0.0.tgz'], [], [], []]);
     });
 
     test('no byte the tarball carries names a self rule', () => {

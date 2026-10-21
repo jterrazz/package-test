@@ -4,10 +4,13 @@ import { dirname, join, normalize, relative } from 'node:path';
 
 import { isRecord } from '../../kit/project/json-shape.js';
 
-/** `npm pack --json` prints one report per package, keyed by its name. */
+/** `npm pack --json` prints one report per package: in a list under npm 11, the one Node 24 ships, keyed by its name under npm 12. */
 export function packedFilenames(report: string): string[] {
     const parsed: unknown = JSON.parse(report);
-    return Object.values(isRecord(parsed) ? parsed : {}).flatMap((entry) => {
+    const reports: unknown[] = Array.isArray(parsed)
+        ? parsed
+        : Object.values(isRecord(parsed) ? parsed : {});
+    return reports.flatMap((entry) => {
         const filename = isRecord(entry) ? entry.filename : undefined;
         return typeof filename === 'string' ? [filename] : [];
     });
