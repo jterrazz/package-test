@@ -39,6 +39,9 @@ export const FRAMEWORK_LAYERS = {
             'expectations/goldens/matchers.ts': ['disk/spec-path'],
             'expectations/goldens/response-goldens.ts': ['disk/resolved-spec-path'],
             'expectations/goldens/text-assertions.ts': ['disk/spec-path'],
+            // invariant: the containers a subject started are read through the one module that runs `docker`, which the containers the test declares share.
+            'expectations/command/cli.result.ts': ['services/containers/docker-cli'],
+            'expectations/command/container.ts': ['services/containers/docker-cli'],
         },
     },
     stubs: {

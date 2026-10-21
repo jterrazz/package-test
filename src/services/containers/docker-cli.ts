@@ -1,9 +1,11 @@
 import { execSync } from 'node:child_process';
 
 import { refusal } from '../../chain/refusals/refusal.js';
-import type { CliOutput } from './cli.result.js';
 
 const DEFAULT_TIMEOUT = 10_000;
+
+/** How every refusal of a run that asked for Docker names a daemon that did not answer. */
+export const DOCKER_ABSENT = 'no Docker daemon answered';
 
 /** Docker-aware mode reads what the daemon answers: a run where none answers is refused, never passed. */
 export function requireDockerDaemon(): void {
@@ -16,7 +18,7 @@ export function requireDockerDaemon(): void {
         throw new Error(
             refusal({
                 fix: 'start Docker (Docker Desktop, OrbStack, colima or another) and run again',
-                found: 'specification.cli({ docker }) asked for Docker, and no Docker daemon answered',
+                found: `specification.cli({ docker }) asked for Docker, and ${DOCKER_ABSENT}`,
                 read: 'docs/guides/cli-specs.md#docker-aware-mode',
                 why: 'Docker-aware mode reads the containers a run spawned, so it needs a Docker daemon.',
             }),
@@ -101,7 +103,10 @@ export function readContainerFile(id: string, path: string): string {
     });
 }
 
-export function execInContainer(id: string, argv: readonly string[]): CliOutput {
+export function execInContainer(
+    id: string,
+    argv: readonly string[],
+): { exitCode: number; stderr: string; stdout: string } {
     try {
         const quoted = argv.map((a) => JSON.stringify(a)).join(' ');
         const stdout = execSync(`docker exec ${id} ${quoted}`, {

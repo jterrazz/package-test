@@ -1,18 +1,18 @@
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
 import type { MatrixRow } from '../../chain/capability.js';
 import { refusal } from '../../chain/refusals/refusal.js';
+import {
+    fieldOf,
+    findContainersByLabel,
+    inspectContainer,
+    removeContainers,
+} from '../../services/containers/docker-cli.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
 import { BaseResult } from '../result.js';
 import type { ResultConfig } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { ContainerAccessor } from './container.js';
-import {
-    fieldOf,
-    findContainersByLabel,
-    inspectContainer,
-    removeContainers,
-} from './docker-cli.js';
 
 /** A request a binary sent the declared backend: the parsed JSON body or the raw text (`null` when absent), the headers by lowercased name, the uppercased method, and the url as the backend saw it. */
 export type SentRequest = {

@@ -4,8 +4,9 @@ import { describe, expect, test } from 'vitest';
 
 import { refusal } from '../../../chain/refusals/refusal.js';
 import type { ContainerPort } from '../container.port.js';
+import { DOCKER_ABSENT } from '../docker-cli.js';
 import { RunSetupContainer } from '../run-setup-container.adapter.js';
-import setup, { DOCKER_ABSENT, prepareDocker, servicesSetup } from '../services.global-setup.js';
+import setup, { prepareDocker, servicesSetup } from '../services.global-setup.js';
 
 async function connection(url: string): Promise<string> {
     return await new Promise((resolve) => {

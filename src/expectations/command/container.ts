@@ -1,10 +1,15 @@
 import { refusal } from '../../chain/refusals/refusal.js';
+import {
+    containerLogs,
+    execInContainer,
+    fieldOf,
+    readContainerFile,
+} from '../../services/containers/docker-cli.js';
 import { A_FILE_IS_READ_WHERE_IT_EXISTS } from '../result.js';
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import type { CliOutput, CliResult } from './cli.result.js';
-import { containerLogs, execInContainer, fieldOf, readContainerFile } from './docker-cli.js';
 
 function readInspectState(inspect: unknown): { running: boolean; status: string } {
     const state = fieldOf(inspect, 'State', 'state');

@@ -6,14 +6,13 @@ import { setupEntry } from '../../chain/paths/setup-entry.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { loadPeer } from '../peer.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
+import { DOCKER_ABSENT } from './docker-cli.js';
 import { sweepOrphans } from './orphans.js';
 import { field, RunContainers, serveContainers } from './run-containers.js';
 import { SERVICE_IMAGES } from './service-images.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
 /** Every project's setup joins the one run's containers. Default images are pulled in the background, so the first file waits on a pull at most once; a project declaring no service needs no Docker. */
-
-export const DOCKER_ABSENT = 'no Docker daemon answered';
 
 /** `connect` stands in for the runtime's own client lookup, so the refusal is reachable without a daemon to stop. */
 export async function prepareDocker(
