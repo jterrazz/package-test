@@ -1,5 +1,7 @@
 import type { SetupServer } from 'msw/node';
+import { METHODS } from 'node:http';
 
+import { refusal } from '../../../chain/refusals/refusal.js';
 import type { StubRegistration } from '../../intercept/intercept.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
@@ -11,6 +13,28 @@ async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> 
 }
 
 let serverInstance: null | SetupServer = null;
+let refuseOffTheWire: ((request: Request) => Response) | null = null;
+
+function offTheWireError(request: Request): Error {
+    return new Error(
+        refusal('network-strict-after-first-stub', {
+            fix: 'send a method in the capitals the HTTP parser reads (`PATCH`, not `patch`): fetch upper-cases DELETE, GET, HEAD, OPTIONS, POST and PUT, and sends any other as written',
+            found: `an outgoing request the network double cannot read off the wire, ${request.method} ${request.url}: its method is not one of node's \`http.METHODS\`, so no stub could answer it and it would reach the network`,
+        }),
+    );
+}
+
+// outside: msw reads a request off the socket with an HTTP parser, which takes no method outside `http.METHODS` and lets it through to the network unseen. Closing the server puts back the `fetch` msw found, which drops this wrapper with msw's own.
+function guardOffTheWireMethods(): void {
+    const next = globalThis.fetch;
+    globalThis.fetch = async (input, init) => {
+        const request = new Request(input, init);
+        if (refuseOffTheWire !== null && !METHODS.includes(request.method)) {
+            return refuseOffTheWire(request);
+        }
+        return await next(request);
+    };
+}
 
 // invariant: once per process.
 async function ensureStubServer(): Promise<SetupServer> {
@@ -20,6 +44,7 @@ async function ensureStubServer(): Promise<SetupServer> {
     const { setupServer } = await loadMsw();
     const server = setupServer();
     server.listen({ onUnhandledFrame: 'bypass' });
+    guardOffTheWireMethods();
     serverInstance = server;
     return server;
 }
@@ -28,11 +53,14 @@ async function ensureStubServer(): Promise<SetupServer> {
 export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistration> {
     const server = await ensureStubServer();
     const { msw } = await loadMsw();
-    const { handlers, violation } = buildStubHandlers(msw, stubs);
+    const { handlers, refuse, violation } = buildStubHandlers(msw, stubs);
     server.use(...handlers);
+    refuseOffTheWire = (request) =>
+        refuse(offTheWireError(request), `unreadable request ${request.method} ${request.url}`);
 
     return {
         cleanup: () => {
+            refuseOffTheWire = null;
             server.resetHandlers();
         },
         violation,

@@ -61,17 +61,23 @@ export function buildStubHandlers(
     msw: Msw,
     stubs: readonly Stub[],
     bypass?: (url: string) => boolean,
-): { handlers: HttpHandler[]; violation: () => Error | null } {
+): {
+    handlers: HttpHandler[];
+    refuse: (error: Error, summary: string) => Response;
+    violation: () => Error | null;
+} {
     const queue = new StubQueue(stubs);
     let violation: Error | null = null;
 
-    const recordViolation = (method: string, url: string): Response => {
-        violation ??= queue.unmatchedError(method, url);
+    const refuse = (error: Error, summary: string): Response => {
+        violation ??= error;
         return msw.HttpResponse.json(
-            { error: `@jterrazz/test strict stubs: unmatched request ${method} ${url}` },
+            { error: `@jterrazz/test strict stubs: ${summary}` },
             { headers: NEVER_CACHED, status: 501 },
         );
     };
+    const recordViolation = (method: string, url: string): Response =>
+        refuse(queue.unmatchedError(method, url), `unmatched request ${method} ${url}`);
 
     const handlers: HttpHandler[] = [];
     for (const route of queue.routes) {
@@ -108,7 +114,7 @@ export function buildStubHandlers(
         ),
     );
 
-    return { handlers, violation: () => queue.verdict(violation) };
+    return { handlers, refuse, violation: () => queue.verdict(violation) };
 }
 
 async function observe(request: Request): Promise<MatchableRequest> {

@@ -24,6 +24,21 @@ describe('refused-init', () => {
         expect(result.error).toMatch(message);
     });
 
+    test('refuses a lower-case `patch`, which no stub can read off the wire, before it reaches the network', async () => {
+        // Given - a stub for the PATCH the module meant, and a module that spells it `patch`, which fetch sends as written
+        const chain = integration
+            .intercept(http.patch(`${PRICING}/quotes`), http.json({ total: 42 }))
+            .call(async () => {
+                const reply = await fetch(`${PRICING}/quotes`, { body: '{}', method: 'patch' });
+                return reply.status;
+            });
+
+        // Then - the chain fails on the request it refused, rather than the module failing to resolve a host it should never have looked up
+        await expect(chain).rejects.toThrow(
+            'found: an outgoing request the network double cannot read off the wire, patch https://pricing.spec.test/quotes',
+        );
+    });
+
     test('hands a streamed body to the stub whole', async () => {
         // Given - a stub taking the quote only when its body reads as sent
         const result = await integration
