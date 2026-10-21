@@ -132,3 +132,18 @@ export function signalGroup(
     }
     return child.kill(signal);
 }
+
+// invariant: the group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it.
+export async function endGroup(child: ChildProcess): Promise<void> {
+    // Stryker disable next-line BlockStatement,ConditionalExpression,EqualityOperator: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
+    if (child.pid === undefined) {
+        return;
+    }
+    const leaderReaped = reaped(child);
+    signalGroup(child, 'SIGTERM');
+    if (!(await groupEnded(-child.pid, KILL_GRACE_MS))) {
+        signalGroup(child, 'SIGKILL');
+    }
+    // hazard: macOS skips an exiting process when it signals a group, so the group reads as gone while the leader still holds its port open; its reaping is what proves the port closed.
+    await leaderReaped;
+}

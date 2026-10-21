@@ -2,8 +2,9 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { ChainConfig } from '../../../chain/config.js';
+import { listenedPort } from '../../../chain/listened-port.js';
 import { pause } from '../../../chain/pause.js';
-import { invariant, refusal } from '../../../chain/refusals/refusal.js';
+import { refusal } from '../../../chain/refusals/refusal.js';
 import { isStreamBody } from '../../exchange.js';
 import type { MatchableRequest, StubResponse } from '../../exchange.js';
 import { StubQueue } from '../../matching/stub-queue.js';
@@ -49,21 +50,12 @@ export class StubBackend {
         });
         this.server = server;
 
-        await new Promise<void>((resolve, reject) => {
-            server.once('error', reject);
-            // Stryker disable next-line StringLiteral: bound to loopback alone, the backend is unreachable from the network, which no test on this machine sees
-            server.listen(this.options.port ?? 0, '127.0.0.1', () => {
-                resolve();
-            });
+        // Stryker disable next-line StringLiteral: bound to loopback alone, the backend is unreachable from the network, which no test on this machine sees
+        const port = await listenedPort(server, {
+            host: '127.0.0.1',
+            port: this.options.port ?? 0,
         });
-
-        const address = server.address();
-        // Stryker disable BlockStatement,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on a TCP port always answers it
-        if (address === null || typeof address === 'string') {
-            throw invariant('the stub backend listens on no port');
-        }
-        // Stryker restore all
-        return `http://127.0.0.1:${address.port}`;
+        return `http://127.0.0.1:${port}`;
     }
 
     async stop(): Promise<void> {

@@ -1,27 +1,15 @@
+import { once } from 'node:events';
 import { connect, createServer } from 'node:net';
 
-import { invariant } from '../../chain/refusals/refusal.js';
+import { listenedPort } from '../../chain/listened-port.js';
 
-// Stryker disable BlockStatement,CallExpression,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on port 0 always answers the port it got, and never errors
 export async function findFreePort(): Promise<number> {
-    return await new Promise((resolve, reject) => {
-        const server = createServer();
-        server.listen(0, () => {
-            const address = server.address();
-            if (address === null || typeof address === 'string') {
-                server.close();
-                reject(invariant('a server listening on port 0 answered no port'));
-                return;
-            }
-            const { port } = address;
-            server.close(() => {
-                resolve(port);
-            });
-        });
-        server.on('error', reject);
-    });
+    const server = createServer();
+    const port = await listenedPort(server);
+    server.close();
+    await once(server, 'close');
+    return port;
 }
-// Stryker restore all
 
 // Stryker disable BlockStatement: a catch emptied answers undefined, which reads as no answer all the same
 export async function firstAnswering(urls: readonly string[]): Promise<string | undefined> {

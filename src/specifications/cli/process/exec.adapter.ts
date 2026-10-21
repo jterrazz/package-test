@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
-import type { ChildProcess } from 'node:child_process';
 import { onTestFinished } from 'vitest';
 
 import {
+    endGroup,
     KILL_GRACE_MS,
     signalGroup,
     SIGNALS_GROUPS,
@@ -119,14 +119,6 @@ export async function observeProcess(
     });
 }
 
-// invariant: SIGTERM to the run's whole group, then SIGKILL once the grace has passed, to whatever of it ignored the first.
-function endGroup(child: ChildProcess): void {
-    signalGroup(child);
-    setTimeout(() => {
-        signalGroup(child, 'SIGKILL');
-    }, KILL_GRACE_MS).unref();
-}
-
 /** Spawned, never `spawnSync`: the test's event loop keeps running while the binary does, so a server the test started (a collector, a stub) answers it. stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
 export class ExecAdapter implements CliPort {
     private readonly command: string;
@@ -147,7 +139,7 @@ export class ExecAdapter implements CliPort {
         });
         // invariant: the run's group ends with the test, 'close' or not: a grandchild holding no stdio, or a child a test timeout abandoned, outlives nothing.
         onTestFinished(() => {
-            endGroup(child);
+            void endGroup(child);
         });
         return await new Promise((resolve) => {
             const output = { stderr: '', stdout: '' };
@@ -157,7 +149,7 @@ export class ExecAdapter implements CliPort {
                     ? undefined
                     : setTimeout(() => {
                           timedOut = true;
-                          endGroup(child);
+                          void endGroup(child);
                       }, input.timeout);
             // Stryker disable next-line StringLiteral: utf8 is the default a stream decodes to
             child.stdout.setEncoding('utf8').on('data', (data: string) => {

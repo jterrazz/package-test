@@ -4,6 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { text } from 'node:stream/consumers';
 
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
+import { listenedPort } from '../../chain/listened-port.js';
 import { invariant } from '../../chain/refusals/refusal.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
@@ -143,16 +144,8 @@ export async function serveContainers(containers: RunContainers): Promise<Served
     const server = createServer((request, response) => {
         void respond(containers, request, response);
     });
-    // Stryker disable next-line StringLiteral: bound to loopback alone, the run's containers are unreachable from the network, which no test on this machine sees
-    server.listen(0, '127.0.0.1');
-    await once(server, 'listening');
-    const address = server.address();
-    // Stryker disable BlockStatement,ConditionalExpression,EqualityOperator,LogicalOperator,StringLiteral: a server listening on a TCP port always answers it
-    if (address === null || typeof address === 'string') {
-        throw invariant('the run containers are served on no port');
-    }
-    // Stryker restore all
-    const { port } = address;
+    // Stryker disable next-line StringLiteral,ObjectLiteral: bound to loopback alone, the run's containers are unreachable from the network, which no test on this machine sees
+    const port = await listenedPort(server, { host: '127.0.0.1' });
     return {
         close: async () => {
             server.close();

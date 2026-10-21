@@ -4,18 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
+import { processAlive } from '../../../../chain/process-alive.js';
 import { waitUntil } from '../../../../expectations/conditions/wait-until.js';
 import { buildEnv, ExecAdapter, observeProcess } from '../exec.adapter.js';
 import type { ObservableProcess } from '../exec.adapter.js';
-
-function isAlive(pid: number): boolean {
-    try {
-        process.kill(pid, 0);
-        return true;
-    } catch {
-        return false;
-    }
-}
 
 class FakeChild implements ObservableProcess {
     exitListeners: ((code: null | number) => void)[] = [];
@@ -299,7 +291,7 @@ describe('ExecAdapter', () => {
         const pidFile = join(folder, 'pid');
         onTestFinished(async () => {
             const pid = Number(readFileSync(pidFile, 'utf8'));
-            await waitUntil(() => !isAlive(pid), { why: `the grandchild ${pid} is gone` });
+            await waitUntil(() => !processAlive(pid), { why: `the grandchild ${pid} is gone` });
             rmSync(folder, { force: true, recursive: true });
         });
         const adapter = new ExecAdapter('sh');

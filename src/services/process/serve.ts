@@ -9,15 +9,7 @@ import { findFreePort, firstAnswering } from './listening.js';
 import { OutputChange } from './output-change.js';
 import { lessonOf, refuseHeldPort } from './port-in-use.js';
 import type { Lesson } from './port-in-use.js';
-import {
-    groupEnded,
-    KILL_GRACE_MS,
-    reaped,
-    REAPER,
-    signalGroup,
-    SIGNALS_GROUPS,
-    WATCHDOG,
-} from './process-group.js';
+import { endGroup, reaped, REAPER, SIGNALS_GROUPS, WATCHDOG } from './process-group.js';
 import type { Strays } from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
 
@@ -272,19 +264,4 @@ export class ServedProcess {
         this.watchdog?.kill('SIGKILL');
         this.watchdog = null;
     }
-}
-
-// invariant: the group gets SIGTERM, and SIGKILL when it outlives the grace: its leader alive or not, its strays die with it.
-async function endGroup(child: ChildProcess): Promise<void> {
-    // Stryker disable next-line BlockStatement,ConditionalExpression,EqualityOperator: a group read from no pid is this very process's, and a mutant of this guard would wait on the run measuring it
-    if (child.pid === undefined) {
-        return;
-    }
-    const leaderReaped = reaped(child);
-    signalGroup(child, 'SIGTERM');
-    if (!(await groupEnded(-child.pid, KILL_GRACE_MS))) {
-        signalGroup(child, 'SIGKILL');
-    }
-    // hazard: macOS skips an exiting process when it signals a group, so the group reads as gone while the leader still holds its port open; its reaping is what proves the port closed.
-    await leaderReaped;
 }

@@ -1,5 +1,6 @@
 import { hostname } from 'node:os';
 
+import { processAlive } from '../../chain/process-alive.js';
 import { OWNER_LABEL, REUSED_LABEL } from './testcontainers.adapter.js';
 
 // invariant: ryuk removes a session's containers only while it runs, and every process shares one session while any holds it: an owner label naming a dead local process marks an orphan.
@@ -40,12 +41,7 @@ export function ownerAlive(
     ) {
         return true;
     }
-    try {
-        probe(pid);
-        return true;
-    } catch (error) {
-        return Reflect.get(new Object(error), 'code') !== 'ESRCH';
-    }
+    return processAlive(pid, probe);
 }
 
 export function orphans(containers: ListedContainer[], alive: OwnerAlive): string[] {
