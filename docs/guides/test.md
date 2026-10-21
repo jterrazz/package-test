@@ -26,7 +26,7 @@ The tree derives nine (one per folder of `specs/`, `unit` over `src/` and `lint/
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })`, the container seams included                        | Docker                                                                |
 | `website`     | `specs/website/**`, built by `website()`                                                                              | playwright + `npx playwright install chromium`; no Docker             |
 | `component`   | `specs/component/**/*.test.tsx` and `src/**/*.test.tsx` (a module test that needs a real DOM), built by `component()` | the same chromium; no Docker                                          |
-| `mobile`      | `specs/mobile/**`, built by `mobile()`, serial by default, one driver session per run                                 | Nothing; the Appium protocol double, served once per run              |
+| `mobile`      | `specs/mobile/**`, built by `mobile({ serial: false })`, one driver session per worker                                | Nothing; the Appium protocol double, served once per run              |
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer, `unit()` included. The derived `vitest.config.ts` builds each one with its helper, so a consumer's projects and this repository's are built alike.
 

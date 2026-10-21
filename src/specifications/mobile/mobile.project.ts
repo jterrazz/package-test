@@ -10,15 +10,18 @@ import { mobileSessionSetup } from './session/mobile-session.global-setup.js';
 export type MobileProjectOptions = SpecificationProjectOptions &
     ({ device: MobileDevice; root?: string } | { device?: never; root?: never });
 
-/** A simulator cannot share a machine with itself: serial. A global setup holds one driver session for the run. */
+/** A simulator cannot share a machine with itself: serial, unless `serial: false` states a server that gives every session an app of its own. A global setup holds the run's driver sessions, one per worker. */
 export function mobile(options: MobileProjectOptions = {}): TestProjectInlineConfiguration {
     const { device, root, ...common } = options;
-    return mergeConfig(specificationProject('mobile', { ...common, serial: true }), {
-        test: {
-            globalSetup: [mobileSessionSetup()],
-            ...(device === undefined
-                ? {}
-                : { provide: { mobileAppium: { device, root: root ?? '.' } } }),
+    return mergeConfig(
+        specificationProject('mobile', { ...common, serial: common.serial !== false }),
+        {
+            test: {
+                globalSetup: [mobileSessionSetup()],
+                ...(device === undefined
+                    ? {}
+                    : { provide: { mobileAppium: { device, root: root ?? '.' } } }),
+            },
         },
-    }) as TestProjectInlineConfiguration;
+    ) as TestProjectInlineConfiguration;
 }

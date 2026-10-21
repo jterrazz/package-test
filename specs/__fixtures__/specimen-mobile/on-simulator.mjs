@@ -184,7 +184,7 @@ const before = new Set(webDriverAgents(udid));
 const appium = await startAppium(installAppium());
 const suite = spawnSync(
     'npx',
-    ['vitest', '--run', '--project', 'mobile', `--testTimeout=${FIRST_SESSION_MS}`],
+    ['vitest', '--run', '--project', 'mobile', '--no-file-parallelism', `--testTimeout=${FIRST_SESSION_MS}`],
     { cwd: root, env: { ...process.env, TEST_MOBILE_APPIUM_URL: appium.url }, stdio: 'inherit' },
 );
 appium.child.kill('SIGTERM');

@@ -47,6 +47,19 @@ describe('sessionLedger', () => {
         ).toStrictEqual([session]);
     });
 
+    test('the session ledger — one driver session per worker — a runner of another worker finds nothing the first one recorded, and the first worker finds it still', () => {
+        // Given - a run's ledger holding the session a runner of worker 1 created
+        const folder = ledgerFolder();
+        const session = { capabilities: {}, serverUrl: 'http://a', sessionId: 's-1' };
+        sessionLedger(folder, '1').record(IPHONE, session);
+
+        // Then - worker 2 opens its own, and worker 1 attaches to the one it recorded
+        expect([
+            sessionLedger(folder, '2').lookup('http://a', IPHONE),
+            sessionLedger(folder, '1').lookup('http://a', IPHONE),
+        ]).toStrictEqual([[], [session]]);
+    });
+
     test('the session ledger — one driver session per run — another server, or another device, finds nothing', () => {
         // Given - a run's ledger holding one session
         const ledger = sessionLedger(ledgerFolder());

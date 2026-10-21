@@ -12,7 +12,7 @@ type RecordedSession = {
     sessionId: string;
 };
 
-/** A recorded session is the run's to end, not the runner's. */
+/** A recorded session is the run's to end, not the runner's, and one worker's to drive: two files running at once never drive one app. */
 export type SessionLedger = {
     forget: (sessionId: string) => void;
     lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession[];
@@ -26,9 +26,9 @@ export const MOBILE_SESSIONS_DIR = `${VITEST_ARTIFACTS_DIR}/mobile-sessions`;
 
 type LedgerEntry = RecordedSession & { key: string };
 
-function keyOf(serverUrl: string, requested: Record<string, unknown>): string {
+function keyOf(serverUrl: string, requested: Record<string, unknown>, worker: string): string {
     const sorted = Object.entries(requested).toSorted(([a], [b]) => a.localeCompare(b));
-    return JSON.stringify([serverUrl, sorted]);
+    return JSON.stringify([serverUrl, sorted, worker]);
 }
 
 function isEntry(value: unknown): value is LedgerEntry {
@@ -58,13 +58,17 @@ function entries(directory: string): LedgerEntry[] {
         .filter((entry) => isEntry(entry));
 }
 
-export function sessionLedger(directory: string): SessionLedger {
+// invariant: a worker runs its files one at a time, so the sessions it records are its own; vitest numbers a run's workers from 1.
+export function sessionLedger(
+    directory: string,
+    worker: string = process.env.VITEST_POOL_ID ?? '',
+): SessionLedger {
     return {
         forget: (sessionId) => {
             rmSync(join(directory, `${sessionId}.json`), { force: true });
         },
         lookup: (serverUrl, requested) => {
-            const key = keyOf(serverUrl, requested);
+            const key = keyOf(serverUrl, requested, worker);
             return entries(directory)
                 .filter((entry) => entry.key === key)
                 .map(({ capabilities, serverUrl: url, sessionId }) => ({
@@ -74,7 +78,10 @@ export function sessionLedger(directory: string): SessionLedger {
                 }));
         },
         record: (requested, session) => {
-            const entry: LedgerEntry = { ...session, key: keyOf(session.serverUrl, requested) };
+            const entry: LedgerEntry = {
+                ...session,
+                key: keyOf(session.serverUrl, requested, worker),
+            };
             mkdirSync(directory, { recursive: true });
             writeFileSync(
                 join(directory, `${session.sessionId}.json`),

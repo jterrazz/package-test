@@ -26,4 +26,19 @@ describe('mobile', () => {
             { mobileAppium: { device: { name: 'iPhone 17' }, root: '.' } },
         ]);
     });
+
+    test('mobile() — runs its files in parallel in group 0 where the project states `serial: false`, its server giving each session an app of its own', () => {
+        // Given - a project stated parallel, and one stated serial
+        const parallel = mobile({ serial: false }).test;
+        const serial = mobile({ serial: true }).test;
+
+        // Then - the first leaves vitest's file parallelism on beside every project, the second runs alone after them
+        expect([
+            [parallel?.fileParallelism, parallel?.sequence?.groupOrder],
+            [serial?.fileParallelism, serial?.sequence?.groupOrder],
+        ]).toStrictEqual([
+            [undefined, 0],
+            [false, 1],
+        ]);
+    });
 });

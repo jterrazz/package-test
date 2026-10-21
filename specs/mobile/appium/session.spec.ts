@@ -22,6 +22,19 @@ describe('session', () => {
         expect(result.stdout.text).toContain('appium double: 1 session(s) created, 1 deleted');
     });
 
+    test('a mobile({ serial: false }) run of two files on two workers drives a session per worker, so no two files drive one app at once', async () => {
+        // Given - the same two files, the project stated parallel on two workers, the second opening once the first has recorded its session
+        const result = await vitestCli
+            .fixture(directory('./__fixtures__/mobile-session/'))
+            .env({ ...ON_THE_DOUBLE, MOBILE_PARALLEL: '1' })
+            .exec('run --configLoader runner');
+
+        // Then - both files passed, each over the session its worker opened, and the run ended both
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toContain('Tests  2 passed');
+        expect(result.stdout.text).toContain('appium double: 2 session(s) created, 2 deleted');
+    });
+
     test('a run whose session the server expired opens another in its place for the next runner, and ends it', async () => {
         // Given - a scratch project whose second runner opens once the double expired the session the first one drove
         const result = await vitestCli
