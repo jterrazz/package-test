@@ -65,7 +65,7 @@ A declared database is not seeded by the chain; a website chain has no `.seed()`
 
 #### `.fetch(path, { method })`: one raw HTTP exchange
 
-`.fetch(path)` performs a single GET, and `.fetch(path, { method: 'POST' })` another method (`DELETE`, `HEAD`, `OPTIONS`, `PATCH`, `PUT`), and never follows redirects: the redirect itself is the result, not something to chase:
+`.fetch(path)` performs a single GET, and `.fetch(path, { method: 'POST' })` another method (`DELETE`, `HEAD`, `OPTIONS`, `PATCH`, `PUT`), and never follows redirects: the redirect itself is the result, not something to chase. Each exchange opens a connection of its own and closes it, so a server's idle keep-alive timeout can never reset a spec's request:
 
 ```typescript
 test('surfaces a permanent redirect without following it', async () => {

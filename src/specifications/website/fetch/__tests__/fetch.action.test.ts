@@ -1,5 +1,6 @@
 import { once } from 'node:events';
 import { createServer } from 'node:http';
+import { createServer as createTcpServer } from 'node:net';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { readerOf } from '../../../../chain/state.js';
@@ -76,6 +77,44 @@ describe('rawFetch', () => {
 
         // Then - each answer names the method the site saw
         expect(bodies).toStrictEqual(['POST /items', 'DELETE /items', 'GET /items']);
+    });
+
+    test('fetch.action — one raw exchange — opens a connection of its own, so a server that closed an idle one cannot reset it', async () => {
+        // Given - a server that resets any second request arriving on a connection it already answered, as one does that closed its idle keep-alive socket
+        const server = createTcpServer((socket) => {
+            let answered = false;
+            socket.on('error', () => undefined);
+            socket.on('data', () => {
+                if (answered) {
+                    socket.resetAndDestroy();
+                    return;
+                }
+                answered = true;
+                socket.write(
+                    'HTTP/1.1 200 OK\r\nContent-Length: 2\r\nKeep-Alive: timeout=60\r\n\r\nok',
+                );
+            });
+        });
+        server.listen(0, '127.0.0.1');
+        await once(server, 'listening');
+        onTestFinished(() => {
+            server.close();
+        });
+        const address = server.address();
+        const baseUrl =
+            typeof address === 'object' && address !== null
+                ? `http://127.0.0.1:${address.port}`
+                : '';
+
+        // When - the same site is fetched three times in a row
+        const statuses = [];
+        for (let index = 0; index < 3; index += 1) {
+            const exchange = await rawFetch.perform(['/'], READ, {}, run(baseUrl));
+            statuses.push(exchange.status);
+        }
+
+        // Then - every one answers: none rode a connection already used
+        expect(statuses).toStrictEqual([200, 200, 200]);
     });
 
     test('fetch.action — one raw exchange — a chain with no website under test is a framework fault', async () => {

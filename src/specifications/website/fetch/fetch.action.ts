@@ -41,8 +41,9 @@ export const rawFetch = defineAction<
         if (baseUrl === undefined || baseUrl === '') {
             throw invariant('.fetch() reached a chain with no website under test');
         }
+        // invariant: one connection per exchange, since a pooled one the server closed on its keep-alive timeout is reset under the next request.
         const response = await fetch(`${baseUrl}${path}`, {
-            headers: read(headers),
+            headers: { ...read(headers), connection: 'close' },
             method: options?.method ?? 'GET',
             redirect: 'manual',
         });
