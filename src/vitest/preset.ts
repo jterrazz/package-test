@@ -1,4 +1,4 @@
-import { GROUND_GLOB } from '@jterrazz/typescript/rules';
+import { GROUND_GLOB, slotsFor } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type {
@@ -57,11 +57,13 @@ export function reporterOutputFiles(argv: readonly string[]): Record<string, str
 }
 
 // invariant: vitest hands the root `env` to every worker it forks, and a worker to every process it spawns; the path is absolute, since a spawned command runs in its own folder. Vitest drops it under v8 coverage, whose source positions a compile-cached script lacks.
+// invariant: the workers are the toolchain's capacity model's, so a run shares the machine with the gates beside it, and one inside a gate's slice (`TYPESCRIPT_CAPACITY`) stays in it.
 function rootDefaults(): ViteUserConfig {
     return mergeConfig(projectDefaults(), {
         test: {
             coverage: COVERAGE,
             env: { NODE_COMPILE_CACHE: resolve(NODE_COMPILE_CACHE_DIR) },
+            maxWorkers: slotsFor(resolve('.'), 'vitest'),
             outputFile: reporterOutputFiles(process.argv),
         },
     }) as ViteUserConfig;

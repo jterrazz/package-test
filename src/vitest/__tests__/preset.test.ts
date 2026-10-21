@@ -1,5 +1,6 @@
+import { CAPACITY_VARIABLE } from '@jterrazz/typescript/rules';
 import { isAbsolute, relative } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import {
     ATTACHMENTS_DIR,
@@ -67,6 +68,17 @@ describe('preset', () => {
         // Then - the run's env names the one cache folder of the project
         expect(isAbsolute(cache)).toBe(true);
         expect(relative(process.cwd(), cache)).toBe(NODE_COMPILE_CACHE_DIR);
+    });
+
+    test("presetConfig() — workers — runs as many as the toolchain's capacity model gives the vitest pool, inside a gate's slice too", () => {
+        // Given - a run inside a gate whose slice is three cpus and ample memory, then one handed a capacity no gate could read
+        vi.stubEnv(CAPACITY_VARIABLE, 'cpus=3,memory=64g');
+        const sliced = presetConfig().test?.maxWorkers;
+        vi.stubEnv(CAPACITY_VARIABLE, 'three cpus');
+
+        // Then - three workers, the cpus binding, and the unreadable capacity refused before any worker starts
+        expect(sliced).toBe(3);
+        expect(() => presetConfig()).toThrow(CAPACITY_VARIABLE);
     });
 
     test('presetConfig() — artefact paths — gives a project the attachments directory too', () => {
