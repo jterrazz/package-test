@@ -177,7 +177,7 @@ export class ServedProcess {
         const captured = Number(group);
         if (!Number.isInteger(captured)) {
             return await this.refuse({
-                fix: "capture the port alone in the pattern's one group, e.g. /listening on (\\d+)/",
+                fix: String.raw`capture the port alone in the pattern's one group, e.g. /listening on (\d+)/`,
                 found: `the ready pattern ${String(banner)} matched, and its capture group is not a port ("${group}")`,
                 why: 'A RegExp `ready` is read over the output, and its one capture group is the port.',
             });

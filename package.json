@@ -84,7 +84,7 @@
         "test:repeat": "vitest --run --repeats 10"
     },
     "dependencies": {
-        "@oxlint/plugins": "^1.85.0",
+        "@oxlint/plugins": "^1.89.0",
         "msw": "^3.0.3",
         "oxc-parser": "^0.150.0",
         "vitest-mock-extended": "^5.0.0",
@@ -103,7 +103,7 @@
         "ajv": "^8.20.0",
         "better-sqlite3": "^13.0.3",
         "hono": "^4.13.9",
-        "oxlint": "1.85.0",
+        "oxlint": "1.89.0",
         "pg": "^8.23.0",
         "playwright": "1.63.0",
         "react": "^19.3.0",

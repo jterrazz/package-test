@@ -35,7 +35,7 @@ ruleTester().run('no-raw-bypass', noRawBypass, {
         },
         {
             name: 'A RegExp carries no token grammar to lose.',
-            code: 'expect(result.stdout.raw).toContain(/\\u001B\\[31m/u);',
+            code: String.raw`expect(result.stdout.raw).toContain(/\u001B\[31m/u);`,
         },
         { code: 'expect(result.raw).toContain(new RegExp(pattern, "u"));' },
         { name: 'Some other property.', code: 'expect(result.value).toContain("hi");' },
