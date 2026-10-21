@@ -25,10 +25,11 @@ describe('listenedPort', () => {
         // When - it listens
         const port = await listenedPort(server, { host: '127.0.0.1' });
 
-        // Then - the port it answers is the one it holds, on loopback
-        expect([port > 0, server.address()]).toStrictEqual([
+        // Then - the port it answers is the one it holds, on loopback, and no listener of the wait is left on the server
+        expect([port > 0, server.address(), server.listenerCount('error')]).toStrictEqual([
             true,
             { address: '127.0.0.1', family: 'IPv4', port },
+            0,
         ]);
     });
 

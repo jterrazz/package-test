@@ -111,6 +111,7 @@ export function execInContainer(
         const quoted = argv.map((a) => JSON.stringify(a)).join(' ');
         const stdout = execSync(`docker exec ${id} ${quoted}`, {
             encoding: 'utf8',
+            // Stryker disable next-line ArrayDeclaration: an empty list pipes all three, and a piped stdin no one writes reads EOF as an ignored one does
             stdio: ['ignore', 'pipe', 'pipe'],
             timeout: DEFAULT_TIMEOUT,
         });

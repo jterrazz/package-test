@@ -117,7 +117,12 @@ async function currentValue(locator: Locator): Promise<null | string> {
 }
 
 // invariant: a poll: a value is a property, and a locator's CSS reads the attribute, which a controlled input never moves.
-async function waitForValue(locator: Locator, target: Target, wanted: boolean): Promise<void> {
+export async function waitForValue(
+    locator: Locator,
+    target: Target,
+    wanted: boolean,
+    timeout: number = VALUE_TIMEOUT_MS,
+): Promise<void> {
     const value = target.value ?? '';
     let actual: null | string = null;
     const held = await untilDeadline(
@@ -125,7 +130,7 @@ async function waitForValue(locator: Locator, target: Target, wanted: boolean): 
             actual = await currentValue(locator);
             return (actual === null ? !wanted : (actual === value) === wanted) || undefined;
         },
-        { interval: VALUE_POLL_MS, timeout: VALUE_TIMEOUT_MS },
+        { interval: VALUE_POLL_MS, timeout },
     );
     if (held === undefined) {
         throw new Error(

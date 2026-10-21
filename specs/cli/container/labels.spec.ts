@@ -34,12 +34,13 @@ describe('labels', () => {
             inside: {
                 exitCode: inside.exitCode,
                 listsOut: inside.stdout.text.split('\n').includes('out.txt'),
+                stderr: inside.stderr.text,
             },
             run: result.exitCode,
             state: { exists: neo.exists, status: neo.status },
         }).toMatchObject({
             file: { content: 'hello-from-test-a', exists: true },
-            inside: { exitCode: 0, listsOut: true },
+            inside: { exitCode: 0, listsOut: true, stderr: '' },
             run: 0,
             state: { exists: true, status: 'running' },
         });
