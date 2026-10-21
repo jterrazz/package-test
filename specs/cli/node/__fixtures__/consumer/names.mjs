@@ -47,6 +47,6 @@ for (const [index, subpath] of paged.entries()) {
     const pageNames = new Set(namesOf(declarations[specifiers.length + index]));
     const nodeValues = Object.keys(await import(specifier));
     const lacking = nodeValues.filter((name) => !pageNames.has(name));
-    lacks.push(`the page build of ${specifier} lacks of the node build's values: ${lacking.length === 0 ? 'none' : lacking.join(', ')}`);
+    lacks.push(`the page build of ${specifier} lacks the node build's values: ${lacking.length === 0 ? 'none' : lacking.join(', ')}`);
 }
 process.stdout.write(`${blocks.join('\n\n')}\n\n${lacks.join('\n')}\n`);

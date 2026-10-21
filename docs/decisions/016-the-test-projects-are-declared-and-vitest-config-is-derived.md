@@ -1,6 +1,6 @@
 # ADR-016: The test projects are declared, and vitest.config.ts is derived
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-018](018-the-test-projects-are-read-off-the-tree-and-a-declared-one-is-a-reasoned-exception.md)
 **Date:** 2026-10-03
 
 ## Context

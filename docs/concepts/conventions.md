@@ -319,14 +319,14 @@ A rule is written when its defect class has been SEEN once and its criterion is 
 
 ## Changing the conventions
 
-- A rule a machine can check is added to the code (its row in `lint/consumer/catalogue/manifest.ts` beside its implementation), and `npm run docs` regenerates the catalogue. It is never written here: the code is its one source.
+- A rule a machine can check is added to the code (its row in `lint/consumer/catalogue/manifest.json` beside its implementation), and `npm run docs` regenerates the catalogue. It is never written here: the code is its one source.
 - A principle, or a criterion no machine can settle, is added here, as a process rule or in [What stays human](#what-stays-human-and-why).
 - A defect class seen once and decidable becomes a rule; one nobody has seen yet is a line of [the backlog](#the-backlog-the-criterion-written-coded-on-its-first-occurrence).
 
 ## Pitfalls
 
 - **Treating these docs as the spec.** They explain and illustrate; this constitution and the generated catalogue ([Linting](../reference/linting.md)) decide. When the docs and the catalogue disagree, the docs are fixed in the same change.
-- **Editing the generated catalogue by hand.** The [Linting](../reference/linting.md) catalogue is GENERATED from `lint/consumer/catalogue/manifest.ts`; a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
+- **Editing the generated catalogue by hand.** The [Linting](../reference/linting.md) catalogue is GENERATED from the rows of `lint/consumer/catalogue/manifest.json`; a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
 
 ## Related
 
