@@ -25,7 +25,7 @@ ifdef SHARD
 	npm test -- --shard=$(SHARD) --reporter=default --reporter=blob
 else
 	rm -rf .artifacts/vitest/blob
-	npm test
+	npx typescript test
 endif
 
 # invariant: the merge runs no global setup, so no teardown judges: the route ratchet is judged here.
@@ -37,12 +37,11 @@ test-merge: node_modules/.install
 test-changed: node_modules/.install
 	npm test -- --changed
 
-# value: `check` passes `--cold`, so the whole suite's run starts from no incremental report and a gate never stands on a verdict an earlier tree earned.
 MUTATION = npx typescript mutation $(MUTATION_ARGS)
 
 # invariant: the four targets CI runs, in its order, are one gate: `TYPESCRIPT_GATE` names this recipe's shell, which `check` and `mutation` hold the checkout in the name of, and whose own builds the lock never refuses; a run that fails midway leaves a lock no live process holds, which the next gate takes over.
 check: node_modules/.install
-	@TYPESCRIPT_GATE=$$$$:$(CURDIR) $(MAKE) --no-print-directory build lint test mutation MUTATION_ARGS=--cold
+	@TYPESCRIPT_GATE=$$$$:$(CURDIR) $(MAKE) --no-print-directory build lint test mutation
 
 # outside: needs Xcode and a simulator; neither `check` nor any CI job calls it, so it is run by hand.
 test-mobile: build

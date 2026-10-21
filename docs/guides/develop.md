@@ -12,8 +12,10 @@ The repository answers six `make` targets, the same six every repository of its 
 | `make build`   | Build the bundle, before `lint` and before the `unit` project; an unchanged tree restores it from the build cache instead                                                      |
 | `make lint`    | Typecheck, lint, format check, knip, then the conventions checker and the self checker (the source tree's structure locks)                                                     |
 | `make fix`     | Build, then `npx typescript fix`, which runs the conventions' fixes and the self checks first, then oxlint's and the formatter, so the formatter formats what the checks wrote |
-| `make test`    | Every suite                                                                                                                                                                    |
-| `make check`   | The whole verdict: build, lint, test, then the mutation verdict (`make mutation`, incremental)                                                                                 |
+| `make test`    | Every suite, through `npx typescript test`, which answers a tree it already proved green from that proof                                                                       |
+| `make check`   | The whole verdict: build, lint, test, then the mutation verdict (`make mutation`, incremental); a stage whose inputs it already proved green answers from its proof            |
+
+A stage keeps its green as a proof keyed by the content of everything it reads, under `.artifacts/proven/`, and answers the same key from it: `make lint`, `make test` and `make mutation` run nothing on a tree they already proved green, on a laptop as on a runner ([the toolchain's Quality checks § A tree proven green](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/quality-checks.md#a-tree-proven-green)). `check` asks no stage cold; a run that must ignore its proofs says so itself, `make mutation MUTATION_ARGS=--cold`.
 
 Every target installs first. CI calls `build`, `lint`, `test`, then `make mutation` ([Test § What CI runs](test.md#what-ci-runs)).
 
