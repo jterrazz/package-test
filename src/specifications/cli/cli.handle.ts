@@ -10,7 +10,7 @@ import type { ResultConfig } from '../../expectations/result.js';
 import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
 import type { Orchestrator } from '../../services/startup/orchestrator.js';
-import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import { startServices } from '../../services/startup/start-services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
 import { StubBackend } from '../../stubs/delivery/other-process/stub-backend.js';
 import type { CliSpecification } from './cli.composition.js';
@@ -105,7 +105,7 @@ async function startedBackend(
     try {
         return { backend, defaults: { [declared.env]: await backend.start(), ...defaults } };
     } catch (error) {
-        await started?.orchestrator.stop();
+        await started?.stop();
         throw error;
     }
 }
@@ -153,13 +153,8 @@ export async function startCli<Services extends ServiceRecord>(
 
     return {
         cleanup: async () => {
+            await started?.stop();
             await backend?.stop();
-            await started?.stopProcesses();
-            await releaseIsolation(services);
-            // Stryker disable next-line ConditionalExpression: an orchestrator exists only beside services, which are containers
-            if (started) {
-                await started.orchestrator.stop();
-            }
         },
         cli: cliDefinition.open(config),
         docker: createDockerReader(callerDir),

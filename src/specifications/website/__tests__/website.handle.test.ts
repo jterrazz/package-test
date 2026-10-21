@@ -1,6 +1,12 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
-import { refuseOptions } from '../website.handle.js';
+import { clock } from '../../../clock/clock.js';
+import {
+    fakeContainers,
+    fakeService,
+} from '../../../services/startup/__tests__/orchestrator.fixtures.js';
+import type { CallLog } from '../../../services/startup/__tests__/orchestrator.fixtures.js';
+import { refuseOptions, startWebsite } from '../website.handle.js';
 import type { WebsiteSpecificationOptions } from '../website.handle.js';
 
 const OPTIONS = 'read: docs/guides/website-specs.md#options';
@@ -45,6 +51,29 @@ describe('website.handle', () => {
                 'fix: start the site with `server`, or drop `backend`',
                 OPTIONS,
             ].join('\n'),
+        ]);
+    });
+
+    test('website.handle — a server that never comes up — the services started for it are released and stopped', async () => {
+        // Given - a cache on a fake container, and a server that exits before it is ready
+        using _ = clock.at('2026-10-21T10:00:00.000Z');
+        const log: CallLog = [];
+        fakeContainers(log);
+        const printed = vi.spyOn(console, 'log').mockReturnValue();
+
+        // When - the website starts
+        const starting = startWebsite({
+            server: { command: `node -e "process.exit(3)"`, ready: /never/u },
+            services: { cache: fakeService(log, 'redis:7') },
+        });
+
+        // Then - the start is refused, and the cache was acquired, then released, then its container stopped
+        await expect(starting).rejects.toThrow('the server command exited before it was ready');
+        printed.mockRestore();
+        expect(log.filter((line) => /^(?:acquire|release|stop) /u.test(line))).toStrictEqual([
+            `acquire redis:7 ${process.env.VITEST_POOL_ID}`,
+            'release redis:7',
+            'stop redis:7',
         ]);
     });
 });

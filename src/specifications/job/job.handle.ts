@@ -4,7 +4,7 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
 import type { Orchestrator } from '../../services/startup/orchestrator.js';
-import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import { startServices } from '../../services/startup/start-services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
 import type { JobSpecification } from './job.composition.js';
 import { jobDefinition } from './job.composition.js';
@@ -61,11 +61,7 @@ export async function startJob<Services extends ServiceRecord>(
 
     return {
         cleanup: async () => {
-            await started?.stopProcesses();
-            await releaseIsolation(services);
-            if (started) {
-                await started.orchestrator.stop();
-            }
+            await started?.stop();
         },
         job: jobDefinition.open(config),
         orchestrator: started?.orchestrator ?? null,

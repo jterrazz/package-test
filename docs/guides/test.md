@@ -405,7 +405,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 
 | Capability    | api | job | cli | lint | integration | website | mobile | component | module |
 | ------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 13     |
+| `clock()`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 15     |
 | `intercept()` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 1      |
 | `mockOf()`    | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 1      |
 | `match.*`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 8      |

@@ -11,7 +11,7 @@ import type { ProcessOptions } from '../../services/process/process.adapter.js';
 import { ServedProcess } from '../../services/process/serve.js';
 import type { ServiceRecord } from '../../services/services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
-import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import { startServices } from '../../services/startup/start-services.js';
 import type { AppInfo } from '../../services/startup/startup-report.js';
 import { StubBackend } from '../../stubs/delivery/other-process/stub-backend.js';
 import type { StubsConfig } from '../../stubs/delivery/other-process/stub-backend.js';
@@ -134,8 +134,7 @@ async function startSite<Services extends ServiceRecord>(
     try {
         return { baseUrl: await serve.start(), serve };
     } catch (error) {
-        await context.started?.stopProcesses();
-        await context.started?.orchestrator.stop();
+        await context.started?.stop();
         await context.backend?.stop();
         throw error;
     }
@@ -257,11 +256,7 @@ export async function startWebsite<Services extends ServiceRecord>(
             if (serve) {
                 await serve.stop();
             }
-            if (started) {
-                await started.stopProcesses();
-                await releaseIsolation(services);
-                await started.orchestrator.stop();
-            }
+            await started?.stop();
             if (backend) {
                 await backend.stop();
             }

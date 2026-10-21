@@ -4,7 +4,7 @@ import { getCallerDir } from '../../chain/paths/caller.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { declaredServices } from '../../services/services.js';
 import type { ServiceRecord } from '../../services/services.js';
-import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import { startServices } from '../../services/startup/start-services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
 import { StubBackend } from '../../stubs/delivery/other-process/stub-backend.js';
 import type { StubsConfig } from '../../stubs/delivery/other-process/stub-backend.js';
@@ -155,11 +155,7 @@ export async function startMobile<Services extends ServiceRecord>(
         backendUrl,
         cleanup: async () => {
             await device.close();
-            if (started) {
-                await started.stopProcesses();
-                await releaseIsolation(services);
-                await started.orchestrator.stop();
-            }
+            await started?.stop();
             await appium.stop();
             if (backend) {
                 await backend.stop();

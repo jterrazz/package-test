@@ -4,7 +4,7 @@ import { getCallerDir } from '../../chain/paths/caller.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
-import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import { startServices } from '../../services/startup/start-services.js';
 import type { StartedServices } from '../../services/startup/start-services.js';
 import type { IntegrationSpecification } from './integration.composition.js';
 import { integrationDefinition } from './integration.composition.js';
@@ -51,11 +51,7 @@ export async function startIntegration<Services extends ServiceRecord>(
 
     return {
         cleanup: async () => {
-            await started?.stopProcesses();
-            await releaseIsolation(services);
-            if (started) {
-                await started.orchestrator.stop();
-            }
+            await started?.stop();
         },
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- one composition opens the chain for every record; `Services` is this constructor's type parameter, which the chain hands `.call()` as it was started
         integration: integrationDefinition.open(config) as IntegrationSpecification<

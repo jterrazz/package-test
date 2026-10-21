@@ -10,16 +10,15 @@ function getWorkerId(): string {
     return process.env.VITEST_POOL_ID ?? '0';
 }
 
-async function acquireIsolation(services: ServiceRecord): Promise<void> {
+// invariant: only what was acquired is released: a release reads the namespace its acquire made.
+async function acquireIsolation(
+    services: ServiceRecord,
+    acquired: ServiceRecord[string][],
+): Promise<void> {
     const workerId = getWorkerId();
     for (const service of Object.values(services)) {
         await service.isolation().acquire(workerId);
-    }
-}
-
-export async function releaseIsolation(services: ServiceRecord): Promise<void> {
-    for (const service of Object.values(services)) {
-        await service.isolation().release();
+        acquired.push(service);
     }
 }
 
@@ -28,7 +27,8 @@ export type StartedServices = {
     databases?: Map<string, DatabasePort> | undefined;
     orchestrator: Orchestrator;
     runId: string;
-    stopProcesses: () => Promise<void>;
+    /** The one teardown of a started record: its processes, then this worker's isolation, then the infrastructure. */
+    stop: () => Promise<void>;
 };
 
 // invariant: the specification starts processes after the rest, so an `env` function reads connection strings that already exist.
@@ -87,15 +87,32 @@ export async function startServices(
         subject,
     });
     await orchestrator.start();
-    await acquireIsolation(infrastructure);
+    const acquired: ServiceRecord[string][] = [];
+    const stopInfrastructure = async (): Promise<void> => {
+        for (const service of acquired.splice(0)) {
+            await service.isolation().release();
+        }
+        await orchestrator.stop();
+    };
     const runId = randomUUID();
-    const stopProcesses = await startProcessServices(services, root, runId);
+    let stopProcesses: () => Promise<void>;
+    try {
+        await acquireIsolation(infrastructure, acquired);
+        stopProcesses = await startProcessServices(services, root, runId);
+    } catch (error) {
+        // hazard: a record that fails halfway must not leave this worker's namespaces nor its containers behind.
+        await stopInfrastructure();
+        throw error;
+    }
     const databases = orchestrator.getDatabases();
     return {
         database: orchestrator.getDatabase() ?? undefined,
         databases: databases.size > 0 ? databases : undefined,
         orchestrator,
         runId,
-        stopProcesses,
+        stop: async () => {
+            await stopProcesses();
+            await stopInfrastructure();
+        },
     };
 }

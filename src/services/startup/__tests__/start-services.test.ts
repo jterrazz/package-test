@@ -6,7 +6,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { clock } from '../../../clock/clock.js';
 import type { DatabasePort } from '../../database.port.js';
 import { processService } from '../../process/process.adapter.js';
-import { releaseIsolation, startProcessServices, startServices } from '../start-services.js';
+import { startProcessServices, startServices } from '../start-services.js';
 import { fakeContainers, fakeService } from './orchestrator.fixtures.js';
 import type { CallLog } from './orchestrator.fixtures.js';
 
@@ -27,7 +27,7 @@ const database = (name: string): DatabasePort => ({
 });
 
 describe('startServices', () => {
-    test('startServices — starts the infrastructure, then acquires each service for this worker, then the processes, and answers the databases declared', async () => {
+    test('startServices — starts the infrastructure, then acquires each service for this worker, then the processes, answers the databases declared, and stops in reverse', async () => {
         // Given - two databases, a cache and a server process, on fake containers
         using _ = clock.at('2026-09-25T10:00:00.000Z');
         const log: CallLog = [];
@@ -42,19 +42,19 @@ describe('startServices', () => {
         };
         const printed = vi.spyOn(console, 'log').mockReturnValue();
 
-        // When - the record starts, then its isolation is released
+        // When - the record starts, then stops
         const started = await startServices(services, scratchRoot());
         printed.mockRestore();
-        await releaseIsolation(services);
-        await started.stopProcesses();
+        const served = api.started;
+        await started.stop();
 
-        // Then - this worker's acquires after the starts, the first database and every one by key, and the process up
+        // Then - this worker's acquires after the starts, the releases before the containers stop, the first database and every one by key, and the process up then down
         const worker = process.env.VITEST_POOL_ID;
         expect([
-            log.filter((line) => /^(?:start|acquire|release) /u.test(line)),
+            log.filter((line) => /^(?:start|acquire|release|stop) /u.test(line)),
             started.database,
             started.databases,
-            api.connectionString.startsWith('http://127.0.0.1:'),
+            [served, api.started],
         ]).toStrictEqual([
             [
                 'start redis:7',
@@ -66,13 +66,44 @@ describe('startServices', () => {
                 'release redis:7',
                 'release postgres:16',
                 'release postgres:17',
+                'stop redis:7',
+                'stop postgres:16',
+                'stop postgres:17',
             ],
             orders,
             new Map([
                 ['orders', orders],
                 ['users', users],
             ]),
-            true,
+            [true, false],
+        ]);
+    });
+
+    test('startServices — a process that never comes up releases what was acquired and stops the infrastructure', async () => {
+        // Given - a cache, and a server process whose build step fails
+        using _ = clock.at('2026-09-25T10:00:00.000Z');
+        const log: CallLog = [];
+        fakeContainers(log);
+        const services = {
+            broken: processService({
+                before: `node -e "console.error('the build failed'); process.exit(1)"`,
+                command: SERVER,
+                ready: READY,
+            }),
+            cache: fakeService(log, 'redis:7'),
+        };
+        const printed = vi.spyOn(console, 'log').mockReturnValue();
+
+        // When - the record starts
+        const starting = startServices(services, scratchRoot());
+
+        // Then - the start is refused, after the cache was acquired, released and its container stopped
+        await expect(starting).rejects.toThrow('the build failed');
+        printed.mockRestore();
+        expect(log.filter((line) => /^(?:acquire|release|stop) /u.test(line))).toStrictEqual([
+            `acquire redis:7 ${process.env.VITEST_POOL_ID}`,
+            'release redis:7',
+            'stop redis:7',
         ]);
     });
 

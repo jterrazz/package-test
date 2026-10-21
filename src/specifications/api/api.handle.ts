@@ -6,7 +6,7 @@ import type { ContainerAccessor } from '../../expectations/command/container.js'
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { declaredDatabaseKeys, declaredServices } from '../../services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
-import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import { startServices } from '../../services/startup/start-services.js';
 import type { ApiSpecification } from './api.composition.js';
 import { apiDefinition } from './api.composition.js';
 import { routesLedger, writeLedger } from './routes/ledger.js';
@@ -44,10 +44,7 @@ export async function startApi<Services extends ServiceRecord>(
     const services = declaredServices(options.services);
     const databaseKeys = declaredDatabaseKeys(services);
 
-    const { database, databases, orchestrator, stopProcesses } = await startServices(
-        services,
-        root,
-    );
+    const { database, databases, stop } = await startServices(services, root);
     const app = options.server(services);
     const server = new HonoAdapter(app);
 
@@ -70,9 +67,7 @@ export async function startApi<Services extends ServiceRecord>(
                 });
             }
             // Stryker restore ConditionalExpression,BlockStatement,ObjectLiteral
-            await stopProcesses();
-            await releaseIsolation(services);
-            await orchestrator.stop();
+            await stop();
         },
         docker: createDockerReader(callerDir),
     };
