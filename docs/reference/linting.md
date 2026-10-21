@@ -137,7 +137,7 @@ Seven columns. **Rule** is the name, and carries the row's anchor. **Specificati
 
 The catalogue is grouped by **family**, a word naming what the rules judge (the sections below, generated from `lint/consumer/catalogue/families.ts`), and a static rule's implementation sits in the folder of its family, `lint/consumer/rules/<family>/<name>.ts`.
 
-<!-- GENERATED:catalogue. Do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/manifest.ts -->
+<!-- GENERATED:catalogue. Do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/manifest.json -->
 
 Every rule a project using the framework meets, across its enforcement channels (**static**: 55 (oxlint rules), **upstream**: 3 (options set on an upstream rule), **toolchain**: 7 (the preset @jterrazz/typescript runs), **checker**: 36 (bundled passes), **runtime**: 15 (execution-time refusals), **type**: 10 (what the compiler refuses), **process**: 2 (review-borne rules)), sourced from one manifest so the code and the catalogue can never drift.
 
