@@ -155,6 +155,18 @@ describe('serve', () => {
         expect(handed?.groups?.port).toBe(polled?.groups?.port);
     });
 
+    test('a served process — a server that never prints its banner is refused within its timeout, under a pinned calendar too', async () => {
+        // Given - the calendar pinned, and a server that prints nothing and keeps running
+        using _ = clock.at('2026-10-21T10:00:00.000Z');
+        adapter = new ServedProcess(
+            { command: `node -e "setInterval(() => {}, 1000)"`, ready: READY, timeout: 300 },
+            process.cwd(),
+        );
+
+        // Then - its own refusal, not the test's budget
+        await expect(adapter.start()).rejects.toThrow('within 300ms');
+    });
+
     test('a served process — the PORT form hands a stated port as PORT and is ready once the path answers', async () => {
         // Given - a port nobody holds, stated to a child that serves it and reports the paths it is asked
         const port = await findFreePort();

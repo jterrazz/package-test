@@ -6,10 +6,10 @@ export class OutputChange {
         this.waiting?.();
     }
 
-    /** Resolves on the next change, or at `deadline` (epoch ms) when none comes. */
-    async next(deadline: number): Promise<void> {
+    /** Resolves on the next change, or after `withinMs` when none comes. */
+    async next(withinMs: number): Promise<void> {
         await new Promise<void>((resolve) => {
-            const late = setTimeout(resolve, deadline - Date.now());
+            const late = setTimeout(resolve, withinMs);
             this.waiting = () => {
                 clearTimeout(late);
                 resolve();

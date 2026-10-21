@@ -13,7 +13,7 @@ describe('OutputChange', () => {
         change.notify();
 
         // When - a wait with a far deadline, then a change
-        const waited = change.next(Date.parse(NOW) + 30_000);
+        const waited = change.next(30_000);
         change.notify();
         await waited;
 
@@ -27,7 +27,7 @@ describe('OutputChange', () => {
         const change = new OutputChange();
         let woken = false;
         const waited = (async (): Promise<void> => {
-            await change.next(Date.parse(NOW) + 1000);
+            await change.next(1000);
             woken = true;
         })();
 

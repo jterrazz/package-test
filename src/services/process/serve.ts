@@ -3,7 +3,7 @@ import type { ChildProcess } from 'node:child_process';
 import { Socket } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
-import { pause } from '../../chain/pause.js';
+import { untilDeadline } from '../../chain/pause.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { findFreePort, firstAnswering } from './listening.js';
 import { OutputChange } from './output-change.js';
@@ -82,10 +82,7 @@ export class ServedProcess {
         // invariant: banner mode: the server picks and announces the port, nothing is injected as `PORT`.
         const port = banner ? null : (this.options.port ?? (await findFreePort()));
         this.spawnServer(port);
-        const deadline = Date.now() + this.timeout();
-        const url = banner
-            ? await this.awaitBanner(banner, deadline)
-            : await this.awaitAnswer(port ?? 0, deadline);
+        const url = banner ? await this.awaitBanner(banner) : await this.awaitAnswer(port ?? 0);
 
         return (
             url ??
@@ -144,25 +141,34 @@ export class ServedProcess {
         });
     }
 
-    private async awaitBanner(banner: RegExp, deadline: number): Promise<null | string> {
-        while (!this.exited) {
-            // hazard: a `g`-flagged pattern would carry lastIndex across polls.
-            banner.lastIndex = 0;
-            const found = banner.exec(this.output);
-            if (found) {
-                return await this.bannerPort(banner, found[1]);
-            }
-            // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
-            if (Date.now() >= deadline) {
-                return await this.refuse({
-                    fix: 'correct the pattern to what the server prints, or raise `timeout`',
-                    found: `the server did not print ${String(banner)} within ${this.timeout()}ms`,
-                    why: 'A process is ready once its output matches `ready`, within `timeout`.',
-                });
-            }
-            await this.change.next(deadline);
+    private async awaitBanner(banner: RegExp): Promise<null | string> {
+        const seen = await untilDeadline<'exited' | RegExpExecArray>(
+            () => {
+                if (this.exited) {
+                    return 'exited';
+                }
+                // hazard: a `g`-flagged pattern would carry lastIndex across polls.
+                banner.lastIndex = 0;
+                return banner.exec(this.output) ?? undefined;
+            },
+            {
+                timeout: this.timeout(),
+                wait: async (remaining) => {
+                    await this.change.next(remaining);
+                },
+            },
+        );
+        if (seen === 'exited') {
+            return null;
         }
-        return null;
+        if (seen === undefined) {
+            return await this.refuse({
+                fix: 'correct the pattern to what the server prints, or raise `timeout`',
+                found: `the server did not print ${String(banner)} within ${this.timeout()}ms`,
+                why: 'A process is ready once its output matches `ready`, within `timeout`.',
+            });
+        }
+        return await this.bannerPort(banner, seen[1]);
     }
 
     private async bannerPort(banner: RegExp, group: string | undefined): Promise<string> {
@@ -178,28 +184,30 @@ export class ServedProcess {
         return `http://127.0.0.1:${captured}`;
     }
 
-    private async awaitAnswer(port: number, deadline: number): Promise<null | string> {
+    private async awaitAnswer(port: number): Promise<null | string> {
         // invariant: a server may listen on either family (Astro listens on ::1), so both are asked, and the one that answers is the site's address.
         const baseUrls = [`http://127.0.0.1:${port}`, `http://[::1]:${port}`];
         // Stryker disable next-line StringLiteral: a URL with no path asks for the root all the same
         const path = typeof this.options.ready === 'string' ? this.options.ready : '/';
-        while (!this.exited) {
-            const answering = await firstAnswering(baseUrls.map((baseUrl) => `${baseUrl}${path}`));
-            if (answering !== undefined) {
-                this.port = port;
-                return answering.slice(0, answering.length - path.length);
-            }
-            // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
-            if (Date.now() >= deadline) {
-                return await this.refuse({
-                    fix: 'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
-                    found: `the server did not answer on ${baseUrls.map((baseUrl) => `${baseUrl}${path}`).join(' or ')} within ${this.timeout()}ms, whatever address it printed above`,
-                    why: 'A process is ready once its `ready` path answers, within `timeout`.',
-                });
-            }
-            await pause(READY_POLL_INTERVAL_MS);
+        const seen = await untilDeadline(
+            async () =>
+                this.exited
+                    ? 'exited'
+                    : await firstAnswering(baseUrls.map((baseUrl) => `${baseUrl}${path}`)),
+            { interval: READY_POLL_INTERVAL_MS, timeout: this.timeout() },
+        );
+        if (seen === 'exited') {
+            return null;
         }
-        return null;
+        if (seen === undefined) {
+            return await this.refuse({
+                fix: 'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
+                found: `the server did not answer on ${baseUrls.map((baseUrl) => `${baseUrl}${path}`).join(' or ')} within ${this.timeout()}ms, whatever address it printed above`,
+                why: 'A process is ready once its `ready` path answers, within `timeout`.',
+            });
+        }
+        this.port = port;
+        return seen.slice(0, seen.length - path.length);
     }
 
     private timeout(): number {

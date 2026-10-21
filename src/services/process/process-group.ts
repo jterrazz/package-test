@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 
-import { pause } from '../../chain/pause.js';
+import { untilDeadline } from '../../chain/pause.js';
 
 export const KILL_GRACE_MS = 2000;
 
@@ -86,20 +86,12 @@ function groupRunning(group: number): boolean {
 }
 // Stryker restore BlockStatement
 
-async function endedBy(group: number, deadline: number): Promise<boolean> {
-    if (!groupRunning(group)) {
-        return true;
-    }
-    // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
-    if (Date.now() >= deadline) {
-        return false;
-    }
-    await pause(GROUP_SETTLE_MS);
-    return await endedBy(group, deadline);
-}
-
 export async function groupEnded(group: number, withinMs: number): Promise<boolean> {
-    return await endedBy(group, Date.now() + withinMs);
+    const ended = await untilDeadline(() => !groupRunning(group) || undefined, {
+        interval: GROUP_SETTLE_MS,
+        timeout: withinMs,
+    });
+    return ended === true;
 }
 
 /** Resolves once the child is reaped, at once for one reaped already. */

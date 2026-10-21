@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs';
 
 import { evidenceFile } from '../../../../lint/kit/project/artifacts.js';
-import { pause } from '../../../chain/pause.js';
+import { untilDeadline } from '../../../chain/pause.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';
@@ -112,22 +112,20 @@ export class AppiumAdapter implements DevicePort {
     ): Promise<DriverElement> {
         const chain = scopeChain(target);
         const anyTarget = verb === 'see';
-        const deadline = Date.now() + this.actionTimeoutMs;
-
         /* invariant: the scroll fallback takes an expensive unfiltered snapshot: once, on the first miss. */
         let tryScroll = true;
-        for (;;) {
-            const resolved = await this.resolveChain(driver, chain, anyTarget, tryScroll);
-            tryScroll = false;
-            if (resolved) {
-                return resolved;
-            }
-            // Stryker disable next-line EqualityOperator: the deadline is not met to the millisecond
-            if (Date.now() > deadline) {
-                throw await this.timeoutError(driver, target, verb);
-            }
-            await pause(POLL_INTERVAL_MS);
+        const resolved = await untilDeadline(
+            async () => {
+                const found = await this.resolveChain(driver, chain, anyTarget, tryScroll);
+                tryScroll = false;
+                return found ?? undefined;
+            },
+            { interval: POLL_INTERVAL_MS, timeout: this.actionTimeoutMs },
+        );
+        if (resolved === undefined) {
+            throw await this.timeoutError(driver, target, verb);
         }
+        return resolved;
     }
 
     private async resolveChain(
