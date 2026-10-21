@@ -1,4 +1,4 @@
-.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation
+.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation rehearse
 
 # invariant: an install replaces the dependencies a running gate reads, so every path that installs (`install`, and any target that depends on `node_modules/.install`) asks the toolchain's `gate-lock` first, which refuses while another gate holds `.artifacts/gate.lock`; a checkout with no install yet holds no gate.
 node_modules/.install: package-lock.json $(wildcard .artifacts/packages/*.tgz)
@@ -54,3 +54,7 @@ check-links:
 
 mutation: build
 	$(MUTATION)
+
+# outside: needs docker and the network; `check` never calls it, and a release runs it on its commit before the tag.
+rehearse: node_modules/.install
+	npx typescript rehearse $(REHEARSE_ARGS)
