@@ -2,7 +2,16 @@ import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, symlinkSync } from 'node:fs';
 import { dirname, join, normalize, relative } from 'node:path';
 
-import { packedFilenames } from '../../kit/project/json-shape.js';
+import { isRecord } from '../../kit/project/json-shape.js';
+
+/** `npm pack --json` prints one report per package, keyed by its name. */
+export function packedFilenames(report: string): string[] {
+    const parsed: unknown = JSON.parse(report);
+    return Object.values(isRecord(parsed) ? parsed : {}).flatMap((entry) => {
+        const filename = isRecord(entry) ? entry.filename : undefined;
+        return typeof filename === 'string' ? [filename] : [];
+    });
+}
 
 /** A `node_modules` beside the extracted `package/` points at this repository's install, so an entry resolves its dependencies as in a consumer's. */
 export function extractTarball(root: string, into: string): string {

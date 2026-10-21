@@ -79,7 +79,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/chain/context/with.capability.ts',
-            'lint/kit/project/artifacts.ts',
             'lint/kit/project/settings-file.ts',
             'src/visitor/matching/landmark-of-tag.ts',
             'src/visitor/matrix.ts',

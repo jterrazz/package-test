@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { packedFilenames, parsedJson, recordAt, stringListAt, stringsAt } from '../json-shape.js';
+import { parsedJson, recordAt, stringListAt, stringsAt } from '../json-shape.js';
 
 describe('json-shape', () => {
     test('a field of another shape reads as absent', () => {
@@ -18,15 +18,6 @@ describe('json-shape', () => {
         }).toStrictEqual({ dependencies: { a: '1' }, exports: {}, files: ['dist'], missing: {} });
     });
 
-    test.each([
-        ['{"@jterrazz/test":{"filename":"jterrazz-test-17.0.0.tgz"}}'],
-        ['[{"filename":"jterrazz-test-17.0.0.tgz"}]'],
-    ])('the tarball npm pack reports is read from %s', (report) => {
-        // Given - a report in the shape one npm version prints
-        // Then - its one filename
-        expect(packedFilenames(report)).toStrictEqual(['jterrazz-test-17.0.0.tgz']);
-    });
-
     test('a text that is no JSON reads as what the caller says it stands for', () => {
         // Given - a JSON text and a truncated one
         // Then - the value, and the caller's stand-in
@@ -36,14 +27,9 @@ describe('json-shape', () => {
         ]);
     });
 
-    test('a report or a value of another shape names no tarball', () => {
-        // Given - reports npm never prints, and a record read where none is
-        // Then - nothing
-        expect([
-            packedFilenames('null'),
-            packedFilenames('"x"'),
-            packedFilenames('[{"name":"x"}]'),
-            recordAt(null, 'x'),
-        ]).toStrictEqual([[], [], [], {}]);
+    test('a record read where none is reads as empty', () => {
+        // Given - no value at all
+        // Then - an empty record
+        expect(recordAt(null, 'x')).toStrictEqual({});
     });
 });

@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 
@@ -17,11 +17,11 @@ export const ATTACHMENTS_DIR = `${VITEST_ARTIFACTS_DIR}/attachments`;
 /** Under the project: the run's temp root is gone by the time the error naming the file is read. */
 export const EVIDENCE_DIR = `${VITEST_ARTIFACTS_DIR}/evidence`;
 
-/** Filed under the run's temp root name, `<pid>-...`: the next run's start sweeps every run that is no longer alive. */
-export function evidenceDirectory(prefix: string): string {
+/** Where a failing scenario's screenshot goes, in a folder of its own filed under the run's temp root name, `<pid>-...`: the next run's start sweeps every run that is no longer alive. */
+export function evidenceFile(kind: 'mobile' | 'website'): string {
     const parent = resolve(EVIDENCE_DIR, basename(tmpdir()));
     mkdirSync(parent, { recursive: true });
-    return join(parent, prefix);
+    return join(mkdtempSync(join(parent, `${kind}-`)), 'failure.png');
 }
 
 export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;

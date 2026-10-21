@@ -14,6 +14,7 @@ import {
     danglingImports,
     extractTarball,
     MODULE_FILE,
+    packedFilenames,
     selfExposures,
     selfMentions,
     strandedBundles,
@@ -70,6 +71,17 @@ describe('audience', () => {
     const packed = new Set(filesUnder(installed));
     const rows = selfRows;
     const self = new Set(selfRows.map((row) => row.name));
+
+    test('the tarball npm pack reports is read off its record, and any other shape names none', () => {
+        // Given - the report npm 11 prints, and values it never prints
+        // Then - its one filename, then nothing
+        expect([
+            packedFilenames('{"@jterrazz/test":{"filename":"jterrazz-test-17.0.0.tgz"}}'),
+            packedFilenames('null'),
+            packedFilenames('"x"'),
+            packedFilenames('{"@jterrazz/test":{"name":"x"}}'),
+        ]).toStrictEqual([['jterrazz-test-17.0.0.tgz'], [], [], []]);
+    });
 
     test('no byte the tarball carries names a self rule', () => {
         // Given - every file of the extracted tarball, read as text: bundles, chunks, types, pages, manifest

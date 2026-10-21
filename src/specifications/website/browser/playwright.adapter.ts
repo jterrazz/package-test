@@ -1,8 +1,6 @@
-import { mkdtempSync } from 'node:fs';
-import { resolve } from 'node:path';
 import type { Browser, BrowserContext, BrowserType, Page } from 'playwright';
 
-import { evidenceDirectory } from '../../../../lint/kit/project/artifacts.js';
+import { evidenceFile } from '../../../../lint/kit/project/artifacts.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import type {
@@ -153,8 +151,7 @@ export class PlaywrightAdapter implements BrowserPort {
     /** Screenshot the failing state into the evidence folder; never masks the original error. */
     private async captureEvidence(page: Page): Promise<null | string> {
         try {
-            const dir = mkdtempSync(evidenceDirectory('website-'));
-            const path = resolve(dir, 'failure.png');
+            const path = evidenceFile('website');
             await page.screenshot({ fullPage: true, path });
             return path;
         } catch {

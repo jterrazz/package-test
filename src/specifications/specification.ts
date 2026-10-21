@@ -14,7 +14,6 @@ import type { WebsiteConfig } from './website/website.handle.js';
 /** Every specification's configuration, as one. */
 export type SpecificationConfig = ApiConfig & CliConfig & JobConfig & MobileConfig & WebsiteConfig;
 
-/** Created in a `*.specification.ts` under `specs/`, destructured with canonical names, cleaned up via `afterAll(cleanup)` (`runner-in-specification-file`, `no-runner-alias`, `cleanup-passed-to-after-all`). */
 /** The seven constructors, and only seven: the framework's whole entry surface. */
 export type Specification = {
     api: typeof startApi;
@@ -26,6 +25,7 @@ export type Specification = {
     website: typeof startWebsite;
 };
 
+/** Created in a `*.specification.ts` under `specs/`, destructured with canonical names, cleaned up via `afterAll(cleanup)` (`runner-in-specification-file`, `no-runner-alias`, `cleanup-passed-to-after-all`). */
 export const specification: Specification = {
     /** Test an HTTP app: services via testcontainers, the app in this process. */
     api: startApi,

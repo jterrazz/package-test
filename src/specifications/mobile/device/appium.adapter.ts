@@ -1,7 +1,6 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
 
-import { evidenceDirectory } from '../../../../lint/kit/project/artifacts.js';
+import { evidenceFile } from '../../../../lint/kit/project/artifacts.js';
 import { pause } from '../../../chain/pause.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
@@ -161,11 +160,10 @@ export class AppiumAdapter implements DevicePort {
         return element;
     }
 
-    /** Screenshot the failing state into a temp file; never masks the original error. */
+    /** Screenshot the failing state into the evidence folder; never masks the original error. */
     private async captureEvidence(driver: Driver): Promise<null | string> {
         try {
-            const dir = mkdtempSync(evidenceDirectory('mobile-'));
-            const path = resolve(dir, 'failure.png');
+            const path = evidenceFile('mobile');
             writeFileSync(path, Buffer.from(await driver.takeScreenshot(), 'base64'));
             return path;
         } catch {
