@@ -1,5 +1,5 @@
 import { TESTS_FOLDER } from '@jterrazz/typescript/rules';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
 import { SPECIFICATIONS } from './specifications.js';
@@ -45,24 +45,50 @@ const foldersIn = (path: string): string[] =>
               .toSorted()
         : [];
 
-// invariant: the runner is derived only where the folder's one specification module is named for it: in a shared module graph, a second specification module would load once per worker, and its files would share the first one's subject.
+// invariant: a module runs again before each file after the sibling modules it imports (`'./<name>.specification.js'`, as the formatter quotes it), so it reads their subject of this file, never the last one's.
+function inImportOrder(directory: string, modules: readonly string[]): string[] {
+    const ordered: string[] = [];
+    const seen = new Set<string>();
+    const visit = (module: string): void => {
+        if (seen.has(module)) {
+            return;
+        }
+        seen.add(module);
+        const text = readFileSync(join(directory, module), 'utf8');
+        for (const imported of modules.filter((other) =>
+            text.includes(`'./${other.slice(0, -'ts'.length)}js'`),
+        )) {
+            visit(imported);
+        }
+        ordered.push(module);
+    };
+    for (const module of modules) {
+        visit(module);
+    }
+
+    return ordered;
+}
+
+// invariant: every specification module of the folder is a runner: in a shared module graph, a module that is none would load once per worker, and its files would share the first one's subject.
 function runnerOf(root: string, folder: string, specification: string): Record<string, unknown> {
     if (!RUNNER_SHARED.has(specification)) {
         return {};
     }
-    const modules = readdirSync(join(root, folder)).filter((name) =>
-        name.endsWith(SPECIFICATION_MODULE),
-    );
-    const own = `${specification}${SPECIFICATION_MODULE}`;
+    const directory = join(root, folder);
+    const modules = readdirSync(directory)
+        .filter((name) => name.endsWith(SPECIFICATION_MODULE))
+        .toSorted();
 
-    return modules.length === 1 && modules[0] === own ? { runner: `./${folder}/${own}` } : {};
+    return modules.length === 0
+        ? {}
+        : { runner: inImportOrder(directory, modules).map((name) => `./${folder}/${name}`) };
 }
 
 // invariant: a workspace member named `specs` is the specs root itself, with no `specs/` folder beneath it: its folders are the specifications.
 const isSpecsMember = (root: string): boolean =>
     basename(root) === SPECS && existsSync(join(root, 'package.json'));
 
-/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder (one whose spec files meet their subject through a runner handed as its `runner` the folder's one specification module, `<specification>.specification.ts`), `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
+/** The projects a tree names, each with the options it derives: one per `specs/<specification>/` folder (one whose spec files meet their subject through a runner handed as its `runner` every specification module of the folder, `*.specification.ts`, a module after those it imports), `unit` over each root holding a module test (`specs/unit/` is one root among them), `component` over each holding a rendered one. */
 export function derivedProjects(root: string): Map<string, Record<string, unknown>> {
     const member = isSpecsMember(root);
     const prefix = member ? '' : `${SPECS}/`;

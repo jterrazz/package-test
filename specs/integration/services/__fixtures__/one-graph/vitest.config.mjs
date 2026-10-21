@@ -1,7 +1,8 @@
 const helpers = await import(/* @vite-ignore */ process.env.RUNNER_ENTRY);
 
 const helper = process.env.HELPER ?? 'integration';
-const files = { include: ['*.spec.mjs'], ...(helper === 'cli' ? { literate: false } : {}) };
+const include = process.env.OTHER === undefined ? ['first.spec.mjs', 'second.spec.mjs'] : ['first.spec.mjs', 'other.spec.mjs'];
+const files = { include, ...(helper === 'cli' ? { literate: false } : {}) };
 
 export default {
     test: {
@@ -10,7 +11,7 @@ export default {
             helpers[helper](
                 process.env.RUNNER === undefined
                     ? files
-                    : { ...files, runner: process.env.RUNNER },
+                    : { ...files, runner: process.env.RUNNER.includes(',') ? process.env.RUNNER.split(',') : process.env.RUNNER },
             ),
         ],
     },

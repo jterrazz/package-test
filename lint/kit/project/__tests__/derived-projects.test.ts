@@ -68,7 +68,7 @@ describe('derivedProjects', () => {
         });
     });
 
-    test("derived-projects — a specification met through its runner is handed it where its folder's one specification module is named for it", () => {
+    test("derived-projects — a specification met through its runner is handed its folder's specification module", () => {
         // Given - api, cli, integration, job and website, each folder holding its one specification module, named for it
         const root = tree([
             'specs/api/api.specification.ts',
@@ -81,15 +81,15 @@ describe('derivedProjects', () => {
 
         // Then - every one of them runs its files in one module graph
         expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
-            api: { runner: './specs/api/api.specification.ts' },
-            cli: { runner: './specs/cli/cli.specification.ts' },
-            integration: { runner: './specs/integration/integration.specification.ts' },
-            job: { runner: './specs/job/job.specification.ts' },
-            website: { runner: './specs/website/website.specification.ts' },
+            api: { runner: ['./specs/api/api.specification.ts'] },
+            cli: { runner: ['./specs/cli/cli.specification.ts'] },
+            integration: { runner: ['./specs/integration/integration.specification.ts'] },
+            job: { runner: ['./specs/job/job.specification.ts'] },
+            website: { runner: ['./specs/website/website.specification.ts'] },
         });
     });
 
-    test('derived-projects — no runner is handed to a folder of two specification modules, to one named otherwise, or to lint, which keeps a worker per file', () => {
+    test('derived-projects — a folder of several specification modules is handed them all, whatever their names, and lint keeps a worker per file', () => {
         // Given - job with two modules, integration with one named otherwise, and lint with its own
         const root = tree([
             'specs/job/job.specification.ts',
@@ -98,11 +98,34 @@ describe('derivedProjects', () => {
             'specs/lint/lint.specification.ts',
         ]);
 
-        // Then - each of them isolates its files
+        // Then - job and integration run every module of their folder before each file; lint isolates its files
         expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
-            integration: {},
-            job: {},
+            integration: { runner: ['./specs/integration/redis.specification.ts'] },
+            job: {
+                runner: ['./specs/job/job.specification.ts', './specs/job/other.specification.ts'],
+            },
             lint: {},
+        });
+    });
+
+    test('derived-projects — a specification module comes after the sibling modules it imports, so it reads their subject of the same file', () => {
+        // Given - a website folder whose deployed module imports the address the website module serves
+        const root = tree([
+            'specs/website/website.specification.ts',
+            'specs/website/backend.specification.ts',
+        ]);
+        writeFileSync(
+            join(root, 'specs/website/deployed.specification.ts'),
+            "import { url } from './website.specification.js';\n",
+        );
+
+        // Then - the website module before the deployed one, the rest in name order
+        expect(derivedProjects(root).get('website')).toStrictEqual({
+            runner: [
+                './specs/website/backend.specification.ts',
+                './specs/website/website.specification.ts',
+                './specs/website/deployed.specification.ts',
+            ],
         });
     });
 
@@ -121,7 +144,7 @@ describe('derivedProjects', () => {
         // Then - the cli and api projects at the member's root, the api one with its runner, and the unit and component ones over the member's own folders
         const projects = Object.fromEntries(derivedProjects(join(parent, 'specs')));
         expect(projects).toStrictEqual({
-            api: { runner: './api/api.specification.ts' },
+            api: { runner: ['./api/api.specification.ts'] },
             cli: {},
             component: { include: ['views/**/*.test.tsx'] },
             unit: { roots: ['helpers'] },

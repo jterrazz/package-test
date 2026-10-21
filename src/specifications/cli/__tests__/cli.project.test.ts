@@ -49,4 +49,18 @@ describe('cli', () => {
             [undefined, undefined],
         ]);
     });
+
+    test('cli.project — the shared worker — several runners run before each file, and share the worker with documents bound to any one of them', () => {
+        // Given - two runners named, the door bound to the second, then to neither
+        const runner = ['./specs/cli/cli.specification.ts', './specs/cli/run.specification.ts'];
+
+        // Then - both run before each file where a document binds one of them; a door bound to neither keeps every file apart
+        expect([
+            sharedOf(cli({ literate: { runner: './specs/cli/run.specification.ts' }, runner })),
+            sharedOf(cli({ literate: { runner: './specs/cli/other.specification.ts' }, runner })),
+        ]).toStrictEqual([
+            [false, runner],
+            [undefined, undefined],
+        ]);
+    });
 });

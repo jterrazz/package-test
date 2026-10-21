@@ -42,6 +42,29 @@ describe('one-graph-per-worker', () => {
         },
     );
 
+    test('a project naming two runners runs both before each file over one module graph, and each file cleans up what both booted', async () => {
+        // Given - two files on one worker, each importing a different specification module of the two the project names
+        const result = await vitestCli
+            .fixture(directory('./__fixtures__/one-graph/'))
+            .env({ OTHER: '1', RUNNER: `${RUNNER},./other.specification.mjs` })
+            .exec('run --configLoader runner');
+
+        // Then - one graph whose loads count both files, and a cleanup of each module for each file
+        expect(result.exitCode).toBe(0);
+        expect(
+            [result.file('first.run').content, result.file('other.run').content]
+                .map((run) => run.replace(/^boot (?<boot>\d+) of \d+ loads$/u, '$<boot>'))
+                .toSorted(),
+        ).toStrictEqual(['1', '2']);
+        expect(result.file('cleanups').content.split('\n').toSorted()).toStrictEqual([
+            '',
+            'boot 1',
+            'boot 2',
+            'other 1',
+            'other 2',
+        ]);
+    });
+
     test('a project naming no runner isolates every file', async () => {
         // Given - the same two files, the project stated with no runner
         const result = await vitestCli

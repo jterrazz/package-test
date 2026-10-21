@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { runnerProject } from '../../vitest/project.js';
+import { runnerProject, runnersOf } from '../../vitest/project.js';
 import type { RunnerOption, SpecificationProjectOptions } from '../../vitest/project.js';
 import { literate } from './documents/literate-plugin.js';
 import type { LiterateOptions } from './documents/literate-plugin.js';
@@ -22,13 +22,16 @@ export type LiterateDoor = {
 /** `cli()`: a binary, and the documents that specify it. */
 export type CliProjectOptions = LiterateDoor & RunnerOption & SpecificationProjectOptions;
 
-// invariant: a document imports the module its door names, which the shared graph runs again before each file only when it is the project's runner.
+// invariant: a document imports the module its door names, which the shared graph runs again before each file only when it is one of the project's runners.
 function runnerBeside(
     common: RunnerOption & SpecificationProjectOptions,
     documents: string,
 ): RunnerOption & SpecificationProjectOptions {
     const { runner, ...isolated } = common;
-    return runner !== undefined && resolve(runner) === resolve(documents) ? common : isolated;
+    return runner !== undefined &&
+        runnersOf(runner).some((module) => resolve(module) === resolve(documents))
+        ? common
+        : isolated;
 }
 
 /** A cli project: the specification's `.spec.ts` files and its documents (docs/guides/spec-documents.md); the plugin's glob joins this project's include, never the root config. */

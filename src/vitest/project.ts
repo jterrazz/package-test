@@ -114,11 +114,15 @@ export function specificationProject(
     });
 }
 
-/** What a specification whose spec files import their runner from one module accepts on top. */
+/** What a specification whose spec files import their runner from its specification modules accepts on top. */
 export type RunnerOption = {
-    /** The `*.specification.ts` module its spec files import their runner from: stated, a worker's files share one module graph and the module runs again before each file, so every file still boots its own subject. */
-    runner?: string;
+    /** The `*.specification.ts` modules its spec files import their runner from: stated, a worker's files share one module graph and each module runs again before each file, so every file still boots its own subject. */
+    runner?: readonly string[] | string;
 };
+
+/** The modules a stated runner names, one or several. */
+export const runnersOf = (runner: readonly string[] | string): string[] =>
+    typeof runner === 'string' ? [runner] : [...runner];
 
 /** What a specification whose runner boots its subject in this process accepts on top. */
 export type InProcessProjectOptions = RunnerOption & SpecificationProjectOptions;
@@ -132,6 +136,6 @@ export function runnerProject(
     return options.runner === undefined
         ? project
         : (mergeConfig(project, {
-              test: { isolate: false, setupFiles: [options.runner] },
+              test: { isolate: false, setupFiles: runnersOf(options.runner) },
           }) as TestProjectInlineConfiguration);
 }
