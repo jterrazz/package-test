@@ -24,7 +24,7 @@ async function ensureStubServer(): Promise<SetupServer> {
     }
     const { setupServer } = await loadMsw();
     const server = setupServer();
-    server.listen({ onUnhandledRequest: 'bypass' });
+    server.listen({ onUnhandledFrame: 'bypass' });
     serverInstance = server;
     installedFetch = globalThis.fetch;
     globalThis.fetch = owningBodies(refusingWhatFetchRefuses(installedFetch));

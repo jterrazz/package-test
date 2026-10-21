@@ -85,7 +85,7 @@
     },
     "dependencies": {
         "@oxlint/plugins": "^1.85.0",
-        "msw": "^2.15.0",
+        "msw": "^3.0.3",
         "oxc-parser": "^0.150.0",
         "vitest-mock-extended": "^5.0.0",
         "yaml": "^2.9.0"

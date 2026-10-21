@@ -1,4 +1,5 @@
-import { HttpResponse, http as mswHttp, passthrough } from 'msw';
+import { getResponse, HttpResponse, http as mswHttp, passthrough } from 'msw';
+import type { HttpHandler } from 'msw';
 import { setupServer } from 'msw/node';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
@@ -8,7 +9,6 @@ import { clock } from '../../../clock/clock.js';
 import { http } from '../../kinds/http.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
-import { fetchJson } from '../other-process/__tests__/stub-backend.fixtures.js';
 
 const API = 'http://api.test';
 
@@ -17,7 +17,7 @@ const MSW = { http: mswHttp, HttpResponse, passthrough };
 function served(stubs: Stub[], bypass?: (url: string) => boolean): () => Error | null {
     const { handlers, violation } = buildStubHandlers(MSW, stubs, bypass);
     const server = setupServer(...handlers);
-    server.listen({ onUnhandledRequest: 'error' });
+    server.listen({ onUnhandledFrame: 'error' });
     onTestFinished(() => {
         server.close();
     });
@@ -35,12 +35,15 @@ async function read(path: string, init?: RequestInit): Promise<(null | number | 
     ];
 }
 
-async function echo(body?: string): Promise<unknown> {
-    return await fetchJson(`${API}/echo`, {
+// outside: resolved by msw's own handler lookup, not over a socket: msw's Node interceptor parses the request off the wire, and a lower-case `patch` there never reaches a handler.
+async function echo(handlers: HttpHandler[], body?: string): Promise<unknown> {
+    const request = new Request(`${API}/echo`, {
         body: body ?? null,
         headers: { 'X-Token': 't' },
         method: 'patch',
     });
+    const reply = await getResponse(handlers, request);
+    return await reply?.json();
 }
 
 describe('buildStubHandlers', () => {
@@ -86,7 +89,7 @@ describe('buildStubHandlers', () => {
 
     test('a responder — reads the body as JSON, as text, or null when none was sent, the headers and the method as observed', async () => {
         // Given - a responder echoing what it observed, on a method spelled in lower case
-        served([
+        const { handlers } = buildStubHandlers(MSW, [
             {
                 request: http.patch('/echo'),
                 response: (request) =>
@@ -99,11 +102,31 @@ describe('buildStubHandlers', () => {
         ]);
 
         // Then - each body as the stub read it
-        expect([await echo('{"a":1}'), await echo('plain'), await echo()]).toStrictEqual([
+        expect([
+            await echo(handlers, '{"a":1}'),
+            await echo(handlers, 'plain'),
+            await echo(handlers),
+        ]).toStrictEqual([
             { body: { a: 1 }, method: 'PATCH', token: 't' },
             { body: 'plain', method: 'PATCH', token: 't' },
             { body: null, method: 'PATCH', token: 't' },
         ]);
+    });
+
+    test('a streamed reply reaches the subject piece by piece, as declared', async () => {
+        // Given - a stream of three pieces, no spacing declared
+        served([{ request: http.get('/pieces'), response: http.stream(['Hel', 'lo, ', 'world']) }]);
+
+        // When - the subject reads the body as it lands
+        const response = await fetch(`${API}/pieces`);
+        const decoder = new TextDecoder();
+        const pieces: string[] = [];
+        for await (const piece of response.body ?? []) {
+            pieces.push(decoder.decode(piece));
+        }
+
+        // Then - each piece was its own read
+        expect(pieces).toStrictEqual(['Hel', 'lo, ', 'world']);
     });
 
     test('a delayed reply lands after an immediate one sent later', async () => {
