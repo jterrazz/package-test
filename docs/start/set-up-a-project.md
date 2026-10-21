@@ -8,7 +8,9 @@ What a project installs, how its `vitest.config.ts` is written, how it turns the
 npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
-**`vitest ^5` and `@jterrazz/typescript ^11` are the only required peers.** The framework registers its matchers into vitest and has no runner of its own. The toolchain, [`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript), is required because the framework prints its refusals through the toolchain's rules kit and its published types extend the toolchain's `JterrazzConfig` (`@jterrazz/typescript/config`). Its lint conventions are a separate, opt-in step ([below](#turning-the-conventions-on)).
+**`vitest ^5.0.4` and `@jterrazz/typescript ^11` are the only required peers.** The framework registers its matchers into vitest and has no runner of its own. The toolchain, [`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript), is required because the framework prints its refusals through the toolchain's rules kit and its published types extend the toolchain's `JterrazzConfig` (`@jterrazz/typescript/config`). Its lint conventions are a separate, opt-in step ([below](#turning-the-conventions-on)).
+
+**The vitest floor is msw's.** The framework carries msw 3, and 5.0.4 is the first vitest whose `@vitest/mocker` accepts it. Under an older one the mocker holds msw 2 at the top of `node_modules` and msw 3 lands nested under this package, where Vite never resolves `msw/browser` for a component test; the peer refuses that tree at install instead.
 
 ### Project requirements
 
@@ -51,7 +53,7 @@ read: docs/start/set-up-a-project.md#what-to-install
 Three more constraints come from the peers themselves:
 
 - **One Playwright for the whole family.** This package's `playwright` peer is the exact version it is gated on, and a project declares that version: two revisions on one machine each need their own Chromium build, and `typescript doctor` names the build a project's Playwright wants and the machine lacks. `npx playwright install chromium`, run in the project, provisions it.
-- **The browser provider moves with vitest.** `@vitest/browser-playwright@X` requires `vitest` at exactly `X`, so the two are upgraded together: `npm install -D vitest@5.0.1 @vitest/browser-playwright@5.0.1`. `component()` checks the two versions match and names both when they do not.
+- **The browser provider moves with vitest.** `@vitest/browser-playwright@X` requires `vitest` at exactly `X`, so the two are upgraded together: `npm install -D vitest@5.0.5 @vitest/browser-playwright@5.0.5`. `component()` checks the two versions match and names both when they do not.
 - **Vite `^6.4 || ^7 || ^8`** for a component. `component()` reads the installed major and states the JSX transform on the key that version reads.
 - **The ARIA dialect of a `.aria.yaml` golden is Playwright's.** A Playwright major can reword a role line, and every committed tree golden then moves with it in one `TEST_UPDATE=1` run.
 
@@ -206,6 +208,7 @@ Each release's notes are its [GitHub release](https://github.com/jterrazz/packag
 | the `SpecificationConfig` type                                           | nothing in its place: it was the intersection of five chain configurations, and no constructor takes it                        |
 | `component()` called directly, reading its root off the caller's file    | `component({ root })`, an absolute path; a project `vitestConfig` builds is handed its root as before                          |
 | a strict-stub test matching `declared backend: no stub matches`          | `strict stubs: unmatched request`, the one wording every delivery answers an unmatched request with                            |
+| `vitest` and `@vitest/browser-playwright` below 5.0.4                    | both at 5.0.4 or later, in one install ([§ What to install](#what-to-install))                                                 |
 
 ### From 16 to 17
 

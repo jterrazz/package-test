@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-09-20
 
+Its `^5` peer is superseded by [ADR-021](021-the-vitest-peer-starts-where-the-mocker-accepts-msw-3.md).
+
 ## Context
 
 Three questions came due together at the major.
