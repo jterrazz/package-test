@@ -69,26 +69,40 @@ describe('derivedProjects', () => {
     });
 
     test("derived-projects — a specification met through its runner is handed it where its folder's one specification module is named for it", () => {
-        // Given - api, cli and website with their one runner, job with two, integration with one named otherwise, and lint, which keeps a worker per file
+        // Given - api, cli, integration, job and website, each folder holding its one specification module, named for it
         const root = tree([
             'specs/api/api.specification.ts',
             'specs/api/orders.spec.ts',
-            'specs/job/job.specification.ts',
-            'specs/job/other.specification.ts',
-            'specs/integration/redis.specification.ts',
             'specs/cli/cli.specification.ts',
+            'specs/integration/integration.specification.ts',
+            'specs/job/job.specification.ts',
             'specs/website/website.specification.ts',
-            'specs/lint/lint.specification.ts',
         ]);
 
-        // Then - the api, cli and website projects run their files in one module graph
+        // Then - every one of them runs its files in one module graph
         expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
             api: { runner: './specs/api/api.specification.ts' },
             cli: { runner: './specs/cli/cli.specification.ts' },
+            integration: { runner: './specs/integration/integration.specification.ts' },
+            job: { runner: './specs/job/job.specification.ts' },
+            website: { runner: './specs/website/website.specification.ts' },
+        });
+    });
+
+    test('derived-projects — no runner is handed to a folder of two specification modules, to one named otherwise, or to lint, which keeps a worker per file', () => {
+        // Given - job with two modules, integration with one named otherwise, and lint with its own
+        const root = tree([
+            'specs/job/job.specification.ts',
+            'specs/job/other.specification.ts',
+            'specs/integration/redis.specification.ts',
+            'specs/lint/lint.specification.ts',
+        ]);
+
+        // Then - each of them isolates its files
+        expect(Object.fromEntries(derivedProjects(root))).toStrictEqual({
             integration: {},
             job: {},
             lint: {},
-            website: { runner: './specs/website/website.specification.ts' },
         });
     });
 
