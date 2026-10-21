@@ -1,6 +1,4 @@
-import { defineSpecConfig } from '@jterrazz/test/vitest';
-
-export default defineSpecConfig({
+export default {
     test: {
         projects: [
             {
@@ -13,4 +11,4 @@ export default defineSpecConfig({
             { include: ['src/**/*.test.ts', 'specs/build/**/*.test.ts'], name: 'unit' },
         ],
     },
-});
+};

@@ -29,7 +29,7 @@ describe('subpaths', () => {
             @jterrazz/test/stubs (browser) → ./dist/browser/stubs.js: reaches 2 modules, imports @jterrazz/typescript/rules, msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
             @jterrazz/test/stubs (import) → ./dist/stubs.js: loads, 6 names
             @jterrazz/test/vitest (types) → ./dist/vitest.d.ts: held
-            @jterrazz/test/vitest (import) → ./dist/vitest.js: loads, 12 names
+            @jterrazz/test/vitest (import) → ./dist/vitest.js: loads, 11 names
             @jterrazz/test/config (types) → ./dist/config.d.ts: held
             @jterrazz/test/config (import) → ./dist/config.js: loads, 1 name
             @jterrazz/test/oxlint (types) → ./dist/oxlint.d.ts: held

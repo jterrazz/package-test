@@ -1,12 +1,11 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { basename, dirname, isAbsolute, resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import type { Plugin, PluginOption, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/kit/project/artifacts.js';
 import { isRecord } from '../../../lint/kit/project/json-shape.js';
-import { callerFrames } from '../../chain/paths/caller.js';
 import { refusal } from '../../chain/refusals/refusal.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { mswWorkerScript } from '../../stubs/delivery/browser-page/worker-script.js';
@@ -25,8 +24,8 @@ export type ComponentOptions = {
     clock?: string;
     /** `Accept-Language` and `Intl` locale of the page. Default `'en-US'`. */
     locale?: string;
-    /** The directory `vite` and `wrap` resolve against; defaults to the calling file's. */
-    root?: string;
+    /** The directory `vite` and `wrap` resolve against, absolute; `vitestConfig` hands it the project root, or the `root` a declared project states read from it. */
+    root: string;
     /** IANA zone the page's `Date` reports in. Default `'UTC'`. */
     timezone?: string;
     /** The app's Vite pipeline: a config path, the object, or a framework's function. Only the pipeline is adopted. */
@@ -64,46 +63,6 @@ const PAGE_DEPENDENCIES = [
 ];
 
 const requireFrom = createRequire(import.meta.url);
-const HELPERS_FILE = import.meta.filename;
-
-// invariant: a config vite bundled before importing it: `<its name>.timestamp-<hash>.mjs`.
-const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
-
-function callerFile(): string | undefined {
-    // Stryker disable next-line OptionalChaining: a frame outside this file always calls it, so the find always holds one
-    return callerFrames().find(({ file }) => file !== HELPERS_FILE)?.file;
-}
-
-function nearestHolding(name: string): string | undefined {
-    let directory = process.cwd();
-    for (;;) {
-        if (existsSync(resolve(directory, name))) {
-            return directory;
-        }
-        const parent = dirname(directory);
-        if (parent === directory) {
-            return undefined;
-        }
-        directory = parent;
-    }
-}
-
-// outside: never `process.cwd()`: knip and `typescript check` load configs from the repository root. Read off the stack; Vite's own loader bundles the config into `node_modules/.vite-temp/`, keeping only its name, looked for upward from the cwd.
-function callerDirectory(): string {
-    const file = callerFile();
-    // Stryker disable next-line ConditionalExpression: a frame outside this file always calls it
-    if (file === undefined) {
-        return process.cwd();
-    }
-    // Stryker disable next-line OptionalChaining: a match of the pattern always holds its one named group
-    const bundled = BUNDLED_CONFIG.exec(basename(file))?.groups?.name;
-    if (bundled === undefined || basename(dirname(file)) !== '.vite-temp') {
-        // invariant: bundled beside the config or not bundled: either way the frame sits in the config's own directory.
-        return dirname(file);
-    }
-    return nearestHolding(bundled) ?? process.cwd();
-}
-
 // invariant: an absent optional peer is simply not pre-bundled.
 function resolves(specifier: string): boolean {
     try {
@@ -253,10 +212,9 @@ function viewportOf(options: ComponentProjectOptions): { height: number; width: 
 
 /** A component project: renders in a real Chromium; the default `exclude` keeps it out of `specs/`. */
 export async function component(
-    options: ComponentProjectOptions = {},
+    options: ComponentProjectOptions,
 ): Promise<TestProjectInlineConfiguration> {
-    // hazard: read before the first `await`: the caller's frame is on the stack only during the synchronous body.
-    const root = options.root ?? callerDirectory();
+    const { root } = options;
     // Stryker disable next-line CallExpression: this package installs the provider on its runner's version, so its tests never meet a mismatch here; the peer-versions test refuses one
     assertProviderPin(versionOf('vitest'), installedVersion('@vitest/browser-playwright'));
     const { playwright } = await import('@vitest/browser-playwright');

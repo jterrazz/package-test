@@ -1,6 +1,6 @@
-import { cli, defineSpecConfig } from '@jterrazz/test/vitest';
+import { cli } from '@jterrazz/test/vitest';
 
-export default defineSpecConfig({
+export default {
     test: {
         projects: [
             cli({
@@ -11,4 +11,4 @@ export default defineSpecConfig({
             }),
         ],
     },
-});
+};

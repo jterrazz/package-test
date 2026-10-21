@@ -1,7 +1,6 @@
 import {
     api,
     cli,
-    defineSpecConfig,
     integration,
     job,
     lint,
@@ -10,8 +9,8 @@ import {
     website,
 } from '@jterrazz/test/vitest';
 
-export default defineSpecConfig({
+export default {
     test: {
         projects: [unit(), api(), cli(), job(), integration(), website(), mobile(), lint()],
     },
-});
+};

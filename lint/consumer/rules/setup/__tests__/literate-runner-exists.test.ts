@@ -8,21 +8,16 @@ import { literateRunnerExists } from '../literate-runner-exists.js';
 const ROOT = resolve(import.meta.dirname, '../../../../..');
 const CONFIG = resolve(ROOT, 'jterrazz.config.ts');
 
-const configNaming = (...paths: string[]): string =>
-    `export default defineSpecConfig({ projects: [${paths
-        .map((path) => `{ literate: { runner: '${path}' } }`)
-        .join(', ')}] });`;
+const configNaming = (path: string): string =>
+    `export default defineConfig({ test: { projects: { cli: { literate: { runner: '${path}' }, reason: 'the documents' } } } });`;
 
 ruleTester().run('literate-runner-exists', literateRunnerExists, {
     invalid: [
         {
-            code: configNaming(
-                './specs/cli/cli.specification.ts',
-                './specs/cli/gone.specification.ts',
-            ),
+            code: configNaming('./specs/cli/gone.specification.ts'),
             errors: [
                 {
-                    column: 121,
+                    column: 69,
                     data: { path: './specs/cli/gone.specification.ts' },
                     line: 1,
                     messageId: 'missing',

@@ -1,6 +1,6 @@
-import { api, cli, defineSpecConfig, unit, website } from '@jterrazz/test/vitest';
+import { api, cli, unit, website } from '@jterrazz/test/vitest';
 
-export default defineSpecConfig({
+export default {
     test: {
         projects: [
             unit({ roots: ['packages', 'apps/'] }),
@@ -9,4 +9,4 @@ export default defineSpecConfig({
             website({ include: ['e2e/**/*.test.ts'] }),
         ],
     },
-});
+};

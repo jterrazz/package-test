@@ -9,8 +9,7 @@ import { isRecord } from '../lint/kit/project/json-shape.js';
 import { TEST_SECTION } from '../lint/kit/project/test-section.js';
 import { refusal } from './chain/refusals/refusal.js';
 import { api } from './specifications/api/api.project.js';
-import { cli, literate } from './specifications/cli/cli.project.js';
-import type { LiterateOptions } from './specifications/cli/cli.project.js';
+import { cli } from './specifications/cli/cli.project.js';
 import { component } from './specifications/component/component.project.js';
 import { integration } from './specifications/integration/integration.project.js';
 import { job } from './specifications/job/job.project.js';
@@ -47,22 +46,6 @@ export {
 } from './vitest/project.js';
 export { unit, type UnitProjectOptions } from './vitest/unit.project.js';
 
-/** A vite/vitest config, merged over the preset's defaults, plus `literate`. */
-export type SpecConfig = ViteUserConfig & {
-    /** Turns matching `<case>.spec.yaml` files into tests; with `projects`, put the plugin in the collecting project instead. */
-    literate?: LiterateOptions;
-};
-
-/** The shared vitest config: what you pass is merged over the defaults. */
-export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
-    const { literate: literateOptions, ...userConfig } = config;
-    return presetConfig(
-        literateOptions
-            ? (mergeConfig({ plugins: [literate(literateOptions)] }, userConfig) as ViteUserConfig)
-            : userConfig,
-    );
-}
-
 type Project = Promise<TestProjectInlineConfiguration> | TestProjectInlineConfiguration;
 
 type Builder = (options: Readonly<Record<string, unknown>>) => Project;
@@ -77,7 +60,8 @@ const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
     ['integration', integration],
     ['website', website],
     ['mobile', mobile],
-    ['component', component],
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `projectOf` hands every component the root it reads its paths against
+    ['component', component as Builder],
 ]);
 
 const anchored = (root: string, path: string): string =>

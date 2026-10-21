@@ -27,25 +27,26 @@ const located = ({ node, value }: LiteralString): string => `${value}@${nodeStar
 
 describe('config-shape', () => {
     test('includedGlobs — the literal globs of a project under `test` or in `projects`, and of nothing else', () => {
-        // Given - a test block, projects with and without an include, a shared one, and an include of package specifiers
+        // Given - a test block, keyed projects with and without an include, a shared one, a list no config of the toolchain writes, and an include of package specifiers
         const source = [
             'export default {',
             "    optimizeDeps: { include: ['react'] },",
             "    plugins: [{ include: ['plugin/**'] }],",
             "    test: { include: ['specs/**/*.spec.ts', glob] },",
-            '    projects: [',
-            "        { name: 'unit', include: ['src/**/*.test.ts'] },",
-            "        { name: label, include: 'specs/**' },",
-            "        { name: 'bare' },",
-            '        shared,',
-            '    ],',
+            '    projects: {',
+            "        unit: { include: ['src/**/*.test.ts'] },",
+            "        lint: { include: 'specs/**' },",
+            '        bare: {},',
+            '        ...shared,',
+            '    },',
+            "    listed: { projects: [{ include: ['listed/**'] }] },",
             '};',
         ].join('\n');
 
-        // Then - each literal glob, where it is written
+        // Then - each literal glob, where it is written, and none of the list
         expect(includedGlobs(programOf(source)).map(located)).toStrictEqual([
-            'specs/**/*.spec.ts@124',
-            'src/**/*.test.ts@205',
+            `specs/**/*.spec.ts@${source.indexOf("'specs/**/*.spec.ts'")}`,
+            `src/**/*.test.ts@${source.indexOf("'src/**/*.test.ts'")}`,
         ]);
     });
 

@@ -16,7 +16,7 @@ function literalOf(property: AstNode | undefined): LiteralString | undefined {
     return property === undefined || value === undefined ? undefined : { node: property, value };
 }
 
-/** Only under `test` or in `projects`, listed or keyed: `optimizeDeps.include` and its kin list package specifiers, not globs over a tree. */
+/** Only under `test` or in `projects`: `optimizeDeps.include` and its kin list package specifiers, not globs over a tree. */
 export function includedGlobs(program: AstNode): LiteralString[] {
     const globs: LiteralString[] = [];
     walk(program, (node) => {
@@ -25,14 +25,11 @@ export function includedGlobs(program: AstNode): LiteralString[] {
             return;
         }
         const value = child(node, 'value');
-        // invariant: `projects` is a vitest list in a vitest config, a record keyed by specification in `jterrazz.config.ts`.
+        // invariant: `projects` is the record `jterrazz.config.ts` keys by specification, the one file the rules read it in.
         const projects =
             key === 'test'
                 ? [value]
-                : [
-                      ...childList(value, 'elements'),
-                      ...childList(value, 'properties').map((property) => child(property, 'value')),
-                  ];
+                : childList(value, 'properties').map((property) => child(property, 'value'));
         for (const project of projects) {
             const include = child(findProperty(project, 'include'), 'value');
             for (const element of childList(include, 'elements')) {

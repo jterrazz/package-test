@@ -99,7 +99,6 @@
     SpecRun
     SpecServeEntry
     SpecStream
-    SpecificationConfig
     TableAccessor
     Target
     TargetOptions
@@ -206,14 +205,12 @@
     LiterateOptions
     LiteratePlugin
     MobileProjectOptions
-    SpecConfig
     SpecificationProjectOptions
     UnitProjectOptions
     WebsiteProjectOptions
     api
     cli
     component
-    defineSpecConfig
     integration
     job
     lint

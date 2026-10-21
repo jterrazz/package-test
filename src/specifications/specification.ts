@@ -1,18 +1,10 @@
 import { startApi } from './api/api.handle.js';
-import type { ApiConfig } from './api/api.handle.js';
 import { startCli } from './cli/cli.handle.js';
-import type { CliConfig } from './cli/cli.handle.js';
 import { startIntegration } from './integration/integration.handle.js';
 import { startJob } from './job/job.handle.js';
-import type { JobConfig } from './job/job.handle.js';
 import { startLint } from './lint/lint.handle.js';
 import { startMobile } from './mobile/mobile.handle.js';
-import type { MobileConfig } from './mobile/mobile.handle.js';
 import { startWebsite } from './website/website.handle.js';
-import type { WebsiteConfig } from './website/website.handle.js';
-
-/** Every specification's configuration, as one. */
-export type SpecificationConfig = ApiConfig & CliConfig & JobConfig & MobileConfig & WebsiteConfig;
 
 /** The seven constructors, and only seven: the framework's whole entry surface. */
 export type Specification = {

@@ -1,4 +1,4 @@
-export { specification, type SpecificationConfig } from './specifications/specification.js';
+export { specification } from './specifications/specification.js';
 export type * from './specifications/api/api.face.js';
 export type * from './specifications/cli/cli.face.js';
 export * from './specifications/component/component.face.js';

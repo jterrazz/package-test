@@ -1,3 +1,3 @@
-import { defineSpecConfig } from '@jterrazz/test/vitest';
+import { vitestConfig } from '@jterrazz/test/vitest';
 
-export default defineSpecConfig();
+export default await vitestConfig(import.meta.url);
