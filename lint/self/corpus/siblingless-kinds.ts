@@ -161,7 +161,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/expectations/command/docker-cli.ts',
             'src/stubs/delivery/same-process/stub-server.ts',
-            'src/stubs/delivery/same-process/fetch-refusals.ts',
             'src/stubs/delivery/browser-page/worker-script.ts',
             'src/specifications/website/browser/page-clock.adapter.ts',
             'src/specifications/website/browser/website-visitor.ts',

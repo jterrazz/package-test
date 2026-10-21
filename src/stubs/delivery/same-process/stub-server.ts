@@ -4,8 +4,6 @@ import type { StubRegistration } from '../../intercept/intercept.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
 import type { Msw } from '../msw-handlers.js';
-import { refusingWhatFetchRefuses } from './fetch-refusals.js';
-import { owningBodies } from './owned-body.js';
 
 async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> {
     const [{ setupServer }, msw] = await Promise.all([import('msw/node'), import('msw')]);
@@ -14,10 +12,7 @@ async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> 
 
 let serverInstance: null | SetupServer = null;
 
-// outside: the `fetch` msw installed, which the owning wrapper sits on while it listens.
-let installedFetch: null | typeof fetch = null;
-
-// invariant: once per process; reply bodies are handed over as owned streams, so a cancel settles.
+// invariant: once per process.
 async function ensureStubServer(): Promise<SetupServer> {
     if (serverInstance !== null) {
         return serverInstance;
@@ -26,8 +21,6 @@ async function ensureStubServer(): Promise<SetupServer> {
     const server = setupServer();
     server.listen({ onUnhandledFrame: 'bypass' });
     serverInstance = server;
-    installedFetch = globalThis.fetch;
-    globalThis.fetch = owningBodies(refusingWhatFetchRefuses(installedFetch));
     return server;
 }
 
@@ -48,10 +41,6 @@ export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistr
 
 export async function stopStubServer(): Promise<void> {
     if (serverInstance !== null) {
-        if (installedFetch !== null) {
-            globalThis.fetch = installedFetch;
-            installedFetch = null;
-        }
         serverInstance.close();
         serverInstance = null;
     }
