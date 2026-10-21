@@ -1,11 +1,11 @@
 import type { http, HttpHandler, HttpResponse, passthrough } from 'msw';
 
-import { pause } from '../../chain/pause.js';
 import { isStreamBody } from '../exchange.js';
 import type { MatchableRequest, StubResponse } from '../exchange.js';
 import { StubQueue } from '../matching/stub-queue.js';
 import type { Stub } from '../stub.js';
 import { toReadableStream } from './stream-body.js';
+import { refusedReply, replyOf, requestBody, unmatchedSummary } from './stub-reply.js';
 
 /** The msw a stub is built with, reached through a lazy import: node and a page load their own. */
 export type Msw = {
@@ -72,12 +72,12 @@ export function buildStubHandlers(
     const refuse = (error: Error, summary: string): Response => {
         violation ??= error;
         return msw.HttpResponse.json(
-            { error: `@jterrazz/test strict stubs: ${summary}` },
+            { error: refusedReply(summary) },
             { headers: NEVER_CACHED, status: 501 },
         );
     };
     const recordViolation = (method: string, url: string): Response =>
-        refuse(queue.unmatchedError(method, url), `unmatched request ${method} ${url}`);
+        refuse(queue.unmatchedError(method, url), unmatchedSummary(method, url));
 
     const handlers: HttpHandler[] = [];
     for (const route of queue.routes) {
@@ -94,12 +94,7 @@ export function buildStubHandlers(
                         // invariant: nothing matches, or everything that matches is spent (`network-strict-after-first-stub`).
                         return recordViolation(request.method, request.url);
                     }
-                    const response =
-                        typeof stub.response === 'function'
-                            ? stub.response(observed)
-                            : stub.response;
-                    await pause(response.delay ?? 0);
-                    return toMswResponse(msw, response);
+                    return toMswResponse(msw, await replyOf(stub.response, observed));
                 }),
             );
         }
@@ -118,18 +113,8 @@ export function buildStubHandlers(
 }
 
 async function observe(request: Request): Promise<MatchableRequest> {
-    let body: unknown = null;
-    const rawText = await request.clone().text();
-    if (rawText) {
-        try {
-            body = JSON.parse(rawText);
-        } catch {
-            // invariant: not JSON; expose the raw text for string/RegExp filters.
-            body = rawText;
-        }
-    }
     return {
-        body,
+        body: requestBody(await request.clone().text()),
         headers: Object.fromEntries(request.headers),
         method: request.method.toUpperCase(),
         url: request.url,

@@ -272,7 +272,7 @@ describe('StubBackend', () => {
                 'application/json',
                 JSON.stringify({
                     declared: ['DELETE /events/1', 'GET /bare', 'GET /block.txt', 'GET /value'],
-                    error: '@jterrazz/test declared backend: no stub matches GET /missing?x=1',
+                    error: '@jterrazz/test strict stubs: unmatched request GET /missing?x=1',
                 }),
             ],
             [204, '*', '600', 'x-custom'],

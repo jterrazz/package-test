@@ -3,13 +3,13 @@ import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { ChainConfig } from '../../../chain/config.js';
 import { listenedPort } from '../../../chain/listened-port.js';
-import { pause } from '../../../chain/pause.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { isStreamBody } from '../../exchange.js';
 import type { MatchableRequest, StubResponse } from '../../exchange.js';
 import { StubQueue } from '../../matching/stub-queue.js';
 import type { Stub } from '../../stub.js';
 import { toReadableStream } from '../stream-body.js';
+import { refusedReply, replyOf, requestBody, unmatchedSummary } from '../stub-reply.js';
 
 type StubBackendOptions = {
     // invariant: fixed port: a bundler inlining the URL at serve time survives warm.
@@ -136,18 +136,18 @@ export class StubBackend {
         const stub = this.queue.take(observed);
         if (!stub) {
             this.record(method, url);
+            const error = refusedReply(unmatchedSummary(method, url));
             response.writeHead(501, { ...cors, 'content-type': 'application/json' });
             response.end(
                 JSON.stringify({
                     declared: this.queue.declaredRoutes(),
-                    error: `@jterrazz/test declared backend: no stub matches ${method} ${url}`,
+                    error,
                 }),
             );
             return;
         }
 
-        const reply = typeof stub.response === 'function' ? stub.response(observed) : stub.response;
-        await pause(reply.delay ?? 0);
+        const reply = await replyOf(stub.response, observed);
         if (reply.transport === 'network-error') {
             request.socket.destroy();
             return;
@@ -212,15 +212,7 @@ async function readBody(request: IncomingMessage): Promise<unknown> {
     for await (const chunk of request) {
         chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
     }
-    const raw = Buffer.concat(chunks).toString('utf8');
-    if (raw.length === 0) {
-        return null;
-    }
-    try {
-        return JSON.parse(raw);
-    } catch {
-        return raw;
-    }
+    return requestBody(Buffer.concat(chunks).toString('utf8'));
 }
 
 function corsHeaders(request: IncomingMessage): Record<string, string> {
