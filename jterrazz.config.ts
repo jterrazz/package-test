@@ -59,10 +59,6 @@ export default defineConfig({
                 },
                 wrap: './wrap/providers.tsx',
             },
-            integration: {
-                reason: 'the integration specs share one database container, which runs a file at a time',
-                serial: true,
-            },
             mobile: {
                 reason: 'the mobile specs run against an Appium double the whole run shares, unless a real server is named, and the double gives each worker its session an app of its own, so its files run in parallel; `make test-mobile` runs them in turn on its one simulator',
                 serial: false,

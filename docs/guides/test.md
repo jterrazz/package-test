@@ -23,7 +23,7 @@ The tree derives nine (one per folder of `specs/`, `unit` over `src/` and `lint/
 | `cli`         | `specs/cli/**`, built by `cli()`, plus the documents `specs/cli/run/*.spec.yaml` (depth 1 only) through `literate()`  | Nothing; the Docker specs self-skip                                   |
 | `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                         | Docker                                                                |
 | `job`         | `specs/job/**`, built by `job()`                                                                                      | Docker                                                                |
-| `integration` | `specs/integration/**`, built by `integration({ serial: true })`, the container seams included                        | Docker                                                                |
+| `integration` | `specs/integration/**`, built by `integration()`, the container seams included                                        | Docker                                                                |
 | `website`     | `specs/website/**`, built by `website()`                                                                              | playwright + `npx playwright install chromium`; no Docker             |
 | `component`   | `specs/component/**/*.test.tsx` and `src/**/*.test.tsx` (a module test that needs a real DOM), built by `component()` | the same chromium; no Docker                                          |
 | `mobile`      | `specs/mobile/**`, built by `mobile({ serial: false })`, one driver session per worker                                | Nothing; the Appium protocol double, served once per run              |
