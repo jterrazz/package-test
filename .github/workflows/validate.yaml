@@ -5,7 +5,6 @@ on:
         branches: [main]
     pull_request:
         branches: [main]
-    # hazard: the mobile specification runs on the shared runner core, which no path filter of the shared workflow can see: once a week the simulator runs whatever changed.
     schedule:
         - cron: '0 6 * * 1'
 

@@ -44,7 +44,7 @@ MUTATION = npx typescript mutation $(MUTATION_ARGS)
 check: node_modules/.install
 	@TYPESCRIPT_GATE=$$$$:$(CURDIR) $(MAKE) --no-print-directory build lint test mutation MUTATION_ARGS=--cold
 
-# outside: needs Xcode and a simulator; `check` never calls it, and CI runs it on macOS when a change reaches the mobile specs.
+# outside: needs Xcode and a simulator; neither `check` nor any CI job calls it, so it is run by hand.
 test-mobile: build
 	node specs/__fixtures__/specimen-mobile/on-simulator.mjs
 
