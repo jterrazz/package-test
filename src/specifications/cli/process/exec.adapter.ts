@@ -138,8 +138,9 @@ export class ExecAdapter implements CliPort {
             shell: true,
         });
         // invariant: the run's group ends with the test, 'close' or not: a grandchild holding no stdio, or a child a test timeout abandoned, outlives nothing.
-        onTestFinished(() => {
-            void endGroup(child);
+        // hazard: the test waits for the SIGKILL that follows the grace: a worker the run tears down at once would otherwise die first, and a process deaf to SIGTERM (a Playwright launcher's, which only closes its browsers) would outlive the run, reparented to init.
+        onTestFinished(async () => {
+            await endGroup(child);
         });
         return await new Promise((resolve) => {
             const output = { stderr: '', stdout: '' };

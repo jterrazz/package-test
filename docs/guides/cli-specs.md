@@ -51,6 +51,8 @@ const result = await cli.exec(); // invoke the binary with no arguments
 
 The binary is spawned, never run with `spawnSync`: the test's event loop keeps turning while it runs, so a server the test itself started (an OTLP collector, a stub API on an ephemeral port) answers the binary, one-shot or long-running alike.
 
+A one-shot run's whole process group ends with the test that ran it, whether the binary exited or not: `SIGTERM`, then `SIGKILL` after a 2 s grace, and the test is held until the group is gone. A process deaf to `SIGTERM` (a Playwright launcher's handler only closes its browsers) is killed before the worker can be torn down, so nothing the binary forked outlives the run.
+
 Note the asymmetry with the array form: `.exec()` (no args) is a bare invocation, but `.exec([])` (empty array) throws: a command _sequence_ must name at least one command.
 
 ```typescript

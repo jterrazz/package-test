@@ -305,4 +305,28 @@ describe('ExecAdapter', () => {
         // Then - the run ended cleanly; the hook above judges the grandchild
         expect(result.exitCode).toBe(0);
     });
+
+    test('exec adapter — ExecAdapter.exec — holds its test until a grandchild deaf to SIGTERM is killed, so nothing it left outlives the run', async () => {
+        // Given - a check registered first, so it runs after the adapter's own hook: by then the grandchild is gone, with no grace of its own
+        const folder = mkdtempSync(join(tmpdir(), 'exec-adapter-'));
+        const pidFile = join(folder, 'pid');
+        onTestFinished(async () => {
+            const pid = Number(readFileSync(pidFile, 'utf8'));
+            await waitUntil(() => !processAlive(pid), {
+                timeout: 500,
+                why: `the grandchild ${pid}, deaf to SIGTERM, is gone`,
+            });
+            rmSync(folder, { force: true, recursive: true });
+        });
+        const adapter = new ExecAdapter('sh');
+
+        // When - a command leaves a grandchild that ignores SIGTERM behind, writes its pid to a file and exits
+        const result = await adapter.exec(
+            `-c "(trap '' TERM; exec sleep 60) </dev/null >/dev/null 2>&1 & echo \\$! > '${pidFile}'"`,
+            process.cwd(),
+        );
+
+        // Then - the run ended cleanly; the hook above judges the grandchild
+        expect(result.exitCode).toBe(0);
+    });
 });
