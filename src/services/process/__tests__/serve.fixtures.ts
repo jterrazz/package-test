@@ -17,6 +17,9 @@ export function serving(status: number): string {
     return `node -e "require('node:http').createServer(async(q,r)=>{await fetch(process.env.REPORT+q.url).catch(()=>{});r.writeHead(${String(status)},{location:'http://127.0.0.1:9/'}).end()}).listen(Number(process.env.PORT),'127.0.0.1')"`;
 }
 
+/** Listens on the `PORT` it is handed, after `DELAY` milliseconds, and answers the `ID` it is handed. */
+export const ANSWERS_ID = `node -e "setTimeout(()=>require('node:http').createServer((q,r)=>r.end(process.env.ID)).listen(Number(process.env.PORT),'127.0.0.1'),Number(process.env.DELAY))"`;
+
 /** Never binds what it is handed: reports the port it got and stays up. */
 export const PRINTS_HANDED = `node -e "console.log('handed '+process.env.PORT);setInterval(()=>{},1000)"`;
 

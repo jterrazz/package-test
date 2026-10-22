@@ -1,7 +1,10 @@
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, onTestFinished, test } from 'vitest';
 
+import { findFreePort } from '../listening.js';
+import { DRAWN_PORTS } from '../port-reservation.js';
 import { processService } from '../process.adapter.js';
 import type { ProcessHandle } from '../process.adapter.js';
+import { ANSWERS_ID } from './serve.fixtures.js';
 
 // invariant: binds the port the OS hands it and announces it: no spec picks a port.
 const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(process.env.GREETING ?? 'ok'));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
@@ -13,6 +16,14 @@ afterEach(async () => {
     await started?.shutdown();
     started = null;
 });
+
+async function shutdown(handles: ProcessHandle[]): Promise<void> {
+    await Promise.all(
+        handles.map(async (handle) => {
+            await handle.shutdown();
+        }),
+    );
+}
 
 describe('process.adapter', () => {
     test('process — the one shape an external process takes — comes up on the port it bound, and answers', async () => {
@@ -107,5 +118,77 @@ describe('process.adapter', () => {
                 ].join('\n'),
             ),
         );
+    });
+
+    test('process — many started at once — are each handed a port of their own, below the range the OS hands unasked ports from, and each is ready on its own answer', async () => {
+        // Given - processes started together, each slow to bind and answering an id of its own
+        const handles = Array.from({ length: 16 }, (_, index) =>
+            processService({
+                command: ANSWERS_ID,
+                env: { DELAY: '200', ID: String(index) },
+                timeout: 10_000,
+            }),
+        );
+        onTestFinished(async () => {
+            await shutdown(handles);
+        });
+
+        // When - all of them start at once
+        await Promise.all(
+            handles.map(async (handle, index) => {
+                await handle.spawnWith(process.cwd(), {}, `run-many-${String(index)}`);
+            }),
+        );
+
+        // Then - no port was handed twice, none from the OS's range, and each url answers its own process
+        const ports = handles.map((handle) => Number(new URL(handle.url).port));
+        const answers = await Promise.all(
+            handles.map(async (handle) => {
+                const answer = await fetch(handle.url);
+                return await answer.text();
+            }),
+        );
+        expect([
+            new Set(ports).size,
+            ports.every((port) => port >= DRAWN_PORTS.first && port <= DRAWN_PORTS.last),
+            answers,
+        ]).toStrictEqual([16, true, handles.map((_, index) => String(index))]);
+    }, 20_000);
+
+    test('process — two pinning one port at once — the second is refused before its command runs, and the first serves', async () => {
+        // Given - one free port, pinned by two processes slow to bind it
+        const port = await findFreePort();
+        const handles = [0, 1].map((index) =>
+            processService({
+                command: ANSWERS_ID,
+                env: { DELAY: '300', ID: String(index) },
+                port,
+                timeout: 5000,
+            }),
+        );
+        onTestFinished(async () => {
+            await shutdown(handles);
+        });
+
+        // When - both start at once
+        const outcomes = await Promise.allSettled(
+            handles.map(async (handle) => {
+                await handle.spawnWith(process.cwd(), {}, 'run-pinned');
+            }),
+        );
+
+        // Then - one is ready on the port, the other refused naming it
+        const refusals = outcomes.flatMap((outcome) =>
+            outcome.status === 'rejected' ? [String(outcome.reason)] : [],
+        );
+        expect([
+            outcomes.filter((outcome) => outcome.status === 'fulfilled').length,
+            refusals,
+        ]).toStrictEqual([
+            1,
+            [
+                `Error: found: specification.process(): port ${String(port)}, which \`port\` pins, is reserved by another served process on this machine.\nCommand: ${ANSWERS_ID}\nOutput:\n\nwhy: A port is one served process's at a time, and a server sharing it would answer in the other's place.\nfix: drop the \`port\` option so each process is handed a free one, or run the specifications that pin it one at a time\nread: docs/reference/services.md#process-the-one-shape-an-external-process-takes`,
+            ],
+        ]);
     });
 });

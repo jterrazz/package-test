@@ -5,10 +5,12 @@ import { resolve as resolvePath } from 'node:path';
 
 import { untilDeadline } from '../../chain/pause.js';
 import { refusal } from '../../chain/refusals/refusal.js';
-import { findFreePort, firstAnswering } from './listening.js';
+import { firstAnswering } from './listening.js';
 import { OutputChange } from './output-change.js';
 import { lessonOf, refuseHeldPort } from './port-in-use.js';
 import type { Lesson } from './port-in-use.js';
+import { reservePort } from './port-reservation.js';
+import type { Reservation } from './port-reservation.js';
 import { endGroup, reaped, REAPER, SIGNALS_GROUPS, WATCHDOG } from './process-group.js';
 import type { Strays } from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
@@ -46,7 +48,7 @@ export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
 
-/** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`; both reap the strays it declares, the processes it spawns outside its group. */
+/** Any HTTP status counts as ready, since the port it is handed is reserved for it until `stop()`: no other served process is handed it, and no socket is handed it by chance. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`; both reap the strays it declares, the processes it spawns outside its group. */
 export class ServedProcess {
     port: null | number = null;
     private child: ChildProcess | null = null;
@@ -54,6 +56,7 @@ export class ServedProcess {
     private readonly extraEnv: Record<string, string>;
     private readonly specification: string;
     private readonly options: ProcessOptions;
+    private reservation: null | Reservation = null;
     // Stryker disable next-line BooleanLiteral: spawnServer sets it before any read
     private exited = false;
     private output = '';
@@ -80,7 +83,7 @@ export class ServedProcess {
         this.runBefore();
         const banner = this.options.ready instanceof RegExp ? this.options.ready : null;
         // invariant: banner mode: the server picks and announces the port, nothing is injected as `PORT`.
-        const port = banner ? null : (this.options.port ?? (await findFreePort()));
+        const port = banner ? null : await this.reserve();
         this.spawnServer(port);
         const url = banner ? await this.awaitBanner(banner) : await this.awaitAnswer(port ?? 0);
 
@@ -92,6 +95,15 @@ export class ServedProcess {
                 why: 'A process is handed to the chain once it is ready, and one that exits never is.',
             }))
         );
+    }
+
+    private async reserve(): Promise<number> {
+        const reserved = await reservePort(this.options.port);
+        if ('release' in reserved) {
+            this.reservation = reserved;
+            return reserved.port;
+        }
+        return await this.refuse(reserved);
     }
 
     // invariant: `before` and the server read one environment, the declared `env` included; the server's carries its port beside it.
@@ -260,6 +272,8 @@ export class ServedProcess {
     }
 
     async stop(): Promise<void> {
+        this.reservation?.release();
+        this.reservation = null;
         const { child } = this;
         if (!child) {
             return;
