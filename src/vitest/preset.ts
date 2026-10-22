@@ -80,8 +80,17 @@ function rootExcludeBeside(projects: TestProjectConfiguration[], exclude: string
 }
 
 // outside: Vitest resolves each project as its own config: nothing is inherited from the root `test` block.
-function withProjectDefaults(project: TestProjectConfiguration): TestProjectConfiguration {
-    return isInline(project) ? onProjectDefaults(project) : project;
+// outside: a project with its own Vite server evaluates the config file again, and each evaluation reads the capacity as it is then; vitest refuses one group of two worker counts, so every project states the root's one read.
+function withProjectDefaults(
+    project: TestProjectConfiguration,
+    maxWorkers: number | string | undefined,
+): TestProjectConfiguration {
+    return isInline(project)
+        ? (mergeConfig(
+              { test: { maxWorkers } },
+              onProjectDefaults(project),
+          ) as TestProjectInlineConfiguration)
+        : project;
 }
 
 export function presetConfig(stated: ViteUserConfig = {}): ViteUserConfig {
@@ -92,7 +101,9 @@ export function presetConfig(stated: ViteUserConfig = {}): ViteUserConfig {
         return { ...merged, test: root };
     }
 
-    const inline = projects.map(withProjectDefaults);
+    const inline = projects.map((project): TestProjectConfiguration =>
+        withProjectDefaults(project, root.maxWorkers),
+    );
     return {
         ...merged,
         test: {

@@ -81,6 +81,28 @@ describe('preset', () => {
         expect(() => presetConfig()).toThrow(CAPACITY_VARIABLE);
     });
 
+    test("presetConfig() — workers — states the run's one read on every inline project, which vitest may resolve by evaluating the config again", () => {
+        // Given - a run handed three cpus, of a project stating no count and one stating its own
+        vi.stubEnv(CAPACITY_VARIABLE, 'cpus=3,memory=64g');
+        const config = presetConfig({
+            test: {
+                projects: [
+                    { test: { include: ['src/a.test.ts'], name: 'unit' } },
+                    { test: { include: ['specs/b.spec.ts'], maxWorkers: 1, name: 'alone' } },
+                ],
+            },
+        });
+
+        // Then - the first carries the count the run read, the second keeps its own
+        expect(
+            (config.test?.projects ?? []).map((project) =>
+                typeof project === 'object' && 'test' in project
+                    ? project.test?.maxWorkers
+                    : undefined,
+            ),
+        ).toStrictEqual([3, 1]);
+    });
+
     test('presetConfig() — artefact paths — gives a project the attachments directory too', () => {
         // Given - a config with one inline project
         const config = presetConfig({
