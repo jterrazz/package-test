@@ -5,6 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 import {
     ATTACHMENTS_DIR,
     COVERAGE_DIR,
+    MODULE_CACHE_DIR,
     NODE_COMPILE_CACHE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
@@ -45,6 +46,17 @@ describe('preset', () => {
                 path.startsWith(VITEST_ARTIFACTS_DIR),
             ),
         ).toBe(true);
+    });
+
+    test("presetConfig() — artefact paths — keeps vitest's module cache under the run's own .artifacts/vitest, never the workspace root's node_modules", () => {
+        // Given - the preset alone, as each member of a monorepo reads it
+        const config = presetConfig();
+
+        // Then - a path relative to the run's root, inside the artefact folder
+        expect([
+            config.test?.fsModuleCachePath,
+            MODULE_CACHE_DIR.startsWith(`${VITEST_ARTIFACTS_DIR}/`),
+        ]).toStrictEqual([MODULE_CACHE_DIR, true]);
     });
 
     test('presetConfig() — artefact paths — names the blob of a shard for its shard, so the shards of one run land side by side', () => {

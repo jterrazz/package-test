@@ -9,6 +9,9 @@ export const VITEST_ARTIFACTS_DIR = `${ARTIFACTS_DIR}/vitest`;
 
 export const COVERAGE_DIR = `${VITEST_ARTIFACTS_DIR}/coverage`;
 
+/** Vitest's transformed-module cache, which it would share at the workspace root's `node_modules/.vitest-cache` between the members of a monorepo running side by side. */
+export const MODULE_CACHE_DIR = `${VITEST_ARTIFACTS_DIR}/modules`;
+
 export const SQLITE_TEMPLATE_DIR = `${VITEST_ARTIFACTS_DIR}/sqlite`;
 
 /** Attachments and Browser Mode failure screenshots, which Vitest 5 would put in `.vitest/`. */

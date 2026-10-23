@@ -10,6 +10,7 @@ import type {
 import {
     BLOB_DIR,
     COVERAGE_DIR,
+    MODULE_CACHE_DIR,
     NODE_COMPILE_CACHE_DIR,
     REPORTER_OUTPUT_FILES,
 } from '../../lint/kit/project/artifacts.js';
@@ -57,12 +58,14 @@ export function reporterOutputFiles(argv: readonly string[]): Record<string, str
 }
 
 // invariant: vitest hands the root `env` to every worker it forks, and a worker to every process it spawns; the path is absolute, since a spawned command runs in its own folder. Vitest drops it under v8 coverage, whose source positions a compile-cached script lacks.
+// invariant: vitest resolves the module cache against the run's root, so each member of a monorepo keeps its own and two running at once never rewrite one folder.
 // invariant: the workers are the toolchain's capacity model's, so a run shares the machine with the gates beside it, and one inside a gate's slice (`TYPESCRIPT_CAPACITY`) stays in it.
 function rootDefaults(): ViteUserConfig {
     return mergeConfig(projectDefaults(), {
         test: {
             coverage: COVERAGE,
             env: { NODE_COMPILE_CACHE: resolve(NODE_COMPILE_CACHE_DIR) },
+            fsModuleCachePath: MODULE_CACHE_DIR,
             maxWorkers: slotsFor(resolve('.'), 'vitest'),
             outputFile: reporterOutputFiles(process.argv),
         },
