@@ -224,7 +224,7 @@ Same semantics as `result.directory(...)`, rooted at the cwd itself. `.files()` 
 
 ## Container subjects (docker-aware cli)
 
-Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`; results must be bound with `await using` (rule `docker-exec-bound-with-await-using`). `result.container(name)` looks a container up by its `nameLabel` value, lazily: no Docker call happens until you touch it. Absent containers return `exists: false` instead of throwing.
+Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`; results must be bound with `await using` (rule `docker-exec-bound-with-await-using`). `result.container(name)` looks a container up by its `nameLabel` value, lazily: no Docker call happens until you touch it. Absent containers return `exists: false` instead of throwing; a name two containers of the run carry is refused, naming each candidate by id and docker name, since reading either would be a guess.
 
 The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.job()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type, so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing. The app of an api spec runs in the test process, but it can still start containers through the Docker daemon, as an API that deploys or provisions something does: the response hands back an id, and `docker(id)` reads the container the request left behind.
 

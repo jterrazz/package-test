@@ -536,7 +536,7 @@ test('destroy removes the container created in an earlier run', async () => {
 });
 ```
 
-Container accessor surface: `exists`, `running`/`toBeRunning`, `status`, `id`, `file(path)` (content read inside the container), `exec(cmd)` (returns stdout/stderr), `stdout`/`stderr` (container logs). Looking up an absent container returns `exists: false` instead of throwing. `result.containerIds` lists every container captured for the run.
+Container accessor surface: `exists`, `running`/`toBeRunning`, `status`, `id`, `file(path)` (content read inside the container), `exec(cmd)` (returns stdout/stderr), `stdout`/`stderr` (container logs). Looking up an absent container returns `exists: false` instead of throwing, and a name two containers of the run carry is refused ([Assertions § Container subjects](../reference/assertions.md#container-subjects-docker-aware-cli)). `result.containerIds` lists every container captured for the run.
 
 The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(containerId)` reader is the escape hatch for reading an **arbitrary** container by raw id (e.g. one a follow-up command referenced): it lazily runs `docker inspect` and returns the same `ContainerAccessor` type, so `await expect(docker(id)).toBeRunning()` and the sync reads work identically. Unlike `result.container(name)` it does not need `nameLabel`: it looks up by id directly; an unknown id yields `exists: false`.
 

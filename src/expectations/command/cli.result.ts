@@ -82,7 +82,7 @@ export class CliResult extends BaseResult {
     private readonly commandOutput: CliOutput;
     /** The working directory the command ran in: a command always runs in one. */
     private readonly cwd: string;
-    private containersCache: Map<string, CapturedContainer> | null = null;
+    private containersCache: Map<string, CapturedContainer[]> | null = null;
     private readonly dockerConfig?: DockerSpecConfig | undefined;
     private readonly received: readonly SentRequest[];
     private readonly containers: RunContainers;
@@ -148,18 +148,28 @@ export class CliResult extends BaseResult {
         return this.received.map((request) => ({ ...request, headers: { ...request.headers } }));
     }
 
-    /** A container the command spawned, by its name-label; `.exists` is `false` when none carries it. */
+    /** A container the command spawned, by its name-label; `.exists` is `false` when none carries it, and two carrying it are refused. */
     container(name: string): ContainerAccessor {
-        const captured = this.capturedContainers('container').get(name);
+        const [captured, ...others] = this.capturedContainers('container').get(name) ?? [];
         if (!captured) {
             return containerAt(null, null, this.testDir, this.transform);
+        }
+        if (others.length > 0) {
+            throw new Error(
+                refusal({
+                    fix: 'give each container of the run its own name-label value, or read them by id: `result.containerIds`, then `docker(id)`',
+                    found: `CliResult.container('${name}'), which ${String(others.length + 1)} containers of the run carry: ${[captured, ...others].map(described).join(', ')}`,
+                    read: 'docs/guides/cli-specs.md#docker-aware-mode',
+                    why: 'A name reads one container, and two carrying it leave which one unsaid.',
+                }),
+            );
         }
         return containerAt(captured.id, captured.inspect, this.testDir, this.transform);
     }
 
     /** All captured container IDs. Triggers the same lazy query as `container()`. */
     get containerIds(): string[] {
-        return [...this.capturedContainers('containerIds').values()].map((c) => c.id);
+        return [...this.capturedContainers('containerIds').values()].flat().map((c) => c.id);
     }
 
     async [Symbol.asyncDispose](): Promise<void> {
@@ -170,11 +180,11 @@ export class CliResult extends BaseResult {
         const ids =
             this.containersCache === null
                 ? this.containers.labelled(this.dockerConfig.testRunLabel, this.testRunId)
-                : [...this.containersCache.values()].map((c) => c.id);
+                : [...this.containersCache.values()].flat().map((c) => c.id);
         this.containers.remove(ids);
     }
 
-    private capturedContainers(member: string): ReadonlyMap<string, CapturedContainer> {
+    private capturedContainers(member: string): ReadonlyMap<string, readonly CapturedContainer[]> {
         if (!this.dockerConfig || this.testRunId === undefined || this.testRunId === '') {
             throw new Error(
                 refusal({
@@ -189,7 +199,7 @@ export class CliResult extends BaseResult {
             return this.containersCache;
         }
         const { nameLabel, testRunLabel } = this.dockerConfig;
-        const map = new Map<string, CapturedContainer>();
+        const map = new Map<string, CapturedContainer[]>();
         for (const id of this.containers.labelled(testRunLabel, this.testRunId)) {
             let inspect: unknown;
             try {
@@ -199,11 +209,17 @@ export class CliResult extends BaseResult {
             }
             const nameValue = labelsOf(inspect)[nameLabel];
             const key = typeof nameValue === 'string' && nameValue.length > 0 ? nameValue : id;
-            map.set(key, { id, inspect });
+            map.set(key, [...(map.get(key) ?? []), { id, inspect }]);
         }
         this.containersCache = map;
         return map;
     }
+}
+
+// outside: docker inspect names a container `/<name>`.
+function described({ id, inspect }: CapturedContainer): string {
+    const name = fieldOf(inspect, 'Name', 'name');
+    return typeof name === 'string' ? `${id} (${name.replace(/^\//u, '')})` : id;
 }
 
 function labelsOf(inspect: unknown): Readonly<Record<string, unknown>> {

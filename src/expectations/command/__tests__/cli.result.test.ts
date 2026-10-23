@@ -159,6 +159,40 @@ describe('CliResult', () => {
         ]);
     });
 
+    test('cli.result — the containers it spawned — a name two of them carry is refused naming both, and both are still listed', () => {
+        // Given - a run whose label two containers named world carry, one of them with a docker name, beside one named api
+        const inspected: Record<string, unknown> = {
+            a1: { Config: { Labels: { 'test.name': 'api' } } },
+            w1: { Config: { Labels: { 'test.name': 'world' } }, Name: '/world-baseline' },
+            w2: { Config: { Labels: { 'test.name': 'world' } } },
+        };
+        const result = resultOf('', {
+            containers: {
+                inspect: (id) => inspected[id],
+                labelled: () => ['a1', 'w1', 'w2'],
+                remove: () => undefined,
+            },
+            testRunId: 'run-1',
+            withDocker: true,
+        });
+
+        // Then - the shared name is refused with its candidates, the single one read, and every id listed
+        expect(() => result.container('world')).toThrow(
+            new Error(
+                [
+                    "found: CliResult.container('world'), which 2 containers of the run carry: w1 (world-baseline), w2",
+                    'why: A name reads one container, and two carrying it leave which one unsaid.',
+                    'fix: give each container of the run its own name-label value, or read them by id: `result.containerIds`, then `docker(id)`',
+                    'read: docs/guides/cli-specs.md#docker-aware-mode',
+                ].join('\n'),
+            ),
+        );
+        expect([result.container('api').id, result.containerIds]).toStrictEqual([
+            'a1',
+            ['a1', 'w1', 'w2'],
+        ]);
+    });
+
     test('cli.result — the containers it spawned — removed on dispose: the ones read, else every one the run labelled, and none without docker', async () => {
         // Given - a result whose containers were read, one whose were not, one with no docker option, and one with no run id
         const log: string[] = [];
