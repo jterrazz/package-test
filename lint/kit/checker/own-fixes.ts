@@ -2,9 +2,11 @@ import {
     GROUND_FOLDERS,
     OXLINT_CONFIG_NAMES,
     OXLINT_SUPPRESSIONS,
+    treeEntries,
+    treeNames,
 } from '@jterrazz/typescript/rules';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { PRUNED_WITH_OUTPUTS } from '../project/module-tests.js';
@@ -135,16 +137,17 @@ function configIn(directory: string, names: readonly string[]): string | undefin
     return name === undefined ? undefined : join(directory, name);
 }
 
-/** The outermost of each subtree, which covers the ones inside it. */
+/** The outermost of each subtree, which covers the ones inside it, found as git lists the tree, so a folder git ignores is never entered and a config inside it never loaded. */
 export function nestedConfigDirectories(root: string): string[] {
     const found: string[] = [];
     const walk = (directory: string): void => {
-        for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        for (const entry of treeEntries(directory)) {
             if (!entry.isDirectory() || UNWALKED.has(entry.name)) {
                 continue;
             }
             const path = join(directory, entry.name);
-            if (NESTED_CONFIG_NAMES.some((name) => existsSync(join(path, name)))) {
+            const names = treeNames(path);
+            if (NESTED_CONFIG_NAMES.some((name) => names.includes(name))) {
                 found.push(relative(root, path));
             } else {
                 walk(path);

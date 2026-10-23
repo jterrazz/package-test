@@ -1,4 +1,5 @@
 import { OXLINT_CONFIG_NAMES } from '@jterrazz/typescript/rules';
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -208,6 +209,35 @@ describe('own-fixes', () => {
         );
         expect(readFileSync(join(root, 'sub', 'deeper', 'wrapper.mjs'), 'utf8')).toBe(
             ownFixesConfig(join(root, 'sub', 'deeper', '.oxlintrc.json')),
+        );
+    });
+
+    test('own-fixes — a folder git ignores is never entered, so a config below a seal that ignores its clones is never loaded', () => {
+        // Given - a git repository whose sealed work/ ignores the clones under it, one of them and one ignored folder holding a config that throws on load
+        const broken = "throw new Error('loaded');\n";
+        const root = projectWith({
+            '.gitignore': 'ignored/\nnode_modules/\nargs.txt\ncwds.txt\n',
+            'ignored/oxlint.config.ts': broken,
+            'oxlint.config.mjs': 'export default {};\n',
+            'work/.gitignore': 'repositories\n',
+            'work/.oxlintrc.json': '{}\n',
+            'work/repositories/clone/oxlint.config.ts': broken,
+            'work/repositories/clone/package.json': '{}\n',
+        });
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+        stubOxlint(
+            root,
+            1,
+            `node --input-type=module -e "await import('./${OWN_FIXES_WRAPPER}')" 2>/dev/null || echo 'Failed to load config'`,
+        );
+
+        // When - the pass runs
+        applyOwnFixes(root);
+
+        // Then - the seal gets a run of its own, and nothing beneath it or in the ignored folder is reached
+        expect(nestedConfigDirectories(root)).toStrictEqual(['work']);
+        expect(readFileSync(join(root, 'cwds.txt'), 'utf8')).toBe(
+            [realpathSync(root), join(realpathSync(root), 'work'), ''].join('\n'),
         );
     });
 
