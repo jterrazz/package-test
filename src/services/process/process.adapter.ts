@@ -18,7 +18,7 @@ export type ProcessOptions = {
         | Record<string, string>;
     /** Fixed port. Default: an OS-assigned free port, injected as `PORT`. */
     port?: number;
-    /** Readiness: a path polled until any HTTP status answers (`PORT` injected), or a regex over the output whose one group captures the port. */
+    /** Readiness: a path polled until any HTTP status answers from the command's own process group (`PORT` injected), or a regex over the output whose one group captures the port. */
     ready?: RegExp | string;
     /** Readiness budget in milliseconds. Default 30 000. */
     timeout?: number;

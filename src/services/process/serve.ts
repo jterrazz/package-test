@@ -5,9 +5,10 @@ import { resolve as resolvePath } from 'node:path';
 
 import { untilDeadline } from '../../chain/pause.js';
 import { refusal } from '../../chain/refusals/refusal.js';
+import { childOwnsPort } from './listener-owner.js';
 import { firstAnswering } from './listening.js';
 import { OutputChange } from './output-change.js';
-import { lessonOf, refuseHeldPort } from './port-in-use.js';
+import { foreignAnswer, lessonOf, refuseHeldPort } from './port-in-use.js';
 import type { Lesson } from './port-in-use.js';
 import { reservePort } from './port-reservation.js';
 import type { Reservation } from './port-reservation.js';
@@ -48,7 +49,7 @@ export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
 
-/** Any HTTP status counts as ready, since the port it is handed is reserved for it until `stop()`: no other served process is handed it, and no socket is handed it by chance. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`; both reap the strays it declares, the processes it spawns outside its group. */
+/** Any HTTP status counts as ready once a process of the child's own group listens on the port, and none outside it: the port it is handed is reserved for it until `stop()`, so no other served process is handed it, and an unrelated server that took it meanwhile is refused rather than read as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`; both reap the strays it declares, the processes it spawns outside its group. */
 export class ServedProcess {
     port: null | number = null;
     private child: ChildProcess | null = null;
@@ -202,14 +203,23 @@ export class ServedProcess {
         // Stryker disable next-line StringLiteral: a URL with no path asks for the root all the same
         const path = typeof this.options.ready === 'string' ? this.options.ready : '/';
         const seen = await untilDeadline(
-            async () =>
-                this.exited
-                    ? 'exited'
-                    : await firstAnswering(baseUrls.map((baseUrl) => `${baseUrl}${path}`)),
+            async () => {
+                if (this.exited) {
+                    return 'exited';
+                }
+                const answered = await firstAnswering(
+                    baseUrls.map((baseUrl) => `${baseUrl}${path}`),
+                );
+                const owned = answered === undefined || (await childOwnsPort(port, this.child));
+                return owned === false ? 'foreign' : answered;
+            },
             { interval: READY_POLL_INTERVAL_MS, timeout: this.timeout() },
         );
         if (seen === 'exited') {
             return null;
+        }
+        if (seen === 'foreign') {
+            return await this.refuse(foreignAnswer(port));
         }
         if (seen === undefined) {
             return await this.refuse({

@@ -20,6 +20,9 @@ export function serving(status: number): string {
 /** Listens on the `PORT` it is handed, after `DELAY` milliseconds, and answers the `ID` it is handed. */
 export const ANSWERS_ID = `node -e "setTimeout(()=>require('node:http').createServer((q,r)=>r.end(process.env.ID)).listen(Number(process.env.PORT),'127.0.0.1'),Number(process.env.DELAY))"`;
 
+/** Hands the `PORT` it is handed to a server in a process group of its own, prints that server's pid, and stays up. */
+export const HANDS_PORT_AWAY = `node -e "const c=require('node:child_process').spawn(process.execPath,['-e','require(\\'node:http\\').createServer((q,r)=>r.end()).listen(Number(process.env.PORT),\\'127.0.0.1\\')'],{detached:true,stdio:'ignore'});c.unref();console.log('away '+c.pid+' '+process.env.PORT);setInterval(()=>{},1000)"`;
+
 /** Never binds what it is handed: reports the port it got and stays up. */
 export const PRINTS_HANDED = `node -e "console.log('handed '+process.env.PORT);setInterval(()=>{},1000)"`;
 

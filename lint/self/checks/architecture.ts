@@ -16,6 +16,7 @@ const SPAWNING_SITES = [
     'specifications/lint/local-linters.adapter.ts',
     'specifications/mobile/server/simulator.ts',
     'services/containers/docker-cli.ts',
+    'services/process/listener-owner.ts',
     'services/process/serve.ts',
 ];
 

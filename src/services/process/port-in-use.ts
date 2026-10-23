@@ -22,6 +22,14 @@ export function lessonOf(reason: Lesson, output: string, port: number | undefine
     };
 }
 
+export function foreignAnswer(port: number): Lesson {
+    return {
+        fix: 'stop the process holding that port, or announce the port with a `ready` pattern if the server runs outside the command (a container, a daemon)',
+        found: `port ${String(port)} answered, and a process the command did not start listens on it`,
+        why: 'A process is ready once its own server answers, and an answer from another process on its port is not one.',
+    };
+}
+
 // hazard: a port another process holds answers the readiness probe in the server's place (a developer's own `astro dev` on 4321).
 export async function refuseHeldPort(
     port: number | undefined,

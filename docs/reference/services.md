@@ -84,7 +84,7 @@ export const { cleanup, website } = await specification.website({
 
 **A port is one process's at a time.** The port handed as `PORT` is drawn between 10000 and 32767, below the range every OS hands unasked ports from (a `listen(0)`, a stub's port, an outgoing connection), so no other socket is handed it by chance while the command starts. It is reserved from the draw until the process stops, against every served process of the machine whatever run started it, so files running in parallel never share one; a draw that finds no free port in 64 tries is refused. A `port` two processes pin at once is held by the first, and the second is refused before its command runs.
 
-**Any status the `ready` path answers is the server's.** Nothing else can answer on a port reserved that way: the one process that could is one started by hand on that very number while the command starts.
+**Any status the `ready` path answers is the server's, once the server is proved to be the one answering.** On Linux and macOS an answer counts only while every listener of the port this run can see is in the command's process group: a process outside it (one started by hand on that very number while the command starts, a server the command detached, a container's port forward) is refused at once, naming the port, never read as ready. A server that rightly runs outside the group announces its port instead, with a `ready` pattern. Elsewhere the answer is taken as the server's.
 
 **Its URL is known once it is ready.** `url` read at declaration time is refused: a process started beside others reads theirs from the started services record: `env: (services) => ...`, `server: (services) => ...`.
 
