@@ -32,7 +32,8 @@ export default defineConfig({
                     include: ['specs/cli/run/*.spec.yaml'],
                     runner: './specs/cli/literate-cli.specification.ts',
                 },
-                reason: 'the documents under run/ drive the literate specimen through its own runner, and those under env/ and fixture/ are the input of the specs proving those keys',
+                reason: 'the documents under run/ drive the literate specimen through its own runner, and those under env/ and fixture/ are the input of the specs proving those keys; the Go specimen is built once per run, since every runner module runs again before each file of every worker',
+                setup: ['specs/cli/__setup__/go/per-run.ts'],
             },
             component: {
                 clock: '2026-01-02T03:04:05.000Z',
