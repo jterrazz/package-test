@@ -24,7 +24,6 @@ describe('pages', () => {
             docs/guides/api-specs.md: held
             docs/guides/cli-specs.md: held
             docs/guides/component-specs.md: held
-            docs/guides/deployment-specs.md: held
             docs/guides/integration-specs.md: held
             docs/guides/job-specs.md: held
             docs/guides/lint-specs.md: held

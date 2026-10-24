@@ -1,8 +1,8 @@
 import type { Composition } from '../../../src/chain/define-specification.js';
 import { apiDefinition } from '../../../src/specifications/api/api.composition.js';
+import { apiDeployedDefinition } from '../../../src/specifications/api/deployed/deployed.composition.js';
 import { cliDefinition } from '../../../src/specifications/cli/cli.composition.js';
 import { componentDefinition } from '../../../src/specifications/component/component.composition.js';
-import { deploymentDefinition } from '../../../src/specifications/deployment/deployment.composition.js';
 import { integrationDefinition } from '../../../src/specifications/integration/integration.composition.js';
 import { jobDefinition } from '../../../src/specifications/job/job.composition.js';
 import { lintDefinition } from '../../../src/specifications/lint/lint.composition.js';
@@ -12,12 +12,20 @@ import type { Column } from './specification-matrix.js';
 
 type MatrixRow = Composition['options'][string];
 
+// invariant: an api is built here or deployed at a url, and its column declares what either target offers.
+function both(served: Composition, deployed: Composition): Composition {
+    return {
+        actions: [...served.actions, ...deployed.actions],
+        capabilities: [...served.capabilities, ...deployed.capabilities],
+        options: { ...served.options, ...deployed.options },
+    };
+}
+
 /** It imports the specifications themselves, so only this package's own tooling loads it. */
 export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
-    api: apiDefinition.composition,
+    api: both(apiDefinition.composition, apiDeployedDefinition.composition),
     cli: cliDefinition.composition,
     component: componentDefinition.composition,
-    deployment: deploymentDefinition.composition,
     integration: integrationDefinition.composition,
     job: jobDefinition.composition,
     lint: lintDefinition.composition,

@@ -2,13 +2,12 @@ import { describe, expect, test } from 'vitest';
 
 import type { CliResult } from '../../../../src/expectations/command/cli.result.js';
 import type { JobResult, LintResult } from '../../../../src/index.js';
-import type { HttpResult } from '../../../../src/specifications/api/api.face.js';
+import type { ExchangeResult, HttpResult } from '../../../../src/specifications/api/api.face.js';
 import type { RouteOptionsAny } from '../../../../src/specifications/api/request/route.js';
 import type {
     ComponentVisitor,
     RenderResult,
 } from '../../../../src/specifications/component/component.face.js';
-import type { ExchangeResult } from '../../../../src/specifications/deployment/deployment.face.js';
 import type { CallResult } from '../../../../src/specifications/integration/integration.face.js';
 import type { MobileElementKind } from '../../../../src/specifications/mobile/device/device.port.js';
 import type {
@@ -39,7 +38,6 @@ const SPECIFICATION_COLUMNS = [
     'api',
     'cli',
     'component',
-    'deployment',
     'integration',
     'job',
     'lint',
@@ -146,12 +144,8 @@ const fetchResult = {
     table: NO_DISK,
 } satisfies Record<keyof FetchResult, Published>;
 
-const deploymentResult = {
-    captures: INTERNAL,
-    directory: NO_DISK,
-    file: NO_DISK,
+const deployedResult = {
     response: true,
-    table: NO_DISK,
     tls: true,
 } satisfies Record<keyof ExchangeResult, Published>;
 
@@ -182,10 +176,9 @@ const componentResult = {
 } satisfies Record<keyof RenderResult, Published>;
 
 const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = {
-    api: [apiResult],
+    api: [apiResult, deployedResult],
     cli: [cliResult],
     component: [componentResult],
-    deployment: [deploymentResult],
     integration: [integrationResult],
     job: [jobResult],
     lint: [lintResult],

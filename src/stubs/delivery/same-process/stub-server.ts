@@ -13,6 +13,7 @@ async function loadMsw(): Promise<{ msw: Msw; setupServer: () => SetupServer }> 
 }
 
 let serverInstance: null | SetupServer = null;
+let registrations = 0;
 let refuseOffTheWire: ((request: Request) => Response) | null = null;
 
 function offTheWireError(request: Request): Error {
@@ -36,7 +37,7 @@ function guardOffTheWireMethods(): void {
     };
 }
 
-// invariant: once per process.
+// invariant: listening only while a registration holds it: msw takes over every socket the process dials, so a request no chain stubs (a deployed api's, over TLS) reaches the network untouched once the last stubs are released.
 async function ensureStubServer(): Promise<SetupServer> {
     if (serverInstance !== null) {
         return serverInstance;
@@ -58,18 +59,35 @@ export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistr
     refuseOffTheWire = (request) =>
         refuse(offTheWireError(request), `unreadable request ${request.method} ${request.url}`);
 
+    registrations += 1;
+    let released = false;
+
     return {
         cleanup: () => {
+            if (released) {
+                return;
+            }
+            released = true;
             refuseOffTheWire = null;
             server.resetHandlers();
+            registrations -= 1;
+            if (registrations === 0) {
+                closeServer();
+            }
         },
         violation,
     };
 }
 
-export async function stopStubServer(): Promise<void> {
+function closeServer(): void {
     if (serverInstance !== null) {
         serverInstance.close();
         serverInstance = null;
     }
+}
+
+export async function stopStubServer(): Promise<void> {
+    registrations = 0;
+    closeServer();
+    await Promise.resolve();
 }

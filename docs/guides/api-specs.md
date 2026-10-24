@@ -1,6 +1,6 @@
 # API specs (`specification.api`)
 
-`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the real services the runner started, so a request reaches it without a socket, and a stub, a clock and a golden all mean something because the app shares this process's world.
+`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the real services the runner started, so a request reaches it without a socket, and a stub, a clock and a golden all mean something because the app shares this process's world. Or it is **already deployed**, named by its `url`, and each request crosses the network to it ([Deployed target (`url`)](#deployed-target-url)): the subject is the same HTTP API, and where it runs is an option, as a website is started by `server` or met at a `url`.
 
 Use it when the subject under test is an HTTP surface. For background pipelines use [job](job-specs.md); for binaries use [cli](cli-specs.md).
 
@@ -17,7 +17,7 @@ An api spec answers one question: **given this state and this request, what does
 | What it proves     | Application logic against real databases, caches and processes                                         |
 | Parallel isolation | Per-worker schema / db-index / file copy (rule `state-isolated-per-worker`)                            |
 
-Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does (its Dockerfile, its wiring, its networking) is a deployment probe, and this specification does not claim it: probe the running deployment with [`specification.deployment()`](deployment-specs.md).
+Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does (its Dockerfile, its wiring, its networking, its certificate) is met at its `url` instead ([Deployed target (`url`)](#deployed-target-url)), where no stub, no clock and no seed reaches it.
 
 A `postgres()` service runs `docker/<service>/init.sql` when it starts, under the kebab-case of its record key; `sqlite()` takes its schema from its own `init` or `prismaSchema` option instead ([Services](../reference/services.md#dockerserviceinitsql)).
 
@@ -64,8 +64,18 @@ afterAll(async () => {
 | Option     | Required                     | Description                                                                                                                                      |
 | ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `services` | yes (if the app needs infra) | Named record of service factories (`postgres()`, `redis()`, `sqlite()`). Keys are your test vocabulary; see [services](../reference/services.md) |
-| `server`   | yes                          | `(services) => app`: receives the started services record, fully typed (rule `server-sees-declared-services`)                                    |
+| `server`   | yes, or `url`                | `(services) => app`: receives the started services record, fully typed (rule `server-sees-declared-services`)                                    |
+| `url`      | yes, or `server`             | The deployed api's base URL: its own target, exclusive of `server`, `services` and `root` ([Deployed target (`url`)](#deployed-target-url))      |
 | `root`     | no                           | Override for root resolution, reserved for cases where the convention is not enough (rule `no-redundant-root`)                                   |
+
+Exactly one of `server` and `url` names the app, as with a website: both, neither, an empty `url` or one that is no `http(s)` URL is refused before anything starts, and so are `services` or `root` beside a `url` (a deployed api is wired to its own services) and an option of a deployed api beside a `server`. Against a `url`, four more options shape each request:
+
+| Option            | Default                        | Description                                                                                                                                      |
+| ----------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `timeout`         | `5000`                         | The milliseconds one request may take, connection to last byte, before it reads `unreachable: timeout`. A positive number                        |
+| `insecure`        | `false`                        | Accept a certificate the trust check refuses (self-signed, expired, another host's); `result.tls` still says why                                 |
+| `ca`              | none                           | A certificate authority trusted beside the ones node trusts: its PEM text, a value like any string                                               |
+| `recordedHeaders` | `['content-type', 'location']` | The headers update mode records into a golden that states none yet, those the response carries ([Deployed target (`url`)](#deployed-target-url)) |
 
 ### Root resolution
 
@@ -360,6 +370,165 @@ A route the app takes on any method (`app.all('/mcp', ...)`) is one the member n
 The list is judged whenever the app exposes a route table of its own, an OpenAPI document declared or not; a `server` that is not the Hono app exposes none, and leaves the list unjudged.
 
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](https://github.com/jterrazz/package-test/blob/main/docs/decisions/007-compose-mode-leaves-the-package.md).
+
+## Deployed target (`url`)
+
+An api already deployed (a preview your CI just shipped, every host of a platform, a node's address or a closed port) is the same subject met elsewhere: `url` names it, and each request goes over the network, with no browser. The answer is compared as an in-process one is (the same `result.response`, the same `.http` golden, header subset, `{{tokens}}` and `TEST_UPDATE=1`), and two things only a network has join it: an exchange that never answered is a result, and the certificate it came over is read off `result.tls`. The decision is [ADR-022](https://github.com/jterrazz/package-test/blob/main/docs/decisions/022-a-deployed-api-is-an-api-spec-with-a-url.md).
+
+```typescript
+// specs/api/deployed.specification.ts
+import { specification } from '@jterrazz/test';
+import { afterAll } from 'vitest';
+
+export const { api, cleanup } = await specification.api({
+    url: process.env.DEPLOYED_URL ?? 'https://preview.site.example',
+});
+
+afterAll(cleanup);
+```
+
+The handle destructures to `{ api, cleanup }`, no `docker`: nothing is started, so `cleanup` releases nothing, and it is passed to `afterAll` like every specification's. The transport is node's own `http`, `https`, `tls` and `net`: nothing to install.
+
+### What a deployed chain offers
+
+| Offered                                                    | Not offered, refused by the type and at run time                                                |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `.get(target)`, `.request(<.http text> \| file(...))`      | `.post()`, `.put()`, `.delete()`: a request other than a GET is written whole with `.request()` |
+| `.headers()`, `api.with({ headers })`, `.connect(address)` | `.seed()`, `.intercept()`, `.clock()`: a deployed api's database, network and clock are its own |
+| `result.response`, `result.tls`                            | `result.table()`, `result.file()`, `result.directory()`: what it left behind is its own         |
+
+### The target
+
+Every request names one URL: written whole (`https://grafana.site.example/`), or a path (`/health`) read from `url`, its own path kept (`https://site.example/app` and `/health` are `https://site.example/app/health`). One specification therefore reaches every host of a platform. A target that is neither, and a URL of another scheme, are refused. A request written as `.http` text or in a `__requests__/` file names its URL on the first line, whole (`GET https://site.example/health`, HTTP's absolute form) or as a path; its body is sent as written. A redirect is the answer, never followed:
+
+```typescript
+test('a moved page answers its redirect, never followed', async () => {
+    // Given - the address of the page before the move
+    const result = await api.get('/blog');
+
+    // Then - the 301 itself, and where it points
+    expect(result.response).toMatch(`
+        HTTP/1.1 301 Moved Permanently
+        location: https://site.example/articles
+    `);
+});
+```
+
+### Setup: `.connect()`
+
+`.connect(address)` opens the socket on another address than the URL's, as curl's `--connect-to`: the `Host` header and the TLS server name stay the URL's, so the certificate is checked against the host the URL names. It is how a node's IP, a tailnet address or a NodePort is probed under the name it serves:
+
+```typescript
+test("the node's NodePort serves the public host itself", async () => {
+    // Given - the public URL, its socket opened on the node
+    const result = await api.connect('100.64.0.7:30443').get('https://site.example/health');
+
+    // Then - the same answer the edge gives
+    expect(result.response).toMatch(`
+        HTTP/1.1 200 OK
+        content-type: application/json
+
+        {"status": "ok"}
+    `);
+});
+```
+
+The address is `host:port`, `[v6]:port`, or a bare host, which keeps the URL's port; a later `.connect()` wins. `.headers()` reads a name case-blind, so a `Host` the test names replaces the URL's, the TLS server name staying the URL's as with curl's `-H Host:`: the probe of a public edge asked for an internal host, `api.headers({ Host: 'grafana.internal.example' }).get('https://site.example/')`, compared to `HTTP/1.1 403 Forbidden`. Every request carries `user-agent: @jterrazz/test` unless a header replaces it.
+
+### Unreachable is a result
+
+A request that never answered is never thrown. Its response is the one line `unreachable: <reason>`:
+
+| Reason       | When                                                                                                                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `refused`    | Nothing listens on the port, or a firewall rejects it                                                                                                                                      |
+| `timeout`    | No whole response within `timeout`: a firewall dropping the packets, a server that accepts and never answers                                                                               |
+| `dns`        | No resolver knows the name                                                                                                                                                                 |
+| `reset`      | The connection was cut before the response ended                                                                                                                                           |
+| `no route`   | The network has no way to the address                                                                                                                                                      |
+| `tls <CODE>` | The handshake failed, or the certificate was refused: `tls CERT_HAS_EXPIRED`, `tls DEPTH_ZERO_SELF_SIGNED_CERT`, `tls ERR_TLS_CERT_ALTNAME_INVALID`, `tls UNABLE_TO_VERIFY_LEAF_SIGNATURE` |
+
+So a negative probe is one sentence, with no `try`/`catch` and no "it should throw" that passes when anything throws:
+
+```typescript
+test('the NodePort is closed to the internet', async () => {
+    // Given - the public address, on the port the cluster must not expose
+    const result = await api.connect('203.0.113.10:30080').get('http://site.example/');
+
+    // Then - the firewall drops it
+    expect(result.response).toMatch('unreachable: timeout');
+});
+```
+
+The line is a golden like any other: a reason takes tokens (`unreachable: tls {{string}}` where the code varies by platform), a golden file may hold it, and `TEST_UPDATE=1` writes it. An answer expected where none came, or the reverse, fails naming both outcomes (`Response outcome mismatch`, [Assertions](../reference/assertions.md#resultresponse-http-response-api)).
+
+### `result.tls`: the certificate
+
+Over https, `result.tls` holds what the handshake presented, whether or not it was trusted:
+
+| Fact                 | Description                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `subject`            | The subject's common name                                                          |
+| `altNames`           | The names it is valid for, without their `DNS:` or `IP Address:` prefix            |
+| `issuer`             | The issuer's common name, or its organisation                                      |
+| `validFrom`          | A `Date`                                                                           |
+| `validTo`            | A `Date`                                                                           |
+| `daysRemaining`      | Whole days from the request to `validTo`, negative once expired                    |
+| `covers(host)`       | Whether it is valid for `host`, a wildcard covering one label as a client reads it |
+| `authorized`         | Whether it chains to a trusted authority and covers the URL's host                 |
+| `authorizationError` | The code the trust check refused with, `undefined` when trusted                    |
+| `protocol`           | The TLS version negotiated (`TLSv1.3`)                                             |
+
+```typescript
+test('the certificate covers the host with a month to spare', async () => {
+    // Given - the public host
+    const result = await api.get('https://site.example/');
+
+    // Then - the answer, and the certificate it came over
+    expect(result.response).toMatch('HTTP/1.1 200 OK');
+    expect(result.tls?.covers('site.example')).toBe(true);
+    expect(result.tls?.daysRemaining).toBeGreaterThanOrEqual(30);
+});
+```
+
+A refused certificate reads `unreachable: tls <CODE>` and keeps its facts, so an expired one says by how many days. With `insecure: true` the request goes on over it, and `authorized` and `authorizationError` still say why it would have been refused. A private authority is read by the specification file that names it, `ca: readFileSync(new URL('__fixtures__/ca.pem', import.meta.url), 'utf8')`: the option takes the certificate, not a path.
+
+### Update mode against a url
+
+`TEST_UPDATE=1` writes a deployed golden as it writes any response golden ([Tokens](../reference/tokens.md#update-mode-tokens-are-preserved)), with two differences that keep a probe's golden about the probe: a golden that states nothing yet records the status, the `recordedHeaders` the response carries, and the body; and a golden that states no body keeps stating none, so a long HTML page is not written into a check of its status. An exchange that never answered is written as its one line.
+
+### A platform suite, from the routes it discovers
+
+A conformance suite reads its hosts from the platform when its specification file loads, then asks each one, one row of a `test.each` per host:
+
+```typescript
+// specs/api/routes/answers.spec.ts
+import { describe, expect, test } from 'vitest';
+
+import { api, publicHosts } from '../deployed.specification.js';
+
+describe('answers', () => {
+    test.each(publicHosts)('%s answers over a certificate that covers it', async (host) => {
+        // Given - the host, as the platform routes it
+        const result = await api.get(`https://${host}/`);
+
+        // Then - an answer, and a certificate naming the host with a month to spare
+        expect(result.response).toMatch('HTTP/1.1 {{int}}');
+        expect(result.tls?.covers(host)).toBe(true);
+        expect(result.tls?.daysRemaining).toBeGreaterThanOrEqual(30);
+    });
+});
+```
+
+`publicHosts` is what the specification file read from the cluster (an `IngressRoute` list, a DNS zone), so a host added to the platform is probed with no line of the suite changed. A value written in place under `test.each` is one value for every row, so it holds tokens where rows differ; a golden per host is `toMatch(file(...))` under `__expected__/`. An application repository points the same specification at its own URL and runs `npx vitest --run --project api` after its deploy step, the URL in the environment. Route coverage is the in-process app's: a deployed api exposes no route table, and records no request.
+
+### Pitfalls against a url
+
+- **Probing what the in-process spec proves.** A field of the JSON a handler builds is the app's logic, proven where its database and clock are the test's; against a `url`, keep the golden to what the edge decides.
+- **A deadline longer than the test's.** `timeout` bounds one request, vitest's budget (30 s) the test: a suite of firewalled ports waits the whole `timeout` for each.
+- **An endpoint that streams forever** reads `unreachable: timeout`: probe it with a request the server ends.
+- **A reason read as stable across platforms.** A handshake's failure is named by the TLS library node runs on: `unreachable: tls {{string}}` in a golden meant for every machine.
+- **A proxy in the environment.** `HTTPS_PROXY` is not read: a request goes where its URL or its `.connect()` says.
 
 ## Pitfalls
 

@@ -32,7 +32,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 | A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                       | a `.test.tsx` in the `__tests__/` of the island's folder, here                            |
 | A Next.js server component             | It renders on the server and reads what the server reads; there is no tree to mount | a website spec, through the served page                                                   |
 
-**What runs under node stays there.** In a page, each node-only name the entry publishes (the eight constructors, the services, the docker accessors, the results that walk a disk) refuses where it is called: a page has no filesystem, no child process and no socket.
+**What runs under node stays there.** In a page, each node-only name the entry publishes (the seven constructors, the services, the docker accessors, the results that walk a disk) refuses where it is called: a page has no filesystem, no child process and no socket.
 
 ## The constructor: there is none
 

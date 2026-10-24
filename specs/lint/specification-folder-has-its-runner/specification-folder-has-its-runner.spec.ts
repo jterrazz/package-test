@@ -14,7 +14,7 @@ describe('specification-folder-has-its-runner', () => {
         expect(result.report).toMatch(`
             specs/job:1:1  jterrazz-check(specification-folder-has-its-runner)
                 found: \`specs/job/\`, a specification folder with no runner constructing \`specification.job()\`
-                why: A first-level folder named for one of the eight specifications holds a \`*.specification.ts(x)\` calling \`specification.<specification>(\`.
+                why: A first-level folder named for one of the seven specifications holds a \`*.specification.ts(x)\` calling \`specification.<specification>(\`.
                 fix: create \`specs/job/job.specification.ts\` calling \`specification.job()\`, or rename the folder
                 read: docs/reference/linting.md#specification-folder-has-its-runner
         `);

@@ -1,5 +1,9 @@
 @jterrazz/test:
+    ApiDeployedHandle
+    ApiDeployedOptions
+    ApiDeployedSpecification
     ApiHandle
+    ApiServedOptions
     ApiSpecification
     ApiSpecificationOptions
     BaseResult
@@ -24,9 +28,6 @@
     ComponentUi
     ComponentVisitor
     ContainerAccessor
-    DeploymentHandle
-    DeploymentSpecification
-    DeploymentSpecificationOptions
     DeviceOpenOptions
     DevicePort
     DeviceScreen
@@ -202,7 +203,6 @@
     ApiProjectOptions
     CliProjectOptions
     ComponentProjectOptions
-    DeploymentProjectOptions
     InProcessProjectOptions
     IntegrationProjectOptions
     JobProjectOptions
@@ -217,7 +217,6 @@
     api
     cli
     component
-    deployment
     integration
     job
     lint

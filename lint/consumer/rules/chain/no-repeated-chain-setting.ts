@@ -21,7 +21,6 @@ import { consumerRows } from '../../catalogue/manifest.js';
 const SETTINGS: Record<string, readonly string[]> = {
     api: ['clock', 'headers'],
     cli: ['env'],
-    deployment: ['headers'],
     integration: ['clock'],
     job: ['clock'],
     website: ['clock', 'headers'],

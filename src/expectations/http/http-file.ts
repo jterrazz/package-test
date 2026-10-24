@@ -175,7 +175,7 @@ function unreachableFile(reason: string, more: boolean, fileName: string): Parse
             refusal({
                 fix: 'keep the one line `unreachable: <reason>`, or state the status the exchange answers',
                 found: `${fileName}: "unreachable: ${reason}" is followed by headers or a body`,
-                read: 'docs/guides/deployment-specs.md#unreachable-is-a-result',
+                read: 'docs/guides/api-specs.md#unreachable-is-a-result',
                 why: 'An exchange that never answered carries no header and no body, so its golden is one line.',
             }),
         );

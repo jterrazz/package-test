@@ -12,7 +12,7 @@ import { databaseSet } from '../../services/seed/database-set.adapter.js';
 import { seed } from '../../services/seed/seed.capability.js';
 import { mswNode } from '../../stubs/delivery/same-process/msw-node.adapter.js';
 import { intercept } from '../../stubs/intercept/intercept.capability.js';
-import type { ApiConfig, ApiSpecificationOptions } from './api.handle.js';
+import type { ApiConfig, ApiServedOptions } from './api.handle.js';
 import { del, get, post, put, request } from './request/request.action.js';
 
 const composition = {
@@ -22,7 +22,7 @@ const composition = {
         root: { group: 'Constructor option', name: 'root', probe: 'root:' },
         server: { group: 'Constructor option', name: 'server', probe: 'server:' },
         services: { group: 'Constructor option', name: 'services', probe: 'services:' },
-    } satisfies Record<keyof ApiSpecificationOptions, MatrixRow>,
+    } satisfies Record<keyof ApiServedOptions, MatrixRow>,
 } as const;
 
 /** The chain `specification.api()` hands out; the app answers in this process (`server-sees-declared-services`). */

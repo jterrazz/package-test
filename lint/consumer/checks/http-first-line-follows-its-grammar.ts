@@ -7,7 +7,7 @@ function firstLine(text: string): string | undefined {
         .find((line) => line.length > 0);
 }
 
-// invariant: the target is a path, or a whole URL (HTTP's absolute form), which a deployment spec sends to the host it names.
+// invariant: the target is a path, or a whole URL (HTTP's absolute form), which an api spec with a `url` sends to the host it names.
 const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) (?:\/|https?:\/\/)/u;
 // invariant: an exchange that never answered is the one line `unreachable: <reason>`.
 const STATUS_LINE = /^(?:HTTP\/\d(?:\.\d)? \d{3}\b|unreachable: \S)/u;

@@ -30,7 +30,6 @@ describe('preset', () => {
                 'api',
                 'cli',
                 'component',
-                'deployment',
                 'integration',
                 'job',
                 'lint',

@@ -23,7 +23,6 @@ export type TestSpecification =
     | 'api'
     | 'cli'
     | 'component'
-    | 'deployment'
     | 'integration'
     | 'job'
     | 'lint'

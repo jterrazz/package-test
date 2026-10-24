@@ -145,7 +145,7 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatch([
 - Segments already covered by a placeholder are **preserved**: a fixture line `Done in {{duration}}` stays `Done in {{duration}}` after an update, no matter what duration the run printed.
 - Values the framework knows to be dynamic are substituted automatically: the spec's cwd becomes `{{workdir}}` in the written fixture without you doing anything.
 - A golden that does not exist yet, or holds nothing but whitespace, is **recorded** from the output: a `.http`, a `.json` and a text golden alike, and a document's `response:` file too: a run that records stands without the goldens it is about to write. A golden is started by naming it, never by stubbing it.
-- A recorded response golden states the status, the `content-type` and the body; a deployment's states the headers its specification records (`recordedHeaders`), keeps stating no body where it stated none, and an exchange that never answered is written as its one line, `unreachable: <reason>` ([Deployment specs § Update mode](../guides/deployment-specs.md#update-mode)).
+- A recorded response golden states the status, the `content-type` and the body; a deployed api's (`specification.api({ url })`) states the headers its specification records (`recordedHeaders`), keeps stating no body where it stated none, and an exchange that never answered is written as its one line, `unreachable: <reason>` ([API specs § Deployed target (`url`)](../guides/api-specs.md#deployed-target-url)).
 
 Example, starting from actual output:
 

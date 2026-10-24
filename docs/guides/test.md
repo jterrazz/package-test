@@ -12,9 +12,9 @@ The suffix says the kind, as in any consumer ([Getting started § Which kind of 
 | Spec documents  | `specs/cli/<domain>/<case>.spec.yaml`                         | A cli session as data, collected as a test file by `literate()` ([Spec documents](spec-documents.md)) |
 | Meta-tests      | `lint/self/corpus/*.test.ts`, `lint/self/catalogue/*.test.ts` | The framework applied to itself and to its own projections                                            |
 
-## The ten projects
+## The nine projects
 
-The tree derives ten (one per folder of `specs/`, `unit` over `src/` and `lint/`, `component` over the component specs and the rendered tests of `src/`), `test.projects` in `jterrazz.config.ts` states how four of them depart, and which one you can run is decided by what is installed and running on the machine.
+The tree derives nine (one per folder of `specs/`, `unit` over `src/` and `lint/`, `component` over the component specs and the rendered tests of `src/`), `test.projects` in `jterrazz.config.ts` states how four of them depart, and which one you can run is decided by what is installed and running on the machine.
 
 | Project       | Collects                                                                                                              | Needs                                                                 |
 | ------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -25,7 +25,6 @@ The tree derives ten (one per folder of `specs/`, `unit` over `src/` and `lint/`
 | `job`         | `specs/job/**`, built by `job()`                                                                                      | Docker                                                                |
 | `integration` | `specs/integration/**`, built by `integration()`, the container seams included                                        | Docker                                                                |
 | `website`     | `specs/website/**`, built by `website()`                                                                              | playwright + `npx playwright install chromium`; no Docker             |
-| `deployment`  | `specs/deployment/**`, built by `deployment()`, against the specimen's servers it starts in its own process           | Nothing; no exchange leaves the machine                               |
 | `component`   | `specs/component/**/*.test.tsx` and `src/**/*.test.tsx` (a module test that needs a real DOM), built by `component()` | the same chromium; no Docker                                          |
 | `mobile`      | `specs/mobile/**`, built by `mobile({ serial: false })`, one driver session per worker                                | Nothing; the Appium protocol double, served once per run              |
 
@@ -37,7 +36,7 @@ Why a file is reached by its ROLE and named by its suffix, and what was weighed 
 
 **The `unit` project's budget is the whole suite's floor.** It collects the module tests and runs with no service, no browser and no container, so it is the one project a developer runs on every save: the same tree took between nine and eleven seconds on consecutive runs of an idle developer machine, and **the budget a change is designed against is twelve**. It is a design budget, not a gate: wall time is the machine's (the same run takes four times as long on a loaded one), so no check fails on it, and a change that adds a slow file to the project is judged at review against it. The budget sits above the range, not at the best measurement, so a measurement read against it is not read on noise.
 
-Every SPECIFICATION folder under `specs/` is named for its specification: eight belong to a constructor, and `specs/component/` to the one specification that is a chain: it is the rendered subject this package ships, and its component tests sit beside its components, since a specs tree holds no `__tests__/` (`no-unknown-constructor`, `test-in-its-tests-folder`). A probe of a container seam (the postgres and redis handles) is a module against a real service, so it is an integration spec: `specs/integration/services/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the container adapters the public entry does not publish (`TestcontainersAdapter`, `RunSetupContainer`, `ServiceContainer`), are module tests in `src/services/containers/__tests__/`: a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (the layer map's `architecture/no-framework-internals`, [§ A spec reaches the framework by its entry](#a-spec-reaches-the-framework-by-its-entry)).
+Every SPECIFICATION folder under `specs/` is named for its specification: seven belong to a constructor, and `specs/component/` to the one specification that is a chain: it is the rendered subject this package ships, and its component tests sit beside its components, since a specs tree holds no `__tests__/` (`no-unknown-constructor`, `test-in-its-tests-folder`). A probe of a container seam (the postgres and redis handles) is a module against a real service, so it is an integration spec: `specs/integration/services/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the container adapters the public entry does not publish (`TestcontainersAdapter`, `RunSetupContainer`, `ServiceContainer`), are module tests in `src/services/containers/__tests__/`: a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (the layer map's `architecture/no-framework-internals`, [§ A spec reaches the framework by its entry](#a-spec-reaches-the-framework-by-its-entry)).
 
 ```bash
 npm test                            # every project; Docker and chromium both required
@@ -72,7 +71,7 @@ specs/
 
 The law of the tree (the closed list of special `__<word>__/` folders, `__setup__/` for code, the lowest-common placement) is [Conventions § The naming recap](../concepts/conventions.md#the-naming-recap)'s, and this tree follows it: the capability folders' stubs sit in `__setup__/stubs/`, and a seed only one specification reads sits in that specification's `__seeds__/`. Which of the two legal shapes a given tree takes (its own domain, or sibling tests in a named group folder) is decided by the assets, and that judgement is the process channel's ([Conventions](../concepts/conventions.md)).
 
-The fixture apps the specs drive are SPECIMENS, each named for the specification that drives it, and they follow the placement law like any ground: a specimen one specification reads sits in that specification's `__fixtures__/`: `specimen-api-outbound` in api's, `specimen-job` in job's, `specimen-website` and its `specimen-website-backend` in website's, `specimen-deployment` (the servers the deployment specs probe, and the certificates and authority they present) in deployment's, `specimen-cli` and its `-docker`, `-go`, `-vitest` and `-literate` variants in cli's, `orders`, the module integration's specs call, in integration's, and the `broken-*` trees for the infrastructure failure paths in `specs/api/services/__fixtures__/`. The pool, `specs/__fixtures__/`, holds what several specifications or a reader outside the specs tree name: `specimen-api` (which carries the jobs too), `specimen-mobile`, which the Makefile runs, `member-workspace`, which lint's module tests, its specs and the checker's command line read, and the trees the lint specs share with the checker's command line: `file-suffix-matches-place-placement`, `no-unused-ground`, `no-unused-ground-ok` and `spec-document-ok`. The code several specifications share sits beside the pool, in `specs/__setup__/`: `appium/`, the protocol double the vitest config runs as a global setup, is TypeScript that prepares specs, not data a spec stands on. A lint rule's trees are not in the pool: each rule keeps them in its own `specs/lint/<rule-id>/__fixtures__/`, and a tree several rules or the checker's command line read sits in the lowest folder they share.
+The fixture apps the specs drive are SPECIMENS, each named for the specification that drives it, and they follow the placement law like any ground: a specimen one specification reads sits in that specification's `__fixtures__/`: `specimen-api-outbound` in api's, and `specimen-api-deployed` (the servers the api's `url` specs probe, and the certificates and authority they present), started by `deployed.specification.ts` in its own process, `specimen-job` in job's, `specimen-website` and its `specimen-website-backend` in website's, `specimen-cli` and its `-docker`, `-go`, `-vitest` and `-literate` variants in cli's, `orders`, the module integration's specs call, in integration's, and the `broken-*` trees for the infrastructure failure paths in `specs/api/services/__fixtures__/`. The pool, `specs/__fixtures__/`, holds what several specifications or a reader outside the specs tree name: `specimen-api` (which carries the jobs too), `specimen-mobile`, which the Makefile runs, `member-workspace`, which lint's module tests, its specs and the checker's command line read, and the trees the lint specs share with the checker's command line: `file-suffix-matches-place-placement`, `no-unused-ground`, `no-unused-ground-ok` and `spec-document-ok`. The code several specifications share sits beside the pool, in `specs/__setup__/`: `appium/`, the protocol double the vitest config runs as a global setup, is TypeScript that prepares specs, not data a spec stands on. A lint rule's trees are not in the pool: each rule keeps them in its own `specs/lint/<rule-id>/__fixtures__/`, and a tree several rules or the checker's command line read sits in the lowest folder they share.
 
 **The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component/` holds the fixture app and its specs as neighbours. It is not under `__fixtures__/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: `test-in-its-tests-folder` requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it (a specs tree holds no `__tests__/`), and `specs-at-declared-depth`'s row says a `.test.tsx` is out of its reach because a rendered unit never lives in a specification/domain tree.
 
@@ -168,17 +167,17 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings. Do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **158 modules** have no test of their own, and every one of them is claimed:
+Today **156 modules** have no test of their own, and every one of them is claimed:
 
 | Kind                                                      | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| composition root or barrel (23)                           | it wires and re-exports; what it publishes is held by the specs that install the packed package (`specs/cli/node/`, `specs/cli/tsc/`) and by every spec that imports the entry                                                                                                                                                                                                                                                                                                                                                                             |
+| composition root or barrel (22)                           | it wires and re-exports; what it publishes is held by the specs that install the packed package (`specs/cli/node/`, `specs/cli/tsc/`) and by every spec that imports the entry                                                                                                                                                                                                                                                                                                                                                                             |
 | type-only declaration (27)                                | it declares a shape and executes nothing; the compiler is its test, and the consumer module `specs/cli/tsc/__fixtures__/consumer/consumer.ts` holds, against the installed declarations, what the compiler must refuse                                                                                                                                                                                                                                                                                                                                     |
 | constant data (18)                                        | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `specification-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguous.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `package-exports.test.ts` for the names of the spec subpaths, `architecture.test.ts` for the library owners) |
 | a module that runs only in a page (2)                     | it reads the `document` and `window` of the page it renders in, which node has none of (`no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global), so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof                                                                                                                                                                                                                                                                             |
 | a specification module (22)                               | the specification is proven end to end by its own tree under `specs/<specification>/`, which is what the constructor exists to make possible                                                                                                                                                                                                                                                                                                                                                                                                               |
 | a result accessor (17)                                    | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| an adapter (13)                                           | an adapter, and what only an adapter reads, is proven through the specification that wires it: a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)                                                                                                                                                                                                                                                                                                                                        |
+| an adapter (12)                                           | an adapter, and what only an adapter reads, is proven through the specification that wires it: a probe that could only reach it directly is an integration spec under `specs/integration/services/` (the Test page)                                                                                                                                                                                                                                                                                                                                        |
 | a bundled CLI entry (6)                                   | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | a lint-layer module (14)                                  | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain's Architecture and Names passes over fixture trees on the lint specification                                                                                                                                                                                                                                                                                                                       |
 | a chain or runner internal (5)                            | it is reached through the chain, so its proof is the specification specs that drive the chain: a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -214,7 +213,7 @@ list the runner and the checker already share, and a scan of the trees each
 column owns. A specification states its own rows through its composition: each
 option, setup and action it composes carries the row it answers for, an
 action that hands a scenario a visitor carries its verbs and targets too,
-and `lint/self/corpus/compositions.ts` lists the eight compositions the matrix reads.
+and `lint/self/corpus/compositions.ts` lists the seven compositions the matrix reads.
 What the libraries own (the goldens, the doubles) is declared in
 `lint/self/corpus/specification-matrix.ts`.
 
@@ -229,226 +228,226 @@ What the framework can do, and how many of this package's own test FILES exercis
 
 ### Constructor option
 
-| Capability        | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ----------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `root`            | 3   | 1   | 1   | 0    | 2           | 1       | n/a        | 1      | 1         | n/a    |
-| `server`          | 5   | n/a | n/a | n/a  | n/a         | 4       | n/a        | n/a    | n/a       | n/a    |
-| `services`        | 2   | 1   | 1   | n/a  | 2           | 1       | n/a        | 1      | n/a       | n/a    |
-| `jobs`            | n/a | 3   | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `backend`         | n/a | n/a | 1   | n/a  | n/a         | 2       | n/a        | 1      | n/a       | n/a    |
-| `commands`        | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `defaults`        | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `docker`          | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `env`             | n/a | n/a | 6   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `serve`           | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `transform`       | n/a | n/a | 2   | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `checkers`        | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `config`          | n/a | n/a | n/a | 1    | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `plugins`         | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `presets`         | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `settings`        | n/a | n/a | n/a | 0    | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `external`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `url`             | n/a | n/a | n/a | n/a  | n/a         | 3       | 4          | n/a    | n/a       | n/a    |
-| `ca`              | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1          | n/a    | n/a       | n/a    |
-| `insecure`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1          | n/a    | n/a       | n/a    |
-| `recordedHeaders` | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1          | n/a    | n/a       | n/a    |
-| `timeout`         | n/a | n/a | n/a | n/a  | n/a         | n/a     | 3          | n/a    | n/a       | n/a    |
-| `app`             | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 1      | n/a       | n/a    |
-| `appium`          | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 1      | n/a       | n/a    |
-| `device`          | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 1      | n/a       | n/a    |
-| `timeouts`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 1      | n/a       | n/a    |
-| `clock`           | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
-| `locale`          | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
-| `timezone`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
-| `viewport`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
-| `vite`            | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
-| `wrap`            | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
+| Capability        | api | job | cli | lint | integration | website | mobile | component | module |
+| ----------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `root`            | 3   | 1   | 1   | 0    | 2           | 1       | 1      | 1         | n/a    |
+| `server`          | 5   | n/a | n/a | n/a  | n/a         | 4       | n/a    | n/a       | n/a    |
+| `services`        | 3   | 1   | 1   | n/a  | 2           | 1       | 1      | n/a       | n/a    |
+| `ca`              | 2   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `insecure`        | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `recordedHeaders` | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `timeout`         | 3   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `url`             | 5   | n/a | n/a | n/a  | n/a         | 3       | n/a    | n/a       | n/a    |
+| `jobs`            | n/a | 3   | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `backend`         | n/a | n/a | 1   | n/a  | n/a         | 2       | 1      | n/a       | n/a    |
+| `commands`        | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `defaults`        | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `docker`          | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `env`             | n/a | n/a | 6   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `serve`           | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `transform`       | n/a | n/a | 2   | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `checkers`        | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `config`          | n/a | n/a | n/a | 1    | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `plugins`         | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `presets`         | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `settings`        | n/a | n/a | n/a | 0    | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `external`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `app`             | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1      | n/a       | n/a    |
+| `appium`          | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1      | n/a       | n/a    |
+| `device`          | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1      | n/a       | n/a    |
+| `timeouts`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1      | n/a       | n/a    |
+| `clock`           | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
+| `locale`          | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
+| `timezone`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
+| `viewport`        | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
+| `vite`            | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
+| `wrap`            | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
 
 ### Setup
 
-| Capability     | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| -------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `.clock()`     | 1   | 2   | n/a | n/a  | 2           | 1       | n/a        | n/a    | 1         | n/a    |
-| `.headers()`   | 5   | n/a | n/a | n/a  | n/a         | 2       | 2          | n/a    | n/a       | n/a    |
-| `.intercept()` | 12  | 1   | 1   | n/a  | 3           | 2       | n/a        | 1      | 6         | n/a    |
-| `.seed()`      | 9   | 1   | 1   | n/a  | 3           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.with()`      | 4   | 1   | 1   | n/a  | 1           | 1       | 1          | n/a    | n/a       | n/a    |
-| `.env()`       | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.fixture()`   | n/a | n/a | 49  | 112  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.link()`      | n/a | n/a | 12  | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.prepare()`   | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.rules()`     | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.storage()`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.connect()`   | n/a | n/a | n/a | n/a  | n/a         | n/a     | 1          | n/a    | n/a       | n/a    |
-| `.viewport()`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 2         | n/a    |
-| `.wrap()`      | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
+| Capability     | api | job | cli | lint | integration | website | mobile | component | module |
+| -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `.clock()`     | 1   | 2   | n/a | n/a  | 2           | 1       | n/a    | 1         | n/a    |
+| `.headers()`   | 8   | n/a | n/a | n/a  | n/a         | 2       | n/a    | n/a       | n/a    |
+| `.intercept()` | 12  | 1   | 1   | n/a  | 3           | 2       | 1      | 6         | n/a    |
+| `.seed()`      | 9   | 1   | 1   | n/a  | 3           | n/a     | n/a    | n/a       | n/a    |
+| `.with()`      | 5   | 1   | 1   | n/a  | 1           | 1       | n/a    | n/a       | n/a    |
+| `.connect()`   | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.env()`       | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.fixture()`   | n/a | n/a | 49  | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.link()`      | n/a | n/a | 12  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.prepare()`   | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.rules()`     | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.storage()`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.viewport()`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 2         | n/a    |
+| `.wrap()`      | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
 
 ### Terminal action
 
-| Capability   | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ------------ | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `.request()` | 2   | n/a | n/a | n/a  | n/a         | n/a     | 1          | n/a    | n/a       | n/a    |
-| `.get()`     | 23  | n/a | n/a | n/a  | n/a         | n/a     | 7          | n/a    | n/a       | n/a    |
-| `.post()`    | 7   | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.put()`     | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.delete()`  | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.trigger()` | n/a | 7   | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.exec()`    | n/a | n/a | 65  | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.run()`     | n/a | n/a | 5   | 113  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.call()`    | n/a | n/a | n/a | n/a  | 11          | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.visit()`   | n/a | n/a | n/a | n/a  | n/a         | 23      | n/a        | n/a    | n/a       | n/a    |
-| `.fetch()`   | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a        | n/a    | n/a       | n/a    |
-| `.open()`    | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 7      | n/a       | n/a    |
-| `.render()`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 31        | n/a    |
+| Capability   | api | job | cli | lint | integration | website | mobile | component | module |
+| ------------ | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `.request()` | 3   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.get()`     | 29  | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.post()`    | 7   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.put()`     | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.delete()`  | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.trigger()` | n/a | 7   | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.exec()`    | n/a | n/a | 65  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.run()`     | n/a | n/a | 5   | 113  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.call()`    | n/a | n/a | n/a | n/a  | 11          | n/a     | n/a    | n/a       | n/a    |
+| `.visit()`   | n/a | n/a | n/a | n/a  | n/a         | 23      | n/a    | n/a       | n/a    |
+| `.fetch()`   | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a    | n/a       | n/a    |
+| `.open()`    | n/a | n/a | n/a | n/a  | n/a         | n/a     | 7      | n/a       | n/a    |
+| `.render()`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 31        | n/a    |
 
 ### Route option
 
-| Capability   | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ------------ | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `{ params }` | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
+| Capability   | api | job | cli | lint | integration | website | mobile | component | module |
+| ------------ | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `{ params }` | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 
 ### Verb
 
-| Capability | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ---------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `see`      | n/a | n/a | n/a | n/a  | n/a         | 11      | n/a        | 6      | 29        | n/a    |
-| `fill`     | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a        | 1      | 3         | n/a    |
-| `click`    | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | 8         | n/a    |
-| `gone`     | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | 8         | n/a    |
-| `press`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 2         | n/a    |
-| `hover`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `check`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 2         | n/a    |
-| `select`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 3         | n/a    |
-| `goto`     | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `tap`      | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 3      | n/a       | n/a    |
-| `rerender` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
-| `unmount`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
+| Capability | api | job | cli | lint | integration | website | mobile | component | module |
+| ---------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `see`      | n/a | n/a | n/a | n/a  | n/a         | 11      | 6      | 29        | n/a    |
+| `fill`     | n/a | n/a | n/a | n/a  | n/a         | 4       | 1      | 3         | n/a    |
+| `click`    | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | 8         | n/a    |
+| `gone`     | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | 8         | n/a    |
+| `press`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 2         | n/a    |
+| `hover`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `check`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 2         | n/a    |
+| `select`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 3         | n/a    |
+| `goto`     | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `tap`      | n/a | n/a | n/a | n/a  | n/a         | n/a     | 3      | n/a       | n/a    |
+| `rerender` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
+| `unmount`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
 
 ### Target
 
-| Capability      | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| --------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `button`        | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a        | 3      | 8         | n/a    |
-| `field`         | n/a | n/a | n/a | n/a  | n/a         | 6       | n/a        | 1      | 7         | n/a    |
-| `content`       | n/a | n/a | n/a | n/a  | n/a         | 7       | n/a        | 6      | 18        | n/a    |
-| `testId`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | 1      | 1         | n/a    |
-| `heading`       | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a        | n/a    | 3         | n/a    |
-| `link`          | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | 3         | n/a    |
-| `dialog`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `status`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 3         | n/a    |
-| `table`         | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `row`           | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `listitem`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `option`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `banner`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `complementary` | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `contentinfo`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `form`          | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `main`          | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `navigation`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `region`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `search`        | n/a | n/a | n/a | n/a  | n/a         | 2       | n/a        | n/a    | 2         | n/a    |
-| `within`        | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a        | 1      | 6         | n/a    |
-| `focused`       | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `selected`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `valued`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `disabled`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
-| `enabled`       | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | 1         | n/a    |
+| Capability      | api | job | cli | lint | integration | website | mobile | component | module |
+| --------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `button`        | n/a | n/a | n/a | n/a  | n/a         | 4       | 3      | 8         | n/a    |
+| `field`         | n/a | n/a | n/a | n/a  | n/a         | 6       | 1      | 7         | n/a    |
+| `content`       | n/a | n/a | n/a | n/a  | n/a         | 7       | 6      | 18        | n/a    |
+| `testId`        | n/a | n/a | n/a | n/a  | n/a         | 1       | 1      | 1         | n/a    |
+| `heading`       | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a    | 3         | n/a    |
+| `link`          | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | 3         | n/a    |
+| `dialog`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `status`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 3         | n/a    |
+| `table`         | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `row`           | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `listitem`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `option`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `banner`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `complementary` | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `contentinfo`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `form`          | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `main`          | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `navigation`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `region`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `search`        | n/a | n/a | n/a | n/a  | n/a         | 2       | n/a    | 2         | n/a    |
+| `within`        | n/a | n/a | n/a | n/a  | n/a         | 4       | 1      | 6         | n/a    |
+| `focused`       | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `selected`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `valued`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `disabled`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
+| `enabled`       | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
 
 ### Result accessor
 
-| Capability        | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ----------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `.response`       | 25  | n/a | n/a | n/a  | n/a         | n/a     | 13         | n/a    | n/a       | n/a    |
-| `.status`         | 1   | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | n/a       | n/a    |
-| `.table()`        | 7   | 4   | 1   | n/a  | 2           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.file()`         | 1   | n/a | 18  | 9    | 4           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.directory()`    | 1   | n/a | 4   | 6    | 1           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.stdout`         | n/a | n/a | 43  | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.stderr`         | n/a | n/a | 15  | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.exitCode`       | n/a | n/a | 49  | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.json`           | n/a | n/a | 6   | n/a  | n/a         | 2       | n/a        | n/a    | n/a       | n/a    |
-| `.filesystem`     | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.container()`    | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.containerIds`   | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.requests`       | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.report`         | n/a | n/a | n/a | 112  | n/a         | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.value`          | n/a | n/a | n/a | n/a  | 9           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.error`          | n/a | n/a | n/a | n/a  | 7           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.tree`           | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a        | n/a    | 6         | n/a    |
-| `.content`        | n/a | n/a | n/a | n/a  | n/a         | 11      | n/a        | 5      | 19        | n/a    |
-| `.console`        | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a        | n/a    | 4         | n/a    |
-| `.errors`         | n/a | n/a | n/a | n/a  | n/a         | 8       | n/a        | n/a    | 8         | n/a    |
-| `.html`           | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | 5         | n/a    |
-| `.title`          | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | n/a       | n/a    |
-| `.url`            | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | n/a       | n/a    |
-| `.head`           | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a        | n/a    | n/a       | n/a    |
-| `.jsonLd`         | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.canonical`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.alternates`     | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.links`          | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.meta()`         | n/a | n/a | n/a | n/a  | n/a         | 2       | n/a        | n/a    | n/a       | n/a    |
-| `.body`           | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.headers`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.location`       | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a        | n/a    | n/a       | n/a    |
-| `.tls`            | n/a | n/a | n/a | n/a  | n/a         | n/a     | 6          | n/a    | n/a       | n/a    |
-| `.screen`         | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | 3      | n/a       | n/a    |
-| `.visibleContent` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | 1         | n/a    |
+| Capability        | api | job | cli | lint | integration | website | mobile | component | module |
+| ----------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `.response`       | 38  | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.status`         | 1   | n/a | n/a | n/a  | n/a         | 3       | n/a    | n/a       | n/a    |
+| `.table()`        | 7   | 4   | 1   | n/a  | 2           | n/a     | n/a    | n/a       | n/a    |
+| `.file()`         | 1   | n/a | 18  | 9    | 4           | n/a     | n/a    | n/a       | n/a    |
+| `.directory()`    | 1   | n/a | 4   | 6    | 1           | n/a     | n/a    | n/a       | n/a    |
+| `.tls`            | 6   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.stdout`         | n/a | n/a | 43  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.stderr`         | n/a | n/a | 15  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.exitCode`       | n/a | n/a | 49  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.json`           | n/a | n/a | 6   | n/a  | n/a         | 2       | n/a    | n/a       | n/a    |
+| `.filesystem`     | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.container()`    | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.containerIds`   | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.requests`       | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.report`         | n/a | n/a | n/a | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.value`          | n/a | n/a | n/a | n/a  | 9           | n/a     | n/a    | n/a       | n/a    |
+| `.error`          | n/a | n/a | n/a | n/a  | 7           | n/a     | n/a    | n/a       | n/a    |
+| `.tree`           | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a    | 6         | n/a    |
+| `.content`        | n/a | n/a | n/a | n/a  | n/a         | 11      | 5      | 19        | n/a    |
+| `.console`        | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a    | 4         | n/a    |
+| `.errors`         | n/a | n/a | n/a | n/a  | n/a         | 8       | n/a    | 8         | n/a    |
+| `.html`           | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | 5         | n/a    |
+| `.title`          | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | n/a       | n/a    |
+| `.url`            | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | n/a       | n/a    |
+| `.head`           | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | n/a       | n/a    |
+| `.jsonLd`         | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.canonical`      | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.alternates`     | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.links`          | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.meta()`         | n/a | n/a | n/a | n/a  | n/a         | 2       | n/a    | n/a       | n/a    |
+| `.body`           | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.headers`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.location`       | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
+| `.screen`         | n/a | n/a | n/a | n/a  | n/a         | n/a     | 3      | n/a       | n/a    |
+| `.visibleContent` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
 
 ### Golden
 
-| Capability             | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | n/a | 10  | n/a  | 4           | 0       | 1          | n/a    | 1         | 2      |
-| `toMatch(directory())` | 1   | n/a | 6   | 6    | 1           | n/a     | n/a        | n/a    | n/a       | 1      |
-| `toMatch(<rows>)`      | 7   | 4   | 1   | n/a  | 1           | n/a     | n/a        | n/a    | n/a       | n/a    |
-| `.http exchange`       | 3   | n/a | n/a | n/a  | n/a         | n/a     | 1          | n/a    | n/a       | 8      |
-| `.aria.yaml tree`      | n/a | n/a | n/a | n/a  | n/a         | 0       | n/a        | n/a    | 1         | n/a    |
-| `.json body`           | 3   | n/a | 11  | n/a  | 3           | 0       | n/a        | n/a    | n/a       | 24     |
-| `.txt stream`          | 1   | n/a | 13  | n/a  | 1           | 1       | n/a        | n/a    | n/a       | 19     |
-| `{ frozen }`           | 2   | n/a | 14  | n/a  | n/a         | n/a     | 2          | n/a    | 1         | 8      |
+| Capability             | api | job | cli | lint | integration | website | mobile | component | module |
+| ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `toMatch(file())`      | 2   | n/a | 10  | n/a  | 4           | 0       | n/a    | 1         | 2      |
+| `toMatch(directory())` | 1   | n/a | 6   | 6    | 1           | n/a     | n/a    | n/a       | 1      |
+| `toMatch(<rows>)`      | 7   | 4   | 1   | n/a  | 1           | n/a     | n/a    | n/a       | n/a    |
+| `.http exchange`       | 4   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 8      |
+| `.aria.yaml tree`      | n/a | n/a | n/a | n/a  | n/a         | 0       | n/a    | 1         | n/a    |
+| `.json body`           | 3   | n/a | 11  | n/a  | 3           | 0       | n/a    | n/a       | 24     |
+| `.txt stream`          | 1   | n/a | 13  | n/a  | 1           | 1       | n/a    | n/a       | 19     |
+| `{ frozen }`           | 4   | n/a | 14  | n/a  | n/a         | n/a     | n/a    | 1         | 8      |
 
 ### Time & doubles
 
-| Capability    | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| ------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `clock()`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | 17     |
-| `intercept()` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | 1      |
-| `mockOf()`    | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | 1      |
-| `match.*`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a        | n/a    | n/a       | 8      |
+| Capability    | api | job | cli | lint | integration | website | mobile | component | module |
+| ------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `clock()`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 17     |
+| `intercept()` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 1      |
+| `mockOf()`    | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 1      |
+| `match.*`     | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | 8      |
 
 ### Token
 
-| Capability     | api | job | cli | lint | integration | website | deployment | mobile | component | module |
-| -------------- | --- | --- | --- | ---- | ----------- | ------- | ---------- | ------ | --------- | ------ |
-| `{{any}}`      | 0   | n/a | 3   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 3      |
-| `{{base64}}`   | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 2      |
-| `{{date}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{duration}}` | 0   | n/a | 1   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 2      |
-| `{{email}}`    | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{float}}`    | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 2      |
-| `{{hex}}`      | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 2      |
-| `{{int}}`      | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{ip}}`       | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{iso8601}}`  | 6   | n/a | 0   | n/a  | 1           | 1       | 0          | n/a    | n/a       | 2      |
-| `{{number}}`   | 1   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{path}}`     | 1   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{port}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | 2          | n/a    | n/a       | 2      |
-| `{{semver}}`   | 0   | n/a | 4   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{sha}}`      | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{string}}`   | 2   | n/a | 1   | n/a  | 0           | 0       | 1          | n/a    | n/a       | 1      |
-| `{{time}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{ulid}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{url}}`      | 0   | n/a | 4   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
-| `{{uuid}}`     | 2   | n/a | 2   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 4      |
-| `{{workdir}}`  | 0   | n/a | 8   | n/a  | 0           | 0       | 0          | n/a    | n/a       | 1      |
+| Capability     | api | job | cli | lint | integration | website | mobile | component | module |
+| -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `{{any}}`      | 0   | n/a | 3   | n/a  | 0           | 0       | n/a    | n/a       | 3      |
+| `{{base64}}`   | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 2      |
+| `{{date}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{duration}}` | 0   | n/a | 1   | n/a  | 0           | 0       | n/a    | n/a       | 2      |
+| `{{email}}`    | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{float}}`    | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 2      |
+| `{{hex}}`      | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 2      |
+| `{{int}}`      | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{ip}}`       | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{iso8601}}`  | 6   | n/a | 0   | n/a  | 1           | 1       | n/a    | n/a       | 2      |
+| `{{number}}`   | 1   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{path}}`     | 1   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{port}}`     | 2   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 2      |
+| `{{semver}}`   | 0   | n/a | 4   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{sha}}`      | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{string}}`   | 3   | n/a | 1   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{time}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{ulid}}`     | 0   | n/a | 0   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{url}}`      | 0   | n/a | 4   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
+| `{{uuid}}`     | 2   | n/a | 2   | n/a  | 0           | 0       | n/a    | n/a       | 4      |
+| `{{workdir}}`  | 0   | n/a | 8   | n/a  | 0           | 0       | n/a    | n/a       | 1      |
 
 ### Exemptions
 
 - a lint specification resolves its plugins and checkers from the project it sits in, and `no-redundant-root` refuses a `root` the walk already finds; the option is proven where a specification runs a product of its own (api, integration): `root`·lint
 - what a repository adds beside its presets is `@jterrazz/typescript`'s to resolve, and its own lint specs run it (`declared-preset-lint`); this package states its additions as the `self()` preset, which `presets` carries: `settings`·lint
 - every golden of this specification's tree is read by one test, so it is written in place (`ground-shared-or-inline`); the file form is proven where goldens are shared: `toMatch(file())`·website, `.aria.yaml tree`·website, `.json body`·website
-- the matcher owns the family (proven in the module column); a specification uses the ones its goldens need: `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{any}}`·deployment, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{base64}}`·deployment, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{date}}`·deployment, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{duration}}`·deployment, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{email}}`·deployment, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{float}}`·deployment, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{hex}}`·deployment, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{int}}`·deployment, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{ip}}`·deployment, `{{iso8601}}`·cli, `{{iso8601}}`·deployment, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{number}}`·deployment, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{path}}`·deployment, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{semver}}`·deployment, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{sha}}`·deployment, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{time}}`·deployment, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{ulid}}`·deployment, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{url}}`·deployment, `{{uuid}}`·integration, `{{uuid}}`·website, `{{uuid}}`·deployment, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website, `{{workdir}}`·deployment
+- the matcher owns the family (proven in the module column); a specification uses the ones its goldens need: `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->
 

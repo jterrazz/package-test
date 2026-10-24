@@ -15,11 +15,10 @@ import type { Specification } from './specifications/specification.js';
 export type * from './index.js';
 
 export { component } from './specifications/component/component.face.browser.js';
-/** The eight constructors, present and refusing in a page. */
+/** The seven constructors, present and refusing in a page. */
 export const specification: Specification = {
     api: () => refuse('specification.api()'),
     cli: () => refuse('specification.cli()'),
-    deployment: () => refuse('specification.deployment()'),
     integration: () => refuse('specification.integration()'),
     job: () => refuse('specification.job()'),
     lint: () => refuse('specification.lint()'),

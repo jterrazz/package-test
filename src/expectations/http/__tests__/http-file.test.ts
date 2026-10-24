@@ -106,7 +106,7 @@ describe('http-file', () => {
             `found: r.http: "unreachable: refused" is followed by headers or a body`,
             'why: An exchange that never answered carries no header and no body, so its golden is one line.',
             'fix: keep the one line `unreachable: <reason>`, or state the status the exchange answers',
-            'read: docs/guides/deployment-specs.md#unreachable-is-a-result',
+            'read: docs/guides/api-specs.md#unreachable-is-a-result',
         ].join('\n');
 
         // Then - each refusal whole

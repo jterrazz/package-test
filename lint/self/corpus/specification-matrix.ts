@@ -7,7 +7,6 @@ export const SPECIFICATION_MATRIX_COLUMNS = [
     'lint',
     'integration',
     'website',
-    'deployment',
     'mobile',
     'component',
     'module',
@@ -59,7 +58,7 @@ export const SPECIFICATION_MATRIX_EXEMPTIONS: Readonly<
 
 export const SPECIFICATION_MATRIX_CAPABILITIES: Capability[] = [
     {
-        columns: ['api', 'cli', 'integration', 'website', 'deployment', 'component', 'module'],
+        columns: ['api', 'cli', 'integration', 'website', 'component', 'module'],
         exempt: { website: IN_PLACE },
         group: 'Golden',
         name: 'toMatch(file())',
@@ -78,7 +77,7 @@ export const SPECIFICATION_MATRIX_CAPABILITIES: Capability[] = [
         probe: ')).toMatch([',
     },
     {
-        columns: ['api', 'deployment', 'module'],
+        columns: ['api', 'module'],
         group: 'Golden',
         name: '.http exchange',
         probe: ".http'",
@@ -104,7 +103,7 @@ export const SPECIFICATION_MATRIX_CAPABILITIES: Capability[] = [
         probe: ".txt'",
     },
     {
-        columns: ['api', 'cli', 'deployment', 'component', 'module'],
+        columns: ['api', 'cli', 'component', 'module'],
         group: 'Golden',
         name: '{ frozen }',
         probe: 'frozen',

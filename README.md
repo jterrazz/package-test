@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-A testing framework on vitest for whole products: HTTP APIs, background jobs, CLIs, websites, running deployments, native mobile apps, rendered components, modules against real databases, and the lint rules a project ships. You declare what a test needs (Postgres, a built binary, a real Chromium, an iOS simulator), and the framework starts it, isolates it per worker and cleans it up. Each test is one sentence: a few setups, one action, and the whole result compared with `expect()`.
+A testing framework on vitest for whole products: HTTP APIs, background jobs, CLIs, websites, native mobile apps, rendered components, modules against real databases, and the lint rules a project ships. You declare what a test needs (Postgres, a built binary, a real Chromium, an iOS simulator), and the framework starts it, isolates it per worker and cleans it up. Each test is one sentence: a few setups, one action, and the whole result compared with `expect()`.
 
 ```typescript
 // specs/api/users/list/shape.spec.ts
@@ -52,8 +52,7 @@ An ES module project on Node 24, vitest 5 and `@jterrazz/typescript` 11 is requi
 | [Component](docs/guides/component-specs.md)     | A React component, hook or DOM function in a real Chromium      | `component.render()`           |
 | [Website](docs/guides/website-specs.md)         | A served page, fetched or driven in a browser                   | `specification.website()`      |
 | [Mobile](docs/guides/mobile-specs.md)           | A native app on an iOS simulator                                | `specification.mobile()`       |
-| [Deployment](docs/guides/deployment-specs.md)   | A running deployment, probed over the network, no browser       | `specification.deployment()`   |
-| [API](docs/guides/api-specs.md)                 | An HTTP app, through complete requests                          | `specification.api()`          |
+| [API](docs/guides/api-specs.md)                 | An HTTP app, in this process or deployed at a `url`             | `specification.api()`          |
 | [Job](docs/guides/job-specs.md)                 | A pipeline triggered by name                                    | `specification.job()`          |
 | [CLI](docs/guides/cli-specs.md)                 | A binary in a fresh working directory, often as a YAML document | `specification.cli()`          |
 | [Lint](docs/guides/lint-specs.md)               | The rules a project ships, over fixture trees                   | `specification.lint()`         |

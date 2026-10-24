@@ -14,10 +14,10 @@
         {
             "audience": "consumer",
             "channel": "static",
-            "sentence": "Eight constructors and only eight: `specification.api()`, `specification.job()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.deployment()`, `specification.mobile()`, `specification.lint()`. Any other member (`.app`, `.http`, `.stack`...) is an error. A rendered component starts nothing: it is a chain, not a member of this record.",
+            "sentence": "Seven constructors and only seven: `specification.api()`, `specification.job()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()`, `specification.lint()`. Any other member (`.app`, `.http`, `.stack`...) is an error. A rendered component starts nothing: it is a chain, not a member of this record.",
             "specification": "model",
             "family": "setup",
-            "fix": "Name one of the eight, or reach for the `component` chain: a ninth subject is a decision before it is a constructor.",
+            "fix": "Name one of the seven, or reach for the `component` chain: an eighth subject is a decision before it is a constructor.",
             "name": "no-unknown-constructor",
             "rationale": "A closed surface stops parallel constructors being invented and keeps the API memorable.",
             "reach": "all"
@@ -755,7 +755,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "A first-level folder named for one of the eight specifications holds a `*.specification.ts(x)` calling `specification.<specification>(`. Positive-only: any other first-level name is a repository suite, judged by `specs-at-declared-depth`'s declared depth alone.",
+            "sentence": "A first-level folder named for one of the seven specifications holds a `*.specification.ts(x)` calling `specification.<specification>(`. Positive-only: any other first-level name is a repository suite, judged by `specs-at-declared-depth`'s declared depth alone.",
             "specification": "model",
             "family": "layout",
             "fix": "Create the specification the folder promises, or rename the folder.",
@@ -854,7 +854,7 @@
         {
             "audience": "consumer",
             "channel": "checker",
-            "sentence": "The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`, or `METHOD https://host/path` for a deployment) under `__requests__/`, a status line (`HTTP/1.1 <status>`, or `unreachable: <reason>` for an exchange that never answered) under `__expected__/`.",
+            "sentence": "The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`, or `METHOD https://host/path` for a deployed api) under `__requests__/`, a status line (`HTTP/1.1 <status>`, or `unreachable: <reason>` for an exchange that never answered) under `__expected__/`.",
             "specification": "api",
             "family": "expectations",
             "fix": "Write the opening line the folder calls for, or move the file to the other one.",
