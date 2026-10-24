@@ -17,6 +17,7 @@ export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 
         | 'api'
         | 'cli'
         | 'component'
+        | 'deployment'
         | 'integration'
         | 'job'
         | 'lint'

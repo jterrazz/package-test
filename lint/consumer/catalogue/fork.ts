@@ -17,7 +17,7 @@ type ForkRow = {
     read: string;
 };
 
-/** The order is the decision: a rendered page is a website spec though it also answers HTTP. */
+/** The order is the decision: a rendered page is a website spec though it also answers HTTP, and a running deployment is probed as one though the app behind it is an api. */
 export const FORK: ForkRow[] = [
     {
         constructor: '`specification.website()`',
@@ -42,6 +42,15 @@ export const FORK: ForkRow[] = [
         project: '`mobile`',
         question: 'Does it render on a simulator?',
         read: '[Mobile specs](../guides/mobile-specs.md)',
+    },
+    {
+        constructor: '`specification.deployment()`',
+        kind: 'deployment',
+        livesAt: '`specs/deployment/<domain>/<aspect>.spec.ts`',
+        project: '`deployment`',
+        question:
+            'Is it already running somewhere, met over the network (a deployed URL, a host, a port), not started by the test?',
+        read: '[Deployment specs](../guides/deployment-specs.md)',
     },
     {
         constructor: '`specification.api()`',

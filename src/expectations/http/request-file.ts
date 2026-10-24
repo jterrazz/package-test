@@ -1,5 +1,5 @@
-import { refusal } from '../../../chain/refusals/refusal.js';
-import { parseHeaders, splitSections } from '../../../expectations/http/http-file.js';
+import { refusal } from '../../chain/refusals/refusal.js';
+import { parseHeaders, splitSections } from './http-file.js';
 
 export type ParsedRequestFile = {
     body?: string | undefined;

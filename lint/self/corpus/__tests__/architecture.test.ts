@@ -9,6 +9,7 @@ const ROOT = resolve(import.meta.dirname, '../../../..');
 
 const SETUPS = [
     'clock',
+    'connect',
     'env',
     'fixture',
     'headers',

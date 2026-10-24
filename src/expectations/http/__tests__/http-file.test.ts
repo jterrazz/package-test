@@ -54,20 +54,73 @@ describe('http-file', () => {
         ]).toStrictEqual([
             [
                 'found: r.http: the first line is "200 OK"',
-                'why: A response file opens on `HTTP/1.1 <status>`.',
-                'fix: start the response file with its status line: "HTTP/1.1 200 OK"',
+                'why: A response file opens on `HTTP/1.1 <status>`, or is the one line `unreachable: <reason>`.',
+                'fix: start the response file with its status line: "HTTP/1.1 200 OK", or "unreachable: <reason>" for an exchange that never answers',
                 READ_LINK,
             ].join('\n'),
             [
                 'found: r.http: the first line is ""',
-                'why: A response file opens on `HTTP/1.1 <status>`.',
-                'fix: start the response file with its status line: "HTTP/1.1 200 OK"',
+                'why: A response file opens on `HTTP/1.1 <status>`, or is the one line `unreachable: <reason>`.',
+                'fix: start the response file with its status line: "HTTP/1.1 200 OK", or "unreachable: <reason>" for an exchange that never answers',
                 READ_LINK,
             ].join('\n'),
             [
                 'found: r.http: the header line "broken header" has no colon',
                 "why: An `.http` file's header is a `Name: value` line.",
                 'fix: write the header as `Name: value`',
+                READ_LINK,
+            ].join('\n'),
+        ]);
+    });
+
+    test('http-files — an exchange that never answered — is the one line `unreachable: <reason>`, read and written back, tokens kept', () => {
+        // Given - unreachable goldens, one with a token and blank lines around it
+
+        // Then - each read as the reason it states, and written back as its line
+        expect([
+            parse('unreachable: refused\n'),
+            parse('\n  unreachable:   tls {{string}}  \n\n'),
+            serializeResponseFile({
+                body: undefined,
+                hasBody: false,
+                headers: {},
+                status: '',
+                unreachable: 'timeout',
+            }),
+        ]).toStrictEqual([
+            { body: undefined, hasBody: false, headers: {}, status: '', unreachable: 'refused' },
+            {
+                body: undefined,
+                hasBody: false,
+                headers: {},
+                status: '',
+                unreachable: 'tls {{string}}',
+            },
+            'unreachable: timeout\n',
+        ]);
+    });
+
+    test('http-files — an exchange that never answered — refuses headers or a body after the line, and a line naming no reason', () => {
+        // Given - an unreachable line with a header under it, one with a body, and one with no reason
+        const more = [
+            `found: r.http: "unreachable: refused" is followed by headers or a body`,
+            'why: An exchange that never answered carries no header and no body, so its golden is one line.',
+            'fix: keep the one line `unreachable: <reason>`, or state the status the exchange answers',
+            'read: docs/guides/deployment-specs.md#unreachable-is-a-result',
+        ].join('\n');
+
+        // Then - each refusal whole
+        expect([
+            refusalOf('unreachable: refused\nx-a: 1\n'),
+            refusalOf('unreachable: refused\n\nbody\n'),
+            refusalOf('unreachable:\n'),
+        ]).toStrictEqual([
+            more,
+            more,
+            [
+                'found: r.http: the first line is "unreachable:"',
+                'why: A response file opens on `HTTP/1.1 <status>`, or is the one line `unreachable: <reason>`.',
+                'fix: start the response file with its status line: "HTTP/1.1 200 OK", or "unreachable: <reason>" for an exchange that never answers',
                 READ_LINK,
             ].join('\n'),
         ]);

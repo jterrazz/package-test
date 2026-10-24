@@ -9,10 +9,10 @@ import { headers } from '../../../chain/context/headers.capability.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../disk/spec-path.js';
 import type { DiskFile } from '../../../disk/spec-path.js';
+import { parseRequestFile } from '../../../expectations/http/request-file.js';
+import type { ParsedRequestFile } from '../../../expectations/http/request-file.js';
 import type { ServerPort } from '../server/server.port.js';
 import { HttpResult } from './http.result.js';
-import { parseRequestFile } from './request-file.js';
-import type { ParsedRequestFile } from './request-file.js';
 import { params, routeRequest } from './route.js';
 import type { RouteArguments, RouteOptionsAny } from './route.js';
 

@@ -1,6 +1,7 @@
 export { specification } from './specifications/specification.js';
 export type * from './specifications/api/api.face.js';
 export type * from './specifications/cli/cli.face.js';
+export type * from './specifications/deployment/deployment.face.js';
 export * from './specifications/component/component.face.js';
 export type * from './specifications/integration/integration.face.js';
 export type * from './specifications/job/job.face.js';

@@ -12,7 +12,7 @@ describe('no-unknown-constructor', () => {
         expect(result.report).toMatch('');
     });
 
-    test('rejects specification.app, which is none of the seven constructors', async () => {
+    test('rejects specification.app, which is none of the eight constructors', async () => {
         // Given - the violation tree
         const result = await lint.fixture(directory('./__fixtures__/violation/')).run();
 
@@ -20,8 +20,8 @@ describe('no-unknown-constructor', () => {
         expect(result.report).toMatch(`
             specs/api/app.specification.ts:5:39  jterrazz(no-unknown-constructor)
                 found: \`specification.app\` is no constructor
-                why: Seven constructors and only seven: \`specification.api()\`, \`specification.job()\`, \`specification.cli(bin)\`, \`specification.integration()\`, \`specification.website()\`, \`specification.mobile()\`, \`specification.lint()\`.
-                fix: call \`specification.api()\`, \`.job()\`, \`.cli(bin)\`, \`.integration()\`, \`.website()\`, \`.mobile()\` or \`.lint()\`; a rendered unit is the \`component\` chain
+                why: Eight constructors and only eight: \`specification.api()\`, \`specification.job()\`, \`specification.cli(bin)\`, \`specification.integration()\`, \`specification.website()\`, \`specification.deployment()\`, \`specification.mobile()\`, \`specification.lint()\`.
+                fix: call \`specification.api()\`, \`.job()\`, \`.cli(bin)\`, \`.integration()\`, \`.website()\`, \`.deployment()\`, \`.mobile()\` or \`.lint()\`; a rendered unit is the \`component\` chain
                 read: docs/reference/linting.md#no-unknown-constructor
         `);
     });

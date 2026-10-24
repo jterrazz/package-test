@@ -17,7 +17,7 @@ An api spec answers one question: **given this state and this request, what does
 | What it proves     | Application logic against real databases, caches and processes                                         |
 | Parallel isolation | Per-worker schema / db-index / file copy (rule `state-isolated-per-worker`)                            |
 
-Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does (its Dockerfile, its wiring, its networking) is a deployment probe, and this specification does not claim it.
+Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does (its Dockerfile, its wiring, its networking) is a deployment probe, and this specification does not claim it: probe the running deployment with [`specification.deployment()`](deployment-specs.md).
 
 A `postgres()` service runs `docker/<service>/init.sql` when it starts, under the kebab-case of its record key; `sqlite()` takes its schema from its own `init` or `prismaSchema` option instead ([Services](../reference/services.md#dockerserviceinitsql)).
 

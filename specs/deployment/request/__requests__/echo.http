@@ -1,0 +1,5 @@
+POST /echo
+content-type: text/plain
+x-probe: from-the-file
+
+ping

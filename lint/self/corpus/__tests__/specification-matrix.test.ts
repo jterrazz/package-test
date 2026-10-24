@@ -8,6 +8,7 @@ import type {
     ComponentVisitor,
     RenderResult,
 } from '../../../../src/specifications/component/component.face.js';
+import type { ExchangeResult } from '../../../../src/specifications/deployment/deployment.face.js';
 import type { CallResult } from '../../../../src/specifications/integration/integration.face.js';
 import type { MobileElementKind } from '../../../../src/specifications/mobile/device/device.port.js';
 import type {
@@ -38,6 +39,7 @@ const SPECIFICATION_COLUMNS = [
     'api',
     'cli',
     'component',
+    'deployment',
     'integration',
     'job',
     'lint',
@@ -144,6 +146,15 @@ const fetchResult = {
     table: NO_DISK,
 } satisfies Record<keyof FetchResult, Published>;
 
+const deploymentResult = {
+    captures: INTERNAL,
+    directory: NO_DISK,
+    file: NO_DISK,
+    response: true,
+    table: NO_DISK,
+    tls: true,
+} satisfies Record<keyof ExchangeResult, Published>;
+
 const mobileResult = {
     captures: INTERNAL,
     content: true,
@@ -174,6 +185,7 @@ const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = 
     api: [apiResult],
     cli: [cliResult],
     component: [componentResult],
+    deployment: [deploymentResult],
     integration: [integrationResult],
     job: [jobResult],
     lint: [lintResult],

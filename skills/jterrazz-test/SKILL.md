@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: 'Testing conventions for @jterrazz projects: the nine kinds (module, integration, component, website, mobile, api, job, cli, lint) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.'
+description: 'Testing conventions for @jterrazz projects: the ten kinds (module, integration, component, website, deployment, mobile, api, job, cli, lint) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.'
 metadata:
     version: '17'
 ---
@@ -18,13 +18,14 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 1. A whole served page in a browser? → **website**, `specs/website/<domain>/<aspect>.spec.ts`
 2. A component (React, a DOM function, a hook)? → **component**, `__tests__/<file>.test.tsx` in the folder of `<file>.tsx`
 3. A screen on a simulator? → **mobile**, `specs/mobile/<domain>/<aspect>.spec.ts`
-4. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts`, the folder derived from the route (`GET /events` gives `events/list/`)
-5. Triggered by name, in-process? → **job**, `specs/job/<job>/<aspect>.spec.ts`
-6. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
-7. A rule the project ships (a plugin, a checker, a preset)? → **lint**, `specs/lint/<rule>/<aspect>.spec.ts`; the rule's visitor alone is a module test on `ruleTester()`
-8. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
-9. A module alone? → **module**, `__tests__/<file>.test.ts` in the folder of `<file>.ts`
-10. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
+4. Already running somewhere, met over the network (a deployed URL, a host, a port)? → **deployment**, `specs/deployment/<domain>/<aspect>.spec.ts`; a connection that never answers is the result `unreachable: <reason>`, never a throw
+5. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts`, the folder derived from the route (`GET /events` gives `events/list/`)
+6. Triggered by name, in-process? → **job**, `specs/job/<job>/<aspect>.spec.ts`
+7. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
+8. A rule the project ships (a plugin, a checker, a preset)? → **lint**, `specs/lint/<rule>/<aspect>.spec.ts`; the rule's visitor alone is a module test on `ruleTester()`
+9. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
+10. A module alone? → **module**, `__tests__/<file>.test.ts` in the folder of `<file>.ts`
+11. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
 
 A spec file asks ONE question (its name, the aspect, never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect; a module test `__tests__/<file>.test.ts(x)` holds one `describe` titled with the export it covers. `typescript fix` splits, moves and retitles ([Conventions § One file, one subject](../../docs/concepts/conventions.md#one-file-one-subject)).
 
@@ -90,6 +91,7 @@ describe('shape', () => {
 | component                                       | [docs/guides/component-specs.md](../../docs/guides/component-specs.md)                                                           |
 | website                                         | [docs/guides/website-specs.md](../../docs/guides/website-specs.md)                                                               |
 | mobile                                          | [docs/guides/mobile-specs.md](../../docs/guides/mobile-specs.md)                                                                 |
+| deployment: a running URL, a host, a port       | [docs/guides/deployment-specs.md](../../docs/guides/deployment-specs.md)                                                         |
 | api                                             | [docs/guides/api-specs.md](../../docs/guides/api-specs.md)                                                                       |
 | job                                             | [docs/guides/job-specs.md](../../docs/guides/job-specs.md)                                                                       |
 | cli, and a `<case>.spec.yaml`                   | [docs/guides/cli-specs.md](../../docs/guides/cli-specs.md), [docs/guides/spec-documents.md](../../docs/guides/spec-documents.md) |

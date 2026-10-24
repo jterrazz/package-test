@@ -22,6 +22,7 @@ The pages follow the package's four export families (what is tested, what surrou
 | [Component specs](guides/component-specs.md)     | A rendered unit in a real Chromium, in its folder's `__tests__/`: the `component` chain |
 | [Website specs](guides/website-specs.md)         | A served page, fetched or driven in a browser: `specification.website()`                |
 | [Mobile specs](guides/mobile-specs.md)           | A native app on an iOS simulator: `specification.mobile()`                              |
+| [Deployment specs](guides/deployment-specs.md)   | A running deployment, one HTTP exchange over the network: `specification.deployment()`  |
 | [API specs](guides/api-specs.md)                 | An HTTP app, in-process, through complete requests: `specification.api()`               |
 | [Job specs](guides/job-specs.md)                 | A pipeline triggered by name: `specification.job()`                                     |
 | [CLI specs](guides/cli-specs.md)                 | A binary in a fresh working directory: `specification.cli()`                            |

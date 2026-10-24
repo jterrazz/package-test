@@ -6,6 +6,7 @@ export default defineStandard({
             'api',
             'cli',
             'component',
+            'deployment',
             'integration',
             'job',
             'lint',

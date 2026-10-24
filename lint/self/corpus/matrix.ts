@@ -85,7 +85,7 @@ function declaredCapabilities(): Capability[] {
 
 export function matrixCapabilities(): Capability[] {
     const tokens: Capability[] = TOKEN_KINDS.map((kind) => ({
-        columns: ['api', 'cli', 'integration', 'website', 'module'],
+        columns: ['api', 'cli', 'integration', 'website', 'deployment', 'module'],
         group: 'Token',
         name: `{{${kind}}}`,
         probe: `{{${kind}`,
@@ -96,6 +96,7 @@ export function matrixCapabilities(): Capability[] {
             cli: TOKENS_ARE_THE_MATCHERS,
             integration: TOKENS_ARE_THE_MATCHERS,
             website: TOKENS_ARE_THE_MATCHERS,
+            deployment: TOKENS_ARE_THE_MATCHERS,
         },
     }));
     return [...declaredCapabilities(), ...tokens];
@@ -150,6 +151,7 @@ export function matrixRows(root: string): MatrixRow[] {
             api: count(capability, 'api'),
             cli: count(capability, 'cli'),
             component: count(capability, 'component'),
+            deployment: count(capability, 'deployment'),
             integration: count(capability, 'integration'),
             job: count(capability, 'job'),
             lint: count(capability, 'lint'),

@@ -25,6 +25,7 @@ ruleTester().run('no-unknown-constructor', noUnknownConstructor, {
         { code: 'await specification.cli("./bin");' },
         { code: 'await specification.integration({ services });' },
         { code: 'await specification.website({ server });' },
+        { code: "await specification.deployment({ url: 'https://site.example' });" },
         { code: 'await specification.mobile({ app, device });' },
         { code: 'await specification.lint({ presets: [] });' },
         { name: 'Other objects are untouched.', code: 'await other.app({});' },

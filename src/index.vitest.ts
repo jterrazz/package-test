@@ -11,6 +11,7 @@ import { refusal } from './chain/refusals/refusal.js';
 import { api } from './specifications/api/api.project.js';
 import { cli } from './specifications/cli/cli.project.js';
 import { component } from './specifications/component/component.project.js';
+import { deployment } from './specifications/deployment/deployment.project.js';
 import { integration } from './specifications/integration/integration.project.js';
 import { job } from './specifications/job/job.project.js';
 import { lint } from './specifications/lint/lint.project.js';
@@ -32,6 +33,10 @@ export {
     component,
     type ComponentProjectOptions,
 } from './specifications/component/component.project.js';
+export {
+    deployment,
+    type DeploymentProjectOptions,
+} from './specifications/deployment/deployment.project.js';
 export {
     integration,
     type IntegrationProjectOptions,
@@ -59,6 +64,7 @@ const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
     ['job', job],
     ['integration', integration],
     ['website', website],
+    ['deployment', deployment],
     ['mobile', mobile],
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `projectOf` hands every component the root it reads its paths against
     ['component', component as Builder],

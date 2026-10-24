@@ -19,6 +19,25 @@ import {
 
 await registerMatchers();
 
+type Outcome = Parameters<typeof buildUpdatedResponse>[1];
+
+const unreachableAnswer = (reason: string): Outcome => ({
+    body: null,
+    headers: {},
+    status: 0,
+    unreachable: reason,
+});
+
+function outcomeVerdict(golden: string, actual: Outcome): null | string {
+    const expected = parseResponseFile(golden, 'g.http');
+    return compareResponse('g.http', expected, actual, new CaptureScope());
+}
+
+function rewritten(golden: null | string, actual: Outcome): string {
+    const previous = golden === null ? null : parseResponseFile(golden, 'g.http');
+    return serializeResponseFile(buildUpdatedResponse(previous, actual));
+}
+
 describe('response-goldens', () => {
     test('responseGoldens — response update mode — buildUpdatedResponse (rule `no-volatile-literal`) — writes only headers present in the actual response (intersection)', () => {
         // Given - a previous fixture with a matching placeholder, a stale value, and a header the response no longer sends
@@ -184,6 +203,73 @@ describe('response-goldens', () => {
             'Response status mismatch (r.http)\n  expected: 201\n  received: 200',
             'Response header mismatch (r.http)\n  header: x-req\n  expected: {{any}}\n  received: (absent)',
             'Response mismatch (r.http)',
+        ]);
+    });
+
+    test('responseGoldens — an exchange that never answered — compareResponse — a reason is judged against a reason, tokens allowed, and against a status line names both outcomes', () => {
+        // Given - goldens of a reason, a tokenised reason and a status, and outcomes of each kind
+
+        // Then - nothing where the outcomes agree, the two outcomes where they do not
+        expect([
+            outcomeVerdict('unreachable: refused\n', unreachableAnswer('refused')),
+            outcomeVerdict(
+                'unreachable: tls {{string}}\n',
+                unreachableAnswer('tls CERT_HAS_EXPIRED'),
+            ),
+            outcomeVerdict('unreachable: refused\n', unreachableAnswer('timeout')),
+            outcomeVerdict('unreachable: refused\n', { body: null, headers: {}, status: 200 }),
+            outcomeVerdict('HTTP/1.1 200 OK\n', unreachableAnswer('dns')),
+        ]).toStrictEqual([
+            null,
+            null,
+            'Response outcome mismatch (g.http)\n  expected: unreachable: refused\n  received: unreachable: timeout',
+            'Response outcome mismatch (g.http)\n  expected: unreachable: refused\n  received: HTTP/1.1 200',
+            'Response outcome mismatch (g.http)\n  expected: HTTP/1.1 200\n  received: unreachable: dns',
+        ]);
+    });
+
+    test('responseGoldens — an exchange that never answered — buildUpdatedResponse — writes the reason, keeps a token that still matches, and states nothing of an earlier outcome', () => {
+        // Given - outcomes that never answered and one that did, over goldens of each kind
+        const answered = {
+            body: { ok: true },
+            headers: { 'content-type': 'application/json', 'x-a': '1' },
+            status: 200,
+        };
+
+        // Then - each golden as update mode rewrites it
+        expect([
+            rewritten(null, unreachableAnswer('refused')),
+            rewritten('unreachable: tls {{string}}\n', unreachableAnswer('tls X')),
+            rewritten('unreachable: refused\n', unreachableAnswer('timeout')),
+            rewritten('HTTP/1.1 200 OK\n', unreachableAnswer('dns')),
+            rewritten('unreachable: refused\n', answered),
+        ]).toStrictEqual([
+            'unreachable: refused\n',
+            'unreachable: tls {{string}}\n',
+            'unreachable: timeout\n',
+            'unreachable: dns\n',
+            'HTTP/1.1 200 OK\ncontent-type: application/json\n\n{\n    "ok": true\n}\n',
+        ]);
+    });
+
+    test("responseGoldens — a response's recording — a fresh golden records the headers it names that the response carries, and a golden with no body keeps none when the recording says so", () => {
+        // Given - a recording of two headers that keeps a bodyless golden bodyless, and a response carrying one of them
+        const actual = {
+            body: { ok: true },
+            headers: { 'content-type': 'application/json', location: '/next' },
+            recording: { bodyKeptAbsent: true, headers: ['Location', 'x-frame-options'] },
+            status: 301,
+        };
+
+        // Then - fresh: the one named header carried, and the body; over a bodyless golden: still bodyless; over one with a body: the body
+        expect([
+            rewritten(null, actual),
+            rewritten('HTTP/1.1 301\n', actual),
+            rewritten('HTTP/1.1 301\n\n{ "ok": false }\n', actual),
+        ]).toStrictEqual([
+            'HTTP/1.1 301 Moved Permanently\nlocation: /next\n\n{\n    "ok": true\n}\n',
+            'HTTP/1.1 301 Moved Permanently\n',
+            'HTTP/1.1 301 Moved Permanently\n\n{\n    "ok": true\n}\n',
         ]);
     });
 

@@ -2,7 +2,7 @@
 
 `specification.website()` tests a rendered website (its raw HTTP surface: redirects, robots.txt, headers; and its rendered surface: title, head metadata, JSON-LD, console, and full user scenarios) through a real Chromium. It starts the site itself, or targets one already running.
 
-Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](api-specs.md); for a binary use [cli](cli-specs.md).
+Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](api-specs.md); for what a running deployment answers with no browser (its status, headers, certificate, and the addresses that refuse) use [deployment](deployment-specs.md); for a binary use [cli](cli-specs.md).
 
 ## What it specifies
 

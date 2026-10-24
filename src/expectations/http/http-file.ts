@@ -7,8 +7,10 @@ export type ParsedResponseFile = {
     body: unknown;
     hasBody: boolean;
     headers: Record<string, string>;
-    /** Status token as written: usually numeric, may be a placeholder. */
+    /** Status token as written: usually numeric, may be a placeholder; empty for an unreachable outcome. */
     status: string;
+    /** The reason an `unreachable: <reason>` golden states, tokens allowed; absent for a status line. */
+    unreachable?: string | undefined;
 };
 
 export function splitSections(content: string): {
@@ -65,6 +67,11 @@ export type BodyKind = 'binary' | 'json' | 'sniffed' | 'text';
 const PARAMETERS = /;.*$/su;
 
 const START_LINE = /^HTTP\/1\.1\s+(?<status>\S+)(?:\s+.*)?$/u;
+
+const UNREACHABLE_LINE = /^unreachable:\s*(?<reason>\S.*)$/u;
+
+/** The one line an exchange that never answered is written as. */
+export const unreachableLine = (reason: string): string => `unreachable: ${reason}`;
 
 const TEXT_MEDIA_TYPES = new Set([
     'application/javascript',
@@ -135,14 +142,19 @@ export function parseResponseFile(
 ): ParsedResponseFile {
     const { body, headerLines, startLine } = splitSections(content);
 
+    const reason = UNREACHABLE_LINE.exec(startLine.trim())?.groups?.reason;
+    if (reason !== undefined) {
+        return unreachableFile(reason, headerLines.length > 0 || body.length > 0, fileName);
+    }
+
     const status = START_LINE.exec(startLine.trim())?.[1];
     if (status === undefined) {
         throw new Error(
             refusal({
-                fix: 'start the response file with its status line: "HTTP/1.1 200 OK"',
+                fix: 'start the response file with its status line: "HTTP/1.1 200 OK", or "unreachable: <reason>" for an exchange that never answers',
                 found: `${fileName}: the first line is "${startLine}"`,
                 read: 'docs/guides/api-specs.md#http-request-files-full-format',
-                why: 'A response file opens on `HTTP/1.1 <status>`.',
+                why: 'A response file opens on `HTTP/1.1 <status>`, or is the one line `unreachable: <reason>`.',
             }),
         );
     }
@@ -156,6 +168,26 @@ export function parseResponseFile(
     };
 }
 
+// invariant: an exchange that never answered has no header and no body to state.
+function unreachableFile(reason: string, more: boolean, fileName: string): ParsedResponseFile {
+    if (more) {
+        throw new Error(
+            refusal({
+                fix: 'keep the one line `unreachable: <reason>`, or state the status the exchange answers',
+                found: `${fileName}: "unreachable: ${reason}" is followed by headers or a body`,
+                read: 'docs/guides/deployment-specs.md#unreachable-is-a-result',
+                why: 'An exchange that never answered carries no header and no body, so its golden is one line.',
+            }),
+        );
+    }
+    return unreachableResponse(reason);
+}
+
+/** The golden of an exchange that never answered: its reason, and no status, header or body. */
+export function unreachableResponse(reason: string): ParsedResponseFile {
+    return { body: undefined, hasBody: false, headers: {}, status: '', unreachable: reason };
+}
+
 const STATUS_TEXT: Record<number, string> = {
     200: 'OK',
     201: 'Created',
@@ -164,6 +196,8 @@ const STATUS_TEXT: Record<number, string> = {
     301: 'Moved Permanently',
     302: 'Found',
     304: 'Not Modified',
+    307: 'Temporary Redirect',
+    308: 'Permanent Redirect',
     400: 'Bad Request',
     401: 'Unauthorized',
     403: 'Forbidden',
@@ -183,9 +217,13 @@ export function serializeResponseFile(
         hasBody: boolean;
         headers: Record<string, string>;
         status: string;
+        unreachable?: string | undefined;
     },
     contentType?: string,
 ): string {
+    if (response.unreachable !== undefined) {
+        return `${unreachableLine(response.unreachable)}\n`;
+    }
     const statusNumber = Number(response.status);
     const statusText = STATUS_TEXT[statusNumber];
     const lines = [

@@ -24,6 +24,9 @@
     ComponentUi
     ComponentVisitor
     ContainerAccessor
+    DeploymentHandle
+    DeploymentSpecification
+    DeploymentSpecificationOptions
     DeviceOpenOptions
     DevicePort
     DeviceScreen
@@ -36,6 +39,7 @@
     DomMount
     ElementKind
     ElementMatch
+    ExchangeResult
     ExecOptions
     FetchResult
     FileAccessor
@@ -103,6 +107,7 @@
     Target
     TargetOptions
     TextAccessor
+    TlsFacts
     VisitScenario
     WaitUntilOptions
     WebsiteBackendOptions
@@ -197,6 +202,7 @@
     ApiProjectOptions
     CliProjectOptions
     ComponentProjectOptions
+    DeploymentProjectOptions
     InProcessProjectOptions
     IntegrationProjectOptions
     JobProjectOptions
@@ -211,6 +217,7 @@
     api
     cli
     component
+    deployment
     integration
     job
     lint

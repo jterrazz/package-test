@@ -76,6 +76,7 @@ export const FRAMEWORK_LAYERS = {
             api: librariesOwnedIn('src/specifications/api/'),
             cli: librariesOwnedIn('src/specifications/cli/'),
             component: librariesOwnedIn('src/specifications/component/'),
+            deployment: librariesOwnedIn('src/specifications/deployment/'),
             integration: librariesOwnedIn('src/specifications/integration/'),
             job: librariesOwnedIn('src/specifications/job/'),
             lint: ['@jterrazz/typescript/rules', ...librariesOwnedIn('src/specifications/lint/')],
@@ -97,6 +98,7 @@ export const FRAMEWORK_LAYERS = {
             'specifications/specification.ts': [
                 'specifications/api/api.handle',
                 'specifications/cli/cli.handle',
+                'specifications/deployment/deployment.handle',
                 'specifications/integration/integration.handle',
                 'specifications/job/job.handle',
                 'specifications/lint/lint.handle',
@@ -107,6 +109,7 @@ export const FRAMEWORK_LAYERS = {
             'specifications/api/api.project.ts': ['vitest/project'],
             'specifications/cli/cli.project.ts': ['vitest/project'],
             'specifications/component/component.project.ts': ['vitest/project'],
+            'specifications/deployment/deployment.project.ts': ['vitest/project'],
             'specifications/integration/integration.project.ts': ['vitest/project'],
             'specifications/job/job.project.ts': ['vitest/project'],
             'specifications/lint/lint.project.ts': ['vitest/project'],

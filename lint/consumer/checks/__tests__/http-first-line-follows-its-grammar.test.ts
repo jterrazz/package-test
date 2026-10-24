@@ -4,7 +4,7 @@ import { checkHttpFirstLineFollowsItsGrammar } from '../http-first-line-follows-
 
 describe('checkHttpFirstLineFollowsItsGrammar', () => {
     test('a request opens on its request line and a response on its status line, past blank lines and indentation', () => {
-        // Given - requests and responses whose first written line is right, wrong, indented, or missing
+        // Given - requests and responses whose first written line is right, wrong, indented, or missing; a request naming its URL whole, and a response that never answered
         const judged = [
             ['request', 'POST /users HTTP/1.1\nHost: x\n'],
             ['request', '\n  \n   GET /\n'],
@@ -15,6 +15,13 @@ describe('checkHttpFirstLineFollowsItsGrammar', () => {
             ['response', '\n HTTP/2 404\n'],
             ['response', 'HTTP/1.1 2000\n'],
             ['response', 'status 200\n'],
+            ['request', 'GET https://site.test/health\n'],
+            ['request', 'GET site.test/health\n'],
+            ['response', 'unreachable: tls CERT_HAS_EXPIRED\n'],
+            ['response', 'unreachable:\n'],
+            ['request', 'GET http://site.test/\n'],
+            ['request', 'FETCH GET /users\n'],
+            ['response', 'see HTTP/1.1 200\n'],
         ] as const;
 
         // Then - the ones that open on no such line, each told what to write
@@ -26,11 +33,15 @@ describe('checkHttpFirstLineFollowsItsGrammar', () => {
                 ),
             ),
         ).toStrictEqual([
-            'http-first-line-follows-its-grammar 2.http:1 the first line of 2.http is no request line — start 2.http with its request line, `GET /path` or another method',
-            'http-first-line-follows-its-grammar 3.http:1 the first line of 3.http is no request line — start 3.http with its request line, `GET /path` or another method',
-            'http-first-line-follows-its-grammar 4.http:1 the first line of 4.http is no request line — start 4.http with its request line, `GET /path` or another method',
-            'http-first-line-follows-its-grammar 7.http:1 the first line of 7.http is no status line — start 7.http with its status line, `HTTP/1.1 200 OK` or the status it expects',
-            'http-first-line-follows-its-grammar 8.http:1 the first line of 8.http is no status line — start 8.http with its status line, `HTTP/1.1 200 OK` or the status it expects',
+            'http-first-line-follows-its-grammar 2.http:1 the first line of 2.http is no request line — start 2.http with its request line, `GET /path`, `GET https://host/path` or another method',
+            'http-first-line-follows-its-grammar 3.http:1 the first line of 3.http is no request line — start 3.http with its request line, `GET /path`, `GET https://host/path` or another method',
+            'http-first-line-follows-its-grammar 4.http:1 the first line of 4.http is no request line — start 4.http with its request line, `GET /path`, `GET https://host/path` or another method',
+            'http-first-line-follows-its-grammar 7.http:1 the first line of 7.http is no status line — start 7.http with its status line, `HTTP/1.1 200 OK` or the status it expects, or `unreachable: <reason>`',
+            'http-first-line-follows-its-grammar 8.http:1 the first line of 8.http is no status line — start 8.http with its status line, `HTTP/1.1 200 OK` or the status it expects, or `unreachable: <reason>`',
+            'http-first-line-follows-its-grammar 10.http:1 the first line of 10.http is no request line — start 10.http with its request line, `GET /path`, `GET https://host/path` or another method',
+            'http-first-line-follows-its-grammar 12.http:1 the first line of 12.http is no status line — start 12.http with its status line, `HTTP/1.1 200 OK` or the status it expects, or `unreachable: <reason>`',
+            'http-first-line-follows-its-grammar 14.http:1 the first line of 14.http is no request line — start 14.http with its request line, `GET /path`, `GET https://host/path` or another method',
+            'http-first-line-follows-its-grammar 15.http:1 the first line of 15.http is no status line — start 15.http with its status line, `HTTP/1.1 200 OK` or the status it expects, or `unreachable: <reason>`',
         ]);
     });
 });

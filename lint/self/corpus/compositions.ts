@@ -2,6 +2,7 @@ import type { Composition } from '../../../src/chain/define-specification.js';
 import { apiDefinition } from '../../../src/specifications/api/api.composition.js';
 import { cliDefinition } from '../../../src/specifications/cli/cli.composition.js';
 import { componentDefinition } from '../../../src/specifications/component/component.composition.js';
+import { deploymentDefinition } from '../../../src/specifications/deployment/deployment.composition.js';
 import { integrationDefinition } from '../../../src/specifications/integration/integration.composition.js';
 import { jobDefinition } from '../../../src/specifications/job/job.composition.js';
 import { lintDefinition } from '../../../src/specifications/lint/lint.composition.js';
@@ -16,6 +17,7 @@ export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
     api: apiDefinition.composition,
     cli: cliDefinition.composition,
     component: componentDefinition.composition,
+    deployment: deploymentDefinition.composition,
     integration: integrationDefinition.composition,
     job: jobDefinition.composition,
     lint: lintDefinition.composition,

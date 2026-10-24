@@ -3,6 +3,7 @@ import { basename } from 'node:path';
 export const SPECIFICATIONS: ReadonlySet<string> = new Set([
     'api',
     'cli',
+    'deployment',
     'integration',
     'job',
     'lint',

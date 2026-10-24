@@ -25,6 +25,23 @@ ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
             ].join('\n'),
         },
         {
+            name: 'Every probe of a deployment sends the same header: the view is declared once.',
+            code: [
+                "import { deployment } from '../deployment.specification.js';",
+                "test('a', async () => { await deployment.headers({ 'x-probe': 'edge' }).get('/health'); });",
+                "test('b', async () => { await deployment.headers({ 'x-probe': 'edge' }).get('/old'); });",
+            ].join('\n'),
+            errors: [{ column: 30, line: 2, messageId: 'repeated' }],
+            filename: '/repo/specs/deployment/edge/probe.spec.ts',
+            output: [
+                "import { deployment } from '../deployment.specification.js';",
+                '',
+                "const deploymentInFile = deployment.with({ headers: { 'x-probe': 'edge' } });",
+                "test('a', async () => { await deploymentInFile.get('/health'); });",
+                "test('b', async () => { await deploymentInFile.get('/old'); });",
+            ].join('\n'),
+        },
+        {
             name: 'A setting that reads a constant of the file is declared after it, never above it.',
             code: [
                 "import { job } from '../job.specification.js';",

@@ -124,7 +124,7 @@ describe('index.vitest', () => {
             new Error(
                 refusal(
                     '`test.projects` names the specification `browser`',
-                    'key it by one of unit, lint, cli, api, job, integration, website, mobile, component',
+                    'key it by one of unit, lint, cli, api, job, integration, website, deployment, mobile, component',
                 ),
             ),
         );

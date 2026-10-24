@@ -79,7 +79,7 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 | `await result.filesystem.files()`           | `string[]`                         | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                                                          |
 | `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`                        | the document asserts itself; the LAST run's result comes back; see [Spec documents](../guides/spec-documents.md#the-three-doors-one-runner) |
 
-## `result.response`: HTTP response (api)
+## `result.response`: HTTP response (api, deployment)
 
 | Matcher                          | Sync/async | Example                                                                     |
 | -------------------------------- | ---------- | --------------------------------------------------------------------------- |
@@ -104,6 +104,14 @@ Response status mismatch (./__expected__/user-created.http)
 ```
 
 A header mismatch has the same shape (`Response header mismatch (name)`, with `header:` / `expected:` / `received:` lines; a missing header shows `received: (absent)`). A body mismatch prints a line-by-line structural diff (`Response mismatch (name)`, `- Expected` / `+ Received`) of the expected body (with matchers and tokens rendered as their placeholder text, `{{uuid#order}}`) against the actual body: a JSON value as its pretty-printed lines, and a text body (when both sides are text) as its own lines, so an HTML page or an event stream reads as written. The diff is literal: it does not annotate captured ref values, and a failed `{{uuid#order}}` re-occurrence surfaces only as the two differing lines.
+
+An exchange with a running deployment that never answered is the one line `unreachable: <reason>` ([Deployment specs § Unreachable is a result](../guides/deployment-specs.md#unreachable-is-a-result)), compared as the status line is, tokens allowed; against a status line, or another reason, the failure names both outcomes:
+
+```text
+Response outcome mismatch (the value in place)
+  expected: unreachable: timeout
+  received: HTTP/1.1 200
+```
 
 `.not`: `expect(result.response).not.toMatch(file('./__expected__/user-created.http'))` passes when any part diverges. Rarely useful; prefer positive fixtures.
 

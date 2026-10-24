@@ -39,8 +39,8 @@ describe('kitchen-sink', () => {
                 read: docs/reference/linting.md#no-malformed-ref
             specs/grammar/__requests__/req.http:1:1  jterrazz-check(http-first-line-follows-its-grammar)
                 found: the first line of req.http is no request line
-                why: The first line of a depth-1 \`.http\` follows its grammar: a request line (\`METHOD /path\`) under \`__requests__/\`, a status line (\`HTTP/1.1 <status>\`) under \`__expected__/\`.
-                fix: start req.http with its request line, \`GET /path\` or another method
+                why: The first line of a depth-1 \`.http\` follows its grammar: a request line (\`METHOD /path\`, or \`METHOD https://host/path\` for a deployment) under \`__requests__/\`, a status line (\`HTTP/1.1 <status>\`, or \`unreachable: <reason>\` for an exchange that never answered) under \`__expected__/\`.
+                fix: start req.http with its request line, \`GET /path\`, \`GET https://host/path\` or another method
                 read: docs/reference/linting.md#http-first-line-follows-its-grammar
             specs/grammar/__requests__/req.http:3:1  jterrazz-check(no-token-in-request)
                 found: the token {{string}} in a __requests__/ file
