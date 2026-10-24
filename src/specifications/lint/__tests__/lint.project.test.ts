@@ -15,4 +15,13 @@ describe('lint', () => {
             ['specs/lint/x/**/*.spec.ts'],
         ]);
     });
+
+    test('lint() — the lint project — shares one module graph per worker when the project says so, and isolates otherwise', () => {
+        // Given - a lint project whose specs keep no state in a module, and one stated by nobody
+        const shared = lint({ isolate: false }).test;
+
+        // Then - the first runs its files in one graph per worker, the other is vitest's default
+        expect(shared?.isolate).toBe(false);
+        expect(lint().test).not.toHaveProperty('isolate');
+    });
 });

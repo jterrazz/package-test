@@ -134,6 +134,10 @@ A preset's own `oxlint` (its plugin, its rulebook) is not run by `presets`: the 
 
 A linter that fails and reports no diagnostic is refused in four parts rather than read as a clean tree: a plugin that does not load, a config oxlint cannot build, a checker that cannot start.
 
+### One module graph per worker
+
+The lint project runs a worker's files in one module graph (`isolate: false`), as the standard hands it: each spec lays its own fixture tree and runs the linters as processes of their own, so a file leaves nothing in a module for the next one, and the worker, the framework and the kit load once per worker instead of once per file. A project whose lint specs keep state in a module (a cache, a counter, a stub set at load) states `isolate: true` for its `lint` project in `jterrazz.config.ts`, with its reason.
+
 ### A rule pack: a nested Vitest and a reporter fixture
 
 A package that ships lint rules for other projects proves them by running the real binary on a tree: the spec starts a nested `vitest` over a fixture project (`.fixture(directory(...))`) with a reporter fixture that prints one line per finding, and compares that output whole. A rule alone is `ruleTester()`.
