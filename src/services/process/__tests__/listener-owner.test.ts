@@ -41,7 +41,10 @@ describe('listener-owner', () => {
         const { pid = '', port = '' } =
             /away (?<pid>\d+) (?<port>\d+)/u.exec(failure)?.groups ?? {};
         onTestFinished(() => {
-            process.kill(Number(pid), 'SIGKILL');
+            // hazard: a pid no refusal printed reads as 0, and a kill of 0 is one of this whole process group.
+            if (Number(pid) > 0) {
+                process.kill(Number(pid), 'SIGKILL');
+            }
         });
 
         // Then - refused for the answer that was not its own
