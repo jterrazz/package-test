@@ -130,21 +130,26 @@ describe('listener-owner', () => {
     });
 
     test('ownsOnLinux — the listeners of /proc/net against the sockets each process of the group holds — owned only by the group alone', async () => {
-        // Given - a /proc where 8080 is listened on by inode 111 (process 40, group 40) and 8081 by 333 (process 90, group 90)
+        // Given - a /proc where 8080 is listened on by inode 111 (process 40, group 40), 8081 by 333 and 8082, over IPv6, by 444 (process 90, group 90)
         const files: Record<string, string> = {
             '/proc/40/stat': '40 (node) S 1 40 40 0',
             '/proc/90/stat': '90 (other one) S 1 90 90 0',
             '/proc/net/tcp': TCP_TABLE,
+            '/proc/net/tcp6': [
+                '  sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode',
+                '   0: 00000000000000000000000001000000:1F92 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000  1000        0 444 1 0000000000000000 100 0 0 10 0',
+            ].join('\n'),
         };
         const links: Record<string, string> = {
             '/proc/40/fd/3': 'socket:[111]',
             '/proc/40/fd/4': '/dev/null',
             '/proc/90/fd/5': 'socket:[333]',
+            '/proc/90/fd/6': 'socket:[444]',
         };
         const folders: Record<string, string[]> = {
             '/proc': ['40', '90', 'net', 'self'],
             '/proc/40/fd': ['3', '4'],
-            '/proc/90/fd': ['5'],
+            '/proc/90/fd': ['5', '6'],
         };
         const proc: ProcReader = {
             entries: async (path) => await Promise.resolve(folders[path] ?? []),
@@ -152,13 +157,14 @@ describe('listener-owner', () => {
             text: async (path) => await Promise.resolve(files[path] ?? ''),
         };
 
-        // Then - 8080 is group 40's, 8081 is not, and a port no one listens on is no one's
+        // Then - 8080 is group 40's, 8081 is not, 8082 is group 90's, and a port no one listens on is no one's
         expect([
             await ownsOnLinux(8080, 40, proc),
             await ownsOnLinux(8081, 40, proc),
             await ownsOnLinux(8081, 90, proc),
+            await ownsOnLinux(8082, 90, proc),
             await ownsOnLinux(9999, 40, proc),
-        ]).toStrictEqual([true, false, true, false]);
+        ]).toStrictEqual([true, false, true, true, false]);
     });
 
     test('ownsOnDarwin — what lsof answers — no listener when it exits 0 or 1 with nothing printed, no verdict when it cannot run', async () => {

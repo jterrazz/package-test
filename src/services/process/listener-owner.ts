@@ -58,8 +58,8 @@ const NODE_PROC: ProcReader = {
 // Stryker restore StringLiteral,ArrayDeclaration,ArrowFunction
 
 async function groupInodes(group: number, proc: ProcReader): Promise<Set<string>> {
-    const names = await proc.entries('/proc');
-    const pids = names.filter((name) => /^\d+$/u.test(name));
+    // invariant: an entry of /proc that is no process (`net`, `sys`) reads no stat, whose group is no number.
+    const pids = await proc.entries('/proc');
     const owned = new Set<string>();
     for (const pid of pids) {
         if (processGroupOf(await proc.text(`/proc/${pid}/stat`)) !== group) {
