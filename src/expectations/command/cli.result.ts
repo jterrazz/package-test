@@ -216,10 +216,10 @@ export class CliResult extends BaseResult {
     }
 }
 
-// outside: docker inspect names a container `/<name>`.
+// outside: docker inspect names a container `Name`, `/<name>`, always with its leading slash.
 function described({ id, inspect }: CapturedContainer): string {
-    const name = fieldOf(inspect, 'Name', 'name');
-    return typeof name === 'string' ? `${id} (${name.replace(/^\//u, '')})` : id;
+    const name = fieldOf(inspect, 'Name');
+    return typeof name === 'string' ? `${id} (${name.slice(1)})` : id;
 }
 
 function labelsOf(inspect: unknown): Readonly<Record<string, unknown>> {
