@@ -6,9 +6,12 @@ import {
     listeningInodes,
     owns,
     ownsFromLsof,
+    ownsOnDarwin,
+    ownsOnLinux,
     processGroupOf,
     socketInode,
 } from '../listener-owner.js';
+import type { ProcReader } from '../listener-owner.js';
 import { ServedProcess } from '../serve.js';
 import { HANDS_PORT_AWAY, refused } from './serve.fixtures.js';
 
@@ -102,12 +105,14 @@ describe('listener-owner', () => {
     });
 
     test("socketInode — a file descriptor link — names a socket's inode and nothing for another file", () => {
-        // Given - a socket, a file and a pipe
-        const links = ['socket:[4242]', '/dev/null', 'pipe:[17]'];
+        // Given - a socket, a file, a pipe, and two links holding a socket's within more
+        const links = ['socket:[4242]', '/dev/null', 'pipe:[17]', 'socket:[5]x', 'xsocket:[6]'];
 
-        // Then - a socket's inode, nothing for a file or a pipe
+        // Then - a socket's inode, nothing for a file, a pipe, or a link that only holds a socket's
         expect(links.map((link) => socketInode(link))).toStrictEqual([
             '4242',
+            undefined,
+            undefined,
             undefined,
             undefined,
         ]);
@@ -122,5 +127,55 @@ describe('listener-owner', () => {
             undefined,
             undefined,
         ]);
+    });
+
+    test('ownsOnLinux — the listeners of /proc/net against the sockets each process of the group holds — owned only by the group alone', async () => {
+        // Given - a /proc where 8080 is listened on by inode 111 (process 40, group 40) and 8081 by 333 (process 90, group 90)
+        const files: Record<string, string> = {
+            '/proc/40/stat': '40 (node) S 1 40 40 0',
+            '/proc/90/stat': '90 (other one) S 1 90 90 0',
+            '/proc/net/tcp': TCP_TABLE,
+        };
+        const links: Record<string, string> = {
+            '/proc/40/fd/3': 'socket:[111]',
+            '/proc/40/fd/4': '/dev/null',
+            '/proc/90/fd/5': 'socket:[333]',
+        };
+        const folders: Record<string, string[]> = {
+            '/proc': ['40', '90', 'net', 'self'],
+            '/proc/40/fd': ['3', '4'],
+            '/proc/90/fd': ['5'],
+        };
+        const proc: ProcReader = {
+            entries: async (path) => await Promise.resolve(folders[path] ?? []),
+            link: async (path) => await Promise.resolve(links[path] ?? ''),
+            text: async (path) => await Promise.resolve(files[path] ?? ''),
+        };
+
+        // Then - 8080 is group 40's, 8081 is not, and a port no one listens on is no one's
+        expect([
+            await ownsOnLinux(8080, 40, proc),
+            await ownsOnLinux(8081, 40, proc),
+            await ownsOnLinux(8081, 90, proc),
+            await ownsOnLinux(9999, 40, proc),
+        ]).toStrictEqual([true, false, true, false]);
+    });
+
+    test('ownsOnDarwin — what lsof answers — no listener when it exits 0 or 1 with nothing printed, no verdict when it cannot run', async () => {
+        // Given - programs standing in for lsof: one that exits 0, one that exits 1, one that is not there
+        const programs = ['true', 'false', 'no-such-lsof-program'];
+
+        // Then - nothing owned for the two that ran, and no verdict for the missing one
+        await expect(
+            Promise.all(programs.map(async (program) => await ownsOnDarwin(1, 1, program))),
+        ).resolves.toStrictEqual([false, false, undefined]);
+    });
+
+    test('groupOwnsPort — linux — reads /proc, which owns nothing on a port no one listens on', async () => {
+        // Given - the Linux answer asked about a port nothing listens on
+        const platform = 'linux';
+
+        // Then - owned by no one, wherever the run is
+        await expect(groupOwnsPort(1, 1, platform)).resolves.toBe(false);
     });
 });

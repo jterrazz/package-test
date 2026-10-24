@@ -20,18 +20,16 @@ export function owns(listeners: readonly string[], owned: ReadonlySet<string>): 
 
 const LISTEN_STATE = '0A';
 
-// outside: a row of `/proc/net/tcp` and `tcp6` reads `sl local_address rem_address st ... uid timeout inode`, the local address `HEXIP:HEXPORT`.
+// outside: a row of `/proc/net/tcp` and `tcp6` reads `sl local_address rem_address st ... uid timeout inode`, the local address `HEXIP:HEXPORT`; the header row's state reads `st`.
 export function listeningInodes(table: string, port: number): string[] {
     return table
         .split('\n')
-        .slice(1)
         .map((row) => row.trim().split(/\s+/u))
-        .filter(
-            ([, local = '', , state]) =>
-                state === LISTEN_STATE &&
-                Number.parseInt(local.split(':').at(-1) ?? '', 16) === port,
-        )
-        .map((fields) => fields[9] ?? '');
+        .filter(([, local, , state]) => {
+            const [, hex] = String(local).split(':');
+            return state === LISTEN_STATE && Number.parseInt(String(hex), 16) === port;
+        })
+        .map((fields) => String(fields[9]));
 }
 
 // outside: `/proc/<pid>/stat` reads `pid (comm) state ppid pgrp ...`, and the command name may hold spaces and parentheses itself.
@@ -44,24 +42,31 @@ export function socketInode(link: string): string | undefined {
     return /^socket:\[(?<inode>\d+)\]$/u.exec(link)?.groups?.inode;
 }
 
-async function readable(path: string): Promise<string> {
-    return await readFile(path, 'utf8').catch(() => '');
-}
+/** The three reads of `/proc` the Linux answer takes, each answering nothing for what it cannot read. */
+export type ProcReader = {
+    entries: (path: string) => Promise<string[]>;
+    link: (path: string) => Promise<string>;
+    text: (path: string) => Promise<string>;
+};
 
-async function entries(path: string): Promise<string[]> {
-    return await readdir(path).catch(() => []);
-}
+// Stryker disable StringLiteral,ArrayDeclaration,ArrowFunction: the node filesystem itself, which a module test hands a reader of its own in place of
+const NODE_PROC: ProcReader = {
+    entries: async (path) => await readdir(path).catch(() => []),
+    link: async (path) => await readlink(path).catch(() => ''),
+    text: async (path) => await readFile(path, 'utf8').catch(() => ''),
+};
+// Stryker restore StringLiteral,ArrayDeclaration,ArrowFunction
 
-async function groupInodes(group: number): Promise<Set<string>> {
-    const names = await entries('/proc');
+async function groupInodes(group: number, proc: ProcReader): Promise<Set<string>> {
+    const names = await proc.entries('/proc');
     const pids = names.filter((name) => /^\d+$/u.test(name));
     const owned = new Set<string>();
     for (const pid of pids) {
-        if (processGroupOf(await readable(`/proc/${pid}/stat`)) !== group) {
+        if (processGroupOf(await proc.text(`/proc/${pid}/stat`)) !== group) {
             continue;
         }
-        for (const fd of await entries(`/proc/${pid}/fd`)) {
-            const inode = socketInode(await readlink(`/proc/${pid}/fd/${fd}`).catch(() => ''));
+        for (const fd of await proc.entries(`/proc/${pid}/fd`)) {
+            const inode = socketInode(await proc.link(`/proc/${pid}/fd/${fd}`));
             if (inode !== undefined) {
                 owned.add(inode);
             }
@@ -70,21 +75,31 @@ async function groupInodes(group: number): Promise<Set<string>> {
     return owned;
 }
 
-async function onLinux(port: number, group: number): Promise<boolean> {
-    const tables = await Promise.all(['/proc/net/tcp', '/proc/net/tcp6'].map(readable));
+/** Linux: the listening sockets of `/proc/net/tcp` and `tcp6` on the port, against the sockets the group's processes hold open. */
+export async function ownsOnLinux(
+    port: number,
+    group: number,
+    proc: ProcReader = NODE_PROC,
+): Promise<boolean> {
+    const tables = await Promise.all(['/proc/net/tcp', '/proc/net/tcp6'].map(proc.text));
     return owns(
         tables.flatMap((table) => listeningInodes(table, port)),
-        await groupInodes(group),
+        await groupInodes(group, proc),
     );
 }
 
-// outside: lsof exits 1 when no file matches, and a missing lsof fails to spawn.
-async function onDarwin(port: number, group: number): Promise<boolean | undefined> {
+/** macOS: the groups `lsof` names for the port's listeners; undefined where `program` cannot run. */
+export async function ownsOnDarwin(
+    port: number,
+    group: number,
+    program = 'lsof',
+): Promise<boolean | undefined> {
     const listed = await new Promise<string | undefined>((resolve) => {
         execFile(
-            'lsof',
+            program,
             ['-nP', '-a', `-iTCP:${String(port)}`, '-sTCP:LISTEN', '-Fpg'],
             (error, stdout) => {
+                // outside: lsof exits 1 when no file matches, and a missing lsof fails to spawn.
                 resolve(error === null || error.code === 1 ? stdout : undefined);
             },
         );
@@ -99,10 +114,10 @@ export async function groupOwnsPort(
     platform: NodeJS.Platform = process.platform,
 ): Promise<boolean | undefined> {
     if (platform === 'linux') {
-        return await onLinux(port, group);
+        return await ownsOnLinux(port, group);
     }
     if (platform === 'darwin') {
-        return await onDarwin(port, group);
+        return await ownsOnDarwin(port, group);
     }
     return undefined;
 }
