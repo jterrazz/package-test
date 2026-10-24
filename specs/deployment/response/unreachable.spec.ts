@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { deployment, specimen } from '../deployment.specification.js';
+import { deployment as strict } from '../strict.specification.js';
 
 describe('unreachable', () => {
     test('a port nothing listens on is refused, and the refusal is the result', async () => {
@@ -12,9 +13,9 @@ describe('unreachable', () => {
         expect(result.tls).toBeUndefined();
     });
 
-    test('a name no resolver knows is a dns failure', async () => {
-        // Given - a host under .invalid, which never resolves
-        const result = await deployment.get('http://nowhere.invalid/health');
+    test('a name no resolver can answer is a dns failure', async () => {
+        // Given - a host whose first label is longer than DNS allows, which every resolver refuses on the machine, network or none
+        const result = await strict.get(`http://${'a'.repeat(64)}.invalid/health`);
 
         // Then - the name, not the network, is why
         expect(result.response).toMatch('unreachable: dns');
