@@ -1,6 +1,6 @@
 # @jterrazz/test: the manual
 
-How to test with `@jterrazz/test`, and how this repository is built. New here: [Getting started](start/getting-started.md), then the guide of the kind of test you are writing. The front page is the root `README.md`; the brief an agent opens first is the root `AGENTS.md`.
+How to test with `@jterrazz/test`, and how this repository is built. New here: [Getting started](start/getting-started.md), then the guide of the kind of test you are writing. The front page is the root `README.md`; the brief an agent opens first is the root `CLAUDE.md`.
 
 The pages follow the package's four export families (what is tested, what surrounds the subject, acting on a screen, judging the result). The first is a guide per kind, the other three are reference.
 
