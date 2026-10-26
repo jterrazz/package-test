@@ -50,7 +50,7 @@ describe('role', () => {
     test('roleOf — the kind a path states — names the settings file the test projects are declared in', () => {
         // Given - the file the derived vitest config reads
         // Then - the config role is what the setup rules reach, and the derived vitest config is not
-        expect(roleOf('/repo/jterrazz.config.ts').role).toBe('config');
+        expect(roleOf('/repo/studio.config.ts').role).toBe('config');
         expect(roleOf('/repo/vitest.config.ts').role).toBe('other');
     });
 

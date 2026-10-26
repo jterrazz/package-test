@@ -48,7 +48,7 @@ describe('member-run', () => {
         // Then - the member is named by its path from the root, and so is every finding it makes
         expect(seen).toStrictEqual([
             {
-                config: 'jterrazz.config.ts',
+                config: 'studio.config.ts',
                 findingAt: 'packages/simulated-dom/package.json',
                 label: 'packages/simulated-dom',
                 subject: 'packages/simulated-dom',

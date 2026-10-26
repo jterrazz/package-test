@@ -41,7 +41,7 @@ one of the channels: the package's "rule K".
 - Product specs live under `specs/<specification>/<domain>/`; unit tests are siblings
   of their module. A consumer's own conventions derive from this package,
   except where its doctrine states a more specific shape. The first such case
-  is jterrazz-os's `docs/decisions/006-cli-specs-mirror-the-command-tree.md`.
+  is studio-os's `docs/decisions/006-cli-specs-mirror-the-command-tree.md`.
 - Migrations proved the value immediately: strict intercepts caught a real
   production-class bug in a consumer (an undrained handler), and dead test
   layers were deleted by the dead-fixture checker.

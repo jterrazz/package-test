@@ -40,13 +40,13 @@ Every other specification starts something (a server, a database, a binary, a si
 
 | What                                               | Whose      | Where                                                           |
 | -------------------------------------------------- | ---------- | --------------------------------------------------------------- |
-| The providers every render is dressed in           | the app's  | the `component` project's `wrap`, in `jterrazz.config.ts`       |
+| The providers every render is dressed in           | the app's  | the `component` project's `wrap`, in `studio.config.ts`         |
 | The Vite pipeline the app builds with              | the app's  | its `vite`                                                      |
 | The viewport, the timezone, the locale             | the app's  | its `viewport`, `timezone`, `locale`                            |
 | The stubs, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
-// apps/web/jterrazz.config.ts: its test section
+// apps/web/studio.config.ts: its test section
 const projects = {
     component: {
         reason: 'the app renders through its Vite pipeline, inside its providers',
@@ -56,7 +56,7 @@ const projects = {
 };
 ```
 
-**A relative `vite` or `wrap` is the project's path.** Both are resolved against the component project's `root`, which is the directory holding `jterrazz.config.ts` unless the project states one, so the two paths above mean `apps/web/web/<path>`. A `root` the project states is read from that same directory.
+**A relative `vite` or `wrap` is the project's path.** Both are resolved against the component project's `root`, which is the directory holding `studio.config.ts` unless the project states one, so the two paths above mean `apps/web/web/<path>`. A `root` the project states is read from that same directory.
 
 `wrap` is a MODULE PATH whose default export is `(ui) => ReactNode`: a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. Nothing imports the module itself, so `test()` names it to knip as an entry: the project declares none. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
 
@@ -67,7 +67,7 @@ const projects = {
 | `clock`               | An ISO instant pinned for every render, for a project whose components stamp the time                                     |
 | `viewport`            | `{ width, height }` of the page. Default `1280 × 720`                                                                     |
 | `timezone` / `locale` | The browser context's. Defaults `'UTC'` and `'en-US'`                                                                     |
-| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory holding `jterrazz.config.ts`                 |
+| `root`                | The directory `vite` and `wrap` are resolved against. Default: the directory holding `studio.config.ts`                   |
 | `include` / `exclude` | The globs. Derived: `specs/component/**/*.test.tsx`, and each root holding a `*.test.tsx`; state your own to replace them |
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                 |
 | `serial`              | `fileParallelism: false`: the project's renders run one file at a time                                                    |
@@ -79,7 +79,7 @@ const projects = {
 **A framework's config function is called as a dev server under test.** `component()` calls it with `{ command: 'serve', mode: 'test', isSsrBuild: false }` and adopts what it returns through the same allow-list, so an Astro app hands over its whole pipeline: its integrations' plugins, React's and Tailwind's among them, its `import.meta.env` defines, its `tsconfig` paths:
 
 ```typescript
-// jterrazz.config.ts of an Astro app: its component project
+// studio.config.ts of an Astro app: its component project
 import { getViteConfig } from 'astro/config';
 
 const component = {

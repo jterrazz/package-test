@@ -50,7 +50,7 @@ describe('config-shape', () => {
         ]);
     });
 
-    test('includedGlobs — the literal globs of the projects `jterrazz.config.ts` keys by specification', () => {
+    test('includedGlobs — the literal globs of the projects `studio.config.ts` keys by specification', () => {
         // Given - a test section declaring two projects, one of them with no include
         const source = [
             'export default {',

@@ -1,7 +1,7 @@
 // oxlint-disable-next-line import/no-empty-named-blocks, unicorn/require-module-specifiers -- the merge below names a module this file must also import: an augmentation alone does not bring its module into a program that imports nothing else of it (TS2664), and there is no name here to import
 import type {} from '@jterrazz/typescript/config';
 
-/** The `test` section of `jterrazz.config.ts`. */
+/** The `test` section of `studio.config.ts`. */
 export type TestSettings = {
     /** The path every api route is mounted under (`'/api'`), left out of the folder each route's subject derives. */
     basePath?: `/${string}`;

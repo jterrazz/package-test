@@ -40,7 +40,7 @@ describe('matrix', () => {
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
             mkdirSync(join(root, 'specs/cli/exec'), { recursive: true });
-            writeFileSync(join(root, 'jterrazz.config.ts'), 'export default {};\n');
+            writeFileSync(join(root, 'studio.config.ts'), 'export default {};\n');
             writeFileSync(
                 join(root, 'specs/cli/exec/named.spec.ts'),
                 "// cli.exec('x') runs the binary\nconst sentence = \"cli.exec('x')\";\n",
@@ -62,7 +62,7 @@ describe('matrix', () => {
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
             mkdirSync(join(root, 'specs/cli/build'), { recursive: true });
-            writeFileSync(join(root, 'jterrazz.config.ts'), 'export default {};\n');
+            writeFileSync(join(root, 'studio.config.ts'), 'export default {};\n');
             writeFileSync(
                 join(root, 'specs/cli/build/tree.spec.ts'),
                 "expect(result.filesystem).toMatch(\n    directory(\n        '../../__fixtures__/tree/',\n    ),\n);\n",
@@ -83,7 +83,7 @@ describe('matrix', () => {
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
             writeFileSync(
-                join(root, 'jterrazz.config.ts'),
+                join(root, 'studio.config.ts'),
                 "export default { projects: [{ include: ['x/*/*.yaml'] }, component({ clock: '2026-01-02T03:04:05Z', include: ['**/*.test.tsx'] })] };\n",
             );
             const clock = matrixRows(root).find((row) => row.capability.name === 'clock');

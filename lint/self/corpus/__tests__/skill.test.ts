@@ -7,7 +7,7 @@ import { FORK } from '../../../consumer/catalogue/fork.js';
 import { SKILL_MAX_LINES, skillFindings } from '../skill.js';
 
 const ROOT = resolve(import.meta.dirname, '../../../..');
-const SKILL = resolve(ROOT, 'skills/jterrazz-test/SKILL.md');
+const SKILL = resolve(ROOT, 'skills/studio-test/SKILL.md');
 
 const SKILL_FORK_LINE = /^\d+\. .*→ \*\*(?<kind>[^*]+)\*\*, `(?<path>[^`]+)`/gmu;
 describe('skill', () => {

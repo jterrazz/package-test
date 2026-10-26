@@ -43,7 +43,7 @@ describe('literate-plugin', () => {
 
         // Then - its identity, and the include each adds
         expect([plain.name, plain.enforce, plain.config(), narrowed.config()]).toStrictEqual([
-            'jterrazz-test:literate',
+            'studio-test:literate',
             'pre',
             { test: { include: ['**/*.spec.yaml'] } },
             { test: { include: ['docs/*.spec.yaml'] } },

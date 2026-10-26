@@ -144,7 +144,7 @@ The golden is named by a template literal, and the checker's `no-unused-ground` 
 
 ### The `integration()` project
 
-The `integration` specification is the canonical project: a `specs/integration/` folder makes it, it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node specifications. `jterrazz.config.ts` states nothing for it until it departs from that.
+The `integration` specification is the canonical project: a `specs/integration/` folder makes it, it collects `specs/integration/**/*.spec.ts`, carries the preset's budgets and artefact directory, and runs in group 0 with the other node specifications. `studio.config.ts` states nothing for it until it departs from that.
 
 An env-gated sub-suite is an option of `test.projects.integration`, not a second project: the whole point of `{ include, exclude, timeout }`:
 

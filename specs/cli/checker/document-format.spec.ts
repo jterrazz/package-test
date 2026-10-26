@@ -40,7 +40,7 @@ describe('document-format', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             conventions checker: rewrote 1 spec document(s)
-            .jterrazz/baseline.json › test: nothing held
+            .studio/baseline.json › test: nothing held
         `);
         expect(result.file('specs/widget/builds.spec.yaml').content).toBe(
             [

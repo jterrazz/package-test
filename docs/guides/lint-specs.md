@@ -47,14 +47,14 @@ afterAll(cleanup);
 
 At least one linter: a plugin, a config, a checker or presets, `presets: []` holding the tree to the base preset alone; a specification naming none is refused.
 
-| Option     | Description                                                                                                                                                                                                                              |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugins`  | oxlint JS plugins, each a path from the specification's folder or a package specifier. They run in the real oxlint, `oxlint` being an optional peer the project installs                                                                 |
-| `config`   | The oxlint config oxlint runs under (`rules`, `settings`, `categories`, `overrides`), less `jsPlugins`, which `plugins` states; named alone, it runs oxlint's built-in rules                                                             |
-| `presets`  | `@jterrazz/typescript` presets whose laws run on the tree (the Architecture pass over every `layers`, each declared `names` rule), resolved after the always-on base preset as `jterrazz.config.ts` would; `[]` is the base preset alone |
-| `checkers` | Cross-file checkers, each a command printing one finding a line in the compiler's convention, `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree last                                               |
-| `root`     | Root-resolution override (rule `no-redundant-root`); the plugins' specifiers and the checkers' commands resolve from its `node_modules`                                                                                                  |
-| `settings` | What the project adds beside its presets, written as `jterrazz.config.ts` writes it (`typescript: { names, architecture: { layers } }`, `optOuts`), so a repository's own additions are its own, never a preset it makes up              |
+| Option     | Description                                                                                                                                                                                                                            |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugins`  | oxlint JS plugins, each a path from the specification's folder or a package specifier. They run in the real oxlint, `oxlint` being an optional peer the project installs                                                               |
+| `config`   | The oxlint config oxlint runs under (`rules`, `settings`, `categories`, `overrides`), less `jsPlugins`, which `plugins` states; named alone, it runs oxlint's built-in rules                                                           |
+| `presets`  | `@jterrazz/typescript` presets whose laws run on the tree (the Architecture pass over every `layers`, each declared `names` rule), resolved after the always-on base preset as `studio.config.ts` would; `[]` is the base preset alone |
+| `checkers` | Cross-file checkers, each a command printing one finding a line in the compiler's convention, `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree last                                             |
+| `root`     | Root-resolution override (rule `no-redundant-root`); the plugins' specifiers and the checkers' commands resolve from its `node_modules`                                                                                                |
+| `settings` | What the project adds beside its presets, written as `studio.config.ts` writes it (`typescript: { names, architecture: { layers } }`, `optOuts`), so a repository's own additions are its own, never a preset it makes up              |
 
 There is nothing to start and nothing to stop: `cleanup` is handed to `afterAll` like every constructor's, and releases nothing.
 
@@ -136,7 +136,7 @@ A linter that fails and reports no diagnostic is refused in four parts rather th
 
 ### One module graph per worker
 
-The lint project runs a worker's files in one module graph (`isolate: false`), as the standard hands it: each spec lays its own fixture tree and runs the linters as processes of their own, so a file leaves nothing in a module for the next one, and the worker, the framework and the kit load once per worker instead of once per file. A project whose lint specs keep state in a module (a cache, a counter, a stub set at load) states `isolate: true` for its `lint` project in `jterrazz.config.ts`, with its reason.
+The lint project runs a worker's files in one module graph (`isolate: false`), as the standard hands it: each spec lays its own fixture tree and runs the linters as processes of their own, so a file leaves nothing in a module for the next one, and the worker, the framework and the kit load once per worker instead of once per file. A project whose lint specs keep state in a module (a cache, a counter, a stub set at load) states `isolate: true` for its `lint` project in `studio.config.ts`, with its reason.
 
 ### A rule pack: a nested Vitest and a reporter fixture
 

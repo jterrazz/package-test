@@ -7,7 +7,7 @@ import { stringsOf, withoutComments } from '../../kit/project/source-scan.js';
 import { sourcesUnder } from '../../kit/project/tree.js';
 import type { Column } from './specification-matrix.js';
 
-/** `files` serves the one column with no constructor: component's options are the project's, stated in this repository's `jterrazz.config.ts`. */
+/** `files` serves the one column with no constructor: component's options are the project's, stated in this repository's `studio.config.ts`. */
 export const MATRIX_SOURCES_TREES: Record<
     Column,
     { extensions: string[]; files?: string[]; roots: string[] }
@@ -16,7 +16,7 @@ export const MATRIX_SOURCES_TREES: Record<
     cli: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/cli'] },
     component: {
         extensions: ['.test.tsx', '.specification.ts'],
-        files: ['jterrazz.config.ts'],
+        files: ['studio.config.ts'],
         roots: ['specs/component'],
     },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },

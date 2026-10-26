@@ -12,7 +12,7 @@ describe('section', () => {
 
         // Then - the recorded debt is the tree's, and the other package's section is untouched
         expect(result.exitCode).toBe(0);
-        expect(result.file('.jterrazz/baseline.json').content).toBe(
+        expect(result.file('.studio/baseline.json').content).toBe(
             '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {\n        "jterrazz-check/no-unused-ground": 1\n    }\n}\n',
         );
     });

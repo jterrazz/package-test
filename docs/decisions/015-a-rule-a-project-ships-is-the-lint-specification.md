@@ -13,7 +13,7 @@ the laws a `@jterrazz/typescript` preset hands the toolchain. This package
 specified its own through a wrapper: `specification.cli(report.sh)`, a shell
 script dispatching on its first word to oxlint (with a standalone JSON config
 listing every rule), to the checker (through a second wrapper), to the self
-checker, or to a Node script that wrote a `jterrazz.config.ts` into the tree
+checker, or to a Node script that wrote a `studio.config.ts` into the tree
 and captured the toolchain's stdout. `lintReport`, published from the
 package root, cut every report to `file:line:column  plugin(rule)`, and the
 234 rule specifications were `<case>.spec.yaml` documents collected into the

@@ -79,8 +79,7 @@ export const NOT_MISPLACED: [string, Record<string, string>][] = [
         {
             ...POOL,
             ...API_READS,
-            'jterrazz.config.ts':
-                "export default { note: 'seeded from specs/__fixtures__/app' };\n",
+            'studio.config.ts': "export default { note: 'seeded from specs/__fixtures__/app' };\n",
         },
     ],
     [

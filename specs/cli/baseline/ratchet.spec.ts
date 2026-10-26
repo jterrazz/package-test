@@ -13,7 +13,7 @@ describe('ratchet', () => {
 
         // Then - both views written, and the section (the checker's passes alone) holds nothing
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
+        expect(result.stdout.text).toBe('.studio/baseline.json › test: nothing held\n');
         expect(result.file('specs/api/events/list/pagination.spec.ts').content).toContain(
             "const events = api.with({ clock: '2026-03-04T09:30:00Z' });",
         );
@@ -30,7 +30,7 @@ describe('ratchet', () => {
 
         // Then - the same line as a project that keeps no section, never a count of nothing
         expect(result.exitCode).toBe(0);
-        expect(result.file('.jterrazz/baseline.json').exists).toBe(false);
-        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
+        expect(result.file('.studio/baseline.json').exists).toBe(false);
+        expect(result.stdout.text).toBe('.studio/baseline.json › test: nothing held\n');
     });
 });

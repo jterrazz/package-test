@@ -1,1 +1,1 @@
-export const SETTINGS_FILE = 'jterrazz.config.ts';
+export const SETTINGS_FILE = 'studio.config.ts';

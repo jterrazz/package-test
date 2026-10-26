@@ -13,7 +13,7 @@ export type LayerOptions = {
 
 const CHAIN_AND_KIT = ['chain/', 'lint/kit/'];
 
-/** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← specifications ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
+/** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← specifications ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `studio.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
     chain: {
         folders: {

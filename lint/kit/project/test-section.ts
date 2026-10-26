@@ -50,7 +50,7 @@ function basePathOf(value: unknown): `/${string}` | undefined {
         throw new Error(
             refusalBlock({
                 fix: "write the path the routes are mounted under from the root, with no slash at its end: test: { basePath: '/api' }",
-                found: `jterrazz.config.ts: test.basePath ${JSON.stringify(value)} is no mount path`,
+                found: `studio.config.ts: test.basePath ${JSON.stringify(value)} is no mount path`,
                 read: 'docs/reference/linting.md#test-settings-section',
                 why: 'The base path is cut from every route before its subject folder is derived, so it is read as a route prefix is written: one leading slash, lowercase segments, no trailing slash.',
             }),

@@ -67,7 +67,7 @@ describe('checkSpecInSubjectFolder', () => {
         });
         const plain = checkSpecInSubjectFolder(root);
         writeFileSync(
-            join(dirname(root), 'jterrazz.config.ts'),
+            join(dirname(root), 'studio.config.ts'),
             "export default { test: { collections: ['data'] } };\n",
         );
         writeFileSync(join(dirname(root), 'package.json'), '{}\n');

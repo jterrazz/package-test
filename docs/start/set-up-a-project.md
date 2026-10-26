@@ -63,10 +63,10 @@ To try an unreleased build of the framework, install the tarball `npm pack` writ
 
 ## The vitest config
 
-The projects a repository runs are read off its tree: one per folder `specs/<specification>/` it keeps (`specs/api/`, `specs/cli/`, `specs/website/` and the rest), `unit` over each root holding a module test (`src/`, `lint/`, a folder of `specs/` no specification names, a `unit` one included), and `component` over the component specs and each root holding a rendered test (`*.test.tsx`). A ground, setup or dot folder is never read. `jterrazz.config.ts` states only how a project departs from the one its tree derives (a helper's options, its own global setups), keyed by its specification, with the reason. The package's standard, `src/standard/standard.ts`, states the one departure every repository shares: the `unit` project runs a worker's files in one module graph (`isolate: false`), since a module test leaves no state behind in a module; a repository whose module tests do states `isolate: true` with its reason. The standard only shapes a project the tree derives or the file declares; it makes none exist. `typescript doctor` prints the projects derived from the tree beside what each file states. The file also declares the project's `kind` and `platform`, which `@jterrazz/typescript` reads to derive the rest of the toolchain ([its Configuration § Kind and platform](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#kind-and-platform)):
+The projects a repository runs are read off its tree: one per folder `specs/<specification>/` it keeps (`specs/api/`, `specs/cli/`, `specs/website/` and the rest), `unit` over each root holding a module test (`src/`, `lint/`, a folder of `specs/` no specification names, a `unit` one included), and `component` over the component specs and each root holding a rendered test (`*.test.tsx`). A ground, setup or dot folder is never read. `studio.config.ts` states only how a project departs from the one its tree derives (a helper's options, its own global setups), keyed by its specification, with the reason. The package's standard, `src/standard/standard.ts`, states the one departure every repository shares: the `unit` project runs a worker's files in one module graph (`isolate: false`), since a module test leaves no state behind in a module; a repository whose module tests do states `isolate: true` with its reason. The standard only shapes a project the tree derives or the file declares; it makes none exist. `typescript doctor` prints the projects derived from the tree beside what each file states. The file also declares the project's `kind` and `platform`, which `@jterrazz/typescript` reads to derive the rest of the toolchain ([its Configuration § Kind and platform](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/configuration.md#kind-and-platform)):
 
 ```typescript
-// jterrazz.config.ts
+// studio.config.ts
 import { test } from '@jterrazz/test/config';
 import { defineConfig } from '@jterrazz/typescript/config';
 
@@ -96,7 +96,7 @@ import { vitestConfig } from '@jterrazz/test/vitest';
 export default await vitestConfig(import.meta.url);
 ```
 
-It reads the `jterrazz.config.ts` beside the module whose `import.meta.url` it is handed (the config file's own folder, wherever vitest, the Vitest extension or knip loads it) and builds each project the tree names, or the file declares, with its helper over the preset below. A project states no `name`, `environment` or `browser`: its helper names it for its specification and sets what the specification needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. A tree with no test and a file declaring no project leave the config the preset alone. It is the one-liner `@jterrazz/typescript` derives for every editor file (the entry handed the module's own `import.meta.url`, awaited at the top), which vitest and knip's loader both read whole.
+It reads the `studio.config.ts` beside the module whose `import.meta.url` it is handed (the config file's own folder, wherever vitest, the Vitest extension or knip loads it) and builds each project the tree names, or the file declares, with its helper over the preset below. A project states no `name`, `environment` or `browser`: its helper names it for its specification and sets what the specification needs. A relative `setup` (global setups the project runs, read from the project root), `root` and `vite.resolve.alias` target are read from the project root; `wrap` stays the component's root's. A tree with no test and a file declaring no project leave the config the preset alone. It is the one-liner `@jterrazz/typescript` derives for every editor file (the entry handed the module's own `import.meta.url`, awaited at the top), which vitest and knip's loader both read whole.
 
 ### The project helpers
 
@@ -155,7 +155,7 @@ To adopt the preset from a config written by hand, file each kind of test under 
 
 ## Turning the conventions on
 
-The conventions travel in the same `test()` preset that sets the vitest defaults, so the `jterrazz.config.ts` [above](#the-vitest-config) already turns them on. The base preset needs no line of its own: the declared `platform` picks the lint profile it runs ([the toolchain's Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles)), and `test()` adds this package's rules on top.
+The conventions travel in the same `test()` preset that sets the vitest defaults, so the `studio.config.ts` [above](#the-vitest-config) already turns them on. The base preset needs no line of its own: the declared `platform` picks the lint profile it runs ([the toolchain's Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/lint-presets.md#the-profiles)), and `test()` adds this package's rules on top.
 
 The linter reads them through the `oxlint.config.ts` that `npx typescript fix` derives, one line like the vitest config:
 
@@ -166,7 +166,7 @@ import { oxlintConfig } from '@jterrazz/typescript/oxlint';
 export default await oxlintConfig(import.meta.url);
 ```
 
-`npx typescript check` then runs all of it: the oxlint plugin, the import and naming rules, and the conventions checker over `specs/`. Nothing is detected from your dependencies: a project that does not list `test()` runs none of these rules, and writes its tests all the same. A rule you set apart is written in `jterrazz.config.ts` with its reason, never in the derived file; how, how to suppress one finding, and the full catalogue are [Linting](../reference/linting.md).
+`npx typescript check` then runs all of it: the oxlint plugin, the import and naming rules, and the conventions checker over `specs/`. Nothing is detected from your dependencies: a project that does not list `test()` runs none of these rules, and writes its tests all the same. A rule you set apart is written in `studio.config.ts` with its reason, never in the derived file; how, how to suppress one finding, and the full catalogue are [Linting](../reference/linting.md).
 
 ## Where a run writes
 
@@ -201,6 +201,16 @@ export default await oxlintConfig(import.meta.url);
 
 Each release's notes are its [GitHub release](https://github.com/jterrazz/package-test/releases); the package keeps no changelog. A major carries no bridge from the one before (no codemod, no rename map, no rule that recognises the old spellings; see [ADR-014](https://github.com/jterrazz/package-test/blob/main/docs/decisions/014-a-major-carries-no-bridge-from-the-one-before.md)), so a project moves by hand, and the rules of the new major name each leftover in their own terms.
 
+### From 18 to 19
+
+| What an 18 project wrote                   | What 19 asks for                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| its `test` section in `jterrazz.config.ts` | the same section in `studio.config.ts`, read with `@jterrazz/typescript` 12 or later |
+| a ratchet under `.jterrazz/`               | the same files under `.studio/`                                                      |
+| the `jterrazz-test` skill                  | `studio-test`                                                                        |
+
+The lint plugin and every rule id keep their names (`jterrazz/...`), so no suppression changes.
+
 ### From 17 to 18
 
 | What a 17 project wrote                                                  | What 18 asks for                                                                                                               |
@@ -216,7 +226,7 @@ Each release's notes are its [GitHub release](https://github.com/jterrazz/packag
 | What a 16 project wrote                                                                                                  | What 17 asks for                                                                                                                                                                                                                                         |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@jterrazz/typescript` ^10                                                                                               | ^11, released first; its own migration is [its Release § Which number moves](https://github.com/jterrazz/package-typescript/blob/main/docs/guides/release.md#which-number-moves)                                                                         |
-| a hand-written `vitest.config.ts`                                                                                        | `test.projects` in `jterrazz.config.ts`, and the derived one-liner `typescript fix` writes ([§ The vitest config](#the-vitest-config))                                                                                                                   |
+| a hand-written `vitest.config.ts`                                                                                        | `test.projects` in `studio.config.ts`, and the derived one-liner `typescript fix` writes ([§ The vitest config](#the-vitest-config))                                                                                                                     |
 | the `jterrazz-test-check` bin, chained after `typescript check`                                                          | `presets: [test()]`; `typescript check`, `fix` and `baseline` run the checker                                                                                                                                                                            |
 | a bare name: `.seed('two-users.sql')`, `.request('create-user.http')`, the `$`-prefixed alias of the shared fixture pool | a path from the spec file, `file('./__seeds__/two-users.sql')` or `directory(...)`; the shared ground is the special folder of its role at the specs root, `specs/__seeds__/`, `specs/__fixtures__/` and the rest, reached by the path that climbs to it |
 | `defineContract()`, `defineContracts()` and the `Contract*` types                                                        | `defineStub()`, `defineStubs()` and the `Stub*` types ([Stubs](../reference/stubs.md))                                                                                                                                                                   |

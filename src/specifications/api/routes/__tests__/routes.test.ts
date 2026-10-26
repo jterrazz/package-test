@@ -10,7 +10,7 @@ const project = (routes: string | undefined, documents: Record<string, string>):
     writeFileSync(join(root, 'package.json'), '{ "name": "routes", "type": "module" }\n');
     const section = routes === undefined ? '{}' : `{ routes: '${routes}' }`;
     writeFileSync(
-        join(root, 'jterrazz.config.ts'),
+        join(root, 'studio.config.ts'),
         `export default { kind: 'library', platform: 'node', test: ${section} };\n`,
     );
     for (const [name, text] of Object.entries(documents)) {

@@ -179,7 +179,7 @@ const ANY_OTHER_FILE = ['.*', '.*.*', '.*.*.*', '.*.*.*.*'];
 // invariant: a workspace's own suite is a unit of its own, so its specs root also holds the four files of a unit.
 const OF_A_UNIT: readonly [string, string][] = [
     ['.json', 'regex:(package|tsconfig)'],
-    ['.config.ts', 'regex:(jterrazz|vitest)'],
+    ['.config.ts', 'regex:(studio|vitest)'],
 ];
 
 function specsRootFiles(): Record<string, string> {

@@ -36,7 +36,7 @@ const PROD = join(ROOT, 'src/domain/user.ts');
 
 // invariant: a service whose product IS a browser, and says so in its config.
 const GATE = packageWith({
-    'jterrazz.config.ts':
+    'studio.config.ts':
         "export default { test: { production: { allow: { playwright: 'the gate drives a browser in production' } } } };\n",
     'package.json': JSON.stringify({ name: 'gate' }),
     'tests/browser.ts': "export { chromium } from 'playwright';\n",

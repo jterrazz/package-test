@@ -238,7 +238,7 @@ export async function assertedSubjectMatcherRows(): Promise<void> {
     expect(out.json).toMatch(file('./__expected__/out.json'));
 }
 
-// test-settings-section — `jterrazz.config.ts` takes a `test` section, holding what `@jterrazz/test` reads and nothing else; its type is published beside the preset, at `/config`.
+// test-settings-section — `studio.config.ts` takes a `test` section, holding what `@jterrazz/test` reads and nothing else; its type is published beside the preset, at `/config`.
 const section: TestSettings = { routes: './openapi.yaml' };
 
 const library = { kind: 'library', platform: 'node' } as const;

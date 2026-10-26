@@ -11,7 +11,7 @@ import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js
 import type { Route } from './routes.js';
 
 export const UNKNOWN_TABLE: Lesson = {
-    fix: "hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: `test: { routes: './openapi.yaml' }` in jterrazz.config.ts",
+    fix: "hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: `test: { routes: './openapi.yaml' }` in studio.config.ts",
     found: 'api routes: an app specification.api() started exposes no route table',
     read: 'docs/guides/api-specs.md#an-app-that-is-not-hono',
     why: 'A route is judged reached against the table the app declares.',

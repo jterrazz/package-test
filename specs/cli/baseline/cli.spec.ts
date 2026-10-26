@@ -12,7 +12,7 @@ describe('cli', () => {
 
         // Then - the family file holds the test section and its one finding, and the run it holds exits 0
         expect(result.exitCode).toBe(0);
-        expect(result.file('.jterrazz/baseline.json').content).toBe(
+        expect(result.file('.studio/baseline.json').content).toBe(
             '{\n    "test": {\n        "jterrazz-check/no-unused-ground": 1\n    }\n}\n',
         );
     });
@@ -25,7 +25,7 @@ describe('cli', () => {
 
         // Then - the summary alone; the held finding prints only when a verdict fails
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: 1 held across 1 rule\n');
+        expect(result.stdout.text).toBe('.studio/baseline.json › test: 1 held across 1 rule\n');
         expect(result.stderr.text).toBe('');
     });
 
@@ -37,7 +37,7 @@ describe('cli', () => {
 
         // Then - the same one line the check prints: nothing to rewrite, nothing more to say
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: 1 held across 1 rule\n');
+        expect(result.stdout.text).toBe('.studio/baseline.json › test: 1 held across 1 rule\n');
         expect(result.stderr.text).toBe('');
     });
 
@@ -51,7 +51,7 @@ describe('cli', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             conventions checker under {{workdir}} (reserved-folder-in-closed-list, spec-code-in-setup-folder, setup-module-at-lowest-common-folder, adapter-named-for-its-port, database-named-only-when-several, docker-exec-bound-with-await-using, file-suffix-matches-place, no-reach-into-sibling-ground, no-document-in-ground, specification-test-uses-its-runner, specification-folder-has-its-runner, ground-beside-its-only-reader, seeds-state-absolute-time, no-duplicate-ground, ground-shared-or-inline, one-subject-per-spec, spec-in-subject-folder, named-path-exists, document-env-and-serve-registered, no-unused-ground, no-token-in-request, no-silent-refusal, no-malformed-ref, no-unknown-token, http-first-line-follows-its-grammar, document-follows-its-grammar, no-volatile-literal, pinned-value-from-the-input, no-empty-expected-stream, document-description-unique, checker-suppression-states-a-reason, checker-suppression-names-a-pass, document-description-reads-as-a-title, no-snapshot-folder, no-simulated-dom-in-config, no-redundant-test-dependency)
-            .jterrazz/baseline.json › test: 1 held across 1 rule
+            .studio/baseline.json › test: 1 held across 1 rule
         `);
         expect(result.stderr.text).toBe('');
     });
@@ -77,7 +77,7 @@ describe('cli', () => {
 
         // Then - one line and nothing after it: what typescript check shows on a green run
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: 1 held across 1 rule\n');
+        expect(result.stdout.text).toBe('.studio/baseline.json › test: 1 held across 1 rule\n');
         expect(result.stderr.text).toBe('');
     });
 });

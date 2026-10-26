@@ -18,7 +18,7 @@ describe('include-points-at-a-folder', () => {
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
-            jterrazz.config.ts:4:42  jterrazz(include-points-at-a-folder)
+            studio.config.ts:4:42  jterrazz(include-points-at-a-folder)
                 found: \`specs/api/**/*.spec.ts\` collects nothing: the folder \`specs/api\` does not exist
                 why: An \`include\` glob of a PROJECT (an object under \`test\` or in \`projects\`, never \`optimizeDeps.include\` and its kin) whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is an error.
                 fix: point the glob at the folder that holds the suite, or delete it

@@ -16,7 +16,7 @@ function methodlessDrift(...drift: string[]): { failure: Lesson } {
     return {
         failure: {
             fix: 'state in `test: { methodless }` exactly the routes the app takes on any method, each with its reason',
-            found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
+            found: `api routes: \`test: { methodless }\` in studio.config.ts drifted from the app's table:\n${drift.join('\n')}`,
             read: 'docs/guides/api-specs.md#a-route-taken-on-any-method',
             why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
         },
@@ -63,12 +63,12 @@ describe('route-judge', () => {
         // Then - two held and said so, and the judged run passes naming them
         expect([recorded, heldUnreached(root)]).toStrictEqual([
             {
-                line: 'api routes: 2 unreached recorded under .jterrazz/baseline.json › test › routes/unreached',
+                line: 'api routes: 2 unreached recorded under .studio/baseline.json › test › routes/unreached',
             },
             2,
         ]);
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: 2 unreached, held by .jterrazz/baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
+            line: 'api routes: 2 unreached, held by .studio/baseline.json › test › routes/unreached:\n  GET /users\n  DELETE /users/:id',
         });
     });
 
@@ -145,7 +145,7 @@ describe('route-judge', () => {
         const { directory, root } = runWithOneRouteReached();
         writeFileSync(join(root, 'openapi.json'), '{"paths": {"/users/{id}": {"get": {}}}}');
         writeFileSync(
-            join(root, 'jterrazz.config.ts'),
+            join(root, 'studio.config.ts'),
             "export default { test: { routes: './openapi.json' } };\n",
         );
 
@@ -173,7 +173,10 @@ describe('route-judge', () => {
 
         // Then - the run fails rather than reading as every route reached
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure: UNKNOWN_TABLE,
+            failure: {
+                ...UNKNOWN_TABLE,
+                fix: "hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: `test: { routes: './openapi.yaml' }` in studio.config.ts",
+            },
         });
     });
 
@@ -187,7 +190,7 @@ describe('route-judge', () => {
         writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
         writeFileSync(join(root, 'openapi.json'), '{"paths": {"/health": {"get": {}}}}');
         writeFileSync(
-            join(root, 'jterrazz.config.ts'),
+            join(root, 'studio.config.ts'),
             "export default { test: { routes: './openapi.json' } };\n",
         );
 
@@ -208,7 +211,7 @@ describe('route-judge', () => {
     });
 
     test('route judge — the api run judged — an ALL route the member does not declare method-less fails the run, in update mode too', async () => {
-        // Given - the app takes /mcp on any method, and jterrazz.config.ts names no route so
+        // Given - the app takes /mcp on any method, and studio.config.ts names no route so
         const { directory, root } = methodlessRun([]);
 
         // Then - the drift is named, whatever the mode
@@ -227,7 +230,7 @@ describe('route-judge', () => {
             '{"paths": {"/mcp": {"post": {}}, "/health": {"get": {}}}}',
         );
         writeFileSync(
-            join(root, 'jterrazz.config.ts'),
+            join(root, 'studio.config.ts'),
             "export default { test: { methodless: { '/mcp': 'the transport answers GET and POST' }, routes: './openapi.json' } };\n",
         );
 
@@ -302,7 +305,7 @@ function methodlessRun(
         ],
     });
     writeFileSync(
-        join(root, 'jterrazz.config.ts'),
+        join(root, 'studio.config.ts'),
         `export default { test: { methodless: ${JSON.stringify(reasoned)} } };\n`,
     );
     return { directory, root };

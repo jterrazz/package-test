@@ -52,8 +52,8 @@ function pluginKeysLeft(root: string): string[] {
                 `baseline-ratchet  ${labelOf(TEST_SECTION)}  ${refusal({
                     fix: "run 'typescript baseline'",
                     found: `\`${key}\` is held in the ${TEST_SECTION} section`,
-                    read: 'docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
-                    why: "the plugin's rules are oxlint's own, held file by file in .jterrazz/oxlint-suppressions.json: one finding, one judge",
+                    read: 'docs/reference/linting.md#the-ratchet-the-test-section-of-studiobaselinejson',
+                    why: "the plugin's rules are oxlint's own, held file by file in .studio/oxlint-suppressions.json: one finding, one judge",
                 })}`,
         );
 }

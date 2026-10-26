@@ -25,7 +25,7 @@ export function includedGlobs(program: AstNode): LiteralString[] {
             return;
         }
         const value = child(node, 'value');
-        // invariant: `projects` is the record `jterrazz.config.ts` keys by specification, the one file the rules read it in.
+        // invariant: `projects` is the record `studio.config.ts` keys by specification, the one file the rules read it in.
         const projects =
             key === 'test'
                 ? [value]

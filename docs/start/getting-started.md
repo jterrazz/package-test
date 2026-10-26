@@ -47,7 +47,7 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest better-sqlite3
 ### 2. Configure vitest
 
 ```typescript
-// jterrazz.config.ts
+// studio.config.ts
 import { test } from '@jterrazz/test/config';
 import { defineConfig } from '@jterrazz/typescript/config';
 
@@ -86,7 +86,7 @@ A spec imports from three entries: `@jterrazz/test` for what writes it (the cons
 
 `server` returns your app, and the specification sends it each request through its `request(path, init)` method, which answers a Fetch `Response`; a Hono `app` is one as it stands. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
 
-An app on another framework needs two things. It needs a `request(path, init)` of its own: Express and Fastify have none, so `server` returns a wrapper you write that answers it with a `Response`. And it exposes no route table, so the run cannot measure route coverage until the project names its routes as an OpenAPI document, `test: { routes: './openapi.yaml' }` in `jterrazz.config.ts`; without one the api run fails ([API specs § An app that is not Hono](../guides/api-specs.md#an-app-that-is-not-hono)).
+An app on another framework needs two things. It needs a `request(path, init)` of its own: Express and Fastify have none, so `server` returns a wrapper you write that answers it with a `Response`. And it exposes no route table, so the run cannot measure route coverage until the project names its routes as an OpenAPI document, `test: { routes: './openapi.yaml' }` in `studio.config.ts`; without one the api run fails ([API specs § An app that is not Hono](../guides/api-specs.md#an-app-that-is-not-hono)).
 
 ### 4. Write the test
 
@@ -128,7 +128,7 @@ npx vitest --run --project api
 
 `--project api` runs one project; `npx vitest --run` runs every project the config declares, and is the line to put in `package.json` as `"test": "vitest --run"`.
 
-The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. There is no switch to turn it off. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `.jterrazz/baseline.json`, which you commit, and the count can only go down from there ([API specs § Route coverage](../guides/api-specs.md#route-coverage)).
+The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. There is no switch to turn it off. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `.studio/baseline.json`, which you commit, and the count can only go down from there ([API specs § Route coverage](../guides/api-specs.md#route-coverage)).
 
 To write the expected value instead of typing it, leave it empty (`toMatch('')`) and run once with `TEST_UPDATE=1`. The framework writes what came back into the test, with tokens where values move; you read the diff before you commit it ([Tokens § Update mode](../reference/tokens.md#update-mode-tokens-are-preserved)).
 
@@ -146,9 +146,9 @@ What it checks, and how to deviate from a rule, is [Set up a project § Turning 
 
 | Path                                                                       | Commit it? | Why                                                                                                                                                      |
 | -------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `jterrazz.config.ts`                                                       | yes        | the one file you write: what the project is, its presets, its test projects                                                                              |
+| `studio.config.ts`                                                         | yes        | the one file you write: what the project is, its presets, its test projects                                                                              |
 | `vitest.config.ts`, `oxlint.config.ts`, `oxfmt.config.ts`, `tsconfig.json` | yes        | derived by `typescript fix` and held by `typescript check`; an editor reads them by name                                                                 |
-| `.jterrazz/`                                                               | yes        | the debt the ratchets hold, such as the `baseline.json` step 5 records; commit it with the change that recorded it, since the next run judges against it |
+| `.studio/`                                                                 | yes        | the debt the ratchets hold, such as the `baseline.json` step 5 records; commit it with the change that recorded it, since the next run judges against it |
 | `.artifacts/`                                                              | no         | caches, reports and evidence every run rewrites: add `.artifacts/` to `.gitignore`                                                                       |
 
 ## Which kind of test

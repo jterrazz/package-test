@@ -6,11 +6,11 @@ import { describe, expect, test } from 'vitest';
 
 import { heldUnreached, recordUnreached, writeBaseline } from '../test-baseline.js';
 
-const FILE = '.jterrazz/baseline.json';
+const FILE = '.studio/baseline.json';
 
 function ledgerRoot(): string {
     const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
-    mkdirSync(join(root, '.jterrazz'));
+    mkdirSync(join(root, '.studio'));
 
     return root;
 }

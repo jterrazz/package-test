@@ -93,7 +93,7 @@ Under a server that outlives the file (a declared `appium` server, or the run's 
 **The run's own server** is the project's to declare: `mobile({ device, root })` names the simulator and where the `appium` binary is resolved from (`<root>/node_modules/.bin/appium`, `root` read against the config's root, `.` when absent). The project's global setup resolves and boots that simulator, spawns the server once for the run, and hands both to the workers. A runner with no `appium` of its own drives that server on the project's device and spawns nothing. The device is the project's to own, so a runner leaves `device` out and drives the project's; one that states it restates the project's, and the booted simulator's UDID stands in when it names none. A `device` that names another simulator, another runtime (`'iOS 26.5'` and `'26.5'` are one, as they are to resolution) or another UDID is refused, naming both devices: the setup booted the project's device alone. The setup stops the server, and its WebDriverAgent, once it has ended the run's sessions.
 
 ```typescript
-// a project of jterrazz.config.ts: one simulator, one Appium server, one session for the run
+// a project of studio.config.ts: one simulator, one Appium server, one session for the run
 const mobile = {
     device: { name: 'iPhone 17', os: '26.5' },
     reason: 'the app and its Appium install live in the workspace member',

@@ -8,7 +8,7 @@ Supersedes [ADR-016](016-the-test-projects-are-declared-and-vitest-config-is-der
 ## Context
 
 ADR-016 moved the projects out of a hand-written `vitest.config.ts` and into
-`test.projects` of `jterrazz.config.ts`, as a list of entries each naming its
+`test.projects` of `studio.config.ts`, as a list of entries each naming its
 `facet`, its options and its setups. Two changes of 2026-10-05 left that
 description behind. The word `facet` became `specification`, the name a user
 types (`specification.api()`). And a repository's tree already said which
@@ -32,9 +32,9 @@ same fact, free to forget a folder the tree held.
   exists.
 - What ADR-016 decided beside the list stands: `vitest.config.ts` is the
   toolchain's derived one-liner, `await vitestConfig(import.meta.url)` from
-  `@jterrazz/test/vitest`, reading the `jterrazz.config.ts` beside it; the
+  `@jterrazz/test/vitest`, reading the `studio.config.ts` beside it; the
   rules whose object was a hand-written config stay retired, and the ones
-  that read a project's options read `jterrazz.config.ts`.
+  that read a project's options read `studio.config.ts`.
 
 ## Consequences
 

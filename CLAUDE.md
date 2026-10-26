@@ -25,7 +25,7 @@ The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md
 | Rule ids, channels, the generated catalogue                | [`docs/reference/linting.md`](docs/reference/linting.md)                                                                             |
 | Anything else: a specification, the vocabulary, stubs, ... | [`docs/README.md`](docs/README.md), which owns the map of the pages                                                                  |
 
-Decisions this package alone took are in `docs/decisions/`. The agent-facing skill is `skills/jterrazz-test/SKILL.md`, a short, hand-written routing page, not a second copy.
+Decisions this package alone took are in `docs/decisions/`. The agent-facing skill is `skills/studio-test/SKILL.md`, a short, hand-written routing page, not a second copy.
 
 ## Setup & commands
 

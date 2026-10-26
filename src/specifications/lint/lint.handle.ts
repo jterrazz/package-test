@@ -25,11 +25,11 @@ export type LintSpecificationOptions = {
     config?: LintConfig;
     /** oxlint JS plugins, each a path from the specification's folder or a package specifier. */
     plugins?: readonly string[];
-    /** `@jterrazz/typescript` presets whose laws run on the tree, after the base preset, as `jterrazz.config.ts` lists them: `[]` holds the tree to the base preset alone. */
+    /** `@jterrazz/typescript` presets whose laws run on the tree, after the base preset, as `studio.config.ts` lists them: `[]` holds the tree to the base preset alone. */
     presets?: readonly Preset[];
     /** Project root override: the plugins' specifiers and the checkers' commands resolve from its `node_modules`. */
     root?: string;
-    /** What the project adds beside its presets, written as `jterrazz.config.ts` writes it: `typescript: { names, architecture }`, `optOuts`. */
+    /** What the project adds beside its presets, written as `studio.config.ts` writes it: `typescript: { names, architecture }`, `optOuts`. */
     settings?: Readonly<Record<string, unknown>>;
 };
 

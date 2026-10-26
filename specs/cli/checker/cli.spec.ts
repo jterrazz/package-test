@@ -16,7 +16,7 @@ describe('cli', () => {
         expect(result.stdout).toMatch(`
             specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\`; \`typescript fix\` does it with \`git mv\` · read: docs/reference/linting.md#file-suffix-matches-place
             specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(specification-test-uses-its-runner): found: a test under the \`api\` specification that reaches no runner · why: A test under \`specs/<specification>/\`, where the specification root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test into the \`__tests__/\` of its module's folder · read: docs/reference/linting.md#specification-test-uses-its-runner
-            found: every finding above, and .jterrazz/baseline.json records no \`jterrazz-check/\` entry in its \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
+            found: every finding above, and .studio/baseline.json records no \`jterrazz-check/\` entry in its \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-studiobaselinejson
         `);
     });
 
@@ -30,7 +30,7 @@ describe('cli', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\`; \`typescript fix\` does it with \`git mv\` · read: docs/reference/linting.md#file-suffix-matches-place
-            found: every finding above, and .jterrazz/baseline.json records no \`jterrazz-check/\` entry in its \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
+            found: every finding above, and .studio/baseline.json records no \`jterrazz-check/\` entry in its \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-studiobaselinejson
         `);
     });
 
@@ -73,7 +73,7 @@ describe('cli', () => {
         // Then - the plugin's key is refused in four parts, naming the two gestures that move it, beside the ratchet's own verdict
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            baseline-ratchet  .jterrazz/baseline.json › test  found: \`jterrazz/test-in-its-tests-folder\` is held in the test section · why: the plugin's rules are oxlint's own, held file by file in .jterrazz/oxlint-suppressions.json: one finding, one judge · fix: run 'typescript baseline' · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
+            baseline-ratchet  .studio/baseline.json › test  found: \`jterrazz/test-in-its-tests-folder\` is held in the test section · why: the plugin's rules are oxlint's own, held file by file in .studio/oxlint-suppressions.json: one finding, one judge · fix: run 'typescript baseline' · read: docs/reference/linting.md#the-ratchet-the-test-section-of-studiobaselinejson
         `);
     });
 
@@ -89,7 +89,7 @@ describe('cli', () => {
     });
 
     test('lint — checker CLI contract — with no ratchet, the root member run judges and prints only its own findings', async () => {
-        // Given - a dead fixture under specs/, no .jterrazz/baseline.json
+        // Given - a dead fixture under specs/, no .studio/baseline.json
         const result = await cli
             .fixture(directory('../../__fixtures__/no-unused-ground/'))
             .exec('--member .');
@@ -100,7 +100,7 @@ describe('cli', () => {
     });
 
     test('lint — checker CLI, the logs a ratchet run prints — a run another run judges prints its findings, names the judge, and exits 0', async () => {
-        // Given - one specs tree of a project keeping .jterrazz/baseline.json › test, the tree holding a finding the section does not
+        // Given - one specs tree of a project keeping .studio/baseline.json › test, the tree holding a finding the section does not
         const result = await cli
             .fixture(directory('../__fixtures__/checker-ratchet/'))
             .exec('specs');
@@ -108,7 +108,7 @@ describe('cli', () => {
         // Then - the finding and the file that judges it, and no verdict of its own
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            conventions checker: 1 finding(s) under {{workdir}}/specs, judged by .jterrazz/baseline.json › test
+            conventions checker: 1 finding(s) under {{workdir}}/specs, judged by .studio/baseline.json › test
             widget/__seeds__/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: __seeds__/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`__seeds__/\`/\`__requests__/\`/\`__fixtures__/\` and every top-level entry of \`__expected__/\` must be referenced: a folder's by the tests at or below it, the specs root's shared four by any test of the tree; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete __seeds__/dead.sql, or name it from the test that stands on it · read: docs/reference/linting.md#no-unused-ground
         `);
     });

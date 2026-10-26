@@ -253,7 +253,7 @@ function specificationRules(): ArchitectureRule[] {
     ];
 }
 
-/** This package's layer map, the edges `FRAMEWORK_LAYERS` and `OWNERS_OF_LIBRARIES` declare (the direction of `lint/` is the base preset's), in dependency-cruiser's vocabulary: `jterrazz.config.ts` hands it to the toolchain's Architecture pass. */
+/** This package's layer map, the edges `FRAMEWORK_LAYERS` and `OWNERS_OF_LIBRARIES` declare (the direction of `lint/` is the base preset's), in dependency-cruiser's vocabulary: `studio.config.ts` hands it to the toolchain's Architecture pass. */
 export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
     ...Object.entries<LayerOptions>(FRAMEWORK_LAYERS).flatMap(([layer, options]) =>
         layerRules(layer, options),

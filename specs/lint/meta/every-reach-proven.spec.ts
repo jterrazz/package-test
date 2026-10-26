@@ -79,9 +79,9 @@ describe('every-reach-proven', () => {
 
         // Then - each carries the rule whose reach names its role, and neither carries a rule that reaches tests
         expect(about(output, 'specs/api/api.specification.ts')).toContain('no-runner-alias');
-        expect(about(output, 'jterrazz.config.ts')).toContain('include-points-at-a-folder');
-        expect(about(output, 'jterrazz.config.ts')).not.toContain('no-sleep');
-        expect(about(output, 'jterrazz.config.ts')).not.toContain('no-raw-env-write');
+        expect(about(output, 'studio.config.ts')).toContain('include-points-at-a-folder');
+        expect(about(output, 'studio.config.ts')).not.toContain('no-sleep');
+        expect(about(output, 'studio.config.ts')).not.toContain('no-raw-env-write');
     });
 
     test('a specification that registers no cleanup is judged by `cleanup-passed-to-after-all`, and a spec beside it is not', async () => {

@@ -11,7 +11,7 @@ function projectDeclaring(projects: string, files: readonly string[] = []): stri
     const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
     writeFileSync(join(root, 'package.json'), '{ "name": "derived", "type": "module" }\n');
     writeFileSync(
-        join(root, 'jterrazz.config.ts'),
+        join(root, 'studio.config.ts'),
         `export default { kind: 'library', platform: 'node', test: { projects: ${projects} } };\n`,
     );
     for (const file of files) {
@@ -86,7 +86,7 @@ describe('index.vitest', () => {
         const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
         writeFileSync(join(root, 'package.json'), '{ "name": "derived", "type": "module" }\n');
         writeFileSync(
-            join(root, 'jterrazz.config.ts'),
+            join(root, 'studio.config.ts'),
             "export default { kind: 'library', platform: 'node', presets: [{ name: 'test', package: '@acme/test', settings: { projects: { lint: { reason: 'r', timeout: 5000 }, unit: { isolate: false, reason: 'r' } } } }] };\n",
         );
         for (const file of ['src/orders.test.ts', 'specs/cli/run.spec.ts']) {
@@ -147,18 +147,18 @@ describe('index.vitest', () => {
     });
 
     test('vitestConfig — refuses a settings file that does not load, rather than running no project', async () => {
-        // Given - a project whose jterrazz.config.ts throws as it loads
+        // Given - a project whose studio.config.ts throws as it loads
         const root = mkdtempSync(join(tmpdir(), 'derived-vitest-'));
         writeFileSync(join(root, 'package.json'), '{ "name": "derived", "type": "module" }\n');
-        writeFileSync(join(root, 'jterrazz.config.ts'), "throw new Error('presets not built');\n");
+        writeFileSync(join(root, 'studio.config.ts'), "throw new Error('presets not built');\n");
 
         // Then - the refusal names the file and what went wrong
         await expect(vitestConfig(configIn(root))).rejects.toThrow(
             new Error(
                 [
-                    'found: jterrazz.config.ts does not load: presets not built',
+                    'found: studio.config.ts does not load: presets not built',
                     'why: the test projects are declared there, and a config read without them would run none of them',
-                    'fix: correct jterrazz.config.ts as the finding says, then run vitest again',
+                    'fix: correct studio.config.ts as the finding says, then run vitest again',
                     'read: docs/start/set-up-a-project.md#the-vitest-config',
                 ].join('\n'),
             ),

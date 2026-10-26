@@ -34,7 +34,7 @@ describe('conventions', () => {
                 LABEL,
                 '',
                 'specs/cli/widget/version.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a `.test.ts` under `specs/cli/`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it `cli/widget/version.spec.ts`; `typescript fix` does it with `git mv` · read: docs/reference/linting.md#file-suffix-matches-place',
-                "found: every finding above, and .jterrazz/baseline.json records no `jterrazz-check/` entry in its `test` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
+                "found: every finding above, and .studio/baseline.json records no `jterrazz-check/` entry in its `test` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'typescript baseline' to record where the project stands · read: docs/reference/linting.md#the-ratchet-the-test-section-of-studiobaselinejson",
                 '✗ Failed with exit code 1 (<time>)',
             ].join('\n'),
         );
@@ -55,7 +55,7 @@ describe('conventions', () => {
         expect(result.file('specs/cli/widget/version.spec.ts').exists).toBe(true);
         expect(result.file('specs/cli/widget/version.test.ts').exists).toBe(false);
         expect(conventionsOf(result.stdout.text)).toBe(
-            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed (<time>)'].join(
+            [LABEL, '', '.studio/baseline.json › test: nothing held', '✓ Passed (<time>)'].join(
                 '\n',
             ),
         );
@@ -73,7 +73,7 @@ describe('conventions', () => {
 
         // Then - the test section holds the convention's key at the count it stands at
         expect(result.exitCode).toBe(0);
-        expect(JSON.parse(result.file('.jterrazz/baseline.json').content)).toStrictEqual({
+        expect(JSON.parse(result.file('.studio/baseline.json').content)).toStrictEqual({
             test: { 'jterrazz-check/file-suffix-matches-place': 1 },
         });
     });
@@ -89,7 +89,7 @@ describe('conventions', () => {
         // Then - the whole check passes, and the conventions say what the ratchet holds
         expect(result.exitCode).toBe(0);
         expect(conventionsOf(result.stdout.text)).toBe(
-            [LABEL, '', '.jterrazz/baseline.json › test: nothing held', '✓ Passed (<time>)'].join(
+            [LABEL, '', '.studio/baseline.json › test: nothing held', '✓ Passed (<time>)'].join(
                 '\n',
             ),
         );

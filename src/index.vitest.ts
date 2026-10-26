@@ -168,8 +168,8 @@ async function derivedFrom(root: string): Promise<ViteUserConfig> {
     if (problem !== null) {
         throw new Error(
             refusal({
-                fix: 'correct jterrazz.config.ts as the finding says, then run vitest again',
-                found: `jterrazz.config.ts ${problem}`,
+                fix: 'correct studio.config.ts as the finding says, then run vitest again',
+                found: `studio.config.ts ${problem}`,
                 read: 'docs/start/set-up-a-project.md#the-vitest-config',
                 why: 'the test projects are declared there, and a config read without them would run none of them',
             }),

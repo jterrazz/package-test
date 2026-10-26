@@ -22,7 +22,7 @@ describe('member-pass', () => {
 
         // Then - one line: the project keeps no section, so nothing is held
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('.jterrazz/baseline.json › test: nothing held\n');
+        expect(result.stdout.text).toBe('.studio/baseline.json › test: nothing held\n');
     });
 
     test('checker CLI — the member pass — `--verbose` names the member it judged and the passes that ran', async () => {

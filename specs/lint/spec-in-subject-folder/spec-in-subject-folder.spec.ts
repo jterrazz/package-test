@@ -26,7 +26,7 @@ describe('spec-in-subject-folder', () => {
         );
     });
 
-    test('--fix lists a collection jterrazz.config.ts declares, where no plural names it', async () => {
+    test('--fix lists a collection studio.config.ts declares, where no plural names it', async () => {
         // Given - the declared-collection tree
         const result = await checker
             .fixture(directory('./__fixtures__/declared-collection/'))
@@ -40,7 +40,7 @@ describe('spec-in-subject-folder', () => {
         );
     });
 
-    test('--fix files a route under the folder of its path past the base path jterrazz.config.ts declares', async () => {
+    test('--fix files a route under the folder of its path past the base path studio.config.ts declares', async () => {
         // Given - the declared-base-path tree: an app mounted under /api, its spec of GET /api/posts filed under api/api/posts/list/
         const result = await checker
             .fixture(directory('./__fixtures__/declared-base-path/'))
@@ -71,7 +71,7 @@ describe('spec-in-subject-folder', () => {
         expect(result.report).toMatch(`
             specs/api/orders/listing.spec.ts:1:1  jterrazz-check(spec-in-subject-folder)
                 found: a spec of GET /orders, filed under api/orders/
-                why: A spec file about one subject sits in the subject's standard folder, derived and never listed: \`GET /events\` files under \`events/list/\`, \`GET /events/:id\` under \`events/get/\`, \`POST /events\` under \`events/create/\`, \`PUT|PATCH /events/:id\` under \`events/update/\`, \`DELETE /events/:id\` under \`events/delete/\`, a route under an item (\`GET /events/:id/timeline\`) its literal segments (\`events/timeline/\`), a singleton (\`GET /health\`) \`health/get/\`, a method-less route, one \`jterrazz.config.ts\` names so (\`test: { methodless: { '/mcp': 'the MCP transport answers GET and POST' } }\`), reached by whatever verb a test sends, and never split by it (\`one-subject-per-spec\`), its segments (\`mcp/\`); a job its name (\`specs/job/<job>/\`), a cli command its first word (\`specs/cli/<word>/\`), or every leading word the \`commands\` list of the runner its chain's handle came from holds (\`specification.cli(bin, { commands: ['db', 'migrate'] })\` files \`db migrate\` under \`db/migrate/\`; the list written in the call or bound to a \`const\` of the runner's file).
+                why: A spec file about one subject sits in the subject's standard folder, derived and never listed: \`GET /events\` files under \`events/list/\`, \`GET /events/:id\` under \`events/get/\`, \`POST /events\` under \`events/create/\`, \`PUT|PATCH /events/:id\` under \`events/update/\`, \`DELETE /events/:id\` under \`events/delete/\`, a route under an item (\`GET /events/:id/timeline\`) its literal segments (\`events/timeline/\`), a singleton (\`GET /health\`) \`health/get/\`, a method-less route, one \`studio.config.ts\` names so (\`test: { methodless: { '/mcp': 'the MCP transport answers GET and POST' } }\`), reached by whatever verb a test sends, and never split by it (\`one-subject-per-spec\`), its segments (\`mcp/\`); a job its name (\`specs/job/<job>/\`), a cli command its first word (\`specs/cli/<word>/\`), or every leading word the \`commands\` list of the runner its chain's handle came from holds (\`specification.cli(bin, { commands: ['db', 'migrate'] })\` files \`db migrate\` under \`db/migrate/\`; the list written in the call or bound to a \`const\` of the runner's file).
                 fix: move it to api/orders/list/listing.spec.ts; \`typescript fix\` moves it, and the ground it stands on
                 read: docs/reference/linting.md#spec-in-subject-folder
         `);

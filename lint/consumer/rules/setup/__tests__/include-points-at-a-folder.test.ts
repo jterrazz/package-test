@@ -6,7 +6,7 @@ import { includePointsAtAFolder } from '../include-points-at-a-folder.js';
 // invariant: placed at this package's own root: `specs/api` exists here and `specs/lint2`
 // does not, so the probe answers against a real tree.
 const ROOT = resolve(import.meta.dirname, '../../../../..');
-const CONFIG = resolve(ROOT, 'jterrazz.config.ts');
+const CONFIG = resolve(ROOT, 'studio.config.ts');
 
 ruleTester().run('include-points-at-a-folder', includePointsAtAFolder, {
     invalid: [

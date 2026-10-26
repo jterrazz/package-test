@@ -34,7 +34,7 @@ export function methodlessDrift(table: readonly Route[], methodless: readonly st
 export function methodlessDrifted(drift: string[]): Lesson {
     return {
         fix: 'state in `test: { methodless }` exactly the routes the app takes on any method, each with its reason',
-        found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
+        found: `api routes: \`test: { methodless }\` in studio.config.ts drifted from the app's table:\n${drift.join('\n')}`,
         read: 'docs/guides/api-specs.md#a-route-taken-on-any-method',
         why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
     };

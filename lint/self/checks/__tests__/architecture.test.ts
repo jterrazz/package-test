@@ -41,7 +41,7 @@ function violationsIn(files: Record<string, string>): string[] {
         symlinkSync(join(ROOT, 'node_modules'), join(tree, 'node_modules'));
         copyFileSync(join(ROOT, 'tsconfig.json'), join(tree, 'tsconfig.json'));
         writeFileSync(
-            join(tree, 'jterrazz.config.ts'),
+            join(tree, 'studio.config.ts'),
             `export default ${JSON.stringify({ typescript: { architecture: { layers: ARCHITECTURE } } })};\n`,
         );
         const { stdout } = spawnSync(

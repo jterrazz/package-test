@@ -33,7 +33,7 @@ describe('methodless', () => {
         // Given - two lines of drift
         // Then - the found names both, one per line
         expect(methodlessDrifted(['  a', '  b']).found).toBe(
-            "api routes: `test: { methodless }` in jterrazz.config.ts drifted from the app's table:\n  a\n  b",
+            "api routes: `test: { methodless }` in studio.config.ts drifted from the app's table:\n  a\n  b",
         );
     });
 

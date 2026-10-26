@@ -13,7 +13,7 @@ import {
 function unit(config?: string): string {
     const root = mkdtempSync(join(tmpdir(), 'test-section-'));
     if (config !== undefined) {
-        writeFileSync(join(root, 'jterrazz.config.ts'), config);
+        writeFileSync(join(root, 'studio.config.ts'), config);
     }
     return root;
 }
@@ -21,7 +21,7 @@ function unit(config?: string): string {
 const DEFAULTS = { collections: [], methodless: [], production: { allow: {} } };
 
 describe('test-section', () => {
-    test('the test section of jterrazz.config.ts, as the checker reads it — the collections a unit declares are read, types stripped', () => {
+    test('the test section of studio.config.ts, as the checker reads it — the collections a unit declares are read, types stripped', () => {
         // Given - a config typed as a repository writes it
         const root = unit(
             "const collections: readonly string[] = ['data', 'people'];\nexport default { test: { collections } };\n",
@@ -35,7 +35,7 @@ describe('test-section', () => {
         });
     });
 
-    test('the test section of jterrazz.config.ts, as the checker reads it — the method-less routes a unit declares are read', () => {
+    test('the test section of studio.config.ts, as the checker reads it — the method-less routes a unit declares are read', () => {
         // Given - a unit whose api takes any method on /mcp
         const root = unit(
             "export default { test: { methodless: { '/mcp': 'the transport answers GET and POST' } } };\n",
@@ -49,7 +49,7 @@ describe('test-section', () => {
         });
     });
 
-    test('the test section of jterrazz.config.ts, as the checker reads it — the test packages production runs are read with their reasons', () => {
+    test('the test section of studio.config.ts, as the checker reads it — the test packages production runs are read with their reasons', () => {
         // Given - a unit whose service drives a browser
         const root = unit(
             "export default { test: { production: { allow: { playwright: 'the gate drives a browser in production' } } } };\n",
@@ -63,7 +63,7 @@ describe('test-section', () => {
         });
     });
 
-    test('the test section of jterrazz.config.ts, as the checker reads it — an allowed package with no reason leaves the whole list unread', () => {
+    test('the test section of studio.config.ts, as the checker reads it — an allowed package with no reason leaves the whole list unread', () => {
         // Given - one package stated without the sentence that says why
         const root = unit(
             "export default { test: { production: { allow: { playwright: 'drives a browser', vitest: '' } } } };\n",
@@ -73,7 +73,7 @@ describe('test-section', () => {
         expect(testSettingsAtSync(root)).toStrictEqual(DEFAULTS);
     });
 
-    test('the test section of jterrazz.config.ts, as the checker reads it — no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
+    test('the test section of studio.config.ts, as the checker reads it — no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
         // Given - four units the reading finds nothing usable in
         const roots = [
             unit(),
@@ -91,7 +91,7 @@ describe('test-section', () => {
         ]);
     });
 
-    test('the test section of jterrazz.config.ts, as the run reads it — the routes document and the method-less paths a member declares are read, types stripped', async () => {
+    test('the test section of studio.config.ts, as the run reads it — the routes document and the method-less paths a member declares are read, types stripped', async () => {
         // Given - a member declaring an OpenAPI document and one method-less route
         const root = unit(
             "const routes: string = './openapi.yaml';\nexport default { test: { methodless: { '/mcp': 'the transport answers GET and POST' }, routes } };\n",
@@ -106,7 +106,7 @@ describe('test-section', () => {
         });
     });
 
-    test('the test section of jterrazz.config.ts, as the run reads it — no file, and a key of the wrong shape, are no settings', async () => {
+    test('the test section of studio.config.ts, as the run reads it — no file, and a key of the wrong shape, are no settings', async () => {
         // Given - a unit with no config, and one whose routes is not a path
         const roots = [unit(), unit('export default { test: { routes: 42 } };\n')];
 
@@ -117,7 +117,7 @@ describe('test-section', () => {
         ]);
     });
 
-    test('the test section of jterrazz.config.ts, as the checker reads it — a unit declaring a preset reads its settings under its own', () => {
+    test('the test section of studio.config.ts, as the checker reads it — a unit declaring a preset reads its settings under its own', () => {
         // Given - a preset of the `test` section setting a default, and the unit adding to it
         const preset = {
             name: 'test',
@@ -179,14 +179,14 @@ describe('test-section', () => {
 
         // Then - each is refused as written, never read as no base path, with the shape it takes
         expect(refused.map((message) => message?.split('\n')[0])).toStrictEqual([
-            'found: jterrazz.config.ts: test.basePath "api" is no mount path',
-            'found: jterrazz.config.ts: test.basePath "api/v1" is no mount path',
-            'found: jterrazz.config.ts: test.basePath "/api/" is no mount path',
-            'found: jterrazz.config.ts: test.basePath "/API" is no mount path',
+            'found: studio.config.ts: test.basePath "api" is no mount path',
+            'found: studio.config.ts: test.basePath "api/v1" is no mount path',
+            'found: studio.config.ts: test.basePath "/api/" is no mount path',
+            'found: studio.config.ts: test.basePath "/API" is no mount path',
         ]);
         expect(refused[2]).toBe(
             [
-                'found: jterrazz.config.ts: test.basePath "/api/" is no mount path',
+                'found: studio.config.ts: test.basePath "/api/" is no mount path',
                 'why: The base path is cut from every route before its subject folder is derived, so it is read as a route prefix is written: one leading slash, lowercase segments, no trailing slash.',
                 "fix: write the path the routes are mounted under from the root, with no slash at its end: test: { basePath: '/api' }",
                 'read: docs/reference/linting.md#test-settings-section',

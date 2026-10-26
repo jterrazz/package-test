@@ -27,7 +27,7 @@ describe('recordBaseline', () => {
         // Then - the command succeeds, naming the section, the findings and the rules
         expect(recordBaseline(SILENT)([root], CHECKER)).toBe(0);
         expect(written.mock.calls).toStrictEqual([
-            ['.jterrazz/baseline.json › test written: 0 finding(s) across 0 rule(s)\n'],
+            ['.studio/baseline.json › test written: 0 finding(s) across 0 rule(s)\n'],
         ]);
         written.mockRestore();
     });
@@ -41,7 +41,7 @@ describe('recordBaseline', () => {
         expect(recordBaseline(SILENT)(['--quiet', root], CHECKER)).toBe(0);
         expect(recordBaseline(SILENT)([`${root}/gone`], CHECKER)).toBe(1);
         expect(written.mock.calls.map(([line]) => String(line).split('\n')[0])).toStrictEqual([
-            '.jterrazz/baseline.json › test written: 0 finding(s) across 0 rule(s)',
+            '.studio/baseline.json › test written: 0 finding(s) across 0 rule(s)',
             `found: no such project root: ${root}/gone · why: a path that names nothing holds no spec to judge, and a run over it would read as a clean tree · fix: name an existing project root, or run from inside one · read: docs/reference/linting.md#the-conventions-checker`,
         ]);
         written.mockRestore();

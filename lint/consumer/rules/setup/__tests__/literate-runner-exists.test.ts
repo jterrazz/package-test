@@ -6,7 +6,7 @@ import { literateRunnerExists } from '../literate-runner-exists.js';
 // invariant: placed at this package's own root, where `specs/cli/cli.specification.ts` exists
 // and `specs/cli/gone.specification.ts` does not, so the stat answers against a real tree.
 const ROOT = resolve(import.meta.dirname, '../../../../..');
-const CONFIG = resolve(ROOT, 'jterrazz.config.ts');
+const CONFIG = resolve(ROOT, 'studio.config.ts');
 
 const configNaming = (path: string): string =>
     `export default defineConfig({ test: { projects: { cli: { literate: { runner: '${path}' }, reason: 'the documents' } } } });`;

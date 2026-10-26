@@ -22,9 +22,9 @@ describe('no-simulated-dom-in-config', () => {
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
-            packages/simulated-dom/jterrazz.config.ts:4:1  jterrazz-check(no-simulated-dom-in-config)
+            packages/simulated-dom/studio.config.ts:4:1  jterrazz-check(no-simulated-dom-in-config)
                 found: \`environment: 'happy-dom'\` gives every file of this project a drawing of a browser
-                why: \`environment: 'happy-dom'|'jsdom'\` in a test project of \`jterrazz.config.ts\` is an error.
+                why: \`environment: 'happy-dom'|'jsdom'\` in a test project of \`studio.config.ts\` is an error.
                 fix: delete \`environment: 'happy-dom'\`, and write each rendered test as a \`.test.tsx\` in the \`__tests__/\` of its component's folder, collected by the \`component\` project
                 read: docs/reference/linting.md#no-simulated-dom-in-config
         `);

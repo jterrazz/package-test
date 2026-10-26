@@ -14,7 +14,7 @@ import {
 const ROOT = originalOf(resolve(import.meta.dirname, '../../../..'));
 const DOCS = resolve(ROOT, 'docs');
 const README = resolve(ROOT, 'README.md');
-const SKILL = resolve(ROOT, 'skills/jterrazz-test/SKILL.md');
+const SKILL = resolve(ROOT, 'skills/studio-test/SKILL.md');
 const INDEX_MODULE = resolve(ROOT, 'src/index.js');
 const TSC_BIN = resolve(ROOT, 'node_modules/typescript/bin/tsc');
 const CACHE = resolve(ROOT, 'node_modules/.cache');

@@ -86,6 +86,6 @@ export function literate(options: LiterateOptions): LiteratePlugin {
                 : resolve(root, options.runner);
             return literateModule(readFileSync(filePath, 'utf8'), filePath, runnerPath);
         },
-        name: 'jterrazz-test:literate',
+        name: 'studio-test:literate',
     };
 }
