@@ -9,6 +9,6 @@ for (const [from, to] of [
     const target = join(import.meta.dirname, to);
     if (!existsSync(target)) {
         const template = readFileSync(join(import.meta.dirname, from), 'utf8');
-        writeFileSync(target, template.replaceAll('JTERRAZZ_TEST_REPO', process.env.JTERRAZZ_TEST_REPO ?? ''));
+        writeFileSync(target, template.replaceAll('STUDIO_TEST_REPO', process.env.STUDIO_TEST_REPO ?? ''));
     }
 }

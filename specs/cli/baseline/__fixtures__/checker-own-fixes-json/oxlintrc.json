@@ -1,5 +1,5 @@
 {
     "extends": ["./base.json"],
-    "jsPlugins": ["JTERRAZZ_TEST_REPO/dist/oxlint.js"],
+    "jsPlugins": ["STUDIO_TEST_REPO/dist/oxlint.js"],
     "rules": { "jterrazz/no-repeated-chain-setting": "warn" }
 }

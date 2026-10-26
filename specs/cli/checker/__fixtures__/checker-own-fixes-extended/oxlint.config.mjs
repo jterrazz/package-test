@@ -3,7 +3,7 @@
 export default {
     extends: [
         {
-            jsPlugins: [`${process.env.JTERRAZZ_TEST_REPO}/dist/oxlint.js`],
+            jsPlugins: [`${process.env.STUDIO_TEST_REPO}/dist/oxlint.js`],
             plugins: ['unicorn'],
             rules: {
                 'jterrazz/no-repeated-chain-setting': 'warn',

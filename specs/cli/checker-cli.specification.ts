@@ -6,10 +6,10 @@ const REPOSITORY = resolve(import.meta.dirname, '../..');
 
 const CONVENTIONS = `node ${REPOSITORY}/node_modules/@jterrazz/typescript/dist/checker.js --preset ${REPOSITORY}/dist/checker.js`;
 
-/** The conventions checks as the toolchain runs them, through its checker program: `npm run build` first. A fixture's stub oxlint runs this repository's, named by `JTERRAZZ_TEST_REPO`. */
+/** The conventions checks as the toolchain runs them, through its checker program: `npm run build` first. A fixture's stub oxlint runs this repository's, named by `STUDIO_TEST_REPO`. */
 export const { cleanup, cli } = await specification.cli(CONVENTIONS, {
     commands: ['baseline'],
-    defaults: { JTERRAZZ_TEST_REPO: REPOSITORY },
+    defaults: { STUDIO_TEST_REPO: REPOSITORY },
 });
 
 afterAll(cleanup);
