@@ -9,7 +9,7 @@ A release is four steps, in this order.
 1. **Bump and land the version.** The version in `package.json` moves, alone, in a commit whose subject is `chore: <version> — <what changed>`. The commit log is the changelog: this repository carries no `CHANGELOG.md`, by decision, and the release notes plus that subject line are the record. A major also adds what it makes a project rewrite to [Set up a project § Upgrading](../start/set-up-a-project.md#upgrading), the one page a consumer reads before bumping.
 2. **Rehearse the gate.** `make rehearse` runs it on that commit as the runner will, on Linux ([A rehearsal on Linux](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/commands.md#a-rehearsal-on-linux)), and exits 0.
 3. **Create the GitHub release**, tagged at that commit. This is the trigger and the only one: `.github/workflows/release.yaml` listens on `release: types: [created]`.
-4. **Watch the gate.** The workflow delegates to the shared `jterrazz/studio-actions/.github/workflows/release-npm.yaml`, which runs the FULL validate job first (the same targets the push gate runs, chromium included: [Test § What CI runs](test.md#what-ci-runs)) and publishes only if it is green.
+4. **Watch the gate.** The workflow delegates to the shared `jterrazz/studio-actions/.github/workflows/publish-npm.yaml`, which runs the FULL Check job first (the same targets the push gate runs, chromium included: [Test § What CI runs](test.md#what-ci-runs)) and publishes only if it is green.
 
 The publish step is `npm publish --access public --provenance`, on Node 24, with `id-token: write` granted so npm records a provenance attestation linking the tarball to the workflow run that built it. The registry is npm's, stated as `publishConfig` in the manifest.
 
