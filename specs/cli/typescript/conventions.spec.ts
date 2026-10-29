@@ -4,6 +4,9 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../packed-cli.specification.js';
 
+// invariant: the spec reads the terminal's report; on a GitHub runner the toolchain prints GitHub's forms instead.
+const cliInFile = cli.with({ env: { GITHUB_ACTIONS: '' } });
+
 const LABEL = 'Test Conventions (@jterrazz/test)';
 
 function conventionsOf(stdout: string): string {
@@ -21,7 +24,7 @@ function conventionsOf(stdout: string): string {
 describe('conventions', () => {
     test("the installed toolchain runs the conventions a consumer's declared preset brings", async () => {
         // Given - a consumer declaring test() in its settings file, whose specs tree breaks one convention and nothing else
-        const result = await cli
+        const result = await cliInFile
             .link('@jterrazz/test', packed())
             .link('@types/node')
             .fixture(directory('./__fixtures__/declaring-test/'))
@@ -44,7 +47,7 @@ describe('conventions', () => {
         // Given - the consumer whose spec wears the unit's suffix under a specification folder
 
         // When - the fixes run
-        const result = await cli
+        const result = await cliInFile
             .link('@jterrazz/test', packed())
             .link('@types/node')
             .fixture(directory('./__fixtures__/declaring-test/'))
@@ -65,7 +68,7 @@ describe('conventions', () => {
         // Given - the same consumer, its finding not yet recorded
 
         // When - the baseline is recorded
-        const result = await cli
+        const result = await cliInFile
             .link('@jterrazz/test', packed())
             .link('@types/node')
             .fixture(directory('./__fixtures__/declaring-test/'))
@@ -80,7 +83,7 @@ describe('conventions', () => {
 
     test("the installed toolchain passes a consumer's tree that keeps the conventions", async () => {
         // Given - a consumer declaring test() in its settings file, every file in order
-        const result = await cli
+        const result = await cliInFile
             .link('@jterrazz/test', packed())
             .link('@types/node')
             .fixture(directory('./__fixtures__/declaring-test-kept/'))
