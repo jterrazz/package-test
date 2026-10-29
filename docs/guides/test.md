@@ -243,7 +243,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `commands`        | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `defaults`        | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `docker`          | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `env`             | n/a | n/a | 6   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `env`             | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `serve`           | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `transform`       | n/a | n/a | 2   | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
 | `checkers`        | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
@@ -271,7 +271,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.headers()`   | 8   | n/a | n/a | n/a  | n/a         | 2       | n/a    | n/a       | n/a    |
 | `.intercept()` | 12  | 1   | 1   | n/a  | 3           | 2       | 1      | 6         | n/a    |
 | `.seed()`      | 9   | 1   | 1   | n/a  | 3           | n/a     | n/a    | n/a       | n/a    |
-| `.with()`      | 5   | 1   | 1   | n/a  | 1           | 1       | n/a    | n/a       | n/a    |
+| `.with()`      | 5   | 1   | 2   | n/a  | 1           | 1       | n/a    | n/a       | n/a    |
 | `.connect()`   | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.env()`       | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.fixture()`   | n/a | n/a | 49  | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
