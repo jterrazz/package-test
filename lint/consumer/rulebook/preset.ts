@@ -39,6 +39,8 @@ const SOURCE = String.raw`\.[cm]?[jt]sx?$`;
 
 const TEST_FILE = String.raw`\.(test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$`;
 
+const TEST_CODE = either([TEST_FILE, '(^|/)__tests__/']);
+
 const RUNS_A_TEST = String.raw`\.(test\.tsx?|spec\.ts|specification\.tsx?)$`;
 
 function packages(names: readonly string[]): string {
@@ -148,8 +150,8 @@ const LAYERS: ArchitectureRule[] = [
     },
     {
         ...taughtBy('fixtures-imported-by-tests-only'),
-        fix: 'import it from a `*.test.ts` only, or move what the file needs into a module of its own',
-        from: { pathNot: TEST_FILE },
+        fix: 'import it from a `*.test.ts` or a file under `__tests__/` only, or move what the file needs into a module of its own',
+        from: { pathNot: TEST_CODE },
         name: 'fixtures-imported-by-tests-only',
         to: { path: String.raw`\.fixtures${SOURCE}` },
     },

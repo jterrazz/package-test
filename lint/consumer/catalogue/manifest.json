@@ -621,10 +621,10 @@
         {
             "audience": "consumer",
             "channel": "toolchain",
-            "sentence": "A `*.fixtures.ts` is importable only from a test file.",
+            "sentence": "A `*.fixtures.ts` is importable only from test code: a test file, or any file under a `__tests__/` folder.",
             "specification": "model",
             "family": "imports",
-            "fix": "Move the value into production code if production needs it; otherwise import it from a test.",
+            "fix": "Move the value into production code if production needs it; otherwise import it from a test or from a file under `__tests__/`.",
             "name": "fixtures-imported-by-tests-only",
             "rationale": "Confining fixtures to tests stops test data leaking into production code.",
             "reach": "all"

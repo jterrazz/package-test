@@ -12,6 +12,14 @@ describe('fixtures-imported-by-tests-only', () => {
         expect(result.report).toMatch('');
     });
 
+    test('a helper under a tests folder importing a fixtures module passes, at any depth', async () => {
+        // Given - helpers in a tests folder and in a folder below it, neither a test file
+        const result = await preset.fixture(directory('./__fixtures__/tests-folder/')).run();
+
+        // Then - nothing is reported
+        expect(result.report).toMatch('');
+    });
+
     test('production code importing a fixtures module is refused', async () => {
         // Given - the violation tree
         const result = await preset.fixture(directory('./__fixtures__/violation/')).run();
@@ -20,8 +28,8 @@ describe('fixtures-imported-by-tests-only', () => {
         expect(result.report).toMatch(`
             src/widget/widget.ts:1:28  architecture(fixtures-imported-by-tests-only)
                 found: \`src/widget/widget.ts\` imports \`src/widget/widget.fixtures.ts\`
-                why: A \`*.fixtures.ts\` is importable only from a test file.
-                fix: import it from a \`*.test.ts\` only, or move what the file needs into a module of its own
+                why: A \`*.fixtures.ts\` is importable only from test code: a test file, or any file under a \`__tests__/\` folder.
+                fix: import it from a \`*.test.ts\` or a file under \`__tests__/\` only, or move what the file needs into a module of its own
                 read: docs/reference/linting.md#fixtures-imported-by-tests-only
         `);
     });
