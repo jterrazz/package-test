@@ -1,6 +1,6 @@
 # ADR-023: The component pages run before any container starts
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-17
 
 Supersedes the one group for every parallel project of [ADR-019](019-every-project-runs-in-one-group-and-a-serial-one-after-it.md); its serial group after the parallel ones, and its one place a group is set, stand.
