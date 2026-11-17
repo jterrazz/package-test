@@ -89,6 +89,9 @@ function closed(server: Server | TcpServer): Promise<void> {
     });
 }
 
+// hazard: a port the OS gave and took back is any process's again (a `listen(0)`, an outgoing connection's local end), and one taken answers a reset or a silence in a refusal's place; port 1 is below every range a port is handed or drawn from, so no process is handed it by chance.
+const REFUSED_PORT = 1;
+
 /** The addresses each server answers on, and how to stop them all. */
 export type Specimen = {
     close: () => Promise<void>;
@@ -112,7 +115,7 @@ export type Specimen = {
     silent: string;
 };
 
-/** Every server starts before the first spec, and a closed port is one the OS gave and took back. */
+/** Every server starts before the first spec. */
 export async function serveSpecimen(): Promise<Specimen> {
     const key = certificate('site.key');
     const plain = createServer(handle);
@@ -126,13 +129,9 @@ export async function serveSpecimen(): Promise<Specimen> {
     const silent = createTcpServer((socket) => {
         held.push(socket);
     });
-    const vacated = createTcpServer();
-
     const servers = [plain, secure, expired, selfSigned, silent, secureSilent];
     const [plainPort, securePort, expiredPort, selfSignedPort, silentPort, secureSilentPort] =
         await Promise.all(servers.map(listening));
-    const refusedPort = await listening(vacated);
-    await closed(vacated);
 
     return {
         close: async () => {
@@ -144,7 +143,7 @@ export async function serveSpecimen(): Promise<Specimen> {
         expired: `https://127.0.0.1:${String(expiredPort)}`,
         plain: `http://127.0.0.1:${String(plainPort)}`,
         plainPort: plainPort ?? 0,
-        refused: `http://127.0.0.1:${String(refusedPort)}`,
+        refused: `http://127.0.0.1:${String(REFUSED_PORT)}`,
         secure: `https://127.0.0.1:${String(securePort)}`,
         securePort: securePort ?? 0,
         secureSilent: `https://127.0.0.1:${String(secureSilentPort)}`,
