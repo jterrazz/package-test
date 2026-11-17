@@ -15,11 +15,11 @@ import {
 const ROOT = process.cwd();
 
 describe('component', () => {
-    test('component() — the browser project — runs headless chromium, in the group every project shares', async () => {
+    test('component() — the browser project — runs headless chromium, in group 0, before any project that may start a container', async () => {
         // Given - the canonical browser project
         const project = testOf(await component({ root: ROOT }));
 
-        // Then - one browser, no window, and the node kinds' group
+        // Then - one browser, no window, and the first group
         expect(project.browser?.enabled).toBe(true);
         expect(project.browser?.headless).toBe(true);
         expect(project.browser?.instances).toStrictEqual([{ browser: 'chromium' }]);

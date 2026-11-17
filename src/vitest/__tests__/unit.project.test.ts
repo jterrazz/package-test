@@ -58,9 +58,9 @@ describe('unit', () => {
         expect(testOf(unit())).not.toHaveProperty('isolate');
     });
 
-    test('unit() — module tests, and only module tests — shares the one group with every other project', () => {
+    test('unit() — module tests, and only module tests — runs in group 0, beside the component pages, since it starts no container', () => {
         // Given - the canonical project
-        // Then - group 0, which the browser projects share
+        // Then - group 0, which the component project shares
         expect(testOf(unit()).sequence).toStrictEqual({ groupOrder: 0 });
     });
 });

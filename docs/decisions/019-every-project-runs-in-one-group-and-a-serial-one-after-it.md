@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-10-21
 
+Its one group for every parallel project is superseded by [ADR-023](023-the-component-pages-run-before-any-container-starts.md).
+
 ## Context
 
 ADR-003 kept the component project's Chromium from sharing a slot with the

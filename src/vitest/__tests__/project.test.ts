@@ -17,14 +17,14 @@ function testOf(
 }
 
 describe('project', () => {
-    test("specificationProject — collects the specification's spec files, in group 0, on the preset's budget", () => {
-        // Given - a specification project stated by nobody
+    test("specificationProject — collects the specification's spec files, in group 2 after every kind that starts no container, on the preset's budget", () => {
+        // Given - a specification project stated by nobody, of a kind that may start a container
         const project = testOf(specificationProject('api', {}));
 
         // Then - its own specs tree, named for it, in parallel on the shared 30s, the run's two global setups from their sources
         expect(project.include).toStrictEqual(['specs/api/**/*.spec.ts']);
         expect(project.name).toBe('api');
-        expect(project.sequence?.groupOrder).toBe(0);
+        expect(project.sequence?.groupOrder).toBe(2);
         expect([project.fileParallelism, project.testTimeout]).toStrictEqual([undefined, 30_000]);
         expect(project.globalSetup).toStrictEqual([
             resolve(import.meta.dirname, '../../expectations/in-place/in-place.global-setup.ts'),
@@ -40,17 +40,26 @@ describe('project', () => {
         expect(project.exclude).toStrictEqual([...EXCLUDE, 'specs/api/slow/**']);
     });
 
-    test('specificationProject — runs its files one at a time on its own budget when stated, in the group after every parallel project', () => {
+    test('specificationProject — runs its files one at a time on its own budget when stated, in the group after the parallel projects of its side', () => {
         // Given - a specification project that shares one app and needs a minute
         const project = testOf(specificationProject('api', { serial: true, timeout: 60_000 }));
 
-        // Then - no file parallelism, group 1, and the stated budget for its tests and its hooks alike
+        // Then - no file parallelism, group 3, and the stated budget for its tests and its hooks alike
         expect([
             project.fileParallelism,
             project.sequence?.groupOrder,
             project.testTimeout,
             project.hookTimeout,
-        ]).toStrictEqual([false, 1, 60_000, 60_000]);
+        ]).toStrictEqual([false, 3, 60_000, 60_000]);
+    });
+
+    test('specificationProject — a serial kind that starts no container runs after the parallel ones of its side, and before every kind that may', () => {
+        // Given - the lint project run in parallel, and one at a time
+        const parallel = testOf(specificationProject('lint', {}));
+        const serial = testOf(specificationProject('lint', { serial: true }));
+
+        // Then - groups 0 and 1, both before group 2
+        expect([parallel.sequence?.groupOrder, serial.sequence?.groupOrder]).toStrictEqual([0, 1]);
     });
 
     test('runnerProject — a serial project naming its runner keeps a group of its own, which vitest needs of one worker beside many', () => {
@@ -62,12 +71,12 @@ describe('project', () => {
             }),
         );
 
-        // Then - one worker, one graph, and group 1
+        // Then - one worker, one graph, and group 3
         expect([
             project.fileParallelism,
             project.isolate,
             project.sequence?.groupOrder,
-        ]).toStrictEqual([false, false, 1]);
+        ]).toStrictEqual([false, false, 3]);
     });
 
     test('runnerProject — shares one module graph per worker and reruns the specification before each file only when it names one', () => {

@@ -79,12 +79,21 @@ type CanonicalGlobs = { exclude?: string[]; include: string[] };
 
 type ProjectTest = NonNullable<TestProjectInlineConfiguration['test']>;
 
-// invariant: the one place a project's group is set: every project runs in group 0, on the one pool of workers the capacity model sizes, a browser project's pages beside the node kinds; a serial one runs after them, in group 1, since vitest refuses one group of two worker counts.
-const PARALLEL = { groupOrder: 0 } as const;
+// hazard: Chromium aborts every request in flight when the host's addresses change, and a container's start or stop changes them (its veth gains or loses an address), so the component pages run before any project that may start a container, never beside one.
+// invariant: the one place a project's group is set: the kinds that start no container share the first groups, the kinds that may start one run after them, and on each side a serial project runs after the parallel ones, since vitest refuses one group of two worker counts.
+const STARTS_NO_CONTAINER: ReadonlySet<string> = new Set(['component', 'lint', 'unit']);
 
-const SERIAL = { groupOrder: 1 } as const;
+const GROUP = {
+    containerFree: { parallel: 0, serial: 1 },
+    containers: { parallel: 2, serial: 3 },
+} as const;
 
-/** A stated `include` or `exclude` replaces the canonical one; a project shares group 0 with every other, a serial one runs after them. */
+function groupOf(name: string, serial: boolean): number {
+    const side = STARTS_NO_CONTAINER.has(name) ? GROUP.containerFree : GROUP.containers;
+    return serial ? side.serial : side.parallel;
+}
+
+/** A stated `include` or `exclude` replaces the canonical one; a kind that starts no container runs before every kind that may, and a serial project after the parallel ones of its side. */
 export function projectTest(
     name: string,
     options: SpecificationProjectOptions,
@@ -96,7 +105,7 @@ export function projectTest(
         include: options.include ?? canonical.include,
         ...(options.serial === true ? { fileParallelism: false } : {}),
         name,
-        sequence: options.serial === true ? SERIAL : PARALLEL,
+        sequence: { groupOrder: groupOf(name, options.serial === true) },
         ...(options.timeout === undefined
             ? {}
             : { hookTimeout: options.timeout, testTimeout: options.timeout }),

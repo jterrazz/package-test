@@ -3,14 +3,14 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.project.js';
 
 describe('website', () => {
-    test('website.project — the vitest project of the specification — is named for it, and runs beside the node projects', () => {
-        // Given - the specification's project
+    test('website.project — the vitest project of the specification — is named for it, and runs with the kinds that may start a container', () => {
+        // Given - the specification's project, whose services may start one
         const project = website();
 
-        // Then - it is named for it, in the group every project shares
+        // Then - it is named for it, in group 2, after the component pages
         expect([project.test?.name, project.test?.sequence?.groupOrder]).toStrictEqual([
             'website',
-            0,
+            2,
         ]);
     });
 

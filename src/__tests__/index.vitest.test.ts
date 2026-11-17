@@ -224,4 +224,39 @@ describe('index.vitest', () => {
             ],
         ]);
     });
+
+    test('vitestConfig — the component pages and every kind that starts no container run in groups before every kind that may start one', async () => {
+        // Given - a tree holding a file of every kind the package ships
+        const root = projectDeclaring('undefined', [
+            'src/orders.test.ts',
+            'specs/component/page.test.tsx',
+            'specs/lint/rule.spec.ts',
+            'specs/api/route.spec.ts',
+            'specs/cli/run.spec.ts',
+            'specs/integration/call.spec.ts',
+            'specs/job/run.spec.ts',
+            'specs/website/page.spec.ts',
+            'specs/mobile/screen.spec.ts',
+        ]);
+
+        // When - the config is derived for it
+        const projects = await projectsOf(root);
+
+        // Then - the browser's group, then the groups where a container may start or stop, the serial mobile project last
+        expect(
+            Object.fromEntries(
+                projects.map(({ test: built }) => [built?.name, built?.sequence?.groupOrder]),
+            ),
+        ).toStrictEqual({
+            api: 2,
+            cli: 2,
+            component: 0,
+            integration: 2,
+            job: 2,
+            lint: 0,
+            mobile: 3,
+            unit: 0,
+            website: 2,
+        });
+    });
 });
