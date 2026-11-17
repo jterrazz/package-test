@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 import { findFreePort } from '../listening.js';
+import { reservePort } from '../port-reservation.js';
 import type { ProcessOptions } from '../process.adapter.js';
 
 /** Binds the port the OS hands it and answers its own pid: no spec picks a port. */
@@ -34,17 +35,22 @@ export async function held(
         paths.push(request.url ?? '');
         response.end();
     });
-    server.listen(0, host);
-    await once(server, 'listening');
-    const address = server.address();
-    if (address === null || typeof address === 'string') {
-        throw new Error('the held server has no port');
+    // hazard: a port the OS hands `listen(0)` on one loopback family may be held on the other by a socket of another process, and the probe naming a port's holder asks both; a drawn port is below the range the OS hands from, and free on both.
+    const reserved = await reservePort(undefined);
+    if (!('release' in reserved)) {
+        throw new Error(`the held server has no port: ${reserved.found}`);
+    }
+    server.listen(reserved.port, host);
+    try {
+        await once(server, 'listening');
+    } finally {
+        reserved.release();
     }
     return {
         paths,
-        port: address.port,
+        port: reserved.port,
         server,
-        url: `http://${host.includes(':') ? `[${host}]` : host}:${address.port}`,
+        url: `http://${host.includes(':') ? `[${host}]` : host}:${String(reserved.port)}`,
     };
 }
 
