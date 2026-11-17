@@ -5,8 +5,8 @@ import type { Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
-import { findFreePort } from '../listening.js';
 import { reservePort } from '../port-reservation.js';
+import type { Reservation } from '../port-reservation.js';
 import type { ProcessOptions } from '../process.adapter.js';
 
 /** Binds the port the OS hands it and answers its own pid: no spec picks a port. */
@@ -27,6 +27,22 @@ export const HANDS_PORT_AWAY = `node -e "const c=require('node:child_process').s
 /** Never binds what it is handed: reports the port it got and stays up. */
 export const PRINTS_HANDED = `node -e "console.log('handed '+process.env.PORT);setInterval(()=>{},1000)"`;
 
+// hazard: a port the OS hands (`listen(0)`, then closed) is any process's to take the moment it is closed, and a socket of another process may hold it on the other loopback family already; a drawn port is below the range the OS hands from, and free on both.
+async function drawn(): Promise<Reservation> {
+    const reserved = await reservePort(undefined);
+    if (!('release' in reserved)) {
+        throw new Error(`no port was drawn: ${reserved.found}`);
+    }
+    return reserved;
+}
+
+/** A port a test pins, or believes nothing listens on: drawn, then released for the served process that claims it as it starts. */
+export async function pinnable(): Promise<number> {
+    const reserved = await drawn();
+    reserved.release();
+    return reserved.port;
+}
+
 export async function held(
     host = '127.0.0.1',
 ): Promise<{ paths: string[]; port: number; server: Server; url: string }> {
@@ -35,11 +51,7 @@ export async function held(
         paths.push(request.url ?? '');
         response.end();
     });
-    // hazard: a port the OS hands `listen(0)` on one loopback family may be held on the other by a socket of another process, and the probe naming a port's holder asks both; a drawn port is below the range the OS hands from, and free on both.
-    const reserved = await reservePort(undefined);
-    if (!('release' in reserved)) {
-        throw new Error(`the held server has no port: ${reserved.found}`);
-    }
+    const reserved = await drawn();
     server.listen(reserved.port, host);
     try {
         await once(server, 'listening');
@@ -82,7 +94,7 @@ export function programNamed(name: string): string {
 }
 
 // hazard: a fixed port may be a developer's own server (Astro's 4321) answering in the refused server's place.
-const PINNED = await findFreePort();
+const PINNED = await pinnable();
 
 /** Each process shape refused before it is ready, and the refusal it gets, whole. */
 export const REFUSALS: [string, ProcessOptions, string][] = [

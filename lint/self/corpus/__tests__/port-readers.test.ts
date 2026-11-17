@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { portReaders } from '../port-readers.js';
+import { portReaders, portReleasers } from '../port-readers.js';
 
 const ROOT = resolve(import.meta.dirname, '../../../..');
 
@@ -41,6 +41,34 @@ describe('portReaders', () => {
         expect(portReaders(root)).toStrictEqual([
             'specs/__fixtures__/site/server.mjs',
             'src/serve.test.ts',
+        ]);
+    });
+
+    test('`server-binds-port-zero` — a spec server binds port 0 (meta-test) — no spec, module or fixture of this package reads a port off a server it then closes', () => {
+        // Given - every file a spec or the source is made of, on the host
+        const releasers = portReleasers(ROOT);
+
+        // Then - none of them hands on a port the OS took back
+        expect(releasers).toStrictEqual([]);
+    });
+
+    test('`server-binds-port-zero` — a spec server binds port 0 (meta-test) — names a port read off a server the next statement closes, never a server kept open, nor a container', () => {
+        // Given - a module and a spec fixture each closing the server they read a port off, a test keeping it, and a container doing the same
+        const root = tree({
+            'specs/__fixtures__/app/Dockerfile': 'FROM node\n',
+            'specs/__fixtures__/app/server.ts':
+                'const port = await listening(vacated);\nawait closed(vacated);\n',
+            'specs/__fixtures__/site/server.ts':
+                'const refusedPort = await listening(vacated);\nawait closed(vacated);\n',
+            'src/listening.ts': 'const port = await listenedPort(server);\nserver.close();\n',
+            'src/served.test.ts':
+                'const port = await listenedPort(server);\nawait fetch(port);\nserver.close();\n',
+        });
+
+        // Then - the two that release the port are named, the kept server and the container are not
+        expect(portReleasers(root)).toStrictEqual([
+            'specs/__fixtures__/site/server.ts',
+            'src/listening.ts',
         ]);
     });
 });

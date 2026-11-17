@@ -1,10 +1,9 @@
 import { afterEach, describe, expect, onTestFinished, test } from 'vitest';
 
-import { findFreePort } from '../listening.js';
 import { DRAWN_PORTS } from '../port-reservation.js';
 import { processService } from '../process.adapter.js';
 import type { ProcessHandle } from '../process.adapter.js';
-import { ANSWERS_ID } from './serve.fixtures.js';
+import { ANSWERS_ID, pinnable } from './serve.fixtures.js';
 
 // invariant: binds the port the OS hands it and announces it: no spec picks a port.
 const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(process.env.GREETING ?? 'ok'));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
@@ -157,7 +156,7 @@ describe('process.adapter', () => {
 
     test('process — two pinning one port at once — the second is refused before its command runs, and the first serves', async () => {
         // Given - one free port, pinned by two processes slow to bind it
-        const port = await findFreePort();
+        const port = await pinnable();
         const handles = [0, 1].map((index) =>
             processService({
                 command: ANSWERS_ID,

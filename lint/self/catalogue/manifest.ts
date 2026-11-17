@@ -174,13 +174,13 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/services/process/__tests__/serve.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
+            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/services/process/__tests__/serve.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it. Nor does any spec, module or fixture read a port off a server the next statement closes: a port the OS took back is any process's to take before it is pinned or probed.",
         specification: 'model',
         family: 'services',
-        fix: 'Bind port 0, print the port the OS gave, and declare `ready: /listening on port (\\d+)/`.',
+        fix: 'Bind port 0, print the port the OS gave, and declare `ready: /listening on port (\\d+)/`; a module test pins a port drawn by `pinnable()` (`src/services/process/__tests__/serve.fixtures.ts`), and probes a dead one on port 1.',
         name: 'server-binds-port-zero',
         rationale:
-            'A port picked, released, then bound is a window another server of the same run can take: `make check` failed twice on a spec reaching a stranger on the port it was handed, and passed on the rerun.',
+            'A port picked, released, then bound is a window another server of the same run can take: `make check` failed twice on a spec reaching a stranger on the port it was handed, and passed on the rerun. A port read off a server and closed is the same window: beside a process churning listeners on ports the OS chose, the nine tests that pinned or probed such a port failed 18 to 33 times in 40 runs each, and none once they drew theirs below that range.',
         reach: 'all',
     },
     {

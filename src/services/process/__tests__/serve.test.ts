@@ -4,11 +4,11 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, onTestFinished, test } from 'vitest';
 
 import { clock } from '../../../clock/clock.js';
-import { findFreePort } from '../listening.js';
 import { runToCompletion, ServedProcess } from '../serve.js';
 import {
     alive,
     held,
+    pinnable,
     PRINTS_HANDED,
     READY,
     REFUSALS,
@@ -169,7 +169,7 @@ describe('serve', () => {
 
     test('a served process — the PORT form hands a stated port as PORT and is ready once the path answers', async () => {
         // Given - a port nobody holds, stated to a child that serves it and reports the paths it is asked
-        const port = await findFreePort();
+        const port = await pinnable();
         const { paths, server, url } = await held();
         adapter = new ServedProcess(
             { command: serving(200), env: { REPORT: url }, port, ready: '/health' },
@@ -332,7 +332,7 @@ describe('serve', () => {
 
     test('a served process — a redirect is an answer, never followed', async () => {
         // Given - a pinned port the child answers with a redirect to nowhere
-        const port = await findFreePort();
+        const port = await pinnable();
         const { server, url } = await held();
         adapter = new ServedProcess(
             { command: serving(302), env: { REPORT: url }, port, timeout: 2000 },
@@ -349,7 +349,7 @@ describe('serve', () => {
 
     test('a served process — the PORT form with no ready path polls the root', async () => {
         // Given - a pinned port the child serves, and no ready path stated
-        const port = await findFreePort();
+        const port = await pinnable();
         const { paths, server, url } = await held();
         adapter = new ServedProcess(
             { command: serving(200), env: { REPORT: url }, port },

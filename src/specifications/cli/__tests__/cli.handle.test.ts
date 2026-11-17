@@ -3,7 +3,7 @@ import { createServer } from 'node:net';
 import { describe, expect, test, vi } from 'vitest';
 
 import { clock } from '../../../clock/clock.js';
-import { findFreePort } from '../../../services/process/listening.js';
+import { pinnable } from '../../../services/process/__tests__/serve.fixtures.js';
 import {
     fakeContainers,
     fakeService,
@@ -14,7 +14,7 @@ import { startCli } from '../cli.handle.js';
 describe('cli.handle', () => {
     test('startCli — a declared backend listens on the port it pins, and is stopped by the cleanup', async () => {
         // Given - a free port, and a runner declaring a backend on it
-        const port = await findFreePort();
+        const port = await pinnable();
         const { cleanup } = await startCli('echo', { backend: { env: 'API_URL', port } });
 
         // When - the port is asked, then the runner cleaned up

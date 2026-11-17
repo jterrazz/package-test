@@ -1,15 +1,4 @@
-import { once } from 'node:events';
-import { connect, createServer } from 'node:net';
-
-import { listenedPort } from '../../chain/listened-port.js';
-
-export async function findFreePort(): Promise<number> {
-    const server = createServer();
-    const port = await listenedPort(server);
-    server.close();
-    await once(server, 'close');
-    return port;
-}
+import { connect } from 'node:net';
 
 // Stryker disable BlockStatement: a catch emptied answers undefined, which reads as no answer all the same
 export async function firstAnswering(urls: readonly string[]): Promise<string | undefined> {
