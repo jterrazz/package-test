@@ -15,7 +15,57 @@ const head = (title, path) => `
     <link rel="alternate" hreflang="fr" href="https://site.test/fr${path}">
     <link rel="alternate" hreflang="x-default" href="https://site.test${path}">`;
 
+// A week drawn as ONE image whose ten squares are found under the pointer,
+// as a calendar grid is: the log reads where the press landed, each square a
+// move passed over (or `out` past the grid, where its pointer capture keeps
+// the moves coming), and where the release landed. `delay` draws it late.
+const grid = (delay) => `<!doctype html><html lang="en"><head><title>Fixture — Grid</title>
+    <style>#week { display: flex; width: 200px; } #week span { width: 20px; height: 20px; }</style>
+    </head><body>
+    <p id="log">idle</p>
+    <script>
+        const draw = () => {
+            const week = document.createElement('div');
+            week.id = 'week';
+            week.setAttribute('role', 'img');
+            week.setAttribute('aria-label', 'Week');
+            week.dataset.testid = 'week';
+            for (let day = 1; day <= 10; day += 1) {
+                const square = document.createElement('span');
+                square.dataset.day = String(day);
+                week.append(square);
+            }
+            const log = [];
+            let last = null;
+            const under = (event) =>
+                document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-day]')?.dataset.day ?? 'out';
+            const write = () => { document.getElementById('log').textContent = log.join(' · '); };
+            week.addEventListener('pointerdown', (event) => {
+                week.setPointerCapture(event.pointerId);
+                last = under(event);
+                log.push('down ' + last);
+                write();
+            });
+            week.addEventListener('pointermove', (event) => {
+                if (last === null || under(event) === last) return;
+                last = under(event);
+                log.push(last);
+                write();
+            });
+            week.addEventListener('pointerup', (event) => {
+                log.push('up ' + under(event));
+                last = null;
+                write();
+            });
+            document.body.prepend(week);
+        };
+        ${delay === 0 ? 'draw();' : `setTimeout(draw, ${delay});`}
+    </script>
+    </body></html>`;
+
 const pages = {
+    '/grid': grid(0),
+    '/grid-late': grid(500),
     '/': `<!doctype html><html lang="en"><head>${head('Fixture: Home', '/')}
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Fixture","url":"https://site.test"}</script>
     </head><body>

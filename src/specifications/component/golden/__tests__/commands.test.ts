@@ -81,6 +81,68 @@ describe('COMPONENT_COMMANDS', () => {
         );
     });
 
+    test('pointerDrag — a selector from the page — drags with the page mouse over the tester frame, its wait ending a second before the budget the page handed', async () => {
+        // Given - a context whose tester frame holds a 100-pixel box at the origin, recording what is done to it
+        const calls: string[] = [];
+        const context = {
+            iframe: {
+                locator: (selector: string) => ({
+                    boundingBox: async () =>
+                        await Promise.resolve({ height: 10, width: 100, x: 0, y: 0 }),
+                    hover: async (options: object) => {
+                        calls.push(`hover ${selector} ${JSON.stringify(options)}`);
+                        await Promise.resolve();
+                    },
+                }),
+            },
+            page: {
+                mouse: {
+                    down: async () => {
+                        calls.push('down');
+                        await Promise.resolve();
+                    },
+                    move: async (x: number, y: number) => {
+                        calls.push(`move ${String(x)} ${String(y)}`);
+                        await Promise.resolve();
+                    },
+                    up: async () => {
+                        calls.push('up');
+                        await Promise.resolve();
+                    },
+                },
+            },
+        };
+
+        // When - the page asks for a drag across the box's whole width, with 2.5 s of budget left, then 0.4 s, then none
+        const dragWithin = async (timeout: number): Promise<void> => {
+            await COMPONENT_COMMANDS.pointerDrag(
+                // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a command context is vitest's to build; the test hands the frame and the mouse this command reads
+                context as unknown as BrowserCommandContext,
+                'internal:role=img[name="Week"i]',
+                {
+                    from: { x: 0, y: 0.5 },
+                    target: { kind: 'testId', name: 'week' },
+                    timeout,
+                    to: { x: 1, y: 0.5 },
+                },
+            );
+        };
+        await dragWithin(2500);
+        await dragWithin(400);
+        await dragWithin(0);
+
+        // Then - the frame's locator waited a second short of each budget, never below a millisecond, and not at all with none; the page's mouse pressed, moved and released
+        const pressed = ['move 0 5', 'down', 'move 100 5', 'up'];
+        expect(calls).toStrictEqual([
+            'hover internal:role=img[name="Week"i] {"timeout":1500,"trial":true}',
+            ...pressed,
+            'hover internal:role=img[name="Week"i] {"timeout":1,"trial":true}',
+            ...pressed,
+            'hover internal:role=img[name="Week"i] {"timeout":0,"trial":true}',
+            ...pressed,
+        ]);
+    });
+
     test('inPlaceWrite — the frame of the test file among others — rewrites the value where that frame stands, and answers the site', () => {
         // Given - a test file written at once, and a stack whose first frame is a module outside it
         deferRewritesTo(null);

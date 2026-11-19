@@ -4,6 +4,7 @@ import { untilDeadline } from '../../../chain/pause.js';
 import { refusal } from '../../../chain/refusals/refusal.js';
 import { ambiguousTargetError } from '../../../visitor/matching/ambiguous.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../visitor/matching/candidates.js';
+import { dragAcross } from '../../../visitor/pointer.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';
 import { scopeChain } from '../../../visitor/targets/landmarks.js';
 import type { Target } from '../../../visitor/targets/target.js';
@@ -176,6 +177,11 @@ export function createVisitor(page: Page, baseUrl: string): WebsiteVisitor {
         click: async (target) => {
             await act(page, target, async (locator) => {
                 await locator.click();
+            });
+        },
+        drag: async (target, from, to) => {
+            await act(page, target, async (locator) => {
+                await dragAcross({ locator, mouse: page.mouse }, { from, target, to });
             });
         },
         fill: async (target, value) => {

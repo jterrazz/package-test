@@ -23,13 +23,14 @@ A scenario is the When: pure interaction, no `expect()` inside it (rule `no-expe
 | `select(target, option)` | Select an option in a select field                                 |
 | `check(target)`          | Check a checkbox or radio                                          |
 | `hover(target)`          | Hover the element                                                  |
+| `drag(target, from, to)` | Press on the element, move in steps, release                       |
 | `goto(path)`             | Navigate to another path of the site under test                    |
 | `rerender(ui)`           | What a PARENT does: new props, same mount                          |
 | `unmount()`              | What a parent does when it takes the thing off the screen          |
 | `see(target)`            | **The synchronization primitive**: retries until visible           |
 | `gone(target)`           | The absence primitive: retries until hidden or out of the document |
 
-The website's and the component's visitors carry the same eight page verbs by construction (one declaration, `VisitorVerbs` in `src/visitor/verbs.ts`, each surface adding only its own words), and the device's visitor takes its `see` and `fill` from it. `goto()` does not exist on a component, because a component has no address. `rerender`/`unmount` exist nowhere else, because only a component has a parent inside the test. `gone()` is absent on mobile until the adapter can answer for absence honestly, which an XCUITest tree does not do yet.
+The website's and the component's visitors carry the same nine page verbs by construction (one declaration, `VisitorVerbs` in `src/visitor/verbs.ts`, each surface adding only its own words), and the device's visitor takes its `see` and `fill` from it. `goto()` does not exist on a component, because a component has no address. `rerender`/`unmount` exist nowhere else, because only a component has a parent inside the test. `gone()` is absent on mobile until the adapter can answer for absence honestly, which an XCUITest tree does not do yet.
 
 ### `see()` and `gone()` are the synchronization
 
@@ -38,6 +39,20 @@ The website's and the component's visitors carry the same eight page verbs by co
 Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard to land and `gone(disabled(button('Save')))` waits for a control to become usable again.
 
 `see()` ACTS ON NOTHING, and on the mobile specification that changes what `target-matches-one-element` asks of it: any visible match satisfies it, because an XCUITest tree legitimately exposes the same label twice (a container and its child both carry it), and a synchronization primitive refusing on that would punish honest screens. On the web and in a component, `see()` holds the same cardinality as every other verb.
+
+### `drag()` presses on the target and moves in steps
+
+`drag(target, from, to)` is a pointer held down across a surface: it waits for the target as `hover()` does, presses at `from`, moves to `to` a step every 4 pixels at most, and releases there. Both points are fractions of the target's box, `{ x: 0, y: 0 }` its top-left corner and `{ x: 1, y: 1 }` its bottom-right, so one element drawn as a whole (a grid, a canvas, a slider's track) is crossed point by point:
+
+```typescript
+// testId: the week is one image, and the vocabulary names no image
+const week = testId('week');
+await visitor.drag(week, { x: 0.15, y: 0.5 }, { x: 0.65, y: 0.5 });
+```
+
+The input is the browser's own mouse, not a dispatched event, so the page meets it as it meets a person: `pointerdown` on the element under `from`, then a `pointermove` on each element the path crosses, which `elementFromPoint` names, then `pointerup` at `to`. `from` is refused outside the box, since a drag presses on what it names; `to` may leave it, and the moves go on past the edge, where a page holding the pointer's capture still receives them.
+
+A target that never shows fails the drag the way it fails `hover()`, with the browser's timeout naming what it waited for. In a component, that wait ends a second before the test's budget, so the drag's own error reaches the test before the test's timeout does.
 
 ### The per-specification matrix
 

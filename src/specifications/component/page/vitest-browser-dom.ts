@@ -195,6 +195,12 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
                 await locator.click();
             });
         },
+        drag: async (target, from, to) => {
+            const timeout = Math.floor(remainingBudget() ?? 0);
+            await act(target, async ({ selector }) => {
+                await commands.pointerDrag(selector, { from, target, timeout, to });
+            });
+        },
         fill: async (target, value) => {
             await act(target, async (locator) => {
                 await locator.fill(value);

@@ -6,6 +6,8 @@ import { invariant, refusal } from '../../../chain/refusals/refusal.js';
 import { resolveSpecPath } from '../../../disk/resolved-spec-path.js';
 import { writeInPlace } from '../../../expectations/in-place/in-place.js';
 import { renderText } from '../../../expectations/in-place/render.js';
+import { dragAcross } from '../../../visitor/pointer.js';
+import type { DragOrder } from '../../../visitor/pointer.js';
 
 // invariant: `context.page` is the orchestrator frame and answers `- iframe`: the ARIA tree is read on the tester frame. A golden resolves against `context.testPath`, not the project root.
 
@@ -30,6 +32,18 @@ const ariaTree: BrowserCommand<[], string> = async (context) => {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the provider merges its own context in at runtime; the playwright one is what `component()` pins
     const frame = await (context as unknown as PlaywrightCommandContext).frame();
     return await frame.locator('body').ariaSnapshot();
+};
+
+// invariant: the drag's wait ends this long before the test's budget: its refusal crosses back to the page, which the page's own 100 ms margin does not cover on a loaded machine.
+const SERVER_ROUND_TRIP_MS = 1000;
+
+// invariant: the mouse is the orchestrator page's, and the locator reaches into the tester frame: its box is read in the page's coordinates, where the mouse moves. A `timeout` of 0 is no deadline, the page's answer when no test is running.
+const pointerDrag: BrowserCommand<[string, DragOrder], void> = async (context, selector, order) => {
+    const { timeout = 0 } = order;
+    await dragAcross(
+        { locator: context.iframe.locator(selector), mouse: context.page.mouse },
+        { ...order, timeout: timeout === 0 ? 0 : Math.max(timeout - SERVER_ROUND_TRIP_MS, 1) },
+    );
 };
 
 const goldenRead: BrowserCommand<[string], null | string> = (context, name) => {
@@ -69,7 +83,7 @@ const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, 
 };
 
 /** One list, so the names the page calls and the names the project registers cannot drift. */
-export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite, inPlaceWrite };
+export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite, inPlaceWrite, pointerDrag };
 
 type PageSide<Command> =
     Command extends BrowserCommand<infer Args, infer Result>

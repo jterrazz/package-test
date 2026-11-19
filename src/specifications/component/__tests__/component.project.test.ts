@@ -35,16 +35,17 @@ describe('component', () => {
         expect(project.attachmentsDir).toBe('.artifacts/vitest/attachments');
     });
 
-    test('component() — the browser project — registers the golden pair and the ARIA producer as server commands', async () => {
+    test('component() — the browser project — registers the golden pair, the ARIA producer and the pointer drag as server commands', async () => {
         // Given - the project's browser block
         const project = testOf(await component({ root: ROOT }));
 
-        // Then - the four things a page cannot do for itself are reachable from it
+        // Then - the five things a page cannot do for itself are reachable from it
         expect(Object.keys(project.browser?.commands ?? {}).toSorted()).toStrictEqual([
             'ariaTree',
             'goldenRead',
             'goldenWrite',
             'inPlaceWrite',
+            'pointerDrag',
         ]);
     });
 

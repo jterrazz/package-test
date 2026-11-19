@@ -134,7 +134,7 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 | `.render(<X />, scenario?)`   | A React tree                                                                  |
 | `.render((container) => ...)` | A DOM function, handed a fresh container; its optional return is the teardown |
 
-The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's (`click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [The visitor § Verbs](../reference/visitor.md#verbs)), plus the two only a parent has:
+The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's (`click` `fill` `check` `select` `hover` `drag` `press` `see` `gone`, each owned and described by [The visitor § Verbs](../reference/visitor.md#verbs)), plus the two only a parent has:
 
 | Verb           | Description                                               |
 | -------------- | --------------------------------------------------------- |

@@ -89,9 +89,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                                              | What it judges                                                           | Files |
 | ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 167   |
+| Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 168   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
-| The package's own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 220   |
+| The package's own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 222   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 114   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
@@ -295,10 +295,10 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.exec()`    | n/a | n/a | 65  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.run()`     | n/a | n/a | 5   | 113  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.call()`    | n/a | n/a | n/a | n/a  | 11          | n/a     | n/a    | n/a       | n/a    |
-| `.visit()`   | n/a | n/a | n/a | n/a  | n/a         | 23      | n/a    | n/a       | n/a    |
+| `.visit()`   | n/a | n/a | n/a | n/a  | n/a         | 24      | n/a    | n/a       | n/a    |
 | `.fetch()`   | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a    | n/a       | n/a    |
 | `.open()`    | n/a | n/a | n/a | n/a  | n/a         | n/a     | 7      | n/a       | n/a    |
-| `.render()`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 31        | n/a    |
+| `.render()`  | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 32        | n/a    |
 
 ### Route option
 
@@ -318,6 +318,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `hover`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
 | `check`    | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 2         | n/a    |
 | `select`   | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 3         | n/a    |
+| `drag`     | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
 | `goto`     | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | n/a       | n/a    |
 | `tap`      | n/a | n/a | n/a | n/a  | n/a         | n/a     | 3      | n/a       | n/a    |
 | `rerender` | n/a | n/a | n/a | n/a  | n/a         | n/a     | n/a    | 1         | n/a    |
@@ -330,7 +331,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `button`        | n/a | n/a | n/a | n/a  | n/a         | 4       | 3      | 8         | n/a    |
 | `field`         | n/a | n/a | n/a | n/a  | n/a         | 6       | 1      | 7         | n/a    |
 | `content`       | n/a | n/a | n/a | n/a  | n/a         | 7       | 6      | 18        | n/a    |
-| `testId`        | n/a | n/a | n/a | n/a  | n/a         | 1       | 1      | 1         | n/a    |
+| `testId`        | n/a | n/a | n/a | n/a  | n/a         | 2       | 1      | 2         | n/a    |
 | `heading`       | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a    | 3         | n/a    |
 | `link`          | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | 3         | n/a    |
 | `dialog`        | n/a | n/a | n/a | n/a  | n/a         | 1       | n/a    | 1         | n/a    |
@@ -376,7 +377,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.value`          | n/a | n/a | n/a | n/a  | 9           | n/a     | n/a    | n/a       | n/a    |
 | `.error`          | n/a | n/a | n/a | n/a  | 7           | n/a     | n/a    | n/a       | n/a    |
 | `.tree`           | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a    | 6         | n/a    |
-| `.content`        | n/a | n/a | n/a | n/a  | n/a         | 11      | 5      | 19        | n/a    |
+| `.content`        | n/a | n/a | n/a | n/a  | n/a         | 12      | 5      | 20        | n/a    |
 | `.console`        | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a    | 4         | n/a    |
 | `.errors`         | n/a | n/a | n/a | n/a  | n/a         | 8       | n/a    | 8         | n/a    |
 | `.html`           | n/a | n/a | n/a | n/a  | n/a         | 3       | n/a    | 5         | n/a    |

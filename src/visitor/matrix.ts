@@ -12,6 +12,7 @@ export const BROWSER_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'hover', probe: '.hover(' },
     { group: 'Verb', name: 'check', probe: '.check(' },
     { group: 'Verb', name: 'select', probe: '.select(' },
+    { group: 'Verb', name: 'drag', probe: '.drag(' },
 ];
 
 export const EVERY_SURFACE_TARGETS: readonly MatrixRow[] = [

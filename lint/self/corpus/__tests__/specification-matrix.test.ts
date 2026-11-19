@@ -189,6 +189,7 @@ const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = 
 const websiteVisitor = {
     check: true,
     click: true,
+    drag: true,
     fill: true,
     gone: true,
     goto: true,
@@ -207,6 +208,7 @@ const mobileVisitor = {
 const componentVisitor = {
     check: true,
     click: true,
+    drag: true,
     fill: true,
     gone: true,
     hover: true,
