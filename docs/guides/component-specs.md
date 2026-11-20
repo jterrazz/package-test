@@ -162,7 +162,84 @@ expect(result.html.text).toContain('row row--live');
 expect(result.errors.text).toBe('');
 ```
 
-The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [Website specs](website-specs.md) produces for a whole page. Goldens live in `__expected__/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([Tokens](../reference/tokens.md)).
+The ARIA tree is the golden this package records of a rendered surface: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [Website specs](website-specs.md) produces for a whole page. Goldens live in `__expected__/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([Tokens](../reference/tokens.md)).
+
+### The view golden: the outline with its geometry and its paint
+
+A rendered view is asserted by a text golden first, and that golden is the **view golden**: `<subject>[.<variant>].view.yaml` in `__expected__/` beside its test, the ARIA outline with each line's frame, type role, paint and states. It is the estate's standard for every renderer, recorded by the renderer's own kit: this package specifies the format and judges the pixels that remain ([ADR-024](../decisions/024-a-rendered-view-is-a-text-golden-and-pixels-are-a-curated-exact-set.md)), and records no view golden yet. A component's or a page's result offers `result.tree` alone today; a recorder written here would offer it as `result.view`, with `result.tree` being `result.view` with the bracketed geometry and paint dropped.
+
+The grammar is a strict superset of the `.aria.yaml` dialect, so one reader reads both:
+
+```text
+file      := header? tokens? (tree | base changes added)
+header    := canvas: { scheme, scale, unit: pt, still, ground, contrast?, transparency? }
+tokens    := every token the drawing READ, by its source name, resolved once
+node      := - <role> ["<name>"] [attr]* [":" children]
+role      := an ARIA role (heading, text, button, listitem, region, dialog, menu,
+             menuitem, separator, img, group ...), the visitor's word where it has one
+
+attr      := at=x,y          frame origin in pt, relative to the parent, on a 0.5 pt grid
+           | size=WxH        frame size in pt
+           | font=<token>    the type role (family, size, weight resolve in tokens:)
+           | ink= / fill= / stroke= / corner= / shadow= / rim=   a paint TOKEN name, never a value
+           | kit=<Component> a container with no ARIA role, named by the kit
+           | lines=N pitch=P | width=W     how a text wrapped, never the glyphs
+           | state=lit|expanded|selected|disabled|checked|focused
+           | visible=H | under=fade | hidden=scrolled | clipped=edge N
+```
+
+Seven rules make it exact and near-total:
+
+1. **Every drawn element is a line.** The recorder sits on the kit's primitives, the only way the kit may draw, so a view reached only through the kit is recorded whole; a primitive drawing outside the recorder is refused.
+2. **Paint is named, never sampled.** A colour is its token (`color.t2`), whose value `tokens:` prints once, so a token edit is one line of diff.
+3. **Frames are local.** A padding change moves its own subtree and its later siblings, never the whole file.
+4. **Text is its words and how they wrapped** (`lines`, `width`), never glyph positions: wrapping is layout, glyph shapes are pixels.
+5. **States are explicit.** What pixels show as absence (a row scrolled away, a dimmed button) is a word.
+6. **It is compared whole, by exact string equality**, written by `TEST_UPDATE=1` and merged like any golden.
+7. **An overlay names its base** (`base:`, then `changes:` and `added:`): the runner composes the base and the delta into the whole expected tree and compares that, and the file holds only what the overlay owns.
+
+A context menu over a page, recorded as an overlay of the page's own golden:
+
+```yaml
+# view golden · story menu.context.stopped · light · standard contrast · glass
+story: menu.context.stopped
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./mac.this.overview.light.view.yaml
+tokens:
+    Metric.Menu.padding: 5
+    Metric.Menu.radius: 11
+    color.menu: '#F1F1F3'
+    color.t1: rgba(0 0 0 / 0.85)
+    color.down: '#EC3B30'
+
+changes:
+    - group [kit=Panel] › region "VMs" › listitem "api" [state=lit]
+added:
+    - menu "api on This Mac" [at=44.5,332] [size=199x123.5] [fill=color.menu] [corner=Metric.Menu.radius] [shadow=Menu.shade]:
+          - menuitem "Open" [at=5,24.5] [size=189x24] [ink=color.t1]
+          - separator [at=5,48.5] [size=189x11]
+          - menuitem "Delete…" [at=5,94.5] [size=189x24] [ink=color.down]
+```
+
+A `Metric.Menu.padding` of 6 fails it on the token line and on every frame the padding moved, each by one point, and on nothing else.
+
+### Pixel goldens: a curated, exact set
+
+A view golden cannot see compositing and blending, shadows, blur and rims, glyph rasters and antialiasing, symbols, the curves of a chart, gradients and fades. Those are proved by a **pixel golden**, and **an image earns its place by proving one paint recipe that no view golden can state and no other kept pixel golden proves**. A state of the product never earns one for being a state: its view golden proves it. The test names the recipe it keeps the image for (`pixels: "<recipe>"`).
+
+| Rule       | Value                                                                                                                                                                        |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Compare    | byte-exact on the decoded 8-bit RGBA, no tolerance and no share of pixels                                                                                                    |
+| Renderer   | the pinned reference renderer, a still frame at a fixed clock with the image's own fonts; the golden names it in a sidecar line, `renderer: <image>@sha256:...`              |
+| Scale      | 2x, the renderer's real output                                                                                                                                               |
+| Crop       | the subject's own frame plus its shadow's reach, never a margin of desk; a ground drawn only where the recipe needs one                                                      |
+| Format     | PNG, written by ONE pinned lossless encoder at a fixed level, every metadata chunk stripped, so the same pixels are the same bytes                                           |
+| Write rule | `TEST_UPDATE=1` writes a pixel golden only when its decoded pixels differ, and lists what it rewrote                                                                         |
+| Naming     | `<subject>.<scheme>[.<contrast>\|.<transparency>].png`, beside its `.view.yaml` in `__expected__/`                                                                           |
+| Storage    | plain git: no LFS, no external baseline service                                                                                                                              |
+| Weight     | 192000 bytes per image and 3000000 per repository, a total held down by the ratchet: rule [`pixel-golden-within-budget`](../reference/linting.md#pixel-golden-within-budget) |
+
+The weight is the one row the package enforces; the others are what a recorder and its comparer owe, and the renderer's kit implements them.
 
 ## Unique here
 
