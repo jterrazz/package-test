@@ -40,6 +40,22 @@ describe('pixel-golden-within-budget', () => {
         `);
     });
 
+    test('a golden in the __expected__/ of a Swift test target is judged like any', async () => {
+        // Given - one PNG golden of 120 bytes beside a SwiftPM test target's sources, under a cap of 100
+        const result = await checker
+            .fixture(directory('./__fixtures__/swift-test-target/'))
+            .run({ args: '--member .' });
+
+        // Then - the finding at the image, with its lesson
+        expect(result.report).toMatch(`
+            apps/menubar/tests/station-kit-tests/__expected__/kit/panel.light.png:1:1  jterrazz-check(pixel-golden-within-budget)
+                found: apps/menubar/tests/station-kit-tests/__expected__/kit/panel.light.png weighs 120 bytes, past the cap of 100 per image
+                why: A pixel golden is a curated, small file: every \`*.png\` under an \`__expected__/\` of the repository, at any depth and in any member, is judged by the run over the project root (a \`__fixtures__/\` tree is verbatim material, and is not entered; a PNG outside every \`__expected__/\` is no golden, and is not judged).
+                fix: crop it to its subject and its shadow, re-encode it with the pinned lossless encoder, or let its view golden prove it
+                read: docs/reference/linting.md#pixel-golden-within-budget
+        `);
+    });
+
     test('goldens past the budget together are refused at the settings', async () => {
         // Given - two PNG goldens of 70 bytes, under a budget of 120
         const result = await checker

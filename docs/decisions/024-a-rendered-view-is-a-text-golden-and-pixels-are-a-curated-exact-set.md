@@ -27,11 +27,13 @@ How the numbers read where the study left them open:
 - The budget is the repository's, as the study measured it: the run over the project root sums every member's images, and a member's own run judges none. A workspace whose root lists no `test()` preset, its members listing their own, is out of the rule's reach.
 - The 64 KB cap waits for the kit's flat swatches: it is a later lowering of the default, or a repository's own `cap`, never this record's.
 - A PNG under a `__fixtures__/` tree is verbatim material, and is not judged, as every pass of the checker skips it.
+- "Beside its test" in a Swift repository is the test target's folder: a SwiftPM test target is a tests folder, and its `__expected__/` sits directly in it (`tests/<target>/__expected__/`), as the owner ruled on 2026-11-20. The rule here judges the PNGs there like any.
 
 What this record specifies that no code of this package implements:
 
 - No recorder writes a view golden here: neither the component nor the website specification records `result.view`, and their results offer `result.tree` alone. The first recorder is the Swift one, in the station's kit; one written here later follows this grammar.
 - No pixel comparer, renderer pin or lossless encoder ships here: those rows are what a renderer's kit owes, and its own repository proves them.
+- The names that let `__expected__/` sit in a Swift test target are not this package's: the toolchain's Names (tree) pass refuses any ground folder of a code root outside a `__tests__/` (`names/directory-in-kebab-case`), so the location waits on a release of `@jterrazz/typescript` that admits it.
 
 ## Consequences
 
