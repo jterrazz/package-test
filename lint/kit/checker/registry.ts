@@ -1,4 +1,4 @@
-import type { Chapter, Manifest, Teaching } from '@jterrazz/typescript/rules';
+import type { Chapter, Counts, Manifest, Teaching } from '@jterrazz/typescript/rules';
 
 import type { Row } from '../catalogue/row.js';
 import type { DocumentFinding } from '../project/document-model.js';
@@ -46,8 +46,12 @@ export type GroundPasses = {
 export type CheckerRegistry = {
     chapter: Chapter;
     fixes: readonly ((root: string) => string[])[];
+    /** The quantities the project root holds that the test section records beside the counts, each key at where the tree stands. */
+    measured: (root: string) => Counts;
     member: Judge<MemberRead>;
     memberPassIds: readonly string[];
+    /** The member passes only the project root's run makes, a member's own run never. */
+    rootPassIds: readonly string[];
     rows: readonly Row[];
     tree: readonly ((specsRoot: string) => Spotted[])[];
     treePassIds: readonly string[];

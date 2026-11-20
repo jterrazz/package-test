@@ -4,7 +4,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { heldUnreached, recordUnreached, writeBaseline } from '../test-baseline.js';
+import {
+    heldPixelBytes,
+    heldUnreached,
+    lowerMeasured,
+    recordUnreached,
+    writeBaseline,
+} from '../test-baseline.js';
 
 const FILE = '.studio/baseline.json';
 
@@ -46,6 +52,50 @@ describe('test-baseline', () => {
         // Then - the count was held, and zero leaves the checker's key alone
         expect(held).toBe(3);
         expect(sectionOf(root, 'test')).toStrictEqual({ 'jterrazz-check/old': 1 });
+    });
+
+    test('the test ratchet — a fix lowers a measured key to where the tree stands, in place, and drops it at zero', () => {
+        // Given - a section holding two measured keys and a count
+        const root = ledgerRoot();
+        writeFileSync(
+            join(root, FILE),
+            '{\n    "test": { "a/bytes": 500, "jterrazz-check/x": 1, "pixel-goldens/bytes": 300 }\n}\n',
+        );
+
+        // When - one quantity fell, the other reached zero, and an unheld one rose
+        const lines = lowerMeasured(root, {
+            'a/bytes': 0,
+            'new/bytes': 9,
+            'pixel-goldens/bytes': 160,
+        });
+
+        // Then - each fall re-recorded and named, nothing raised, nothing added
+        expect([lines, heldPixelBytes(root), readFileSync(join(root, FILE), 'utf8')]).toStrictEqual(
+            [
+                [
+                    're-recorded .studio/baseline.json › test › a/bytes from 500 to 0',
+                    're-recorded .studio/baseline.json › test › pixel-goldens/bytes from 300 to 160',
+                ],
+                160,
+                '{\n    "test": {\n        "jterrazz-check/x": 1,\n        "pixel-goldens/bytes": 160\n    }\n}\n',
+            ],
+        );
+    });
+
+    test('the test ratchet — a measured key at or above its entry is left as recorded', () => {
+        // Given - a section holding the pixel bytes
+        const root = ledgerRoot();
+        const held = '{\n    "test": { "pixel-goldens/bytes": 300 }\n}\n';
+        writeFileSync(join(root, FILE), held);
+
+        // When - the tree holds as much, then more
+        const lines = [
+            ...lowerMeasured(root, { 'pixel-goldens/bytes': 300 }),
+            ...lowerMeasured(root, { 'pixel-goldens/bytes': 400 }),
+        ];
+
+        // Then - nothing re-recorded, the file byte for byte
+        expect([lines, readFileSync(join(root, FILE), 'utf8')]).toStrictEqual([[], held]);
     });
 
     test('the test ratchet — a file that is not JSON refuses a recording, which would lose what it holds', () => {

@@ -9,6 +9,8 @@ export type TestSettings = {
     collections?: readonly string[];
     /** Routes the api takes on any method (`app.all('/mcp', ...)`), each path mapped to why it takes any. */
     methodless?: Readonly<Record<string, string>>;
+    /** The bytes a pixel golden may weigh (`cap`, 192000 by default) and every PNG under an `__expected__/` together (`budget`, 3000000), set lower than the standard, never higher. */
+    pixels?: { budget?: number; cap?: number };
     production?: { allow: Readonly<Record<string, string>> };
     /** How a project departs from the one its tree derives, keyed by its specification, with the reason. */
     projects?: Readonly<Partial<Record<TestSpecification, TestProject>>>;

@@ -1063,6 +1063,17 @@
         {
             "audience": "consumer",
             "channel": "checker",
+            "sentence": "A pixel golden is a curated, small file: every `*.png` under an `__expected__/` of the repository, at any depth and in any member, is judged by the run over the project root (a `__fixtures__/` tree is verbatim material, and is not entered; a PNG outside every `__expected__/` is no golden, and is not judged). One image past its cap is an error at the image, and their total past the repository's budget an error at `studio.config.ts`: 192000 bytes per image and 3000000 in all, which `test: { pixels: { cap, budget } }` sets lower, never higher (a value above the standard's, or of another shape, reads as the standard's). The total is a ratchet held down: `typescript baseline` records it under `.studio/baseline.json › test › pixel-goldens/bytes`, and from then a tree above the entry is an error at the entry, a growth the recording gesture alone accepts, and a tree below it is too, a slack `typescript fix` lowers.",
+            "specification": "model",
+            "family": "layout",
+            "fix": "Crop an image to its subject and re-encode it with the pinned lossless encoder, or drop the ones no paint recipe needs: their view golden proves the state. Run `typescript fix` to lower an entry the tree fell below, and `typescript baseline` to record a growth the review accepted.",
+            "name": "pixel-golden-within-budget",
+            "rationale": "A PNG written to git stays in every clone's history forever: a few hundred goldens rewritten on each change cost a repository hundreds of MB. An image earns its place by proving a paint recipe no text golden can state, and a budget held down keeps that set curated.",
+            "reach": "ground"
+        },
+        {
+            "audience": "consumer",
+            "channel": "checker",
             "sentence": "Docker-aware runners are inferred from the `docker:` option of the imported specification file, and every `.exec()` result bound without `await using` is reported.",
             "specification": "model",
             "family": "setup",
@@ -1186,7 +1197,7 @@
         {
             "audience": "consumer",
             "channel": "type",
-            "sentence": "`studio.config.ts` takes a `test` section, typed by `@jterrazz/test`: `projects`, how a vitest project departs from the one the tree derives, keyed by its specification with its `reason`; `routes`, a path to an OpenAPI document; `collections`, a list of route segments; `basePath`, the path every api route is mounted under, written from the root with no slash at its end (`'/api'`): any other string is refused when the section is read; `methodless`, the paths of routes taken on any method, each with its reason; `production.allow`. A key the package does not read is refused, and so is a list written as one word, a specification the package does not ship, and a project stating no reason.",
+            "sentence": "`studio.config.ts` takes a `test` section, typed by `@jterrazz/test`: `projects`, how a vitest project departs from the one the tree derives, keyed by its specification with its `reason`; `routes`, a path to an OpenAPI document; `collections`, a list of route segments; `basePath`, the path every api route is mounted under, written from the root with no slash at its end (`'/api'`): any other string is refused when the section is read; `methodless`, the paths of routes taken on any method, each with its reason; `pixels`, the `cap` and `budget` in bytes `pixel-golden-within-budget` judges the PNG goldens by; `production.allow`. A key the package does not read is refused, and so is a list written as one word, a specification the package does not ship, and a project stating no reason.",
             "specification": "model",
             "family": "setup",
             "fix": "Write only the keys `@jterrazz/test` reads, lists as lists: `test: { collections: ['data'] }`.",

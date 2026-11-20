@@ -1,3 +1,4 @@
+import { sectionOf } from '@jterrazz/typescript/rules';
 import type { Checker } from '@jterrazz/typescript/rules';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -8,8 +9,10 @@ import type { CheckerRegistry } from '../registry.js';
 const SILENT: CheckerRegistry = {
     chapter: 'docs/probe.md',
     fixes: [],
+    measured: () => ({}),
     member: () => [],
     memberPassIds: [],
+    rootPassIds: [],
     rows: [],
     tree: [],
     treePassIds: [],
@@ -30,6 +33,20 @@ describe('recordBaseline', () => {
             ['.studio/baseline.json › test written: 0 finding(s) across 0 rule(s)\n'],
         ]);
         written.mockRestore();
+    });
+
+    test('records each measured quantity beside the counts, and none the tree holds nothing of', async () => {
+        // Given - a project whose registry measures one quantity and holds none of another
+        const root = packageWith({ '.studio/baseline.json': '{}\n' });
+        const written = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+        const measuring = { ...SILENT, measured: () => ({ 'gone/bytes': 0, 'probe/bytes': 160 }) };
+
+        // When - the command records the project
+        await recordBaseline(measuring)([root], CHECKER);
+        written.mockRestore();
+
+        // Then - the section holds the measured quantity alone
+        expect(sectionOf(root, 'test')).toStrictEqual({ 'probe/bytes': 160 });
     });
 
     test('reads the project root off the first argument that is no flag, and refuses one that is no directory', () => {

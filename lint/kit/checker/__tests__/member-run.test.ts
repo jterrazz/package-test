@@ -21,6 +21,7 @@ function recording(): { registry: CheckerRegistry; seen: Seen[] } {
     const registry: CheckerRegistry = {
         chapter: 'docs/probe.md',
         fixes: [],
+        measured: () => ({}),
         member: (read) => {
             const [anchored] = read.anchored([probe]);
             seen.push({
@@ -32,6 +33,7 @@ function recording(): { registry: CheckerRegistry; seen: Seen[] } {
             return [];
         },
         memberPassIds: [],
+        rootPassIds: [],
         rows: [],
         tree: [],
         treePassIds: [],
