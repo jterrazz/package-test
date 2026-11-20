@@ -222,7 +222,7 @@ test('lays the article out as a reader walks it', async () => {
 });
 ```
 
-It is produced by the same Playwright `ariaSnapshot()` the component specification calls, so a page's outline and a component's outline are the same kind of golden and comparable to each other. Deterministic where a screenshot is not, and it says what the markup MEANS rather than what it is made of.
+It is produced by the same Playwright `ariaSnapshot()` the component specification calls, so a page's outline and a component's outline are the same kind of golden and comparable to each other. Deterministic where a screenshot is not, and it says what the markup MEANS rather than what it is made of. The estate's standard for a rendered view extends this outline with each line's frame, type and paint, the view golden, and keeps pixels for a curated set; both are [Component specs § The view golden](component-specs.md#the-view-golden-the-outline-with-its-geometry-and-its-paint)'s, and a page records neither yet.
 
 ### The `head` golden: one per page
 
