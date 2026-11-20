@@ -185,4 +185,24 @@ describe('ratchet', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toBe('.studio/baseline.json › test: 2 held across 1 rule\n');
     });
+
+    test('lint — checker CLI, the ratchet is exact — `--fix` lowers the recorded PNG bytes to what the tree holds', async () => {
+        // Given - 500 bytes recorded, and one golden of 70
+        const result = await cli
+            .fixture(directory('./__fixtures__/pixel-slack/'))
+            .exec('--member . --fix');
+
+        // Then - the fall re-recorded, and the run it leaves green
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe(
+            [
+                're-recorded .studio/baseline.json › test › pixel-goldens/bytes from 500 to 70',
+                '.studio/baseline.json › test: 70 held across 1 rule',
+                '',
+            ].join('\n'),
+        );
+        expect(result.file('.studio/baseline.json').content).toBe(
+            '{\n    "test": {\n        "pixel-goldens/bytes": 70\n    }\n}\n',
+        );
+    });
 });

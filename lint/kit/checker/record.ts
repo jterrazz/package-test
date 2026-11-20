@@ -1,5 +1,5 @@
 import { countsOf, labelOf } from '@jterrazz/typescript/rules';
-import type { KitCommand } from '@jterrazz/typescript/rules';
+import type { Counts, KitCommand } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 
 import { writeBaseline } from '../baseline/test-baseline.js';
@@ -7,6 +7,9 @@ import { TEST_SECTION } from '../project/test-section.js';
 import { directoryRefusal, projectSpotted } from './conventions.js';
 import type { CheckerRegistry } from './registry.js';
 import { teacherOf } from './teacher.js';
+
+const heldQuantities = (measured: Readonly<Counts>): Counts =>
+    Object.fromEntries(Object.entries(measured).filter(([, quantity]) => quantity > 0));
 
 export function recordBaseline(registry: CheckerRegistry): KitCommand {
     const teach = teacherOf(registry);
@@ -22,7 +25,7 @@ export function recordBaseline(registry: CheckerRegistry): KitCommand {
         const root = resolve(positional);
         const findings = teach(projectSpotted(registry, root));
         const counts = countsOf(findings);
-        writeBaseline(root, counts);
+        writeBaseline(root, { ...counts, ...heldQuantities(registry.measured(root)) });
         process.stdout.write(
             `${labelOf(TEST_SECTION)} written: ${String(findings.length)} finding(s) across ${String(Object.keys(counts).length)} rule(s)\n`,
         );

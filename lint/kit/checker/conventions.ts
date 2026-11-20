@@ -3,6 +3,7 @@ import type { Context, Finding, Pass, PassResult } from '@jterrazz/typescript/ru
 import { existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
+import { lowerMeasured } from '../baseline/test-baseline.js';
 import { discoverSpecRoots } from '../project/members.js';
 import { projectRootOf } from '../project/role.js';
 import { listsTestPreset, TEST_SECTION } from '../project/test-section.js';
@@ -65,6 +66,12 @@ function fixesOf(registry: CheckerRegistry, specsRoots: readonly string[]): stri
         ),
     );
 }
+
+const rootFixesOf = (
+    registry: CheckerRegistry,
+    specsRoots: readonly string[],
+    root: string,
+): string[] => [...fixesOf(registry, specsRoots), ...lowerMeasured(root, registry.measured(root))];
 
 const treeSpotted = (registry: CheckerRegistry, specsRoot: string, root: string): Spotted[] =>
     underTree(
@@ -129,7 +136,7 @@ function memberRun(run: Run, member: string): PassResult {
     }
     const dir = resolve(member);
     const judged = {
-        passes: registry.memberPassIds,
+        passes: [...registry.memberPassIds, ...registry.rootPassIds],
         what: `for member ${relative(root, dir) || '.'}`,
     };
     if (dir !== root) {
@@ -154,7 +161,7 @@ function memberRun(run: Run, member: string): PassResult {
         );
     }
     const specsRoots = discoverSpecRoots(root);
-    const fixes = context.fix ? fixesOf(registry, specsRoots) : [];
+    const fixes = context.fix ? rootFixesOf(registry, specsRoots, root) : [];
     if (context.fix) {
         applyOwnFixes(root);
     }
@@ -208,7 +215,7 @@ function projectRun(run: Run): PassResult {
             ],
         };
     }
-    const fixes = context.fix ? fixesOf(registry, specsRoots) : [];
+    const fixes = context.fix ? rootFixesOf(registry, specsRoots, root) : [];
     if (context.fix) {
         applyOwnFixes(root);
     }
@@ -218,7 +225,13 @@ function projectRun(run: Run): PassResult {
         {
             findings: teach(projectSpotted(registry, root)),
             fixes,
-            passes: [...new Set([...registry.treePassIds, ...registry.memberPassIds])],
+            passes: [
+                ...new Set([
+                    ...registry.treePassIds,
+                    ...registry.memberPassIds,
+                    ...registry.rootPassIds,
+                ]),
+            ],
             refusals: [...unformattedRefusals(root, specsRoots), ...pluginKeysLeft(root)],
             what: `under ${root}`,
         },

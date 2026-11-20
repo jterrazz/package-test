@@ -44,6 +44,10 @@ import { checkNoUnusedGround } from './no-unused-ground.js';
 import { checkNoVolatileLiteral, noVolatileLiteralsInGround } from './no-volatile-literal.js';
 import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
 import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
+import {
+    checkPixelGoldenWithinBudget,
+    measurePixelGoldenWithinBudget,
+} from './pixel-golden-within-budget.js';
 import { checkReservedFolderInClosedList } from './reserved-folder-in-closed-list.js';
 import { checkSeedsStateAbsoluteTime } from './seeds-state-absolute-time.js';
 import {
@@ -101,12 +105,17 @@ const MEMBER_PASS_IDS = [
     'no-redundant-test-dependency',
 ] as const;
 
+const ROOT_PASS_IDS = ['pixel-golden-within-budget'] as const;
+
 /** The registry the catalogue and the E2E inventory derive from, so neither names a pass the CLI does not run. */
 export const CHECKER_PASS_IDS: string[] = [
-    ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS]),
+    ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS, ...ROOT_PASS_IDS]),
 ];
 
-export type CheckerPassId = (typeof MEMBER_PASS_IDS)[number] | (typeof TREE_PASS_IDS)[number];
+export type CheckerPassId =
+    | (typeof MEMBER_PASS_IDS)[number]
+    | (typeof ROOT_PASS_IDS)[number]
+    | (typeof TREE_PASS_IDS)[number];
 
 export type Spotted<PassId extends string = CheckerPassId> = CheckerSpotted<PassId>;
 
@@ -164,6 +173,7 @@ function memberFindings({
         ...checkNoSnapshotFolder(memberDir, label),
         // invariant: the tree pass reads the tests under `specs/`.
         ...moduleTestsOf(memberDir).flatMap((test) => checkNamedPathExistsIn(test, rootDir)),
+        ...(memberDir === rootDir ? checkPixelGoldenWithinBudget(rootDir) : []),
     ];
 }
 
@@ -189,8 +199,10 @@ export const CHECKER: CheckerRegistry = {
                 (move) => `moved ${move} (setup-module-at-lowest-common-folder)`,
             ),
     ],
+    measured: measurePixelGoldenWithinBudget,
     member: memberFindings,
     memberPassIds: MEMBER_PASS_IDS,
+    rootPassIds: ROOT_PASS_IDS,
     rows: consumerRows,
     tree: [
         checkReservedFolderInClosedList,

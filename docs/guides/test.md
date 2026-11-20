@@ -92,7 +92,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Module tests            | `src/**/__tests__/*.test.ts`, in the folder of the module                          | one module, through its own exports, with nothing started                | 168   |
 | Rule tests              | `lint/consumer/rules/<family>/__tests__/<rule>.test.ts`, in the folder of the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
 | The package's own specs | `specs/<specification>/`                                                           | the framework's own specifications, each met through its constructor     | 222   |
-| The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 114   |
+| The lint specs          | `specs/lint/<rule>/`, on the lint specification                                    | the built plugins, checkers and preset end to end, over fixture trees    | 115   |
 | Meta-tests              | `lint/self/catalogue/__tests__/*.test.ts`, `lint/self/corpus/__tests__/*.test.ts`  | the corpus itself: the catalogue, the matrix, the skill, the floor       | 26    |
 
 <!-- /GENERATED:layers -->
@@ -274,7 +274,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.with()`      | 5   | 1   | 2   | n/a  | 1           | 1       | n/a    | n/a       | n/a    |
 | `.connect()`   | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.env()`       | n/a | n/a | 7   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.fixture()`   | n/a | n/a | 49  | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.fixture()`   | n/a | n/a | 49  | 113  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.link()`      | n/a | n/a | 12  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.prepare()`   | n/a | n/a | 2   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.rules()`     | n/a | n/a | n/a | 2    | n/a         | n/a     | n/a    | n/a       | n/a    |
@@ -293,7 +293,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.delete()`  | 1   | n/a | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.trigger()` | n/a | 7   | n/a | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.exec()`    | n/a | n/a | 65  | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.run()`     | n/a | n/a | 5   | 113  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.run()`     | n/a | n/a | 5   | 114  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.call()`    | n/a | n/a | n/a | n/a  | 11          | n/a     | n/a    | n/a       | n/a    |
 | `.visit()`   | n/a | n/a | n/a | n/a  | n/a         | 24      | n/a    | n/a       | n/a    |
 | `.fetch()`   | n/a | n/a | n/a | n/a  | n/a         | 4       | n/a    | n/a       | n/a    |
@@ -373,7 +373,7 @@ What the framework can do, and how many of this package's own test FILES exercis
 | `.container()`    | n/a | n/a | 3   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.containerIds`   | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.requests`       | n/a | n/a | 1   | n/a  | n/a         | n/a     | n/a    | n/a       | n/a    |
-| `.report`         | n/a | n/a | n/a | 112  | n/a         | n/a     | n/a    | n/a       | n/a    |
+| `.report`         | n/a | n/a | n/a | 113  | n/a         | n/a     | n/a    | n/a       | n/a    |
 | `.value`          | n/a | n/a | n/a | n/a  | 9           | n/a     | n/a    | n/a       | n/a    |
 | `.error`          | n/a | n/a | n/a | n/a  | 7           | n/a     | n/a    | n/a       | n/a    |
 | `.tree`           | n/a | n/a | n/a | n/a  | n/a         | 5       | n/a    | 6         | n/a    |
