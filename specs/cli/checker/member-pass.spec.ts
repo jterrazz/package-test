@@ -60,6 +60,16 @@ describe('member-pass', () => {
         expect(result.stdout.text).toContain('for member .');
     });
 
+    test('checker CLI — the member pass — `--verbose` at the root names the root pass after the member passes', async () => {
+        // Given - the workspace root, judged verbosely as its own member
+        const result = await cli.exec(`--member ${WORKSPACE} ${WORKSPACE} --verbose`);
+
+        // Then - the member passes, then the pass only the root's run judges
+        expect(result.stdout.text).toContain(
+            'conventions checker for member . (file-suffix-matches-place, named-path-exists, no-snapshot-folder, no-simulated-dom-in-config, no-redundant-test-dependency, pixel-golden-within-budget)',
+        );
+    });
+
     test('checker CLI — the member pass — a member a nested glob claims is judged like any other', async () => {
         // Given - a member the root reaches through `apps/*/packages/*`
         const result = await cli.exec(
